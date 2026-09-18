@@ -473,7 +473,7 @@ function renderMemory() {
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Images : uniquement Nano Banana 2 et Gemini 2.5 Flash Image. Texte : Gemini 3.5 Flash Lite.</p>
+    <p style="color:var(--muted);font-size:13px">Images : Auto essaie Lite, 2.0, 2.5, Nano Banana 2, Imagen 3. Texte : Gemini 3.5 Flash Lite.</p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
@@ -485,9 +485,12 @@ function renderSettings() {
     <h3>Images</h3>
     <label>Modèle images</label>
     <select id="gemimgmodel">
-      <option value="auto">Auto (Nano Banana 2 puis 2.5 Flash Image)</option>
+      <option value="auto">Auto (Lite → 2.0 → 2.5 → NB2 → Imagen 3)</option>
+      <option value="gemini-3.1-flash-lite-image">Nano Banana 2 Lite</option>
+      <option value="gemini-2.0-flash-preview-image-generation">Gemini 2.0 Flash Image</option>
+      <option value="gemini-2.5-flash-image">Nano Banana (2.5)</option>
       <option value="gemini-3.1-flash-image">Nano Banana 2</option>
-      <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
+      <option value="imagen-3.0-generate-002">Imagen 3</option>
     </select>
     <p style="color:var(--muted);font-size:13px">OpenAI n'est plus utilisé pour les images.</p>
     <label>Ton nom / persona</label>
