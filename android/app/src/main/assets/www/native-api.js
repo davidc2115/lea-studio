@@ -97,7 +97,7 @@
               body: JSON.stringify({
                 systemInstruction: { parts: [{ text: system }] },
                 contents,
-                generationConfig: { temperature: 0.95, maxOutputTokens: 1200 },
+                generationConfig: { temperature: 0.9, maxOutputTokens: 450 },
                 safetySettings,
               }),
             }
@@ -105,6 +105,7 @@
           const data = await res.json();
           if (data.error) {
             last = data.error.message + " [" + model + "]";
+            if (!/not found|NOT_FOUND|does not exist/i.test(last)) break;
             continue;
           }
           const cand = data.candidates?.[0];
@@ -258,9 +259,9 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement en NSFW si le joueur l'oriente.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
-        "Réponds in-character. 1 à 3 courts paragraphes.",
+        "Réponds in-character. 1 à 2 courts paragraphes, rapide.",
       ].join("\n\n");
-      const history = chat.messages.slice(-18).map((m) => ({
+      const history = chat.messages.slice(-10).map((m) => ({
         role: m.role === "user" ? "user" : "assistant",
         content: m.content,
       }));
@@ -354,19 +355,22 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         if (u) return u;
         throw new Error(data.error?.message || "OpenAI image vide");
       }
-      const order = pref === "openai" ? ["openai", "grok", "gemini"]
-        : pref === "gemini" ? ["gemini", "grok", "openai"]
-        : pref === "grok" ? ["grok", "gemini", "openai"]
-        : ["grok", "gemini", "openai"];
-      let last = "Aucune clé images";
+      const order = pref === "openai" ? ["openai", "gemini", "grok"]
+        : pref === "grok" ? ["grok", "gemini"]
+        : pref === "gemini" ? ["gemini", "grok"]
+        : ["gemini", "grok"];
+      let last = "Aucune clé images (Gemini / Grok)";
       const pools = { grok, gemini, openai };
       const fns = { grok: grokImg, gemini: geminiImg, openai: openaiImg };
       for (const pvd of order) {
-        for (const key of pools[pvd]) {
+        for (const key of pools[pvd] || []) {
           try {
             const url = await fns[pvd](key);
             if (url) return { url };
-          } catch (e) { last = String(e.message || e); }
+          } catch (e) {
+            last = String(e.message || e);
+            if (/credits|billing|quota|insufficient/i.test(last)) break;
+          }
         }
       }
       throw new Error(last + " — ajoute une clé images dans Réglages");

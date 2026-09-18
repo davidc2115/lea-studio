@@ -89,7 +89,7 @@ async function callGemini(messages) {
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: system }] },
             contents,
-            generationConfig: { temperature: 0.95, maxOutputTokens: 1200 },
+            generationConfig: { temperature: 0.9, maxOutputTokens: 450 },
             safetySettings: GEMINI_SAFETY,
           }),
         });
@@ -97,6 +97,7 @@ async function callGemini(messages) {
         if (!res.ok || data.error) {
           lastErr = (data.error?.message || res.statusText) + " [" + model + "]";
           if (data.error?.status === "RESOURCE_EXHAUSTED") pools.gemini.fail(key, 120000);
+          if (!/not found|NOT_FOUND|does not exist/i.test(lastErr)) break;
           continue;
         }
         const cand = data.candidates?.[0];

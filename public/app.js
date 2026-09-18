@@ -41,6 +41,7 @@ async function api(path, opts = {}) {
 
 function show(view) {
   state.view = view;
+  document.body.classList.toggle("chat-open", view === "chat");
   document.querySelectorAll(".view").forEach((v) => v.classList.add("hidden"));
   document.querySelectorAll(".nav").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
   $("view-" + view).classList.remove("hidden");
@@ -179,7 +180,10 @@ async function generatePhoto() {
     renderProfile();
     openFull(data.url);
   } catch (e) {
-    $("imgerr").textContent = e.message;
+    const msg = String(e.message || e);
+    $("imgerr").textContent = /credits|billing/i.test(msg)
+      ? "OpenAI n'a plus de crédits. Choisis Gemini ou Grok dans Réglages (provider images) et mets une clé AIza / xai-."
+      : msg;
   }
 }
 
@@ -205,32 +209,52 @@ function paintMessages() {
   }
 }
 
+function chatBg() {
+  return localStorage.getItem("lea.chatBg") || "images/lea-orage-dentelle.jpg";
+}
+function applyChatBg() {
+  const el = document.querySelector(".chat-bg");
+  if (el) el.style.backgroundImage = "url('" + chatBg() + "')";
+}
+
 function renderChat() {
   const c = character();
+  const extras = extraPhotos().map((src, i) => ({ src, title: "Générée " + (i + 1) }));
+  const bgs = GALLERY.concat(extras);
+  const current = chatBg();
   $("view-chat").innerHTML = `
-    <div class="chat-wrap">
-      <div class="thread">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div><strong>${c.name}</strong><div style="font-size:12px;color:var(--muted)">${c.title}</div><div class="mode-pill" id="mode-now">Auto · SFW</div></div>
-          <button class="cta" type="button" id="reset">Nouvelle scène</button>
+    <div class="chat-full">
+      <div class="chat-bg" style="background-image:url('${current}')"></div>
+      <div class="chat-bg-dim"></div>
+      <div class="chat-head">
+        <button type="button" id="back-disc">←</button>
+        <img src="images/lea-portrait.jpg" alt="" />
+        <div class="grow">
+          <strong>${c.name}</strong>
+          <div class="mode-pill" id="mode-now">Auto · SFW</div>
         </div>
-        <div class="msgs" id="msgs"></div>
-        <div class="composer">
-          <textarea id="input" placeholder="Écris à Léa…"></textarea>
-          <button class="cta" type="button" id="send">Envoyer</button>
-        </div>
+        <button type="button" id="open-sheet">⋮</button>
       </div>
-      <aside class="side">
+      <div class="msgs" id="msgs"></div>
+      <div class="composer">
+        <textarea id="input" placeholder="Écris à Léa…"></textarea>
+        <button class="cta" type="button" id="send">Envoyer</button>
+      </div>
+      <aside class="sheet hidden" id="sheet">
         <label>Mode</label>
         <select id="mode">
           <option value="auto">Auto (SFW ↔ NSFW)</option>
           <option value="sfw">SFW forcé</option>
           <option value="nsfw">NSFW 18+ forcé</option>
         </select>
-        <p style="font-size:12px;color:var(--muted)">Auto par défaut : Léa reste douce, puis bascule en NSFW seulement si tu l'orientes.</p>
-        <p style="font-size:13px;color:var(--muted);white-space:pre-wrap">${escapeHtml(c.greeting)}</p>
         <div id="rel"></div>
         <p class="err" id="err"></p>
+        <label>Fond de conversation</label>
+        <div class="bg-pick">
+          ${bgs.map((g) => `<img src="${g.src}" data-bg="${g.src}" class="${g.src === current ? "on" : ""}" alt="${g.title || ""}" />`).join("")}
+        </div>
+        <p style="margin-top:12px"><button class="cta" type="button" id="reset">Nouvelle scène</button></p>
+        <p style="margin-top:8px"><button type="button" id="close-sheet">Fermer</button></p>
       </aside>
     </div>`;
   const modeEl = $("mode");
@@ -249,6 +273,16 @@ function renderChat() {
       e.preventDefault();
       send();
     }
+  };
+  $("back-disc").onclick = () => { show("discover"); };
+  $("open-sheet").onclick = () => $("sheet").classList.toggle("hidden");
+  $("close-sheet").onclick = () => $("sheet").classList.add("hidden");
+  $("sheet").onclick = (e) => {
+    const bg = e.target.getAttribute("data-bg");
+    if (!bg) return;
+    localStorage.setItem("lea.chatBg", bg);
+    document.querySelectorAll(".bg-pick img").forEach((img) => img.classList.toggle("on", img.getAttribute("data-bg") === bg));
+    applyChatBg();
   };
   $("reset").onclick = async () => {
     try {

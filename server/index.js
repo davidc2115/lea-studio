@@ -56,14 +56,14 @@ app.post("/api/image", async (req, res) => {
   const s = loadSettings();
   const dedicated = splitKeys(s.imageKeys || process.env.IMAGE_API_KEYS);
   const grok = dedicated.concat(splitKeys(s.grokKeys || process.env.XAI_API_KEYS)).filter((k) => /xai/i.test(k));
-  const gemini = dedicated.concat(splitKeys(process.env.GEMINI_API_KEYS)).filter((k) => k.startsWith("AIza"));
-  const openai = dedicated.concat(splitKeys(process.env.OPENAI_API_KEYS)).filter((k) => k.startsWith("sk-"));
+  const gemini = dedicated.concat(splitKeys(s.geminiKeys || process.env.GEMINI_API_KEYS)).filter((k) => k.startsWith("AIza"));
+  const openai = dedicated.concat(splitKeys(s.openaiKeys || process.env.OPENAI_API_KEYS)).filter((k) => k.startsWith("sk-"));
   const pref = s.imageProvider || process.env.IMAGE_PROVIDER || "auto";
-  const order = pref === "openai" ? ["openai", "grok", "gemini"]
-    : pref === "gemini" ? ["gemini", "grok", "openai"]
-    : pref === "grok" ? ["grok", "gemini", "openai"]
-    : ["grok", "gemini", "openai"];
-  let last = "Aucune clé images dans Réglages";
+  const order = pref === "openai" ? ["openai", "gemini", "grok"]
+    : pref === "grok" ? ["grok", "gemini"]
+    : pref === "gemini" ? ["gemini", "grok"]
+    : ["gemini", "grok"];
+  let last = "Aucune clé Gemini / Grok images dans Réglages";
   for (const pvd of order) {
     const pool = pvd === "grok" ? grok : pvd === "gemini" ? gemini : openai;
     for (const key of pool) {
@@ -202,10 +202,10 @@ app.post("/api/chat/:id/message", async (req, res) => {
     `Utilisateur: ${settings.personaName}. ${settings.personaBio}`,
     "Exemples:\n" + character.example_dialogue,
     buildMemoryBlock(chat),
-    "Réponds uniquement in-character. 1 à 3 courts paragraphes max sauf si la scène l'exige.",
+    "Réponds uniquement in-character. 1 à 2 courts paragraphes, rapide.",
   ].join("\n\n");
 
-  const history = recentWindow(chat.messages, 18).map((m) => ({
+  const history = recentWindow(chat.messages, 10).map((m) => ({
     role: m.role === "user" ? "user" : "assistant",
     content: m.content,
   }));
@@ -213,9 +213,9 @@ app.post("/api/chat/:id/message", async (req, res) => {
   try {
     const reply = await generate([{ role: "system", content: system }, ...history], provider || settings.provider);
     chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
-    await maybeExtractMemory(chat, provider || settings.provider);
     saveChat(character.id, chat);
     res.json({ reply, chat });
+    maybeExtractMemory(chat, provider || settings.provider).then((updated) => saveChat(character.id, updated)).catch(() => {});
   } catch (e) {
     chat.messages.pop();
     saveChat(character.id, chat);
