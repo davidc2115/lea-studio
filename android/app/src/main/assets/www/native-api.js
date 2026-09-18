@@ -299,60 +299,82 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const gemini = allGeminiKeys();
+      if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
       const s = settings();
-      const prefModel = s.geminiImageModel || "auto";
-      const working = [
+      const pref = s.geminiImageModel || "auto";
+      const known = [
         "gemini-2.0-flash-preview-image-generation",
         "gemini-2.0-flash-exp-image-generation",
         "gemini-2.0-flash-exp",
-        "gemini-3.1-flash-lite-image",
         "gemini-2.5-flash-image",
+        "gemini-2.5-flash-preview-image",
+        "gemini-3.1-flash-lite-image",
         "gemini-3.1-flash-image",
       ];
-      const models = prefModel === "auto" || !prefModel
-        ? working
-        : [prefModel].concat(working.filter((m) => m !== prefModel));
-      if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
-      const tries = [];
       function pickImage(data) {
         const parts = data.candidates?.[0]?.content?.parts || [];
-        const img = parts.find((x) => {
+        for (const x of parts) {
           const blob = x.inlineData || x.inline_data;
-          return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
-        });
-        if (!img) return null;
-        const blob = img.inlineData || img.inline_data;
-        return "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data;
+          if (blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/") && blob.data) {
+            return "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data;
+          }
+        }
+        return null;
       }
+      async function listImageModels(key) {
+        try {
+          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(key));
+          const data = await res.json();
+          const names = (data.models || []).map((m) => String(m.name || "").replace(/^models\//, ""));
+          return names.filter((n) => /image/i.test(n));
+        } catch {
+          return [];
+        }
+      }
+      async function generateOnce(key, model) {
+        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key);
+        const bodies = [
+          { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } },
+          { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseModalities: ["IMAGE", "TEXT"] } },
+        ];
+        let last = "";
+        for (const payload of bodies) {
+          const res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+            body: JSON.stringify(payload),
+          });
+          const data = await res.json();
+          const img = pickImage(data);
+          if (img) return img;
+          last = data.error?.message || data.candidates?.[0]?.finishReason || ("HTTP " + res.status);
+          if (/API key not valid|API_KEY_INVALID/i.test(String(last))) throw new Error("INVALID");
+        }
+        throw new Error(last);
+      }
+      const tries = [];
       for (const key of gemini) {
+        let models = known.slice();
+        try {
+          const listed = await listImageModels(key);
+          if (listed.length) models = listed.concat(known.filter((m) => !listed.includes(m)));
+        } catch (_) {}
+        if (pref && pref !== "auto") models = [pref].concat(models.filter((m) => m !== pref));
         for (const model of models) {
           try {
-            const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-              })
-            });
-            const data = await res.json();
-            const url = pickImage(data);
+            const url = await generateOnce(key, model);
             if (url) return { url, model };
-            const err = String(data.error?.message || data.candidates?.[0]?.finishReason || "vide");
-            if (/API key not valid|API_KEY_INVALID/i.test(err)) {
+          } catch (e) {
+            const msg = String(e.message || e);
+            if (msg === "INVALID") {
               tries.push("clé invalide");
               break;
             }
-            tries.push(model + ": " + (/quota|exhausted/i.test(err) ? "quota" : err.slice(0, 50)));
-          } catch (e) {
-            tries.push((e.message || String(e)).slice(0, 50));
+            tries.push(model.replace("gemini-", "") + " → " + msg.slice(0, 70));
           }
         }
       }
-      return {
-        url: "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt.slice(0, 380)) + "?width=768&height=1152&nologo=true&seed=" + Date.now(),
-        note: "Gemini n'a pas renvoyé d'image. Repli comme l'ancienne APK. " + tries.slice(0, 3).join(" · ")
-      };
+      throw new Error("Gemini n'a renvoyé aucune image. " + tries.slice(0, 6).join(" | "));
     }
 
     if (path === "/api/image-test" && method === "POST") {
