@@ -43,6 +43,7 @@ app.post("/api/settings", (req, res) => {
     ...(grokKeys != null ? { grokKeys } : {}),
     ...(geminiImageModel ? { geminiImageModel } : {}),
     ...(geminiTextModel ? { geminiTextModel } : {}),
+    ...(geminiKeys != null ? { geminiKeys } : {}),
   });
   const keys = keyStatus();
   keys.image = splitKeys((loadSettings().imageKeys) || process.env.IMAGE_API_KEYS).length;
@@ -90,7 +91,7 @@ app.post("/api/image", async (req, res) => {
       } catch (e) { last = e.message; }
     }
   }
-  res.status(400).json({ error: last + " — ajoute une clé AIza… dans Clés" });
+  res.status(400).json({ error: last + " — ajoute ta clé Gemini dans Clés" });
 });
 
 app.get("/api/characters", (_req, res) => {

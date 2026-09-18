@@ -229,7 +229,7 @@ async function generatePhoto() {
   } catch (e) {
     const msg = String(e.message || e);
     $("imgerr").textContent = /AIza|clé|Gemini|quota/i.test(msg)
-      ? "Ajoute une clé Google AI Studio (AIza…) dans l'onglet Clés en bas."
+      ? "Ajoute ta clé Gemini (aq… ou AIza…) dans l'onglet Clés en bas."
       : msg;
   }
 }
@@ -440,7 +440,7 @@ function renderSettings() {
       <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
     </select>
     <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
-    <textarea class="field" id="gemini" rows="3" placeholder="AIza..."></textarea>
+    <textarea class="field" id="gemini" rows="3" placeholder="aq... ou AIza... une par ligne"></textarea>
     <h3>Images</h3>
     <label>Modèle images</label>
     <select id="gemimgmodel">

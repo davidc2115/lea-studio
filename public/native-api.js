@@ -288,7 +288,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
-      const gemini = parseKeys(s.geminiKeys).filter((k) => k.startsWith("AIza") || k.length > 24);
+      const gemini = parseKeys(s.geminiKeys);
       async function geminiImg(key) {
         const prefModel = s.geminiImageModel || "auto";
         const models = prefModel === "gemini-2.5-flash-image"
@@ -321,7 +321,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         throw new Error(last);
       }
       const order = ["gemini"];
-      let last = "Aucune clé Gemini AI Studio (AIza…)";
+      let last = "Aucune clé Gemini";
       const pools = { gemini };
       const fns = { gemini: geminiImg };
       for (const pvd of order) {
