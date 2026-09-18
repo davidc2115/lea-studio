@@ -300,10 +300,11 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const prompt = String(body.prompt || "Photorealistic Léa portrait").slice(0, 450);
       const seed = Date.now() % 999999;
       const enc = encodeURIComponent(prompt);
+      const extra = "&width=832&height=1248&nologo=true&enhance=true&private=true&safe=false&seed=" + seed + "&negative=" + encodeURIComponent("cartoon, anime, illustration, painting, 3d, plastic skin, child, watermark, shorts");
       const freeUrls = [
-        "https://image.pollinations.ai/prompt/" + enc + "?model=flux&width=768&height=1152&nologo=true&enhance=true&seed=" + seed,
-        "https://gen.pollinations.ai/image/" + enc + "?model=flux&width=768&height=1152&nologo=true&seed=" + seed,
-        "https://image.pollinations.ai/prompt/" + enc + "?model=zimage&width=768&height=1152&nologo=true&seed=" + seed,
+        "https://image.pollinations.ai/prompt/" + enc + "?model=flux-realism" + extra,
+        "https://image.pollinations.ai/prompt/" + enc + "?model=flux" + extra,
+        "https://gen.pollinations.ai/image/" + enc + "?model=flux" + extra,
       ];
       for (const u of freeUrls) {
         try {

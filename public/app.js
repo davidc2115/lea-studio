@@ -51,39 +51,30 @@ function show(view) {
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function buildLeaImagePrompt(extra = "") {
-  const c = (state.characters && state.characters[0]) || {};
   const moods = [
-    "shy blushing, looking down then peeking up",
-    "playful mischievous smirk, espiègle",
-    "soft sexy gaze at camera, lips slightly parted",
-    "provocative but still a bit timid, biting lip",
-    "embarrassed, cheeks pink, arms loosely crossed",
-    "teasing half-smile, one eyebrow raised",
-    "vulnerable and wet, quiet intimacy"
+    "shy blush, looking down then peeking up at camera",
+    "soft timid smile, cheeks pink",
+    "wet and embarrassed, biting her lip",
+    "quiet gaze, vulnerable"
   ];
   const poses = [
-    "standing in the open apartment doorway",
-    "leaning on the doorframe, hip cocked",
-    "just inside the entrance, dripping on the tiles",
-    "one hand in wet hair, other on the door",
-    "sitting on the floor by the open door, knees up",
-    "turning back toward the rain then looking over her shoulder"
+    "standing in a narrow apartment hallway doorway",
+    "just inside the entrance dripping on the tiles",
+    "one hand in soaked hair, other on the doorframe"
   ];
-  const cams = [
-    "medium shot", "three-quarter portrait", "full body in doorway", "close cinematic portrait"
-  ];
-  const mood = pick(moods);
-  const pose = pick(poses);
-  const cam = pick(cams);
   return [
-    "Photorealistic photograph of " + (c.name || "Léa") + ", 18 years old.",
-    "Physical: " + (c.appearance || "long straight dark brown hair to lower back, dark brown eyes, fair skin, generous 95D bust, slim waist, marked hips") + ".",
-    "SCENARIO LOCK (must keep clothing + place): violent thunderstorm night, apartment front door / hallway, she is soaked from the rain, wearing a short wet white crop top clinging to her chest and tight wet dark jeans. Rain and lightning visible outside. Warm indoor lamp light.",
-    "Pose: " + pose + ".",
-    "Attitude: " + mood + ".",
-    "Camera: " + cam + ".",
-    extra ? ("User note: " + extra) : "",
-    "Same unique face every time. Realistic skin, wet hair, rain droplets. Adult 18+. Not nude, stay in the wet crop top and jeans of the storm scene."
+    "Ultra photorealistic DSLR photo, 85mm f1.8, natural skin pores, film grain, cinematic lighting.",
+    "Young French woman named Lea, 18 years old adult, same face every time:",
+    "long straight espresso-brown hair to the lower back, wet and clinging,",
+    "dark brown almond eyes, soft oval face, small straight nose, full natural lips,",
+    "fair cool skin, slim waist, marked hips, large full 95D bust,",
+    "soaked from a thunderstorm, rain droplets on skin and hair.",
+    "Outfit locked: wet white short crop top clinging to chest, tight wet dark blue skinny jeans, no shorts, no skirt.",
+    "Place locked: apartment hallway and front door at night, warm indoor lamp, storm visible behind her.",
+    "Pose: " + pick(poses) + ".",
+    "Mood: " + pick(moods) + ".",
+    extra ? ("Extra: " + extra) : "",
+    "Realistic photography only. No illustration, no anime, no painting, no CGI."
   ].filter(Boolean).join(" ");
 }
 
@@ -219,11 +210,7 @@ async function generatePhoto() {
   const prompt = buildLeaImagePrompt(extra);
   $("imgerr").textContent = "Génération scène orage…";
   try {
-    const st = await api("/api/status");
-    if (!st?.keys?.gemini) {
-      throw new Error("Aucune clé lue. Rouvre l'onglet Clés, recolle tes clés aq… et Enregistrer.");
-    }
-    $("imgerr").textContent = "Génération avec " + st.keys.gemini + " clé(s) Gemini…";
+    $("imgerr").textContent = "Flux photo (sans clé)…";
     const data = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
     const list = extraPhotos();
     list.unshift(data.url);
