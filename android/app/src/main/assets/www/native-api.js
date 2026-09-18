@@ -51,6 +51,8 @@
       personaBio: "La personne chez qui Léa se réfugie.",
       geminiKeys: "",
       openaiKeys: "",
+      imageKeys: "",
+      imageProvider: "auto",
     });
   }
 
@@ -170,6 +172,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         keys: {
           gemini: parseKeys(s.geminiKeys).length,
           openai: parseKeys(s.openaiKeys).length,
+          image: parseKeys(s.imageKeys).length,
         },
         settings: s,
       };
@@ -179,7 +182,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       save("lea.settings", s);
       return {
         settings: s,
-        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length },
+        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length },
       };
     }
     if (path === "/api/characters") return [LEA];
@@ -251,27 +254,52 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
 
     if (path === "/api/image" && method === "POST") {
-      const prompt = "Photorealistic 18-year-old French woman Léa, long straight dark brown hair, " + (body.prompt || "portrait");
+      const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
-      const keys = parseKeys(s.geminiKeys);
-      for (const key of keys) {
-        try {
-          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
-              generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-            })
-          });
-          const data = await res.json();
-          const parts = data.candidates?.[0]?.content?.parts || [];
-          const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType||"").startsWith("image/"));
-          if (img) return { url: "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data };
-        } catch (e) {}
+      const dedicated = parseKeys(s.imageKeys);
+      const gemini = dedicated.concat(parseKeys(s.geminiKeys));
+      const openai = dedicated.concat(parseKeys(s.openaiKeys));
+      const pref = s.imageProvider || "auto";
+      async function geminiImg(key) {
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
+          })
+        });
+        const data = await res.json();
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType||"").startsWith("image/"));
+        if (img) return "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data;
+        throw new Error(data.error?.message || "Gemini image vide");
       }
-      const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) + "?width=768&height=1152&nologo=true&seed=" + Date.now();
-      return { url };
+      async function openaiImg(key) {
+        const res = await fetch("https://api.openai.com/v1/images/generations", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: "gpt-image-1", prompt, size: "1024x1536" })
+        });
+        const data = await res.json();
+        const b64 = data.data?.[0]?.b64_json;
+        const u = data.data?.[0]?.url;
+        if (b64) return "data:image/png;base64," + b64;
+        if (u) return u;
+        throw new Error(data.error?.message || "OpenAI image vide");
+      }
+      const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+      let last = "Aucune clé images";
+      for (const pvd of order) {
+        const pool = pvd === "gemini" ? gemini.filter((k) => k.startsWith("AIza") || !k.startsWith("sk-")) : openai.filter((k) => k.startsWith("sk-") || k.startsWith("xai-"));
+        for (const key of pool) {
+          try {
+            const url = pvd === "gemini" ? await geminiImg(key) : await openaiImg(key);
+            if (url) return { url };
+          } catch (e) { last = e.message; }
+        }
+      }
+      throw new Error(last + " — ajoute une clé images dans Réglages");
     }
 
     throw new Error("route inconnue " + path);

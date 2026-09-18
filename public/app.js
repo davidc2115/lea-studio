@@ -268,6 +268,16 @@ function renderSettings() {
     <textarea class="field" id="gemini" rows="3" placeholder="AIza...,AIza..."></textarea>
     <label>Clés OpenAI (plusieurs, séparées par virgule)</label>
     <textarea class="field" id="openai" rows="3" placeholder="sk-...,sk-..."></textarea>
+    <h3>Génération d'images</h3>
+    <label>Provider images</label>
+    <select id="imgprov">
+      <option value="gemini">Gemini (Imagen / Flash image)</option>
+      <option value="openai">OpenAI (gpt-image / DALL·E)</option>
+      <option value="auto">Auto (Gemini puis OpenAI)</option>
+    </select>
+    <label>Clés images (optionnel — sinon on réutilise Gemini / OpenAI ci-dessus)</label>
+    <textarea class="field" id="imgkeys" rows="3" placeholder="AIza... ou sk-... une par ligne"></textarea>
+    <p style="color:var(--muted);font-size:13px">Les clés restent sur l'appareil (réglages). Rien n'est collé dans le code.</p>
     <label>Ton nom / persona</label>
     <input id="pname" />
     <label>Bio persona</label>
@@ -276,9 +286,13 @@ function renderSettings() {
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
     $("provider").value = s.settings.provider || "gemini";
+    $("imgprov").value = s.settings.imageProvider || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
-    $("st").textContent = `Clés actives — Gemini: ${s.keys.gemini} | OpenAI: ${s.keys.openai}`;
+    $("gemini").value = s.settings.geminiKeys || "";
+    $("openai").value = s.settings.openaiKeys || "";
+    $("imgkeys").value = s.settings.imageKeys || "";
+    $("st").textContent = `Clés — Gemini: ${s.keys.gemini} | OpenAI: ${s.keys.openai} | Images: ${s.keys.image || 0}`;
     $("st").style.color = "#9dffc2";
   });
   $("save").onclick = async () => {
@@ -290,9 +304,11 @@ function renderSettings() {
         personaBio: $("pbio").value,
         geminiKeys: $("gemini").value,
         openaiKeys: $("openai").value,
+        imageKeys: $("imgkeys").value,
+        imageProvider: $("imgprov").value,
       }),
     });
-    $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai}`;
+    $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Images ${data.keys.image || 0}`;
     $("st").style.color = "#9dffc2";
   };
 }
