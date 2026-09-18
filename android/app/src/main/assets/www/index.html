@@ -11,12 +11,14 @@
     <aside class="rail">
       <div class="brand">Léa<span>Studio</span></div>
       <button class="nav active" data-view="discover">Découvrir</button>
+      <button class="nav" data-view="profile">Profil</button>
       <button class="nav" data-view="chat">Chat</button>
       <button class="nav" data-view="memory">Mémoire</button>
       <button class="nav" data-view="settings">Clés & réglages</button>
     </aside>
     <main>
       <section id="view-discover" class="view"></section>
+      <section id="view-profile" class="view hidden"></section>
       <section id="view-chat" class="view hidden"></section>
       <section id="view-memory" class="view hidden"></section>
       <section id="view-settings" class="view hidden"></section>
@@ -24,5 +26,9 @@
   </div>
   <script src="native-api.js"></script>
   <script src="app.js"></script>
+  <div id="lightbox" class="lightbox hidden" onclick="if(event.target===this)this.classList.add('hidden')">
+    <img id="lightbox-img" alt="Léa" />
+    <button class="cta lb-close" onclick="document.getElementById('lightbox').classList.add('hidden')">Fermer</button>
+  </div>
 </body>
 </html>

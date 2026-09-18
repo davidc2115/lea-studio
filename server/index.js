@@ -30,6 +30,30 @@ app.post("/api/settings", (req, res) => {
   res.json({ settings, keys: keyStatus() });
 });
 
+
+app.post("/api/image", async (req, res) => {
+  const prompt = "Photorealistic 18-year-old French woman Léa, long straight dark brown hair, " + String(req.body?.prompt || "portrait");
+  const keys = String(process.env.GEMINI_API_KEYS || "").split(/[,;\n]+/).map((k) => k.trim()).filter(Boolean);
+  for (const key of keys) {
+    try {
+      const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
+        })
+      });
+      const data = await r.json();
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType || "").startsWith("image/"));
+      if (img) return res.json({ url: "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data });
+    } catch {}
+  }
+  const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) + "?width=768&height=1152&nologo=true&seed=" + Date.now();
+  res.json({ url });
+});
+
 app.get("/api/characters", (_req, res) => {
   res.json(loadCharacters());
 });

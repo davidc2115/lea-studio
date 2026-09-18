@@ -22,26 +22,82 @@ function show(view) {
   $("view-" + view).classList.remove("hidden");
 }
 
+const GALLERY = [
+  { src: "images/lea-portrait.jpg", title: "Portrait" },
+  { src: "images/lea-orage.jpg", title: "L'orage" },
+  { src: "images/lea-feu.jpg", title: "Au coin du feu" },
+  { src: "images/lea-canape.jpg", title: "Nuisette" },
+  { src: "images/lea-sortie.jpg", title: "Prête à sortir" },
+];
+
+function openFull(src) {
+  $("lightbox-img").src = src;
+  $("lightbox").classList.remove("hidden");
+}
+
+function extraPhotos() {
+  try { return JSON.parse(localStorage.getItem("lea.photos") || "[]"); } catch { return []; }
+}
+function saveExtra(list) { localStorage.setItem("lea.photos", JSON.stringify(list)); }
+
 function renderDiscover() {
   const c = state.characters[0];
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div class="grid">
       <article class="card">
-        <div class="cover">Léa</div>
+        <img class="cover-img" src="images/lea-orage.jpg" alt="Léa" />
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title}</div>
           <div class="tags">${c.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
           <p style="color:#d7c8dc;font-size:14px">${c.scenario}</p>
           <button class="cta" id="start-lea">Discuter</button>
+          <button class="cta" id="open-profile" style="margin-left:8px;background:#3a2048">Profil</button>
         </div>
       </article>
     </div>`;
-  $("start-lea").onclick = () => {
-    show("chat");
-    renderChat();
+  $("start-lea").onclick = () => { show("chat"); renderChat(); };
+  $("open-profile").onclick = () => { show("profile"); renderProfile(); };
+}
+
+function renderProfile() {
+  const extras = extraPhotos();
+  const all = GALLERY.concat(extras.map((src, i) => ({ src, title: "Générée " + (i + 1) })));
+  $("view-profile").innerHTML = `
+    <h1>Léa Moreau</h1>
+    <img class="profile-hero" src="images/lea-portrait.jpg" alt="Léa" data-full="images/lea-portrait.jpg" />
+    <p style="color:var(--muted)">18 ans · meilleure amie timide · coincée par l'orage</p>
+    <p>Cheveux bruns lisses jusqu'aux reins, regard doux, poitrine généreuse. Elle rougit facilement.</p>
+    <h3>Photos</h3>
+    <div class="gallery">
+      ${all.map((g) => `<img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" />`).join("")}
+    </div>
+    <h3 style="margin-top:18px">Générer une photo</h3>
+    <textarea class="field" id="imgprompt" rows="2" placeholder="Ex: Léa en nuisette satin près de la cheminée, sourire espiègle"></textarea>
+    <p style="margin-top:8px"><button class="cta" id="genimg">Générer</button></p>
+    <p class="err" id="imgerr"></p>`;
+  $("view-profile").onclick = (e) => {
+    const full = e.target.getAttribute("data-full");
+    if (full) openFull(full);
   };
+  $("genimg").onclick = generatePhoto;
+}
+
+async function generatePhoto() {
+  const prompt = ($("imgprompt").value || "Léa, jeune femme brune 18 ans, cheveux longs, portrait réaliste").trim();
+  $("imgerr").textContent = "Génération…";
+  try {
+    const data = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
+    const list = extraPhotos();
+    list.unshift(data.url);
+    saveExtra(list.slice(0, 20));
+    $("imgerr").textContent = "";
+    renderProfile();
+    openFull(data.url);
+  } catch (e) {
+    $("imgerr").textContent = e.message;
+  }
 }
 
 function renderChat() {
@@ -202,6 +258,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   b.onclick = () => {
     show(b.dataset.view);
     if (b.dataset.view === "discover") renderDiscover();
+    if (b.dataset.view === "profile") renderProfile();
     if (b.dataset.view === "chat") renderChat();
     if (b.dataset.view === "memory") renderMemory();
     if (b.dataset.view === "settings") renderSettings();

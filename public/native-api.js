@@ -249,6 +249,31 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       save("lea.chat", chat);
       return { reply, chat };
     }
+
+    if (path === "/api/image" && method === "POST") {
+      const prompt = "Photorealistic 18-year-old French woman Léa, long straight dark brown hair, " + (body.prompt || "portrait");
+      const s = settings();
+      const keys = parseKeys(s.geminiKeys);
+      for (const key of keys) {
+        try {
+          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
+            })
+          });
+          const data = await res.json();
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType||"").startsWith("image/"));
+          if (img) return { url: "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data };
+        } catch (e) {}
+      }
+      const url = "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt) + "?width=768&height=1152&nologo=true&seed=" + Date.now();
+      return { url };
+    }
+
     throw new Error("route inconnue " + path);
   };
 })();
