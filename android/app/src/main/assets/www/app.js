@@ -1,4 +1,28 @@
-const state = { characters: [], chat: null, current: "lea", mode: "auto", view: "discover" };
+const FALLBACK_LEA = {
+  id: "lea",
+  name: "Léa Moreau",
+  age: 18,
+  title: "Ta meilleure amie coincée par l'orage",
+  tags: ["timide", "meilleure amie", "romance", "réaliste", "nsfw"],
+  greeting:
+    "Euh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et…\nJe suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
+  scenario:
+    "Léa, meilleure amie d'enfance de 18 ans, s'est fait surprendre par un orage violent. Elle frappe à la porte de chez toi, trempée, en jean moulant et top court.",
+  personality: "Timide, maladroite, voix douce. Rougit facilement.",
+  appearance: "Cheveux bruns lisses jusqu'aux reins, yeux marron foncé, peau claire, poitrine généreuse 95D.",
+};
+
+const state = {
+  characters: [FALLBACK_LEA],
+  chat: { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } },
+  current: "lea",
+  mode: localStorage.getItem("lea.mode") || "auto",
+  view: "discover",
+};
+
+function character() {
+  return (state.characters && state.characters[0]) || FALLBACK_LEA;
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -84,17 +108,17 @@ function extraPhotos() {
 function saveExtra(list) { localStorage.setItem("lea.photos", JSON.stringify(list)); }
 
 function renderDiscover() {
-  const c = state.characters[0];
+  const c = character();
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div class="grid">
-      <article class="card">
+      <article class="card discover-card">
         <div class="cover-frame"><img class="cover-img" src="images/lea-orage.jpg" alt="Léa" /></div>
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title}</div>
-          <div class="tags">${c.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-          <p style="color:#d7c8dc;font-size:14px">${c.scenario}</p>
+          <div class="tags">${(c.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
+          <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
           <button class="cta" id="start-lea">Discuter</button>
           <button class="cta" id="open-profile" style="margin-left:8px;background:#3a2048">Profil</button>
         </div>
@@ -147,46 +171,67 @@ async function generatePhoto() {
   }
 }
 
-function renderChat() {
-  const c = state.characters[0];
+function paintMessages() {
+  const box = $("msgs");
+  if (!box) return;
+  const c = character();
   const msgs = state.chat?.messages || [];
+  if (!msgs.length) {
+    box.innerHTML = `<div class="bubble assistant">${escapeHtml(c.greeting)}</div>`;
+  } else {
+    box.innerHTML = msgs.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${escapeHtml(m.content)}</div>`).join("");
+  }
+  box.scrollTop = box.scrollHeight;
+  const rel = state.chat?.relationship || {};
+  if ($("rel")) {
+    $("rel").innerHTML = `<p style="font-size:13px;color:var(--rose)">Proximité ${rel.closeness || 1}/10 · Confiance ${rel.trust || 1}/10 · Tension ${rel.heat || 0}/10</p>`;
+  }
+  if ($("mode-now")) {
+    const heat = rel.heat || 0;
+    const label = state.mode === "nsfw" ? "NSFW forcé" : state.mode === "sfw" ? "SFW forcé" : (heat >= 4 ? "Auto · NSFW" : "Auto · SFW");
+    $("mode-now").textContent = label;
+  }
+}
+
+function renderChat() {
+  const c = character();
   $("view-chat").innerHTML = `
     <div class="chat-wrap">
       <div class="thread">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
-          <div><strong>${c.name}</strong><div style="font-size:12px;color:var(--muted)">${c.title}</div></div>
-          <button class="cta" id="reset">Nouvelle scène</button>
+        <div style="padding:12px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div><strong>${c.name}</strong><div style="font-size:12px;color:var(--muted)">${c.title}</div><div class="mode-pill" id="mode-now">Auto · SFW</div></div>
+          <button class="cta" type="button" id="reset">Nouvelle scène</button>
         </div>
         <div class="msgs" id="msgs"></div>
         <div class="composer">
           <textarea id="input" placeholder="Écris à Léa…"></textarea>
-          <button class="cta" id="send">Envoyer</button>
+          <button class="cta" type="button" id="send">Envoyer</button>
         </div>
       </div>
       <aside class="side">
         <label>Mode</label>
         <select id="mode">
-          <option value="auto" ${state.mode === "auto" ? "selected" : ""}>Auto (SFW ↔ NSFW)</option>
-          <option value="sfw" ${state.mode === "sfw" ? "selected" : ""}>SFW forcé</option>
-          <option value="nsfw" ${state.mode === "nsfw" ? "selected" : ""}>NSFW 18+ forcé</option>
+          <option value="auto">Auto (SFW ↔ NSFW)</option>
+          <option value="sfw">SFW forcé</option>
+          <option value="nsfw">NSFW 18+ forcé</option>
         </select>
-        <p style="font-size:12px;color:var(--muted)">Auto : Léa reste douce, et passe en NSFW seulement si tu l'orientes.</p>
-        <p style="font-size:13px;color:var(--muted);white-space:pre-wrap">${c.greeting}</p>
+        <p style="font-size:12px;color:var(--muted)">Auto par défaut : Léa reste douce, puis bascule en NSFW seulement si tu l'orientes.</p>
+        <p style="font-size:13px;color:var(--muted);white-space:pre-wrap">${escapeHtml(c.greeting)}</p>
         <div id="rel"></div>
         <p class="err" id="err"></p>
       </aside>
     </div>`;
-  const box = $("msgs");
-  if (!msgs.length) {
-    box.innerHTML = `<div class="bubble assistant">${c.greeting}</div>`;
-  } else {
-    box.innerHTML = msgs.map((m) => `<div class="bubble ${m.role}">${escapeHtml(m.content)}</div>`).join("");
+  const modeEl = $("mode");
+  if (modeEl) {
+    modeEl.value = state.mode || "auto";
+    modeEl.onchange = (e) => {
+      state.mode = e.target.value || "auto";
+      localStorage.setItem("lea.mode", state.mode);
+      paintMessages();
+    };
   }
-  box.scrollTop = box.scrollHeight;
-  const rel = state.chat?.relationship || {};
-  $("rel").innerHTML = `<p style="font-size:13px;color:var(--rose)">Proximité ${rel.closeness || 1}/10 · Confiance ${rel.trust || 1}/10 · Tension ${rel.heat || 0}/10</p>`;
-  $("mode").onchange = (e) => (state.mode = e.target.value);
-  $("send").onclick = send;
+  paintMessages();
+  $("send").onclick = (e) => { e.preventDefault(); send(); };
   $("input").onkeydown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -194,8 +239,12 @@ function renderChat() {
     }
   };
   $("reset").onclick = async () => {
-    state.chat = await api("/api/chat/lea/reset", { method: "POST" });
-    renderChat();
+    try {
+      state.chat = await api("/api/chat/lea/reset", { method: "POST" });
+    } catch {
+      state.chat = { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
+    }
+    paintMessages();
   };
 }
 
@@ -205,12 +254,12 @@ async function send() {
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
-  if (!state.chat) state.chat = { messages: [], memories: [], summaries: [], relationship: {} };
+  if (!state.chat) state.chat = { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
   if (!Array.isArray(state.chat.messages)) state.chat.messages = [];
   state.chat.messages.push({ role: "user", content: text, ts: Date.now() });
+  paintMessages();
   const box = $("msgs");
   if (box) {
-    box.insertAdjacentHTML("beforeend", `<div class="bubble user">${escapeHtml(text)}</div>`);
     box.insertAdjacentHTML("beforeend", `<div class="bubble assistant" id="pending">Léa réfléchit…</div>`);
     box.scrollTop = box.scrollHeight;
   }
@@ -222,21 +271,27 @@ async function send() {
       method: "POST",
       body: JSON.stringify({ text, mode: state.mode || "auto" }),
     });
-    if (data && data.chat) state.chat = data.chat;
-    else if (data && data.reply) {
+    if (data && data.chat && Array.isArray(data.chat.messages) && data.chat.messages.length) {
+      state.chat = data.chat;
+    } else if (data && data.reply) {
       state.chat.messages.push({ role: "assistant", content: data.reply, ts: Date.now() });
+    } else {
+      throw new Error("Réponse vide");
     }
-    renderChat();
+    paintMessages();
   } catch (e) {
+    const pending = $("pending");
+    if (pending) pending.remove();
     state.chat.messages.push({
       role: "assistant",
-      content: "*elle reste sur le seuil, trempée, la voix petite*\nJe… je t'écoute. (Réponse API : " + (e.message || "erreur") + " — ajoute une clé dans Réglages si besoin.)",
+      content: "*elle reste sur le seuil, trempée, la voix petite*\nJe… je t'écoute.\n(" + (e.message || "erreur") + " — ajoute une clé Gemini / OpenAI / Grok dans Réglages.)",
       ts: Date.now(),
     });
-    renderChat();
+    paintMessages();
     if ($("err")) $("err").textContent = e.message;
   } finally {
     if ($("send")) $("send").disabled = false;
+    if ($("input")) $("input").focus();
   }
 }
 
@@ -359,7 +414,14 @@ document.querySelectorAll(".nav").forEach((b) => {
 });
 
 (async function init() {
-  state.characters = await api("/api/characters");
-  state.chat = await api("/api/chat/lea");
+  try {
+    const chars = await api("/api/characters");
+    if (Array.isArray(chars) && chars[0]) state.characters = chars;
+  } catch { /* fallback Léa déjà en mémoire */ }
+  try {
+    const chat = await api("/api/chat/lea");
+    if (chat) state.chat = chat;
+  } catch { /* chat vide local */ }
+  if (!state.mode) state.mode = "auto";
   renderDiscover();
 })();

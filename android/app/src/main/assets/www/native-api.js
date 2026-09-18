@@ -223,8 +223,12 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const s = settings();
       const rawMode = body.mode || "auto";
       const txt = String(body.text || "");
-      const nsfwHint = /(sexe|sexuel|nsfw|nu\b|nue\b|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|hardcore|bite|chatte|nude|orgasme)/i.test(txt);
+      const recent = (chat.messages || []).slice(-8).map((m) => m.content).join("\n") + "\n" + txt;
+      const nsfwHint = /(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)
+        || ((chat.relationship || {}).heat >= 5);
       const mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
+      if (mode === "nsfw") chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
+      if (rawMode === "auto" && !nsfwHint) chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - ( /stop|stoppe|sfw|trop loin/i.test(txt) ? 3 : 0 ));
       chat.messages.push({ role: "user", content: txt, ts: Date.now() });
       save("lea.chat", chat);
       const system = [

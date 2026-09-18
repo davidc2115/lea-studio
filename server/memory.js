@@ -77,11 +77,14 @@ export async function maybeExtractMemory(chat, provider) {
   return chat;
 }
 
-export function resolveMode(mode, text = "") {
+export function resolveMode(mode, text = "", chat = null) {
   const m = String(mode || "auto").toLowerCase();
   if (m === "sfw" || m === "nsfw") return m;
-  const t = String(text || "");
-  const nsfw = /(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte)/i.test(t);
+  const recent = chat && Array.isArray(chat.messages)
+    ? chat.messages.slice(-8).map((x) => x.content).join("\n") + "\n" + text
+    : String(text || "");
+  const nsfw = /(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)
+    || ((chat?.relationship?.heat || 0) >= 5);
   return nsfw ? "nsfw" : "sfw";
 }
 

@@ -159,10 +159,14 @@ app.post("/api/chat/:id/message", async (req, res) => {
 
   const { text, mode = "auto", provider } = req.body || {};
   if (!text) return res.status(400).json({ error: "message vide" });
-  const resolvedMode = resolveMode(mode, text);
 
   const settings = loadSettings();
   const chat = getChat(character.id);
+  const resolvedMode = resolveMode(mode, text, chat);
+  if (resolvedMode === "nsfw") {
+    chat.relationship = chat.relationship || {};
+    chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
+  }
   chat.messages.push({ role: "user", content: String(text), ts: Date.now() });
 
   const system = [
