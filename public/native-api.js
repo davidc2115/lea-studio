@@ -66,6 +66,12 @@
       .filter(Boolean);
   }
 
+  function allGeminiKeys() {
+    const s = settings();
+    const raw = [s.geminiKeys, s.imageKeys, s.grokKeys, s.openaiKeys].filter(Boolean).join("\n");
+    return [...new Set(parseKeys(raw).filter((k) => !/^sk-/.test(k)))];
+  }
+
   async function callGemini(messages, keys) {
     const s = settings();
     const pref = s.geminiTextModel || "gemini-3.5-flash-lite";
@@ -153,7 +159,7 @@
   async function generate(messages, provider) {
     const s = settings();
     const pref = (provider || s.provider || "gemini").toLowerCase();
-    const g = parseKeys(s.geminiKeys);
+    const g = allGeminiKeys();
     const o = parseKeys(s.openaiKeys);
     const errors = [];
     const order = pref === "openai" ? ["openai", "gemini"] : ["gemini"];
@@ -188,7 +194,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       return {
         ok: true,
         keys: {
-          gemini: parseKeys(s.geminiKeys).length,
+          gemini: allGeminiKeys().length,
           openai: parseKeys(s.openaiKeys).length,
           image: parseKeys(s.imageKeys).length,
           grok: parseKeys(s.grokKeys).length,
@@ -293,54 +299,49 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
-      const gemini = parseKeys(s.geminiKeys + "\n" + (s.imageKeys || "")).filter((k) => !/^sk-/.test(k) && !/^xai/i.test(k));
-      async function geminiImg(key) {
-        const prefModel = s.geminiImageModel || "auto";
-        const models = prefModel === "gemini-2.5-flash-image"
-          ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
-          : prefModel === "gemini-3.1-flash-image"
-            ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
-            : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
-        let last = "Gemini image vide";
-        for (const model of models) {
-          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
-              generationConfig: {
-                responseModalities: ["IMAGE", "TEXT"],
-                imageConfig: { aspectRatio: "2:3" }
-              }
-            })
-          });
-          const data = await res.json();
-          const parts = data.candidates?.[0]?.content?.parts || [];
-          const img = parts.find((x) => (x.inlineData || x.inline_data) && String((x.inlineData || x.inline_data).mimeType || (x.inlineData || x.inline_data).mime_type || "").startsWith("image/"));
-          if (img) {
-            const blob = img.inlineData || img.inline_data;
-            return "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data;
-          }
-          last = data.error?.message || (model + " vide");
-        }
-        throw new Error(last);
-      }
-      const order = ["gemini"];
-      let last = "Aucune clé Gemini";
-      const pools = { gemini };
-      const fns = { gemini: geminiImg };
-      for (const pvd of order) {
-        for (const key of pools[pvd] || []) {
+      const gemini = allGeminiKeys();
+      const prefModel = s.geminiImageModel || "auto";
+      const models = prefModel === "gemini-2.5-flash-image"
+        ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
+        : prefModel === "gemini-3.1-flash-image"
+          ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
+          : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+      if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
+      let start = Number(localStorage.getItem("lea.imgKey") || 0) % gemini.length;
+      const tries = [];
+      for (let mi = 0; mi < models.length; mi++) {
+        const model = models[mi];
+        for (let i = 0; i < gemini.length; i++) {
+          const key = gemini[(start + i) % gemini.length];
+          const tag = "clé" + (((start + i) % gemini.length) + 1) + "/" + model;
           try {
-            const url = await fns[pvd](key);
-            if (url) return { url };
+            const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                  responseModalities: ["IMAGE", "TEXT"],
+                  imageConfig: { aspectRatio: "2:3" }
+                }
+              })
+            });
+            const data = await res.json();
+            const err = data.error?.message || data.error?.status || "";
+            const parts = data.candidates?.[0]?.content?.parts || [];
+            const img = parts.find((x) => (x.inlineData || x.inline_data) && String((x.inlineData || x.inline_data).mimeType || (x.inlineData || x.inline_data).mime_type || "").startsWith("image/"));
+            if (img) {
+              const blob = img.inlineData || img.inline_data;
+              localStorage.setItem("lea.imgKey", String((start + i + 1) % gemini.length));
+              return { url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data };
+            }
+            tries.push(tag + " → " + (err || data.candidates?.[0]?.finishReason || "pas d'image"));
           } catch (e) {
-            last = String(e.message || e);
-            if (/credits|billing|quota/i.test(last)) last = "Quota Gemini. Essaie une autre clé AI Studio.";
+            tries.push(tag + " → " + (e.message || e));
           }
         }
       }
-      throw new Error((last || "échec image") + " (" + gemini.length + " clé(s) Gemini)");
+      throw new Error("Toutes les tentatives ont échoué (" + gemini.length + " clés × " + models.length + " modèles) : " + tries.join(" | "));
     }
 
     throw new Error("route inconnue " + path);

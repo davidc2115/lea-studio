@@ -219,6 +219,11 @@ async function generatePhoto() {
   const prompt = buildLeaImagePrompt(extra);
   $("imgerr").textContent = "Génération scène orage…";
   try {
+    const st = await api("/api/status");
+    if (!st?.keys?.gemini) {
+      throw new Error("Aucune clé lue. Rouvre l'onglet Clés, recolle tes clés aq… et Enregistrer.");
+    }
+    $("imgerr").textContent = "Génération avec " + st.keys.gemini + " clé(s) Gemini…";
     const data = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
     const list = extraPhotos();
     list.unshift(data.url);
@@ -235,7 +240,7 @@ async function generatePhoto() {
 function formatBubble(text) {
   const raw = String(text || "");
   const parts = [];
-  const re = /(~[^~\n]+~|\*[^*\n]+\*|_[^_\n]+_)/g;
+  const re = /(~[^~\n]+~|\*[^*\n]+\*|_[^_\n]+_|\([^)\n]{3,}\))/g;
   let last = 0;
   let m;
   while ((m = re.exec(raw))) {
