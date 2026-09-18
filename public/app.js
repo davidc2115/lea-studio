@@ -92,9 +92,21 @@ const GALLERY = [
   { src: "images/lea-orage-timide.jpg", title: "Orage, timide" },
   { src: "images/lea-orage-espiegle.jpg", title: "Orage, espiègle" },
   { src: "images/lea-orage-sol.jpg", title: "Assise sous la pluie" },
+  { src: "images/lea-orage-dentelle.jpg", title: "Orage, top dentelle" },
   { src: "images/lea-feu.jpg", title: "Sèche ses cheveux au feu" },
+  { src: "images/lea-serviette.jpg", title: "Serviette au coin du feu" },
+  { src: "images/lea-feu-sol.jpg", title: "Trempée au tapis" },
+  { src: "images/lea-feu-pierre.jpg", title: "Devant la cheminée" },
+  { src: "images/lea-feu-genoux.jpg", title: "À genoux près du feu" },
   { src: "images/lea-canape.jpg", title: "Nuisette satin" },
+  { src: "images/lea-nuisette-satin.jpg", title: "Nuisette satin, sourire" },
+  { src: "images/lea-nuisette-dentelle.jpg", title: "Nuisette dentelle fine" },
+  { src: "images/lea-nuisette-timide.jpg", title: "Nuisette, regard baissé" },
+  { src: "images/lea-lingerie-ivoire.jpg", title: "Lingerie ivoire" },
+  { src: "images/lea-lingerie-rouge.jpg", title: "Lingerie rouge" },
+  { src: "images/lea-lingerie-rouge-dos.jpg", title: "Lingerie rouge, de dos" },
   { src: "images/lea-sortie.jpg", title: "Haut blanc, prête à sortir" },
+  { src: "images/lea-sortie-decollete.jpg", title: "Sortie, décolleté" },
 ];
 
 function openFull(src) {
@@ -113,7 +125,7 @@ function renderDiscover() {
     <h1>Découvrir</h1>
     <div class="grid">
       <article class="card discover-card">
-        <div class="cover-frame"><img class="cover-img" src="images/lea-orage.jpg" alt="Léa" /></div>
+        <div class="cover-frame"><img class="cover-img" src="images/lea-orage-dentelle.jpg" alt="Léa" /></div>
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title}</div>
