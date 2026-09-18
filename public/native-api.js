@@ -298,8 +298,32 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
 
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
+      const s0 = settings();
+      const grokKeys = parseKeys(s0.grokKeys).filter((k) => /^xai-/i.test(k) || k.length > 20);
+      for (const key of grokKeys) {
+        try {
+          const res = await fetch("https://api.x.ai/v1/images/generations", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "grok-imagine-image-2.0", prompt, n: 1 }),
+          });
+          const data = await res.json();
+          if (data.data?.[0]?.b64_json) return { url: "data:image/jpeg;base64," + data.data[0].b64_json, model: "grok-imagine-image-2.0" };
+          if (data.data?.[0]?.url) return { url: data.data[0].url, model: "grok-imagine-image-2.0" };
+        } catch (_) {}
+        try {
+          const res = await fetch("https://api.x.ai/v1/images/generations", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "grok-imagine-image", prompt, n: 1 }),
+          });
+          const data = await res.json();
+          if (data.data?.[0]?.b64_json) return { url: "data:image/jpeg;base64," + data.data[0].b64_json, model: "grok-imagine-image" };
+          if (data.data?.[0]?.url) return { url: data.data[0].url, model: "grok-imagine-image" };
+        } catch (_) {}
+      }
       const gemini = allGeminiKeys();
-      if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
+      if (!gemini.length && !grokKeys.length) throw new Error("Aucune clé Gemini ou Grok");
       const s = settings();
       const pref = s.geminiImageModel || "auto";
       const known = [

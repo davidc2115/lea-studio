@@ -482,6 +482,9 @@ function renderSettings() {
     </select>
     <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
     <textarea class="field" id="gemini" rows="3" placeholder="aq... ou AIza... une par ligne"></textarea>
+    <label>Clé Grok / xAI Imagine (xai-…)</label>
+    <textarea class="field" id="grok" rows="2" placeholder="xai-..."></textarea>
+    <p style="color:var(--muted);font-size:13px">Grok Imagine : crée la clé sur console.x.ai (crédits API, pas l'abo SuperGrok chat).</p>
     <h3>Images</h3>
     <label>Modèle images</label>
     <select id="gemimgmodel">
@@ -506,6 +509,7 @@ function renderSettings() {
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
+    if ($("grok")) $("grok").value = s.settings.grokKeys || "";
     $("st").textContent = `Clés Gemini : ${s.keys.gemini}`;
     $("st").style.color = "#9dffc2";
   });
@@ -517,6 +521,7 @@ function renderSettings() {
         personaName: $("pname").value,
         personaBio: $("pbio").value,
         geminiKeys: $("gemini").value,
+        grokKeys: $("grok") ? $("grok").value : "",
         imageProvider: "gemini",
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
         geminiTextModel: $("gemtextmodel") ? $("gemtextmodel").value : "gemini-3.5-flash-lite",
