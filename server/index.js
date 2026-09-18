@@ -22,14 +22,16 @@ app.get("/api/status", (_req, res) => {
   const settings = loadSettings();
   const keys = keyStatus();
   keys.image = splitKeys(settings.imageKeys || process.env.IMAGE_API_KEYS).length;
+  keys.grok = splitKeys(settings.grokKeys || process.env.XAI_API_KEYS).length;
   res.json({ ok: true, keys, settings });
 });
 
 app.post("/api/settings", (req, res) => {
-  const { provider, personaName, personaBio, openaiKeys, geminiKeys, imageKeys, imageProvider } = req.body || {};
+  const { provider, personaName, personaBio, openaiKeys, geminiKeys, grokKeys, imageKeys, imageProvider } = req.body || {};
   if (typeof openaiKeys === "string") process.env.OPENAI_API_KEYS = openaiKeys;
   if (typeof geminiKeys === "string") process.env.GEMINI_API_KEYS = geminiKeys;
   if (typeof imageKeys === "string") process.env.IMAGE_API_KEYS = imageKeys;
+  if (typeof grokKeys === "string") process.env.XAI_API_KEYS = grokKeys;
   if (openaiKeys || geminiKeys) reloadPools();
   const settings = saveSettings({
     ...(provider ? { provider } : {}),
@@ -37,9 +39,11 @@ app.post("/api/settings", (req, res) => {
     ...(personaBio != null ? { personaBio } : {}),
     ...(imageProvider ? { imageProvider } : {}),
     ...(imageKeys != null ? { imageKeys } : {}),
+    ...(grokKeys != null ? { grokKeys } : {}),
   });
   const keys = keyStatus();
   keys.image = splitKeys((loadSettings().imageKeys) || process.env.IMAGE_API_KEYS).length;
+  keys.grok = splitKeys((loadSettings().grokKeys) || process.env.XAI_API_KEYS).length;
   res.json({ settings, keys });
 });
 
@@ -48,18 +52,30 @@ app.post("/api/image", async (req, res) => {
   const prompt = String(req.body?.prompt || "Photorealistic Léa portrait");
   const s = loadSettings();
   const dedicated = splitKeys(s.imageKeys || process.env.IMAGE_API_KEYS);
-  const gemini = dedicated.concat(splitKeys(process.env.GEMINI_API_KEYS));
-  const openai = dedicated.concat(splitKeys(process.env.OPENAI_API_KEYS));
+  const grok = dedicated.concat(splitKeys(s.grokKeys || process.env.XAI_API_KEYS)).filter((k) => /xai/i.test(k));
+  const gemini = dedicated.concat(splitKeys(process.env.GEMINI_API_KEYS)).filter((k) => k.startsWith("AIza"));
+  const openai = dedicated.concat(splitKeys(process.env.OPENAI_API_KEYS)).filter((k) => k.startsWith("sk-"));
   const pref = s.imageProvider || process.env.IMAGE_PROVIDER || "auto";
-  const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+  const order = pref === "openai" ? ["openai", "grok", "gemini"]
+    : pref === "gemini" ? ["gemini", "grok", "openai"]
+    : pref === "grok" ? ["grok", "gemini", "openai"]
+    : ["grok", "gemini", "openai"];
   let last = "Aucune clé images dans Réglages";
   for (const pvd of order) {
-    const pool = pvd === "gemini"
-      ? gemini.filter((k) => k.startsWith("AIza") || !k.startsWith("sk-"))
-      : openai.filter((k) => k.startsWith("sk-"));
+    const pool = pvd === "grok" ? grok : pvd === "gemini" ? gemini : openai;
     for (const key of pool) {
       try {
-        if (pvd === "gemini") {
+        if (pvd === "grok") {
+          const r = await fetch("https://api.x.ai/v1/images/generations", {
+            method: "POST",
+            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+            body: JSON.stringify({ model: "grok-imagine-image-2.0", prompt, n: 1, aspect_ratio: "2:3" })
+          });
+          const data = await r.json();
+          if (data.data?.[0]?.b64_json) return res.json({ url: "data:image/jpeg;base64," + data.data[0].b64_json });
+          if (data.data?.[0]?.url) return res.json({ url: data.data[0].url });
+          last = data.error?.message || "Grok image vide";
+        } else if (pvd === "gemini") {
           const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
             method: "POST",
             headers: { "Content-Type": "application/json" },

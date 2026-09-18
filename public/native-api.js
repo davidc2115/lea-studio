@@ -51,6 +51,7 @@
       personaBio: "La personne chez qui Léa se réfugie.",
       geminiKeys: "",
       openaiKeys: "",
+      grokKeys: "",
       imageKeys: "",
       imageProvider: "auto",
     });
@@ -173,6 +174,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           gemini: parseKeys(s.geminiKeys).length,
           openai: parseKeys(s.openaiKeys).length,
           image: parseKeys(s.imageKeys).length,
+          grok: parseKeys(s.grokKeys).length,
         },
         settings: s,
       };
@@ -182,7 +184,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       save("lea.settings", s);
       return {
         settings: s,
-        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length },
+        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length, grok: parseKeys(s.grokKeys).length },
       };
     }
     if (path === "/api/characters") return [LEA];
@@ -257,8 +259,9 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
       const dedicated = parseKeys(s.imageKeys);
-      const gemini = dedicated.concat(parseKeys(s.geminiKeys));
-      const openai = dedicated.concat(parseKeys(s.openaiKeys));
+      const grok = dedicated.concat(parseKeys(s.grokKeys)).filter((k) => k.startsWith("xai-") || k.startsWith("xai_") || k.includes("xai"));
+      const gemini = dedicated.concat(parseKeys(s.geminiKeys)).filter((k) => k.startsWith("AIza"));
+      const openai = dedicated.concat(parseKeys(s.openaiKeys)).filter((k) => k.startsWith("sk-"));
       const pref = s.imageProvider || "auto";
       async function geminiImg(key) {
         const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
@@ -275,6 +278,24 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         if (img) return "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data;
         throw new Error(data.error?.message || "Gemini image vide");
       }
+      async function grokImg(key) {
+        const res = await fetch("https://api.x.ai/v1/images/generations", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "grok-imagine-image-2.0",
+            prompt,
+            n: 1,
+            aspect_ratio: "2:3"
+          })
+        });
+        const data = await res.json();
+        const b64 = data.data?.[0]?.b64_json;
+        const u = data.data?.[0]?.url;
+        if (b64) return "data:image/jpeg;base64," + b64;
+        if (u) return u;
+        throw new Error(data.error?.message || data.error || "Grok image vide");
+      }
       async function openaiImg(key) {
         const res = await fetch("https://api.openai.com/v1/images/generations", {
           method: "POST",
@@ -288,15 +309,19 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         if (u) return u;
         throw new Error(data.error?.message || "OpenAI image vide");
       }
-      const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+      const order = pref === "openai" ? ["openai", "grok", "gemini"]
+        : pref === "gemini" ? ["gemini", "grok", "openai"]
+        : pref === "grok" ? ["grok", "gemini", "openai"]
+        : ["grok", "gemini", "openai"];
       let last = "Aucune clé images";
+      const pools = { grok, gemini, openai };
+      const fns = { grok: grokImg, gemini: geminiImg, openai: openaiImg };
       for (const pvd of order) {
-        const pool = pvd === "gemini" ? gemini.filter((k) => k.startsWith("AIza") || !k.startsWith("sk-")) : openai.filter((k) => k.startsWith("sk-") || k.startsWith("xai-"));
-        for (const key of pool) {
+        for (const key of pools[pvd]) {
           try {
-            const url = pvd === "gemini" ? await geminiImg(key) : await openaiImg(key);
+            const url = await fns[pvd](key);
             if (url) return { url };
-          } catch (e) { last = e.message; }
+          } catch (e) { last = String(e.message || e); }
         }
       }
       throw new Error(last + " — ajoute une clé images dans Réglages");

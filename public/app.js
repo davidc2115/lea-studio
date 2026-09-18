@@ -268,15 +268,18 @@ function renderSettings() {
     <textarea class="field" id="gemini" rows="3" placeholder="AIza...,AIza..."></textarea>
     <label>Clés OpenAI (plusieurs, séparées par virgule)</label>
     <textarea class="field" id="openai" rows="3" placeholder="sk-...,sk-..."></textarea>
+    <label>Clés Grok / xAI (plusieurs, séparées par virgule)</label>
+    <textarea class="field" id="grok" rows="3" placeholder="xai-...,xai-..."></textarea>
     <h3>Génération d'images</h3>
     <label>Provider images</label>
     <select id="imgprov">
+      <option value="grok">Grok Imagine (xAI)</option>
       <option value="gemini">Gemini (Imagen / Flash image)</option>
       <option value="openai">OpenAI (gpt-image / DALL·E)</option>
-      <option value="auto">Auto (Gemini puis OpenAI)</option>
+      <option value="auto">Auto (Grok → Gemini → OpenAI)</option>
     </select>
     <label>Clés images (optionnel — sinon on réutilise Gemini / OpenAI ci-dessus)</label>
-    <textarea class="field" id="imgkeys" rows="3" placeholder="AIza... ou sk-... une par ligne"></textarea>
+    <textarea class="field" id="imgkeys" rows="3" placeholder="xai-... / AIza... / sk-... une par ligne"></textarea>
     <p style="color:var(--muted);font-size:13px">Les clés restent sur l'appareil (réglages). Rien n'est collé dans le code.</p>
     <label>Ton nom / persona</label>
     <input id="pname" />
@@ -291,8 +294,9 @@ function renderSettings() {
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
     $("openai").value = s.settings.openaiKeys || "";
+    $("grok").value = s.settings.grokKeys || "";
     $("imgkeys").value = s.settings.imageKeys || "";
-    $("st").textContent = `Clés — Gemini: ${s.keys.gemini} | OpenAI: ${s.keys.openai} | Images: ${s.keys.image || 0}`;
+    $("st").textContent = `Clés — Gemini: ${s.keys.gemini} | OpenAI: ${s.keys.openai} | Grok: ${s.keys.grok || 0} | Images: ${s.keys.image || 0}`;
     $("st").style.color = "#9dffc2";
   });
   $("save").onclick = async () => {
@@ -304,11 +308,12 @@ function renderSettings() {
         personaBio: $("pbio").value,
         geminiKeys: $("gemini").value,
         openaiKeys: $("openai").value,
+        grokKeys: $("grok").value,
         imageKeys: $("imgkeys").value,
         imageProvider: $("imgprov").value,
       }),
     });
-    $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Images ${data.keys.image || 0}`;
+    $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Grok ${data.keys.grok || 0} / Images ${data.keys.image || 0}`;
     $("st").style.color = "#9dffc2";
   };
 }
