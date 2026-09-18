@@ -288,11 +288,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
-      const dedicated = parseKeys(s.imageKeys);
-      const grok = dedicated.concat(parseKeys(s.grokKeys)).filter((k) => k.startsWith("xai-") || k.startsWith("xai_") || k.includes("xai"));
-      const gemini = dedicated.concat(parseKeys(s.geminiKeys)).filter((k) => k.startsWith("AIza"));
-      const openai = dedicated.concat(parseKeys(s.openaiKeys)).filter((k) => k.startsWith("sk-"));
-      const pref = s.imageProvider || "gemini";
+      const gemini = parseKeys(s.geminiKeys).filter((k) => k.startsWith("AIza") || k.length > 24);
       async function geminiImg(key) {
         const prefModel = s.geminiImageModel || "auto";
         const models = prefModel === "gemini-2.5-flash-image"
@@ -324,43 +320,10 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         }
         throw new Error(last);
       }
-      async function grokImg(key) {
-        const res = await fetch("https://api.x.ai/v1/images/generations", {
-          method: "POST",
-          headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "grok-imagine-image-2.0",
-            prompt,
-            n: 1,
-            aspect_ratio: "2:3"
-          })
-        });
-        const data = await res.json();
-        const b64 = data.data?.[0]?.b64_json;
-        const u = data.data?.[0]?.url;
-        if (b64) return "data:image/jpeg;base64," + b64;
-        if (u) return u;
-        throw new Error(data.error?.message || data.error || "Grok image vide");
-      }
-      async function openaiImg(key) {
-        const res = await fetch("https://api.openai.com/v1/images/generations", {
-          method: "POST",
-          headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "gpt-image-1", prompt, size: "1024x1536" })
-        });
-        const data = await res.json();
-        const b64 = data.data?.[0]?.b64_json;
-        const u = data.data?.[0]?.url;
-        if (b64) return "data:image/png;base64," + b64;
-        if (u) return u;
-        throw new Error(data.error?.message || "OpenAI image vide");
-      }
-      const order = pref === "openai" ? ["openai"]
-        : pref === "grok" ? ["grok", "gemini"]
-        : ["gemini", "grok"];
-      let last = "Aucune clé Gemini / Grok images. N'utilise pas OpenAI en auto (crédits).";
-      const pools = { grok, gemini, openai };
-      const fns = { grok: grokImg, gemini: geminiImg, openai: openaiImg };
+      const order = ["gemini"];
+      let last = "Aucune clé Gemini AI Studio (AIza…)";
+      const pools = { gemini };
+      const fns = { gemini: geminiImg };
       for (const pvd of order) {
         for (const key of pools[pvd] || []) {
           try {
@@ -368,10 +331,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
             if (url) return { url };
           } catch (e) {
             last = String(e.message || e);
-            if (/credits|billing|quota|insufficient/i.test(last)) {
-              last = "OpenAI sans crédits — passe sur Gemini (Nano Banana) ou Grok dans Réglages.";
-              continue;
-            }
+            if (/credits|billing|quota/i.test(last)) last = "Quota Gemini. Essaie une autre clé AI Studio.";
           }
         }
       }

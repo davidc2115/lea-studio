@@ -54,78 +54,43 @@ app.post("/api/settings", (req, res) => {
 app.post("/api/image", async (req, res) => {
   const prompt = String(req.body?.prompt || "Photorealistic Léa portrait");
   const s = loadSettings();
-  const dedicated = splitKeys(s.imageKeys || process.env.IMAGE_API_KEYS);
-  const grok = dedicated.concat(splitKeys(s.grokKeys || process.env.XAI_API_KEYS)).filter((k) => /xai/i.test(k));
-  const gemini = dedicated.concat(splitKeys(s.geminiKeys || process.env.GEMINI_API_KEYS)).filter((k) => k.startsWith("AIza"));
-  const openai = dedicated.concat(splitKeys(s.openaiKeys || process.env.OPENAI_API_KEYS)).filter((k) => k.startsWith("sk-"));
-  const pref = s.imageProvider || process.env.IMAGE_PROVIDER || "gemini";
-  const order = pref === "openai" ? ["openai"]
-    : pref === "grok" ? ["grok", "gemini"]
-    : ["gemini", "grok"];
-  let last = "Aucune clé Gemini / Grok images. OpenAI n'est plus utilisé en auto.";
-  for (const pvd of order) {
-    const pool = pvd === "grok" ? grok : pvd === "gemini" ? gemini : openai;
-    for (const key of pool) {
+  const gemini = splitKeys(s.geminiKeys || process.env.GEMINI_API_KEYS);
+  let last = "Aucune clé Gemini AI Studio";
+  const prefModel = s.geminiImageModel || "auto";
+  const models = prefModel === "gemini-2.5-flash-image"
+    ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
+    : prefModel === "gemini-3.1-flash-image"
+      ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
+      : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+  for (const key of gemini) {
+    for (const model of models) {
       try {
-        if (pvd === "grok") {
-          const r = await fetch("https://api.x.ai/v1/images/generations", {
-            method: "POST",
-            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "grok-imagine-image-2.0", prompt, n: 1, aspect_ratio: "2:3" })
-          });
-          const data = await r.json();
-          if (data.data?.[0]?.b64_json) return res.json({ url: "data:image/jpeg;base64," + data.data[0].b64_json });
-          if (data.data?.[0]?.url) return res.json({ url: data.data[0].url });
-          last = data.error?.message || "Grok image vide";
-        } else if (pvd === "gemini") {
-          const prefModel = s.geminiImageModel || "auto";
-          const models = prefModel === "gemini-2.5-flash-image"
-            ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
-            : prefModel === "gemini-3.1-flash-image"
-              ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
-              : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
-          let gemOk = false;
-          for (const model of models) {
-            const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: {
-                  responseModalities: ["IMAGE", "TEXT"],
-                  imageConfig: { aspectRatio: "2:3" }
-                }
-              })
-            });
-            const data = await r.json();
-            const parts = data.candidates?.[0]?.content?.parts || [];
-            const img = parts.find((x) => {
-              const blob = x.inlineData || x.inline_data;
-              return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
-            });
-            if (img) {
-              const blob = img.inlineData || img.inline_data;
-              gemOk = true;
-              return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
+        const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseModalities: ["IMAGE", "TEXT"],
+              imageConfig: { aspectRatio: "2:3" }
             }
-            last = data.error?.message || (model + " vide");
-          }
-          if (gemOk) return;
-        } else {
-          const r = await fetch("https://api.openai.com/v1/images/generations", {
-            method: "POST",
-            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "gpt-image-1", prompt, size: "1024x1536" })
-          });
-          const data = await r.json();
-          if (data.data?.[0]?.b64_json) return res.json({ url: "data:image/png;base64," + data.data[0].b64_json });
-          if (data.data?.[0]?.url) return res.json({ url: data.data[0].url });
-          last = data.error?.message || "OpenAI image vide";
+          })
+        });
+        const data = await r.json();
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const img = parts.find((x) => {
+          const blob = x.inlineData || x.inline_data;
+          return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
+        });
+        if (img) {
+          const blob = img.inlineData || img.inline_data;
+          return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
         }
+        last = data.error?.message || (model + " vide");
       } catch (e) { last = e.message; }
     }
   }
-  res.status(400).json({ error: last + " — configure une clé images dans Réglages" });
+  res.status(400).json({ error: last + " — ajoute une clé AIza… dans Clés" });
 });
 
 app.get("/api/characters", (_req, res) => {

@@ -14,16 +14,17 @@ body {
   background: radial-gradient(1200px 600px at 10% -10%, #3a1230 0%, var(--bg) 50%);
   color: var(--text);
 }
-#app { display: flex; min-height: 100vh; }
-.rail {
-  width: 220px;
-  background: #100813;
-  border-right: 1px solid var(--line);
-  padding: 20px 14px;
+#app { display: flex; flex-direction: column; min-height: 100dvh; }
+.tabbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 15;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  background: #100813;
+  border-top: 1px solid var(--line);
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
 }
+.tabbar .nav { flex: 1; text-align: center; }
 .brand { font-size: 22px; font-weight: 700; margin-bottom: 18px; }
 .brand span { color: var(--pink); }
 .nav {
@@ -139,13 +140,10 @@ input, select, textarea.field {
 .mem { background: #120c16; border: 1px solid var(--line); border-radius: 10px; padding: 8px; margin-bottom: 8px; font-size: 13px; }
 .err { color: #ff8aa8; font-size: 13px; }
 h1 { margin: 0 0 16px; }
-@media (max-width: 900px) {
-  #app { flex-direction: column; min-height: 100dvh; }
-  .rail { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 10px; }
-  main { padding: 10px 10px 16px; }
-}
+main { padding: 12px 12px 18px; }
+body.chat-open .tabbar { display: none; }
 
-body.chat-open .rail { display: none; }
+body.chat-open .tabbar { display: none; }
 body.chat-open main { padding: 0; }
 body.chat-open #view-chat { margin: 0; }
 .chat-full {

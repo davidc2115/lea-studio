@@ -8,21 +8,19 @@
 </head>
 <body>
   <div id="app">
-    <aside class="rail">
-      <div class="brand">Léa<span>Studio</span></div>
-      <button class="nav active" data-view="discover">Découvrir</button>
-      <button class="nav" data-view="profile">Profil</button>
-      <button class="nav" data-view="chat">Chat</button>
-      <button class="nav" data-view="memory">Mémoire</button>
-      <button class="nav" data-view="settings">Clés & réglages</button>
-    </aside>
     <main>
       <section id="view-discover" class="view"></section>
       <section id="view-profile" class="view hidden"></section>
       <section id="view-chat" class="view hidden"></section>
+      <section id="view-chats" class="view hidden"></section>
       <section id="view-memory" class="view hidden"></section>
       <section id="view-settings" class="view hidden"></section>
     </main>
+    <nav class="tabbar" id="tabbar">
+      <button class="nav active" data-view="discover">Découvrir</button>
+      <button class="nav" data-view="chats">Chats</button>
+      <button class="nav" data-view="settings">Clés</button>
+    </nav>
   </div>
   <script src="native-api.js"></script>
   <script src="app.js"></script>

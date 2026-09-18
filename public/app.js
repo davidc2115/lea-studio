@@ -129,25 +129,63 @@ function extraPhotos() {
 }
 function saveExtra(list) { localStorage.setItem("lea.photos", JSON.stringify(list)); }
 
+function chatPreview(chat) {
+  const msgs = chat?.messages || [];
+  if (!msgs.length) return "Nouvelle conversation";
+  const last = msgs[msgs.length - 1];
+  return String(last.content || "").replace(/\s+/g, " ").slice(0, 80);
+}
+
 function renderDiscover() {
-  const c = character();
+  const list = state.characters.length ? state.characters : [FALLBACK_LEA];
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div class="grid">
+      ${list.map((c) => `
       <article class="card discover-card">
-        <div class="cover-frame"><img class="cover-img" src="images/lea-orage-dentelle.jpg" alt="Léa" /></div>
+        <div class="cover-frame"><img class="cover-img" src="images/lea-orage-dentelle.jpg" alt="${c.name}" /></div>
         <div class="body">
           <strong>${c.name}</strong>
-          <div style="color:var(--muted);font-size:13px">${c.title}</div>
+          <div style="color:var(--muted);font-size:13px">${c.title || ""}</div>
           <div class="tags">${(c.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
           <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
-          <button class="cta" id="start-lea">Discuter</button>
-          <button class="cta" id="open-profile" style="margin-left:8px;background:#3a2048">Profil</button>
+          <button class="cta start-chat" data-id="${c.id}">Discuter</button>
+          <button class="cta open-profile" data-id="${c.id}" style="margin-left:8px;background:#3a2048">Profil</button>
         </div>
-      </article>
+      </article>`).join("")}
     </div>`;
-  $("start-lea").onclick = () => { show("chat"); renderChat(); };
-  $("open-profile").onclick = () => { show("profile"); renderProfile(); };
+  $("view-discover").onclick = (e) => {
+    const start = e.target.closest(".start-chat");
+    const prof = e.target.closest(".open-profile");
+    if (start) { state.current = start.dataset.id || "lea"; show("chat"); renderChat(); }
+    if (prof) { state.current = prof.dataset.id || "lea"; show("profile"); renderProfile(); }
+  };
+}
+
+function renderChats() {
+  const list = state.characters.length ? state.characters : [FALLBACK_LEA];
+  const chat = state.chat || {};
+  $("view-chats").innerHTML = `
+    <h1>Chats</h1>
+    <p style="color:var(--muted);font-size:13px">Reprends une discussion en cours.</p>
+    ${list.map((c) => `
+      <article class="card" style="margin-top:12px">
+        <div class="body" style="display:flex;gap:12px;align-items:center">
+          <img src="images/lea-portrait.jpg" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover" />
+          <div style="flex:1;min-width:0">
+            <strong>${c.name}</strong>
+            <div style="color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${chatPreview(c.id === "lea" ? chat : {})}</div>
+          </div>
+          <button class="cta resume-chat" data-id="${c.id}">Ouvrir</button>
+        </div>
+      </article>`).join("")}`;
+  $("view-chats").onclick = (e) => {
+    const b = e.target.closest(".resume-chat");
+    if (!b) return;
+    state.current = b.dataset.id || "lea";
+    show("chat");
+    renderChat();
+  };
 }
 
 function renderProfile() {
@@ -190,8 +228,8 @@ async function generatePhoto() {
     openFull(data.url);
   } catch (e) {
     const msg = String(e.message || e);
-    $("imgerr").textContent = /credits|billing|OpenAI/i.test(msg)
-      ? "OpenAI n'a plus de crédits. Dans Réglages : provider images = Gemini ou Grok, et une clé AIza… ou xai-…"
+    $("imgerr").textContent = /AIza|clé|Gemini|quota/i.test(msg)
+      ? "Ajoute une clé Google AI Studio (AIza…) dans l'onglet Clés en bas."
       : msg;
   }
 }
@@ -393,41 +431,24 @@ function renderMemory() {
 
 function renderSettings() {
   $("view-settings").innerHTML = `
-    <h1>Clés API & persona</h1>
-    <label>Provider par défaut</label>
-    <select id="provider">
-      <option value="gemini">Gemini</option>
-      <option value="openai">OpenAI</option>
-    </select>
+    <h1>Clés Google AI Studio</h1>
+    <p style="color:var(--muted);font-size:13px">Images : uniquement Nano Banana 2 et Gemini 2.5 Flash Image. Texte : Gemini 3.5 Flash Lite.</p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
-      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (défaut, NSFW ok)</option>
+      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
       <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
       <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
     </select>
-    <label>Clés Gemini (plusieurs, séparées par virgule)</label>
-    <textarea class="field" id="gemini" rows="3" placeholder="AIza...,AIza..."></textarea>
-    <label>Clés OpenAI (plusieurs, séparées par virgule)</label>
-    <textarea class="field" id="openai" rows="3" placeholder="sk-...,sk-..."></textarea>
-    <label>Clés Grok / xAI (plusieurs, séparées par virgule)</label>
-    <textarea class="field" id="grok" rows="3" placeholder="xai-...,xai-..."></textarea>
-    <h3>Génération d'images</h3>
-    <label>Provider images</label>
-    <select id="imgprov">
-      <option value="grok">Grok Imagine (xAI)</option>
-      <option value="gemini">Gemini (Nano Banana 2 / 2.5 Flash Image)</option>
-      <option value="openai">OpenAI (gpt-image / DALL·E)</option>
-      <option value="auto">Auto (Gemini puis Grok — pas OpenAI)</option>
-    </select>
-    <label>Modèle Gemini images</label>
+    <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
+    <textarea class="field" id="gemini" rows="3" placeholder="AIza..."></textarea>
+    <h3>Images</h3>
+    <label>Modèle images</label>
     <select id="gemimgmodel">
-      <option value="gemini-3.1-flash-image">Nano Banana 2 (gemini-3.1-flash-image)</option>
-      <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
       <option value="auto">Auto (Nano Banana 2 puis 2.5 Flash Image)</option>
+      <option value="gemini-3.1-flash-image">Nano Banana 2</option>
+      <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
     </select>
-    <label>Clés images (optionnel — sinon on réutilise Gemini / OpenAI ci-dessus)</label>
-    <textarea class="field" id="imgkeys" rows="3" placeholder="xai-... / AIza... / sk-... une par ligne"></textarea>
-    <p style="color:var(--muted);font-size:13px">Les clés restent sur l'appareil (réglages). Rien n'est collé dans le code.</p>
+    <p style="color:var(--muted);font-size:13px">OpenAI n'est plus utilisé pour les images.</p>
     <label>Ton nom / persona</label>
     <input id="pname" />
     <label>Bio persona</label>
@@ -435,36 +456,28 @@ function renderSettings() {
     <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button></p>
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
-    $("provider").value = s.settings.provider || "gemini";
     if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
-    $("imgprov").value = s.settings.imageProvider || "gemini";
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
-    $("openai").value = s.settings.openaiKeys || "";
-    $("grok").value = s.settings.grokKeys || "";
-    $("imgkeys").value = s.settings.imageKeys || "";
-    $("st").textContent = `Clés — Gemini: ${s.keys.gemini} | OpenAI: ${s.keys.openai} | Grok: ${s.keys.grok || 0} | Images: ${s.keys.image || 0}`;
+    $("st").textContent = `Clés Gemini : ${s.keys.gemini}`;
     $("st").style.color = "#9dffc2";
   });
   $("save").onclick = async () => {
     const data = await api("/api/settings", {
       method: "POST",
       body: JSON.stringify({
-        provider: $("provider").value,
+        provider: "gemini",
         personaName: $("pname").value,
         personaBio: $("pbio").value,
         geminiKeys: $("gemini").value,
-        openaiKeys: $("openai").value,
-        grokKeys: $("grok").value,
-        imageKeys: $("imgkeys").value,
-        imageProvider: $("imgprov").value,
+        imageProvider: "gemini",
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
         geminiTextModel: $("gemtextmodel") ? $("gemtextmodel").value : "gemini-3.5-flash-lite",
       }),
     });
-    $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Grok ${data.keys.grok || 0} / Images ${data.keys.image || 0}`;
+    $("st").textContent = `OK — ${data.keys.gemini} clé(s) Gemini`;
     $("st").style.color = "#9dffc2";
   };
 }
@@ -477,6 +490,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   b.onclick = () => {
     show(b.dataset.view);
     if (b.dataset.view === "discover") renderDiscover();
+    if (b.dataset.view === "chats") renderChats();
     if (b.dataset.view === "profile") renderProfile();
     if (b.dataset.view === "chat") renderChat();
     if (b.dataset.view === "memory") renderMemory();
