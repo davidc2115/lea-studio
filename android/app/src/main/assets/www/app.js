@@ -205,23 +205,59 @@ function renderProfile() {
   $("genimg").onclick = generatePhoto;
 }
 
+function setGenStatus(t) {
+  if ($("imgerr")) $("imgerr").textContent = t;
+}
+
 async function generatePhoto() {
-  const extra = ($("imgprompt").value || "").trim();
-  const prompt = buildLeaImagePrompt(extra);
-  $("imgerr").textContent = "Génération scène orage…";
-  try {
-    $("imgerr").textContent = "Flux photo (sans clé)…";
-    const data = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
-    const list = extraPhotos();
-    list.unshift(data.url);
-    saveExtra(list.slice(0, 20));
-    $("imgerr").textContent = data.note || "";
-    renderProfile();
-    openFull(data.url);
-  } catch (e) {
-    const msg = String(e.message || e);
-    $("imgerr").textContent = msg;
+  if (window._leaGenBusy) {
+    setGenStatus("Déjà une génération en cours…");
+    return;
   }
+  const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
+  const prompt = buildLeaImagePrompt(extra);
+  window._leaGenBusy = true;
+  setGenStatus("Horde : envoi du job…");
+  try {
+    const start = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
+    if (!start.jobId) throw new Error("Pas de job Horde");
+    setGenStatus("Horde file d’attente… tu peux quitter cet écran");
+    pollHordeJob(start.jobId, start.host);
+  } catch (e) {
+    window._leaGenBusy = false;
+    setGenStatus(String(e.message || e));
+  }
+}
+
+async function pollHordeJob(jobId, host) {
+  for (let i = 0; i < 90; i++) {
+    await new Promise((r) => setTimeout(r, 2500));
+    try {
+      const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
+      if (!st.done) {
+        const q = st.queue != null ? " file " + st.queue : "";
+        const w = st.wait != null ? " ~" + st.wait + "s" : "";
+        setGenStatus("Horde en arrière-plan" + q + w + " (" + (i + 1) + ")");
+        continue;
+      }
+      window._leaGenBusy = false;
+      if (st.error) {
+        setGenStatus(st.error);
+        return;
+      }
+      const list = extraPhotos();
+      list.unshift(st.url);
+      saveExtra(list.slice(0, 20));
+      setGenStatus("Image Horde prête");
+      if (state.view === "profile") renderProfile();
+      if (st.url) openFull(st.url);
+      return;
+    } catch (e) {
+      setGenStatus("Horde… " + (e.message || e));
+    }
+  }
+  window._leaGenBusy = false;
+  setGenStatus("Horde timeout (>3 min). Réessaie.");
 }
 
 function formatBubble(text) {
@@ -460,7 +496,7 @@ function renderMemory() {
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Images : Flux gratuit sans clé (Pollinations). Gemini images reste payant. Texte : tes clés Gemini.</p>
+    <p style="color:var(--muted);font-size:13px">Images : AI Horde (SDXL) gratuit, en arrière-plan. Texte : tes clés Gemini.</p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>

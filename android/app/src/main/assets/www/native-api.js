@@ -297,32 +297,53 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
 
     if (path === "/api/image" && method === "POST") {
-      const prompt = String(body.prompt || "Photorealistic Léa portrait").slice(0, 450);
-      const seed = Date.now() % 999999;
-      const enc = encodeURIComponent(prompt);
-      const extra = "&width=832&height=1248&nologo=true&enhance=true&private=true&safe=false&seed=" + seed + "&negative=" + encodeURIComponent("cartoon, anime, illustration, painting, 3d, plastic skin, child, watermark, shorts");
-      const freeUrls = [
-        "https://image.pollinations.ai/prompt/" + enc + "?model=flux-realism" + extra,
-        "https://image.pollinations.ai/prompt/" + enc + "?model=flux" + extra,
-        "https://gen.pollinations.ai/image/" + enc + "?model=flux" + extra,
-      ];
-      for (const u of freeUrls) {
+      const prompt = String(body.prompt || "photorealistic portrait of Lea").slice(0, 900);
+      const negative = "cartoon, anime, illustration, painting, 3d render, deformed, extra fingers, child, watermark, text, blurry, low quality";
+      const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
+      let last = "";
+      for (const host of hosts) {
         try {
-          const res = await fetch(u, { headers: { Accept: "image/*" } });
-          const ct = res.headers.get("content-type") || "";
-          if (res.ok && ct.startsWith("image/")) {
-            const blob = await res.blob();
-            const url = await new Promise((resolve, reject) => {
-              const fr = new FileReader();
-              fr.onload = () => resolve(fr.result);
-              fr.onerror = reject;
-              fr.readAsDataURL(blob);
-            });
-            if (String(url).startsWith("data:image")) return { url, model: "flux-gratuit" };
-          }
-        } catch (_) {}
+          const res = await fetch(host + "/generate/async", {
+            method: "POST",
+            headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.0:anon" },
+            body: JSON.stringify({
+              prompt: prompt + " ### " + negative,
+              params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+              nsfw: true,
+              censor_nsfw: false,
+              models: ["AlbedoBase XL (SDXL)", "DreamShaper", "Deliberate", "SDXL 1.0"],
+              r2: true,
+              slow_workers: true,
+              trusted_workers: false,
+            }),
+          });
+          const data = await res.json();
+          if (data.id) return { jobId: data.id, host, pending: true };
+          last = data.message || JSON.stringify(data).slice(0, 120);
+        } catch (e) {
+          last = e.message || String(e);
+        }
       }
-      return { url: freeUrls[0], model: "flux-url", note: "Flux gratuit (sans clé)" };
+      throw new Error("Horde indisponible: " + last);
+    }
+
+    if (path === "/api/image-status") {
+      const jobId = body.jobId || "";
+      const host = body.host || "https://stablehorde.net/api/v2";
+      if (!jobId) throw new Error("jobId manquant");
+      const chk = await fetch(host + "/generate/check/" + jobId, { headers: { "Client-Agent": "lea-studio:1.0:anon" } });
+      const c = await chk.json();
+      if (c.faulted) return { done: true, error: "Worker Horde en échec" };
+      if (!c.done) {
+        return { done: false, wait: c.wait_time, queue: c.queue_position, processing: c.processing };
+      }
+      const st = await fetch(host + "/generate/status/" + jobId, { headers: { "Client-Agent": "lea-studio:1.0:anon" } });
+      const data = await st.json();
+      const g = data.generations && data.generations[0];
+      if (!g) return { done: true, error: "Pas d'image renvoyée" };
+      if (g.img && String(g.img).startsWith("http")) return { done: true, url: g.img };
+      if (g.img) return { done: true, url: "data:image/webp;base64," + g.img };
+      return { done: true, error: "Image vide" };
     }
 
     if (path === "/api/image-test" && method === "POST") {
