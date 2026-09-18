@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version APK (ex: 1.0.0)"
+        description: "Nom de version affiché (ex: 1.0.1)"
         required: true
-        default: "1.0.0"
+        default: "1.0.1"
   push:
     branches: [main]
     paths:
@@ -29,29 +29,47 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Copier le frontend dans les assets Android
+      - name: Installer Android SDK (licences auto)
         run: |
-          mkdir -p android/app/src/main/assets/www
-          cp -R public/. android/app/src/main/assets/www/
-          ls -la android/app/src/main/assets/www
+          ANDROID_SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          curl -sS -L -o /tmp/cmdtools.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+          unzip -q /tmp/cmdtools.zip -d /tmp/cmdtools
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          mv /tmp/cmdtools/cmdline-tools/* "$ANDROID_SDK_ROOT/cmdline-tools/latest/"
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" --licenses || true
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$ANDROID_SDK_ROOT" \
+            "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
 
-      - name: Assemble Debug APK
+      - name: Copier le frontend dans les assets
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp -R public/. android/app/src/main/assets/www/
+
+      - name: Assemble APK signé
         working-directory: android
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: |
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          CODE="${{ github.run_number }}"
+          gradle assembleRelease --no-daemon --stacktrace \
+            -PversionName="$VERSION" \
+            -PversionCode="$CODE"
 
       - name: Renommer l'APK
         run: |
           VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          CODE="${{ github.run_number }}"
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
           test -n "$APK"
-          cp "$APK" "lea-studio-v${VERSION}.apk"
-          ls -lh "lea-studio-v${VERSION}.apk"
+          cp "$APK" "lea-studio-v${VERSION}-b${CODE}.apk"
+          ls -lh "lea-studio-v${VERSION}-b${CODE}.apk"
 
       - uses: actions/upload-artifact@v4
         with:

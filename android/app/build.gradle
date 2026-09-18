@@ -2,6 +2,9 @@ plugins {
     id "com.android.application"
 }
 
+def versionMajor = (project.findProperty("versionName") ?: "1.0.0")
+def versionInt = (project.findProperty("versionCode") ?: "1").toInteger()
+
 android {
     namespace "com.leastudio.app"
     compileSdk 34
@@ -9,16 +12,24 @@ android {
         applicationId "com.leastudio.app"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0.0"
+        versionCode versionInt
+        versionName versionMajor
+    }
+    signingConfigs {
+        release {
+            storeFile file("lea-release.keystore")
+            storePassword "leastudio"
+            keyAlias "lea"
+            keyPassword "leastudio"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
         debug {
-            applicationIdSuffix ""
+            signingConfig signingConfigs.release
         }
     }
     compileOptions {
