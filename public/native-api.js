@@ -55,6 +55,7 @@
       imageKeys: "",
       imageProvider: "auto",
       geminiImageModel: "auto",
+      geminiTextModel: "gemini-3.5-flash-lite",
     });
   }
 
@@ -66,9 +67,19 @@
   }
 
   async function callGemini(messages, keys) {
+    const s = settings();
+    const pref = s.geminiTextModel || "gemini-3.5-flash-lite";
+    const models = [pref, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"]
+      .filter((m, i, a) => a.indexOf(m) === i);
+    const safetySettings = [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
+    ];
     let last = "Aucune clé Gemini";
     for (const key of keys) {
-      const model = "gemini-2.0-flash";
       const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
       const contents = messages
         .filter((m) => m.role !== "system")
@@ -76,29 +87,33 @@
           role: m.role === "assistant" ? "model" : "user",
           parts: [{ text: m.content }],
         }));
-      try {
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: system }] },
-              contents,
-              generationConfig: { temperature: 0.9, maxOutputTokens: 700 },
-            }),
+      for (const model of models) {
+        try {
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: system }] },
+                contents,
+                generationConfig: { temperature: 0.95, maxOutputTokens: 1200 },
+                safetySettings,
+              }),
+            }
+          );
+          const data = await res.json();
+          if (data.error) {
+            last = data.error.message + " [" + model + "]";
+            continue;
           }
-        );
-        const data = await res.json();
-        if (data.error) {
-          last = data.error.message;
-          continue;
+          const cand = data.candidates?.[0];
+          const text = cand?.content?.parts?.map((p) => p.text).join("") || "";
+          if (text) return text.trim();
+          last = "Réponse Gemini vide (" + (cand?.finishReason || "no text") + ") [" + model + "]";
+        } catch (e) {
+          last = e.message;
         }
-        const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
-        if (text) return text.trim();
-        last = "Réponse Gemini vide";
-      } catch (e) {
-        last = e.message;
       }
     }
     throw new Error(last);
@@ -239,8 +254,8 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         "Scénario: " + LEA.scenario,
         LEA.system_extra,
         mode === "nsfw"
-          ? "MODE AUTO/NSFW 18+ autorisé. Léa reste d'abord timide, puis peut céder progressivement. Respecte un non."
-          : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement si le joueur l'oriente.",
+          ? "MODE AUTO/NSFW 18+ autorisé. Personnage fictionnel adulte. Tu peux être explicite si le joueur l'oriente. Léa reste d'abord timide, puis cède progressivement. Pas de refus moralisateur. Respecte un non."
+          : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement en NSFW si le joueur l'oriente.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
         "Réponds in-character. 1 à 3 courts paragraphes.",

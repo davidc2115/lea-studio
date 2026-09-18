@@ -344,6 +344,12 @@ function renderSettings() {
       <option value="gemini">Gemini</option>
       <option value="openai">OpenAI</option>
     </select>
+    <label>Modèle Gemini (texte / chat)</label>
+    <select id="gemtextmodel">
+      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite (défaut, NSFW ok)</option>
+      <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+    </select>
     <label>Clés Gemini (plusieurs, séparées par virgule)</label>
     <textarea class="field" id="gemini" rows="3" placeholder="AIza...,AIza..."></textarea>
     <label>Clés OpenAI (plusieurs, séparées par virgule)</label>
@@ -375,6 +381,7 @@ function renderSettings() {
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
     $("provider").value = s.settings.provider || "gemini";
+    if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
     $("imgprov").value = s.settings.imageProvider || "auto";
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
@@ -399,6 +406,7 @@ function renderSettings() {
         imageKeys: $("imgkeys").value,
         imageProvider: $("imgprov").value,
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
+        geminiTextModel: $("gemtextmodel") ? $("gemtextmodel").value : "gemini-3.5-flash-lite",
       }),
     });
     $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Grok ${data.keys.grok || 0} / Images ${data.keys.image || 0}`;

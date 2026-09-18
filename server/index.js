@@ -27,11 +27,12 @@ app.get("/api/status", (_req, res) => {
 });
 
 app.post("/api/settings", (req, res) => {
-  const { provider, personaName, personaBio, openaiKeys, geminiKeys, grokKeys, imageKeys, imageProvider, geminiImageModel } = req.body || {};
+  const { provider, personaName, personaBio, openaiKeys, geminiKeys, grokKeys, imageKeys, imageProvider, geminiImageModel, geminiTextModel } = req.body || {};
   if (typeof openaiKeys === "string") process.env.OPENAI_API_KEYS = openaiKeys;
   if (typeof geminiKeys === "string") process.env.GEMINI_API_KEYS = geminiKeys;
   if (typeof imageKeys === "string") process.env.IMAGE_API_KEYS = imageKeys;
   if (typeof grokKeys === "string") process.env.XAI_API_KEYS = grokKeys;
+  if (typeof geminiTextModel === "string" && geminiTextModel) process.env.GEMINI_MODEL = geminiTextModel;
   if (openaiKeys || geminiKeys) reloadPools();
   const settings = saveSettings({
     ...(provider ? { provider } : {}),
@@ -41,6 +42,7 @@ app.post("/api/settings", (req, res) => {
     ...(imageKeys != null ? { imageKeys } : {}),
     ...(grokKeys != null ? { grokKeys } : {}),
     ...(geminiImageModel ? { geminiImageModel } : {}),
+    ...(geminiTextModel ? { geminiTextModel } : {}),
   });
   const keys = keyStatus();
   keys.image = splitKeys((loadSettings().imageKeys) || process.env.IMAGE_API_KEYS).length;

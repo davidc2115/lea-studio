@@ -53,8 +53,21 @@ async function callOpenAI(messages) {
   throw new Error(lastErr);
 }
 
+const GEMINI_SAFETY = [
+  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+  { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
+];
+
+function geminiTextModels() {
+  const pref = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+  const all = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"];
+  return [pref, ...all.filter((m) => m !== pref)];
+}
+
 async function callGemini(messages) {
-  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
   const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
   const contents = messages
     .filter((m) => m.role !== "system")
@@ -67,32 +80,32 @@ async function callGemini(messages) {
   for (let i = 0; i < Math.max(pools.gemini.count(), 1); i++) {
     const key = pools.gemini.next();
     if (!key) break;
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: system }] },
-          contents,
-          generationConfig: { temperature: 0.9, maxOutputTokens: 700 },
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        pools.gemini.fail(key, data.error?.status === "RESOURCE_EXHAUSTED" ? 120000 : 30000);
-        lastErr = data.error?.message || res.statusText;
-        continue;
+    for (const model of geminiTextModels()) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: system }] },
+            contents,
+            generationConfig: { temperature: 0.95, maxOutputTokens: 1200 },
+            safetySettings: GEMINI_SAFETY,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          lastErr = (data.error?.message || res.statusText) + " [" + model + "]";
+          if (data.error?.status === "RESOURCE_EXHAUSTED") pools.gemini.fail(key, 120000);
+          continue;
+        }
+        const cand = data.candidates?.[0];
+        const text = cand?.content?.parts?.map((p) => p.text).join("") || "";
+        if (text) return text.trim();
+        lastErr = "Réponse Gemini vide (" + (cand?.finishReason || "no text") + ") [" + model + "]";
+      } catch (e) {
+        lastErr = e.message;
       }
-      const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text).join("") || "";
-      if (!text) {
-        lastErr = "Réponse Gemini vide";
-        continue;
-      }
-      return text.trim();
-    } catch (e) {
-      pools.gemini.fail(key, 20000);
-      lastErr = e.message;
     }
   }
   throw new Error(lastErr);
