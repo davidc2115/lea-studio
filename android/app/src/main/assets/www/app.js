@@ -22,12 +22,55 @@ function show(view) {
   $("view-" + view).classList.remove("hidden");
 }
 
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function buildLeaImagePrompt(extra = "") {
+  const c = (state.characters && state.characters[0]) || {};
+  const moods = [
+    "shy blushing, looking down then peeking up",
+    "playful mischievous smirk, espiègle",
+    "soft sexy gaze at camera, lips slightly parted",
+    "provocative but still a bit timid, biting lip",
+    "embarrassed, cheeks pink, arms loosely crossed",
+    "teasing half-smile, one eyebrow raised",
+    "vulnerable and wet, quiet intimacy"
+  ];
+  const poses = [
+    "standing in the open apartment doorway",
+    "leaning on the doorframe, hip cocked",
+    "just inside the entrance, dripping on the tiles",
+    "one hand in wet hair, other on the door",
+    "sitting on the floor by the open door, knees up",
+    "turning back toward the rain then looking over her shoulder"
+  ];
+  const cams = [
+    "medium shot", "three-quarter portrait", "full body in doorway", "close cinematic portrait"
+  ];
+  const mood = pick(moods);
+  const pose = pick(poses);
+  const cam = pick(cams);
+  return [
+    "Photorealistic photograph of " + (c.name || "Léa") + ", 18 years old.",
+    "Physical: " + (c.appearance || "long straight dark brown hair to lower back, dark brown eyes, fair skin, generous 95D bust, slim waist, marked hips") + ".",
+    "SCENARIO LOCK (must keep clothing + place): violent thunderstorm night, apartment front door / hallway, she is soaked from the rain, wearing a short wet white crop top clinging to her chest and tight wet dark jeans. Rain and lightning visible outside. Warm indoor lamp light.",
+    "Pose: " + pose + ".",
+    "Attitude: " + mood + ".",
+    "Camera: " + cam + ".",
+    extra ? ("User note: " + extra) : "",
+    "Same unique face every time. Realistic skin, wet hair, rain droplets. Adult 18+. Not nude, stay in the wet crop top and jeans of the storm scene."
+  ].filter(Boolean).join(" ");
+}
+
 const GALLERY = [
   { src: "images/lea-portrait.jpg", title: "Portrait" },
   { src: "images/lea-orage.jpg", title: "L'orage" },
   { src: "images/lea-feu.jpg", title: "Au coin du feu" },
   { src: "images/lea-canape.jpg", title: "Nuisette" },
   { src: "images/lea-sortie.jpg", title: "Prête à sortir" },
+  { src: "images/lea-orage-timide.jpg", title: "Orage, timide" },
+  { src: "images/lea-orage-espiegle.jpg", title: "Orage, espiègle" },
+  { src: "images/lea-orage-sol.jpg", title: "Orage, assise" },
 ];
 
 function openFull(src) {
@@ -73,9 +116,12 @@ function renderProfile() {
     <div class="gallery">
       ${all.map((g) => `<img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" />`).join("")}
     </div>
-    <h3 style="margin-top:18px">Générer une photo</h3>
-    <textarea class="field" id="imgprompt" rows="2" placeholder="Ex: Léa en nuisette satin près de la cheminée, sourire espiègle"></textarea>
-    <p style="margin-top:8px"><button class="cta" id="genimg">Générer</button></p>
+    <h3 style="margin-top:18px">Photo du scénario</h3>
+    <p style="color:var(--muted);font-size:13px">Toujours Léa : physique + orage + top court mouillé + jean moulant + porte. Pose et attitude tirées au sort (timide, sexy, provocante, espiègle…).</p>
+    <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
+    <p style="margin-top:8px">
+      <button class="cta" id="genimg">Générer (aléatoire)</button>
+    </p>
     <p class="err" id="imgerr"></p>`;
   $("view-profile").onclick = (e) => {
     const full = e.target.getAttribute("data-full");
@@ -85,8 +131,9 @@ function renderProfile() {
 }
 
 async function generatePhoto() {
-  const prompt = ($("imgprompt").value || "Léa, jeune femme brune 18 ans, cheveux longs, portrait réaliste").trim();
-  $("imgerr").textContent = "Génération…";
+  const extra = ($("imgprompt").value || "").trim();
+  const prompt = buildLeaImagePrompt(extra);
+  $("imgerr").textContent = "Génération scène orage…";
   try {
     const data = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
     const list = extraPhotos();
