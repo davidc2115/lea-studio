@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { generate, keyStatus, reloadPools } from "./providers.js";
 import { loadCharacters, loadSettings, saveSettings, getChat, saveChat } from "./store.js";
-import { buildMemoryBlock, maybeExtractMemory, modeInstructions, recentWindow } from "./memory.js";
+import { buildMemoryBlock, maybeExtractMemory, modeInstructions, resolveMode, recentWindow } from "./memory.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -157,8 +157,9 @@ app.post("/api/chat/:id/message", async (req, res) => {
   const character = loadCharacters().find((c) => c.id === req.params.id);
   if (!character) return res.status(404).json({ error: "personnage inconnu" });
 
-  const { text, mode = "sfw", provider } = req.body || {};
+  const { text, mode = "auto", provider } = req.body || {};
   if (!text) return res.status(400).json({ error: "message vide" });
+  const resolvedMode = resolveMode(mode, text);
 
   const settings = loadSettings();
   const chat = getChat(character.id);
@@ -170,7 +171,7 @@ app.post("/api/chat/:id/message", async (req, res) => {
     "Apparence: " + character.appearance,
     "Scénario: " + character.scenario,
     character.system_extra,
-    modeInstructions(mode),
+    modeInstructions(resolvedMode, text),
     `Utilisateur: ${settings.personaName}. ${settings.personaBio}`,
     "Exemples:\n" + character.example_dialogue,
     buildMemoryBlock(chat),

@@ -221,8 +221,12 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
     if (path === "/api/chat/lea/message" && method === "POST") {
       const s = settings();
-      const mode = body.mode || "sfw";
-      chat.messages.push({ role: "user", content: body.text, ts: Date.now() });
+      const rawMode = body.mode || "auto";
+      const txt = String(body.text || "");
+      const nsfwHint = /(sexe|sexuel|nsfw|nu\b|nue\b|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|hardcore|bite|chatte|nude|orgasme)/i.test(txt);
+      const mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
+      chat.messages.push({ role: "user", content: txt, ts: Date.now() });
+      save("lea.chat", chat);
       const system = [
         `Tu incarnes ${LEA.name}, ${LEA.age} ans.`,
         LEA.personality,
@@ -230,8 +234,8 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         "Scénario: " + LEA.scenario,
         LEA.system_extra,
         mode === "nsfw"
-          ? "MODE NSFW 18+ autorisé. Léa reste d'abord timide, puis peut céder progressivement. Respecte un non."
-          : "MODE SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites.",
+          ? "MODE AUTO/NSFW 18+ autorisé. Léa reste d'abord timide, puis peut céder progressivement. Respecte un non."
+          : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement si le joueur l'oriente.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
         "Réponds in-character. 1 à 3 courts paragraphes.",
@@ -240,7 +244,12 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         role: m.role === "user" ? "user" : "assistant",
         content: m.content,
       }));
-      const reply = await generate([{ role: "system", content: system }, ...history], s.provider);
+      let reply;
+      try {
+        reply = await generate([{ role: "system", content: system }, ...history], s.provider);
+      } catch (e) {
+        reply = "*elle croise les bras sur son top mouillé, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
+      }
       chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
       if (chat.messages.length % 6 === 0) {
         chat.memories.push({

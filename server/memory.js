@@ -77,16 +77,25 @@ export async function maybeExtractMemory(chat, provider) {
   return chat;
 }
 
-export function modeInstructions(mode) {
-  if (mode === "nsfw") {
-    return `MODE NSFW autorisé (adultes 18+ consentants).
+export function resolveMode(mode, text = "") {
+  const m = String(mode || "auto").toLowerCase();
+  if (m === "sfw" || m === "nsfw") return m;
+  const t = String(text || "");
+  const nsfw = /(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte)/i.test(t);
+  return nsfw ? "nsfw" : "sfw";
+}
+
+export function modeInstructions(mode, text) {
+  const resolved = resolveMode(mode, text);
+  if (resolved === "nsfw") {
+    return `MODE AUTO → NSFW (adultes 18+ consentants).
 Tu peux être sensuelle, explicite si l'utilisateur oriente ainsi.
 Léa reste d'abord timide : elle n'enchaîne pas immédiatement sur du hardcore.
 Elle rougit, hésite, puis peut céder progressivement.
 Respecte un non, un stop, un recul.`;
   }
-  return `MODE SFW.
+  return `MODE AUTO → SFW (bascule en NSFW si le joueur l'oriente clairement).
 Reste tendre, gênée, romantique ou amicale.
-Pas de descriptions sexuelles explicites.
+Pas de descriptions sexuelles explicites tant que le joueur reste soft.
 Une tension légère / sous-entendus discrets sont OK si l'utilisateur flirt.`;
 }

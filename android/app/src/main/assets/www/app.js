@@ -1,4 +1,4 @@
-const state = { characters: [], chat: null, current: "lea", mode: "sfw", view: "discover" };
+const state = { characters: [], chat: null, current: "lea", mode: "auto", view: "discover" };
 
 const $ = (id) => document.getElementById(id);
 
@@ -89,7 +89,7 @@ function renderDiscover() {
     <h1>Découvrir</h1>
     <div class="grid">
       <article class="card">
-        <img class="cover-img" src="images/lea-orage.jpg" alt="Léa" />
+        <div class="cover-frame"><img class="cover-img" src="images/lea-orage.jpg" alt="Léa" /></div>
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title}</div>
@@ -166,9 +166,11 @@ function renderChat() {
       <aside class="side">
         <label>Mode</label>
         <select id="mode">
-          <option value="sfw" ${state.mode === "sfw" ? "selected" : ""}>SFW</option>
-          <option value="nsfw" ${state.mode === "nsfw" ? "selected" : ""}>NSFW 18+</option>
+          <option value="auto" ${state.mode === "auto" ? "selected" : ""}>Auto (SFW ↔ NSFW)</option>
+          <option value="sfw" ${state.mode === "sfw" ? "selected" : ""}>SFW forcé</option>
+          <option value="nsfw" ${state.mode === "nsfw" ? "selected" : ""}>NSFW 18+ forcé</option>
         </select>
+        <p style="font-size:12px;color:var(--muted)">Auto : Léa reste douce, et passe en NSFW seulement si tu l'orientes.</p>
         <p style="font-size:13px;color:var(--muted);white-space:pre-wrap">${c.greeting}</p>
         <div id="rel"></div>
         <p class="err" id="err"></p>
@@ -199,19 +201,42 @@ function renderChat() {
 
 async function send() {
   const input = $("input");
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
   input.value = "";
-  $("err").textContent = "";
+  if (!state.chat) state.chat = { messages: [], memories: [], summaries: [], relationship: {} };
+  if (!Array.isArray(state.chat.messages)) state.chat.messages = [];
+  state.chat.messages.push({ role: "user", content: text, ts: Date.now() });
+  const box = $("msgs");
+  if (box) {
+    box.insertAdjacentHTML("beforeend", `<div class="bubble user">${escapeHtml(text)}</div>`);
+    box.insertAdjacentHTML("beforeend", `<div class="bubble assistant" id="pending">Léa réfléchit…</div>`);
+    box.scrollTop = box.scrollHeight;
+  }
+  if ($("err")) $("err").textContent = "";
+  const sendBtn = $("send");
+  if (sendBtn) sendBtn.disabled = true;
   try {
     const data = await api("/api/chat/lea/message", {
       method: "POST",
-      body: JSON.stringify({ text, mode: state.mode }),
+      body: JSON.stringify({ text, mode: state.mode || "auto" }),
     });
-    state.chat = data.chat;
+    if (data && data.chat) state.chat = data.chat;
+    else if (data && data.reply) {
+      state.chat.messages.push({ role: "assistant", content: data.reply, ts: Date.now() });
+    }
     renderChat();
   } catch (e) {
-    $("err").textContent = e.message;
+    state.chat.messages.push({
+      role: "assistant",
+      content: "*elle reste sur le seuil, trempée, la voix petite*\nJe… je t'écoute. (Réponse API : " + (e.message || "erreur") + " — ajoute une clé dans Réglages si besoin.)",
+      ts: Date.now(),
+    });
+    renderChat();
+    if ($("err")) $("err").textContent = e.message;
+  } finally {
+    if ($("send")) $("send").disabled = false;
   }
 }
 
