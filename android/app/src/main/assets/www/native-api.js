@@ -313,7 +313,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         ? ALL
         : [prefModel].concat(ALL.filter((m) => m !== prefModel));
       if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
-      let start = Number(localStorage.getItem("lea.imgKey") || 0) % gemini.length;
+      let start = gemini.length - 1;
       const dead = new Set();
       const tries = [];
       async function tryImagen(key, model) {
@@ -370,7 +370,51 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           }
         }
       }
-      throw new Error(gemini.length + " clés × " + models.length + " modèles : " + tries.join(" | "));
+      try {
+        const u = "https://image.pollinations.ai/prompt/" + encodeURIComponent(prompt.slice(0, 400)) + "?width=768&height=1152&nologo=true&model=flux";
+        const r = await fetch(u);
+        if (r.ok) {
+          const blob = await r.blob();
+          const url = await new Promise((resolve, reject) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result);
+            fr.onerror = reject;
+            fr.readAsDataURL(blob);
+          });
+          if (String(url).startsWith("data:image")) return { url, fallback: "pollinations", note: "Gemini images quota 0 — repli gratuit" };
+        }
+      } catch (_) {}
+      throw new Error("Gemini images: quota API gratuit = 0 sur ce compte (même clé neuve). " + tries.slice(0, 8).join(" | "));
+    }
+
+    if (path === "/api/image-test" && method === "POST") {
+      const keys = allGeminiKeys();
+      const models = ["gemini-3.1-flash-lite-image", "gemini-2.0-flash-preview-image-generation", "gemini-2.5-flash-image", "gemini-3.1-flash-image"];
+      const rows = [];
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        const line = { key: "clé " + (i + 1) + " …" + key.slice(-6), models: [] };
+        for (const model of models) {
+          try {
+            const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: "tiny test red circle image" }] }],
+                generationConfig: { responseModalities: ["IMAGE", "TEXT"], imageConfig: { aspectRatio: "1:1" } },
+              }),
+            });
+            const data = await res.json();
+            const err = String(data.error?.message || "");
+            const ok = !!(data.candidates?.[0]?.content?.parts || []).find((x) => x.inlineData || x.inline_data);
+            line.models.push(model.split("-").slice(-2).join("-") + ": " + (ok ? "OK" : /not valid/i.test(err) ? "invalide" : /quota|exhausted/i.test(err) ? "quota 0" : (err.slice(0, 40) || "vide")));
+          } catch (e) {
+            line.models.push(model + ": " + e.message);
+          }
+        }
+        rows.push(line.key + " → " + line.models.join(" · "));
+      }
+      return { rows, count: keys.length };
     }
 
     throw new Error("route inconnue " + path);

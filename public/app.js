@@ -228,7 +228,7 @@ async function generatePhoto() {
     const list = extraPhotos();
     list.unshift(data.url);
     saveExtra(list.slice(0, 20));
-    $("imgerr").textContent = "";
+    $("imgerr").textContent = data.note || "";
     renderProfile();
     openFull(data.url);
   } catch (e) {
@@ -497,7 +497,8 @@ function renderSettings() {
     <input id="pname" />
     <label>Bio persona</label>
     <textarea class="field" id="pbio" rows="3"></textarea>
-    <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button></p>
+    <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button>
+    <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
     if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
@@ -523,6 +524,16 @@ function renderSettings() {
     });
     $("st").textContent = `OK — ${data.keys.gemini} clé(s) Gemini`;
     $("st").style.color = "#9dffc2";
+  };
+  $("testimg").onclick = async () => {
+    $("st").textContent = "Test de chaque clé × modèles images…";
+    try {
+      const t = await api("/api/image-test", { method: "POST", body: "{}" });
+      $("st").textContent = (t.rows || []).join("\n") || "Aucune clé";
+      $("st").style.color = "#ffd3e4";
+    } catch (e) {
+      $("st").textContent = e.message;
+    }
   };
 }
 
