@@ -58,12 +58,11 @@ app.post("/api/image", async (req, res) => {
   const grok = dedicated.concat(splitKeys(s.grokKeys || process.env.XAI_API_KEYS)).filter((k) => /xai/i.test(k));
   const gemini = dedicated.concat(splitKeys(s.geminiKeys || process.env.GEMINI_API_KEYS)).filter((k) => k.startsWith("AIza"));
   const openai = dedicated.concat(splitKeys(s.openaiKeys || process.env.OPENAI_API_KEYS)).filter((k) => k.startsWith("sk-"));
-  const pref = s.imageProvider || process.env.IMAGE_PROVIDER || "auto";
-  const order = pref === "openai" ? ["openai", "gemini", "grok"]
+  const pref = s.imageProvider || process.env.IMAGE_PROVIDER || "gemini";
+  const order = pref === "openai" ? ["openai"]
     : pref === "grok" ? ["grok", "gemini"]
-    : pref === "gemini" ? ["gemini", "grok"]
     : ["gemini", "grok"];
-  let last = "Aucune clé Gemini / Grok images dans Réglages";
+  let last = "Aucune clé Gemini / Grok images. OpenAI n'est plus utilisé en auto.";
   for (const pvd of order) {
     const pool = pvd === "grok" ? grok : pvd === "gemini" ? gemini : openai;
     for (const key of pool) {

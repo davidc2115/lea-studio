@@ -114,7 +114,7 @@ async function callGemini(messages) {
 
 export async function generate(messages, provider) {
   const pref = (provider || process.env.DEFAULT_PROVIDER || "gemini").toLowerCase();
-  const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+  const order = pref === "openai" ? ["openai", "gemini"] : ["gemini"];
   const errors = [];
   for (const p of order) {
     try {

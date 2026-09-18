@@ -113,6 +113,15 @@ const GALLERY = [
 function openFull(src) {
   $("lightbox-img").src = src;
   $("lightbox").classList.remove("hidden");
+  const btn = $("lb-bg");
+  if (btn) {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      localStorage.setItem("lea.chatBg", src);
+      btn.textContent = "Fond du chat ✓";
+    };
+    btn.textContent = "Utiliser comme fond";
+  }
 }
 
 function extraPhotos() {
@@ -181,8 +190,8 @@ async function generatePhoto() {
     openFull(data.url);
   } catch (e) {
     const msg = String(e.message || e);
-    $("imgerr").textContent = /credits|billing/i.test(msg)
-      ? "OpenAI n'a plus de crédits. Choisis Gemini ou Grok dans Réglages (provider images) et mets une clé AIza / xai-."
+    $("imgerr").textContent = /credits|billing|OpenAI/i.test(msg)
+      ? "OpenAI n'a plus de crédits. Dans Réglages : provider images = Gemini ou Grok, et une clé AIza… ou xai-…"
       : msg;
   }
 }
@@ -408,7 +417,7 @@ function renderSettings() {
       <option value="grok">Grok Imagine (xAI)</option>
       <option value="gemini">Gemini (Nano Banana 2 / 2.5 Flash Image)</option>
       <option value="openai">OpenAI (gpt-image / DALL·E)</option>
-      <option value="auto">Auto (Grok → Gemini → OpenAI)</option>
+      <option value="auto">Auto (Gemini puis Grok — pas OpenAI)</option>
     </select>
     <label>Modèle Gemini images</label>
     <select id="gemimgmodel">
@@ -428,7 +437,7 @@ function renderSettings() {
   api("/api/status").then((s) => {
     $("provider").value = s.settings.provider || "gemini";
     if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
-    $("imgprov").value = s.settings.imageProvider || "auto";
+    $("imgprov").value = s.settings.imageProvider || "gemini";
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
