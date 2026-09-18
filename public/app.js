@@ -473,7 +473,7 @@ function renderMemory() {
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Images : Auto essaie Lite, 2.0, 2.5, Nano Banana 2, Imagen 3. Texte : Gemini 3.5 Flash Lite.</p>
+    <p style="color:var(--muted);font-size:13px">Images : Flux gratuit sans clé (Pollinations). Gemini images reste payant. Texte : tes clés Gemini.</p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>

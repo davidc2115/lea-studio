@@ -297,108 +297,31 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
 
     if (path === "/api/image" && method === "POST") {
-      const prompt = body.prompt || "Photorealistic Léa portrait";
-      const s0 = settings();
-      const grokKeys = parseKeys(s0.grokKeys).filter((k) => /^xai-/i.test(k) || k.length > 20);
-      for (const key of grokKeys) {
-        try {
-          const res = await fetch("https://api.x.ai/v1/images/generations", {
-            method: "POST",
-            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "grok-imagine-image-2.0", prompt, n: 1 }),
-          });
-          const data = await res.json();
-          if (data.data?.[0]?.b64_json) return { url: "data:image/jpeg;base64," + data.data[0].b64_json, model: "grok-imagine-image-2.0" };
-          if (data.data?.[0]?.url) return { url: data.data[0].url, model: "grok-imagine-image-2.0" };
-        } catch (_) {}
-        try {
-          const res = await fetch("https://api.x.ai/v1/images/generations", {
-            method: "POST",
-            headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
-            body: JSON.stringify({ model: "grok-imagine-image", prompt, n: 1 }),
-          });
-          const data = await res.json();
-          if (data.data?.[0]?.b64_json) return { url: "data:image/jpeg;base64," + data.data[0].b64_json, model: "grok-imagine-image" };
-          if (data.data?.[0]?.url) return { url: data.data[0].url, model: "grok-imagine-image" };
-        } catch (_) {}
-      }
-      const gemini = allGeminiKeys();
-      if (!gemini.length && !grokKeys.length) throw new Error("Aucune clé Gemini ou Grok");
-      const s = settings();
-      const pref = s.geminiImageModel || "auto";
-      const known = [
-        "gemini-2.0-flash-preview-image-generation",
-        "gemini-2.0-flash-exp-image-generation",
-        "gemini-2.0-flash-exp",
-        "gemini-2.5-flash-image",
-        "gemini-2.5-flash-preview-image",
-        "gemini-3.1-flash-lite-image",
-        "gemini-3.1-flash-image",
+      const prompt = String(body.prompt || "Photorealistic Léa portrait").slice(0, 450);
+      const seed = Date.now() % 999999;
+      const enc = encodeURIComponent(prompt);
+      const freeUrls = [
+        "https://image.pollinations.ai/prompt/" + enc + "?model=flux&width=768&height=1152&nologo=true&enhance=true&seed=" + seed,
+        "https://gen.pollinations.ai/image/" + enc + "?model=flux&width=768&height=1152&nologo=true&seed=" + seed,
+        "https://image.pollinations.ai/prompt/" + enc + "?model=zimage&width=768&height=1152&nologo=true&seed=" + seed,
       ];
-      function pickImage(data) {
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        for (const x of parts) {
-          const blob = x.inlineData || x.inline_data;
-          if (blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/") && blob.data) {
-            return "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data;
+      for (const u of freeUrls) {
+        try {
+          const res = await fetch(u, { headers: { Accept: "image/*" } });
+          const ct = res.headers.get("content-type") || "";
+          if (res.ok && ct.startsWith("image/")) {
+            const blob = await res.blob();
+            const url = await new Promise((resolve, reject) => {
+              const fr = new FileReader();
+              fr.onload = () => resolve(fr.result);
+              fr.onerror = reject;
+              fr.readAsDataURL(blob);
+            });
+            if (String(url).startsWith("data:image")) return { url, model: "flux-gratuit" };
           }
-        }
-        return null;
-      }
-      async function listImageModels(key) {
-        try {
-          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models?key=" + encodeURIComponent(key));
-          const data = await res.json();
-          const names = (data.models || []).map((m) => String(m.name || "").replace(/^models\//, ""));
-          return names.filter((n) => /image/i.test(n));
-        } catch {
-          return [];
-        }
-      }
-      async function generateOnce(key, model) {
-        const url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key);
-        const bodies = [
-          { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } },
-          { contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseModalities: ["IMAGE", "TEXT"] } },
-        ];
-        let last = "";
-        for (const payload of bodies) {
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-            body: JSON.stringify(payload),
-          });
-          const data = await res.json();
-          const img = pickImage(data);
-          if (img) return img;
-          last = data.error?.message || data.candidates?.[0]?.finishReason || ("HTTP " + res.status);
-          if (/API key not valid|API_KEY_INVALID/i.test(String(last))) throw new Error("INVALID");
-        }
-        throw new Error(last);
-      }
-      const tries = [];
-      for (const key of gemini) {
-        let models = known.slice();
-        try {
-          const listed = await listImageModels(key);
-          if (listed.length) models = listed.concat(known.filter((m) => !listed.includes(m)));
         } catch (_) {}
-        if (pref && pref !== "auto") models = [pref].concat(models.filter((m) => m !== pref));
-        for (const model of models) {
-          try {
-            const url = await generateOnce(key, model);
-            if (url) return { url, model };
-          } catch (e) {
-            const msg = String(e.message || e);
-            if (msg === "INVALID") {
-              tries.push("clé invalide");
-              break;
-            }
-            tries.push(model.replace("gemini-", "") + " → " + msg.slice(0, 70));
-          }
-        }
       }
-      throw new Error("Gemini n'a renvoyé aucune image. " + tries.slice(0, 6).join(" | "));
+      return { url: freeUrls[0], model: "flux-url", note: "Flux gratuit (sans clé)" };
     }
 
     if (path === "/api/image-test" && method === "POST") {
