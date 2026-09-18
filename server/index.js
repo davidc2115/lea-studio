@@ -167,7 +167,7 @@ app.post("/api/chat/:id/message", async (req, res) => {
     `Utilisateur: ${settings.personaName}. ${settings.personaBio}`,
     "Exemples:\n" + character.example_dialogue,
     buildMemoryBlock(chat),
-    "Réponds uniquement in-character. 1 à 2 courts paragraphes, rapide.",
+    "Format: ~pensée~ *action* puis la parole. Toujours une pensée et une action.",
   ].join("\n\n");
 
   const history = recentWindow(chat.messages, 10).map((m) => ({

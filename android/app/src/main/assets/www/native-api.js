@@ -11,7 +11,7 @@
     title: "Ta meilleure amie coincée par l'orage",
     tags: ["timide", "meilleure amie", "romance", "réaliste", "nsfw"],
     greeting:
-      "Euh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et…\nJe suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
+      "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et… je suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
     scenario:
       "Léa, meilleure amie d'enfance de 18 ans, s'est fait surprendre par un orage violent. Elle frappe à la porte de chez toi, trempée, en jean moulant et top court.",
     personality:
@@ -259,7 +259,12 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement en NSFW si le joueur l'oriente.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
-        "Réponds in-character. 1 à 2 courts paragraphes, rapide.",
+        "Format OBLIGATOIRE chaque réponse:",
+        "~pensée intérieure courte~",
+        "*action physique*",
+        "parole à voix haute (sans astérisques)",
+        "Exemple: ~Il me regarde trop…~ *elle croise les bras, trempée* Euh… je peux entrer ?",
+        "1 à 2 courts blocs. Toujours au moins une pensée et une action.",
       ].join("\n\n");
       const history = chat.messages.slice(-10).map((m) => ({
         role: m.role === "user" ? "user" : "assistant",
@@ -288,7 +293,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/image" && method === "POST") {
       const prompt = body.prompt || "Photorealistic Léa portrait";
       const s = settings();
-      const gemini = parseKeys(s.geminiKeys);
+      const gemini = parseKeys(s.geminiKeys + "\n" + (s.imageKeys || "")).filter((k) => !/^sk-/.test(k) && !/^xai/i.test(k));
       async function geminiImg(key) {
         const prefModel = s.geminiImageModel || "auto";
         const models = prefModel === "gemini-2.5-flash-image"
@@ -335,7 +340,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           }
         }
       }
-      throw new Error(last + " — ajoute une clé images dans Réglages");
+      throw new Error((last || "échec image") + " (" + gemini.length + " clé(s) Gemini)");
     }
 
     throw new Error("route inconnue " + path);

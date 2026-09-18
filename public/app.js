@@ -5,7 +5,7 @@ const FALLBACK_LEA = {
   title: "Ta meilleure amie coincée par l'orage",
   tags: ["timide", "meilleure amie", "romance", "réaliste", "nsfw"],
   greeting:
-    "Euh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et…\nJe suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
+    "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et… je suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
   scenario:
     "Léa, meilleure amie d'enfance de 18 ans, s'est fait surprendre par un orage violent. Elle frappe à la porte de chez toi, trempée, en jean moulant et top court.",
   personality: "Timide, maladroite, voix douce. Rougit facilement.",
@@ -228,10 +228,32 @@ async function generatePhoto() {
     openFull(data.url);
   } catch (e) {
     const msg = String(e.message || e);
-    $("imgerr").textContent = /AIza|clé|Gemini|quota/i.test(msg)
-      ? "Ajoute ta clé Gemini (aq… ou AIza…) dans l'onglet Clés en bas."
-      : msg;
+    $("imgerr").textContent = msg;
   }
+}
+
+function formatBubble(text) {
+  const raw = String(text || "");
+  const parts = [];
+  const re = /(~[^~\n]+~|\*[^*\n]+\*|_[^_\n]+_)/g;
+  let last = 0;
+  let m;
+  while ((m = re.exec(raw))) {
+    if (m.index > last) parts.push({ t: "say", v: raw.slice(last, m.index) });
+    const tok = m[0];
+    if (tok.startsWith("~") || tok.startsWith("_")) parts.push({ t: "think", v: tok.slice(1, -1) });
+    else parts.push({ t: "act", v: tok.slice(1, -1) });
+    last = m.index + tok.length;
+  }
+  if (last < raw.length) parts.push({ t: "say", v: raw.slice(last) });
+  if (!parts.length) parts.push({ t: "say", v: raw });
+  return parts.map((p) => {
+    const v = escapeHtml(p.v).replace(/\n/g, "<br>");
+    if (!v.trim()) return "";
+    if (p.t === "think") return `<span class="seg think">${v}</span>`;
+    if (p.t === "act") return `<span class="seg act">${v}</span>`;
+    return `<span class="seg say">${v}</span>`;
+  }).join("");
 }
 
 function paintMessages() {
@@ -240,9 +262,9 @@ function paintMessages() {
   const c = character();
   const msgs = state.chat?.messages || [];
   if (!msgs.length) {
-    box.innerHTML = `<div class="bubble assistant">${escapeHtml(c.greeting)}</div>`;
+    box.innerHTML = `<div class="bubble assistant">${formatBubble(c.greeting)}</div>`;
   } else {
-    box.innerHTML = msgs.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${escapeHtml(m.content)}</div>`).join("");
+    box.innerHTML = msgs.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${formatBubble(m.content)}</div>`).join("");
   }
   box.scrollTop = box.scrollHeight;
   const rel = state.chat?.relationship || {};
@@ -259,10 +281,15 @@ function paintMessages() {
 function chatBg() {
   return localStorage.getItem("lea.chatBg") || "images/lea-orage-dentelle.jpg";
 }
-function applyChatBg() {
+function applyChatLook() {
+  const bub = Number(localStorage.getItem("lea.bub") || 82);
+  const bgv = Number(localStorage.getItem("lea.bgv") || 38);
+  document.documentElement.style.setProperty("--bub", String(bub / 100));
+  document.documentElement.style.setProperty("--bgv", String(bgv / 100));
   const el = document.querySelector(".chat-bg");
   if (el) el.style.backgroundImage = "url('" + chatBg() + "')";
 }
+function applyChatBg() { applyChatLook(); }
 
 function renderChat() {
   const c = character();
@@ -296,6 +323,10 @@ function renderChat() {
         </select>
         <div id="rel"></div>
         <p class="err" id="err"></p>
+        <label>Transparence des bulles</label>
+        <input type="range" id="bub-alpha" min="25" max="95" value="${localStorage.getItem("lea.bub") || "82"}" />
+        <label>Visibilité du fond</label>
+        <input type="range" id="bg-bright" min="15" max="80" value="${localStorage.getItem("lea.bgv") || "38"}" />
         <label>Fond de conversation</label>
         <div class="bg-pick">
           ${bgs.map((g) => `<img src="${g.src}" data-bg="${g.src}" class="${g.src === current ? "on" : ""}" alt="${g.title || ""}" />`).join("")}
@@ -314,6 +345,11 @@ function renderChat() {
     };
   }
   paintMessages();
+  applyChatLook();
+  const ba = $("bub-alpha");
+  const bb = $("bg-bright");
+  if (ba) ba.oninput = () => { localStorage.setItem("lea.bub", ba.value); applyChatLook(); };
+  if (bb) bb.oninput = () => { localStorage.setItem("lea.bgv", bb.value); applyChatLook(); };
   $("send").onclick = (e) => { e.preventDefault(); send(); };
   $("input").onkeydown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
