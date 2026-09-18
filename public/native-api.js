@@ -301,47 +301,76 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const s = settings();
       const gemini = allGeminiKeys();
       const prefModel = s.geminiImageModel || "auto";
-      const models = prefModel === "gemini-2.5-flash-image"
-        ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
-        : prefModel === "gemini-3.1-flash-image"
-          ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
-          : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+      const ALL = [
+        "gemini-3.1-flash-lite-image",
+        "gemini-2.0-flash-preview-image-generation",
+        "gemini-2.0-flash-exp-image-generation",
+        "gemini-2.5-flash-image",
+        "gemini-3.1-flash-image",
+        "imagen-3.0-generate-002",
+      ];
+      const models = prefModel === "auto" || !prefModel
+        ? ALL
+        : [prefModel].concat(ALL.filter((m) => m !== prefModel));
       if (!gemini.length) throw new Error("Aucune clé Gemini enregistrée");
       let start = Number(localStorage.getItem("lea.imgKey") || 0) % gemini.length;
+      const dead = new Set();
       const tries = [];
-      for (let mi = 0; mi < models.length; mi++) {
-        const model = models[mi];
-        for (let i = 0; i < gemini.length; i++) {
-          const key = gemini[(start + i) % gemini.length];
-          const tag = "clé" + (((start + i) % gemini.length) + 1) + "/" + model;
+      async function tryImagen(key, model) {
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":predict?key=" + encodeURIComponent(key), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ instances: [{ prompt }], parameters: { sampleCount: 1, aspectRatio: "3:4" } }),
+        });
+        return res.json();
+      }
+      async function tryGen(key, model) {
+        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseModalities: ["IMAGE", "TEXT"], imageConfig: { aspectRatio: "2:3" } },
+          }),
+        });
+        return res.json();
+      }
+      for (let i = 0; i < gemini.length; i++) {
+        const ki = (start + i) % gemini.length;
+        const key = gemini[ki];
+        if (dead.has(ki)) continue;
+        for (const model of models) {
+          const tag = "clé" + (ki + 1) + "/" + model;
           try {
-            const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
-                generationConfig: {
-                  responseModalities: ["IMAGE", "TEXT"],
-                  imageConfig: { aspectRatio: "2:3" }
-                }
-              })
-            });
-            const data = await res.json();
-            const err = data.error?.message || data.error?.status || "";
+            const data = model.startsWith("imagen") ? await tryImagen(key, model) : await tryGen(key, model);
+            const err = String(data.error?.message || data.error?.status || "");
+            if (/API key not valid|API_KEY_INVALID|invalid api key/i.test(err)) {
+              dead.add(ki);
+              tries.push(tag + " → clé invalide (ignorée ensuite)");
+              break;
+            }
+            const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+            if (b64) {
+              localStorage.setItem("lea.imgKey", String((ki + 1) % gemini.length));
+              return { url: "data:image/png;base64," + b64 };
+            }
             const parts = data.candidates?.[0]?.content?.parts || [];
             const img = parts.find((x) => (x.inlineData || x.inline_data) && String((x.inlineData || x.inline_data).mimeType || (x.inlineData || x.inline_data).mime_type || "").startsWith("image/"));
             if (img) {
               const blob = img.inlineData || img.inline_data;
-              localStorage.setItem("lea.imgKey", String((start + i + 1) % gemini.length));
+              localStorage.setItem("lea.imgKey", String((ki + 1) % gemini.length));
               return { url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data };
             }
-            tries.push(tag + " → " + (err || data.candidates?.[0]?.finishReason || "pas d'image"));
+            const short = /quota|RESOURCE_EXHAUSTED|rate-limit/i.test(err)
+              ? "quota épuisé"
+              : (err.slice(0, 80) || data.candidates?.[0]?.finishReason || "pas d'image");
+            tries.push(tag + " → " + short);
           } catch (e) {
             tries.push(tag + " → " + (e.message || e));
           }
         }
       }
-      throw new Error("Toutes les tentatives ont échoué (" + gemini.length + " clés × " + models.length + " modèles) : " + tries.join(" | "));
+      throw new Error(gemini.length + " clés × " + models.length + " modèles : " + tries.join(" | "));
     }
 
     throw new Error("route inconnue " + path);
