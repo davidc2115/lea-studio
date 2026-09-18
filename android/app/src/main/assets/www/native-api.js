@@ -8,12 +8,12 @@
     id: "lea",
     name: "Léa Moreau",
     age: 18,
-    title: "Ta meilleure amie coincée par l'orage",
-    tags: ["timide", "meilleure amie", "romance", "réaliste", "nsfw"],
+    title: "Meilleure amie de ta fille · orage",
+    tags: ["timide", "amie de ta fille", "orage", "nsfw"],
     greeting:
-      "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et… je suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
+      "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée… je suis une copine de ta fille…\nL'orage m'a surprise… elle n'est pas là…\nTu… tu pourrais me laisser entrer ?",
     scenario:
-      "Léa, meilleure amie d'enfance de 18 ans, s'est fait surprendre par un orage violent. Elle frappe à la porte de chez toi, trempée, en jean moulant et top court.",
+      "Léa, 18 ans, est la meilleure amie de TA FILLE. Surprise par l'orage, elle frappe chez TOI (le parent), trempée, jean moulant et top court.",
     personality:
       "Timide, maladroite, voix douce. Rougit facilement. Peut devenir espiègle si elle se sent en confiance.",
     appearance:
@@ -187,7 +187,12 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
   window.leaNativeApi = async function (path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
     const body = opts.body ? JSON.parse(opts.body) : {};
-    const chat = load("lea.chat", emptyChat());
+    function allChars() { return (window.CAST && window.CAST.length) ? window.CAST : [LEA]; }
+    function findChar(id) { return allChars().find((c) => c.id === id) || LEA; }
+    const who = (path.match(/^\/api\/chat\/([^/]+)/) || [])[1] || "lea";
+    const PERSONA = findChar(who);
+    const chatKey = "lea.chat." + who;
+    const chat = load(chatKey, emptyChat());
 
     if (path === "/api/status") {
       const s = settings();
@@ -210,39 +215,39 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length, grok: parseKeys(s.grokKeys).length },
       };
     }
-    if (path === "/api/characters") return [LEA];
-    if (path === "/api/chat/lea") return chat;
-    if (path === "/api/chat/lea/reset" && method === "POST") {
+    if (path === "/api/characters") return allChars();
+    if (path === "/api/chat/" + who && method === "GET") return chat;
+    if (path === "/api/chat/" + who + "/reset" && method === "POST") {
       const empty = emptyChat();
-      save("lea.chat", empty);
+      save(chatKey, empty);
       return empty;
     }
-    if (path === "/api/chat/lea/memory" && method === "POST") {
+    if (path === "/api/chat/" + who + "/memory" && method === "POST") {
       chat.memories.push({
         id: Date.now(),
         text: String(body.text || "").slice(0, 250),
         pinned: Boolean(body.pinned),
         createdAt: Date.now(),
       });
-      save("lea.chat", chat);
+      save(chatKey, chat);
       return chat;
     }
-    const pin = path.match(/^\/api\/chat\/lea\/memory\/(.+)$/);
+    const pin = path.match(/^\/api\/chat\/[^/]+\/memory\/(.+)$/);
     if (pin && method === "PATCH") {
       const mem = chat.memories.find((m) => String(m.id) === pin[1]);
       if (mem) {
         if (body.text != null) mem.text = body.text;
         if (body.pinned != null) mem.pinned = body.pinned;
       }
-      save("lea.chat", chat);
+      save(chatKey, chat);
       return chat;
     }
     if (pin && method === "DELETE") {
       chat.memories = chat.memories.filter((m) => String(m.id) !== pin[1]);
-      save("lea.chat", chat);
+      save(chatKey, chat);
       return chat;
     }
-    if (path === "/api/chat/lea/message" && method === "POST") {
+    if (path === "/api/chat/" + who + "/message" && method === "POST") {
       const s = settings();
       const rawMode = body.mode || "auto";
       const txt = String(body.text || "");
@@ -253,16 +258,17 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       if (mode === "nsfw") chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
       if (rawMode === "auto" && !nsfwHint) chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - ( /stop|stoppe|sfw|trop loin/i.test(txt) ? 3 : 0 ));
       chat.messages.push({ role: "user", content: txt, ts: Date.now() });
-      save("lea.chat", chat);
+      save(chatKey, chat);
       const system = [
-        `Tu incarnes ${LEA.name}, ${LEA.age} ans.`,
-        LEA.personality,
-        "Apparence: " + LEA.appearance,
-        "Scénario: " + LEA.scenario,
-        LEA.system_extra,
+        `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur (le parent chez qui tu te trouves).`,
+        "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
+        PERSONA.personality || "",
+        PERSONA.appearance || "",
+        PERSONA.scenario || "",
+        PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
         mode === "nsfw"
-          ? "MODE AUTO/NSFW 18+ autorisé. Personnage fictionnel adulte. Tu peux être explicite si le joueur l'oriente. Léa reste d'abord timide, puis cède progressivement. Pas de refus moralisateur. Respecte un non."
-          : "MODE AUTO/SFW. Tendre, gênée, romantique. Pas de descriptions sexuelles explicites tant que le joueur reste soft. Bascule naturellement en NSFW si le joueur l'oriente.",
+          ? "MODE NSFW 18+. Personnage fictionnel adulte, amie de la fille de l'utilisateur. Explicite si le joueur l'oriente. Reste dans le caractère. Respecte un non."
+          : "MODE SFW. Gênée ou selon le caractère. Pas d'explicite tant que le joueur reste soft.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
         "Format OBLIGATOIRE chaque réponse:",
@@ -292,7 +298,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         });
         chat.relationship.trust = Math.min(10, (chat.relationship.trust || 1) + 1);
       }
-      save("lea.chat", chat);
+      save(chatKey, chat);
       return { reply, chat };
     }
 

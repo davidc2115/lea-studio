@@ -1,19 +1,7 @@
-const FALLBACK_LEA = {
-  id: "lea",
-  name: "Léa Moreau",
-  age: 18,
-  title: "Ta meilleure amie coincée par l'orage",
-  tags: ["timide", "meilleure amie", "romance", "réaliste", "nsfw"],
-  greeting:
-    "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée de te déranger…\nJe… j'ai été surprise par l'orage et… je suis complètement trempée…\nTu… tu pourrais me laisser entrer un moment… s'il te plaît ?",
-  scenario:
-    "Léa, meilleure amie d'enfance de 18 ans, s'est fait surprendre par un orage violent. Elle frappe à la porte de chez toi, trempée, en jean moulant et top court.",
-  personality: "Timide, maladroite, voix douce. Rougit facilement.",
-  appearance: "Cheveux bruns lisses jusqu'aux reins, yeux marron foncé, peau claire, poitrine généreuse 95D.",
-};
+const FALLBACK_LEA = (window.CAST && window.CAST[0]) || { id: "lea", name: "Léa Moreau", age: 18, title: "", tags: [], greeting: "", scenario: "", personality: "", appearance: "", cover: "images/lea-portrait.jpg", gallery: [] };
 
 const state = {
-  characters: [FALLBACK_LEA],
+  characters: window.CAST || [FALLBACK_LEA],
   chat: { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } },
   current: "lea",
   mode: localStorage.getItem("lea.mode") || "auto",
@@ -21,7 +9,12 @@ const state = {
 };
 
 function character() {
-  return (state.characters && state.characters[0]) || FALLBACK_LEA;
+  const list = state.characters.length ? state.characters : window.CAST || [FALLBACK_LEA];
+  return list.find((c) => c.id === state.current) || list[0] || FALLBACK_LEA;
+}
+
+function chatKey() {
+  return "lea.chat." + (state.current || "lea");
 }
 
 const $ = (id) => document.getElementById(id);
@@ -51,30 +44,18 @@ function show(view) {
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function buildLeaImagePrompt(extra = "") {
-  const moods = [
-    "shy blush, looking down then peeking up at camera",
-    "soft timid smile, cheeks pink",
-    "wet and embarrassed, biting her lip",
-    "quiet gaze, vulnerable"
-  ];
-  const poses = [
-    "standing in a narrow apartment hallway doorway",
-    "just inside the entrance dripping on the tiles",
-    "one hand in soaked hair, other on the doorframe"
-  ];
+  const c = character();
+  const outfit = pick(c.outfits || ["casual sexy outfit"]);
+  const place = pick(c.places || ["apartment interior"]);
+  const moods = ["sexy gaze at camera", "provocative pose", "shy blush", "lingerie look", "teasing smile"];
   return [
-    "Ultra photorealistic DSLR photo, 85mm f1.8, natural skin pores, film grain, cinematic lighting.",
-    "Young French woman named Lea, 18 years old adult, same face every time:",
-    "long straight espresso-brown hair to the lower back, wet and clinging,",
-    "dark brown almond eyes, soft oval face, small straight nose, full natural lips,",
-    "fair cool skin, slim waist, marked hips, large full 95D bust,",
-    "soaked from a thunderstorm, rain droplets on skin and hair.",
-    "Outfit locked: wet white short crop top clinging to chest, tight wet dark blue skinny jeans, no shorts, no skirt.",
-    "Place locked: apartment hallway and front door at night, warm indoor lamp, storm visible behind her.",
-    "Pose: " + pick(poses) + ".",
+    "Photorealistic adult woman 18+ named " + c.name + ".",
+    "Look: " + (c.appearance || "") + ".",
+    "Scene: " + place + ".",
+    "Wearing: " + outfit + ".",
     "Mood: " + pick(moods) + ".",
-    extra ? ("Extra: " + extra) : "",
-    "Realistic photography only. No illustration, no anime, no painting, no CGI."
+    extra ? extra : "",
+    "Same unique face. Realistic photo, not illustration."
   ].filter(Boolean).join(" ");
 }
 
@@ -116,9 +97,12 @@ function openFull(src) {
 }
 
 function extraPhotos() {
-  try { return JSON.parse(localStorage.getItem("lea.photos") || "[]"); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem("lea.photos." + (state.current || "lea")) || "[]"); } catch { return []; }
 }
-function saveExtra(list) { localStorage.setItem("lea.photos", JSON.stringify(list)); }
+function saveExtra(list) { localStorage.setItem("lea.photos." + (state.current || "lea"), JSON.stringify(list)); }
+function loadChat(id) {
+  try { return JSON.parse(localStorage.getItem("lea.chat." + (id || "lea")) || "null"); } catch { return null; }
+}
 
 function chatPreview(chat) {
   const msgs = chat?.messages || [];
@@ -134,7 +118,7 @@ function renderDiscover() {
     <div class="grid">
       ${list.map((c) => `
       <article class="card discover-card">
-        <div class="cover-frame"><img class="cover-img" src="images/lea-orage-dentelle.jpg" alt="${c.name}" /></div>
+        <div class="cover-frame"><img class="cover-img" src="${c.cover || "images/lea-portrait.jpg"}" alt="${c.name}" /></div>
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title || ""}</div>
@@ -148,7 +132,11 @@ function renderDiscover() {
   $("view-discover").onclick = (e) => {
     const start = e.target.closest(".start-chat");
     const prof = e.target.closest(".open-profile");
-    if (start) { state.current = start.dataset.id || "lea"; show("chat"); renderChat(); }
+    if (start) {
+      state.current = start.dataset.id || "lea";
+      state.chat = loadChat(state.current) || { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
+      show("chat"); renderChat();
+    }
     if (prof) { state.current = prof.dataset.id || "lea"; show("profile"); renderProfile(); }
   };
 }
@@ -162,10 +150,10 @@ function renderChats() {
     ${list.map((c) => `
       <article class="card" style="margin-top:12px">
         <div class="body" style="display:flex;gap:12px;align-items:center">
-          <img src="images/lea-portrait.jpg" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover" />
+          <img src="${c.cover || "images/lea-portrait.jpg"}" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover" />
           <div style="flex:1;min-width:0">
             <strong>${c.name}</strong>
-            <div style="color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${chatPreview(c.id === "lea" ? chat : {})}</div>
+            <div style="color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${chatPreview(loadChat(c.id))}</div>
           </div>
           <button class="cta resume-chat" data-id="${c.id}">Ouvrir</button>
         </div>
@@ -174,25 +162,29 @@ function renderChats() {
     const b = e.target.closest(".resume-chat");
     if (!b) return;
     state.current = b.dataset.id || "lea";
+    state.chat = loadChat(state.current) || { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
     show("chat");
     renderChat();
   };
 }
 
 function renderProfile() {
+  const c = character();
   const extras = extraPhotos();
-  const all = GALLERY.concat(extras.map((src, i) => ({ src, title: "Générée " + (i + 1) })));
+  const base = (c.gallery && c.gallery.length ? c.gallery : GALLERY.map((g) => g.src)).map((src, i) => ({ src, title: "Photo " + (i + 1) }));
+  const all = base.concat(extras.map((src, i) => ({ src, title: "Générée " + (i + 1) })));
   $("view-profile").innerHTML = `
-    <h1>Léa Moreau</h1>
-    <img class="profile-hero" src="images/lea-portrait.jpg" alt="Léa" data-full="images/lea-portrait.jpg" />
-    <p style="color:var(--muted)">18 ans · meilleure amie timide · coincée par l'orage</p>
-    <p>Cheveux bruns lisses jusqu'aux reins, regard doux, poitrine généreuse. Elle rougit facilement.</p>
+    <h1>${c.name}</h1>
+    <img class="profile-hero" src="${c.cover || all[0] && all[0].src}" alt="${c.name}" data-full="${c.cover || ""}" />
+    <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
+    <p>${c.appearance || ""}</p>
+    <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
     <h3>Photos</h3>
     <div class="gallery">
       ${all.map((g) => `<img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" />`).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario</h3>
-    <p style="color:var(--muted);font-size:13px">Toujours Léa : physique + orage + top court mouillé + jean moulant + porte. Pose et attitude tirées au sort (timide, sexy, provocante, espiègle…).</p>
+    <p style="color:var(--muted);font-size:13px">Photos liées au scénario de ${c.name} (tenue / lieu / attitude au hasard : sexy, lingerie, provocante…).</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
@@ -330,7 +322,7 @@ function renderChat() {
       <div class="chat-bg-dim"></div>
       <div class="chat-head">
         <button type="button" id="back-disc">←</button>
-        <img src="images/lea-portrait.jpg" alt="" />
+        <img src="${c.cover || "images/lea-portrait.jpg"}" alt="" />
         <div class="grow">
           <strong>${c.name}</strong>
           <div class="mode-pill" id="mode-now">Auto · SFW</div>
@@ -339,7 +331,7 @@ function renderChat() {
       </div>
       <div class="msgs" id="msgs"></div>
       <div class="composer">
-        <textarea id="input" placeholder="Écris à Léa…"></textarea>
+        <textarea id="input" placeholder="Écris à ${c.name}…"></textarea>
         <button class="cta" type="button" id="send">Envoyer</button>
       </div>
       <aside class="sheet hidden" id="sheet">
@@ -397,7 +389,7 @@ function renderChat() {
   };
   $("reset").onclick = async () => {
     try {
-      state.chat = await api("/api/chat/lea/reset", { method: "POST" });
+      state.chat = await api("/api/chat/" + (state.current || "lea") + "/reset", { method: "POST" });
     } catch {
       state.chat = { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
     }
@@ -417,14 +409,14 @@ async function send() {
   paintMessages();
   const box = $("msgs");
   if (box) {
-    box.insertAdjacentHTML("beforeend", `<div class="bubble assistant" id="pending">Léa réfléchit…</div>`);
+    box.insertAdjacentHTML("beforeend", `<div class="bubble assistant" id="pending">${character().name} réfléchit…</div>`);
     box.scrollTop = box.scrollHeight;
   }
   if ($("err")) $("err").textContent = "";
   const sendBtn = $("send");
   if (sendBtn) sendBtn.disabled = true;
   try {
-    const data = await api("/api/chat/lea/message", {
+    const data = await api("/api/chat/" + (state.current || "lea") + "/message", {
       method: "POST",
       body: JSON.stringify({ text, mode: state.mode || "auto" }),
     });
@@ -475,7 +467,7 @@ function renderMemory() {
   $("addmem").onclick = async () => {
     const text = $("newmem").value.trim();
     if (!text) return;
-    state.chat = await api("/api/chat/lea/memory", { method: "POST", body: JSON.stringify({ text, pinned: true }) });
+    state.chat = await api("/api/chat/" + (state.current || "lea") + "/memory", { method: "POST", body: JSON.stringify({ text, pinned: true }) });
     renderMemory();
   };
   $("view-memory").onclick = async (e) => {
@@ -483,11 +475,11 @@ function renderMemory() {
     const del = e.target.getAttribute("data-del");
     if (pin) {
       const mem = mems.find((m) => String(m.id) === pin);
-      state.chat = await api(`/api/chat/lea/memory/${pin}`, { method: "PATCH", body: JSON.stringify({ pinned: !mem.pinned }) });
+      state.chat = await api(`/api/chat/${state.current || "lea"}/memory/${pin}`, { method: "PATCH", body: JSON.stringify({ pinned: !mem.pinned }) });
       renderMemory();
     }
     if (del) {
-      state.chat = await api(`/api/chat/lea/memory/${del}`, { method: "DELETE" });
+      state.chat = await api(`/api/chat/${state.current || "lea"}/memory/${del}`, { method: "DELETE" });
       renderMemory();
     }
   };
@@ -587,9 +579,10 @@ document.querySelectorAll(".nav").forEach((b) => {
     if (Array.isArray(chars) && chars[0]) state.characters = chars;
   } catch { /* fallback Léa déjà en mémoire */ }
   try {
-    const chat = await api("/api/chat/lea");
+    const chat = await api("/api/chat/" + (state.current || "lea"));
     if (chat) state.chat = chat;
   } catch { /* chat vide local */ }
   if (!state.mode) state.mode = "auto";
+  if (window.CAST && window.CAST.length) state.characters = window.CAST;
   renderDiscover();
 })();
