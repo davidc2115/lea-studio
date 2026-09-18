@@ -64,13 +64,13 @@ function buildLeaImagePrompt(extra = "") {
 
 const GALLERY = [
   { src: "images/lea-portrait.jpg", title: "Portrait" },
-  { src: "images/lea-orage.jpg", title: "L'orage" },
-  { src: "images/lea-feu.jpg", title: "Au coin du feu" },
-  { src: "images/lea-canape.jpg", title: "Nuisette" },
-  { src: "images/lea-sortie.jpg", title: "Prête à sortir" },
+  { src: "images/lea-orage.jpg", title: "Trempée à la porte" },
   { src: "images/lea-orage-timide.jpg", title: "Orage, timide" },
   { src: "images/lea-orage-espiegle.jpg", title: "Orage, espiègle" },
-  { src: "images/lea-orage-sol.jpg", title: "Orage, assise" },
+  { src: "images/lea-orage-sol.jpg", title: "Assise sous la pluie" },
+  { src: "images/lea-feu.jpg", title: "Sèche ses cheveux au feu" },
+  { src: "images/lea-canape.jpg", title: "Nuisette satin" },
+  { src: "images/lea-sortie.jpg", title: "Haut blanc, prête à sortir" },
 ];
 
 function openFull(src) {
