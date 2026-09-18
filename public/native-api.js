@@ -54,6 +54,7 @@
       grokKeys: "",
       imageKeys: "",
       imageProvider: "auto",
+      geminiImageModel: "auto",
     });
   }
 
@@ -277,19 +278,35 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const openai = dedicated.concat(parseKeys(s.openaiKeys)).filter((k) => k.startsWith("sk-"));
       const pref = s.imageProvider || "auto";
       async function geminiImg(key) {
-        const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-          })
-        });
-        const data = await res.json();
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType||"").startsWith("image/"));
-        if (img) return "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data;
-        throw new Error(data.error?.message || "Gemini image vide");
+        const prefModel = s.geminiImageModel || "auto";
+        const models = prefModel === "gemini-2.5-flash-image"
+          ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
+          : prefModel === "gemini-3.1-flash-image"
+            ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
+            : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+        let last = "Gemini image vide";
+        for (const model of models) {
+          const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseModalities: ["IMAGE", "TEXT"],
+                imageConfig: { aspectRatio: "2:3" }
+              }
+            })
+          });
+          const data = await res.json();
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          const img = parts.find((x) => (x.inlineData || x.inline_data) && String((x.inlineData || x.inline_data).mimeType || (x.inlineData || x.inline_data).mime_type || "").startsWith("image/"));
+          if (img) {
+            const blob = img.inlineData || img.inline_data;
+            return "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data;
+          }
+          last = data.error?.message || (model + " vide");
+        }
+        throw new Error(last);
       }
       async function grokImg(key) {
         const res = await fetch("https://api.x.ai/v1/images/generations", {

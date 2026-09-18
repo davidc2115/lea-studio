@@ -354,9 +354,15 @@ function renderSettings() {
     <label>Provider images</label>
     <select id="imgprov">
       <option value="grok">Grok Imagine (xAI)</option>
-      <option value="gemini">Gemini (Imagen / Flash image)</option>
+      <option value="gemini">Gemini (Nano Banana 2 / 2.5 Flash Image)</option>
       <option value="openai">OpenAI (gpt-image / DALL·E)</option>
       <option value="auto">Auto (Grok → Gemini → OpenAI)</option>
+    </select>
+    <label>Modèle Gemini images</label>
+    <select id="gemimgmodel">
+      <option value="gemini-3.1-flash-image">Nano Banana 2 (gemini-3.1-flash-image)</option>
+      <option value="gemini-2.5-flash-image">Gemini 2.5 Flash Image</option>
+      <option value="auto">Auto (Nano Banana 2 puis 2.5 Flash Image)</option>
     </select>
     <label>Clés images (optionnel — sinon on réutilise Gemini / OpenAI ci-dessus)</label>
     <textarea class="field" id="imgkeys" rows="3" placeholder="xai-... / AIza... / sk-... une par ligne"></textarea>
@@ -370,6 +376,7 @@ function renderSettings() {
   api("/api/status").then((s) => {
     $("provider").value = s.settings.provider || "gemini";
     $("imgprov").value = s.settings.imageProvider || "auto";
+    if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
@@ -391,6 +398,7 @@ function renderSettings() {
         grokKeys: $("grok").value,
         imageKeys: $("imgkeys").value,
         imageProvider: $("imgprov").value,
+        geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
       }),
     });
     $("st").textContent = `OK — Gemini ${data.keys.gemini} / OpenAI ${data.keys.openai} / Grok ${data.keys.grok || 0} / Images ${data.keys.image || 0}`;

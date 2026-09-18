@@ -27,7 +27,7 @@ app.get("/api/status", (_req, res) => {
 });
 
 app.post("/api/settings", (req, res) => {
-  const { provider, personaName, personaBio, openaiKeys, geminiKeys, grokKeys, imageKeys, imageProvider } = req.body || {};
+  const { provider, personaName, personaBio, openaiKeys, geminiKeys, grokKeys, imageKeys, imageProvider, geminiImageModel } = req.body || {};
   if (typeof openaiKeys === "string") process.env.OPENAI_API_KEYS = openaiKeys;
   if (typeof geminiKeys === "string") process.env.GEMINI_API_KEYS = geminiKeys;
   if (typeof imageKeys === "string") process.env.IMAGE_API_KEYS = imageKeys;
@@ -40,6 +40,7 @@ app.post("/api/settings", (req, res) => {
     ...(imageProvider ? { imageProvider } : {}),
     ...(imageKeys != null ? { imageKeys } : {}),
     ...(grokKeys != null ? { grokKeys } : {}),
+    ...(geminiImageModel ? { geminiImageModel } : {}),
   });
   const keys = keyStatus();
   keys.image = splitKeys((loadSettings().imageKeys) || process.env.IMAGE_API_KEYS).length;
@@ -76,19 +77,39 @@ app.post("/api/image", async (req, res) => {
           if (data.data?.[0]?.url) return res.json({ url: data.data[0].url });
           last = data.error?.message || "Grok image vide";
         } else if (pvd === "gemini") {
-          const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=" + encodeURIComponent(key), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: prompt }] }],
-              generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
-            })
-          });
-          const data = await r.json();
-          const parts = data.candidates?.[0]?.content?.parts || [];
-          const img = parts.find((x) => x.inlineData && String(x.inlineData.mimeType || "").startsWith("image/"));
-          if (img) return res.json({ url: "data:" + img.inlineData.mimeType + ";base64," + img.inlineData.data });
-          last = data.error?.message || "Gemini image vide";
+          const prefModel = s.geminiImageModel || "auto";
+          const models = prefModel === "gemini-2.5-flash-image"
+            ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
+            : prefModel === "gemini-3.1-flash-image"
+              ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
+              : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+          let gemOk = false;
+          for (const model of models) {
+            const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                  responseModalities: ["IMAGE", "TEXT"],
+                  imageConfig: { aspectRatio: "2:3" }
+                }
+              })
+            });
+            const data = await r.json();
+            const parts = data.candidates?.[0]?.content?.parts || [];
+            const img = parts.find((x) => {
+              const blob = x.inlineData || x.inline_data;
+              return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
+            });
+            if (img) {
+              const blob = img.inlineData || img.inline_data;
+              gemOk = true;
+              return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
+            }
+            last = data.error?.message || (model + " vide");
+          }
+          if (gemOk) return;
         } else {
           const r = await fetch("https://api.openai.com/v1/images/generations", {
             method: "POST",
