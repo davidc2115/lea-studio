@@ -48,7 +48,7 @@ function buildLeaImagePrompt(extra = "") {
   if (c.id === "lea") {
     // Très court + ordre strict. Img2img part d'une photo ORAGE déjà trempée.
     return [
-      "21 year old adult woman, clearly adult face,",
+      "young adult woman about 21, youthful early-twenties face, NOT 30s, NOT middle-aged,",
       "keep the exact same face and body,",
       "soaked wet white short crop top clinging to large breasts,",
       "tight wet dark blue skinny jeans,",
@@ -62,11 +62,12 @@ function buildLeaImagePrompt(extra = "") {
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
   const place = pick(c.places || ["apartment interior at night"]);
   return [
+    "young adult woman age " + (c.age || 21) + ", youthful early-twenties face, smooth skin, NOT 30s, NOT wrinkles, NOT middle-aged,",
     (c.body || "") + ",",
     (c.appearance || "") + ",",
     outfit + ",",
     place + ",",
-    "adult 18+ " + c.name + ", unique face not Lea, photorealistic,",
+    "photorealistic unique face not Lea, adult 21+,",
     extra || ""
   ].filter(Boolean).join(" ");
 }
