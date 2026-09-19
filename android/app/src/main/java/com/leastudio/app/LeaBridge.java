@@ -49,39 +49,69 @@ public class LeaBridge {
 
     @JavascriptInterface
     public String downloadPack(String url) {
-        final String src = url == null ? "" : url.trim();
-        if (src.isEmpty()) return "URL vide";
-        if (!src.startsWith("https://")) return "URL https requise";
-        dlStatus = "téléchargement…";
+        dlStatus = "préparation…";
         new Thread(() -> {
             try {
                 File dir = new File(ctx.getFilesDir(), "models/sd15");
                 if (!dir.exists()) dir.mkdirs();
-                File zip = new File(dir, "pack.bin");
-                HttpURLConnection c = (HttpURLConnection) new URL(src).openConnection();
-                c.setConnectTimeout(20000);
-                c.setReadTimeout(60000);
-                c.connect();
-                long total = c.getContentLength();
-                InputStream in = c.getInputStream();
-                FileOutputStream out = new FileOutputStream(zip);
-                byte[] buf = new byte[8192];
-                long n = 0;
-                int r;
-                while ((r = in.read(buf)) > 0) {
-                    out.write(buf, 0, r);
-                    n += r;
-                    if (total > 0) dlStatus = "téléchargement " + (n * 100 / total) + "%";
-                    else dlStatus = "téléchargement " + (n / 1024 / 1024) + " Mo";
+                String custom = url == null ? "" : url.trim();
+                String[][] files;
+                if (custom.startsWith("https://")) {
+                    files = new String[][]{ { custom, "pack.bin" } };
+                } else {
+                    files = new String[][]{
+                        { "https://github.com/wangzhaode/mnn-stable-diffusion/releases/download/v0.1/text_encoder.mnn", "clip.bin" },
+                        { "https://github.com/wangzhaode/mnn-stable-diffusion/releases/download/v0.1/vae_decoder.mnn", "vae_decoder.bin" },
+                        { "https://github.com/wangzhaode/mnn-stable-diffusion/releases/download/v0.1/unet.mnn", "unet.bin" }
+                    };
                 }
-                out.close();
-                in.close();
-                dlStatus = "pack reçu (" + (n / 1024 / 1024) + " Mo). Renomme en unet.bin / clip.bin / vae_decoder.bin si besoin.";
+                for (int i = 0; i < files.length; i++) {
+                    File dest = new File(dir, files[i][1]);
+                    if (dest.isFile() && dest.length() > 1024L * 1024L) {
+                        dlStatus = "déjà là : " + files[i][1];
+                        continue;
+                    }
+                    downloadOne(files[i][0], dest, i + 1, files.length);
+                }
+                dlStatus = modelReady() ? "pack OK. Relance Générer en Local." : "téléchargé, fichiers incomplets";
             } catch (Exception e) {
                 dlStatus = "échec: " + e.getMessage();
             }
         }).start();
-        return "démarré";
+        return "téléchargement lancé";
+    }
+
+    private void downloadOne(String src, File dest, int idx, int total) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL(src).openConnection();
+        c.setInstanceFollowRedirects(true);
+        c.setConnectTimeout(25000);
+        c.setReadTimeout(120000);
+        c.setRequestProperty("User-Agent", "lea-studio");
+        int code = c.getResponseCode();
+        if (code >= 300 && code < 400) {
+            String loc = c.getHeaderField("Location");
+            c.disconnect();
+            c = (HttpURLConnection) new URL(loc).openConnection();
+            c.setInstanceFollowRedirects(true);
+            c.setRequestProperty("User-Agent", "lea-studio");
+        }
+        long totalBytes = c.getContentLength();
+        InputStream in = c.getInputStream();
+        File tmp = new File(dest.getAbsolutePath() + ".part");
+        FileOutputStream out = new FileOutputStream(tmp);
+        byte[] buf = new byte[65536];
+        long n = 0;
+        int r;
+        while ((r = in.read(buf)) > 0) {
+            out.write(buf, 0, r);
+            n += r;
+            String pct = totalBytes > 0 ? (n * 100 / totalBytes) + "%" : (n / 1024 / 1024) + " Mo";
+            dlStatus = "fichier " + idx + "/" + total + " " + dest.getName() + " " + pct;
+        }
+        out.close();
+        in.close();
+        if (dest.exists()) dest.delete();
+        tmp.renameTo(dest);
     }
 
     @JavascriptInterface

@@ -233,6 +233,7 @@ function renderProfile() {
     </select>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
+      <button class="cta" id="dlpack2" type="button" style="margin-left:8px;background:#3a2048">Télécharger pack local</button>
     </p>
     <p class="err" id="imgerr"></p>`;
   $("view-profile").onclick = (e) => {
@@ -261,6 +262,17 @@ function renderProfile() {
     };
   } catch (_) {}
   $("genimg").onclick = generatePhoto;
+  if ($("dlpack2")) $("dlpack2").onclick = () => {
+    if (!window.LeaAndroid || !window.LeaAndroid.downloadPack) {
+      setGenStatus("Téléchargement seulement dans l’APK.");
+      return;
+    }
+    setGenStatus(window.LeaAndroid.downloadPack(""));
+    const tick = setInterval(() => {
+      if ($("imgerr")) $("imgerr").textContent = window.LeaAndroid.downloadStatus();
+    }, 1000);
+    setTimeout(() => clearInterval(tick), 30 * 60 * 1000);
+  };
 }
 
 function setGenStatus(t) {
@@ -622,9 +634,7 @@ function renderSettings() {
       <option value="local">Local SD 1.5 (téléphone, pack ~1–2 Go)</option>
     </select>
     <p style="color:var(--muted);font-size:13px">Local : pack SD 1.5 (~1–2 Go) à télécharger. Sans pack, Horde prend le relais automatiquement. Horde attend maintenant jusqu’à ~12 min (28 steps).</p>
-    <label>URL pack local (https)</label>
-    <input id="localpackurl" placeholder="https://…/sd15-pack.zip" />
-    <p style="margin-top:8px"><button class="cta" id="dlpack" type="button" style="background:#3a2048">Télécharger le pack local</button></p>
+    <p style="margin-top:8px"><button class="cta" id="dlpack" type="button" style="background:#3a2048">Télécharger le pack SD 1.5 (~2 Go)</button></p>
     <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
@@ -695,8 +705,7 @@ function renderSettings() {
       $("dlst").textContent = "Téléchargement natif dispo seulement dans l’APK.";
       return;
     }
-    const u = ($("localpackurl") && $("localpackurl").value || "").trim();
-    $("dlst").textContent = window.LeaAndroid.downloadPack(u);
+    $("dlst").textContent = window.LeaAndroid.downloadPack("");
     const tick = setInterval(() => {
       $("dlst").textContent = window.LeaAndroid.downloadStatus();
     }, 1000);
