@@ -305,11 +305,23 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         if (path === "/api/image" && method === "POST") {
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
       const negative = "cartoon, anime, illustration, painting, cgi, 3d, plastic skin, deformed, extra fingers, child, watermark, text, blurry, low quality, celebrity, short hair, blonde hair, flat chest, small breasts, dry clothes, black shirt, long sleeves, outdoor daylight, different face";
-      // Anonyme (0000000000) : rester sous le budget kudos gratuit
-      // 512x768, ~20-25 steps, sampler simple, pas de hires
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       let last = "";
-      const payloads = [
+      const src = body.source_image ? String(body.source_image).slice(0, 4_500_000) : null;
+      const useImg2Img = Boolean(src && body.source_processing === "img2img");
+      const payloads = [];
+      if (useImg2Img) {
+        payloads.push({
+          prompt: prompt + " ### " + negative,
+          params: { width: 512, height: 640, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, denoising_strength: 0.42 },
+          nsfw: true, censor_nsfw: false,
+          models: ["DreamShaper", "Deliberate"],
+          r2: true, slow_workers: true, trusted_workers: false,
+          source_image: src,
+          source_processing: "img2img",
+        });
+      }
+      payloads.push(
         {
           prompt: prompt + " ### " + negative,
           params: { width: 512, height: 640, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
@@ -323,18 +335,18 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           nsfw: true, censor_nsfw: false,
           models: ["DreamShaper"],
           r2: true, slow_workers: true, trusted_workers: false,
-        },
-      ];
+        }
+      );
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
-              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.2:anon" },
+              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.3:anon" },
               body: JSON.stringify(bodyPayload),
             });
             const data = await res.json();
-            if (data.id) return { jobId: data.id, host, pending: true };
+            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img" };
             last = data.message || JSON.stringify(data).slice(0, 200);
           } catch (e) {
             last = e.message || String(e);

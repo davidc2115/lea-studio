@@ -217,6 +217,25 @@ function setGenStatus(t) {
   if ($("imgerr")) $("imgerr").textContent = t;
 }
 
+async function imageToBase64(src) {
+  try {
+    const res = await fetch(src);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => {
+        const s = String(fr.result || "");
+        const i = s.indexOf(",");
+        resolve(i >= 0 ? s.slice(i + 1) : s);
+      };
+      fr.onerror = reject;
+      fr.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
+
 async function generatePhoto() {
   if (window._leaGenBusy) {
     setGenStatus("Déjà une génération en cours…");
@@ -224,10 +243,27 @@ async function generatePhoto() {
   }
   const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
   const prompt = buildLeaImagePrompt(extra);
+  const c = character();
   window._leaGenBusy = true;
-  setGenStatus("Horde : envoi du job…");
+  setGenStatus("Préparation…");
   try {
-    const start = await api("/api/image", { method: "POST", body: JSON.stringify({ prompt }) });
+    const payload = { prompt };
+    // Léa : img2img depuis une photo de la galerie pour coller le visage
+    if (c.id === "lea") {
+      setGenStatus("Référence visage Léa…");
+      const ref = await imageToBase64("images/lea-portrait.jpg")
+        || await imageToBase64("images/lea-orage-dentelle.jpg");
+      if (ref) {
+        payload.source_image = ref;
+        payload.source_processing = "img2img";
+        setGenStatus("Horde img2img (visage de référence)…");
+      } else {
+        setGenStatus("Horde texte (sans ref)…");
+      }
+    } else {
+      setGenStatus("Horde : envoi du job…");
+    }
+    const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde file d’attente… tu peux quitter cet écran");
     pollHordeJob(start.jobId, start.host);
