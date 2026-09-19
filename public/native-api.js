@@ -302,60 +302,49 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       return { reply, chat };
     }
 
-    if (path === "/api/image" && method === "POST") {
-      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1200);
-      const negative = [
-        "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin,",
-        "deformed, extra fingers, bad anatomy, blurry, low quality, jpeg artifacts,",
-        "child, underage, watermark, text, logo, different face, celebrity,",
-        "overexposed, underexposed, weird proportions"
-      ].join(" ");
+        if (path === "/api/image" && method === "POST") {
+      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
+      const negative = "cartoon, anime, illustration, painting, cgi, 3d, plastic skin, deformed, extra fingers, child, watermark, text, blurry, low quality, celebrity";
+      // Anonyme (0000000000) : rester sous le budget kudos gratuit
+      // 512x768, ~20-25 steps, sampler simple, pas de hires
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       let last = "";
+      const payloads = [
+        {
+          prompt: prompt + " ### " + negative,
+          params: { width: 512, height: 768, steps: 22, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+          nsfw: true, censor_nsfw: false,
+          models: ["DreamShaper", "Deliberate", "Realistic Vision", "ICBINP - I Can't Believe It's Not Photography"],
+          r2: true, slow_workers: true, trusted_workers: false,
+        },
+        {
+          prompt: prompt + " ### " + negative,
+          params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler", cfg_scale: 6.5 },
+          nsfw: true, censor_nsfw: false,
+          models: ["DreamShaper", "Deliberate"],
+          r2: true, slow_workers: true, trusted_workers: false,
+        },
+      ];
       for (const host of hosts) {
-        try {
-          const res = await fetch(host + "/generate/async", {
-            method: "POST",
-            headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.1:anon" },
-            body: JSON.stringify({
-              prompt: prompt + " ### " + negative,
-              params: {
-                width: 576,
-                height: 832,
-                steps: 35,
-                n: 1,
-                sampler_name: "k_dpmpp_2m",
-                cfg_scale: 6.5,
-                karras: true,
-                hires_fix: true,
-                hires_strength: 0.35,
-              },
-              nsfw: true,
-              censor_nsfw: false,
-              models: [
-                "ICBINP - I Can't Believe It's Not Photography",
-                "Realistic Vision",
-                "Epic Realism",
-                "DreamShaper XL",
-                "AlbedoBase XL (SDXL)",
-                "Deliberate",
-              ],
-              r2: true,
-              slow_workers: true,
-              trusted_workers: false,
-            }),
-          });
-          const data = await res.json();
-          if (data.id) return { jobId: data.id, host, pending: true };
-          last = data.message || JSON.stringify(data).slice(0, 160);
-        } catch (e) {
-          last = e.message || String(e);
+        for (const bodyPayload of payloads) {
+          try {
+            const res = await fetch(host + "/generate/async", {
+              method: "POST",
+              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.2:anon" },
+              body: JSON.stringify(bodyPayload),
+            });
+            const data = await res.json();
+            if (data.id) return { jobId: data.id, host, pending: true };
+            last = data.message || JSON.stringify(data).slice(0, 200);
+          } catch (e) {
+            last = e.message || String(e);
+          }
         }
       }
       throw new Error("Horde indisponible: " + last);
     }
 
-    if (path === "/api/image-status") {
+if (path === "/api/image-status") {
       const jobId = body.jobId || "";
       const host = body.host || "https://stablehorde.net/api/v2";
       if (!jobId) throw new Error("jobId manquant");
