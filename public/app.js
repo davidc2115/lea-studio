@@ -63,7 +63,7 @@ function buildLeaImagePrompt(extra = "") {
   const place = pick(c.places || ["apartment interior at night"]);
   const age = c.age || 21;
   const bodyLock = {
-    sofia: "VOLUPTUOUS hourglass, extremely LARGE heavy 100E breasts, tiny cinched waist, wide hips, curvy Italian, NOT slim, NOT athletic, NOT small chest",
+    sofia: "hourglass bombshell, extremely LARGE heavy 100E breasts, TINY cinched waist, wide hips, Italian olive, NOT plus-size, NOT chubby, NOT thick arms, NOT soft belly, NOT slim, NOT small chest",
     amelie: "CHUBBY plus-size soft belly, very LARGE heavy breasts, round cheeks, NOT slim",
     aya: "ATHLETIC lean muscle, SMALL firm A-B breasts, NOT large chest",
     jade: "VERY THIN petite, FLAT small A-cup, glasses, NOT curvy",
