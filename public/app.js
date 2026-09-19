@@ -46,16 +46,16 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
-    // Prompt COURT : SD/Horde lit surtout le début. Tenue + pluie en premier.
+    // Ordre = priorité pour SD/Horde. Physique d'abord, puis tenue mouillée.
     return [
-      "wet white crop top, tight wet dark blue skinny jeans, rain soaked clothes clinging to body,",
-      "water droplets on skin and fabric, thunderstorm, apartment doorway at night,",
-      "18 year old French woman, long straight dark espresso brown hair wet to lower back,",
-      "dark brown eyes, oval face, fair skin, large natural 95D bust, slim waist,",
-      "standing in hallway entrance, warm indoor light, rain visible behind door,",
-      "shy expression, photorealistic photo, natural skin,",
-      extra ? extra : "",
-      "NOT dry clothes, NOT black top, NOT long sleeves, NOT outdoor day, NOT blonde"
+      "same woman every time: long straight dark brown hair reaching lower back, wet hair clinging to shoulders,",
+      "large full natural 95D breasts, slim waist, wide hips, fair cool skin,",
+      "soft oval face, dark brown almond eyes, small nose, full lips, young French adult 18+,",
+      "soaked translucent white short crop top, tight wet dark blue skinny jeans, rain droplets on skin,",
+      "apartment hallway doorway at night thunderstorm, warm lamp light, shy look,",
+      "photorealistic, natural skin pores,",
+      extra || "",
+      "NOT short hair, NOT blonde, NOT flat chest, NOT dry clothes, NOT black top, NOT long sleeves, NOT outdoor"
     ].filter(Boolean).join(" ");
   }
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
@@ -65,12 +65,11 @@ function buildLeaImagePrompt(extra = "") {
     (c.appearance || "") + ",",
     outfit + ",",
     place + ",",
-    "18+ adult woman named " + c.name + ", unique face not Lea,",
-    "photorealistic photo, natural skin,",
-    extra || "",
-    "different person from Lea"
+    "adult 18+ " + c.name + ", unique face not Lea, photorealistic,",
+    extra || ""
   ].filter(Boolean).join(" ");
 }
+
 
 
 

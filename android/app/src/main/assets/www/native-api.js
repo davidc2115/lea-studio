@@ -304,7 +304,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
 
         if (path === "/api/image" && method === "POST") {
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
-      const negative = "cartoon, anime, illustration, painting, cgi, 3d, plastic skin, deformed, extra fingers, child, watermark, text, blurry, low quality, celebrity";
+      const negative = "cartoon, anime, illustration, painting, cgi, 3d, plastic skin, deformed, extra fingers, child, watermark, text, blurry, low quality, celebrity, short hair, blonde hair, flat chest, small breasts, dry clothes, black shirt, long sleeves, outdoor daylight, different face";
       // Anonyme (0000000000) : rester sous le budget kudos gratuit
       // 512x768, ~20-25 steps, sampler simple, pas de hires
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
