@@ -312,16 +312,16 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const payloads = [
         {
           prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 768, steps: 22, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+          params: { width: 512, height: 640, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
           nsfw: true, censor_nsfw: false,
-          models: ["DreamShaper", "Deliberate", "Realistic Vision", "ICBINP - I Can't Believe It's Not Photography"],
+          models: ["DreamShaper", "Deliberate"],
           r2: true, slow_workers: true, trusted_workers: false,
         },
         {
           prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler", cfg_scale: 6.5 },
+          params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
           nsfw: true, censor_nsfw: false,
-          models: ["DreamShaper", "Deliberate"],
+          models: ["DreamShaper"],
           r2: true, slow_workers: true, trusted_workers: false,
         },
       ];
