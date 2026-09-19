@@ -313,7 +313,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       if (useImg2Img) {
         payloads.push({
           prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 640, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, denoising_strength: 0.42 },
+          params: { width: 512, height: 640, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 6, denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.32) },
           nsfw: true, censor_nsfw: false,
           models: ["DreamShaper", "Deliberate"],
           r2: true, slow_workers: true, trusted_workers: false,

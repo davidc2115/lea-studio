@@ -46,16 +46,16 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
-    // Ordre = priorité pour SD/Horde. Physique d'abord, puis tenue mouillée.
+    // Très court + ordre strict. Img2img part d'une photo ORAGE déjà trempée.
     return [
-      "same woman every time: long straight dark brown hair reaching lower back, wet hair clinging to shoulders,",
-      "large full natural 95D breasts, slim waist, wide hips, fair cool skin,",
-      "soft oval face, dark brown almond eyes, small nose, full lips, young French adult 18+,",
-      "soaked translucent white short crop top, tight wet dark blue skinny jeans, rain droplets on skin,",
-      "apartment hallway doorway at night thunderstorm, warm lamp light, shy look,",
-      "photorealistic, natural skin pores,",
+      "keep the exact same face and body,",
+      "soaked wet white short crop top clinging to large breasts,",
+      "tight wet dark blue skinny jeans,",
+      "rain water droplets on skin and clothes,",
+      "apartment doorway hallway at night thunderstorm,",
+      "photorealistic DSLR photo natural skin pores,",
       extra || "",
-      "NOT short hair, NOT blonde, NOT flat chest, NOT dry clothes, NOT black top, NOT long sleeves, NOT outdoor"
+      "NOT dry, NOT studio wall, NOT burgundy top, NOT long sleeves, NOT outdoor forest, NOT plastic skin, NOT CGI"
     ].filter(Boolean).join(" ");
   }
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
@@ -69,6 +69,7 @@ function buildLeaImagePrompt(extra = "") {
     extra || ""
   ].filter(Boolean).join(" ");
 }
+
 
 
 
@@ -267,12 +268,15 @@ async function generatePhoto() {
     // Léa : img2img depuis une photo de la galerie pour coller le visage
     if (c.id === "lea") {
       setGenStatus("Référence visage Léa…");
-      const ref = await imageToBase64("images/lea-portrait.jpg")
-        || await imageToBase64("images/lea-orage-dentelle.jpg");
+      // Réf ORAGE (déjà trempée + porte) — pas le portrait sec
+      const ref = await imageToBase64("images/lea-orage-dentelle.jpg")
+        || await imageToBase64("images/lea-orage.jpg")
+        || await imageToBase64("images/lea-orage-timide.jpg");
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        setGenStatus("Horde img2img (visage de référence)…");
+        payload.denoising = 0.32;
+        setGenStatus("Horde img2img depuis photo orage…");
       } else {
         setGenStatus("Horde texte (sans ref)…");
       }
