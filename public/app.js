@@ -60,6 +60,7 @@ function buildLeaImagePrompt(extra = "") {
     ].filter(Boolean).join(" ");
   }
   let outfit = pick(c.outfits || ["casual home outfit"]);
+  if (c.id === "jade") outfit = "glasses, oversized white shirt, socks, desk books, small chest";
   const place = pick(c.places || ["apartment interior at night"]);
   const age = c.age || 21;
   const bodyLock = {
@@ -367,7 +368,7 @@ async function generatePhoto() {
           }
         } catch (_) {}
       }
-      setGenStatus("Local : pack ou moteur NCNN absent → Horde");
+      setGenStatus("Pack poids OK, mais lib MNN absente de l’APK → Horde (le local ne dessine pas encore)");
     }
     const payload = { prompt, negative: bodyNegatives(c) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
