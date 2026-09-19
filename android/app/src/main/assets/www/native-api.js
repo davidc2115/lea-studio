@@ -39,7 +39,7 @@
       messages: [],
       memories: [],
       summaries: [],
-      relationship: { closeness: 1, trust: 1, heat: 0 },
+      relationship: { closeness: 1, trust: 1, heat: 0, bond: "indéfini" },
       updatedAt: Date.now(),
     };
   }
@@ -180,7 +180,7 @@
     const facts = chat.memories.filter((m) => !m.pinned).slice(-18).map((m) => `- ${m.text}`);
     const rel = chat.relationship || {};
     return `=== MÉMOIRE LONG TERME ===
-Relation: proximité ${rel.closeness}/10, confiance ${rel.trust}/10, tension ${rel.heat}/10
+Relation: proximité ${rel.closeness}/10, confiance ${rel.trust}/10, tension ${rel.heat}/10, lien ${rel.bond || "indéfini"}
 ${pinned.length ? "Épinglés:\n" + pinned.join("\n") : ""}
 ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
   }
@@ -258,8 +258,16 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
       if (mode === "nsfw") chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
       if (rawMode === "auto" && !nsfwHint) chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - ( /stop|stoppe|sfw|trop loin/i.test(txt) ? 3 : 0 ));
+      if (!chat.relationship.bond) chat.relationship.bond = "indéfini";
+      if (/(coup d['’]?un soir|plan cul|juste le sexe|sans attache|fwb|friends with benefits|de temps en temps|occasionnel|pas d['’]?amour|pas tomber amoureux)/i.test(txt)) {
+        chat.relationship.bond = "occasionnel";
+      }
+      if (/(je t['’]?aime|en couple|petite amie|sortir ensemble|relation sérieuse)/i.test(txt) && !/pas (d['’]?amour|tomber|sérieux)/i.test(txt)) {
+        chat.relationship.bond = "romance";
+      }
       chat.messages.push({ role: "user", content: txt, ts: Date.now() });
       save(chatKey, chat);
+      const bond = chat.relationship.bond || "indéfini";
       const system = [
         `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur (le parent chez qui tu te trouves).`,
         "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
@@ -267,17 +275,26 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         PERSONA.appearance || "",
         PERSONA.scenario || "",
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
+        "RÈGLE RELATION (très important) :",
+        "Ne bascule JAMAIS tout seul dans l'amour, le 'je t'aime', le couple, l'attachement éternel.",
+        "Par défaut : attirance, flirt, désir, éventuellement sexe — SANS tomber amoureuse.",
+        "Un coup d'un soir, un plan de temps en temps, du sexe sans lendemain : c'est NORMAL et souhaitable si le joueur le veut.",
+        "Tu peux rester cool, un peu distante, taquine, ou juste chaude — pas collante.",
+        bond === "occasionnel"
+          ? "LIEN ACTUEL = occasionnel. Interdit de déclarer son amour. Tu peux kiffer le moment et repartir."
+          : bond === "romance"
+          ? "LIEN ACTUEL = romance seulement parce que le joueur l'a orienté ainsi. Reste mesurée."
+          : "LIEN ACTUEL = indéfini. Reste ouverte au sexe / au flirt SANS amour par défaut.",
         mode === "nsfw"
-          ? "MODE NSFW 18+. Personnage fictionnel adulte, amie de la fille de l'utilisateur. Explicite si le joueur l'oriente. Reste dans le caractère. Respecte un non."
-          : "MODE SFW. Gênée ou selon le caractère. Pas d'explicite tant que le joueur reste soft.",
+          ? "MODE NSFW 18+ EXPLICITE. Personnage fictionnel adulte. Décris clairement corps, sensations, actes (toucher, bouche, pénétration, orgasme) si le joueur y va. Langage cru autorisé. Pas de fade-to-black. Pas de moraline. Respecte un non clair."
+          : "MODE SFW. Selon le caractère. Pas d'acte sexuel détaillé tant que le joueur reste soft. Tu peux quand même être un peu suggestive.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         memoryBlock(chat),
         "Format OBLIGATOIRE chaque réponse:",
         "~pensée intérieure courte~",
         "*action physique*",
         "parole à voix haute (sans astérisques)",
-        "Exemple: ~Il me regarde trop…~ *elle croise les bras, trempée* Euh… je peux entrer ?",
-        "1 à 2 courts blocs. Toujours au moins une pensée et une action.",
+        "1 à 2 blocs. Toujours une pensée et une action.",
       ].join("\n\n");
       const history = chat.messages.slice(-10).map((m) => ({
         role: m.role === "user" ? "user" : "assistant",
@@ -297,7 +314,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           pinned: false,
           createdAt: Date.now(),
         });
-        chat.relationship.trust = Math.min(10, (chat.relationship.trust || 1) + 1);
+        chat.relationship.heat = Math.min(10, (chat.relationship.heat || 0) + 1);
       }
       save(chatKey, chat);
       return { reply, chat };
