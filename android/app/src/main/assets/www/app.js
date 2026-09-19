@@ -275,8 +275,8 @@ async function generatePhoto() {
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = 0.32;
-        setGenStatus("Horde img2img depuis photo orage…");
+        payload.denoising = 0.28;
+        setGenStatus("Horde Juggernaut/ICBINP img2img (orage)…");
       } else {
         setGenStatus("Horde texte (sans ref)…");
       }

@@ -302,51 +302,68 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       return { reply, chat };
     }
 
-        if (path === "/api/image" && method === "POST") {
+            if (path === "/api/image" && method === "POST") {
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
-      const negative = "cartoon, anime, illustration, painting, cgi, 3d, plastic skin, deformed, extra fingers, child, watermark, text, blurry, low quality, celebrity, short hair, blonde hair, flat chest, small breasts, dry clothes, black shirt, long sleeves, outdoor daylight, different face";
-      const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
+      const negative = [
+        "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin, airbrushed,",
+        "deformed, extra fingers, bad anatomy, blurry, low quality, watermark, text,",
+        "child, celebrity, short hair, blonde, flat chest, dry clothes, long sleeves,",
+        "studio seamless backdrop, plain white wall only, outdoor forest, different person"
+      ].join(" ");
+      const hosts = ["https://stablehorde.net/api/v2"];
       let last = "";
       const src = body.source_image ? String(body.source_image).slice(0, 4_500_000) : null;
       const useImg2Img = Boolean(src && body.source_processing === "img2img");
+      // Modèles photo dispo en gratuit (testés OK à 512x640 / 18 steps)
+      const photoModels = [
+        "Juggernaut XL",
+        "ICBINP - I Can't Believe It's Not Photography",
+        "AbsoluteReality",
+        "Realistic Vision",
+        "AlbedoBase XL (SDXL)",
+        "Deliberate",
+      ];
       const payloads = [];
       if (useImg2Img) {
         payloads.push({
           prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 640, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 6, denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.32) },
+          params: {
+            width: 512, height: 640, steps: 20, n: 1,
+            sampler_name: "k_euler_a", cfg_scale: 5.5,
+            denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.28),
+          },
           nsfw: true, censor_nsfw: false,
-          models: ["DreamShaper", "Deliberate"],
+          models: photoModels,
           r2: true, slow_workers: true, trusted_workers: false,
           source_image: src,
           source_processing: "img2img",
         });
       }
-      payloads.push(
-        {
-          prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 640, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
-          nsfw: true, censor_nsfw: false,
-          models: ["DreamShaper", "Deliberate"],
-          r2: true, slow_workers: true, trusted_workers: false,
-        },
-        {
-          prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
-          nsfw: true, censor_nsfw: false,
-          models: ["DreamShaper"],
-          r2: true, slow_workers: true, trusted_workers: false,
-        }
-      );
+      // txt2img fallback — mêmes modèles photo
+      payloads.push({
+        prompt: prompt + " ### " + negative,
+        params: { width: 512, height: 640, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
+        nsfw: true, censor_nsfw: false,
+        models: photoModels,
+        r2: true, slow_workers: true, trusted_workers: false,
+      });
+      payloads.push({
+        prompt: prompt + " ### " + negative,
+        params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
+        nsfw: true, censor_nsfw: false,
+        models: ["Realistic Vision", "AbsoluteReality", "stable_diffusion"],
+        r2: true, slow_workers: true, trusted_workers: false,
+      });
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
-              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.3:anon" },
+              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.4:anon" },
               body: JSON.stringify(bodyPayload),
             });
             const data = await res.json();
-            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img" };
+            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img", models: (bodyPayload.models || []).slice(0, 2) };
             last = data.message || JSON.stringify(data).slice(0, 200);
           } catch (e) {
             last = e.message || String(e);
