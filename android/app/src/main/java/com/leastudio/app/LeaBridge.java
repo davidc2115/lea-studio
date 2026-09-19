@@ -18,10 +18,20 @@ import java.net.URL;
  */
 public class LeaBridge {
     private final Context ctx;
+    private boolean nativeOk;
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
+        try {
+            System.loadLibrary("MNN");
+            System.loadLibrary("lea_local");
+            nativeOk = true;
+        } catch (Throwable t) {
+            nativeOk = false;
+        }
     }
+
+    public native String nativeSd(String prompt, String modelDir, String outPath);
 
     @JavascriptInterface
     public String deviceInfo() {
@@ -34,6 +44,7 @@ public class LeaBridge {
             o.put("availMb", mi.availMem / (1024 * 1024));
             o.put("lowRam", am != null && am.isLowRamDevice());
             o.put("modelReady", modelReady());
+            o.put("nativeOk", nativeOk);
             return o.toString();
         } catch (Exception e) {
             return "{\"error\":\"" + e.getMessage() + "\"}";
@@ -124,13 +135,26 @@ public class LeaBridge {
                 return o.toString();
             }
             long avail = availableMb();
-            if (avail < 1800) {
-                o.put("error", "Pas assez de RAM libre (" + avail + " Mo). Ferme des apps ou reste sur Horde.");
+            if (avail < 1200) {
+                o.put("error", "Pas assez de RAM libre (" + avail + " Mo). Ferme des apps.");
                 return o.toString();
             }
-            // Moteur natif SD à brancher ici (NCNN / MNN). On ne lance pas
-            // d'inférence lourde tant que le runtime n'est pas lié.
-            o.put("error", "Pack détecté, runtime NCNN/MNN pas encore lié dans cette build. Horde reste actif.");
+            if (!nativeOk) {
+                o.put("error", "lib lea_local / MNN absente. Rebuild l'APK native.");
+                o.put("modelReady", true);
+                return o.toString();
+            }
+            File dir = new File(ctx.getFilesDir(), "models/sd15");
+            ensureAliases(dir);
+            File out = new File(ctx.getFilesDir(), "local-out.ppm");
+            String res = nativeSd(prompt == null ? "a woman" : prompt, dir.getAbsolutePath(), out.getAbsolutePath());
+            if (res == null || !"OK".equals(res)) {
+                o.put("error", "MNN: " + res);
+                o.put("modelReady", true);
+                return o.toString();
+            }
+            o.put("url", "file://" + out.getAbsolutePath());
+            o.put("note", "Image locale MNN");
             o.put("modelReady", true);
             return o.toString();
         } catch (Exception e) {
@@ -147,6 +171,30 @@ public class LeaBridge {
             if (!f.isFile() || f.length() < 1024 * 1024) return false;
         }
         return true;
+    }
+
+    private void ensureAliases(File dir) {
+        alias(new File(dir, "clip.bin"), new File(dir, "text_encoder.mnn"));
+        alias(new File(dir, "unet.bin"), new File(dir, "unet.mnn"));
+        alias(new File(dir, "vae_decoder.bin"), new File(dir, "vae_decoder.mnn"));
+        copyAsset("sd15res/alphas.txt", new File(dir, "alphas.txt"));
+        copyAsset("sd15res/vocab.txt", new File(dir, "vocab.txt"));
+    }
+
+    private void alias(File src, File dst) {
+        if (!src.isFile() || (dst.isFile() && dst.length() == src.length())) return;
+        try {
+            java.nio.file.Files.copy(src.toPath(), dst.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception ignored) {}
+    }
+
+    private void copyAsset(String name, File dst) {
+        if (dst.isFile() && dst.length() > 100) return;
+        try (InputStream in = ctx.getAssets().open(name); FileOutputStream out = new FileOutputStream(dst)) {
+            byte[] b = new byte[8192];
+            int n;
+            while ((n = in.read(b)) > 0) out.write(b, 0, n);
+        } catch (Exception ignored) {}
     }
 
     private long availableMb() {

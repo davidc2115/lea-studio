@@ -722,7 +722,7 @@ function renderSettings() {
     try {
       if (window.LeaAndroid && window.LeaAndroid.deviceInfo) {
         const d = JSON.parse(window.LeaAndroid.deviceInfo());
-        $("st").textContent += " · RAM " + d.ramMb + " Mo · local " + (d.modelReady ? "pack OK" : "pack absent");
+        $("st").textContent += " · RAM " + d.ramMb + " Mo · pack " + (d.modelReady ? "OK" : "absent") + " · moteur " + (d.nativeOk ? "MNN" : "non");
       }
     } catch (_) {}
   });
