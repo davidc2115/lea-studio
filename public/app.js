@@ -59,32 +59,56 @@ function buildLeaImagePrompt(extra = "") {
       "NOT dry, NOT studio wall, NOT burgundy top, NOT long sleeves, NOT outdoor forest, NOT plastic skin, NOT CGI"
     ].filter(Boolean).join(" ");
   }
-  const outfit = pick(c.outfits || ["sexy casual outfit"]);
+  let outfit = pick(c.outfits || ["casual home outfit"]);
   const place = pick(c.places || ["apartment interior at night"]);
   const age = c.age || 21;
   const bodyLock = {
-    sofia: "hourglass bombshell, extremely LARGE heavy 100E breasts, TINY cinched waist, wide hips, Italian olive, NOT plus-size, NOT chubby, NOT thick arms, NOT soft belly, NOT slim, NOT small chest",
-    amelie: "CHUBBY plus-size soft belly, very LARGE heavy breasts, round cheeks, NOT slim",
-    aya: "ATHLETIC lean muscle, SMALL firm A-B breasts, NOT large chest",
-    jade: "VERY THIN petite, FLAT small A-cup, glasses, NOT curvy",
-    bruna: "tiny waist HUGE round Brazilian butt, NOT skinny hips",
-    elise: "very LARGE heavy breasts, soft French body",
-    fatou: "tall powerful hips, extremely LARGE heavy breasts",
-    lina: "petite Korean, VERY small chest, NOT busty",
-    mei: "thin Chinese, flat chest, NOT curvy",
-    olga: "plump Russian, heavy large breasts, full hips",
-    keisha: "dark skin, large breasts, very round butt",
-    camila: "thick round butt, slim waist, Colombian curves",
-    myriam: "full soft body, large D breasts, wide hips",
-    ines: "golden tan, wide hips, medium C breasts, NOT tiny",
+    ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
+    aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
+    sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
+    jade: "VERY THIN petite bookish woman, FLAT small A-cup chest, almost no cleavage, brown bun, glasses, freckles, NOT busty, NOT large breasts, NOT curvy, NOT hourglass",
+    myriam: "full soft figure, large D breasts, wide hips, NOT skinny",
+    chloe: "slim petite, small-medium B-cup, freckles, NOT huge chest",
+    nina: "TALL slim Slavic, medium C-cup, long legs, NOT plus-size",
+    keisha: "dark skin, large breasts, very round butt, NOT skinny",
+    lina: "petite Korean, VERY SMALL almost flat chest, slim, NOT busty",
+    priya: "Indian bronze, large D breasts, wide hips",
+    camila: "slim waist, THICK round butt, medium breasts, NOT plus-size",
+    amelie: "CHUBBY plus-size, soft belly, very LARGE breasts, round face, NOT slim",
+    zoe: "VERY THIN goth, small B-cup, pale, NOT busty",
+    fatou: "tall, extremely LARGE heavy F breasts, powerful hips",
+    hana: "petite Japanese, FLAT A-cup, short black bob, NOT busty",
+    lucia: "hourglass, large D breasts, defined waist",
+    marine: "athletic swimmer, medium breasts, toned, NOT chubby",
+    rania: "slim elegant, medium C-cup, NOT plus-size",
+    thea: "thin redhead, small B-cup, freckles, NOT busty",
+    viola: "soft plump, large D breasts, NOT skinny",
+    noemie: "short petite, small-medium B-cup",
+    daria: "sculpted, medium C-cup, NOT chubby",
+    mei: "thin Chinese, FLAT A-cup, NOT busty",
+    aisha: "dancer, medium B-cup, toned glutes, NOT plus-size",
+    bruna: "TINY waist, HUGE round Brazilian butt, medium C-cup",
+    elise: "soft, very LARGE E breasts, NOT skinny",
+    sasha: "androgynous slim, FLAT small A-cup, short hair, NOT busty",
+    yasmine: "glamorous, large 95D breasts, NOT plus-size",
+    olga: "plump Russian, heavy E breasts, full hips",
+    maya: "slim waist, medium C-cup, caramel skin",
   }[c.id] || (c.body || "");
+  const smallChest = /jade|aya|lina|hana|mei|sasha|thea|zoe|chloe/.test(c.id);
+  if (smallChest && /towel|lingerie|bustier|cleavage/i.test(outfit)) {
+    outfit = "oversized button shirt, modest chest, no cleavage";
+  }
+  const anti = smallChest
+    ? "NOT large breasts, NOT huge cleavage, NOT voluptuous, NOT 95D"
+    : "";
   return [
     bodyLock + ",",
-    age + " year old woman who looks " + age + ", not older,",
+    age + " year old woman who looks " + age + ",",
     (c.appearance || "") + ",",
     outfit + ",",
     place + ",",
-    "photorealistic unique face, adult " + age + ",",
+    "photorealistic, adult " + age + ",",
+    anti,
     extra || ""
   ].filter(Boolean).join(" ");
 }
