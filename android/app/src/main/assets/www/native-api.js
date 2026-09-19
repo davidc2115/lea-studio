@@ -370,7 +370,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
 
             if (path === "/api/image" && method === "POST") {
-      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
+      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1800);
       const extraNeg = String(body.negative || "");
       const negative = [
         "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin, airbrushed,",
@@ -385,11 +385,10 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const useImg2Img = Boolean(src && body.source_processing === "img2img");
       // Modèles photo dispo en gratuit (testés OK à 512x640 / 18 steps)
       const photoModels = [
-        "Juggernaut XL",
-        "ICBINP - I Can't Believe It's Not Photography",
-        "AbsoluteReality",
         "Realistic Vision",
-        "AlbedoBase XL (SDXL)",
+        "AbsoluteReality",
+        "ICBINP - I Can't Believe It's Not Photography",
+        "Juggernaut XL",
         "Deliberate",
       ];
       const payloads = [];
@@ -416,13 +415,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         models: photoModels,
         r2: true, slow_workers: true, trusted_workers: false,
       });
-      payloads.push({
-        prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
-        nsfw: true, censor_nsfw: false,
-        models: ["Realistic Vision", "AbsoluteReality", "stable_diffusion"],
-        r2: true, slow_workers: true, trusted_workers: false,
-      });
+      // Pas de fallback 16 steps / SD1.5 brut : trop rapide et ignore le physique.
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {

@@ -392,7 +392,17 @@ async function generatePhoto() {
         setGenStatus("Horde texte (sans ref)…");
       }
     } else {
-      setGenStatus("Horde : envoi du job…");
+      const cover = (c.cover || ("images/cast/" + c.id + ".jpg"));
+      setGenStatus("Référence " + c.name + "…");
+      const ref = await imageToBase64(cover);
+      if (ref) {
+        payload.source_image = ref;
+        payload.source_processing = "img2img";
+        payload.denoising = c.id === "jade" ? 0.32 : 0.38;
+        setGenStatus("Horde img2img 28 steps (physique)…");
+      } else {
+        setGenStatus("Horde 28 steps…");
+      }
     }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
