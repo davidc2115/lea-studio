@@ -122,10 +122,13 @@ function buildLeaImagePrompt(extra = "") {
     ? "NOT large breasts, NOT huge cleavage, NOT voluptuous, NOT 95D"
     : "";
   return [
+    (c.body || "") + ",",
+    bodyLock + ",",
+    (c.appearance || "") + ",",
     bodyLock + ",",
     age + " year old woman who looks " + age + ",",
-    (c.appearance || "") + ",",
     outfit + ",",
+    pose + ",",
     place + ",",
     "photorealistic, adult " + age + ",",
     anti,
@@ -176,10 +179,14 @@ function openFull(src) {
   }
 }
 
-function extraPhotos() {
-  try { return JSON.parse(localStorage.getItem("lea.photos." + (state.current || "lea")) || "[]"); } catch { return []; }
+function extraPhotos(id) {
+  const k = id || state.current || "lea";
+  try { return JSON.parse(localStorage.getItem("lea.photos." + k) || "[]"); } catch { return []; }
 }
-function saveExtra(list) { localStorage.setItem("lea.photos." + (state.current || "lea"), JSON.stringify(list)); }
+function saveExtra(list, id) {
+  const k = id || state.current || "lea";
+  localStorage.setItem("lea.photos." + k, JSON.stringify(list));
+}
 function loadChat(id) {
   try { return JSON.parse(localStorage.getItem("lea.chat." + (id || "lea")) || "null"); } catch { return null; }
 }
@@ -376,18 +383,24 @@ async function generatePhoto() {
           const raw = window.LeaAndroid.localGenerate(prompt);
           const data = typeof raw === "string" ? JSON.parse(raw) : raw;
           if (data && data.url) {
-            const list = extraPhotos();
+            const list = extraPhotos(c.id);
             list.unshift(data.url);
-            saveExtra(list.slice(0, 20));
+            saveExtra(list.slice(0, 20), c.id);
             setGenStatus(data.note || "Image locale prête");
             window._leaGenBusy = false;
             if (state.view === "profile") renderProfile();
             openFull(data.url);
             return;
           }
+          if (data && data.pending) {
+            setGenStatus(data.note || "Local en arrière-plan…");
+            pollLocalJob(c.id);
+            return;
+          }
+          if (data && data.error) setGenStatus(data.error);
         } catch (_) {}
       }
-      setGenStatus("Pack poids OK, mais lib MNN absente de l’APK → Horde (le local ne dessine pas encore)");
+      setGenStatus("Local indisponible → Horde");
     }
     const payload = { prompt, negative: bodyNegatives(c), nsfw: !/jade|lina|hana|mei|sasha/.test(c.id) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
@@ -417,14 +430,65 @@ async function generatePhoto() {
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde file d’attente… tu peux quitter cet écran");
-    pollHordeJob(start.jobId, start.host);
+    pollHordeJob(start.jobId, start.host, c.id);
   } catch (e) {
     window._leaGenBusy = false;
     setGenStatus(String(e.message || e));
   }
 }
 
-async function pollHordeJob(jobId, host) {
+async function pollLocalJob(charId) {
+  const cid = charId || state.current || "lea";
+  for (let i = 0; i < 180; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    let data = {};
+    try {
+      data = JSON.parse(window.LeaAndroid.localStatus() || "{}");
+    } catch {
+      data = {};
+    }
+    if (data.pending || (!data.done && !data.url && !data.error)) {
+      setGenStatus("Local MNN… " + (data.note || (i + 1)));
+      continue;
+    }
+    window._leaGenBusy = false;
+    if (data.error) {
+      setGenStatus(data.error);
+      return;
+    }
+    if (data.url) {
+      const list = extraPhotos(cid);
+      list.unshift(data.url);
+      saveExtra(list.slice(0, 20), cid);
+      setGenStatus("Image locale ajoutée à la galerie");
+      if (state.view === "profile" && state.current === cid) renderProfile();
+      if (state.current === cid) openFull(data.url);
+    }
+    return;
+  }
+  window._leaGenBusy = false;
+  setGenStatus("Local timeout");
+}
+
+async function persistImageUrl(url) {
+  if (!url) return url;
+  if (String(url).startsWith("data:")) return url;
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result || url));
+      fr.onerror = () => resolve(url);
+      fr.readAsDataURL(blob);
+    });
+  } catch {
+    return url;
+  }
+}
+
+async function pollHordeJob(jobId, host, charId) {
+  const cid = charId || state.current || "lea";
   for (let i = 0; i < 240; i++) {
     await new Promise((r) => setTimeout(r, 3000));
     try {
@@ -440,12 +504,13 @@ async function pollHordeJob(jobId, host) {
         setGenStatus(st.error);
         return;
       }
-      const list = extraPhotos();
-      list.unshift(st.url);
-      saveExtra(list.slice(0, 20));
-      setGenStatus("Image Horde prête");
-      if (state.view === "profile") renderProfile();
-      if (st.url) openFull(st.url);
+      const stored = await persistImageUrl(st.url);
+      const list = extraPhotos(cid);
+      list.unshift(stored);
+      saveExtra(list.slice(0, 20), cid);
+      setGenStatus("Image ajoutée à la galerie");
+      if (state.view === "profile" && state.current === cid) renderProfile();
+      if (stored && state.current === cid) openFull(stored);
       return;
     } catch (e) {
       setGenStatus("Horde… " + (e.message || e));
@@ -484,10 +549,11 @@ function paintMessages() {
   if (!box) return;
   const c = character();
   const msgs = state.chat?.messages || [];
-  if (!msgs.length) {
-    box.innerHTML = `<div class="bubble assistant">${formatBubble(c.greeting)}</div>`;
+  const shown = msgs.length ? msgs : (c.greeting ? [{ role: "assistant", content: c.greeting }] : []);
+  if (!shown.length) {
+    box.innerHTML = "";
   } else {
-    box.innerHTML = msgs.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${formatBubble(m.content)}</div>`).join("");
+    box.innerHTML = shown.map((m) => `<div class="bubble ${m.role === "user" ? "user" : "assistant"}">${formatBubble(m.content)}</div>`).join("");
   }
   box.scrollTop = box.scrollHeight;
   const rel = state.chat?.relationship || {};
@@ -608,6 +674,10 @@ async function send() {
   input.value = "";
   if (!state.chat) state.chat = { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
   if (!Array.isArray(state.chat.messages)) state.chat.messages = [];
+  const greet = character().greeting;
+  if (greet && !state.chat.messages.some((m) => m.role === "assistant")) {
+    state.chat.messages.unshift({ role: "assistant", content: greet, ts: Date.now() - 1 });
+  }
   state.chat.messages.push({ role: "user", content: text, ts: Date.now() });
   paintMessages();
   const box = $("msgs");
@@ -625,6 +695,10 @@ async function send() {
     });
     if (data && data.chat && Array.isArray(data.chat.messages) && data.chat.messages.length) {
       state.chat = data.chat;
+      const g = character().greeting;
+      if (g && !(state.chat.messages || []).some((m) => m.role === "assistant" && String(m.content).slice(0, 40) === String(g).slice(0, 40))) {
+        state.chat.messages.unshift({ role: "assistant", content: g, ts: Date.now() - 2 });
+      }
     } else if (data && data.reply) {
       state.chat.messages.push({ role: "assistant", content: data.reply, ts: Date.now() });
     } else {

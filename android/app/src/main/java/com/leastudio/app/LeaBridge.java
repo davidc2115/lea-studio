@@ -125,39 +125,63 @@ public class LeaBridge {
         tmp.renameTo(dest);
     }
 
+    private volatile boolean localBusy = false;
+    private volatile String localJson = "{\"pending\":true}";
+
+    @JavascriptInterface
+    public String localStatus() {
+        return localJson;
+    }
+
     @JavascriptInterface
     public String localGenerate(String prompt) {
         try {
             JSONObject o = new JSONObject();
             if (!modelReady()) {
-                o.put("error", "Pack SD 1.5 absent. Copie clip/unet/vae dans Android/data/com.leastudio.app/files/models/sd15/ (environ 1–2 Go). En attendant, utilise Horde.");
+                o.put("error", "Pack SD 1.5 absent.");
                 o.put("modelReady", false);
                 return o.toString();
             }
-            long avail = availableMb();
-            if (avail < 1200) {
-                o.put("error", "Pas assez de RAM libre (" + avail + " Mo). Ferme des apps.");
-                return o.toString();
-            }
             if (!nativeOk) {
-                o.put("error", "lib lea_local / MNN absente. Rebuild l'APK native.");
+                o.put("error", "Moteur MNN absent (rebuild APK native).");
                 o.put("modelReady", true);
                 return o.toString();
             }
-            File dir = new File(ctx.getFilesDir(), "models/sd15");
-            ensureAliases(dir);
-            File out = new File(ctx.getFilesDir(), "local-out.ppm");
-            String res = nativeSd(prompt == null ? "a woman" : prompt, dir.getAbsolutePath(), out.getAbsolutePath());
-            if (res == null || !"OK".equals(res)) {
-                o.put("error", "MNN: " + res);
-                o.put("modelReady", true);
+            if (localBusy) {
+                o.put("pending", true);
+                o.put("note", "déjà en cours");
                 return o.toString();
             }
-            o.put("url", "file://" + out.getAbsolutePath());
-            o.put("note", "Image locale MNN");
-            o.put("modelReady", true);
+            localBusy = true;
+            localJson = "{\"pending\":true,\"note\":\"inférence locale…\"}";
+            final String p = prompt == null ? "a woman" : prompt;
+            new Thread(() -> {
+                try {
+                    File dir = new File(ctx.getFilesDir(), "models/sd15");
+                    ensureAliases(dir);
+                    File out = new File(ctx.getFilesDir(), "local-out-" + System.currentTimeMillis() + ".ppm");
+                    String res = nativeSd(p, dir.getAbsolutePath(), out.getAbsolutePath());
+                    JSONObject r = new JSONObject();
+                    if (res != null && "OK".equals(res) && out.isFile() && out.length() > 100) {
+                        r.put("url", "file://" + out.getAbsolutePath());
+                        r.put("note", "Image locale MNN");
+                        r.put("done", true);
+                    } else {
+                        r.put("error", "MNN: " + res);
+                        r.put("done", true);
+                    }
+                    localJson = r.toString();
+                } catch (Exception e) {
+                    localJson = "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\",\"done\":true}";
+                } finally {
+                    localBusy = false;
+                }
+            }, "lea-sd").start();
+            o.put("pending", true);
+            o.put("note", "Local lancé en arrière-plan (ne ferme pas l'app)");
             return o.toString();
         } catch (Exception e) {
+            localBusy = false;
             return "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
         }
     }
