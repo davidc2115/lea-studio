@@ -303,6 +303,20 @@ function setGenStatus(t) {
   if ($("imgerr")) $("imgerr").textContent = t;
 }
 
+function bodyNegatives(c) {
+  const id = c && c.id;
+  const small = /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe)$/.test(id);
+  const huge = /^(sofia|amelie|fatou|elise|olga|yasmine|priya|myriam|keisha)$/.test(id);
+  if (small) {
+    return "large breasts, huge breasts, heavy breasts, busty, voluptuous, cleavage, 95D, 100E, curvy hourglass, plus-size, chubby";
+  }
+  if (huge) {
+    return "flat chest, small breasts, athletic slim boyish body, plus-size belly";
+  }
+  if (id === "sofia") return "plus-size, chubby, thick arms, soft belly, flat chest";
+  return "child, teen, middle-aged";
+}
+
 async function imageToBase64(src) {
   try {
     const res = await fetch(src);
@@ -355,7 +369,7 @@ async function generatePhoto() {
       }
       setGenStatus("Local : pack ou moteur NCNN absent → Horde");
     }
-    const payload = { prompt };
+    const payload = { prompt, negative: bodyNegatives(c) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
