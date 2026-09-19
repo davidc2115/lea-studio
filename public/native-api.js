@@ -54,6 +54,7 @@
       grokKeys: "",
       imageKeys: "",
       imageProvider: "gemini",
+      imageEngine: "horde",
       geminiImageModel: "auto",
       geminiTextModel: "gemini-3.5-flash-lite",
     });

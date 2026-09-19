@@ -264,6 +264,26 @@ async function generatePhoto() {
   window._leaGenBusy = true;
   setGenStatus("Préparation…");
   try {
+    const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
+    if (engine === "local") {
+      setGenStatus("Local SD 1.5…");
+      if (window.LeaAndroid && window.LeaAndroid.localGenerate) {
+        const raw = window.LeaAndroid.localGenerate(prompt);
+        const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+        if (data && data.url) {
+          const list = extraPhotos();
+          list.unshift(data.url);
+          saveExtra(list.slice(0, 20));
+          setGenStatus(data.note || "Image locale prête");
+          window._leaGenBusy = false;
+          if (state.view === "profile") renderProfile();
+          openFull(data.url);
+          return;
+        }
+        throw new Error(data && data.error ? data.error : "Moteur local indisponible (pack non installé). Repasse sur Horde ou installe le pack SD 1.5.");
+      }
+      throw new Error("Moteur local : pack SD 1.5 non installé sur ce téléphone. Utilise Horde en attendant.");
+    }
     const payload = { prompt };
     // Léa : img2img depuis une photo de la galerie pour coller le visage
     if (c.id === "lea") {
@@ -560,7 +580,13 @@ function renderMemory() {
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Images : AI Horde (SDXL) gratuit, en arrière-plan. Texte : tes clés Gemini.</p>
+    <p style="color:var(--muted);font-size:13px">Chat : clés Gemini. Images : Horde (cloud gratuit) ou Local SD 1.5 (téléphone, pack optionnel).</p>
+    <label>Moteur images</label>
+    <select id="imgengine">
+      <option value="horde">Horde (cloud gratuit, recommandé)</option>
+      <option value="local">Local SD 1.5 (téléphone, pack ~1–2 Go)</option>
+    </select>
+    <p style="color:var(--muted);font-size:13px">Local : meilleur contrôle hors-ligne. Qualité 512×640, chauffe possible. Le pack se télécharge à part, il n’est pas dans l’APK.</p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
@@ -597,8 +623,15 @@ function renderSettings() {
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
     if ($("grok")) $("grok").value = s.settings.grokKeys || "";
+    if ($("imgengine")) $("imgengine").value = s.settings.imageEngine || "horde";
     $("st").textContent = `Clés Gemini : ${s.keys.gemini}`;
     $("st").style.color = "#9dffc2";
+    try {
+      if (window.LeaAndroid && window.LeaAndroid.deviceInfo) {
+        const d = JSON.parse(window.LeaAndroid.deviceInfo());
+        $("st").textContent += " · RAM " + d.ramMb + " Mo · local " + (d.modelReady ? "pack OK" : "pack absent");
+      }
+    } catch (_) {}
   });
   $("save").onclick = async () => {
     const data = await api("/api/settings", {
@@ -610,6 +643,7 @@ function renderSettings() {
         geminiKeys: $("gemini").value,
         grokKeys: $("grok") ? $("grok").value : "",
         imageProvider: "gemini",
+        imageEngine: $("imgengine") ? $("imgengine").value : "horde",
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
         geminiTextModel: $("gemtextmodel") ? $("gemtextmodel").value : "gemini-3.5-flash-lite",
       }),

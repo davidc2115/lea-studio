@@ -20,6 +20,7 @@ public class MainActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         try { s.setAllowFileAccessFromFileURLs(true); } catch (Throwable ignored) {}
         try { s.setAllowUniversalAccessFromFileURLs(true); } catch (Throwable ignored) {}
+        web.addJavascriptInterface(new LeaBridge(this), "LeaAndroid");
         web.setWebViewClient(new WebViewClient());
         web.loadUrl("file:///android_asset/www/index.html");
     }
