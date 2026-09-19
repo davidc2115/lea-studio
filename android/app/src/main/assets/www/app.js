@@ -349,8 +349,8 @@ async function generatePhoto() {
 }
 
 async function pollHordeJob(jobId, host) {
-  for (let i = 0; i < 90; i++) {
-    await new Promise((r) => setTimeout(r, 2500));
+  for (let i = 0; i < 240; i++) {
+    await new Promise((r) => setTimeout(r, 3000));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
       if (!st.done) {
@@ -376,7 +376,7 @@ async function pollHordeJob(jobId, host) {
     }
   }
   window._leaGenBusy = false;
-  setGenStatus("Horde timeout (>3 min). Réessaie.");
+  setGenStatus("Horde timeout (~12 min). Réessaie, file parfois très longue.");
 }
 
 function formatBubble(text) {
@@ -621,7 +621,11 @@ function renderSettings() {
       <option value="horde">Horde (cloud gratuit, recommandé)</option>
       <option value="local">Local SD 1.5 (téléphone, pack ~1–2 Go)</option>
     </select>
-    <p style="color:var(--muted);font-size:13px">Local : meilleur contrôle hors-ligne. Qualité 512×640, chauffe possible. Le pack se télécharge à part, il n’est pas dans l’APK.</p>
+    <p style="color:var(--muted);font-size:13px">Local : pack SD 1.5 (~1–2 Go) à télécharger. Sans pack, Horde prend le relais automatiquement. Horde attend maintenant jusqu’à ~12 min (28 steps).</p>
+    <label>URL pack local (https)</label>
+    <input id="localpackurl" placeholder="https://…/sd15-pack.zip" />
+    <p style="margin-top:8px"><button class="cta" id="dlpack" type="button" style="background:#3a2048">Télécharger le pack local</button></p>
+    <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash Lite</option>
@@ -685,6 +689,18 @@ function renderSettings() {
     });
     $("st").textContent = `OK — ${data.keys.gemini} clé(s) Gemini`;
     $("st").style.color = "#9dffc2";
+  };
+  if ($("dlpack")) $("dlpack").onclick = () => {
+    if (!window.LeaAndroid || !window.LeaAndroid.downloadPack) {
+      $("dlst").textContent = "Téléchargement natif dispo seulement dans l’APK.";
+      return;
+    }
+    const u = ($("localpackurl") && $("localpackurl").value || "").trim();
+    $("dlst").textContent = window.LeaAndroid.downloadPack(u);
+    const tick = setInterval(() => {
+      $("dlst").textContent = window.LeaAndroid.downloadStatus();
+    }, 1000);
+    setTimeout(() => clearInterval(tick), 30 * 60 * 1000);
   };
   $("testimg").onclick = async () => {
     $("st").textContent = "Test de chaque clé × modèles images…";

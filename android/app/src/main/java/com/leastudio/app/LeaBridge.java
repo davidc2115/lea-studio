@@ -5,6 +5,10 @@ import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
 import org.json.JSONObject;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * Pont JS ↔ natif.
@@ -34,6 +38,50 @@ public class LeaBridge {
         } catch (Exception e) {
             return "{\"error\":\"" + e.getMessage() + "\"}";
         }
+    }
+
+    private volatile String dlStatus = "idle";
+
+    @JavascriptInterface
+    public String downloadStatus() {
+        return dlStatus;
+    }
+
+    @JavascriptInterface
+    public String downloadPack(String url) {
+        final String src = url == null ? "" : url.trim();
+        if (src.isEmpty()) return "URL vide";
+        if (!src.startsWith("https://")) return "URL https requise";
+        dlStatus = "téléchargement…";
+        new Thread(() -> {
+            try {
+                File dir = new File(ctx.getFilesDir(), "models/sd15");
+                if (!dir.exists()) dir.mkdirs();
+                File zip = new File(dir, "pack.bin");
+                HttpURLConnection c = (HttpURLConnection) new URL(src).openConnection();
+                c.setConnectTimeout(20000);
+                c.setReadTimeout(60000);
+                c.connect();
+                long total = c.getContentLength();
+                InputStream in = c.getInputStream();
+                FileOutputStream out = new FileOutputStream(zip);
+                byte[] buf = new byte[8192];
+                long n = 0;
+                int r;
+                while ((r = in.read(buf)) > 0) {
+                    out.write(buf, 0, r);
+                    n += r;
+                    if (total > 0) dlStatus = "téléchargement " + (n * 100 / total) + "%";
+                    else dlStatus = "téléchargement " + (n / 1024 / 1024) + " Mo";
+                }
+                out.close();
+                in.close();
+                dlStatus = "pack reçu (" + (n / 1024 / 1024) + " Mo). Renomme en unet.bin / clip.bin / vae_decoder.bin si besoin.";
+            } catch (Exception e) {
+                dlStatus = "échec: " + e.getMessage();
+            }
+        }).start();
+        return "démarré";
     }
 
     @JavascriptInterface

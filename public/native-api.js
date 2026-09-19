@@ -395,7 +395,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         payloads.push({
           prompt: prompt + " ### " + negative,
           params: {
-            width: 512, height: 640, steps: 20, n: 1,
+            width: 512, height: 768, steps: 28, n: 1,
             sampler_name: "k_euler_a", cfg_scale: 5.5,
             denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.28),
           },
@@ -409,7 +409,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       // txt2img fallback — mêmes modèles photo
       payloads.push({
         prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 640, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
+        params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
         nsfw: true, censor_nsfw: false,
         models: photoModels,
         r2: true, slow_workers: true, trusted_workers: false,
