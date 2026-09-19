@@ -188,25 +188,41 @@ function renderProfile() {
   const c = character();
   const extras = extraPhotos();
   const base = (c.gallery && c.gallery.length ? c.gallery : GALLERY.map((g) => g.src)).map((src, i) => ({ src, title: "Photo " + (i + 1) }));
-  const all = base.concat(extras.map((src, i) => ({ src, title: "Générée " + (i + 1) })));
+  const genItems = extras.map((src, i) => ({ src, title: "Générée " + (i + 1), gen: true, idx: i }));
+  const all = base.map((g) => ({ ...g, gen: false })).concat(genItems);
   $("view-profile").innerHTML = `
     <h1>${c.name}</h1>
-    <img class="profile-hero" src="${c.cover || all[0] && all[0].src}" alt="${c.name}" data-full="${c.cover || ""}" />
+    <img class="profile-hero" src="${c.cover || (all[0] && all[0].src) || ""}" alt="${c.name}" data-full="${c.cover || (all[0] && all[0].src) || ""}" />
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
     <p>${c.appearance || ""}</p>
     <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
     <h3>Photos</h3>
     <div class="gallery">
-      ${all.map((g) => `<img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" />`).join("")}
+      ${all.map((g) => g.gen
+        ? `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" /><button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button></div>`
+        : `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" /></div>`
+      ).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario</h3>
-    <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit (Horde gratuit = variable).' : ('Scénario de ' + c.name + ' : tenue / lieu selon son profil.')}</p>
+    <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit. Horde gratuit = visage variable. Tu peux supprimer les générées avec ×.' : ('Scénario de ' + c.name + ' · × pour supprimer une générée.')}</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
     </p>
     <p class="err" id="imgerr"></p>`;
   $("view-profile").onclick = (e) => {
+    const del = e.target.getAttribute("data-del");
+    if (del != null) {
+      e.stopPropagation();
+      const list = extraPhotos();
+      const i = Number(del);
+      if (i >= 0 && i < list.length) {
+        list.splice(i, 1);
+        saveExtra(list);
+        renderProfile();
+      }
+      return;
+    }
     const full = e.target.getAttribute("data-full");
     if (full) openFull(full);
   };
