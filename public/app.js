@@ -46,37 +46,32 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
-    const moods = ["shy blush looking at camera", "timid soft eyes", "wet embarrassed biting lip", "vulnerable quiet gaze"];
-    const poses = [
-      "standing in apartment hallway doorway at night",
-      "just inside the entrance dripping on tiles",
-      "one hand in soaked hair other on doorframe"
-    ];
+    // Prompt COURT : SD/Horde lit surtout le début. Tenue + pluie en premier.
     return [
-      "Ultra photorealistic DSLR photo, 85mm f1.8, natural skin pores, film grain.",
-      "Young French adult woman 18+, FIXED FACE: long straight espresso-brown hair to lower back wet and clinging,",
-      "dark brown almond eyes, soft oval face, small straight nose, full natural lips, fair cool skin,",
-      "slim waist, marked hips, large full natural 95D bust.",
-      "LOCKED OUTFIT: soaked white short crop top clinging to chest, tight wet dark blue skinny jeans.",
-      "LOCKED PLACE: apartment hallway front door night, warm indoor lamp, thunderstorm rain behind her.",
-      "Pose: " + pick(poses) + ". Mood: " + pick(moods) + ".",
-      extra ? ("Extra: " + extra) : "",
-      "Same Léa every time. No blonde hair. No outdoor park. No white dress. Realistic photography only."
+      "wet white crop top, tight wet dark blue skinny jeans, rain soaked clothes clinging to body,",
+      "water droplets on skin and fabric, thunderstorm, apartment doorway at night,",
+      "18 year old French woman, long straight dark espresso brown hair wet to lower back,",
+      "dark brown eyes, oval face, fair skin, large natural 95D bust, slim waist,",
+      "standing in hallway entrance, warm indoor light, rain visible behind door,",
+      "shy expression, photorealistic photo, natural skin,",
+      extra ? extra : "",
+      "NOT dry clothes, NOT black top, NOT long sleeves, NOT outdoor day, NOT blonde"
     ].filter(Boolean).join(" ");
   }
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
   const place = pick(c.places || ["apartment interior at night"]);
-  const moods = ["sexy gaze at camera", "provocative pose", "lingerie look", "teasing smile"];
   return [
-    "Ultra photorealistic DSLR photo, natural skin pores, film grain.",
-    "Adult woman 18+ named " + c.name + ", UNIQUE face (never look like Léa or other girls).",
-    "BODY LOCK: " + (c.body || "") + ".",
-    "LOOK: " + (c.appearance || "") + ". Ethnicity: " + (c.ethnicity || "") + ".",
-    "Scene: " + place + ". Outfit: " + outfit + ". Mood: " + pick(moods) + ".",
+    (c.body || "") + ",",
+    (c.appearance || "") + ",",
+    outfit + ",",
+    place + ",",
+    "18+ adult woman named " + c.name + ", unique face not Lea,",
+    "photorealistic photo, natural skin,",
     extra || "",
-    "Photoreal only. Different face from Léa."
+    "different person from Lea"
   ].filter(Boolean).join(" ");
 }
+
 
 
 
@@ -206,7 +201,7 @@ function renderProfile() {
       ${all.map((g) => `<img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" />`).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario</h3>
-    <p style="color:var(--muted);font-size:13px">Photos liées au scénario de ${c.name} (tenue / lieu / attitude au hasard : sexy, lingerie, provocante…).</p>
+    <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit (Horde gratuit = variable).' : ('Scénario de ' + c.name + ' : tenue / lieu selon son profil.')}</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
