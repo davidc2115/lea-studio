@@ -303,21 +303,43 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     }
 
     if (path === "/api/image" && method === "POST") {
-      const prompt = String(body.prompt || "photorealistic portrait of Lea").slice(0, 900);
-      const negative = "cartoon, anime, illustration, painting, 3d render, deformed, extra fingers, child, watermark, text, blurry, low quality";
+      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1200);
+      const negative = [
+        "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin,",
+        "deformed, extra fingers, bad anatomy, blurry, low quality, jpeg artifacts,",
+        "child, underage, watermark, text, logo, different face, celebrity,",
+        "overexposed, underexposed, weird proportions"
+      ].join(" ");
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       let last = "";
       for (const host of hosts) {
         try {
           const res = await fetch(host + "/generate/async", {
             method: "POST",
-            headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.0:anon" },
+            headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.1:anon" },
             body: JSON.stringify({
               prompt: prompt + " ### " + negative,
-              params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+              params: {
+                width: 576,
+                height: 832,
+                steps: 35,
+                n: 1,
+                sampler_name: "k_dpmpp_2m",
+                cfg_scale: 6.5,
+                karras: true,
+                hires_fix: true,
+                hires_strength: 0.35,
+              },
               nsfw: true,
               censor_nsfw: false,
-              models: ["AlbedoBase XL (SDXL)", "DreamShaper", "Deliberate", "SDXL 1.0"],
+              models: [
+                "ICBINP - I Can't Believe It's Not Photography",
+                "Realistic Vision",
+                "Epic Realism",
+                "DreamShaper XL",
+                "AlbedoBase XL (SDXL)",
+                "Deliberate",
+              ],
               r2: true,
               slow_workers: true,
               trusted_workers: false,
@@ -325,7 +347,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           });
           const data = await res.json();
           if (data.id) return { jobId: data.id, host, pending: true };
-          last = data.message || JSON.stringify(data).slice(0, 120);
+          last = data.message || JSON.stringify(data).slice(0, 160);
         } catch (e) {
           last = e.message || String(e);
         }

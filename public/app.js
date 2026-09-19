@@ -45,19 +45,39 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
+  if (c.id === "lea") {
+    const moods = ["shy blush looking at camera", "timid soft eyes", "wet embarrassed biting lip", "vulnerable quiet gaze"];
+    const poses = [
+      "standing in apartment hallway doorway at night",
+      "just inside the entrance dripping on tiles",
+      "one hand in soaked hair other on doorframe"
+    ];
+    return [
+      "Ultra photorealistic DSLR photo, 85mm f1.8, natural skin pores, film grain.",
+      "Young French adult woman 18+, FIXED FACE: long straight espresso-brown hair to lower back wet and clinging,",
+      "dark brown almond eyes, soft oval face, small straight nose, full natural lips, fair cool skin,",
+      "slim waist, marked hips, large full natural 95D bust.",
+      "LOCKED OUTFIT: soaked white short crop top clinging to chest, tight wet dark blue skinny jeans.",
+      "LOCKED PLACE: apartment hallway front door night, warm indoor lamp, thunderstorm rain behind her.",
+      "Pose: " + pick(poses) + ". Mood: " + pick(moods) + ".",
+      extra ? ("Extra: " + extra) : "",
+      "Same Léa every time. No blonde hair. No outdoor park. No white dress. Realistic photography only."
+    ].filter(Boolean).join(" ");
+  }
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
   const place = pick(c.places || ["apartment interior at night"]);
-  const moods = ["sexy gaze", "provocative pose", "lingerie look", "teasing smile", "confident stance"];
+  const moods = ["sexy gaze at camera", "provocative pose", "lingerie look", "teasing smile"];
   return [
-    "Photorealistic DSLR photo of adult woman 18+ named " + c.name + ".",
-    "CRITICAL BODY (must match exactly): " + (c.body || "") + ". " + (c.appearance || "") + ".",
-    "Ethnicity: " + (c.ethnicity || "") + ".",
-    "Scene: " + place + ". Wearing: " + outfit + ".",
-    "Mood: " + pick(moods) + ".",
+    "Ultra photorealistic DSLR photo, natural skin pores, film grain.",
+    "Adult woman 18+ named " + c.name + ", UNIQUE face (never look like Léa or other girls).",
+    "BODY LOCK: " + (c.body || "") + ".",
+    "LOOK: " + (c.appearance || "") + ". Ethnicity: " + (c.ethnicity || "") + ".",
+    "Scene: " + place + ". Outfit: " + outfit + ". Mood: " + pick(moods) + ".",
     extra || "",
-    "Unique face different from other characters. Realistic skin pores. Not Léa. Not the same person as other girls."
+    "Photoreal only. Different face from Léa."
   ].filter(Boolean).join(" ");
 }
+
 
 
 
