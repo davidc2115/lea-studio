@@ -54,20 +54,39 @@ function buildLeaImagePrompt(extra = "") {
       "tight wet dark blue skinny jeans,",
       "rain water droplets on skin and clothes,",
       "apartment doorway hallway at night thunderstorm,",
+      pick([
+        "shy pose arms crossed wet clothes clinging",
+        "provocative lean in the doorway looking at camera",
+        "sexy hip pop, soaked crop top",
+        "looking down timid then up, wet hair",
+        "hand on the doorframe, teasing smile",
+      ]) + ",",
       "photorealistic DSLR photo natural skin pores,",
       extra || "",
       "NOT dry, NOT studio wall, NOT burgundy top, NOT long sleeves, NOT outdoor forest, NOT plastic skin, NOT CGI"
     ].filter(Boolean).join(" ");
   }
-  let outfit = pick(c.outfits || ["casual home outfit"]);
-  if (c.id === "jade") outfit = "glasses, oversized white shirt, socks, desk books, small chest";
-  const place = pick(c.places || ["apartment interior at night"]);
+  // Tenue = celle du SCÉNARIO (1er outfit). On ne randomise que la pose.
+  let outfit = (c.outfits && c.outfits[0]) || "scenario outfit";
+  const place = (c.places && c.places[0]) || "apartment interior at night";
+  const pose = /jade|lina|hana|mei|sasha/.test(c.id)
+    ? pick(["sitting at a desk with books", "standing shy with arms folded", "reading, glasses on"])
+    : pick([
+    "sexy pose looking at camera",
+    "provocative stance, weight on one hip",
+    "teasing over-the-shoulder look",
+    "sitting, legs crossed, playful",
+    "leaning forward slightly, inviting",
+    "shy but flirty, biting lip",
+    "standing in doorway, hand on frame",
+    "arching back slightly, confident",
+  ]);
   const age = c.age || 21;
   const bodyLock = {
     ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
     aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
     sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
-    jade: "21yo slim French student, youthful, round glasses ON, light freckles, messy brown bun, small A-cup, thin, oversized shirt and socks",
+    jade: "slim young student wearing round glasses, brown bun, freckles, small A-cup chest, thin arms, oversized white shirt fully buttoned, no cleavage, books",
     myriam: "full soft figure, large D breasts, wide hips, NOT skinny",
     chloe: "slim petite, small-medium B-cup, freckles, NOT huge chest",
     nina: "TALL slim Slavic, medium C-cup, long legs, NOT plus-size",
@@ -370,7 +389,7 @@ async function generatePhoto() {
       }
       setGenStatus("Pack poids OK, mais lib MNN absente de l’APK → Horde (le local ne dessine pas encore)");
     }
-    const payload = { prompt, negative: bodyNegatives(c) };
+    const payload = { prompt, negative: bodyNegatives(c), nsfw: !/jade|lina|hana|mei|sasha/.test(c.id) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
@@ -392,17 +411,8 @@ async function generatePhoto() {
         setGenStatus("Horde texte (sans ref)…");
       }
     } else {
-      const cover = (c.cover || ("images/cast/" + c.id + ".jpg"));
-      setGenStatus("Référence " + c.name + "…");
-      const ref = await imageToBase64(cover);
-      if (ref) {
-        payload.source_image = ref;
-        payload.source_processing = "img2img";
-        payload.denoising = c.id === "jade" ? 0.32 : 0.38;
-        setGenStatus("Horde img2img 28 steps (physique)…");
-      } else {
-        setGenStatus("Horde 28 steps…");
-      }
+      // Pas d'img2img sur les covers Horde (elles faussent le physique).
+      setGenStatus("Horde 40 steps, descriptif seul…");
     }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");

@@ -396,11 +396,11 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         payloads.push({
           prompt: prompt + " ### " + negative,
           params: {
-            width: 512, height: 768, steps: 28, n: 1,
-            sampler_name: "k_euler_a", cfg_scale: 5.5,
+            width: 512, height: 768, steps: 40, n: 1,
+            sampler_name: "k_euler_a", cfg_scale: 7,
             denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.28),
           },
-          nsfw: true, censor_nsfw: false,
+          nsfw: body.nsfw !== false, censor_nsfw: false,
           models: photoModels,
           r2: true, slow_workers: true, trusted_workers: false,
           source_image: src,
@@ -410,8 +410,8 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       // txt2img fallback — mêmes modèles photo
       payloads.push({
         prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 6 },
-        nsfw: true, censor_nsfw: false,
+        params: { width: 512, height: 768, steps: 40, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        nsfw: body.nsfw !== false, censor_nsfw: false,
         models: photoModels,
         r2: true, slow_workers: true, trusted_workers: false,
       });
