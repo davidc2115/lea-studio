@@ -371,12 +371,14 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
 
             if (path === "/api/image" && method === "POST") {
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1000);
+      const extraNeg = String(body.negative || "");
       const negative = [
         "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin, airbrushed,",
         "deformed, extra fingers, bad anatomy, blurry, low quality, watermark, text,",
-        "child, celebrity, short hair, blonde, flat chest, dry clothes, long sleeves,",
-        "studio seamless backdrop, plain white wall only, outdoor forest, different person"
-      ].join(" ");
+        "child, celebrity,",
+        extraNeg,
+        "studio seamless backdrop, plain white wall only"
+      ].filter(Boolean).join(" ");
       const hosts = ["https://stablehorde.net/api/v2"];
       let last = "";
       const src = body.source_image ? String(body.source_image).slice(0, 4_500_000) : null;

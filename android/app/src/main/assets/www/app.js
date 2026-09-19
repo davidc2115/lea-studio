@@ -66,7 +66,7 @@ function buildLeaImagePrompt(extra = "") {
     ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
     aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
     sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
-    jade: "VERY THIN petite bookish woman, FLAT small A-cup chest, almost no cleavage, brown bun, glasses, freckles, NOT busty, NOT large breasts, NOT curvy, NOT hourglass",
+    jade: "(flat chest:1.4), (small breasts:1.4), A-cup, thin petite bookish, brown bun, glasses, freckles, oversized shirt, no cleavage",
     myriam: "full soft figure, large D breasts, wide hips, NOT skinny",
     chloe: "slim petite, small-medium B-cup, freckles, NOT huge chest",
     nina: "TALL slim Slavic, medium C-cup, long legs, NOT plus-size",
@@ -356,6 +356,10 @@ async function generatePhoto() {
       setGenStatus("Pack local absent → Horde (morphologie du perso)…");
     }
     const payload = { prompt };
+    const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
+    const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
+    if (small) payload.negative = "large breasts, huge breasts, huge cleavage, 95D, 100E, voluptuous chest, busty, hanging breasts";
+    if (busty) payload.negative = "flat chest, small breasts, androgynous body";
     // Léa : img2img depuis une photo de la galerie pour coller le visage
     if (c.id === "lea") {
       setGenStatus("Référence visage Léa…");
