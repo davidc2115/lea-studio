@@ -62,14 +62,29 @@ function buildLeaImagePrompt(extra = "") {
   const outfit = pick(c.outfits || ["sexy casual outfit"]);
   const place = pick(c.places || ["apartment interior at night"]);
   const age = c.age || 21;
+  const bodyLock = {
+    sofia: "VOLUPTUOUS hourglass, extremely LARGE heavy 100E breasts, tiny cinched waist, wide hips, curvy Italian, NOT slim, NOT athletic, NOT small chest",
+    amelie: "CHUBBY plus-size soft belly, very LARGE heavy breasts, round cheeks, NOT slim",
+    aya: "ATHLETIC lean muscle, SMALL firm A-B breasts, NOT large chest",
+    jade: "VERY THIN petite, FLAT small A-cup, glasses, NOT curvy",
+    bruna: "tiny waist HUGE round Brazilian butt, NOT skinny hips",
+    elise: "very LARGE heavy breasts, soft French body",
+    fatou: "tall powerful hips, extremely LARGE heavy breasts",
+    lina: "petite Korean, VERY small chest, NOT busty",
+    mei: "thin Chinese, flat chest, NOT curvy",
+    olga: "plump Russian, heavy large breasts, full hips",
+    keisha: "dark skin, large breasts, very round butt",
+    camila: "thick round butt, slim waist, Colombian curves",
+    myriam: "full soft body, large D breasts, wide hips",
+    ines: "golden tan, wide hips, medium C breasts, NOT tiny",
+  }[c.id] || (c.body || "");
   return [
-    age + " year old woman who looks exactly " + age + ",",
-    "face of a " + age + " year old, not older, not mid-thirties,",
-    (c.body || "") + ",",
+    bodyLock + ",",
+    age + " year old woman who looks " + age + ", not older,",
     (c.appearance || "") + ",",
     outfit + ",",
     place + ",",
-    "photorealistic unique face not Lea, adult " + age + ",",
+    "photorealistic unique face, adult " + age + ",",
     extra || ""
   ].filter(Boolean).join(" ");
 }
@@ -285,22 +300,24 @@ async function generatePhoto() {
     const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
     if (engine === "local") {
       setGenStatus("Local SD 1.5…");
+      let localOk = false;
       if (window.LeaAndroid && window.LeaAndroid.localGenerate) {
-        const raw = window.LeaAndroid.localGenerate(prompt);
-        const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-        if (data && data.url) {
-          const list = extraPhotos();
-          list.unshift(data.url);
-          saveExtra(list.slice(0, 20));
-          setGenStatus(data.note || "Image locale prête");
-          window._leaGenBusy = false;
-          if (state.view === "profile") renderProfile();
-          openFull(data.url);
-          return;
-        }
-        throw new Error(data && data.error ? data.error : "Moteur local indisponible (pack non installé). Repasse sur Horde ou installe le pack SD 1.5.");
+        try {
+          const raw = window.LeaAndroid.localGenerate(prompt);
+          const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+          if (data && data.url) {
+            const list = extraPhotos();
+            list.unshift(data.url);
+            saveExtra(list.slice(0, 20));
+            setGenStatus(data.note || "Image locale prête");
+            window._leaGenBusy = false;
+            if (state.view === "profile") renderProfile();
+            openFull(data.url);
+            return;
+          }
+        } catch (_) {}
       }
-      throw new Error("Moteur local : pack SD 1.5 non installé sur ce téléphone. Utilise Horde en attendant.");
+      setGenStatus("Pack local absent → Horde (morphologie du perso)…");
     }
     const payload = { prompt };
     // Léa : img2img depuis une photo de la galerie pour coller le visage
