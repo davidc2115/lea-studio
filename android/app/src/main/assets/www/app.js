@@ -48,6 +48,7 @@ function buildLeaImagePrompt(extra = "") {
   if (c.id === "lea") {
     // Très court + ordre strict. Img2img part d'une photo ORAGE déjà trempée.
     return [
+      "21 year old adult woman, clearly adult face,",
       "keep the exact same face and body,",
       "soaked wet white short crop top clinging to large breasts,",
       "tight wet dark blue skinny jeans,",
@@ -207,6 +208,11 @@ function renderProfile() {
     <h3 style="margin-top:18px">Photo du scénario</h3>
     <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit. Horde gratuit = visage variable. Tu peux supprimer les générées avec ×.' : ('Scénario de ' + c.name + ' · × pour supprimer une générée.')}</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
+    <label style="display:block;margin-top:10px">Moteur images</label>
+    <select id="imgengine-profile">
+      <option value="horde">Horde (cloud gratuit)</option>
+      <option value="local">Local SD 1.5 (pack téléphone)</option>
+    </select>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
     </p>
@@ -227,6 +233,15 @@ function renderProfile() {
     const full = e.target.getAttribute("data-full");
     if (full) openFull(full);
   };
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    if ($("imgengine-profile")) $("imgengine-profile").value = st.imageEngine || "horde";
+    $("imgengine-profile").onchange = () => {
+      const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+      cur.imageEngine = $("imgengine-profile").value;
+      localStorage.setItem("lea.settings", JSON.stringify(cur));
+    };
+  } catch (_) {}
   $("genimg").onclick = generatePhoto;
 }
 
