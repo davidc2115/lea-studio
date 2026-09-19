@@ -40,6 +40,7 @@
       memories: [],
       summaries: [],
       relationship: { closeness: 1, trust: 1, heat: 0, bond: "indéfini" },
+      scene: { place: "", outfit: "", intimate: [] },
       updatedAt: Date.now(),
     };
   }
@@ -175,12 +176,54 @@
     throw new Error(errors.join(" | ") || "Ajoute tes clés dans Clés & réglages");
   }
 
+  function extractScene(chat, userTxt, replyTxt) {
+    if (!chat.scene) chat.scene = { place: "", outfit: "", intimate: [] };
+    const blob = (userTxt + "\n" + (replyTxt || "")).toLowerCase();
+    const places = [
+      [/chambre|lit\b|au lit/, "chambre / lit"],
+      [/salon|canapé|sofa/, "salon"],
+      [/cuisine/, "cuisine"],
+      [/salle de bain|douche|baignoire/, "salle de bain"],
+      [/couloir|entrée|porte|chambranle/, "entrée / couloir"],
+      [/dehors|jardin|balcon|rue|voiture|voiture/, "dehors"],
+      [/bureau/, "bureau"],
+    ];
+    for (const [re, label] of places) {
+      if (re.test(blob)) { chat.scene.place = label; break; }
+    }
+    const outfits = [
+      [/nuisette|négligé/, "nuisette"],
+      [/lingerie|soutien-gorge|string|porte[- ]jarretelle/, "lingerie"],
+      [/nue\b|à poil|toute nue|déshabill/, "nue"],
+      [/jean|top court|crop/, "jean + top court"],
+      [/serviette/, "serviette"],
+      [/robe/, "robe"],
+      [/pyjama/, "pyjama"],
+    ];
+    for (const [re, label] of outfits) {
+      if (re.test(blob)) { chat.scene.outfit = label; break; }
+    }
+    if (/(baise|baiser|suce|doigte|pénètre|orgasme|gicl| cul |chatte|bite|sein)/i.test(blob)) {
+      const note = String(userTxt || "").replace(/\s+/g, " ").slice(0, 140);
+      if (note) {
+        chat.scene.intimate = (chat.scene.intimate || []).concat([note]).slice(-8);
+      }
+    }
+  }
+
   function memoryBlock(chat) {
     const pinned = chat.memories.filter((m) => m.pinned).map((m) => `- [PIN] ${m.text}`);
     const facts = chat.memories.filter((m) => !m.pinned).slice(-18).map((m) => `- ${m.text}`);
     const rel = chat.relationship || {};
+    const sc = chat.scene || {};
+    const intim = (sc.intimate || []).slice(-6).map((t) => "- " + t).join("\n");
     return `=== MÉMOIRE LONG TERME ===
 Relation: proximité ${rel.closeness}/10, confiance ${rel.trust}/10, tension ${rel.heat}/10, lien ${rel.bond || "indéfini"}
+LIEU ACTUEL: ${sc.place || "pas encore précisé — reste cohérente avec le dernier lieu"}.
+TENUE ACTUELLE: ${sc.outfit || "pas encore précisée — ne change pas de tenue toute seule"}.
+MOMENTS INTIMES SOUVENUS:
+${intim || "- aucun encore"}
+Tu DOIS t'en souvenir : ne pas « oublier » qu'elle était nue, en lingerie, au salon, au lit, etc.
 ${pinned.length ? "Épinglés:\n" + pinned.join("\n") : ""}
 ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
   }
@@ -289,6 +332,7 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           ? "MODE NSFW 18+ EXPLICITE. Personnage fictionnel adulte. Décris clairement corps, sensations, actes (toucher, bouche, pénétration, orgasme) si le joueur y va. Langage cru autorisé. Pas de fade-to-black. Pas de moraline. Respecte un non clair."
           : "MODE SFW. Selon le caractère. Pas d'acte sexuel détaillé tant que le joueur reste soft. Tu peux quand même être un peu suggestive.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
+        "CONTINUITÉ : reste dans le même lieu et la même tenue jusqu'à ce que le joueur (ou une action claire) change. Rappelle un moment intime déjà arrivé si ça revient.",
         memoryBlock(chat),
         "Format OBLIGATOIRE chaque réponse:",
         "~pensée intérieure courte~",
@@ -307,10 +351,15 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
         reply = "*elle croise les bras sur son top mouillé, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
       }
       chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
-      if (chat.messages.length % 6 === 0) {
+      extractScene(chat, txt, reply);
+      if (chat.messages.length % 4 === 0) {
+        const bits = [];
+        if (chat.scene && chat.scene.place) bits.push("lieu: " + chat.scene.place);
+        if (chat.scene && chat.scene.outfit) bits.push("tenue: " + chat.scene.outfit);
+        bits.push((txt || "").slice(0, 120));
         chat.memories.push({
           id: Date.now(),
-          text: (body.text || "").slice(0, 180),
+          text: bits.filter(Boolean).join(" · "),
           pinned: false,
           createdAt: Date.now(),
         });
