@@ -45,19 +45,21 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
-  const outfit = pick(c.outfits || ["casual sexy outfit"]);
-  const place = pick(c.places || ["apartment interior"]);
-  const moods = ["sexy gaze at camera", "provocative pose", "shy blush", "lingerie look", "teasing smile"];
+  const outfit = pick(c.outfits || ["sexy casual outfit"]);
+  const place = pick(c.places || ["apartment interior at night"]);
+  const moods = ["sexy gaze", "provocative pose", "lingerie look", "teasing smile", "confident stance"];
   return [
-    "Photorealistic adult woman 18+ named " + c.name + ".",
-    "Look: " + (c.appearance || "") + ".",
-    "Scene: " + place + ".",
-    "Wearing: " + outfit + ".",
+    "Photorealistic DSLR photo of adult woman 18+ named " + c.name + ".",
+    "CRITICAL BODY (must match exactly): " + (c.body || "") + ". " + (c.appearance || "") + ".",
+    "Ethnicity: " + (c.ethnicity || "") + ".",
+    "Scene: " + place + ". Wearing: " + outfit + ".",
     "Mood: " + pick(moods) + ".",
-    extra ? extra : "",
-    "Same unique face. Realistic photo, not illustration."
+    extra || "",
+    "Unique face different from other characters. Realistic skin pores. Not Léa. Not the same person as other girls."
   ].filter(Boolean).join(" ");
 }
+
+
 
 const GALLERY = [
   { src: "images/lea-portrait.jpg", title: "Portrait" },
@@ -122,7 +124,7 @@ function renderDiscover() {
         <div class="body">
           <strong>${c.name}</strong>
           <div style="color:var(--muted);font-size:13px">${c.title || ""}</div>
-          <div class="tags">${(c.tags || []).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
+          <div class="tags">${[c.body, c.ethnicity].filter(Boolean).concat(c.tags || []).slice(0,6).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
           <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
           <button class="cta start-chat" data-id="${c.id}">Discuter</button>
           <button class="cta open-profile" data-id="${c.id}" style="margin-left:8px;background:#3a2048">Profil</button>
