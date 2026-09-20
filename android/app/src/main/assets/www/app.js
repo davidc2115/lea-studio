@@ -172,7 +172,7 @@ function openFull(src) {
   if (btn) {
     btn.onclick = (e) => {
       e.stopPropagation();
-      localStorage.setItem("lea.chatBg", src);
+      localStorage.setItem(chatBgKey(state.current || "lea"), src);
       btn.textContent = "Fond du chat ✓";
     };
     btn.textContent = "Utiliser comme fond";
@@ -316,13 +316,19 @@ function renderDiscover() {
   };
 }
 
+function hasStartedChat(id) {
+  const chat = loadChat(id);
+  return !!(chat && Array.isArray(chat.messages) && chat.messages.length > 0);
+}
+
 function renderChats() {
-  const list = state.characters.length ? state.characters : [FALLBACK_LEA];
-  const chat = state.chat || {};
+  const all = state.characters.length ? state.characters : [FALLBACK_LEA];
+  const list = all.filter((c) => hasStartedChat(c.id));
   $("view-chats").innerHTML = `
     <h1>Chats</h1>
-    <p style="color:var(--muted);font-size:13px">Reprends une discussion en cours.</p>
-    ${list.map((c) => `
+    <p style="color:var(--muted);font-size:13px">Uniquement les conversations déjà commencées.</p>
+    ${list.length
+      ? list.map((c) => `
       <article class="card" style="margin-top:12px">
         <div class="body" style="display:flex;gap:12px;align-items:center">
           <img src="${c.cover || "images/lea-portrait.jpg"}" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover" />
@@ -332,7 +338,8 @@ function renderChats() {
           </div>
           <button class="cta resume-chat" data-id="${c.id}">Ouvrir</button>
         </div>
-      </article>`).join("")}`;
+      </article>`).join("")
+      : `<p style="color:var(--muted);margin-top:24px;text-align:center">Aucune conversation pour l’instant.<br/>Ouvre un personnage dans Découvrir pour commencer.</p>`}`;
   $("view-chats").onclick = (e) => {
     const b = e.target.closest(".resume-chat");
     if (!b) return;
@@ -654,9 +661,48 @@ function paintMessages() {
   }
 }
 
-function chatBg() {
-  return localStorage.getItem("lea.chatBg") || "images/lea-orage-dentelle.jpg";
+/** Fonds autorisés = uniquement images de CE personnage (cover + galerie + générées). */
+function characterBgOptions(c) {
+  const char = c || character();
+  const id = char.id || "lea";
+  const opts = [];
+  const seen = new Set();
+  const push = (src, title) => {
+    if (!src || seen.has(src)) return;
+    seen.add(src);
+    opts.push({ src, title: title || "Photo" });
+  };
+  push(char.cover, "Profil");
+  const gal = char.gallery && char.gallery.length
+    ? char.gallery
+    : (id === "lea" ? GALLERY.map((g) => g.src) : []);
+  (gal || []).forEach((src, i) => push(src, "Photo " + (i + 1)));
+  extraPhotos(id).forEach((src, i) => {
+    const resolved = resolvePhotoSrc(src) || src;
+    if (resolved) push(resolved, "Générée " + (i + 1));
+  });
+  return opts;
 }
+
+function chatBgKey(id) {
+  return "lea.chatBg." + (id || state.current || "lea");
+}
+
+function chatBg(id) {
+  const cid = id || state.current || "lea";
+  const c = (state.characters || []).find((x) => x.id === cid) || character();
+  const opts = characterBgOptions(c);
+  const allowed = new Set(opts.map((o) => o.src));
+  let saved = localStorage.getItem(chatBgKey(cid));
+  // Ancien fond global Léa : ne l’appliquer qu’à Léa
+  if (!saved && cid === "lea") {
+    const legacy = localStorage.getItem("lea.chatBg");
+    if (legacy && allowed.has(legacy)) saved = legacy;
+  }
+  if (saved && allowed.has(saved)) return saved;
+  return (opts[0] && opts[0].src) || c.cover || "images/lea-portrait.jpg";
+}
+
 function applyChatLook() {
   const bub = Number(localStorage.getItem("lea.bub") || 82);
   const bgv = Number(localStorage.getItem("lea.bgv") || 38);
@@ -669,9 +715,8 @@ function applyChatBg() { applyChatLook(); }
 
 function renderChat() {
   const c = character();
-  const extras = extraPhotos().map((src, i) => ({ src: resolvePhotoSrc(src) || src, title: "Générée " + (i + 1) })).filter((g) => g.src);
-  const bgs = GALLERY.concat(extras);
-  const current = chatBg();
+  const bgs = characterBgOptions(c);
+  const current = chatBg(c.id);
   $("view-chat").innerHTML = `
     <div class="chat-full">
       <div class="chat-bg" style="background-image:url('${current}')"></div>
@@ -739,7 +784,7 @@ function renderChat() {
   $("sheet").onclick = (e) => {
     const bg = e.target.getAttribute("data-bg");
     if (!bg) return;
-    localStorage.setItem("lea.chatBg", bg);
+    localStorage.setItem(chatBgKey(c.id), bg);
     document.querySelectorAll(".bg-pick img").forEach((img) => img.classList.toggle("on", img.getAttribute("data-bg") === bg));
     applyChatBg();
   };
