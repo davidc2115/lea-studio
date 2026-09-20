@@ -559,29 +559,14 @@ async function generatePhoto() {
   try {
     const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
     if (engine === "local") {
-      setGenStatus("Local SD 1.5…");
-      let localOk = false;
-      if (window.LeaAndroid && window.LeaAndroid.localGenerate) {
-        try {
-          const raw = window.LeaAndroid.localGenerate(prompt);
-          const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-          if (data && data.url) {
-            const stored = await addToGallery(data.url, c.id);
-            setGenStatus(data.note || "Image locale prête");
-            window._leaGenBusy = false;
-            if (state.view === "profile") renderProfile();
-            openFull(resolvePhotoSrc(stored) || stored);
-            return;
-          }
-          if (data && data.pending) {
-            setGenStatus(data.note || "Local en arrière-plan…");
-            pollLocalJob(c.id);
-            return;
-          }
-          if (data && data.error) setGenStatus(data.error);
-        } catch (_) {}
-      }
-      setGenStatus("Local indisponible → Horde");
+      // MNN natif provoque un crash process (SIGSEGV/OOM) non rattrapable.
+      setGenStatus("Local MNN désactivé (crash) → bascule Horde…");
+      try {
+        const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        st.imageEngine = "horde";
+        localStorage.setItem("lea.settings", JSON.stringify(st));
+        if ($("imgengine-profile")) $("imgengine-profile").value = "horde";
+      } catch (_) {}
     }
     const payload = { prompt, negative: bodyNegatives(c), nsfw: !/jade|lina|hana|mei|sasha/.test(c.id) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
