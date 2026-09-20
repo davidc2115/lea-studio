@@ -579,66 +579,105 @@ public class LeaBridge {
         return out;
     }
 
-    /**
-     * Télécharge un modèle SD 1.5 quantifié GGUF (environ 2 Go) vers models/sdcpp/.
-     * URL par défaut : HuggingFace second-state / alternative petite.
-     */
-    @JavascriptInterface
     public String downloadSdCppModel(String url) {
-        final String u = (url == null || url.isEmpty())
-            ? "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-Q4_0.gguf"
-            : url;
+        // URLs valides (le nom Q4_0 sans "pruned-emaonly" renvoyait 404)
+        final String[] fallbacks = new String[] {
+            (url != null && !url.isEmpty()) ? url : null,
+            "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-pruned-emaonly-Q4_0.gguf",
+            "https://huggingface.co/kostakoff/stable-diffusion-v1-5-GGUF/resolve/main/v1-5-pruned_Q4_0.gguf",
+            "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors"
+        };
         new Thread(() -> {
-            try {
-                dlStatus = "sd.cpp modèle : démarrage…";
-                File dir = new File(ctx.getFilesDir(), "models/sdcpp");
-                if (!dir.exists()) dir.mkdirs();
-                String name = u.substring(u.lastIndexOf('/') + 1);
-                if (name.isEmpty() || !name.contains(".")) name = "model.gguf";
-                File out = new File(dir, name);
-                File tmp = new File(dir, name + ".part");
-                HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
-                c.setConnectTimeout(30000);
-                c.setReadTimeout(600000);
-                c.setInstanceFollowRedirects(true);
-                c.connect();
-                int code = c.getResponseCode();
-                if (code >= 400) {
-                    dlStatus = "Erreur HTTP " + code + " modèle sd.cpp";
-                    return;
-                }
-                long total = c.getContentLengthLong();
-                InputStream in = c.getInputStream();
-                FileOutputStream fos = new FileOutputStream(tmp);
-                byte[] buf = new byte[65536];
-                long got = 0;
-                int r;
-                while ((r = in.read(buf)) > 0) {
-                    fos.write(buf, 0, r);
-                    got += r;
-                    if (total > 0) {
-                        dlStatus = "sd.cpp modèle " + (got * 100 / total) + "% (" + (got / 1048576) + " Mo)";
-                    } else {
-                        dlStatus = "sd.cpp modèle " + (got / 1048576) + " Mo…";
+            File dir = new File(ctx.getFilesDir(), "models/sdcpp");
+            if (!dir.exists()) dir.mkdirs();
+            Exception last = null;
+            for (String u : fallbacks) {
+                if (u == null) continue;
+                try {
+                    dlStatus = "sd.cpp : " + u.substring(Math.max(0, u.lastIndexOf('/') + 1));
+                    String name = u.substring(u.lastIndexOf('/') + 1);
+                    if (name.isEmpty() || !name.contains(".")) name = "model.gguf";
+                    // query params strip
+                    int q = name.indexOf('?');
+                    if (q > 0) name = name.substring(0, q);
+                    File out = new File(dir, name);
+                    if (out.isFile() && out.length() > 50_000_000L) {
+                        dlStatus = "Déjà présent : " + name + " (" + (out.length() / 1048576) + " Mo)";
+                        return;
                     }
+                    File tmp = new File(dir, name + ".part");
+                    HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
+                    c.setConnectTimeout(30000);
+                    c.setReadTimeout(600000);
+                    c.setInstanceFollowRedirects(true);
+                    c.setRequestProperty("User-Agent", "LeaStudio/1.0");
+                    c.connect();
+                    int code = c.getResponseCode();
+                    // suivre redirections manuelles si besoin
+                    int redirects = 0;
+                    while (code >= 300 && code < 400 && redirects < 5) {
+                        String loc = c.getHeaderField("Location");
+                        c.disconnect();
+                        if (loc == null) break;
+                        c = (HttpURLConnection) new URL(loc).openConnection();
+                        c.setConnectTimeout(30000);
+                        c.setReadTimeout(600000);
+                        c.setInstanceFollowRedirects(true);
+                        c.setRequestProperty("User-Agent", "LeaStudio/1.0");
+                        c.connect();
+                        code = c.getResponseCode();
+                        redirects++;
+                    }
+                    if (code == 404) {
+                        dlStatus = "404 sur " + name + " — essai suivant…";
+                        c.disconnect();
+                        continue;
+                    }
+                    if (code >= 400) {
+                        dlStatus = "HTTP " + code + " — " + name;
+                        c.disconnect();
+                        continue;
+                    }
+                    long total = c.getContentLengthLong();
+                    InputStream in = c.getInputStream();
+                    FileOutputStream fos = new FileOutputStream(tmp);
+                    byte[] buf = new byte[65536];
+                    long got = 0;
+                    int r;
+                    while ((r = in.read(buf)) > 0) {
+                        fos.write(buf, 0, r);
+                        got += r;
+                        if (total > 0) {
+                            dlStatus = "sd.cpp " + (got * 100 / total) + "% · " + (got / 1048576) + " Mo / " + (total / 1048576) + " Mo";
+                        } else {
+                            dlStatus = "sd.cpp " + (got / 1048576) + " Mo…";
+                        }
+                    }
+                    fos.close();
+                    in.close();
+                    c.disconnect();
+                    if (out.exists()) out.delete();
+                    if (!tmp.renameTo(out)) {
+                        // copy fallback
+                        java.nio.file.Files.move(tmp.toPath(), out.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    if (out.length() < 10_000_000L) {
+                        out.delete();
+                        dlStatus = "Fichier trop petit, URL invalide — essai suivant…";
+                        continue;
+                    }
+                    dlStatus = "Modèle OK : " + out.getName() + " (" + (out.length() / 1048576) + " Mo)";
+                    return;
+                } catch (Exception e) {
+                    last = e;
+                    dlStatus = "Échec : " + e.getMessage() + " — essai suivant…";
                 }
-                fos.close();
-                in.close();
-                if (out.exists()) out.delete();
-                tmp.renameTo(out);
-                dlStatus = "Modèle OK : " + out.getName() + " (" + (out.length() / 1048576) + " Mo)";
-            } catch (Exception e) {
-                dlStatus = "Échec modèle sd.cpp : " + e.getMessage();
             }
+            dlStatus = "Échec téléchargement modèle" + (last != null ? (" : " + last.getMessage()) : "");
         }, "lea-sd-dl").start();
-        return "Téléchargement modèle sd.cpp lancé…";
+        return "Téléchargement modèle sd.cpp (plusieurs miroirs)…";
     }
 
-    /**
-     * Lance txt2img via le binaire stable-diffusion.cpp.
-     * Async : suivre avec sdCppPoll().
-     */
-    @JavascriptInterface
     public String sdCppGenerate(String prompt) {
         final String p = prompt == null ? "a woman" : prompt;
         if (sdBusy) return "{\"pending\":true,\"note\":\"déjà en cours\"}";
