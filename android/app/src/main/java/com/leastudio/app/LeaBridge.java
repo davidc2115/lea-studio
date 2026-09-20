@@ -336,12 +336,13 @@ public class LeaBridge {
                 JSONObject body = new JSONObject();
                 body.put("prompt", p);
                 body.put("negative_prompt", "child, teen, underage, cartoon, anime, deformed, blurry, low quality");
-                body.put("steps", 20);
-                body.put("cfg", 7.5);
+                // Qualité : 512 (pas 256). Sur NPU, la taille doit matcher le modèle chargé.
+                body.put("steps", 28);
+                body.put("cfg", 7.0);
                 body.put("width", 512);
-                body.put("height", 512);
+                body.put("height", 768);
                 body.put("size", 512);
-                body.put("scheduler", "euler_a");
+                body.put("scheduler", "dpm_karras");
                 byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
 
                 HttpURLConnection post = (HttpURLConnection) new URL("http://127.0.0.1:8081/generate").openConnection();
@@ -671,9 +672,9 @@ public class LeaBridge {
                     "-m", model.getAbsolutePath(),
                     "-p", p,
                     "--negative-prompt", "child, teen, underage, cartoon, deformed, blurry, low quality",
-                    "-H", "512",
+                    "-H", "640",
                     "-W", "512",
-                    "--steps", "15",
+                    "--steps", "20",
                     "--cfg-scale", "7",
                     "--sampling-method", "euler_a",
                     "-o", outPng.getAbsolutePath(),

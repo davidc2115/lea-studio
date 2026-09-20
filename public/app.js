@@ -1168,8 +1168,8 @@ function renderSettings() {
     </select>
     <p style="color:var(--muted);font-size:13px">
       <b>Horde</b> : cloud gratuit.<br/>
-      <b>Local Dream</b> : 1) ouvre Local Dream 2) charge un modèle (API :8081 démarre alors) 3) reviens ici et Génère. Pas de bascule Horde auto.<br/>
-      <b>SD.cpp</b> : moteur natif pas encore dans cet APK.
+      <b>Local Dream</b> : charge un modèle, taille <b>512 ou plus</b> (évite 256 = flou). API :8081 après chargement.<br/>
+      <b>SD.cpp</b> : binaire CI + modèle GGUF (bouton Pack).
     </p>
     <p style="margin-top:8px">
       <button class="cta" id="open-ld-settings" type="button" style="background:#3a2048">Ouvrir / installer Local Dream</button>
