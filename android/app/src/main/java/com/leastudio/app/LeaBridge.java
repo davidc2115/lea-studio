@@ -484,35 +484,274 @@ public class LeaBridge {
         }
     }
 
-    /** Statut pack stable-diffusion.cpp (GGUF dans filesDir/models/sdcpp/). */
+    // —— stable-diffusion.cpp (binaire CLI extrait des assets) ——
+    private volatile boolean sdBusy = false;
+    private volatile String sdJson = "{\"pending\":false}";
+
     @JavascriptInterface
     public String sdCppStatus() {
         try {
+            File bin = new File(ctx.getFilesDir(), "bin/sd");
             File dir = new File(ctx.getFilesDir(), "models/sdcpp");
-            File[] files = dir.isDirectory() ? dir.listFiles() : null;
-            long total = 0;
-            int n = 0;
-            if (files != null) {
-                for (File f : files) {
-                    if (f.isFile() && (f.getName().endsWith(".gguf") || f.getName().endsWith(".safetensors") || f.getName().endsWith(".ckpt"))) {
-                        total += f.length();
-                        n++;
+            File model = findSdModel(dir);
+            boolean hasAsset = false;
+            try {
+                String[] list = ctx.getAssets().list("native");
+                if (list != null) {
+                    for (String s : list) {
+                        if (s.startsWith("sd")) hasAsset = true;
                     }
                 }
-            }
+            } catch (Exception ignored) {}
             JSONObject o = new JSONObject();
-            o.put("ready", n > 0 && total > 50_000_000L);
-            o.put("files", n);
-            o.put("sizeMb", total / (1024 * 1024));
+            o.put("native", bin.isFile() || hasAsset);
+            o.put("binary", bin.isFile());
+            o.put("binarySize", bin.isFile() ? bin.length() : 0);
+            o.put("ready", model != null && model.length() > 30_000_000L);
+            o.put("model", model != null ? model.getName() : "");
+            o.put("modelMb", model != null ? model.length() / (1024 * 1024) : 0);
             o.put("path", dir.getAbsolutePath());
-            o.put("native", false); // lib sd.cpp pas encore liée dans ce build
-            o.put("note", n > 0
-                ? "Pack détecté. Moteur sd.cpp natif en cours d'intégration — utilise Local Dream ou Horde pour générer."
-                : "Pas de modèle GGUF. Télécharge un SD 1.5 quantifié (ex. via Local Dream) ou utilise Horde.");
+            if (!(bin.isFile() || hasAsset)) {
+                o.put("note", "Binaire sd absent de l'APK (rebuild avec étape CI sd.cpp).");
+            } else if (model == null) {
+                o.put("note", "Binaire OK. Télécharge un modèle GGUF/safetensors (bouton pack SD).");
+            } else {
+                o.put("note", "Prêt : " + model.getName());
+            }
             return o.toString();
         } catch (Exception e) {
-            return "{\"ready\":false,\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
+            return "{\"ready\":false,\"native\":false,\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
         }
+    }
+
+    @JavascriptInterface
+    public String sdCppPoll() {
+        return sdJson;
+    }
+
+    private File findSdModel(File dir) {
+        if (dir == null || !dir.isDirectory()) return null;
+        File[] files = dir.listFiles();
+        if (files == null) return null;
+        File best = null;
+        for (File f : files) {
+            if (!f.isFile()) continue;
+            String n = f.getName().toLowerCase();
+            if (!(n.endsWith(".gguf") || n.endsWith(".safetensors") || n.endsWith(".ckpt"))) continue;
+            if (f.length() < 30_000_000L) continue;
+            if (best == null || f.length() > best.length()) best = f;
+        }
+        return best;
+    }
+
+    /** Extrait assets/native/sd-arm64 → filesDir/bin/sd */
+    private File ensureSdBinary() throws Exception {
+        File dir = new File(ctx.getFilesDir(), "bin");
+        if (!dir.exists()) dir.mkdirs();
+        File out = new File(dir, "sd");
+        if (out.isFile() && out.length() > 100_000 && out.canExecute()) return out;
+
+        String[] candidates = { "native/sd-arm64", "native/sd", "bin/sd-arm64" };
+        InputStream in = null;
+        for (String c : candidates) {
+            try {
+                in = ctx.getAssets().open(c);
+                break;
+            } catch (Exception ignored) {}
+        }
+        if (in == null) {
+            throw new Exception("Binaire sd.cpp absent (assets/native/sd-arm64). Rebuild APK avec CI sd.cpp.");
+        }
+        FileOutputStream fos = new FileOutputStream(out);
+        byte[] buf = new byte[8192];
+        int n;
+        while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
+        fos.close();
+        in.close();
+        out.setExecutable(true, false);
+        out.setReadable(true, false);
+        // Android 10+ : aussi essayer chmod
+        try {
+            Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
+        } catch (Exception ignored) {}
+        if (!out.isFile()) throw new Exception("Échec extraction binaire sd");
+        return out;
+    }
+
+    /**
+     * Télécharge un modèle SD 1.5 quantifié GGUF (environ 2 Go) vers models/sdcpp/.
+     * URL par défaut : HuggingFace second-state / alternative petite.
+     */
+    @JavascriptInterface
+    public String downloadSdCppModel(String url) {
+        final String u = (url == null || url.isEmpty())
+            ? "https://huggingface.co/second-state/stable-diffusion-v1-5-GGUF/resolve/main/stable-diffusion-v1-5-Q4_0.gguf"
+            : url;
+        new Thread(() -> {
+            try {
+                dlStatus = "sd.cpp modèle : démarrage…";
+                File dir = new File(ctx.getFilesDir(), "models/sdcpp");
+                if (!dir.exists()) dir.mkdirs();
+                String name = u.substring(u.lastIndexOf('/') + 1);
+                if (name.isEmpty() || !name.contains(".")) name = "model.gguf";
+                File out = new File(dir, name);
+                File tmp = new File(dir, name + ".part");
+                HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
+                c.setConnectTimeout(30000);
+                c.setReadTimeout(600000);
+                c.setInstanceFollowRedirects(true);
+                c.connect();
+                int code = c.getResponseCode();
+                if (code >= 400) {
+                    dlStatus = "Erreur HTTP " + code + " modèle sd.cpp";
+                    return;
+                }
+                long total = c.getContentLengthLong();
+                InputStream in = c.getInputStream();
+                FileOutputStream fos = new FileOutputStream(tmp);
+                byte[] buf = new byte[65536];
+                long got = 0;
+                int r;
+                while ((r = in.read(buf)) > 0) {
+                    fos.write(buf, 0, r);
+                    got += r;
+                    if (total > 0) {
+                        dlStatus = "sd.cpp modèle " + (got * 100 / total) + "% (" + (got / 1048576) + " Mo)";
+                    } else {
+                        dlStatus = "sd.cpp modèle " + (got / 1048576) + " Mo…";
+                    }
+                }
+                fos.close();
+                in.close();
+                if (out.exists()) out.delete();
+                tmp.renameTo(out);
+                dlStatus = "Modèle OK : " + out.getName() + " (" + (out.length() / 1048576) + " Mo)";
+            } catch (Exception e) {
+                dlStatus = "Échec modèle sd.cpp : " + e.getMessage();
+            }
+        }, "lea-sd-dl").start();
+        return "Téléchargement modèle sd.cpp lancé…";
+    }
+
+    /**
+     * Lance txt2img via le binaire stable-diffusion.cpp.
+     * Async : suivre avec sdCppPoll().
+     */
+    @JavascriptInterface
+    public String sdCppGenerate(String prompt) {
+        final String p = prompt == null ? "a woman" : prompt;
+        if (sdBusy) return "{\"pending\":true,\"note\":\"déjà en cours\"}";
+        File modelDir = new File(ctx.getFilesDir(), "models/sdcpp");
+        final File model = findSdModel(modelDir);
+        if (model == null) {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("done", true);
+                o.put("pending", false);
+                o.put("error", "Aucun modèle GGUF/safetensors dans models/sdcpp/. Utilise « Télécharger pack SD.cpp ».");
+                o.put("needModel", true);
+                return o.toString();
+            } catch (Exception e) {
+                return "{\"error\":\"pas de modèle\",\"done\":true}";
+            }
+        }
+
+        sdBusy = true;
+        sdJson = "{\"pending\":true,\"note\":\"préparation sd.cpp…\"}";
+        new Thread(() -> {
+            try {
+                File bin = ensureSdBinary();
+                File outDir = new File(ctx.getFilesDir(), "sd_out");
+                if (!outDir.exists()) outDir.mkdirs();
+                File outPng = new File(outDir, "out_" + System.currentTimeMillis() + ".png");
+
+                // CLI stable-diffusion.cpp
+                ProcessBuilder pb = new ProcessBuilder(
+                    bin.getAbsolutePath(),
+                    "-m", model.getAbsolutePath(),
+                    "-p", p,
+                    "--negative-prompt", "child, teen, underage, cartoon, deformed, blurry, low quality",
+                    "-H", "512",
+                    "-W", "512",
+                    "--steps", "15",
+                    "--cfg-scale", "7",
+                    "--sampling-method", "euler_a",
+                    "-o", outPng.getAbsolutePath(),
+                    "-v"
+                );
+                pb.directory(ctx.getFilesDir());
+                pb.redirectErrorStream(true);
+                MapEnvFix(pb);
+                Process proc = pb.start();
+                BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
+                String line;
+                StringBuilder log = new StringBuilder();
+                while ((line = br.readLine()) != null) {
+                    if (log.length() < 4000) log.append(line).append('\n');
+                    if (line.contains("%") || line.toLowerCase().contains("step")) {
+                        sdJson = "{\"pending\":true,\"note\":\"" + line.replace("\"", "'").replace("\n", " ") + "\"}";
+                    }
+                }
+                int code = proc.waitFor();
+                if (code != 0 || !outPng.isFile() || outPng.length() < 1000) {
+                    JSONObject err = new JSONObject();
+                    err.put("done", true);
+                    err.put("pending", false);
+                    err.put("error", "sd.cpp exit " + code + (log.length() > 0 ? " : " + log.toString().trim().replace("\"", "'") : ""));
+                    sdJson = err.toString();
+                    return;
+                }
+                // PNG → data URL
+                byte[] bytes = new byte[(int) outPng.length()];
+                java.io.FileInputStream fis = new java.io.FileInputStream(outPng);
+                int off = 0;
+                while (off < bytes.length) {
+                    int r = fis.read(bytes, off, bytes.length - off);
+                    if (r < 0) break;
+                    off += r;
+                }
+                fis.close();
+                String b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+                JSONObject o = new JSONObject();
+                o.put("url", "data:image/png;base64," + b64);
+                o.put("engine", "sd_cpp");
+                o.put("done", true);
+                o.put("pending", false);
+                sdJson = o.toString();
+                // nettoyer gros fichiers
+                try { outPng.delete(); } catch (Exception ignored) {}
+            } catch (Exception e) {
+                try {
+                    JSONObject err = new JSONObject();
+                    err.put("done", true);
+                    err.put("pending", false);
+                    err.put("error", String.valueOf(e.getMessage()).replace("\"", "'"));
+                    sdJson = err.toString();
+                } catch (Exception e2) {
+                    sdJson = "{\"error\":\"sd.cpp échec\",\"done\":true}";
+                }
+            } finally {
+                sdBusy = false;
+            }
+        }, "lea-sdcpp").start();
+
+        try {
+            JSONObject o = new JSONObject();
+            o.put("pending", true);
+            o.put("note", "sd.cpp lancé…");
+            return o.toString();
+        } catch (Exception e) {
+            return "{\"pending\":true}";
+        }
+    }
+
+    private void MapEnvFix(ProcessBuilder pb) {
+        try {
+            java.util.Map<String, String> env = pb.environment();
+            // éviter OpenMP excessif sur téléphone
+            env.put("OMP_NUM_THREADS", "4");
+            env.put("GGML_NUM_THREADS", "4");
+        } catch (Exception ignored) {}
     }
 
     @JavascriptInterface

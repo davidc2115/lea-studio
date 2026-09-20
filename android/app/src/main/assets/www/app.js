@@ -463,6 +463,7 @@ function renderProfile() {
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
       <button class="cta" id="open-ld" type="button" style="margin-left:8px;background:#3a2048">Ouvrir Local Dream</button>
+      <button class="cta" id="dl-sdcpp2" type="button" style="margin-left:8px;background:#2a3a48">Pack SD.cpp</button>
     </p>
     <p class="err" id="imgerr"></p>`;
   $("view-profile").onclick = (e) => {
@@ -527,6 +528,17 @@ function renderProfile() {
     } catch (e) {
       setGenStatus(String(e.message || e));
     }
+  };
+  if ($("dl-sdcpp2")) $("dl-sdcpp2").onclick = () => {
+    if (!window.LeaAndroid || !window.LeaAndroid.downloadSdCppModel) {
+      setGenStatus("Téléchargement dans l'APK seulement.");
+      return;
+    }
+    setGenStatus(window.LeaAndroid.downloadSdCppModel(""));
+    const tick = setInterval(() => {
+      try { setGenStatus(window.LeaAndroid.downloadStatus()); } catch (_) {}
+    }, 1500);
+    setTimeout(() => clearInterval(tick), 60 * 60 * 1000);
   };
 }
 
@@ -680,14 +692,70 @@ async function generatePhoto() {
       return;
     }
 
-    // —— stable-diffusion.cpp ——
+    // —— stable-diffusion.cpp (binaire dans APK + modèle GGUF) ——
     if (engine === "sd_cpp") {
-      setGenStatus("SD.cpp pas encore dans cet APK.\nChoisis « Local Dream » (modèle chargé) ou « Horde ».\nPrompt : " + prompt.slice(0, 140));
-      if (window.LeaAndroid && window.LeaAndroid.copyText) {
-        try { window.LeaAndroid.copyText(prompt); } catch (_) {}
+      if (!window.LeaAndroid || !window.LeaAndroid.sdCppGenerate) {
+        setGenStatus("Pont sd.cpp manquant — rebuild APK.");
+        window._leaGenBusy = false;
+        return;
       }
-      window._leaGenBusy = false;
-      return;
+      try {
+        const st = JSON.parse(window.LeaAndroid.sdCppStatus() || "{}");
+        showPromptStatus("sd.cpp · " + (st.note || ""), prompt);
+        if (!st.native && !st.binary) {
+          setGenStatus("Binaire sd.cpp absent de cet APK. Rebuild avec CI (étape build sd.cpp). En attendant : Local Dream ou Horde.");
+          window._leaGenBusy = false;
+          return;
+        }
+        if (!st.ready) {
+          setGenStatus("Modèle manquant. Clique « Télécharger modèle SD.cpp » dans les réglages (~2 Go), puis réessaie.\nPrompt : " + prompt.slice(0, 100));
+          window._leaGenBusy = false;
+          return;
+        }
+        const raw = window.LeaAndroid.sdCppGenerate(prompt);
+        const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+        if (data && data.url) {
+          const stored = await addToGallery(data.url, c.id);
+          setGenStatus("Image sd.cpp prête");
+          window._leaGenBusy = false;
+          if (state.view === "profile") renderProfile();
+          openFull(resolvePhotoSrc(stored) || stored);
+          return;
+        }
+        if (data && data.pending) {
+          for (let i = 0; i < 180; i++) {
+            await new Promise((r) => setTimeout(r, 2000));
+            let pol = {};
+            try { pol = JSON.parse(window.LeaAndroid.sdCppPoll() || "{}"); } catch (_) {}
+            if (pol.pending) {
+              setGenStatus(pol.note || ("sd.cpp… " + (i + 1)));
+              continue;
+            }
+            window._leaGenBusy = false;
+            if (pol.error) {
+              setGenStatus(pol.error);
+              return;
+            }
+            if (pol.url) {
+              const stored = await addToGallery(pol.url, c.id);
+              setGenStatus("Image sd.cpp prête");
+              if (state.view === "profile") renderProfile();
+              openFull(resolvePhotoSrc(stored) || stored);
+            }
+            return;
+          }
+          window._leaGenBusy = false;
+          setGenStatus("sd.cpp timeout (~6 min)");
+          return;
+        }
+        setGenStatus((data && data.error) || "sd.cpp indisponible");
+        window._leaGenBusy = false;
+        return;
+      } catch (e) {
+        setGenStatus("sd.cpp : " + (e.message || e));
+        window._leaGenBusy = false;
+        return;
+      }
     }
 
     if (engine === "local") {
@@ -1105,6 +1173,7 @@ function renderSettings() {
     </p>
     <p style="margin-top:8px">
       <button class="cta" id="open-ld-settings" type="button" style="background:#3a2048">Ouvrir / installer Local Dream</button>
+      <button class="cta" id="dl-sdcpp" type="button" style="margin-left:8px;background:#2a3a48">Télécharger modèle SD.cpp (~2 Go)</button>
     </p>
     <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
@@ -1170,6 +1239,17 @@ function renderSettings() {
     });
     $("st").textContent = `OK — ${data.keys.gemini} clé(s) Gemini`;
     $("st").style.color = "#9dffc2";
+  };
+  if ($("dl-sdcpp")) $("dl-sdcpp").onclick = () => {
+    if (!window.LeaAndroid || !window.LeaAndroid.downloadSdCppModel) {
+      $("dlst").textContent = "Téléchargement seulement dans l'APK.";
+      return;
+    }
+    $("dlst").textContent = window.LeaAndroid.downloadSdCppModel("");
+    const tick = setInterval(() => {
+      try { $("dlst").textContent = window.LeaAndroid.downloadStatus(); } catch (_) {}
+    }, 1500);
+    setTimeout(() => clearInterval(tick), 60 * 60 * 1000);
   };
   if ($("open-ld-settings")) $("open-ld-settings").onclick = () => {
     if (window.LeaAndroid && window.LeaAndroid.openLocalDream) {

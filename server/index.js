@@ -63,8 +63,11 @@ app.post("/api/image", async (req, res) => {
     : prefModel === "gemini-3.1-flash-image"
       ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
       : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
-  for (const key of gemini) {
-    for (const model of models) {
+  const tries = [];
+  for (const model of models) {
+    for (let i = 0; i < gemini.length; i++) {
+      const key = gemini[i];
+      const tag = "clé" + (i + 1) + "/" + model;
       try {
         const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
           method: "POST",
@@ -78,6 +81,7 @@ app.post("/api/image", async (req, res) => {
           })
         });
         const data = await r.json();
+        const err = data.error?.message || data.error?.status || "";
         const parts = data.candidates?.[0]?.content?.parts || [];
         const img = parts.find((x) => {
           const blob = x.inlineData || x.inline_data;
@@ -87,11 +91,11 @@ app.post("/api/image", async (req, res) => {
           const blob = img.inlineData || img.inline_data;
           return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
         }
-        last = data.error?.message || (model + " vide");
-      } catch (e) { last = e.message; }
+        tries.push(tag + " → " + (err || "pas d'image"));
+      } catch (e) { tries.push(tag + " → " + e.message); }
     }
   }
-  res.status(400).json({ error: last + " — ajoute ta clé Gemini dans Clés" });
+  res.status(400).json({ error: "Échec " + gemini.length + " clés × " + models.length + " modèles : " + tries.join(" | ") });
 });
 
 app.get("/api/characters", (_req, res) => {
