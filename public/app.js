@@ -8,9 +8,20 @@ const state = {
   view: "discover",
 };
 
+function customCover(id) {
+  try { return localStorage.getItem("lea.cover." + (id || state.current || "lea")) || ""; } catch { return ""; }
+}
+function setCustomCover(id, src) {
+  if (!src) localStorage.removeItem("lea.cover." + id);
+  else localStorage.setItem("lea.cover." + id, src);
+}
+
 function character() {
   const list = state.characters.length ? state.characters : window.CAST || [FALLBACK_LEA];
-  return list.find((c) => c.id === state.current) || list[0] || FALLBACK_LEA;
+  const base = list.find((c) => c.id === state.current) || list[0] || FALLBACK_LEA;
+  const cover = customCover(base.id) || base.cover;
+  const resolved = cover && String(cover).startsWith("gallery:") ? (resolvePhotoSrc(cover) || base.cover) : cover;
+  return Object.assign({}, base, { cover: resolved || base.cover, coverKey: cover });
 }
 
 function chatKey() {
@@ -286,25 +297,80 @@ function chatPreview(chat) {
   return String(last.content || "").replace(/\s+/g, " ").slice(0, 80);
 }
 
-function renderDiscover() {
+function discoverCover(c) {
+  const key = customCover(c.id);
+  if (key) {
+    const r = key.startsWith("gallery:") ? resolvePhotoSrc(key) : key;
+    if (r) return r;
+  }
+  return c.cover || "images/lea-portrait.jpg";
+}
+
+function filterDiscoverList(q) {
   const list = state.characters.length ? state.characters : [FALLBACK_LEA];
-  $("view-discover").innerHTML = `
-    <h1>Découvrir</h1>
-    <div class="grid">
-      ${list.map((c) => `
+  const s = String(q || "").trim().toLowerCase();
+  if (!s) return list;
+  return list.filter((c) => {
+    const blob = [
+      c.name, c.title, c.body, c.ethnicity, c.appearance, c.scenario, c.personality,
+      ...(c.tags || []),
+    ].join(" ").toLowerCase();
+    return s.split(/\s+/).every((tok) => blob.includes(tok));
+  });
+}
+
+function renderDiscoverCards(list) {
+  if (!list.length) {
+    return `<p style="color:var(--muted);margin-top:24px;text-align:center">Aucun personnage pour « ${($("disc-search") && $("disc-search").value) || ""} ».</p>`;
+  }
+  return `<div class="grid">${list.map((c) => `
       <article class="card discover-card">
-        <div class="cover-frame"><img class="cover-img" src="${c.cover || "images/lea-portrait.jpg"}" alt="${c.name}" /></div>
+        <div class="cover-frame"><img class="cover-img" src="${discoverCover(c)}" alt="${c.name}" /></div>
         <div class="body">
           <strong>${c.name}</strong>
-          <div style="color:var(--muted);font-size:13px">${c.title || ""}</div>
-          <div class="tags">${[c.body, c.ethnicity].filter(Boolean).concat(c.tags || []).slice(0,6).map((t) => `<span class="tag">${t}</span>`).join("")}</div>
-          <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
+          <div style="color:var(--muted);font-size:13px">${c.age || ""} ans · ${c.title || ""}</div>
+          <div class="tags">${[c.body, c.ethnicity].filter(Boolean).concat(c.tags || []).slice(0, 8).map((t) => `<span class="tag tag-filter" data-tag="${t}">${t}</span>`).join("")}</div>
+          <p style="color:#d7c8dc;font-size:14px">${(c.scenario || "").slice(0, 140)}${(c.scenario || "").length > 140 ? "…" : ""}</p>
           <button class="cta start-chat" data-id="${c.id}">Discuter</button>
           <button class="cta open-profile" data-id="${c.id}" style="margin-left:8px;background:#3a2048">Profil</button>
         </div>
-      </article>`).join("")}
-    </div>`;
+      </article>`).join("")}</div>`;
+}
+
+function renderDiscover() {
+  const q0 = (state.discQuery || "");
+  $("view-discover").innerHTML = `
+    <h1>Découvrir</h1>
+    <input class="field" id="disc-search" type="search" placeholder="Rechercher nom, tag, corps, ethnie…" value="${q0.replace(/"/g, "&quot;")}" style="margin:10px 0 6px;width:100%" />
+    <div class="tags" id="disc-quick" style="margin-bottom:10px;flex-wrap:wrap">
+      ${["belle-mère","belle-sœur","amie","timide","nsfw","française","maghrébine","asiatique","africaine","sablier","mince","ronde","athlétique"].map((t) =>
+        `<span class="tag tag-filter" data-tag="${t}" style="cursor:pointer">${t}</span>`).join("")}
+    </div>
+    <p style="color:var(--muted);font-size:12px;margin-bottom:8px" id="disc-count"></p>
+    <div id="disc-list"></div>`;
+  const paint = () => {
+    const q = ($("disc-search") && $("disc-search").value) || "";
+    state.discQuery = q;
+    const list = filterDiscoverList(q);
+    if ($("disc-count")) $("disc-count").textContent = list.length + " personnage(s)";
+    if ($("disc-list")) $("disc-list").innerHTML = renderDiscoverCards(list);
+  };
+  paint();
+  if ($("disc-search")) {
+    $("disc-search").oninput = paint;
+    $("disc-search").focus();
+  }
   $("view-discover").onclick = (e) => {
+    const tag = e.target.closest(".tag-filter");
+    if (tag && tag.dataset.tag) {
+      if ($("disc-search")) {
+        const cur = $("disc-search").value.trim();
+        const t = tag.dataset.tag;
+        $("disc-search").value = cur && !cur.includes(t) ? (cur + " " + t) : t;
+        paint();
+      }
+      return;
+    }
     const start = e.target.closest(".start-chat");
     const prof = e.target.closest(".open-profile");
     if (start) {
@@ -358,19 +424,26 @@ function renderProfile() {
     const resolved = resolvePhotoSrc(src);
     return { src: resolved || "", raw: src, title: "Générée " + (i + 1), gen: true, idx: i };
   }).filter((g) => g.src);
-  const all = base.map((g) => ({ ...g, gen: false })).concat(genItems);
+  const all = base.map((g) => ({ ...g, gen: false, raw: g.src })).concat(genItems);
+  const hero = c.cover || (all[0] && all[0].src) || "";
   $("view-profile").innerHTML = `
     <h1>${c.name}</h1>
-    <img class="profile-hero" src="${c.cover || (all[0] && all[0].src) || ""}" alt="${c.name}" data-full="${c.cover || (all[0] && all[0].src) || ""}" />
+    <img class="profile-hero" src="${hero}" alt="${c.name}" data-full="${hero}" />
+    <p style="color:var(--muted);font-size:13px">Appuie sur ★ sous une photo pour en faire l’image de profil.</p>
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
     <p>${c.appearance || ""}</p>
     <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
     <h3>Photos</h3>
     <div class="gallery">
-      ${all.map((g) => g.gen
-        ? `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" onerror="this.parentNode.style.display='none'" /><button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button></div>`
-        : `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" /></div>`
-      ).join("")}
+      ${all.map((g) => {
+        const key = g.raw || g.src;
+        const isCover = customCover(c.id) === key || (!customCover(c.id) && g.src === c.cover);
+        return `<div class="gal-item">
+          <img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" onerror="this.parentNode.style.display='none'" />
+          <button type="button" class="gal-cover" data-cover="${String(key).replace(/"/g, "&quot;")}" title="Image de profil">${isCover ? "★" : "☆"}</button>
+          ${g.gen ? `<button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button>` : ""}
+        </div>`;
+      }).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario</h3>
     <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit. Horde gratuit = visage variable. Tu peux supprimer les générées avec ×.' : ('Scénario de ' + c.name + ' · × pour supprimer une générée.')}</p>
@@ -378,7 +451,7 @@ function renderProfile() {
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
       <option value="horde">Horde (cloud gratuit)</option>
-      <option value="local">Local SD 1.5 (pack téléphone)</option>
+      <option value="local">Local (désactivé — crash natif)</option>
     </select>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
@@ -396,9 +469,18 @@ function renderProfile() {
         if (removed && String(removed).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.deleteGalleryImage) {
           try { window.LeaAndroid.deleteGalleryImage(removed); } catch (_) {}
         }
+        if (customCover(c.id) === removed) setCustomCover(c.id, "");
         saveExtra(list);
         renderProfile();
       }
+      return;
+    }
+    const cov = e.target.getAttribute("data-cover");
+    if (cov != null) {
+      e.stopPropagation();
+      setCustomCover(c.id, cov);
+      setGenStatus("Image de profil mise à jour");
+      renderProfile();
       return;
     }
     const full = e.target.getAttribute("data-full");

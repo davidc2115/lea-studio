@@ -197,69 +197,18 @@ public class LeaBridge {
 
     @JavascriptInterface
     public String localGenerate(String prompt) {
+        // MNN natif provoque un SIGSEGV/OOM qui tue tout le process Android
+        // (non catchable en Java). On n'appelle plus nativeSd tant que le
+        // pipeline n'est pas stabilisé. Horde reste le moteur fiable.
         try {
             JSONObject o = new JSONObject();
-            if (!modelReady()) {
-                o.put("error", "Pack SD 1.5 absent.");
-                o.put("modelReady", false);
-                return o.toString();
-            }
-            if (!ensureNative()) {
-                o.put("error", "Moteur MNN absent ou incompatible. Utilise Horde. (rebuild APK native si besoin)");
-                o.put("modelReady", true);
-                return o.toString();
-            }
-            if (localBusy) {
-                o.put("pending", true);
-                o.put("note", "déjà en cours");
-                return o.toString();
-            }
-            long avail = availableMb();
-            if (avail < 1500) {
-                o.put("error", "RAM libre insuffisante (" + avail + " Mo). Ferme des apps ou utilise Horde.");
-                return o.toString();
-            }
-            localBusy = true;
-            localJson = "{\"pending\":true,\"note\":\"inférence locale (peut prendre 1–3 min)…\"}";
-            final String p = prompt == null ? "a woman" : prompt;
-            new Thread(() -> {
-                try {
-                    File dir = new File(ctx.getFilesDir(), "models/sd15");
-                    ensureAliases(dir);
-                    File out = new File(ctx.getFilesDir(), "local-out-" + System.currentTimeMillis() + ".ppm");
-                    String res = nativeSd(p, dir.getAbsolutePath(), out.getAbsolutePath());
-                    JSONObject r = new JSONObject();
-                    if (res != null && "OK".equals(res) && out.isFile() && out.length() > 100) {
-                        // Convertir PPM → JPEG base64 pour affichage WebView
-                        String dataUrl = ppmToJpegDataUrl(out);
-                        if (dataUrl != null && dataUrl.length() > 100) {
-                            r.put("url", dataUrl);
-                            r.put("note", "Image locale MNN");
-                            r.put("done", true);
-                        } else {
-                            r.put("error", "Conversion PPM échouée");
-                            r.put("done", true);
-                        }
-                    } else {
-                        r.put("error", "MNN: " + (res == null ? "crash/null" : res));
-                        r.put("done", true);
-                    }
-                    localJson = r.toString();
-                } catch (UnsatisfiedLinkError e) {
-                    nativeOk = false;
-                    localJson = "{\"error\":\"Lib native manquante\",\"done\":true}";
-                } catch (Throwable e) {
-                    localJson = "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\",\"done\":true}";
-                } finally {
-                    localBusy = false;
-                }
-            }, "lea-sd").start();
-            o.put("pending", true);
-            o.put("note", "Local lancé en arrière-plan");
+            o.put("error", "Local MNN désactivé : crash natif sur cet appareil. Utilise Horde (cloud).");
+            o.put("modelReady", modelReady());
+            o.put("nativeOk", false);
+            o.put("done", true);
             return o.toString();
         } catch (Exception e) {
-            localBusy = false;
-            return "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
+            return "{\"error\":\"Local indisponible\",\"done\":true}";
         }
     }
 
