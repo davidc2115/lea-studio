@@ -566,55 +566,61 @@ async function generatePhoto() {
   try {
     const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
 
-    // —— Local Dream (app io.github.xororz.localdream) ——
+    // —— Local Dream (API officielle 127.0.0.1:8081) ——
     if (engine === "local_dream") {
-      setGenStatus("Local Dream…");
+      setGenStatus("Local Dream :8081… (app ouverte + modèle chargé)");
       if (!window.LeaAndroid || !window.LeaAndroid.localDreamGenerate) {
-        setGenStatus("Local Dream : APK natif requis → Horde");
-      } else {
-        try {
-          const raw = window.LeaAndroid.localDreamGenerate(prompt);
-          const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-          if (data && data.url) {
-            const stored = await addToGallery(data.url, c.id);
-            setGenStatus("Image Local Dream prête");
-            window._leaGenBusy = false;
-            if (state.view === "profile") renderProfile();
-            openFull(resolvePhotoSrc(stored) || stored);
-            return;
-          }
-          if (data && data.hint === "install" && window.LeaAndroid.openLocalDream) {
-            window.LeaAndroid.openLocalDream();
-          }
-          setGenStatus((data && data.error) || "Local Dream indisponible → Horde");
-        } catch (e) {
-          setGenStatus("Local Dream erreur → Horde");
+        setGenStatus("Pont natif manquant — rebuild APK.");
+        window._leaGenBusy = false;
+        return;
+      }
+      try {
+        await new Promise((r) => setTimeout(r, 30));
+        const raw = window.LeaAndroid.localDreamGenerate(prompt);
+        const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+        if (data && data.url) {
+          const stored = await addToGallery(data.url, c.id);
+          setGenStatus("Image Local Dream prête");
+          window._leaGenBusy = false;
+          if (state.view === "profile") renderProfile();
+          openFull(resolvePhotoSrc(stored) || stored);
+          return;
         }
+        if (data && (data.hint === "install" || data.hint === "open") && window.LeaAndroid.openLocalDream) {
+          try { window.LeaAndroid.openLocalDream(); } catch (_) {}
+        }
+        setGenStatus((data && data.error) || "Local Dream indisponible");
+        window._leaGenBusy = false;
+        return; // ne pas basculer sur Horde
+      } catch (e) {
+        setGenStatus("Local Dream : " + (e.message || e));
+        window._leaGenBusy = false;
+        return;
       }
     }
 
-    // —— stable-diffusion.cpp (pack GGUF) ——
+    // —— stable-diffusion.cpp (natif pas encore lié) ——
     if (engine === "sd_cpp") {
-      setGenStatus("Stable Diffusion.cpp…");
       try {
         const st = window.LeaAndroid && window.LeaAndroid.sdCppStatus
           ? JSON.parse(window.LeaAndroid.sdCppStatus() || "{}")
           : { ready: false, native: false };
-        if (!st.native) {
-          setGenStatus((st.note || "sd.cpp natif pas encore lié dans ce build") + " → Horde");
-        } else if (!st.ready) {
-          setGenStatus("Pas de modèle GGUF dans models/sdcpp/ → Horde");
-        } else {
-          setGenStatus("sd.cpp prêt mais bridge génération à finaliser → Horde");
-        }
+        setGenStatus(
+          st.native
+            ? (st.ready ? "sd.cpp : bridge génération à finaliser" : "Pas de modèle GGUF")
+            : "SD.cpp pas encore dans cet APK. Utilise Local Dream (modèle chargé) ou Horde."
+        );
       } catch (_) {
-        setGenStatus("sd.cpp indisponible → Horde");
+        setGenStatus("SD.cpp indisponible.");
       }
+      window._leaGenBusy = false;
+      return; // ne pas basculer sur Horde
     }
 
-    // Ancien "local" MNN
     if (engine === "local") {
-      setGenStatus("Ancien MNN désactivé → Horde");
+      setGenStatus("Ancien MNN désactivé. Choisis Local Dream ou Horde.");
+      window._leaGenBusy = false;
+      return;
     }
     const payload = { prompt, negative: bodyNegatives(c), nsfw: !/jade|lina|hana|mei|sasha/.test(c.id) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
@@ -1020,9 +1026,9 @@ function renderSettings() {
       <option value="sd_cpp">Stable Diffusion.cpp (local GGUF)</option>
     </select>
     <p style="color:var(--muted);font-size:13px">
-      <b>Horde</b> : gratuit, file d’attente.<br/>
-      <b>Local Dream</b> : installe l’app (Play Store), télécharge un modèle SD 1.5, active « Allow LAN access » pour que Léa Studio l’utilise.<br/>
-      <b>SD.cpp</b> : pack GGUF quantifié dans le téléphone (moteur natif en intégration).
+      <b>Horde</b> : cloud gratuit.<br/>
+      <b>Local Dream</b> : 1) ouvre Local Dream 2) charge un modèle (API :8081 démarre alors) 3) reviens ici et Génère. Pas de bascule Horde auto.<br/>
+      <b>SD.cpp</b> : moteur natif pas encore dans cet APK.
     </p>
     <p style="margin-top:8px">
       <button class="cta" id="open-ld-settings" type="button" style="background:#3a2048">Ouvrir / installer Local Dream</button>

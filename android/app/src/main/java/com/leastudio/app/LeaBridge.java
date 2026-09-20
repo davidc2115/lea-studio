@@ -242,110 +242,153 @@ public class LeaBridge {
     }
 
     /**
-     * Tente une génération via l'API HTTP locale de Local Dream (option « Allow LAN access »).
-     * Ports courants testés : 8080, 8188, 7860, 5000, 3000.
+     * API officielle Local Dream : 127.0.0.1:8081 POST /generate (SSE).
+     * Prérequis : Local Dream ouvert + modèle chargé (le backend démarre après).
+     * complete.image = RGB brut base64 → JPEG.
      */
     @JavascriptInterface
     public String localDreamGenerate(String prompt) {
         final String p = prompt == null ? "a woman" : prompt;
-        String[] bases = {
-            "http://127.0.0.1:8080",
-            "http://127.0.0.1:8188",
-            "http://127.0.0.1:7860",
-            "http://127.0.0.1:5000",
-            "http://127.0.0.1:3000"
-        };
-        for (String base : bases) {
-            try {
-                // Probe health
-                URL u = new URL(base + "/");
-                HttpURLConnection c = (HttpURLConnection) u.openConnection();
-                c.setConnectTimeout(800);
-                c.setReadTimeout(800);
-                c.setRequestMethod("GET");
-                int code = c.getResponseCode();
-                c.disconnect();
-                if (code < 200 || code >= 500) continue;
+        try {
+            JSONObject body = new JSONObject();
+            body.put("prompt", p);
+            body.put("negative_prompt", "child, teen, underage, cartoon, anime, deformed, blurry, low quality");
+            body.put("steps", 20);
+            body.put("cfg", 7.5);
+            body.put("width", 512);
+            body.put("height", 512);
+            body.put("size", 512);
+            body.put("scheduler", "euler_a");
+            byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
 
-                // Try txt2img style endpoints used by many local UIs
-                String[] paths = { "/sdapi/v1/txt2img", "/api/generate", "/generate", "/v1/txt2img" };
-                for (String path : paths) {
-                    try {
-                        JSONObject body = new JSONObject();
-                        body.put("prompt", p);
-                        body.put("negative_prompt", "child, teen, cartoon, blurry");
-                        body.put("steps", 20);
-                        body.put("width", 512);
-                        body.put("height", 768);
-                        body.put("cfg_scale", 7);
-                        byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
-                        HttpURLConnection post = (HttpURLConnection) new URL(base + path).openConnection();
-                        post.setConnectTimeout(2000);
-                        post.setReadTimeout(180000);
-                        post.setRequestMethod("POST");
-                        post.setDoOutput(true);
-                        post.setRequestProperty("Content-Type", "application/json");
-                        OutputStream os = post.getOutputStream();
-                        os.write(payload);
-                        os.close();
-                        int pc = post.getResponseCode();
-                        InputStream in = pc >= 200 && pc < 300 ? post.getInputStream() : post.getErrorStream();
-                        if (in == null) continue;
-                        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-                        StringBuilder sb = new StringBuilder();
-                        String line;
-                        while ((line = br.readLine()) != null) sb.append(line);
-                        br.close();
-                        post.disconnect();
-                        String resp = sb.toString();
-                        // A1111 style: images[0] base64
-                        if (resp.contains("\"images\"")) {
-                            int i = resp.indexOf("\"images\"");
-                            int b = resp.indexOf("\"", i + 10);
-                            int e2 = resp.indexOf("\"", b + 1);
-                            if (b > 0 && e2 > b) {
-                                String b64 = resp.substring(b + 1, e2);
-                                if (b64.length() > 200) {
-                                    JSONObject o = new JSONObject();
-                                    o.put("url", "data:image/png;base64," + b64);
-                                    o.put("engine", "local_dream");
-                                    o.put("done", true);
-                                    return o.toString();
-                                }
-                            }
+            HttpURLConnection post = (HttpURLConnection) new URL("http://127.0.0.1:8081/generate").openConnection();
+            post.setConnectTimeout(3000);
+            post.setReadTimeout(300000);
+            post.setRequestMethod("POST");
+            post.setDoOutput(true);
+            post.setRequestProperty("Content-Type", "application/json");
+            post.setRequestProperty("Accept", "text/event-stream");
+            OutputStream os = post.getOutputStream();
+            os.write(payload);
+            os.close();
+
+            int pc = post.getResponseCode();
+            InputStream in = (pc >= 200 && pc < 300) ? post.getInputStream() : post.getErrorStream();
+            if (in == null) {
+                post.disconnect();
+                return ldFail("HTTP " + pc + " sans corps. Ouvre Local Dream, charge un modèle, réessaie.");
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            String line;
+            String currentEvent = "";
+            StringBuilder dataBuf = new StringBuilder();
+            String completeJson = null;
+            String errorMsg = null;
+
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith("event:")) {
+                    currentEvent = line.substring(6).trim();
+                    dataBuf.setLength(0);
+                } else if (line.startsWith("data:")) {
+                    String d = line.substring(5).trim();
+                    if (dataBuf.length() > 0) dataBuf.append('\n');
+                    dataBuf.append(d);
+                } else if (line.isEmpty() && dataBuf.length() > 0) {
+                    String data = dataBuf.toString();
+                    dataBuf.setLength(0);
+                    if ("complete".equals(currentEvent) || data.contains("\"type\":\"complete\"")) {
+                        completeJson = data;
+                        break;
+                    }
+                    if ("error".equals(currentEvent) || data.contains("\"type\":\"error\"")) {
+                        try {
+                            errorMsg = new JSONObject(data).optString("message", data);
+                        } catch (Exception e) {
+                            errorMsg = data;
                         }
-                        if (resp.startsWith("data:image") || resp.contains("base64")) {
-                            JSONObject o = new JSONObject();
-                            o.put("url", resp.length() > 500 && resp.startsWith("data:") ? resp : ("data:image/png;base64," + resp));
-                            o.put("engine", "local_dream");
-                            o.put("done", true);
-                            return o.toString();
-                        }
-                    } catch (Exception ignored) {}
+                        break;
+                    }
                 }
-            } catch (Exception ignored) {}
+            }
+            br.close();
+            post.disconnect();
+
+            if (errorMsg != null) {
+                return ldFail("Local Dream: " + errorMsg);
+            }
+            if (completeJson == null) {
+                return ldFail("Pas d'événement complete. Charge un modèle dans Local Dream (backend :8081).");
+            }
+
+            JSONObject done = new JSONObject(completeJson);
+            String rgbB64 = done.optString("image", "");
+            int w = done.optInt("width", 512);
+            int h = done.optInt("height", 512);
+            int ch = done.optInt("channels", 3);
+            if (rgbB64.isEmpty()) {
+                return ldFail("Réponse complete sans image.");
+            }
+            String dataUrl = rgbBase64ToJpegDataUrl(rgbB64, w, h, ch);
+            if (dataUrl == null) {
+                return ldFail("Conversion RGB→JPEG échouée.");
+            }
+            JSONObject o = new JSONObject();
+            o.put("url", dataUrl);
+            o.put("engine", "local_dream");
+            o.put("done", true);
+            o.put("width", w);
+            o.put("height", h);
+            o.put("seed", done.opt("seed"));
+            return o.toString();
+        } catch (java.net.ConnectException e) {
+            return ldFail("127.0.0.1:8081 refusé. Ouvre Local Dream et charge un modèle (serveur démarre après).");
+        } catch (Exception e) {
+            return ldFail(String.valueOf(e.getMessage()));
         }
+    }
+
+    private String ldFail(String msg) {
         try {
             JSONObject o = new JSONObject();
-            boolean installed;
+            o.put("done", true);
+            o.put("error", msg);
+            boolean installed = false;
             try {
                 ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0);
                 installed = true;
-            } catch (Exception e) {
-                installed = false;
-            }
-            o.put("done", true);
+            } catch (Exception ignored) {}
             o.put("installed", installed);
-            if (installed) {
-                o.put("error", "Local Dream installé mais API locale inaccessible. Ouvre Local Dream → active « Allow LAN access », lance une génération une fois, puis réessaie ici.");
-                o.put("hint", "open");
-            } else {
-                o.put("error", "Local Dream non installé. Installe-le (Play Store : Local Dream), télécharge un modèle SD 1.5, active LAN si dispo.");
-                o.put("hint", "install");
-            }
+            o.put("hint", installed ? "open" : "install");
             return o.toString();
         } catch (Exception e) {
-            return "{\"error\":\"Local Dream indisponible\",\"done\":true}";
+            return "{\"error\":\"" + String.valueOf(msg).replace("\"", "'") + "\",\"done\":true}";
+        }
+    }
+
+    private String rgbBase64ToJpegDataUrl(String b64, int w, int h, int channels) {
+        try {
+            byte[] rgb = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+            if (w <= 0 || h <= 0 || channels < 3) return null;
+            if (rgb == null || rgb.length < w * h * 3) return null;
+            channels = 3;
+            android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888);
+            int[] pixels = new int[w * h];
+            for (int i = 0; i < w * h; i++) {
+                int o = i * channels;
+                int R = rgb[o] & 0xff;
+                int G = rgb[o + 1] & 0xff;
+                int B = rgb[o + 2] & 0xff;
+                pixels[i] = 0xff000000 | (R << 16) | (G << 8) | B;
+            }
+            bmp.setPixels(pixels, 0, w, 0, 0, w, h);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, baos);
+            bmp.recycle();
+            String out = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP);
+            return "data:image/jpeg;base64," + out;
+        } catch (Exception e) {
+            return null;
         }
     }
 
