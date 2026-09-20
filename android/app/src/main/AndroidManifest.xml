@@ -6,7 +6,9 @@
         android:icon="@drawable/ic_launcher"
         android:label="Léa Studio"
         android:theme="@style/Theme.LeaStudio"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        android:largeHeap="true"
+        android:hardwareAccelerated="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

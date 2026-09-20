@@ -181,11 +181,99 @@ function openFull(src) {
 
 function extraPhotos(id) {
   const k = id || state.current || "lea";
-  try { return JSON.parse(localStorage.getItem("lea.photos." + k) || "[]"); } catch { return []; }
+  try {
+    const list = JSON.parse(localStorage.getItem("lea.photos." + k) || "[]");
+    if (!Array.isArray(list)) return [];
+    // Filtre les entrées vides / URLs Horde expirées / file:// cassés
+    return list.filter((src) => {
+      if (!src || typeof src !== "string") return false;
+      if (src.startsWith("gallery:")) return true;
+      if (src.startsWith("data:image")) return src.length > 200;
+      if (src.startsWith("http")) return false; // URLs Horde temporaires → déjà perdues
+      if (src.startsWith("file:")) return false;
+      return src.length > 8;
+    });
+  } catch {
+    return [];
+  }
 }
 function saveExtra(list, id) {
   const k = id || state.current || "lea";
-  localStorage.setItem("lea.photos." + k, JSON.stringify(list));
+  const clean = (list || []).filter(Boolean).slice(0, 8);
+  try {
+    localStorage.setItem("lea.photos." + k, JSON.stringify(clean));
+  } catch (e) {
+    // Quota localStorage : on garde les 4 plus récentes
+    try {
+      localStorage.setItem("lea.photos." + k, JSON.stringify(clean.slice(0, 4)));
+    } catch (_) {
+      try { localStorage.removeItem("lea.photos." + k); } catch (__) {}
+    }
+  }
+}
+
+/** Compresse une image (url/data) en JPEG data URL léger pour la galerie. */
+function compressToJpeg(src, maxW, quality) {
+  maxW = maxW || 512;
+  quality = quality || 0.72;
+  return new Promise((resolve) => {
+    if (!src) return resolve("");
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, maxW / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", quality));
+      } catch {
+        resolve(src);
+      }
+    };
+    img.onerror = () => resolve(src);
+    img.src = src;
+  });
+}
+
+/** Persiste une image dans la galerie du personnage (disque Android si possible, sinon data URL). */
+async function addToGallery(src, charId) {
+  const cid = charId || state.current || "lea";
+  let stored = src;
+  try {
+    const compressed = await compressToJpeg(src, 512, 0.72);
+    if (window.LeaAndroid && window.LeaAndroid.saveGalleryImage && compressed.startsWith("data:")) {
+      const key = window.LeaAndroid.saveGalleryImage(cid, compressed);
+      if (key && key.startsWith("gallery:")) stored = key;
+      else stored = compressed;
+    } else {
+      stored = compressed;
+    }
+  } catch {
+    stored = src;
+  }
+  const list = extraPhotos(cid);
+  list.unshift(stored);
+  saveExtra(list.slice(0, 8), cid);
+  return stored;
+}
+
+/** Résout une clé gallery: ou data URL pour affichage. */
+function resolvePhotoSrc(src) {
+  if (!src) return "";
+  if (src.startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.loadGalleryImage) {
+    try {
+      const data = window.LeaAndroid.loadGalleryImage(src);
+      return data || "";
+    } catch {
+      return "";
+    }
+  }
+  return src;
 }
 function loadChat(id) {
   try { return JSON.parse(localStorage.getItem("lea.chat." + (id || "lea")) || "null"); } catch { return null; }
@@ -259,7 +347,10 @@ function renderProfile() {
   const c = character();
   const extras = extraPhotos();
   const base = (c.gallery && c.gallery.length ? c.gallery : GALLERY.map((g) => g.src)).map((src, i) => ({ src, title: "Photo " + (i + 1) }));
-  const genItems = extras.map((src, i) => ({ src, title: "Générée " + (i + 1), gen: true, idx: i }));
+  const genItems = extras.map((src, i) => {
+    const resolved = resolvePhotoSrc(src);
+    return { src: resolved || "", raw: src, title: "Générée " + (i + 1), gen: true, idx: i };
+  }).filter((g) => g.src);
   const all = base.map((g) => ({ ...g, gen: false })).concat(genItems);
   $("view-profile").innerHTML = `
     <h1>${c.name}</h1>
@@ -270,7 +361,7 @@ function renderProfile() {
     <h3>Photos</h3>
     <div class="gallery">
       ${all.map((g) => g.gen
-        ? `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" /><button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button></div>`
+        ? `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" onerror="this.parentNode.style.display='none'" /><button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button></div>`
         : `<div class="gal-item"><img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" /></div>`
       ).join("")}
     </div>
@@ -294,7 +385,10 @@ function renderProfile() {
       const list = extraPhotos();
       const i = Number(del);
       if (i >= 0 && i < list.length) {
-        list.splice(i, 1);
+        const removed = list.splice(i, 1)[0];
+        if (removed && String(removed).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.deleteGalleryImage) {
+          try { window.LeaAndroid.deleteGalleryImage(removed); } catch (_) {}
+        }
         saveExtra(list);
         renderProfile();
       }
@@ -383,13 +477,11 @@ async function generatePhoto() {
           const raw = window.LeaAndroid.localGenerate(prompt);
           const data = typeof raw === "string" ? JSON.parse(raw) : raw;
           if (data && data.url) {
-            const list = extraPhotos(c.id);
-            list.unshift(data.url);
-            saveExtra(list.slice(0, 20), c.id);
+            const stored = await addToGallery(data.url, c.id);
             setGenStatus(data.note || "Image locale prête");
             window._leaGenBusy = false;
             if (state.view === "profile") renderProfile();
-            openFull(data.url);
+            openFull(resolvePhotoSrc(stored) || stored);
             return;
           }
           if (data && data.pending) {
@@ -457,12 +549,10 @@ async function pollLocalJob(charId) {
       return;
     }
     if (data.url) {
-      const list = extraPhotos(cid);
-      list.unshift(data.url);
-      saveExtra(list.slice(0, 20), cid);
+      const stored = await addToGallery(data.url, cid);
       setGenStatus("Image locale ajoutée à la galerie");
       if (state.view === "profile" && state.current === cid) renderProfile();
-      if (state.current === cid) openFull(data.url);
+      if (state.current === cid && stored) openFull(resolvePhotoSrc(stored) || stored);
     }
     return;
   }
@@ -504,13 +594,10 @@ async function pollHordeJob(jobId, host, charId) {
         setGenStatus(st.error);
         return;
       }
-      const stored = await persistImageUrl(st.url);
-      const list = extraPhotos(cid);
-      list.unshift(stored);
-      saveExtra(list.slice(0, 20), cid);
+      const stored = await addToGallery(st.url, cid);
       setGenStatus("Image ajoutée à la galerie");
       if (state.view === "profile" && state.current === cid) renderProfile();
-      if (stored && state.current === cid) openFull(stored);
+      if (stored && state.current === cid) openFull(resolvePhotoSrc(stored) || stored);
       return;
     } catch (e) {
       setGenStatus("Horde… " + (e.message || e));
@@ -582,7 +669,7 @@ function applyChatBg() { applyChatLook(); }
 
 function renderChat() {
   const c = character();
-  const extras = extraPhotos().map((src, i) => ({ src, title: "Générée " + (i + 1) }));
+  const extras = extraPhotos().map((src, i) => ({ src: resolvePhotoSrc(src) || src, title: "Générée " + (i + 1) })).filter((g) => g.src);
   const bgs = GALLERY.concat(extras);
   const current = chatBg();
   $("view-chat").innerHTML = `

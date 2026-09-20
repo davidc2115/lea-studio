@@ -22,16 +22,78 @@ public class LeaBridge {
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
+        // Ne pas charger MNN au démarrage : évite un crash au lancement si .so absente / incompatible.
+        nativeOk = false;
+    }
+
+    public native String nativeSd(String prompt, String modelDir, String outPath);
+
+    private synchronized boolean ensureNative() {
+        if (nativeOk) return true;
         try {
             System.loadLibrary("MNN");
             System.loadLibrary("lea_local");
             nativeOk = true;
+            return true;
         } catch (Throwable t) {
             nativeOk = false;
+            return false;
         }
     }
 
-    public native String nativeSd(String prompt, String modelDir, String outPath);
+    /** Enregistre une image (data URL ou base64) sur disque. Retourne une clé gallery:… stable. */
+    @JavascriptInterface
+    public String saveGalleryImage(String charId, String dataUrl) {
+        try {
+            if (charId == null || charId.isEmpty()) charId = "lea";
+            if (dataUrl == null || dataUrl.length() < 32) return "";
+            String b64 = dataUrl;
+            int comma = dataUrl.indexOf(',');
+            if (dataUrl.startsWith("data:") && comma > 0) b64 = dataUrl.substring(comma + 1);
+            byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+            if (bytes == null || bytes.length < 100) return "";
+            File dir = new File(ctx.getFilesDir(), "gallery/" + charId);
+            if (!dir.exists()) dir.mkdirs();
+            String name = "g" + System.currentTimeMillis() + ".jpg";
+            File out = new File(dir, name);
+            FileOutputStream fos = new FileOutputStream(out);
+            fos.write(bytes);
+            fos.close();
+            return "gallery:" + charId + "/" + name;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Lit une clé gallery:… → data URL jpeg. */
+    @JavascriptInterface
+    public String loadGalleryImage(String key) {
+        try {
+            if (key == null || !key.startsWith("gallery:")) return "";
+            String rel = key.substring("gallery:".length());
+            File f = new File(ctx.getFilesDir(), "gallery/" + rel);
+            if (!f.isFile() || f.length() < 100) return "";
+            byte[] bytes = new byte[(int) f.length()];
+            java.io.FileInputStream in = new java.io.FileInputStream(f);
+            int n = in.read(bytes);
+            in.close();
+            if (n <= 0) return "";
+            String b64 = android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+            return "data:image/jpeg;base64," + b64;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    @JavascriptInterface
+    public void deleteGalleryImage(String key) {
+        try {
+            if (key == null || !key.startsWith("gallery:")) return;
+            String rel = key.substring("gallery:".length());
+            File f = new File(ctx.getFilesDir(), "gallery/" + rel);
+            if (f.isFile()) f.delete();
+        } catch (Exception ignored) {}
+    }
 
     @JavascriptInterface
     public String deviceInfo() {
@@ -142,8 +204,8 @@ public class LeaBridge {
                 o.put("modelReady", false);
                 return o.toString();
             }
-            if (!nativeOk) {
-                o.put("error", "Moteur MNN absent (rebuild APK native).");
+            if (!ensureNative()) {
+                o.put("error", "Moteur MNN absent ou incompatible. Utilise Horde. (rebuild APK native si besoin)");
                 o.put("modelReady", true);
                 return o.toString();
             }
@@ -152,8 +214,13 @@ public class LeaBridge {
                 o.put("note", "déjà en cours");
                 return o.toString();
             }
+            long avail = availableMb();
+            if (avail < 1500) {
+                o.put("error", "RAM libre insuffisante (" + avail + " Mo). Ferme des apps ou utilise Horde.");
+                return o.toString();
+            }
             localBusy = true;
-            localJson = "{\"pending\":true,\"note\":\"inférence locale…\"}";
+            localJson = "{\"pending\":true,\"note\":\"inférence locale (peut prendre 1–3 min)…\"}";
             final String p = prompt == null ? "a woman" : prompt;
             new Thread(() -> {
                 try {
@@ -163,26 +230,91 @@ public class LeaBridge {
                     String res = nativeSd(p, dir.getAbsolutePath(), out.getAbsolutePath());
                     JSONObject r = new JSONObject();
                     if (res != null && "OK".equals(res) && out.isFile() && out.length() > 100) {
-                        r.put("url", "file://" + out.getAbsolutePath());
-                        r.put("note", "Image locale MNN");
-                        r.put("done", true);
+                        // Convertir PPM → JPEG base64 pour affichage WebView
+                        String dataUrl = ppmToJpegDataUrl(out);
+                        if (dataUrl != null && dataUrl.length() > 100) {
+                            r.put("url", dataUrl);
+                            r.put("note", "Image locale MNN");
+                            r.put("done", true);
+                        } else {
+                            r.put("error", "Conversion PPM échouée");
+                            r.put("done", true);
+                        }
                     } else {
-                        r.put("error", "MNN: " + res);
+                        r.put("error", "MNN: " + (res == null ? "crash/null" : res));
                         r.put("done", true);
                     }
                     localJson = r.toString();
-                } catch (Exception e) {
+                } catch (UnsatisfiedLinkError e) {
+                    nativeOk = false;
+                    localJson = "{\"error\":\"Lib native manquante\",\"done\":true}";
+                } catch (Throwable e) {
                     localJson = "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\",\"done\":true}";
                 } finally {
                     localBusy = false;
                 }
             }, "lea-sd").start();
             o.put("pending", true);
-            o.put("note", "Local lancé en arrière-plan (ne ferme pas l'app)");
+            o.put("note", "Local lancé en arrière-plan");
             return o.toString();
         } catch (Exception e) {
             localBusy = false;
             return "{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
+        }
+    }
+
+    private String ppmToJpegDataUrl(File ppm) {
+        try {
+            java.io.BufferedInputStream in = new java.io.BufferedInputStream(new java.io.FileInputStream(ppm));
+            // Skip P6 header
+            StringBuilder hdr = new StringBuilder();
+            int b;
+            int newlines = 0;
+            while ((b = in.read()) != -1) {
+                hdr.append((char) b);
+                if (b == '\n') {
+                    newlines++;
+                    // P6\nW H\n255\n → 3 lines after optional comments
+                    String h = hdr.toString();
+                    if (h.contains("255") && newlines >= 3) break;
+                }
+            }
+            String[] parts = hdr.toString().trim().split("\\s+");
+            int w = 0, h = 0;
+            for (int i = 0; i < parts.length; i++) {
+                if (parts[i].equals("P6") && i + 2 < parts.length) {
+                    w = Integer.parseInt(parts[i + 1]);
+                    h = Integer.parseInt(parts[i + 2]);
+                    break;
+                }
+            }
+            if (w <= 0 || h <= 0 || w > 2048 || h > 2048) {
+                in.close();
+                return null;
+            }
+            byte[] rgb = new byte[w * h * 3];
+            int off = 0;
+            while (off < rgb.length) {
+                int r = in.read(rgb, off, rgb.length - off);
+                if (r < 0) break;
+                off += r;
+            }
+            in.close();
+            android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888);
+            int[] pixels = new int[w * h];
+            for (int i = 0; i < w * h; i++) {
+                int o = i * 3;
+                int R = rgb[o] & 0xff, G = rgb[o + 1] & 0xff, B = rgb[o + 2] & 0xff;
+                pixels[i] = 0xff000000 | (R << 16) | (G << 8) | B;
+            }
+            bmp.setPixels(pixels, 0, w, 0, 0, w, h);
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 85, baos);
+            bmp.recycle();
+            String b64 = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP);
+            return "data:image/jpeg;base64," + b64;
+        } catch (Exception e) {
+            return null;
         }
     }
 
