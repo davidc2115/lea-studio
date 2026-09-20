@@ -459,31 +459,106 @@ public class LeaBridge {
         }
     }
 
+    /** Décode image Local Dream : PNG/JPEG base64 OU RGB brut. */
     private String rgbBase64ToJpegDataUrl(String b64, int w, int h, int channels) {
         try {
-            byte[] rgb = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
-            if (w <= 0 || h <= 0 || channels < 3) return null;
-            if (rgb == null || rgb.length < w * h * 3) return null;
-            channels = 3;
+            if (b64 == null || b64.isEmpty()) return null;
+            // Nettoyer espaces / retours ligne SSE
+            b64 = b64.replace("\n", "").replace("\r", "").replace(" ", "");
+            byte[] raw = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+            if (raw == null || raw.length < 100) return null;
+
+            // PNG magic
+            if (raw.length > 8 && (raw[0] & 0xff) == 0x89 && raw[1] == 0x50 && raw[2] == 0x4E && raw[3] == 0x47) {
+                String out = android.util.Base64.encodeToString(raw, android.util.Base64.NO_WRAP);
+                return "data:image/png;base64," + out;
+            }
+            // JPEG magic
+            if ((raw[0] & 0xff) == 0xFF && (raw[1] & 0xff) == 0xD8) {
+                String out = android.util.Base64.encodeToString(raw, android.util.Base64.NO_WRAP);
+                return "data:image/jpeg;base64," + out;
+            }
+
+            if (w <= 0) w = 512;
+            if (h <= 0) h = 512;
+            if (channels < 3) channels = 3;
+
+            int need = w * h * channels;
+            // Si taille incohérente, tenter d'inférer depuis la longueur (RGB)
+            if (raw.length < need) {
+                // essayer square
+                int px = raw.length / 3;
+                int side = (int) Math.sqrt(px);
+                if (side * side * 3 == raw.length) {
+                    w = h = side;
+                    channels = 3;
+                    need = raw.length;
+                } else if (raw.length % 3 == 0) {
+                    // garder w, recalculer h
+                    h = (raw.length / 3) / Math.max(1, w);
+                    if (h < 8) return null;
+                    channels = 3;
+                    need = w * h * 3;
+                } else {
+                    return null;
+                }
+            }
+
             android.graphics.Bitmap bmp = android.graphics.Bitmap.createBitmap(w, h, android.graphics.Bitmap.Config.ARGB_8888);
             int[] pixels = new int[w * h];
+            boolean allWhite = true;
+            boolean allBlack = true;
             for (int i = 0; i < w * h; i++) {
                 int o = i * channels;
-                int R = rgb[o] & 0xff;
-                int G = rgb[o + 1] & 0xff;
-                int B = rgb[o + 2] & 0xff;
+                int R = raw[o] & 0xff;
+                int G = raw[o + 1] & 0xff;
+                int B = raw[o + 2] & 0xff;
+                if (R < 250 || G < 250 || B < 250) allWhite = false;
+                if (R > 5 || G > 5 || B > 5) allBlack = false;
                 pixels[i] = 0xff000000 | (R << 16) | (G << 8) | B;
+            }
+            // Image toute blanche/noire = souvent mauvais décodage → essayer BitmapFactory
+            if (allWhite || allBlack) {
+                try {
+                    android.graphics.Bitmap decoded = android.graphics.BitmapFactory.decodeByteArray(raw, 0, raw.length);
+                    if (decoded != null) {
+                        java.io.ByteArrayOutputStream baos2 = new java.io.ByteArrayOutputStream();
+                        decoded.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, baos2);
+                        decoded.recycle();
+                        return "data:image/jpeg;base64," + android.util.Base64.encodeToString(baos2.toByteArray(), android.util.Base64.NO_WRAP);
+                    }
+                } catch (Exception ignored) {}
             }
             bmp.setPixels(pixels, 0, w, 0, 0, w, h);
             java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
-            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, baos);
+            bmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, baos);
             bmp.recycle();
-            String out = android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP);
-            return "data:image/jpeg;base64," + out;
+            return "data:image/jpeg;base64," + android.util.Base64.encodeToString(baos.toByteArray(), android.util.Base64.NO_WRAP);
         } catch (Exception e) {
             return null;
         }
     }
+
+    @JavascriptInterface
+    public String bridgeInfo() {
+        try {
+            JSONObject o = new JSONObject();
+            o.put("downloadSdCppModel", true);
+            o.put("downloadStatus", true);
+            o.put("sdCppGenerate", true);
+            o.put("localDreamGenerate", true);
+            o.put("openLocalDream", true);
+            File dir = new File(ctx.getFilesDir(), "models/sdcpp");
+            File model = findSdModel(dir);
+            o.put("sdModel", model != null ? model.getName() : "");
+            o.put("sdModelMb", model != null ? model.length() / 1048576 : 0);
+            o.put("dlStatus", dlStatus);
+            return o.toString();
+        } catch (Exception e) {
+            return "{}";
+        }
+    }
+
 
     // —— stable-diffusion.cpp (binaire CLI extrait des assets) ——
     private volatile boolean sdBusy = false;

@@ -530,14 +530,27 @@ function renderProfile() {
     }
   };
   if ($("dl-sdcpp2")) $("dl-sdcpp2").onclick = () => {
-    if (!window.LeaAndroid || !window.LeaAndroid.downloadSdCppModel) {
-      setGenStatus("Téléchargement dans l'APK seulement.");
+    if (!window.LeaAndroid) {
+      setGenStatus("Pas de pont natif (ouvre l'app Android, pas le navigateur).");
       return;
     }
+    if (!window.LeaAndroid.downloadSdCppModel) {
+      setGenStatus("APK trop vieux : rebuild requis (méthode downloadSdCppModel absente).");
+      return;
+    }
+    try {
+      const info = window.LeaAndroid.bridgeInfo ? JSON.parse(window.LeaAndroid.bridgeInfo()) : {};
+      setGenStatus("Démarrage DL… modèle actuel: " + (info.sdModel || "aucun"));
+    } catch (_) {}
     setGenStatus(window.LeaAndroid.downloadSdCppModel(""));
     const tick = setInterval(() => {
-      try { setGenStatus(window.LeaAndroid.downloadStatus()); } catch (_) {}
-    }, 1500);
+      try {
+        const st = window.LeaAndroid.downloadStatus();
+        setGenStatus(st || "téléchargement…");
+      } catch (e) {
+        setGenStatus("poll: " + e);
+      }
+    }, 800);
     setTimeout(() => clearInterval(tick), 60 * 60 * 1000);
   };
 }
@@ -1241,14 +1254,18 @@ function renderSettings() {
     $("st").style.color = "#9dffc2";
   };
   if ($("dl-sdcpp")) $("dl-sdcpp").onclick = () => {
-    if (!window.LeaAndroid || !window.LeaAndroid.downloadSdCppModel) {
-      $("dlst").textContent = "Téléchargement seulement dans l'APK.";
+    if (!window.LeaAndroid) {
+      $("dlst").textContent = "Pas de pont natif — utilise l'APK Android.";
+      return;
+    }
+    if (!window.LeaAndroid.downloadSdCppModel) {
+      $("dlst").textContent = "APK trop vieux (rebuild). Méthode downloadSdCppModel absente.";
       return;
     }
     $("dlst").textContent = window.LeaAndroid.downloadSdCppModel("");
     const tick = setInterval(() => {
-      try { $("dlst").textContent = window.LeaAndroid.downloadStatus(); } catch (_) {}
-    }, 1500);
+      try { $("dlst").textContent = window.LeaAndroid.downloadStatus() || "…"; } catch (e) { $("dlst").textContent = String(e); }
+    }, 800);
     setTimeout(() => clearInterval(tick), 60 * 60 * 1000);
   };
   if ($("open-ld-settings")) $("open-ld-settings").onclick = () => {
