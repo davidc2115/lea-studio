@@ -246,105 +246,199 @@ public class LeaBridge {
      * Prérequis : Local Dream ouvert + modèle chargé (le backend démarre après).
      * complete.image = RGB brut base64 → JPEG.
      */
+    private volatile boolean ldBusy = false;
+    private volatile String ldJson = "{\"pending\":false}";
+
+    @JavascriptInterface
+    public String localDreamStatus() {
+        return ldJson;
+    }
+
+    /** Probe rapide : le backend Local Dream écoute-t-il sur :8081 ? */
+    @JavascriptInterface
+    public String localDreamProbe() {
+        try {
+            HttpURLConnection c = (HttpURLConnection) new URL("http://127.0.0.1:8081/tokenize").openConnection();
+            c.setConnectTimeout(1500);
+            c.setReadTimeout(2000);
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setRequestProperty("Content-Type", "application/json");
+            byte[] b = "{\"prompt\":\"test\"}".getBytes(StandardCharsets.UTF_8);
+            c.getOutputStream().write(b);
+            int code = c.getResponseCode();
+            c.disconnect();
+            JSONObject o = new JSONObject();
+            o.put("ok", code >= 200 && code < 500);
+            o.put("code", code);
+            o.put("port", 8081);
+            return o.toString();
+        } catch (Exception e) {
+            try {
+                JSONObject o = new JSONObject();
+                o.put("ok", false);
+                o.put("error", String.valueOf(e.getMessage()));
+                boolean installed = false;
+                try { ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0); installed = true; } catch (Exception ignored) {}
+                o.put("installed", installed);
+                return o.toString();
+            } catch (Exception e2) {
+                return "{\"ok\":false}";
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public String copyText(String text) {
+        try {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm != null) {
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("prompt", text == null ? "" : text));
+                return "{\"ok\":true}";
+            }
+        } catch (Exception ignored) {}
+        return "{\"ok\":false}";
+    }
+
+    /**
+     * Lance la génération Local Dream en arrière-plan (API 127.0.0.1:8081).
+     * Prérequis : Local Dream au premier plan ou en arrière-plan AVEC modèle chargé
+     * (le serveur :8081 ne démarre qu'après chargement du modèle).
+     */
     @JavascriptInterface
     public String localDreamGenerate(String prompt) {
         final String p = prompt == null ? "a woman" : prompt;
+        if (ldBusy) {
+            return "{\"pending\":true,\"note\":\"déjà en cours\"}";
+        }
+        // Probe d'abord
         try {
-            JSONObject body = new JSONObject();
-            body.put("prompt", p);
-            body.put("negative_prompt", "child, teen, underage, cartoon, anime, deformed, blurry, low quality");
-            body.put("steps", 20);
-            body.put("cfg", 7.5);
-            body.put("width", 512);
-            body.put("height", 512);
-            body.put("size", 512);
-            body.put("scheduler", "euler_a");
-            byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
-
-            HttpURLConnection post = (HttpURLConnection) new URL("http://127.0.0.1:8081/generate").openConnection();
-            post.setConnectTimeout(3000);
-            post.setReadTimeout(300000);
-            post.setRequestMethod("POST");
-            post.setDoOutput(true);
-            post.setRequestProperty("Content-Type", "application/json");
-            post.setRequestProperty("Accept", "text/event-stream");
-            OutputStream os = post.getOutputStream();
-            os.write(payload);
-            os.close();
-
-            int pc = post.getResponseCode();
-            InputStream in = (pc >= 200 && pc < 300) ? post.getInputStream() : post.getErrorStream();
-            if (in == null) {
-                post.disconnect();
-                return ldFail("HTTP " + pc + " sans corps. Ouvre Local Dream, charge un modèle, réessaie.");
+            HttpURLConnection c = (HttpURLConnection) new URL("http://127.0.0.1:8081/tokenize").openConnection();
+            c.setConnectTimeout(1500);
+            c.setReadTimeout(2000);
+            c.setRequestMethod("POST");
+            c.setDoOutput(true);
+            c.setRequestProperty("Content-Type", "application/json");
+            c.getOutputStream().write("{\"prompt\":\"hi\"}".getBytes(StandardCharsets.UTF_8));
+            int code = c.getResponseCode();
+            c.disconnect();
+            if (code < 200 || code >= 500) {
+                return ldFail("Backend :8081 répond HTTP " + code + ". Recharge le modèle dans Local Dream.");
             }
+        } catch (Exception e) {
+            return ldFail("127.0.0.1:8081 inaccessible. Étapes : 1) Ouvre Local Dream 2) Choisis et CHARGE un modèle jusqu'à l'écran de génération 3) Reviens ici sans forcer l'arrêt de Local Dream 4) Génère. Prompt copié si possible.");
+        }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            String line;
-            String currentEvent = "";
-            StringBuilder dataBuf = new StringBuilder();
-            String completeJson = null;
-            String errorMsg = null;
+        ldBusy = true;
+        ldJson = "{\"pending\":true,\"note\":\"génération Local Dream…\"}";
+        new Thread(() -> {
+            try {
+                JSONObject body = new JSONObject();
+                body.put("prompt", p);
+                body.put("negative_prompt", "child, teen, underage, cartoon, anime, deformed, blurry, low quality");
+                body.put("steps", 20);
+                body.put("cfg", 7.5);
+                body.put("width", 512);
+                body.put("height", 512);
+                body.put("size", 512);
+                body.put("scheduler", "euler_a");
+                byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
 
-            while ((line = br.readLine()) != null) {
-                if (line.startsWith("event:")) {
-                    currentEvent = line.substring(6).trim();
-                    dataBuf.setLength(0);
-                } else if (line.startsWith("data:")) {
-                    String d = line.substring(5).trim();
-                    if (dataBuf.length() > 0) dataBuf.append('\n');
-                    dataBuf.append(d);
-                } else if (line.isEmpty() && dataBuf.length() > 0) {
-                    String data = dataBuf.toString();
-                    dataBuf.setLength(0);
-                    if ("complete".equals(currentEvent) || data.contains("\"type\":\"complete\"")) {
-                        completeJson = data;
-                        break;
-                    }
-                    if ("error".equals(currentEvent) || data.contains("\"type\":\"error\"")) {
-                        try {
-                            errorMsg = new JSONObject(data).optString("message", data);
-                        } catch (Exception e) {
-                            errorMsg = data;
+                HttpURLConnection post = (HttpURLConnection) new URL("http://127.0.0.1:8081/generate").openConnection();
+                post.setConnectTimeout(5000);
+                post.setReadTimeout(300000);
+                post.setRequestMethod("POST");
+                post.setDoOutput(true);
+                post.setRequestProperty("Content-Type", "application/json");
+                post.setRequestProperty("Accept", "text/event-stream");
+                post.getOutputStream().write(payload);
+
+                int pc = post.getResponseCode();
+                InputStream in = (pc >= 200 && pc < 300) ? post.getInputStream() : post.getErrorStream();
+                if (in == null) {
+                    ldJson = ldFail("HTTP " + pc + " vide");
+                    return;
+                }
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                String line;
+                String currentEvent = "";
+                StringBuilder dataBuf = new StringBuilder();
+                String completeJson = null;
+                String errorMsg = null;
+                int step = 0;
+
+                while ((line = br.readLine()) != null) {
+                    if (line.startsWith("event:")) {
+                        currentEvent = line.substring(6).trim();
+                        dataBuf.setLength(0);
+                    } else if (line.startsWith("data:")) {
+                        String d = line.substring(5).trim();
+                        if (dataBuf.length() > 0) dataBuf.append('\n');
+                        dataBuf.append(d);
+                    } else if (line.isEmpty() && dataBuf.length() > 0) {
+                        String data = dataBuf.toString();
+                        dataBuf.setLength(0);
+                        if (data.contains("\"type\":\"progress\"") || "progress".equals(currentEvent)) {
+                            try {
+                                JSONObject pr = new JSONObject(data);
+                                step = pr.optInt("step", step);
+                                int total = pr.optInt("total_steps", 20);
+                                ldJson = "{\"pending\":true,\"note\":\"Local Dream step " + step + "/" + total + "\"}";
+                            } catch (Exception ignored) {}
                         }
-                        break;
+                        if ("complete".equals(currentEvent) || data.contains("\"type\":\"complete\"")) {
+                            completeJson = data;
+                            break;
+                        }
+                        if ("error".equals(currentEvent) || data.contains("\"type\":\"error\"")) {
+                            try { errorMsg = new JSONObject(data).optString("message", data); }
+                            catch (Exception e) { errorMsg = data; }
+                            break;
+                        }
                     }
                 }
-            }
-            br.close();
-            post.disconnect();
+                br.close();
+                post.disconnect();
 
-            if (errorMsg != null) {
-                return ldFail("Local Dream: " + errorMsg);
+                if (errorMsg != null) {
+                    ldJson = ldFail("Local Dream: " + errorMsg);
+                    return;
+                }
+                if (completeJson == null) {
+                    ldJson = ldFail("Pas d'image complete. Garde Local Dream ouvert pendant la génération.");
+                    return;
+                }
+                JSONObject done = new JSONObject(completeJson);
+                String rgbB64 = done.optString("image", "");
+                int w = done.optInt("width", 512);
+                int h = done.optInt("height", 512);
+                int ch = done.optInt("channels", 3);
+                String dataUrl = rgbBase64ToJpegDataUrl(rgbB64, w, h, ch);
+                if (dataUrl == null) {
+                    ldJson = ldFail("Conversion RGB→JPEG échouée");
+                    return;
+                }
+                JSONObject o = new JSONObject();
+                o.put("url", dataUrl);
+                o.put("engine", "local_dream");
+                o.put("done", true);
+                o.put("pending", false);
+                ldJson = o.toString();
+            } catch (Exception e) {
+                ldJson = ldFail(String.valueOf(e.getMessage()));
+            } finally {
+                ldBusy = false;
             }
-            if (completeJson == null) {
-                return ldFail("Pas d'événement complete. Charge un modèle dans Local Dream (backend :8081).");
-            }
+        }, "lea-localdream").start();
 
-            JSONObject done = new JSONObject(completeJson);
-            String rgbB64 = done.optString("image", "");
-            int w = done.optInt("width", 512);
-            int h = done.optInt("height", 512);
-            int ch = done.optInt("channels", 3);
-            if (rgbB64.isEmpty()) {
-                return ldFail("Réponse complete sans image.");
-            }
-            String dataUrl = rgbBase64ToJpegDataUrl(rgbB64, w, h, ch);
-            if (dataUrl == null) {
-                return ldFail("Conversion RGB→JPEG échouée.");
-            }
+        try {
             JSONObject o = new JSONObject();
-            o.put("url", dataUrl);
-            o.put("engine", "local_dream");
-            o.put("done", true);
-            o.put("width", w);
-            o.put("height", h);
-            o.put("seed", done.opt("seed"));
+            o.put("pending", true);
+            o.put("note", "Local Dream lancé (ne quitte pas Local Dream)");
             return o.toString();
-        } catch (java.net.ConnectException e) {
-            return ldFail("127.0.0.1:8081 refusé. Ouvre Local Dream et charge un modèle (serveur démarre après).");
         } catch (Exception e) {
-            return ldFail(String.valueOf(e.getMessage()));
+            return "{\"pending\":true}";
         }
     }
 
@@ -352,12 +446,10 @@ public class LeaBridge {
         try {
             JSONObject o = new JSONObject();
             o.put("done", true);
+            o.put("pending", false);
             o.put("error", msg);
             boolean installed = false;
-            try {
-                ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0);
-                installed = true;
-            } catch (Exception ignored) {}
+            try { ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0); installed = true; } catch (Exception ignored) {}
             o.put("installed", installed);
             o.put("hint", installed ? "open" : "install");
             return o.toString();

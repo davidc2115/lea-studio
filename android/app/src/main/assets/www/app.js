@@ -453,6 +453,7 @@ function renderProfile() {
     <h3 style="margin-top:18px">Photo du scénario</h3>
     <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit. Horde gratuit = visage variable. Tu peux supprimer les générées avec ×.' : ('Scénario de ' + c.name + ' · × pour supprimer une générée.')}</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
+    <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
       <option value="horde">Horde (cloud gratuit)</option>
@@ -502,6 +503,19 @@ function renderProfile() {
     };
   } catch (_) {}
   $("genimg").onclick = generatePhoto;
+  const refreshPreview = () => {
+    if (!$("prompt-preview")) return;
+    try {
+      const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
+      const pr = buildLeaImagePrompt(extra);
+      $("prompt-preview").textContent = "Prompt : " + pr.slice(0, 280) + (pr.length > 280 ? "…" : "");
+    } catch (e) {
+      $("prompt-preview").textContent = "";
+    }
+  };
+  if ($("imgprompt")) $("imgprompt").oninput = refreshPreview;
+  refreshPreview();
+
   if ($("open-ld")) $("open-ld").onclick = () => {
     if (!window.LeaAndroid || !window.LeaAndroid.openLocalDream) {
       setGenStatus("Ouvre Local Dream manuellement (Play Store : io.github.xororz.localdream).");
@@ -553,6 +567,60 @@ async function imageToBase64(src) {
   }
 }
 
+function currentImageEngine() {
+  // Priorité au sélecteur visible du profil
+  if ($("imgengine-profile") && $("imgengine-profile").value) {
+    return $("imgengine-profile").value;
+  }
+  if ($("imgengine") && $("imgengine").value) {
+    return $("imgengine").value;
+  }
+  try {
+    return JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine || "horde";
+  } catch {
+    return "horde";
+  }
+}
+
+function showPromptStatus(label, prompt) {
+  const short = String(prompt || "").replace(/\s+/g, " ").slice(0, 120);
+  setGenStatus(label + (short ? "\nPrompt : " + short + (prompt.length > 120 ? "…" : "") : ""));
+}
+
+async function pollLocalDreamJob(charId, prompt) {
+  const cid = charId || state.current || "lea";
+  for (let i = 0; i < 150; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    let data = {};
+    try {
+      data = JSON.parse(window.LeaAndroid.localDreamStatus() || "{}");
+    } catch {
+      data = {};
+    }
+    if (data.pending) {
+      setGenStatus(data.note || ("Local Dream… " + (i + 1)));
+      continue;
+    }
+    window._leaGenBusy = false;
+    if (data.error) {
+      setGenStatus(data.error);
+      if (window.LeaAndroid.copyText && prompt) {
+        try { window.LeaAndroid.copyText(prompt); } catch (_) {}
+      }
+      return;
+    }
+    if (data.url) {
+      const stored = await addToGallery(data.url, cid);
+      setGenStatus("Image Local Dream prête");
+      if (state.view === "profile" && state.current === cid) renderProfile();
+      if (state.current === cid) openFull(resolvePhotoSrc(stored) || stored);
+    }
+    return;
+  }
+  window._leaGenBusy = false;
+  setGenStatus("Local Dream timeout");
+}
+
 async function generatePhoto() {
   if (window._leaGenBusy) {
     setGenStatus("Déjà une génération en cours…");
@@ -562,59 +630,64 @@ async function generatePhoto() {
   const prompt = buildLeaImagePrompt(extra);
   const c = character();
   window._leaGenBusy = true;
-  setGenStatus("Préparation…");
+  const engine = currentImageEngine();
+  // mémoriser le choix du profil
   try {
-    const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
-
-    // —— Local Dream (API officielle 127.0.0.1:8081) ——
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    st.imageEngine = engine;
+    localStorage.setItem("lea.settings", JSON.stringify(st));
+  } catch (_) {}
+  showPromptStatus("Moteur : " + engine + " · préparation…", prompt);
+  try {
+    // —— Local Dream (API 127.0.0.1:8081) ——
     if (engine === "local_dream") {
-      setGenStatus("Local Dream :8081… (app ouverte + modèle chargé)");
       if (!window.LeaAndroid || !window.LeaAndroid.localDreamGenerate) {
-        setGenStatus("Pont natif manquant — rebuild APK.");
+        setGenStatus("Pont natif manquant — rebuild APK.\nPrompt : " + prompt.slice(0, 100));
         window._leaGenBusy = false;
         return;
       }
+      // Probe
       try {
-        await new Promise((r) => setTimeout(r, 30));
-        const raw = window.LeaAndroid.localDreamGenerate(prompt);
-        const data = typeof raw === "string" ? JSON.parse(raw) : raw;
-        if (data && data.url) {
-          const stored = await addToGallery(data.url, c.id);
-          setGenStatus("Image Local Dream prête");
+        const probe = JSON.parse(window.LeaAndroid.localDreamProbe() || "{}");
+        if (!probe.ok) {
+          if (window.LeaAndroid.copyText) try { window.LeaAndroid.copyText(prompt); } catch (_) {}
+          setGenStatus(
+            (probe.error || "API :8081 fermée") +
+            "\n1) Ouvre Local Dream  2) Charge un modèle jusqu'à l'écran générer  3) Ne force pas la fermeture  4) Reviens ici.\nPrompt copié dans le presse-papiers."
+          );
           window._leaGenBusy = false;
-          if (state.view === "profile") renderProfile();
-          openFull(resolvePhotoSrc(stored) || stored);
           return;
         }
-        if (data && (data.hint === "install" || data.hint === "open") && window.LeaAndroid.openLocalDream) {
-          try { window.LeaAndroid.openLocalDream(); } catch (_) {}
-        }
-        setGenStatus((data && data.error) || "Local Dream indisponible");
+      } catch (_) {}
+      showPromptStatus("Local Dream connecté — génération…", prompt);
+      const raw = window.LeaAndroid.localDreamGenerate(prompt);
+      const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+      if (data && data.url) {
+        const stored = await addToGallery(data.url, c.id);
+        setGenStatus("Image Local Dream prête");
         window._leaGenBusy = false;
-        return; // ne pas basculer sur Horde
-      } catch (e) {
-        setGenStatus("Local Dream : " + (e.message || e));
-        window._leaGenBusy = false;
+        if (state.view === "profile") renderProfile();
+        openFull(resolvePhotoSrc(stored) || stored);
         return;
       }
+      if (data && data.pending) {
+        pollLocalDreamJob(c.id, prompt);
+        return;
+      }
+      if (window.LeaAndroid.copyText) try { window.LeaAndroid.copyText(prompt); } catch (_) {}
+      setGenStatus((data && data.error) || "Local Dream indisponible");
+      window._leaGenBusy = false;
+      return;
     }
 
-    // —— stable-diffusion.cpp (natif pas encore lié) ——
+    // —— stable-diffusion.cpp ——
     if (engine === "sd_cpp") {
-      try {
-        const st = window.LeaAndroid && window.LeaAndroid.sdCppStatus
-          ? JSON.parse(window.LeaAndroid.sdCppStatus() || "{}")
-          : { ready: false, native: false };
-        setGenStatus(
-          st.native
-            ? (st.ready ? "sd.cpp : bridge génération à finaliser" : "Pas de modèle GGUF")
-            : "SD.cpp pas encore dans cet APK. Utilise Local Dream (modèle chargé) ou Horde."
-        );
-      } catch (_) {
-        setGenStatus("SD.cpp indisponible.");
+      setGenStatus("SD.cpp pas encore dans cet APK.\nChoisis « Local Dream » (modèle chargé) ou « Horde ».\nPrompt : " + prompt.slice(0, 140));
+      if (window.LeaAndroid && window.LeaAndroid.copyText) {
+        try { window.LeaAndroid.copyText(prompt); } catch (_) {}
       }
       window._leaGenBusy = false;
-      return; // ne pas basculer sur Horde
+      return;
     }
 
     if (engine === "local") {
