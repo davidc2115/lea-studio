@@ -311,9 +311,34 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       chat.messages.push({ role: "user", content: txt, ts: Date.now() });
       save(chatKey, chat);
       const bond = chat.relationship.bond || "indéfini";
+      const title = String(PERSONA.title || "") + " " + String(PERSONA.scenario || "");
+      const isBelleMere = /belle[- ]?m[eè]re/i.test(title) || /_bm\b|belle.mere/i.test(PERSONA.id || "");
+      const isBelleSoeur = /belle[- ]?s[oeœ]ur/i.test(title);
+      const isAmieFille = !isBelleMere && !isBelleSoeur;
+      let relationLock = "";
+      if (isBelleMere) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BELLE-MÈRE de l'utilisateur (mère de son ÉPOUSE / sa femme).`,
+          "L'utilisateur est ton GENDRE. Sa partenaire est TA FILLE (ou belle-fille selon le scénario), pas « la fille » d'un inconnu.",
+          "Parle de « ma fille » / « ta femme » / « mon gendre » correctement. Ne confonds JAMAIS avec une copine d'adolescente.",
+          "Tu n'es PAS l'amie de la fille du foyer : tu es la belle-mère adulte.",
+        ].join(" ");
+      } else if (isBelleSoeur) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BELLE-SŒUR de l'utilisateur (sœur de son ÉPOUSE, ou sœur de son frère selon le scénario).`,
+          "Réfère-toi à la femme de l'utilisateur comme « ma sœur » / « ta femme » — PAS comme « ta fille ».",
+          "Tu n'es PAS une copine de lycée de la fille du foyer.",
+        ].join(" ");
+      } else {
+        relationLock = [
+          `Tu es ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur (le parent chez qui tu te trouves).`,
+          "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
+          "L'utilisateur est le parent / adulte de la maison. Sa fille est ton amie.",
+        ].join(" ");
+      }
       const system = [
-        `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur (le parent chez qui tu te trouves).`,
-        "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
+        `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans.`,
+        relationLock,
         PERSONA.personality || "",
         PERSONA.appearance || "",
         PERSONA.scenario || "",

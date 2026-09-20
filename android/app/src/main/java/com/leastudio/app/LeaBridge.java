@@ -417,11 +417,25 @@ public class LeaBridge {
                 int ch = done.optInt("channels", 3);
                 String dataUrl = rgbBase64ToJpegDataUrl(rgbB64, w, h, ch);
                 if (dataUrl == null) {
-                    ldJson = ldFail("Conversion RGB→JPEG échouée");
+                    ldJson = ldFail("Conversion RGB→JPEG échouée (données invalides)");
                     return;
                 }
+                // Éviter limite Binder (~1 Mo) : écrire sur disque, renvoyer gallery:
+                String key = null;
+                try {
+                    key = saveGalleryImage("lea", dataUrl);
+                } catch (Exception ignored) {}
                 JSONObject o = new JSONObject();
-                o.put("url", dataUrl);
+                if (key != null && key.startsWith("gallery:")) {
+                    o.put("url", key);
+                } else {
+                    // fallback compressé si petit
+                    if (dataUrl.length() < 700000) o.put("url", dataUrl);
+                    else {
+                        ldJson = ldFail("Image trop grosse pour le pont JS et écriture disque échouée");
+                        return;
+                    }
+                }
                 o.put("engine", "local_dream");
                 o.put("done", true);
                 o.put("pending", false);
@@ -652,6 +666,11 @@ public class LeaBridge {
         } catch (Exception ignored) {}
         if (!out.isFile()) throw new Exception("Échec extraction binaire sd");
         return out;
+    }
+
+        @JavascriptInterface
+    public String downloadSdModel(String url) {
+        return downloadSdCppModel(url);
     }
 
     public String downloadSdCppModel(String url) {

@@ -163,6 +163,17 @@ app.post("/api/chat/:id/message", async (req, res) => {
 
   const system = [
     `Tu incarnes ${character.name}, ${character.age} ans.`,
+    (() => {
+      const t = String(character.title || "") + " " + String(character.scenario || "");
+      const id = String(character.id || "");
+      if (/belle[- ]?m[eè]re/i.test(t) || /_bm$/i.test(id)) {
+        return "Tu es la BELLE-MÈRE de l'utilisateur (mère de son épouse). Il est ton gendre. Parle de ta fille / sa femme correctement. PAS une amie de lycée.";
+      }
+      if (/belle[- ]?s[oeœ]ur/i.test(t)) {
+        return "Tu es la BELLE-SŒUR de l'utilisateur (sœur de son épouse). Réfère-toi à « ma sœur / ta femme », jamais « ta fille » comme amie d'ado.";
+      }
+      return "Tu es l'AMIE DE LA FILLE de l'utilisateur (parent de la maison). Pas sa meilleure amie à lui.";
+    })(),
     character.personality,
     "Apparence: " + character.appearance,
     "Scénario: " + character.scenario,

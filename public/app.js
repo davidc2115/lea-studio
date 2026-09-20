@@ -534,15 +534,16 @@ function renderProfile() {
       setGenStatus("Pas de pont natif (ouvre l'app Android, pas le navigateur).");
       return;
     }
-    if (!window.LeaAndroid.downloadSdCppModel) {
-      setGenStatus("APK trop vieux : rebuild requis (méthode downloadSdCppModel absente).");
+    const dlFn = window.LeaAndroid.downloadSdCppModel || window.LeaAndroid.downloadSdModel || window.LeaAndroid.downloadPack;
+    if (!dlFn) {
+      setGenStatus("APK trop vieux : rebuild requis. Méthodes DL absentes du pont natif.");
       return;
     }
     try {
       const info = window.LeaAndroid.bridgeInfo ? JSON.parse(window.LeaAndroid.bridgeInfo()) : {};
       setGenStatus("Démarrage DL… modèle actuel: " + (info.sdModel || "aucun"));
     } catch (_) {}
-    setGenStatus(window.LeaAndroid.downloadSdCppModel(""));
+    setGenStatus(dlFn.call(window.LeaAndroid, ""));
     const tick = setInterval(() => {
       try {
         const st = window.LeaAndroid.downloadStatus();
@@ -1258,11 +1259,12 @@ function renderSettings() {
       $("dlst").textContent = "Pas de pont natif — utilise l'APK Android.";
       return;
     }
-    if (!window.LeaAndroid.downloadSdCppModel) {
-      $("dlst").textContent = "APK trop vieux (rebuild). Méthode downloadSdCppModel absente.";
+    const dlFn2 = window.LeaAndroid.downloadSdCppModel || window.LeaAndroid.downloadSdModel;
+    if (!dlFn2) {
+      $("dlst").textContent = "APK trop vieux (rebuild). Pont DL absent.";
       return;
     }
-    $("dlst").textContent = window.LeaAndroid.downloadSdCppModel("");
+    $("dlst").textContent = dlFn2.call(window.LeaAndroid, "");
     const tick = setInterval(() => {
       try { $("dlst").textContent = window.LeaAndroid.downloadStatus() || "…"; } catch (e) { $("dlst").textContent = String(e); }
     }, 800);
