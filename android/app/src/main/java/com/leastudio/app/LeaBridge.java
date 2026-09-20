@@ -1,14 +1,21 @@
 package com.leastudio.app;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
 import org.json.JSONObject;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Pont JS ↔ natif.
@@ -195,14 +202,190 @@ public class LeaBridge {
         return localJson;
     }
 
+    private static final String LOCAL_DREAM_PKG = "io.github.xororz.localdream";
+
     @JavascriptInterface
-    public String localGenerate(String prompt) {
-        // MNN natif provoque un SIGSEGV/OOM qui tue tout le process Android
-        // (non catchable en Java). On n'appelle plus nativeSd tant que le
-        // pipeline n'est pas stabilisé. Horde reste le moteur fiable.
+    public String isLocalDreamInstalled() {
+        try {
+            ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0);
+            return "{\"installed\":true,\"package\":\"" + LOCAL_DREAM_PKG + "\"}";
+        } catch (Exception e) {
+            return "{\"installed\":false}";
+        }
+    }
+
+    /** Ouvre Local Dream, ou le Play Store / GitHub si absent. */
+    @JavascriptInterface
+    public String openLocalDream() {
+        try {
+            PackageManager pm = ctx.getPackageManager();
+            Intent launch = pm.getLaunchIntentForPackage(LOCAL_DREAM_PKG);
+            if (launch != null) {
+                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(launch);
+                return "{\"ok\":true,\"action\":\"launch\"}";
+            }
+            Intent market = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + LOCAL_DREAM_PKG));
+            market.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                ctx.startActivity(market);
+                return "{\"ok\":true,\"action\":\"playstore\"}";
+            } catch (Exception e) {
+                Intent web = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + LOCAL_DREAM_PKG));
+                web.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(web);
+                return "{\"ok\":true,\"action\":\"web\"}";
+            }
+        } catch (Exception e) {
+            return "{\"ok\":false,\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
+        }
+    }
+
+    /**
+     * Tente une génération via l'API HTTP locale de Local Dream (option « Allow LAN access »).
+     * Ports courants testés : 8080, 8188, 7860, 5000, 3000.
+     */
+    @JavascriptInterface
+    public String localDreamGenerate(String prompt) {
+        final String p = prompt == null ? "a woman" : prompt;
+        String[] bases = {
+            "http://127.0.0.1:8080",
+            "http://127.0.0.1:8188",
+            "http://127.0.0.1:7860",
+            "http://127.0.0.1:5000",
+            "http://127.0.0.1:3000"
+        };
+        for (String base : bases) {
+            try {
+                // Probe health
+                URL u = new URL(base + "/");
+                HttpURLConnection c = (HttpURLConnection) u.openConnection();
+                c.setConnectTimeout(800);
+                c.setReadTimeout(800);
+                c.setRequestMethod("GET");
+                int code = c.getResponseCode();
+                c.disconnect();
+                if (code < 200 || code >= 500) continue;
+
+                // Try txt2img style endpoints used by many local UIs
+                String[] paths = { "/sdapi/v1/txt2img", "/api/generate", "/generate", "/v1/txt2img" };
+                for (String path : paths) {
+                    try {
+                        JSONObject body = new JSONObject();
+                        body.put("prompt", p);
+                        body.put("negative_prompt", "child, teen, cartoon, blurry");
+                        body.put("steps", 20);
+                        body.put("width", 512);
+                        body.put("height", 768);
+                        body.put("cfg_scale", 7);
+                        byte[] payload = body.toString().getBytes(StandardCharsets.UTF_8);
+                        HttpURLConnection post = (HttpURLConnection) new URL(base + path).openConnection();
+                        post.setConnectTimeout(2000);
+                        post.setReadTimeout(180000);
+                        post.setRequestMethod("POST");
+                        post.setDoOutput(true);
+                        post.setRequestProperty("Content-Type", "application/json");
+                        OutputStream os = post.getOutputStream();
+                        os.write(payload);
+                        os.close();
+                        int pc = post.getResponseCode();
+                        InputStream in = pc >= 200 && pc < 300 ? post.getInputStream() : post.getErrorStream();
+                        if (in == null) continue;
+                        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) sb.append(line);
+                        br.close();
+                        post.disconnect();
+                        String resp = sb.toString();
+                        // A1111 style: images[0] base64
+                        if (resp.contains("\"images\"")) {
+                            int i = resp.indexOf("\"images\"");
+                            int b = resp.indexOf("\"", i + 10);
+                            int e2 = resp.indexOf("\"", b + 1);
+                            if (b > 0 && e2 > b) {
+                                String b64 = resp.substring(b + 1, e2);
+                                if (b64.length() > 200) {
+                                    JSONObject o = new JSONObject();
+                                    o.put("url", "data:image/png;base64," + b64);
+                                    o.put("engine", "local_dream");
+                                    o.put("done", true);
+                                    return o.toString();
+                                }
+                            }
+                        }
+                        if (resp.startsWith("data:image") || resp.contains("base64")) {
+                            JSONObject o = new JSONObject();
+                            o.put("url", resp.length() > 500 && resp.startsWith("data:") ? resp : ("data:image/png;base64," + resp));
+                            o.put("engine", "local_dream");
+                            o.put("done", true);
+                            return o.toString();
+                        }
+                    } catch (Exception ignored) {}
+                }
+            } catch (Exception ignored) {}
+        }
         try {
             JSONObject o = new JSONObject();
-            o.put("error", "Local MNN désactivé : crash natif sur cet appareil. Utilise Horde (cloud).");
+            boolean installed;
+            try {
+                ctx.getPackageManager().getPackageInfo(LOCAL_DREAM_PKG, 0);
+                installed = true;
+            } catch (Exception e) {
+                installed = false;
+            }
+            o.put("done", true);
+            o.put("installed", installed);
+            if (installed) {
+                o.put("error", "Local Dream installé mais API locale inaccessible. Ouvre Local Dream → active « Allow LAN access », lance une génération une fois, puis réessaie ici.");
+                o.put("hint", "open");
+            } else {
+                o.put("error", "Local Dream non installé. Installe-le (Play Store : Local Dream), télécharge un modèle SD 1.5, active LAN si dispo.");
+                o.put("hint", "install");
+            }
+            return o.toString();
+        } catch (Exception e) {
+            return "{\"error\":\"Local Dream indisponible\",\"done\":true}";
+        }
+    }
+
+    /** Statut pack stable-diffusion.cpp (GGUF dans filesDir/models/sdcpp/). */
+    @JavascriptInterface
+    public String sdCppStatus() {
+        try {
+            File dir = new File(ctx.getFilesDir(), "models/sdcpp");
+            File[] files = dir.isDirectory() ? dir.listFiles() : null;
+            long total = 0;
+            int n = 0;
+            if (files != null) {
+                for (File f : files) {
+                    if (f.isFile() && (f.getName().endsWith(".gguf") || f.getName().endsWith(".safetensors") || f.getName().endsWith(".ckpt"))) {
+                        total += f.length();
+                        n++;
+                    }
+                }
+            }
+            JSONObject o = new JSONObject();
+            o.put("ready", n > 0 && total > 50_000_000L);
+            o.put("files", n);
+            o.put("sizeMb", total / (1024 * 1024));
+            o.put("path", dir.getAbsolutePath());
+            o.put("native", false); // lib sd.cpp pas encore liée dans ce build
+            o.put("note", n > 0
+                ? "Pack détecté. Moteur sd.cpp natif en cours d'intégration — utilise Local Dream ou Horde pour générer."
+                : "Pas de modèle GGUF. Télécharge un SD 1.5 quantifié (ex. via Local Dream) ou utilise Horde.");
+            return o.toString();
+        } catch (Exception e) {
+            return "{\"ready\":false,\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}";
+        }
+    }
+
+    @JavascriptInterface
+    public String localGenerate(String prompt) {
+        // Ancien chemin MNN désactivé (crash). Redirige vers diagnostic.
+        try {
+            JSONObject o = new JSONObject();
+            o.put("error", "Ancien MNN désactivé. Choisis « Local Dream » ou « Horde », ou installe un modèle pour sd.cpp.");
             o.put("modelReady", modelReady());
             o.put("nativeOk", false);
             o.put("done", true);

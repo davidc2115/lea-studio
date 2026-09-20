@@ -303,7 +303,12 @@ function discoverCover(c) {
     const r = key.startsWith("gallery:") ? resolvePhotoSrc(key) : key;
     if (r) return r;
   }
-  return c.cover || "images/lea-portrait.jpg";
+  // cover déclarée peut ne pas encore être dans l'APK → fallback portrait
+  const cov = c.cover || "";
+  if (cov && !cov.includes("cast/")) return cov;
+  // si fichier cast manquant, le navigateur affichera cassé : on laisse le path
+  // (les covers sont ajoutées progressivement dans les builds)
+  return cov || "images/lea-portrait.jpg";
 }
 
 function filterDiscoverList(q) {
@@ -451,11 +456,12 @@ function renderProfile() {
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
       <option value="horde">Horde (cloud gratuit)</option>
-      <option value="local">Local (désactivé — crash natif)</option>
+      <option value="local_dream">Local Dream (app Android NPU/CPU)</option>
+      <option value="sd_cpp">Stable Diffusion.cpp (local, pack GGUF)</option>
     </select>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer (aléatoire)</button>
-      <button class="cta" id="dlpack2" type="button" style="margin-left:8px;background:#3a2048">Télécharger pack local</button>
+      <button class="cta" id="open-ld" type="button" style="margin-left:8px;background:#3a2048">Ouvrir Local Dream</button>
     </p>
     <p class="err" id="imgerr"></p>`;
   $("view-profile").onclick = (e) => {
@@ -496,16 +502,17 @@ function renderProfile() {
     };
   } catch (_) {}
   $("genimg").onclick = generatePhoto;
-  if ($("dlpack2")) $("dlpack2").onclick = () => {
-    if (!window.LeaAndroid || !window.LeaAndroid.downloadPack) {
-      setGenStatus("Téléchargement seulement dans l’APK.");
+  if ($("open-ld")) $("open-ld").onclick = () => {
+    if (!window.LeaAndroid || !window.LeaAndroid.openLocalDream) {
+      setGenStatus("Ouvre Local Dream manuellement (Play Store : io.github.xororz.localdream).");
       return;
     }
-    setGenStatus(window.LeaAndroid.downloadPack(""));
-    const tick = setInterval(() => {
-      if ($("imgerr")) $("imgerr").textContent = window.LeaAndroid.downloadStatus();
-    }, 1000);
-    setTimeout(() => clearInterval(tick), 30 * 60 * 1000);
+    try {
+      const r = JSON.parse(window.LeaAndroid.openLocalDream() || "{}");
+      setGenStatus(r.action === "launch" ? "Local Dream ouvert" : "Installation Local Dream…");
+    } catch (e) {
+      setGenStatus(String(e.message || e));
+    }
   };
 }
 
@@ -558,15 +565,56 @@ async function generatePhoto() {
   setGenStatus("Préparation…");
   try {
     const engine = (localStorage.getItem("lea.settings") && JSON.parse(localStorage.getItem("lea.settings") || "{}").imageEngine) || "horde";
-    if (engine === "local") {
-      // MNN natif provoque un crash process (SIGSEGV/OOM) non rattrapable.
-      setGenStatus("Local MNN désactivé (crash) → bascule Horde…");
+
+    // —— Local Dream (app io.github.xororz.localdream) ——
+    if (engine === "local_dream") {
+      setGenStatus("Local Dream…");
+      if (!window.LeaAndroid || !window.LeaAndroid.localDreamGenerate) {
+        setGenStatus("Local Dream : APK natif requis → Horde");
+      } else {
+        try {
+          const raw = window.LeaAndroid.localDreamGenerate(prompt);
+          const data = typeof raw === "string" ? JSON.parse(raw) : raw;
+          if (data && data.url) {
+            const stored = await addToGallery(data.url, c.id);
+            setGenStatus("Image Local Dream prête");
+            window._leaGenBusy = false;
+            if (state.view === "profile") renderProfile();
+            openFull(resolvePhotoSrc(stored) || stored);
+            return;
+          }
+          if (data && data.hint === "install" && window.LeaAndroid.openLocalDream) {
+            window.LeaAndroid.openLocalDream();
+          }
+          setGenStatus((data && data.error) || "Local Dream indisponible → Horde");
+        } catch (e) {
+          setGenStatus("Local Dream erreur → Horde");
+        }
+      }
+    }
+
+    // —— stable-diffusion.cpp (pack GGUF) ——
+    if (engine === "sd_cpp") {
+      setGenStatus("Stable Diffusion.cpp…");
       try {
-        const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        st.imageEngine = "horde";
-        localStorage.setItem("lea.settings", JSON.stringify(st));
-        if ($("imgengine-profile")) $("imgengine-profile").value = "horde";
-      } catch (_) {}
+        const st = window.LeaAndroid && window.LeaAndroid.sdCppStatus
+          ? JSON.parse(window.LeaAndroid.sdCppStatus() || "{}")
+          : { ready: false, native: false };
+        if (!st.native) {
+          setGenStatus((st.note || "sd.cpp natif pas encore lié dans ce build") + " → Horde");
+        } else if (!st.ready) {
+          setGenStatus("Pas de modèle GGUF dans models/sdcpp/ → Horde");
+        } else {
+          setGenStatus("sd.cpp prêt mais bridge génération à finaliser → Horde");
+        }
+      } catch (_) {
+        setGenStatus("sd.cpp indisponible → Horde");
+      }
+    }
+
+    // Ancien "local" MNN
+    if (engine === "local") {
+      setGenStatus("Ancien MNN désactivé → Horde");
     }
     const payload = { prompt, negative: bodyNegatives(c), nsfw: !/jade|lina|hana|mei|sasha/.test(c.id) };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
@@ -964,14 +1012,21 @@ function renderMemory() {
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Chat : clés Gemini. Images : Horde (cloud gratuit) ou Local SD 1.5 (téléphone, pack optionnel).</p>
+    <p style="color:var(--muted);font-size:13px">Chat : Gemini. Images : Horde, Local Dream (app), ou Stable Diffusion.cpp.</p>
     <label>Moteur images</label>
     <select id="imgengine">
       <option value="horde">Horde (cloud gratuit, recommandé)</option>
-      <option value="local">Local SD 1.5 (téléphone, pack ~1–2 Go)</option>
+      <option value="local_dream">Local Dream (NPU/CPU, app séparée)</option>
+      <option value="sd_cpp">Stable Diffusion.cpp (local GGUF)</option>
     </select>
-    <p style="color:var(--muted);font-size:13px">Local : pack SD 1.5 (~1–2 Go) à télécharger. Sans pack, Horde prend le relais automatiquement. Horde attend maintenant jusqu’à ~12 min (28 steps).</p>
-    <p style="margin-top:8px"><button class="cta" id="dlpack" type="button" style="background:#3a2048">Télécharger le pack SD 1.5 (~2 Go)</button></p>
+    <p style="color:var(--muted);font-size:13px">
+      <b>Horde</b> : gratuit, file d’attente.<br/>
+      <b>Local Dream</b> : installe l’app (Play Store), télécharge un modèle SD 1.5, active « Allow LAN access » pour que Léa Studio l’utilise.<br/>
+      <b>SD.cpp</b> : pack GGUF quantifié dans le téléphone (moteur natif en intégration).
+    </p>
+    <p style="margin-top:8px">
+      <button class="cta" id="open-ld-settings" type="button" style="background:#3a2048">Ouvrir / installer Local Dream</button>
+    </p>
     <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
@@ -1036,6 +1091,18 @@ function renderSettings() {
     });
     $("st").textContent = `OK — ${data.keys.gemini} clé(s) Gemini`;
     $("st").style.color = "#9dffc2";
+  };
+  if ($("open-ld-settings")) $("open-ld-settings").onclick = () => {
+    if (window.LeaAndroid && window.LeaAndroid.openLocalDream) {
+      try {
+        const r = JSON.parse(window.LeaAndroid.openLocalDream() || "{}");
+        $("dlst").textContent = r.action === "launch" ? "Local Dream ouvert" : "Redirection installation Local Dream…";
+      } catch (e) {
+        $("dlst").textContent = String(e.message || e);
+      }
+    } else {
+      $("dlst").textContent = "Play Store : Local Dream (io.github.xororz.localdream)";
+    }
   };
   if ($("dlpack")) $("dlpack").onclick = () => {
     if (!window.LeaAndroid || !window.LeaAndroid.downloadPack) {
