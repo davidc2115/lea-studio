@@ -69,10 +69,14 @@ jobs:
             BIN=$(find . -type f -executable | grep -E '/sd$|/sd-cli$' | head -1 || true)
           fi
           mkdir -p "$GITHUB_WORKSPACE/android/app/src/main/assets/native"
+          # UNE SEULE copie : jni/prebuilt (évite Duplicate resources mergeReleaseJniLibFolders)
+          mkdir -p "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a"
+          rm -f "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so" 2>/dev/null || true
           if [ -n "$BIN" ] && [ -f "$BIN" ]; then
             cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64"
-            chmod +x "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64"
-            ls -lh "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64"
+            cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
+            chmod +x "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
+            ls -lh "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
             echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
           else
             echo "WARN: binaire sd non trouvé — APK sans sd.cpp"
@@ -83,6 +87,28 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.7"
+
+
+      - name: Télécharger covers personnages
+        run: |
+          mkdir -p public/images/cast android/app/src/main/assets/www/images/cast
+          curl -sSL -o /tmp/cast-covers.zip             "https://github.com/davidc2115/lea-studio/releases/download/covers-v1/cast-covers.zip" || true
+          if [ -f /tmp/cast-covers.zip ]; then
+            unzip -qo /tmp/cast-covers.zip -d /tmp/cast_unpack
+            cp -n /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
+            cp -n /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
+            # also copy gallery slots from cover if missing
+            for f in public/images/cast/*.jpg; do
+              base=$(basename "$f" .jpg)
+              for i in 01 02 03 04 05; do
+                [ -f "public/images/cast/${base}-${i}.jpg" ] || cp "$f" "public/images/cast/${base}-${i}.jpg"
+                [ -f "android/app/src/main/assets/www/images/cast/${base}-${i}.jpg" ] || cp "$f" "android/app/src/main/assets/www/images/cast/${base}-${i}.jpg"
+              done
+            done
+            echo "covers: $(ls public/images/cast | wc -l)"
+          else
+            echo "WARN: pas de pack covers"
+          fi
 
       - name: Copier le frontend dans les assets
         run: |
@@ -97,6 +123,34 @@ jobs:
           gradle assembleRelease --no-daemon --stacktrace \
             -PversionName="$VERSION" \
             -PversionCode="$CODE"
+
+
+      - name: Vérifier libsd.so dans APK
+        run: |
+          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
+          echo "APK=$APK"
+          unzip -l "$APK" | grep -E "libsd|sd-arm64" || true
+          if ! unzip -l "$APK" | grep -q "lib/arm64-v8a/libsd.so"; then
+            echo "ERREUR: libsd.so absent de l'APK — injection forcée"
+            WORK=$(mktemp -d)
+            cp "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so" "$WORK/libsd.so" ||               cp "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64" "$WORK/libsd.so"
+            (
+              cd "$WORK"
+              mkdir -p lib/arm64-v8a
+              cp libsd.so lib/arm64-v8a/libsd.so
+              zip -u -X "$OLDPWD/$APK" lib/arm64-v8a/libsd.so
+            )
+            # re-sign
+            ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+            APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort | tail -1)
+            ZIPALIGN=$(find "$ANDROID_SDK_ROOT/build-tools" -name zipalign | sort | tail -1)
+            "$ZIPALIGN" -f -p 4 "$APK" "$APK.aligned"
+            mv "$APK.aligned" "$APK"
+            "$APKSIGNER" sign --ks android/app/lea-release.keystore --ks-pass pass:leastudio --key-pass pass:leastudio --ks-key-alias lea "$APK"
+            unzip -l "$APK" | grep libsd.so
+          else
+            echo "OK libsd.so présent"
+          fi
 
       - name: Renommer l'APK
         run: |
