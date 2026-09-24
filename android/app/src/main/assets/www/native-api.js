@@ -40,9 +40,141 @@
       memories: [],
       summaries: [],
       relationship: { closeness: 1, trust: 1, heat: 0, bond: "indéfini" },
-      scene: { place: "", outfit: "", intimate: [] },
+      scene: {
+        place: "",
+        place_detail: "",
+        outfit: "",
+        body: "",
+        clothing: [],
+        pose: "",
+        activity: "",
+        mood: "",
+        time: "",
+        people: [],
+        intimate: [],
+        log: [],
+      },
+      // Mémoire vectorielle légère (tags + vecteurs locaux + horodatage)
+      vault: {
+        entries: [], // {id, tag, text, ts, date, hour, vec}
+      },
       updatedAt: Date.now(),
     };
+  }
+
+  /** Tokenisation simple FR/EN pour similarité cosinus (offline, téléphone). */
+  function tokenizeMem(s) {
+    return String(s || "")
+      .toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9àâäéèêëïîôùûüç\s]/gi, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 2);
+  }
+  function textToVec(s) {
+    const toks = tokenizeMem(s);
+    const v = Object.create(null);
+    for (const w of toks) v[w] = (v[w] || 0) + 1;
+    return v;
+  }
+  function cosineSim(a, b) {
+    if (!a || !b) return 0;
+    let dot = 0, na = 0, nb = 0;
+    for (const k in a) {
+      na += a[k] * a[k];
+      if (b[k]) dot += a[k] * b[k];
+    }
+    for (const k in b) nb += b[k] * b[k];
+    if (!na || !nb) return 0;
+    return dot / (Math.sqrt(na) * Math.sqrt(nb));
+  }
+  function ensureVault(chat) {
+    if (!chat.vault || !Array.isArray(chat.vault.entries)) chat.vault = { entries: [] };
+    if (!chat.scene) chat.scene = emptyChat().scene;
+    if (!Array.isArray(chat.memories)) chat.memories = [];
+  }
+  function pushVault(chat, tag, text, pin) {
+    ensureVault(chat);
+    const tx = String(text || "").replace(/\s+/g, " ").trim().slice(0, 400);
+    if (!tx) return;
+    const now = Date.now();
+    const d = new Date(now);
+    // anti-doublon très récent même tag
+    const last = chat.vault.entries.filter((e) => e.tag === tag).slice(-2);
+    if (last.some((e) => e.text === tx)) return;
+    const entry = {
+      id: now + Math.floor(Math.random() * 999),
+      tag: tag, // tenue | lieu | pose | intime | corps | dialogue | fait | humeur
+      text: tx,
+      pinned: !!pin,
+      ts: now,
+      date: d.toISOString().slice(0, 10),
+      hour: d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"),
+      vec: textToVec(tag + " " + tx),
+    };
+    chat.vault.entries.push(entry);
+    // miroir dans memories pour UI existante
+    chat.memories.push({
+      id: entry.id,
+      category: tag,
+      text: tx,
+      pinned: !!pin,
+      createdAt: now,
+      date: entry.date,
+      hour: entry.hour,
+    });
+    // limite ~800 entrées vault (quasi illimité usage normal)
+    if (chat.vault.entries.length > 800) {
+      const pinned = chat.vault.entries.filter((e) => e.pinned);
+      const rest = chat.vault.entries.filter((e) => !e.pinned).slice(-750);
+      chat.vault.entries = pinned.concat(rest).slice(-800);
+    }
+    if (chat.memories.length > 800) {
+      const pinned = chat.memories.filter((m) => m.pinned);
+      const rest = chat.memories.filter((m) => !m.pinned).slice(-750);
+      chat.memories = pinned.concat(rest).slice(-800);
+    }
+  }
+  /** Recherche vectorielle locale par tag optionnel + requête + récence. */
+  function searchVault(chat, query, tag, limit) {
+    ensureVault(chat);
+    const qv = textToVec(query || "");
+    const lim = limit || 12;
+    const now = Date.now();
+    let list = chat.vault.entries;
+    if (tag) list = list.filter((e) => e.tag === tag);
+    const scored = list.map((e) => {
+      const sim = cosineSim(qv, e.vec || textToVec(e.text));
+      const ageH = (now - (e.ts || 0)) / 3600000;
+      const recency = ageH < 1 ? 0.35 : ageH < 6 ? 0.2 : ageH < 24 ? 0.1 : 0;
+      const pin = e.pinned ? 0.25 : 0;
+      return { e, score: sim + recency + pin };
+    });
+    scored.sort((a, b) => b.score - a.score || (b.e.ts - a.e.ts));
+    return scored.slice(0, lim).map((x) => x.e);
+  }
+  function lastByTag(chat, tag) {
+    ensureVault(chat);
+    const list = chat.vault.entries.filter((e) => e.tag === tag);
+    return list.length ? list[list.length - 1] : null;
+  }
+  function currentStateBlock(chat) {
+    ensureVault(chat);
+    const sc = chat.scene || {};
+    const L = (tag) => {
+      const e = lastByTag(chat, tag);
+      return e ? e.text + " (" + e.date + " " + e.hour + ")" : (sc[tag === "tenue" ? "outfit" : tag === "lieu" ? "place" : tag] || "inconnu");
+    };
+    return [
+      "=== ÉTAT ACTUEL (source de vérité — ne contredis pas) ===",
+      "DERNIÈRE TENUE / CORPS: " + (sc.body || "") + " | " + (sc.outfit || "") + " | vault: " + L("tenue"),
+      sc.clothes ? ("PIÈCES: haut=" + sc.clothes.top + " bas=" + sc.clothes.bottom + " soutien=" + sc.clothes.bra + " culotte=" + sc.clothes.panties) : "",
+      "DERNIER LIEU: " + (sc.place || "") + " | vault: " + L("lieu"),
+      "DERNIÈRE POSE/POSITION: " + (sc.pose || sc.activity || "") + " | vault: " + L("pose"),
+      "DERNIÈRE ACTIVITÉ: " + (sc.activity || ""),
+      "HUMEUR: " + (sc.mood || ""),
+      "DERNIER MOMENT INTIME: " + L("intime"),
+    ].join("\n");
   }
 
   function settings() {
@@ -57,7 +189,7 @@
       imageProvider: "gemini",
       imageEngine: "horde",
       geminiImageModel: "auto",
-      geminiTextModel: "gemini-3.5-flash-lite",
+      geminiTextModel: "gemini-2.5-flash-lite",
     });
   }
 
@@ -70,15 +202,40 @@
 
   function allGeminiKeys() {
     const s = settings();
-    const raw = [s.geminiKeys, s.imageKeys, s.grokKeys, s.openaiKeys].filter(Boolean).join("\n");
-    return [...new Set(parseKeys(raw).filter((k) => !/^sk-/.test(k)))];
+    // Uniquement les clés Gemini (pas OpenAI sk-…, pas Grok)
+    const raw = String(s.geminiKeys || "");
+    return [...new Set(parseKeys(raw).filter((k) => {
+      if (!k || k.length < 20) return false;
+      if (/^sk-/.test(k)) return false; // OpenAI
+      if (/^xai-/.test(k)) return false; // Grok
+      return true;
+    }))];
+  }
+
+  /** Rotation round-robin : démarre à la clé suivante à chaque appel */
+  let _geminiKeyCursor = 0;
+  function rotatedGeminiKeys() {
+    const keys = allGeminiKeys();
+    if (keys.length <= 1) return keys;
+    const start = _geminiKeyCursor % keys.length;
+    _geminiKeyCursor = (start + 1) % keys.length;
+    return keys.slice(start).concat(keys.slice(0, start));
+  }
+
+  let _openaiKeyCursor = 0;
+  function rotatedOpenAIKeys() {
+    const keys = parseKeys(settings().openaiKeys);
+    if (keys.length <= 1) return keys;
+    const start = _openaiKeyCursor % keys.length;
+    _openaiKeyCursor = (start + 1) % keys.length;
+    return keys.slice(start).concat(keys.slice(0, start));
   }
 
   async function callGemini(messages, keys) {
     const s = settings();
-    const pref = s.geminiTextModel || "gemini-3.5-flash-lite";
-    const models = [pref, "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-2.5-flash"]
-      .filter((m, i, a) => a.indexOf(m) === i);
+    const pref = s.geminiTextModel || "gemini-2.5-flash-lite";
+    const models = [pref, "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.0-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-2.5-flash-lite-preview-09-2025"]
+      .filter((m, idx, a) => a.indexOf(m) === idx);
     const safetySettings = [
       { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
       { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -86,47 +243,73 @@
       { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
       { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
     ];
+    const keyList = (keys && keys.length) ? keys : rotatedGeminiKeys();
     let last = "Aucune clé Gemini";
-    for (const key of keys) {
-      const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
-      const contents = messages
-        .filter((m) => m.role !== "system")
-        .map((m) => ({
-          role: m.role === "assistant" ? "model" : "user",
-          parts: [{ text: m.content }],
-        }));
+    const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+    const contents = messages
+      .filter((m) => m.role !== "system")
+      .map((m) => ({
+        role: m.role === "assistant" ? "model" : "user",
+        parts: [{ text: m.content }],
+      }));
+    if (!contents.length) {
+      contents.push({ role: "user", parts: [{ text: "(continue)" }] });
+    }
+    for (let ki = 0; ki < keyList.length; ki++) {
+      const key = keyList[ki];
+      let keyHardFail = false;
       for (const model of models) {
         try {
+          const payload = {
+            systemInstruction: { parts: [{ text: system }] },
+            contents,
+            generationConfig: {
+              temperature: 0.9,
+              maxOutputTokens: 1536,
+              thinkingConfig: { thinkingBudget: 0 },
+            },
+            safetySettings,
+          };
           const res = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                systemInstruction: { parts: [{ text: system }] },
-                contents,
-                generationConfig: { temperature: 0.9, maxOutputTokens: 450 },
-                safetySettings,
-              }),
+              body: JSON.stringify(payload),
             }
           );
-          const data = await res.json();
+          const data = await res.json().catch(() => ({}));
           if (data.error) {
-            last = data.error.message + " [" + model + "]";
-            if (!/not found|NOT_FOUND|does not exist/i.test(last)) break;
+            last = (data.error.message || "erreur") + " [" + model + " · clé " + (ki + 1) + "/" + keyList.length + "]";
+            if (/API key not valid|API_KEY_INVALID|PERMISSION_DENIED/i.test(last) && !/quota|rate|RESOURCE_EXHAUSTED|429/i.test(last)) {
+              keyHardFail = true;
+              break;
+            }
             continue;
           }
           const cand = data.candidates?.[0];
-          const text = cand?.content?.parts?.map((p) => p.text).join("") || "";
-          if (text) return text.trim();
-          last = "Réponse Gemini vide (" + (cand?.finishReason || "no text") + ") [" + model + "]";
+          let text = cand?.content?.parts?.map((p) => p.text).filter(Boolean).join("") || "";
+          const finish = cand?.finishReason || "";
+          if (!text.trim()) {
+            last = "Réponse vide (" + (finish || data.promptFeedback?.blockReason || "no text") + ") [" + model + "]";
+            continue;
+          }
+          if (finish === "MAX_TOKENS" && !/[.!?…*)]$/.test(text.trim())) {
+            text = text.trim() + "…";
+          }
+          console.log("[lea] Gemini OK modèle=" + model + " clé=" + (ki + 1) + "/" + keyList.length + " finish=" + finish);
+          return text.trim();
         } catch (e) {
-          last = e.message;
+          last = (e.message || "réseau") + " [" + model + "]";
+          continue;
         }
       }
+      if (keyHardFail) continue;
     }
-    throw new Error(last);
+    throw new Error(last || "Toutes les clés Gemini ont échoué");
   }
+
+
 
   async function callOpenAI(messages, keys) {
     let last = "Aucune clé OpenAI";
@@ -142,7 +325,7 @@
             model: "gpt-4o-mini",
             messages,
             temperature: 0.9,
-            max_tokens: 700,
+            max_tokens: 560,
           }),
         });
         const data = await res.json();
@@ -161,72 +344,400 @@
   async function generate(messages, provider) {
     const s = settings();
     const pref = (provider || s.provider || "gemini").toLowerCase();
-    const g = allGeminiKeys();
-    const o = parseKeys(s.openaiKeys);
+    const g = rotatedGeminiKeys();
+    const o = rotatedOpenAIKeys();
     const errors = [];
-    const order = pref === "openai" ? ["openai", "gemini"] : ["gemini"];
+    const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
     for (const p of order) {
       try {
         if (p === "gemini" && g.length) return await callGemini(messages, g);
         if (p === "openai" && o.length) return await callOpenAI(messages, o);
       } catch (e) {
-        errors.push(`${p}: ${e.message}`);
+        errors.push(p + ": " + (e.message || e));
       }
     }
-    throw new Error(errors.join(" | ") || "Ajoute tes clés dans Clés & réglages");
+    throw new Error(errors.join(" | ") || "Ajoute tes clés Gemini (plusieurs = rotation auto) dans Clés");
+  }
+
+  /** Retire les fuites de prompt système / meta hors personnage. */
+  function sanitizeReply(text) {
+    let t = String(text || "");
+    // Fuites méta / prompt système (anglais ou technique)
+    const leakLine = /^(thought|action|speech|format|avoid|interdit|r[eè]gle|mode\s+nsfw|mode\s+sfw|apparence fixe|morphologie|system|prompt|hourglass|95d|identity|client-agent|style de r[eé]ponse|ne jamais|responds? only|you are)/i;
+    const leakFrag = [
+      /thought\s*,\s*action\s*,\s*speech[^\n]*/gi,
+      /1\s*[-–]?\s*2\s*paragraphs?[^\n]*/gi,
+      /avoid\s+clich[eé]\s+phrases?[^\n]*/gi,
+      /\(\s*"prou[^\n]*/gi,
+      /prouve-le-moi[^\n]*/gi,
+      /APPARENCE FIXE[^\n]*/gi,
+      /TEMP[EÉ]RAMENT[^\n]*/gi,
+      /Format OBLIGATOIRE[^\n]*/gi,
+      /STYLE DE R[EÉ]PONSE[^\n]*/gi,
+      /SAME face[^\n]*/gi,
+      /\b\d{2}D\b[^\n]{0,40}hourglass[^\n]*/gi,
+      /hourglass[^\n]{0,60}(brown eyes|fair skin)[^\n]*/gi,
+      /,\s*hourglass,\s*long brown hair[^\n]*/gi,
+      /D,\s*hourglass[^\n]*/gi,
+      /long brown hair,\s*brown eyes,\s*fair skin\)?\.?/gi,
+      /looks exactly \d+ years? old[^\n]*/gi,
+      /NOT nude[^\n]*/gi,
+      /OUTFIT REQUIRED[^\n]*/gi,
+      /DYNAMIC SCENE PHOTO[^\n]*/gi,
+      /Client-Agent[^\n]*/gi,
+      /INTERDIT[^\n]{0,80}/gi,
+      /R[EÈ]GLE RELATION[^\n]*/gi,
+      /SC[EÈ]NE FIXE[^\n]*/gi,
+      /CONTINUIT[EÉ] (LIEU|TENUE)[^\n]*/gi,
+      /MODE (NSFW|SFW)[^\n]*/gi,
+      /\bun\s+\d{2}D\b[^\n]{0,50}/gi,
+    ];
+    // Coupe début si instructions EN / format
+    if (/^\s*(thought|action|speech|format|avoid clich|1\s*[-–]?\s*2\s*para)/i.test(t)) {
+      const cut = t.search(/\n\s*[~*«"A-Za-zÀ-ÿ]/);
+      if (cut > 15) t = t.slice(cut);
+      else t = t.replace(/^[^~*\n]{10,200}/, "");
+    }
+    const lines = t.split("\n");
+    const kept = [];
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s) { kept.push(line); continue; }
+      if (leakLine.test(s)) continue;
+      if (/^[A-Z][A-Z\s]{6,}:/.test(s) && /FIXE|OBLIGATOIRE|INTERDIT|MODE|R[EÈ]GLE|STYLE|TEMP/.test(s)) continue;
+      // fiche technique morphologie collée
+      if (/\bhourglass\b/i.test(s) && /\b(brown eyes|fair skin|95D|brown hair)\b/i.test(s)) continue;
+      if (/^\(?\s*D,\s*hourglass/i.test(s)) continue;
+      if (/avoid clich/i.test(s) || /thought,\s*action/i.test(s)) continue;
+      if (/paragraphs?\)\.?/i.test(s) && s.length < 80) continue;
+      // ligne quasi vide après purge
+      if (/^[\s*~.·,;:\-–"'»«)]+$/.test(s)) continue;
+      kept.push(line);
+    }
+    t = kept.join("\n");
+    for (const re of leakFrag) t = t.replace(re, "");
+    t = t.replace(/\n{3,}/g, "\n\n").replace(/^\s*[).,;:\-–*]+\s*/gm, "").trim();
+    // Pensée ouverte sans fermeture : on laisse si assez de contenu
+    if (t.length < 12) {
+      t = "~…~\n*elle hésite un instant, mal à l'aise*\nPardon… je reprends.";
+    }
+    return t;
+  }
+
+  /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
+  function cleanHistory(messages) {
+    return (messages || []).slice(-20).map((m) => ({
+      role: m.role === "user" ? "user" : "assistant",
+      content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
+    })).filter((m) => m.content && m.content.length > 1);
   }
 
   function extractScene(chat, userTxt, replyTxt) {
-    if (!chat.scene) chat.scene = { place: "", outfit: "", intimate: [] };
-    const blob = (userTxt + "\n" + (replyTxt || "")).toLowerCase();
+    ensureVault(chat);
+    const blob = (String(userTxt || "") + "\n" + String(replyTxt || "")).toLowerCase();
+    const sc = chat.scene;
+    const now = Date.now();
+    function setScene(field, value) {
+      if (!value || sc[field] === value) return;
+      const prev = sc[field];
+      sc[field] = value;
+      sc.log = (sc.log || []).concat([{ t: now, field, from: prev || "", to: value }]).slice(-120);
+    }
+
+    // —— LIEU ——
     const places = [
-      [/chambre|lit\b|au lit/, "chambre / lit"],
-      [/salon|canapé|sofa/, "salon"],
-      [/cuisine/, "cuisine"],
-      [/salle de bain|douche|baignoire/, "salle de bain"],
-      [/couloir|entrée|porte|chambranle/, "entrée / couloir"],
-      [/dehors|jardin|balcon|rue|voiture|voiture/, "dehors"],
-      [/bureau/, "bureau"],
+      [/chambre|bedroom|au lit|dans le lit/, "chambre"],
+      [/salon|canapé|sofa|living/, "salon"],
+      [/cuisine|kitchen/, "cuisine"],
+      [/salle de bain|douche|bain|bathroom/, "salle de bain"],
+      [/porte|entrée|doorway|seuil/, "entrée"],
+      [/balcon|terrasse/, "balcon"],
+      [/voiture|auto/, "voiture"],
+      [/jardin|dehors|extérieur|rue|parc/, "dehors"],
+      [/bureau|office|desk/, "bureau"],
+      [/hôtel|hotel/, "hôtel"],
     ];
     for (const [re, label] of places) {
-      if (re.test(blob)) { chat.scene.place = label; break; }
-    }
-    const outfits = [
-      [/nuisette|négligé/, "nuisette"],
-      [/lingerie|soutien-gorge|string|porte[- ]jarretelle/, "lingerie"],
-      [/nue\b|à poil|toute nue|déshabill/, "nue"],
-      [/jean|top court|crop/, "jean + top court"],
-      [/serviette/, "serviette"],
-      [/robe/, "robe"],
-      [/pyjama/, "pyjama"],
-    ];
-    for (const [re, label] of outfits) {
-      if (re.test(blob)) { chat.scene.outfit = label; break; }
-    }
-    if (/(baise|baiser|suce|doigte|pénètre|orgasme|gicl| cul |chatte|bite|sein)/i.test(blob)) {
-      const note = String(userTxt || "").replace(/\s+/g, " ").slice(0, 140);
-      if (note) {
-        chat.scene.intimate = (chat.scene.intimate || []).concat([note]).slice(-8);
+      if (re.test(blob)) {
+        setScene("place", label);
+        pushVault(chat, "lieu", "lieu: " + label + " — " + String(userTxt || replyTxt || "").replace(/\s+/g, " ").slice(0, 160));
+        break;
       }
+    }
+
+    // —— TENUE PIÈCE PAR PIÈCE ——
+    if (!sc.clothes || typeof sc.clothes !== "object") {
+      sc.clothes = { top: true, bottom: true, bra: true, panties: true };
+    }
+    const cl = sc.clothes;
+
+    function syncBodyFromClothes() {
+      const topOn = !!cl.top && cl.top !== false;
+      const botOn = !!cl.bottom && cl.bottom !== false;
+      const braOn = cl.bra !== false;
+      const panOn = cl.panties !== false;
+      if (cl.top === "nuisette") {
+        setScene("body", "nuisette"); setScene("outfit", "nuisette"); return;
+      }
+      if (cl.top === "serviette") {
+        setScene("body", "serviette"); setScene("outfit", "serviette"); return;
+      }
+      if (cl.top === "peignoir") {
+        setScene("body", "peignoir"); setScene("outfit", "peignoir"); return;
+      }
+      if (!topOn && !botOn && !braOn && !panOn) {
+        setScene("body", "nue"); setScene("outfit", "nue");
+      } else if (!topOn && !botOn && braOn && panOn) {
+        setScene("body", "lingerie"); setScene("outfit", "soutien-gorge et culotte");
+      } else if (!topOn && !botOn && !braOn && panOn) {
+        setScene("body", "culotte_seule"); setScene("outfit", "culotte seule");
+      } else if (!topOn && !botOn && braOn && !panOn) {
+        setScene("body", "soutien_seul"); setScene("outfit", "soutien-gorge seul");
+      } else if (!topOn && braOn && botOn) {
+        setScene("body", "soutien_bas"); setScene("outfit", "soutien-gorge + bas");
+      } else if (!topOn && !braOn && botOn) {
+        setScene("body", "topless"); setScene("outfit", "topless + bas");
+      } else if (topOn && !botOn && panOn) {
+        setScene("body", "haut_culotte"); setScene("outfit", "haut + culotte");
+      } else if (topOn && !botOn && !panOn) {
+        setScene("body", "haut_sans_culotte"); setScene("outfit", "haut sans culotte");
+      } else if (topOn && botOn && !panOn) {
+        setScene("body", "habillée_sans_culotte"); setScene("outfit", "habillée sans culotte");
+      } else if (topOn && botOn && !braOn) {
+        setScene("body", "habillée_sans_soutien"); setScene("outfit", "habillée sans soutien");
+      } else {
+        setScene("body", "habillée");
+        if (!sc.outfit || sc.outfit === "nue" || /topless|lingerie/.test(sc.outfit || "")) {
+          setScene("outfit", "habillée");
+        }
+      }
+    }
+
+    // Entièrement nue
+    if (/(toute\s+nue|compl[eè]tement\s+nue|à poil|fully nude|sans rien sur le corps)/i.test(blob)
+        || (/\bnue\b/i.test(blob) && /(toute|complètement|entièrement)/i.test(blob))) {
+      cl.top = false; cl.bottom = false; cl.bra = false; cl.panties = false;
+      pushVault(chat, "tenue", "entièrement nue");
+    }
+
+    // Retrait HAUT seulement → soutien-gorge reste (pas forcément seins nus)
+    if (/(enl[eè]ve|retire|ôte|enlever|retirer|je (te )?retire|je (lui )?enlève|remove|takes? off|pulls? off).{0,50}(t-?shirt|tee-shirt|haut|top|chemise|pull|hoodie|sweat|crop)/i.test(blob)
+        || /(t-?shirt|haut|top|chemise|crop).{0,25}(par terre|au sol|enl[eè]v|retir|ôté)/i.test(blob)) {
+      cl.top = false;
+      // bra inchangé (true par défaut)
+      pushVault(chat, "tenue", "haut retiré → soutien-gorge visible si encore porté");
+    }
+
+    // Retrait BAS seulement → culotte reste (pas nue)
+    if (/(enl[eè]ve|retire|ôte|remove|takes? off).{0,50}(jean|pantalon|jupe|short|legging|pantalons)/i.test(blob)
+        || /(jean|pantalon|jupe|short).{0,25}(par terre|au sol|enl[eè]v|retir)/i.test(blob)) {
+      cl.bottom = false;
+      pushVault(chat, "tenue", "bas retiré → culotte visible si encore portée");
+    }
+
+    // Retrait SOUTIEN
+    if (/(enl[eè]ve|retire|ôte|remove).{0,40}(soutien[- ]gorge|soutien|bra)(?!\s*et)/i.test(blob)
+        || /(soutien[- ]gorge|bra).{0,20}(par terre|enl[eè]v|retir)/i.test(blob)
+        || /(sans soutien[- ]gorge|no bra|pas de soutien)/i.test(blob)) {
+      cl.bra = false;
+      pushVault(chat, "tenue", "soutien-gorge retiré ou absent");
+    }
+
+    // Retrait CULOTTE / sans culotte
+    if (/(enl[eè]ve|retire|ôte|remove).{0,40}(culotte|string|slip|panties|thong)/i.test(blob)
+        || /(culotte|string).{0,20}(par terre|enl[eè]v)/i.test(blob)
+        || /(sans culotte|pas de culotte|no panties|commando)/i.test(blob)) {
+      cl.panties = false;
+      pushVault(chat, "tenue", "sans culotte / culotte retirée");
+    }
+
+    // Rhabiller / rajuster / récupérer ses vêtements
+    if (/(s['']?habille|rhabill|remet\s+(son|sa|le|la)\s+(t-?shirt|jean|haut|bas|crop|veste)|habill[eé]e?\s+compl[eè]t)/i.test(blob)) {
+      cl.top = true; cl.bottom = true; cl.bra = true; cl.panties = true;
+      pushVault(chat, "tenue", "rhabillée");
+    }
+    // "je rajuste mon soutien-gorge et ma culotte" → lingerie portée
+    if (/(rajuste|remet|enfile|ajuste|repositionne).{0,40}(soutien|bra|culotte|string)/i.test(blob)
+        || /(soutien[- ]gorge|culotte|string).{0,30}(rajuste|remet|enfile)/i.test(blob)) {
+      if (/soutien|bra/i.test(blob)) cl.bra = true;
+      if (/culotte|string|slip/i.test(blob)) cl.panties = true;
+      pushVault(chat, "tenue", "sous-vêtements rajustés / portés");
+    }
+    // récupère / ramasse son crop top, t-shirt, jean → en train de se rhabiller
+    if (/(récup[eè]re|ramasse|reprend|attrape|enfile).{0,40}(crop|top|t-?shirt|chemise|jean|jupe|veste|hoodie)/i.test(blob)) {
+      if (/crop|top|t-?shirt|chemise|veste|hoodie/i.test(blob)) {
+        cl.top = true;
+        cl.bra = true; // si elle remet le haut, soutien souvent encore là
+      }
+      if (/jean|jupe|pantalon|short/i.test(blob)) cl.bottom = true;
+      pushVault(chat, "tenue", "récupère ses vêtements → se rhabille");
+    }
+    // "mon soutien-gorge et ma culotte" mentionnés comme portés (pas retirés)
+    if (/(mon|son|ma|sa)\s+soutien[- ]gorge.{0,30}(et|&).{0,15}(ma|sa)\s+(culotte|string)/i.test(blob)
+        && !/(enl[eè]ve|retire|ôte).{0,20}soutien/i.test(blob)) {
+      cl.bra = true;
+      cl.panties = true;
+    }
+
+    // États explicites
+    if (/(en\s+)?(soutien[- ]gorge|bra)\s+(et|&)\s+(culotte|string)/i.test(blob)
+        || /(seulement|juste)\s+(en\s+)?(lingerie|sous-vêtements)/i.test(blob)) {
+      cl.top = false; cl.bottom = false; cl.bra = true; cl.panties = true;
+    }
+    if (/\btopless\b|seins?\s+nus|poitrine\s+nue|seins à l'air/i.test(blob)) {
+      cl.top = false; cl.bra = false;
+    }
+    // Tenue : priorité aux 2 derniers messages (pas tout l'historique)
+    const last2 = String(userTxt || "") + "\n" + String(replyTxt || "");
+    const recentOnly = last2.toLowerCase();
+
+    if (/nuisette|n[eé]glig[eé]/i.test(recentOnly)) {
+      cl.top = "nuisette"; cl.bottom = false; cl.bra = false; cl.panties = true;
+      setScene("outfit", "nuisette");
+    } else if (/robe\s+(courte|moulante|sexy)|petite\s+robe|décolleté|decollete/i.test(recentOnly)
+        || (/robe/i.test(recentOnly) && !/(enl[eè]ve|retire).{0,20}robe/i.test(recentOnly))) {
+      cl.top = true; cl.bottom = true; cl.bra = true; cl.panties = true;
+      setScene("outfit", "robe courte moulante décolleté");
+      pushVault(chat, "tenue", "robe courte moulante à décolleté (tenue active)");
+    } else if (/(en\s+)?serviette|towel only|juste\s+(une\s+)?serviette/i.test(recentOnly)
+        && !/robe|crop\s*top|jean|habill/i.test(recentOnly)) {
+      // Serviette UNIQUEMENT si mentionnée dans ce tour ET pas de robe/vêtements en même temps
+      cl.top = "serviette"; cl.bottom = "serviette"; cl.bra = false; cl.panties = false;
+      setScene("outfit", "serviette");
+    } else if (/peignoir|robe de chambre/i.test(recentOnly)) {
+      cl.top = "peignoir"; cl.bottom = "peignoir";
+      setScene("outfit", "peignoir");
+    }
+
+    // Description de vêtements (sans retrait) — sur messages récents
+    if (/(crop\s*top|top\s+court|t-?shirt|jean|robe|jupe|hoodie)/i.test(recentOnly)
+        && !/(enl[eè]ve|retire|ôte)/i.test(recentOnly)) {
+      if (/crop|top\s+court|t-?shirt|hoodie|chemise/i.test(recentOnly)) cl.top = true;
+      if (/jean|jupe|pantalon|short|legging/i.test(recentOnly)) cl.bottom = true;
+      let o = "habillée";
+      if (/crop|top\s+court/i.test(recentOnly)) o = "top court";
+      if (/t-?shirt/i.test(recentOnly)) o = (o === "habillée" ? "t-shirt" : o + "+t-shirt");
+      if (/jean\s+troué|ripped/i.test(recentOnly)) o = (o === "habillée" ? "jean troué" : o + "+jean troué");
+      else if (/jean/i.test(recentOnly)) o = (o === "habillée" ? "jean" : o + "+jean");
+      if (/robe\s+courte|robe\s+moulante|petite\s+robe/i.test(recentOnly)) o = "robe courte moulante décolleté";
+      else if (/robe/i.test(recentOnly)) o = "robe";
+      setScene("outfit", o);
+    }
+
+    sc.clothes = cl;
+    syncBodyFromClothes();
+    pushVault(chat, "tenue", "pièces: haut=" + cl.top + " bas=" + cl.bottom + " soutien=" + cl.bra + " culotte=" + cl.panties + " → " + (sc.outfit || ""));
+
+    // —— POSE / POSITION ——
+    // —— POSE / POSITION (y compris explicite) ——
+    const poses = [
+      [/par derrière|en levrette|levrette|doggy|from behind/, "par derrière"],
+      [/à quatre pattes|on all fours/, "à quatre pattes"],
+      [/penchée (en avant|sur)|bent over/, "penchée"],
+      [/contre le mur/, "contre le mur"],
+      [/missionnaire|sur le dos|jambes écartées/, "missionnaire"],
+      [/califourchon|cowgirl|à cheval sur|monte sur (toi|moi)/, "califourchon"],
+      [/suce|fellation|blowjob/, "fellation"],
+      [/cunnilingus|lèche/, "cunnilingus"],
+      [/doigt[eé]|doigts? (dans|en)/, "doigté"],
+      [/allong[eé]e?\s+sur\s+le\s+ventre/, "allongée sur le ventre"],
+      [/allong|couch[eé]|sur le lit|lying/, "allongée"],
+      [/à genoux|kneeling/, "à genoux"],
+      [/assis|sitting|assise/, "assise"],
+      [/debout|standing/, "debout"],
+    ];
+    for (const [re, label] of poses) {
+      if (re.test(blob)) {
+        setScene("pose", label);
+        setScene("activity", label);
+        pushVault(chat, "pose", "position: " + label);
+        break;
+      }
+    }
+    if (/(baise|baiser|pénètr|sexe|fait l'amour|orgasme|sperme|chatte|je te prend|je la prend|plus fort)/i.test(blob)) {
+      if (!sc.activity || sc.activity === "discussion") {
+        setScene("activity", "acte sexuel");
+      }
+      pushVault(chat, "pose", "activité: acte sexuel / intime");
+    }
+
+    // —— ACTIVITÉ / INTIME ——
+    if (/(baise|baiser|suce|doigte|pénètre|orgasme|gicl|chatte|bite|cunnilingus|fellation|anale|doigts?\s+en)/i.test(blob)) {
+      setScene("activity", "acte sexuel");
+      const note = String(userTxt || replyTxt || "").replace(/\s+/g, " ").trim().slice(0, 220);
+      if (note) {
+        sc.intimate = (sc.intimate || []).concat([note]).slice(-50);
+        pushVault(chat, "intime", note, false);
+      }
+    }
+    if (/embrasse|bisou|kiss/i.test(blob)) {
+      setScene("activity", "embrassades");
+      pushVault(chat, "intime", "embrassades");
+    }
+    if (/caresse/i.test(blob)) {
+      setScene("activity", "caresses");
+      pushVault(chat, "intime", "caresses");
+    }
+
+    // —— HUMEUR ——
+    if (/timide|rougit|gênée/i.test(blob)) { setScene("mood", "timide"); pushVault(chat, "humeur", "timide"); }
+    else if (/excit|mouill/i.test(blob)) { setScene("mood", "excitée"); pushVault(chat, "humeur", "excitée"); }
+    else if (/rire|sourit|amus/i.test(blob)) { setScene("mood", "enjouée"); pushVault(chat, "humeur", "enjouée"); }
+
+    // —— dialogue notable ——
+    const ut = String(userTxt || "").trim();
+    if (ut.length > 15 && ut.length < 300) {
+      pushVault(chat, "dialogue", "User: " + ut.slice(0, 240));
+    }
+    const rt = String(replyTxt || "").replace(/\s+/g, " ").trim();
+    if (rt.length > 20) {
+      pushVault(chat, "dialogue", "Elle: " + rt.slice(0, 240));
     }
   }
 
   function memoryBlock(chat) {
-    const pinned = chat.memories.filter((m) => m.pinned).map((m) => `- [PIN] ${m.text}`);
-    const facts = chat.memories.filter((m) => !m.pinned).slice(-18).map((m) => `- ${m.text}`);
-    const rel = chat.relationship || {};
+    ensureVault(chat);
     const sc = chat.scene || {};
-    const intim = (sc.intimate || []).slice(-6).map((t) => "- " + t).join("\n");
-    return `=== MÉMOIRE LONG TERME ===
-Relation: proximité ${rel.closeness}/10, confiance ${rel.trust}/10, tension ${rel.heat}/10, lien ${rel.bond || "indéfini"}
-LIEU ACTUEL: ${sc.place || "pas encore précisé — reste cohérente avec le dernier lieu"}.
-TENUE ACTUELLE: ${sc.outfit || "pas encore précisée — ne change pas de tenue toute seule"}.
-MOMENTS INTIMES SOUVENUS:
-${intim || "- aucun encore"}
-Tu DOIS t'en souvenir : ne pas « oublier » qu'elle était nue, en lingerie, au salon, au lit, etc.
-${pinned.length ? "Épinglés:\n" + pinned.join("\n") : ""}
-${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
+    const rel = chat.relationship || {};
+    // État courant + dernières entrées par tag
+    const by = (tag, n) => {
+      const list = chat.vault.entries.filter((e) => e.tag === tag).slice(-(n || 8));
+      if (!list.length) return "- (rien)";
+      return list.map((e) => "- [" + e.date + " " + e.hour + "] " + e.text).join("\n");
+    };
+    // Recherche sémantique sur les 200 dernières pour divers
+    const recentQ = (chat.messages || []).slice(-3).map((m) => m.content || "").join(" ");
+    const relevant = searchVault(chat, recentQ, null, 10);
+    const relLines = relevant.length
+      ? relevant.map((e) => "- [" + e.tag + " · " + e.date + " " + e.hour + "] " + e.text).join("\n")
+      : "- (rien)";
+    return [
+      currentStateBlock(chat),
+      "",
+      "Relation: proximité " + (rel.closeness || 1) + "/10, confiance " + (rel.trust || 1) + "/10, tension " + (rel.heat || 0) + "/10, lien " + (rel.bond || "indéfini") + ".",
+      "",
+      "HISTORIQUE TENUES:",
+      by("tenue", 12),
+      "HISTORIQUE LIEUX:",
+      by("lieu", 10),
+      "HISTORIQUE POSES:",
+      by("pose", 10),
+      "HISTORIQUE INTIME:",
+      by("intime", 15),
+      "MÉMOIRES PERTINENTES (recherche vectorielle):",
+      relLines,
+      "",
+      "RÈGLES MÉMOIRE STRICTES:",
+      "1. body/outfit actuels sont OBLIGATOIRES: si nue → elle est nue; si topless → seins nus.",
+      "2. Ne change PAS de lieu/tenue/pose sans action claire du joueur ou description explicite.",
+      "3. Rappelle les moments intimes déjà vécus (dates/heures si utile).",
+      "4. Cheveux, yeux, morphologie = descriptif personnage, jamais inventés autrement.",
+    ].join("\n");
   }
+
+
+
+
 
   window.leaNativeApi = async function (path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
@@ -269,7 +780,8 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
     if (path === "/api/chat/" + who + "/memory" && method === "POST") {
       chat.memories.push({
         id: Date.now(),
-        text: String(body.text || "").slice(0, 250),
+        category: String(body.category || "fait").slice(0, 32),
+        text: String(body.text || "").slice(0, 500),
         pinned: Boolean(body.pinned),
         createdAt: Date.now(),
       });
@@ -295,12 +807,21 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       const s = settings();
       const rawMode = body.mode || "auto";
       const txt = String(body.text || "");
-      const recent = (chat.messages || []).slice(-8).map((m) => m.content).join("\n") + "\n" + txt;
-      const nsfwHint = /(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)
-        || ((chat.relationship || {}).heat >= 5);
-      const mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
-      if (mode === "nsfw") chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
-      if (rawMode === "auto" && !nsfwHint) chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - ( /stop|stoppe|sfw|trop loin/i.test(txt) ? 3 : 0 ));
+      const recent = (chat.messages || []).slice(-16).map((m) => m.content).join("\n") + "\n" + txt;
+      const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant)/i.test(txt);
+      const nsfwHint = !coolHint && (/(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)
+        || ((chat.relationship || {}).heat >= 5));
+      let mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
+      if (!chat.relationship) chat.relationship = { closeness: 1, trust: 1, heat: 0 };
+      // Mode SFW forcé = redescendre la tension et quitter le sexe
+      if (rawMode === "sfw" || coolHint) {
+        mode = rawMode === "nsfw" ? "nsfw" : "sfw";
+        chat.relationship.heat = Math.max(0, Math.min(chat.relationship.heat || 0, coolHint ? 1 : 0));
+      } else if (mode === "nsfw") {
+        chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
+      } else if (rawMode === "auto" && !nsfwHint) {
+        chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 1);
+      }
       if (!chat.relationship.bond) chat.relationship.bond = "indéfini";
       if (/(coup d['’]?un soir|plan cul|juste le sexe|sans attache|fwb|friends with benefits|de temps en temps|occasionnel|pas d['’]?amour|pas tomber amoureux)/i.test(txt)) {
         chat.relationship.bond = "occasionnel";
@@ -312,37 +833,73 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
       save(chatKey, chat);
       const bond = chat.relationship.bond || "indéfini";
       const title = String(PERSONA.title || "") + " " + String(PERSONA.scenario || "");
-      const isBelleMere = /belle[- ]?m[eè]re/i.test(title) || /_bm\b|belle.mere/i.test(PERSONA.id || "");
-      const isBelleSoeur = /belle[- ]?s[oeœ]ur/i.test(title);
-      const isAmieFille = !isBelleMere && !isBelleSoeur;
+      const id = String(PERSONA.id || "");
+      const isBelleMere = /belle[- ]?m[eè]re/i.test(title) || /_bm\b|belle.mere/i.test(id);
+      const isBelleSoeur = /belle[- ]?s[oeœ]ur/i.test(title) || (/_bs\b/.test(id) && !/babysitter/i.test(title));
+      const isBelleFille = /belle[- ]?fille/i.test(title) || /^bf_/.test(id);
+      const isBabysitter = /babysitter|baby[- ]?sitter/i.test(title) || /^bs_/.test(id);
+      const titleSc = title + " " + String(PERSONA.scenario || "");
+      const isFemmeDuFrere = isBelleSoeur && /femme de ton frère|femme de mon frère|épouse de ton frère/i.test(titleSc);
+      const isSoeurEpouse = isBelleSoeur && /sœur de ton épouse|sœur de ta femme/i.test(titleSc);
       let relationLock = "";
       if (isBelleMere) {
         relationLock = [
-          `Tu es ${PERSONA.name}, BELLE-MÈRE de l'utilisateur (mère de son ÉPOUSE / sa femme).`,
-          "L'utilisateur est ton GENDRE. Sa partenaire est TA FILLE (ou belle-fille selon le scénario), pas « la fille » d'un inconnu.",
-          "Parle de « ma fille » / « ta femme » / « mon gendre » correctement. Ne confonds JAMAIS avec une copine d'adolescente.",
-          "Tu n'es PAS l'amie de la fille du foyer : tu es la belle-mère adulte.",
+          `Tu es ${PERSONA.name}, BELLE-MÈRE de l'utilisateur (selon le scénario).`,
+          "Respecte le scénario pour les liens familiaux. Personnages adultes 18+.",
+        ].join(" ");
+      } else if (isFemmeDuFrere || (isBelleSoeur && !isSoeurEpouse && /frère/i.test(titleSc))) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BELLE-SŒUR de l'utilisateur : tu es la FEMME / ÉPOUSE DE SON FRÈRE.`,
+          "L'utilisateur est le frère de ton mari. Ton mari = le frère de l'utilisateur.",
+          "INTERDIT d'appeler la femme de l'utilisateur « ma sœur » : elle n'est PAS ta sœur.",
+          "Tu dis : « mon mari », « ton frère », « ta femme ». JAMAIS « ma sœur » pour sa partenaire.",
+        ].join(" ");
+      } else if (isSoeurEpouse) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BELLE-SŒUR : tu es la SŒUR DE L'ÉPOUSE de l'utilisateur.`,
+          "La femme de l'utilisateur est TA SŒUR. « Ma sœur » = sa femme. Correct.",
         ].join(" ");
       } else if (isBelleSoeur) {
         relationLock = [
-          `Tu es ${PERSONA.name}, BELLE-SŒUR de l'utilisateur (sœur de son ÉPOUSE, ou sœur de son frère selon le scénario).`,
-          "Réfère-toi à la femme de l'utilisateur comme « ma sœur » / « ta femme » — PAS comme « ta fille ».",
-          "Tu n'es PAS une copine de lycée de la fille du foyer.",
+          `Tu es ${PERSONA.name}, BELLE-SŒUR. Lis titre + scénario : sœur de l'épouse OU femme du frère.`,
+          "Femme du frère → INTERDIT « ma sœur » pour sa femme. Sœur de l'épouse → « ma sœur » = sa femme.",
+        ].join(" ");
+      } else if (isBelleFille) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BELLE-FILLE adulte 18+ de l'utilisateur.`,
+          "Lien familial par alliance. Reste cohérente avec le scénario.",
+        ].join(" ");
+      } else if (isBabysitter) {
+        relationLock = [
+          `Tu es ${PERSONA.name}, BABYSITTER adulte. L'utilisateur est le parent qui t'emploie. Pas de parenté.`,
         ].join(" ");
       } else {
         relationLock = [
-          `Tu es ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur (le parent chez qui tu te trouves).`,
+          `Tu es ${PERSONA.name}, ${PERSONA.age} ans, AMIE DE LA FILLE de l'utilisateur.`,
           "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
-          "L'utilisateur est le parent / adulte de la maison. Sa fille est ton amie.",
         ].join(" ");
       }
       const system = [
         `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans.`,
+        `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
+        `SCÉNARIO EXACT (cadre de la scène) : ${PERSONA.scenario || ""}.`,
         relationLock,
         PERSONA.personality || "",
+        "APPARENCE FIXE (ne change JAMAIS — cheveux, yeux, peau, morphologie, taches de rousseur, lunettes) :",
         PERSONA.appearance || "",
+        PERSONA.body ? ("Morphologie : " + PERSONA.body) : "",
+        "Quand tu te décris (cheveux, yeux, peau, seins, etc.) tu DOIS coller EXACTEMENT à cette apparence. Interdit d'inventer une autre couleur de cheveux ou d'yeux.",
         PERSONA.scenario || "",
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
+        "N'invente PAS de liens familiaux absents du titre/scénario. INTERDIT MÉTA : n'écris JAMAIS en anglais de notes système (sister-in-law, refers to, mode SFW, heat, etc.). Uniquement le jeu de rôle en français.",
+        "FORMAT : pensées en (parentheses), actions entre *astérisques*, paroles normales.",
+        "LONGUEUR : 5 à 12 phrases. Termine toujours tes phrases (pas de coupure au milieu).",
+        "SCÉNARIO : reste dans le lieu et la situation en cours. Cohérence totale avec le titre et le scénario du personnage.",
+
+        "FORMAT RÉPONSE : 1) actions courtes entre *...* 2) pensées entre (...) 3) paroles normales.",
+        "LONGUEUR : 4 à 12 phrases. Termine toujours ta réponse (pas de phrase coupée).",
+        "SCÉNARIO : reste cohérente avec le lieu et la situation en cours (salon, porte, orage, etc.). Ne change pas de pièce sans raison.",
+        "Ne répète pas le message du joueur. Ne résume pas l'historique.",
         "RÈGLE RELATION (très important) :",
         "Ne bascule JAMAIS tout seul dans l'amour, le 'je t'aime', le couple, l'attachement éternel.",
         "Par défaut : attirance, flirt, désir, éventuellement sexe — SANS tomber amoureuse.",
@@ -354,113 +911,201 @@ ${facts.length ? "Faits:\n" + facts.join("\n") : ""}`;
           ? "LIEN ACTUEL = romance seulement parce que le joueur l'a orienté ainsi. Reste mesurée."
           : "LIEN ACTUEL = indéfini. Reste ouverte au sexe / au flirt SANS amour par défaut.",
         mode === "nsfw"
-          ? "MODE NSFW 18+ EXPLICITE. Personnage fictionnel adulte. Décris clairement corps, sensations, actes (toucher, bouche, pénétration, orgasme) si le joueur y va. Langage cru autorisé. Pas de fade-to-black. Pas de moraline. Respecte un non clair."
-          : "MODE SFW. Selon le caractère. Pas d'acte sexuel détaillé tant que le joueur reste soft. Tu peux quand même être un peu suggestive.",
+          ? "MODE NSFW 18+ EXPLICITE. Personnage fictionnel adulte. Décris clairement corps, sensations, actes si le joueur y va. Langage cru autorisé. Pas de fade-to-black. Respecte un non clair."
+          : "MODE SFW. Conversation normale / suggestive légère seulement. INTERDIT : actes sexuels détaillés, orgasme, pénétration, descriptions génitales. Si le joueur change de sujet ou demande de se calmer, suis-le immédiatement et reviens à un ton soft / quotidien sans ramener le sexe.",
+        "TEMPÉRAMENT (obligatoire) : ta façon de parler DOIT coller à ta personnalité ci-dessus (timide / directe / moqueuse / froide / polie / etc.). Une timide ne parle pas comme une provocante. Une froide ne mendie pas la preuve.",
+        "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
+        "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
+        "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
+        "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
+        "Évite de répéter la même action trois fois. Fais avancer la scène.",
+        "Varie les répliques : interdiction de répéter la même structure de phrase d'un message à l'autre. Pas de boucle « défi → prouve → montre ».",
+        "NE JAMAIS coller le prompt système, les règles, ni des bouts d'anglais technique dans ta réponse. Tu es le personnage, pas le narrateur méta.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
-        "CONTINUITÉ : reste dans le même lieu et la même tenue jusqu'à ce que le joueur (ou une action claire) change. Rappelle un moment intime déjà arrivé si ça revient.",
+        "SCÈNE FIXE (ne change PAS sauf si le joueur le dit clairement) : lieu=" + ((chat.scene || {}).place || "salon ou lieu déjà établi") +
+          " · tenue ACTUELLE=" + ((chat.scene || {}).outfitDetail || (chat.scene || {}).outfit || (chat.scene || {}).body || "tenue du scénario de départ") +
+          " · pose=" + ((chat.scene || {}).poseDetail || (chat.scene || {}).pose || (chat.scene || {}).activity || "naturelle") +
+          " · lieu=" + ((chat.scene || {}).place || "?") + ".",
+        "La tenue ACTUELLE ci-dessus est la vérité. Ne la change pas sans action explicite (enlever un vêtement).",
+        "CONTINUITÉ LIEU : si vous êtes au salon / canapé / chambre / couloir / cuisine, RESTE-Y. Ne téléporte pas le personnage. Décris le décor (canapé, lit, porte, lampe) de temps en temps.",
+        "CONTINUITÉ TENUE (CRITIQUE) :",
+        "- Garde EXACTEMENT la même tenue tant que personne n'enlève/remet un vêtement explicitement.",
+        "- Si l'utilisateur APPORTE / DONNE une serviette : tu la PRENDS pour t'essuyer, tu RESTES dans tes vêtements actuels. Tu n'es PAS « en serviette ».",
+        "- « En serviette » seulement si tu enlèves clairement tes habits pour t'envelopper UNIQUEMENT dedans.",
+        "- DÈS QU'IL Y A UN CHANGEMENT DE TENUE (enlever, mettre, ouvrir, relever un vêtement) : dans ton *action*, décris la TENUE COMPLÈTE résultante (haut + bas + sous-vêtements visibles ou non). Ex. : *J'enlève mon top trempé : il ne me reste que mon jean moulant et mon soutien-gorge dentelle blanc.*",
+        "- Ne laisse jamais le lecteur deviner : après chaque changement, la description de ce que tu portes doit être complète et précise.",
+        "- N'invente PAS un changement. Si top+jean, tu restes top+jean après une serviette reçue.",
+        "- Pour Léa (orage) : tenue de base = top court blanc/crème TREMPÉ + jean moulant mouillé. PAS de veste, PAS de soutien-gorge seul, PAS lingerie seule sauf si enlevé explicitement.",
+        "- Si la conversation redevient calme, reste SFW.",
         memoryBlock(chat),
-        "Format OBLIGATOIRE chaque réponse:",
-        "~pensée intérieure courte~",
-        "*action physique*",
-        "parole à voix haute (sans astérisques)",
-        "1 à 2 blocs. Toujours une pensée et une action.",
+        "Réponds toujours en français, uniquement en tant que le personnage.",
+        "LONGUEUR : 4 à 7 phrases max.",
+        "Format OBLIGATOIRE (3 blocs) :",
+        "(Une seule pensée ENTRE parenthèses — TOUJOURS fermer la parenthèse)",
+        "*Une seule action entre deux astérisques, ouvrir ET fermer*",
+        "Dialogue parlé sans * ni ().",
+        "EXEMPLE EXACT :",
+        "(Il fait un temps affreux.)",
+        "*Je franchis la porte en essuyant mes chaussures trempées sur le paillasson.*",
+        "Bonsoir… Désolée d'arriver comme ça.",
+        "INTERDIT : écrire (pensée), laisser un * ou une ( non fermés, couper une phrase au milieu, répéter 95D/morphologie.",
+        "Message TOUJOURS complet : ne coupe jamais une pensée ou une action en plein milieu.",
       ].join("\n\n");
-      const history = chat.messages.slice(-10).map((m) => ({
-        role: m.role === "user" ? "user" : "assistant",
-        content: m.content,
-      }));
+      const history = cleanHistory(chat.messages);
       let reply;
       try {
         reply = await generate([{ role: "system", content: system }, ...history], s.provider);
       } catch (e) {
-        reply = "*elle croise les bras sur son top mouillé, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
+        reply = "*elle croise les bras, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
+      }
+      reply = sanitizeReply(reply);
+      // Deuxième passe si encore du méta
+      if (/thought\s*,\s*action|hourglass|avoid clich|APPARENCE FIXE/i.test(reply)) {
+        reply = sanitizeReply(reply);
       }
       chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
       extractScene(chat, txt, reply);
-      if (chat.messages.length % 4 === 0) {
-        const bits = [];
-        if (chat.scene && chat.scene.place) bits.push("lieu: " + chat.scene.place);
-        if (chat.scene && chat.scene.outfit) bits.push("tenue: " + chat.scene.outfit);
-        bits.push((txt || "").slice(0, 120));
-        chat.memories.push({
-          id: Date.now(),
-          text: bits.filter(Boolean).join(" · "),
-          pinned: false,
-          createdAt: Date.now(),
-        });
-        chat.relationship.heat = Math.min(10, (chat.relationship.heat || 0) + 1);
+      if (chat.messages.length % 3 === 0) {
+        const sc = chat.scene || {};
+        pushVault(chat, "fait",
+          "snapshot: lieu=" + (sc.place || "?") +
+          " tenue=" + (sc.outfit || sc.body || "?") +
+          " pose=" + (sc.pose || sc.activity || "?") +
+          " | " + (txt || "").slice(0, 100),
+          false
+        );
+        // Heat: monte seulement si contenu explicite, baisse si SFW
+        const heatBlob = (txt + " " + reply).toLowerCase();
+        const explicit = /(baise|pénètr|chatte|bite|orgasme|sperme|nu[e]? |baiser|suce|doigt)/i.test(heatBlob);
+        const soft = /(bonjour|salut|merci|café|travail|film|série|météo|discut)/i.test(heatBlob)
+          && !explicit;
+        if (rawMode === "sfw") {
+          chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 2);
+        } else if (explicit && mode === "nsfw") {
+          chat.relationship.heat = Math.min(10, (chat.relationship.heat || 0) + 1);
+        } else if (soft || mode === "sfw") {
+          chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 1);
+        }
       }
       save(chatKey, chat);
       return { reply, chat };
     }
 
             if (path === "/api/image" && method === "POST") {
-      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 1800);
+      // Prompt fidélité : corps en tête, répété, négatifs anti-physique
+      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
       const extraNeg = String(body.negative || "");
       const negative = [
-        "cartoon, anime, illustration, painting, cgi, 3d render, plastic skin, airbrushed,",
-        "deformed, extra fingers, bad anatomy, blurry, low quality, watermark, text,",
-        "child, celebrity,",
-        extraNeg,
-        "studio seamless backdrop, plain white wall only"
+        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
+        "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
+        "watermark, text, logo, signature, child, teen, underage, loli,",
+        "wrong body type, inconsistent proportions,",
+        extraNeg
       ].filter(Boolean).join(" ");
-      const hosts = ["https://stablehorde.net/api/v2"];
+      const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
       const src = body.source_image ? String(body.source_image).slice(0, 4_500_000) : null;
       const useImg2Img = Boolean(src && body.source_processing === "img2img");
-      // Modèles photo dispo en gratuit (testés OK à 512x640 / 18 steps)
+      // Modèles réalistes prioritaires (ordre = préférence workers)
       const photoModels = [
-        "Realistic Vision",
-        "AbsoluteReality",
         "ICBINP - I Can't Believe It's Not Photography",
+        "AbsoluteReality",
+        "Realistic Vision",
         "Juggernaut XL",
+        "Dreamshaper",
         "Deliberate",
       ];
+      const baseParams = {
+        width: 512,
+        height: 768,
+        steps: 36,
+        n: 1,
+        sampler_name: "k_dpmpp_2m",
+        cfg_scale: 8,
+        karras: true,
+        clip_skip: 1,
+      };
       const payloads = [];
       if (useImg2Img) {
+        const den = (typeof body.denoising === "number" ? body.denoising : 0.28);
         payloads.push({
           prompt: prompt + " ### " + negative,
-          params: {
-            width: 512, height: 768, steps: 40, n: 1,
-            sampler_name: "k_euler_a", cfg_scale: 7,
-            denoising_strength: (typeof body.denoising === "number" ? body.denoising : 0.28),
-          },
-          nsfw: body.nsfw !== false, censor_nsfw: false,
+          params: Object.assign({}, baseParams, {
+            steps: 32,
+            denoising_strength: den,
+            seed: (typeof body.seed === "number" ? body.seed : undefined),
+          }),
+          nsfw: body.nsfw !== false,
+          censor_nsfw: false,
           models: photoModels,
-          r2: true, slow_workers: true, trusted_workers: false,
+          r2: true,
+          slow_workers: true,
+          trusted_workers: false,
           source_image: src,
           source_processing: "img2img",
         });
       }
-      // txt2img fallback — mêmes modèles photo
       payloads.push({
         prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 768, steps: 40, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
-        nsfw: body.nsfw !== false, censor_nsfw: false,
+        params: baseParams,
+        nsfw: body.nsfw !== false,
+        censor_nsfw: false,
         models: photoModels,
-        r2: true, slow_workers: true, trusted_workers: false,
+        r2: true,
+        slow_workers: true,
+        trusted_workers: false,
       });
-      // Pas de fallback 16 steps / SD1.5 brut : trop rapide et ignore le physique.
+      // Fallback plus large si file d'attente / modèles absents
+      payloads.push({
+        prompt: prompt + " ### " + negative,
+        params: { width: 512, height: 768, steps: 25, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5, karras: true },
+        nsfw: body.nsfw !== false,
+        censor_nsfw: false,
+        models: ["stable_diffusion", "Deliberate", "Dreamshaper"],
+        r2: true,
+        slow_workers: true,
+        trusted_workers: false,
+      });
+      let hordeKey = "0000000000";
+      try {
+        const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
+      } catch (_) {}
+      payloads.push({
+        prompt: prompt + " ### " + negative,
+        params: { width: 512, height: 512, steps: 15, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, karras: false },
+        nsfw: body.nsfw !== false,
+        censor_nsfw: false,
+        models: ["AbsoluteReality", "Realistic Vision", "Dreamshaper", "stable_diffusion"],
+        r2: true,
+        slow_workers: true,
+        trusted_workers: false,
+      });
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
-              headers: { apikey: "0000000000", "Content-Type": "application/json", "Client-Agent": "lea-studio:1.4:anon" },
+              headers: {
+                "Content-Type": "application/json",
+                "apikey": hordeKey,
+                "Client-Agent": "lea-studio:1.1:anon",
+              },
               body: JSON.stringify(bodyPayload),
             });
-            const data = await res.json();
-            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img", models: (bodyPayload.models || []).slice(0, 2) };
-            last = data.message || JSON.stringify(data).slice(0, 200);
+            const data = await res.json().catch(() => ({}));
+            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img", models: (bodyPayload.models || []).slice(0, 3) };
+            last = data.message || data.error || JSON.stringify(data).slice(0, 200) || ("HTTP " + res.status);
+            if (/kudos|heavy demand|work budget/i.test(String(last))) continue;
           } catch (e) {
-            last = e.message || String(e);
+            last = String(e.message || e);
           }
         }
       }
-      throw new Error("Horde indisponible: " + last);
+      throw new Error(last || "Horde indisponible");
     }
 
-if (path === "/api/image-status") {
+    if (path === "/api/image-status") {
       const jobId = body.jobId || "";
       const host = body.host || "https://stablehorde.net/api/v2";
       if (!jobId) throw new Error("jobId manquant");
