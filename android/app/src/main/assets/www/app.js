@@ -1124,17 +1124,38 @@ const GALLERY = [
   { src: "images/lea-sortie-decollete.jpg", title: "Sortie, décolleté" },
 ];
 
-function openFull(src) {
-  $("lightbox-img").src = src;
+function openFull(src, opts) {
+  opts = opts || {};
+  const img = $("lightbox-img");
+  if (img) {
+    img.src = src;
+    img.style.maxWidth = "100vw";
+    img.style.maxHeight = "92vh";
+    img.style.width = "auto";
+    img.style.height = "auto";
+    img.style.objectFit = "contain";
+  }
   $("lightbox").classList.remove("hidden");
   const btn = $("lb-bg");
   if (btn) {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      localStorage.setItem(chatBgKey(state.current || "lea"), src);
-      btn.textContent = "Fond du chat ✓";
-    };
-    btn.textContent = "Utiliser comme fond";
+    // Section Générer / studio : pas de lien avec un personnage / chat
+    if (opts.studio || state.view === "studio") {
+      btn.style.display = "none";
+      btn.onclick = null;
+    } else {
+      btn.style.display = "";
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const id = state.current || null;
+        if (!id) {
+          btn.textContent = "Ouvre un chat d'abord";
+          return;
+        }
+        localStorage.setItem(chatBgKey(id), src);
+        btn.textContent = "Fond du chat ✓";
+      };
+      btn.textContent = "Utiliser comme fond";
+    }
   }
 }
 
@@ -3324,7 +3345,7 @@ async function generateStudioImage(opts) {
             "COMPOSITION from " + uploads.length + " reference photos:",
             "reference image 1 is the BASE (body/scene/outfit must stay recognizable),",
             "reference image 2 supplies the FACE / second person identity to insert,",
-            "follow the user request EXACTLY for placement (e.g. face between breasts, kissing cleavage, licking, embrace),",
+            "CRITICAL placement: if user asks for face between breasts / kissing / licking cleavage — put the FACE from image 2 physically against the breasts of image 1 (mouth on breast or tongue on nipple), close-up, same photo, NOT a separate portrait, NOT a different woman,",
             "same lighting, photorealistic, coherent anatomy, no extra random people,",
             "do not ignore the face from reference 2"
           ].join(" ");
@@ -3422,7 +3443,7 @@ async function generateStudioImage(opts) {
           window._leaGenBusy = false;
           $("studio-status").textContent = "Image SD.cpp prête";
           renderStudio();
-          if (stored) openFull(resolvePhotoSrc(stored) || stored);
+          if (stored) { renderStudio(); openFull(resolvePhotoSrc(stored) || stored, { studio: true }); }
           return;
         }
       } catch (e) {
@@ -3447,7 +3468,7 @@ async function generateStudioImage(opts) {
       window._leaGenBusy = false;
       $("studio-status").textContent = "Image prête";
       renderStudio();
-      if (stored) openFull(resolvePhotoSrc(stored) || stored);
+      if (stored) { renderStudio(); openFull(resolvePhotoSrc(stored) || stored, { studio: true }); }
       return;
     }
     const jobId = start.jobId;
@@ -3478,7 +3499,7 @@ async function generateStudioImage(opts) {
         window._leaGenBusy = false;
         $("studio-status").textContent = sourceB64 ? "Modification appliquée" : "Image ajoutée";
         renderStudio();
-        if (stored) openFull(resolvePhotoSrc(stored) || stored);
+        if (stored) { renderStudio(); openFull(resolvePhotoSrc(stored) || stored, { studio: true }); }
         return;
       }
     }

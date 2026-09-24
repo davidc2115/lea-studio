@@ -736,45 +736,47 @@
     }
   }
 
-  function memoryBlock(chat) {
+  function memoryBlock(chat, userTxt) {
     ensureVault(chat);
     const sc = chat.scene || {};
     const rel = chat.relationship || {};
-    // État courant + dernières entrées par tag
-    const by = (tag, n) => {
-      const list = chat.vault.entries.filter((e) => e.tag === tag).slice(-(n || 8));
-      if (!list.length) return "- (rien)";
-      return list.map((e) => "- [" + e.date + " " + e.hour + "] " + e.text).join("\n");
+    const q = String(userTxt || "");
+    // Tags à aller chercher selon le message (sinon état courant seulement)
+    const need = new Set(["tenue", "lieu"]);
+    if (/(pose|position|à genoux|allong|debout|missionnaire|doggy|fesse|genou)/i.test(q)) need.add("pose");
+    if (/(sexe|baiser|baise|suce|doigt|orgasme|chatte|bite|nude|nue|cul|seins|caresse|touche)/i.test(q)) need.add("intime");
+    if (/(humeur|triste|colère|fatigue|timide|excité)/i.test(q)) need.add("humeur");
+    if (/(hier|avant|souviens|rappelle|la dernière fois)/i.test(q)) {
+      need.add("intime"); need.add("dialogue"); need.add("fait");
+    }
+    const last1 = (tag) => {
+      const e = lastByTag(chat, tag);
+      return e ? ("- [" + e.date + " " + e.hour + "] " + e.text) : null;
     };
-    // Recherche sémantique sur les 200 dernières pour divers
-    const recentQ = (chat.messages || []).slice(-3).map((m) => m.content || "").join(" ");
-    const relevant = searchVault(chat, recentQ, null, 10);
-    const relLines = relevant.length
-      ? relevant.map((e) => "- [" + e.tag + " · " + e.date + " " + e.hour + "] " + e.text).join("\n")
-      : "- (rien)";
-    return [
+    // Vecteur : seulement ce qui est pertinent, limite basse
+    const relevant = searchVault(chat, q || (chat.messages || []).slice(-2).map((m) => m.content || "").join(" "), null, 5);
+    const lines = [
       currentStateBlock(chat),
       "",
-      "Relation: proximité " + (rel.closeness || 1) + "/10, confiance " + (rel.trust || 1) + "/10, tension " + (rel.heat || 0) + "/10, lien " + (rel.bond || "indéfini") + ".",
+      "Relation: prox " + (rel.closeness || 1) + "/10 conf " + (rel.trust || 1) + "/10 heat " + (rel.heat || 0) + "/10 lien " + (rel.bond || "indéfini") + ".",
+    ];
+    for (const tag of need) {
+      const one = last1(tag);
+      if (one) lines.push("Dernier " + tag + ": " + one);
+    }
+    if (relevant.length) {
+      lines.push("Mémoires utiles:");
+      for (const e of relevant.slice(0, 5)) {
+        lines.push("- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 160));
+      }
+    }
+    lines.push(
       "",
-      "HISTORIQUE TENUES:",
-      by("tenue", 12),
-      "HISTORIQUE LIEUX:",
-      by("lieu", 10),
-      "HISTORIQUE POSES:",
-      by("pose", 10),
-      "HISTORIQUE INTIME:",
-      by("intime", 15),
-      "MÉMOIRES PERTINENTES (recherche vectorielle):",
-      relLines,
-      "",
-      "RÈGLES MÉMOIRE STRICTES:",
-      "1. body/outfit actuels sont OBLIGATOIRES: si nue → elle est nue; si topless → seins nus.",
-      "2. Ne change PAS de lieu/tenue/pose sans action claire du joueur ou description explicite.",
-      "3. Rappelle les moments intimes déjà vécus (dates/heures si utile).",
-      "4. Cheveux, yeux, morphologie = descriptif personnage, jamais inventés autrement.",
-    ].join("\n");
+      "RÈGLES: respecter état actuel (tenue/lieu/pose). Ne change rien sans action claire. Physique = fiche personnage."
+    );
+    return lines.join("\n");
   }
+
 
 
 
@@ -980,7 +982,7 @@
         "- N'invente PAS un changement. Si top+jean, tu restes top+jean après une serviette reçue.",
         "- Pour Léa (orage) : tenue de base = top court blanc/crème TREMPÉ + jean moulant mouillé. PAS de veste, PAS de soutien-gorge seul, PAS lingerie seule sauf si enlevé explicitement.",
         "- Si la conversation redevient calme, reste SFW.",
-        memoryBlock(chat),
+        memoryBlock(chat, typeof txt !== "undefined" ? txt : ""),
         "Réponds toujours en français, uniquement en tant que le personnage.",
         "LONGUEUR : 4 à 7 phrases max.",
         "Format OBLIGATOIRE (3 blocs) :",
