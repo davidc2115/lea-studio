@@ -3532,15 +3532,16 @@ function renderSettings() {
     <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
-      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite (rapide)</option>
-      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite ★ rapide / cohérent</option>
+      <option value="gemini-2.0-flash">Gemini 2.0 Flash ★ stable</option>
       <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option>
-      <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+      <option value="gemini-2.5-flash">Gemini 2.5 Flash (plus lent)</option>
+      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (peut être lent)</option>
+      <option value="gemini-3.5-flash">Gemini 3.5 Flash (lent / parfois incohérent)</option>
       <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
       <option value="gemini-flash-latest">Gemini Flash Latest</option>
     </select>
+    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Conseil : 2.5 Flash-Lite ou 2.0 Flash. Les modèles 3.5 peuvent être lents ou hors-sujet selon les clés.</p>
     <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
     <textarea class="field" id="gemini" rows="3" placeholder="aq... ou AIza... une par ligne"></textarea>
     <label>Clé Grok / xAI Imagine (xai-…)</label>

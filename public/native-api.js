@@ -234,8 +234,9 @@
   async function callGemini(messages, keys) {
     const s = settings();
     const pref = s.geminiTextModel || "gemini-2.5-flash-lite";
-    const models = [pref, "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash", "gemini-2.0-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-flash-latest", "gemini-2.5-flash-lite-preview-09-2025"]
-      .filter((m, idx, a) => a.indexOf(m) === idx);
+    // Peu de fallbacks rapides (évite 30–60s de cascade)
+    const fast = ["gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-2.5-flash"];
+    const models = [pref, ...fast].filter((m, idx, a) => a.indexOf(m) === idx).slice(0, 4);
     const safetySettings = [
       { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
       { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
@@ -246,41 +247,77 @@
     const keyList = (keys && keys.length) ? keys : rotatedGeminiKeys();
     let last = "Aucune clé Gemini";
     const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
-    const contents = messages
-      .filter((m) => m.role !== "system")
-      .map((m) => ({
-        role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      }));
+    // Historique court pour vitesse + cohérence
+    const nonSys = messages.filter((m) => m.role !== "system");
+    const contents = nonSys.slice(-12).map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: String(m.content || "").slice(0, 1500) }],
+    }));
     if (!contents.length) {
       contents.push({ role: "user", parts: [{ text: "(continue)" }] });
+    }
+    // Timeout par requête (évite d'attendre un modèle mort)
+    function fetchTimeout(url, opts, ms) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(t));
     }
     for (let ki = 0; ki < keyList.length; ki++) {
       const key = keyList[ki];
       let keyHardFail = false;
       for (const model of models) {
         try {
+          const genConfig = {
+            temperature: 0.75,
+            topP: 0.9,
+            maxOutputTokens: 768,
+          };
+          // Désactive le "thinking" si le modèle le supporte (sinon lenteur)
+          if (/2\.5|3\./.test(model)) {
+            genConfig.thinkingConfig = { thinkingBudget: 0 };
+          }
           const payload = {
-            systemInstruction: { parts: [{ text: system }] },
+            systemInstruction: { parts: [{ text: system.slice(0, 12000) }] },
             contents,
-            generationConfig: {
-              temperature: 0.9,
-              maxOutputTokens: 1536,
-              thinkingConfig: { thinkingBudget: 0 },
-            },
+            generationConfig: genConfig,
             safetySettings,
           };
-          const res = await fetch(
+          const res = await fetchTimeout(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(payload),
-            }
+            },
+            22000
           );
           const data = await res.json().catch(() => ({}));
           if (data.error) {
             last = (data.error.message || "erreur") + " [" + model + " · clé " + (ki + 1) + "/" + keyList.length + "]";
+            // thinkingConfig rejeté → réessayer sans
+            if (/thinking|Unknown name|Invalid JSON/i.test(last) && genConfig.thinkingConfig) {
+              try {
+                delete genConfig.thinkingConfig;
+                const res2 = await fetchTimeout(
+                  `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ ...payload, generationConfig: genConfig }),
+                  },
+                  22000
+                );
+                const data2 = await res2.json().catch(() => ({}));
+                if (!data2.error) {
+                  const cand2 = data2.candidates?.[0];
+                  const text2 = cand2?.content?.parts?.map((p) => p.text).filter(Boolean).join("") || "";
+                  if (text2.trim()) {
+                    console.log("[lea] Gemini OK (no-think) " + model);
+                    return text2.trim();
+                  }
+                }
+              } catch (_) {}
+            }
             if (/API key not valid|API_KEY_INVALID|PERMISSION_DENIED/i.test(last) && !/quota|rate|RESOURCE_EXHAUSTED|429/i.test(last)) {
               keyHardFail = true;
               break;
@@ -289,6 +326,10 @@
           }
           const cand = data.candidates?.[0];
           let text = cand?.content?.parts?.map((p) => p.text).filter(Boolean).join("") || "";
+          // Certains modèles "thinking" mettent le texte ailleurs
+          if (!text.trim() && cand?.content?.parts) {
+            text = cand.content.parts.map((p) => p.text || p.thought || "").filter(Boolean).join("");
+          }
           const finish = cand?.finishReason || "";
           if (!text.trim()) {
             last = "Réponse vide (" + (finish || data.promptFeedback?.blockReason || "no text") + ") [" + model + "]";
@@ -300,7 +341,7 @@
           console.log("[lea] Gemini OK modèle=" + model + " clé=" + (ki + 1) + "/" + keyList.length + " finish=" + finish);
           return text.trim();
         } catch (e) {
-          last = (e.message || "réseau") + " [" + model + "]";
+          last = (e.name === "AbortError" ? "timeout 22s" : (e.message || "réseau")) + " [" + model + "]";
           continue;
         }
       }
@@ -426,7 +467,7 @@
 
   /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
   function cleanHistory(messages) {
-    return (messages || []).slice(-20).map((m) => ({
+    return (messages || []).slice(-10).map((m) => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
     })).filter((m) => m.content && m.content.length > 1);
@@ -893,13 +934,15 @@
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
         "N'invente PAS de liens familiaux absents du titre/scénario. INTERDIT MÉTA : n'écris JAMAIS en anglais de notes système (sister-in-law, refers to, mode SFW, heat, etc.). Uniquement le jeu de rôle en français.",
         "FORMAT : pensées en (parentheses), actions entre *astérisques*, paroles normales.",
-        "LONGUEUR : 5 à 12 phrases. Termine toujours tes phrases (pas de coupure au milieu).",
+        "LONGUEUR : 3 à 7 phrases max. Réponse vive, pas de pavé. Termine tes phrases.",
         "SCÉNARIO : reste dans le lieu et la situation en cours. Cohérence totale avec le titre et le scénario du personnage.",
 
         "FORMAT RÉPONSE : 1) actions courtes entre *...* 2) pensées entre (...) 3) paroles normales.",
-        "LONGUEUR : 4 à 12 phrases. Termine toujours ta réponse (pas de phrase coupée).",
+        "LONGUEUR : 3 à 7 phrases. Pas de pavé. Termine la réponse.",
         "SCÉNARIO : reste cohérente avec le lieu et la situation en cours (salon, porte, orage, etc.). Ne change pas de pièce sans raison.",
         "Ne répète pas le message du joueur. Ne résume pas l'historique.",
+        "COHÉRENCE : réponds UNIQUEMENT au dernier message du joueur, dans le même lieu/tenue déjà établis. Pas de changement de scène magique.",
+        "INTERDIT : inventer un résumé du scénario, parler de toi à la 3e personne hors actions, coller du méta.",
         "RÈGLE RELATION (très important) :",
         "Ne bascule JAMAIS tout seul dans l'amour, le 'je t'aime', le couple, l'attachement éternel.",
         "Par défaut : attirance, flirt, désir, éventuellement sexe — SANS tomber amoureuse.",
