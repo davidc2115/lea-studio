@@ -1663,6 +1663,247 @@ async function importCharacterFiles(fileList) {
 }
 
 
+
+async function nativeHttpGet(url) {
+  try {
+    if (window.LeaAndroid && window.LeaAndroid.httpGet) {
+      return String(window.LeaAndroid.httpGet(url) || "");
+    }
+  } catch (_) {}
+  // Navigateur / fallback
+  const res = await fetch(url, {
+    headers: { Accept: "application/json", Origin: "https://chub.ai", Referer: "https://chub.ai/" },
+  });
+  return await res.text();
+}
+async function nativeHttpDataUrl(url) {
+  try {
+    if (window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
+      return String(window.LeaAndroid.httpGetDataUrl(url) || "");
+    }
+  } catch (_) {}
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return await new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = reject;
+      r.readAsDataURL(blob);
+    });
+  } catch (_) { return ""; }
+}
+
+async function searchChubCharacters(query, tags, page) {
+  page = page || 1;
+  const params = new URLSearchParams();
+  params.set("search", query || "");
+  params.set("first", "24");
+  params.set("page", String(page));
+  params.set("nsfw", "true");
+  params.set("include_explicit", "true");
+  if (tags) params.set("include_tags", tags);
+  params.set("sort", "default");
+  const url = "https://api.chub.ai/search?" + params.toString();
+  const raw = await nativeHttpGet(url);
+  let data;
+  try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse Chub invalide"); }
+  if (data.error) throw new Error(data.error);
+  const nodes = (data.data && data.data.nodes) || data.nodes || [];
+  const count = (data.data && data.data.count) || nodes.length;
+  return { nodes, count };
+}
+
+async function importChubNode(node) {
+  if (!node) throw new Error("personnage vide");
+  const path = node.fullPath || "";
+  // PNG carte embarquée (meilleure source)
+  let cardUrl = node.max_res_url || "";
+  if (!cardUrl && path) {
+    cardUrl = "https://avatars.charhub.io/avatars/" + path + "/chara_card_v2.png";
+  }
+  let cover = node.avatar_url || "";
+  let chars = [];
+  if (cardUrl) {
+    const dataUrl = await nativeHttpDataUrl(cardUrl);
+    if (dataUrl && dataUrl.length > 1000) {
+      // Parse PNG chara via existing logic — simulate File
+      try {
+        const bin = atob(dataUrl.split(",")[1] || "");
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        // Minimal PNG parser for chara tEXt
+        let offset = 8;
+        while (offset + 8 < bytes.length) {
+          const len = (bytes[offset] << 24) | (bytes[offset+1] << 16) | (bytes[offset+2] << 8) | bytes[offset+3];
+          const type = String.fromCharCode(bytes[offset+4], bytes[offset+5], bytes[offset+6], bytes[offset+7]);
+          const data = bytes.slice(offset + 8, offset + 8 + len);
+          if (type === "tEXt" || type === "iTXt") {
+            let key = "", i = 0;
+            while (i < data.length && data[i] !== 0) { key += String.fromCharCode(data[i]); i++; }
+            i++;
+            if (type === "iTXt") {
+              i += 2;
+              while (i < data.length && data[i] !== 0) i++; i++;
+              while (i < data.length && data[i] !== 0) i++; i++;
+            }
+            if (/^chara$|^ccv3$/i.test(key)) {
+              let b64 = "";
+              for (; i < data.length; i++) b64 += String.fromCharCode(data[i]);
+              const json = decodeURIComponent(escape(atob(b64.trim())));
+              const parsed = JSON.parse(json);
+              chars.push(cardToCharacter(parsed, {
+                cover: dataUrl,
+                source: "chub:" + path,
+                tags: ["importé", "chub"].concat(node.topics || []).slice(0, 15),
+              }));
+            }
+          }
+          offset = offset + 12 + len;
+          if (type === "IEND") break;
+        }
+      } catch (e) {
+        console.warn("chub png parse", e);
+      }
+    }
+  }
+  if (!chars.length) {
+    // Fallback metadata seule
+    chars.push(cardToCharacter({
+      name: node.name || "Chub",
+      description: node.description || node.tagline || "",
+      scenario: node.tagline || node.description || "",
+      first_mes: "*" + (node.name || "Elle") + " te regarde.*\n…Salut.",
+      personality: (node.topics || []).join(", "),
+      tags: node.topics || [],
+    }, {
+      cover: cover,
+      source: "chub:" + path,
+      tags: ["importé", "chub"].concat(node.topics || []).slice(0, 15),
+    }));
+  }
+  const cur = loadCustomChars();
+  const seen = new Set(cur.map((c) => c.id));
+  const added = [];
+  for (const c of chars) {
+    if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); added.push(c); }
+  }
+  saveCustomChars(cur);
+  mergeCustomIntoCast();
+  return added;
+}
+
+function renderImportHub() {
+  $("view-discover").innerHTML = `
+    <h1>Importer des personnages</h1>
+    <p style="color:var(--muted);font-size:13px;line-height:1.45">
+      <b>Chub.ai</b> : recherche en direct + import en un clic (cartes Character Card).<br/>
+      <b>Janitor / SpicyChat / Polybuzz / RosyTalk</b> : pas d'API publique — exporte la carte JSON/PNG depuis le site, puis « Fichier ».
+    </p>
+    <div class="tags" style="margin:8px 0;flex-wrap:wrap">
+      <span class="tag tag-filter" data-src="chub" style="cursor:pointer;background:#5a2a6a">Chub.ai</span>
+      <span class="tag" data-src="file" id="imp-file-btn" style="cursor:pointer">Fichier JSON/PNG</span>
+      <span class="tag" style="opacity:.7">Janitor*</span>
+      <span class="tag" style="opacity:.7">SpicyChat*</span>
+      <span class="tag" style="opacity:.7">Polybuzz*</span>
+    </div>
+    <p style="color:var(--muted);font-size:11px">* Sites sans API ouverte : utilise l'export carte puis Fichier.</p>
+    <div id="imp-chub">
+      <input class="field" id="chub-q" type="search" placeholder="Recherche (nom, thème…)" style="width:100%;margin:6px 0" />
+      <div class="tags" id="chub-tags" style="margin:6px 0;flex-wrap:wrap">
+        ${["female","male","romance","nsfw","dominant","submissive","fantasy","school","girlfriend","milf","anime","scenario"].map((t) =>
+          `<span class="tag chub-tag" data-tag="${t}" style="cursor:pointer">${t}</span>`).join("")}
+      </div>
+      <button class="cta" id="chub-search" type="button">Rechercher sur Chub</button>
+      <p id="chub-status" style="color:var(--muted);font-size:12px;margin:8px 0"></p>
+      <div id="chub-results"></div>
+    </div>
+    <input type="file" id="disc-import" accept=".json,.png,.txt,application/json,image/png" multiple hidden />
+    <button class="cta" type="button" id="imp-back" style="margin-top:16px;background:#3a2048">← Retour Découvrir</button>
+  `;
+  const setStatus = (t) => { if ($("chub-status")) $("chub-status").textContent = t; };
+  let activeTags = [];
+  $("view-discover").onclick = async (e) => {
+    const tag = e.target.closest(".chub-tag");
+    if (tag) {
+      const t = tag.dataset.tag;
+      if (activeTags.includes(t)) activeTags = activeTags.filter((x) => x !== t);
+      else activeTags.push(t);
+      document.querySelectorAll(".chub-tag").forEach((el) => {
+        el.style.outline = activeTags.includes(el.dataset.tag) ? "2px solid #ff8fbf" : "";
+      });
+      return;
+    }
+    if (e.target.closest("#imp-back")) { renderDiscover(); return; }
+    if (e.target.closest("#imp-file-btn") || e.target.closest("[data-src=file]")) {
+      $("disc-import") && $("disc-import").click();
+      return;
+    }
+    const imp = e.target.closest(".chub-import");
+    if (imp) {
+      const idx = Number(imp.dataset.idx);
+      const node = (window._chubNodes || [])[idx];
+      if (!node) return;
+      setStatus("Import de " + (node.name || "") + "…");
+      try {
+        const added = await importChubNode(node);
+        setStatus(added.length ? ("✓ Importé : " + added.map((c) => c.name).join(", ")) : "Déjà présent ou échec");
+      } catch (err) {
+        setStatus("Erreur: " + (err.message || err));
+      }
+      return;
+    }
+  };
+  if ($("chub-search")) {
+    $("chub-search").onclick = async () => {
+      const q = ($("chub-q") && $("chub-q").value) || "";
+      setStatus("Recherche Chub…");
+      try {
+        const { nodes, count } = await searchChubCharacters(q, activeTags.join(","), 1);
+        window._chubNodes = nodes;
+        setStatus(count + " résultat(s) — affiche " + nodes.length);
+        const box = $("chub-results");
+        if (!box) return;
+        if (!nodes.length) {
+          box.innerHTML = "<p style='color:var(--muted)'>Aucun résultat.</p>";
+          return;
+        }
+        box.innerHTML = `<div class="grid">${nodes.map((n, i) => `
+          <article class="card">
+            <div class="cover-frame"><img class="cover-img" src="${n.avatar_url || ""}" alt="" onerror="this.style.opacity=.3"/></div>
+            <div class="body">
+              <strong>${escapeHtml(n.name || "?")}</strong>
+              <div style="color:var(--muted);font-size:12px">${escapeHtml((n.topics || []).slice(0, 6).join(" · "))}</div>
+              <p style="font-size:13px;color:#d7c8dc">${escapeHtml(String(n.tagline || n.description || "").slice(0, 120))}</p>
+              <button class="cta chub-import" data-idx="${i}" type="button">Importer</button>
+            </div>
+          </article>`).join("")}</div>`;
+      } catch (err) {
+        setStatus("Erreur Chub: " + (err.message || err));
+      }
+    };
+  }
+  if ($("disc-import")) {
+    $("disc-import").onchange = async (ev) => {
+      setStatus("Import fichier…");
+      try {
+        const r = await importCharacterFiles(ev.target.files);
+        setStatus(r.ok ? ("Importé : " + (r.names || []).join(", ")) : ("Échec : " + (r.err || "?")));
+      } catch (e) {
+        setStatus("Erreur: " + (e.message || e));
+      }
+      ev.target.value = "";
+    };
+  }
+  if ($("chub-q")) {
+    $("chub-q").onkeydown = (ev) => {
+      if (ev.key === "Enter") $("chub-search") && $("chub-search").click();
+    };
+  }
+}
+
+
+
 function filterDiscoverList(q) {
   // Toujours fusionner CAST + EXTRA au cas où le script extra charge après
   let list = state.characters.length ? state.characters.slice() : [];
@@ -1747,11 +1988,8 @@ function renderDiscover() {
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center">
-      <label class="cta" style="margin:0;cursor:pointer;padding:8px 12px;font-size:13px">
-        ＋ Importer personnage
-        <input type="file" id="disc-import" accept=".json,.png,.txt,application/json,image/png" multiple hidden />
-      </label>
-      <span style="color:var(--muted);font-size:11px;flex:1">JSON / PNG Character Card (Janitor, SillyTavern, exports SpicyChat…)</span>
+      <button type="button" class="cta" id="disc-open-import" style="margin:0;padding:8px 12px;font-size:13px">＋ Importer (Chub / fichier)</button>
+      <span style="color:var(--muted);font-size:11px;flex:1">Chub.ai en direct · ou JSON/PNG (Janitor, SpicyChat…)</span>
     </div>
     <p id="disc-import-status" style="color:var(--muted);font-size:12px;margin:0 0 6px"></p>
     <input class="field" id="disc-search" type="search" placeholder="Rechercher nom, tag, corps, ethnie…" value="${q0.replace(/"/g, "&quot;")}" style="margin:10px 0 6px;width:100%" />
@@ -1778,20 +2016,8 @@ function renderDiscover() {
     $("disc-search").oninput = paint;
     $("disc-search").focus();
   }
-  if ($("disc-import")) {
-    $("disc-import").onchange = async (ev) => {
-      const st = $("disc-import-status");
-      if (st) st.textContent = "Import en cours…";
-      try {
-        const r = await importCharacterFiles(ev.target.files);
-        if (st) st.textContent = r.ok ? ("Importé : " + (r.names || []).join(", ")) : ("Échec : " + (r.err || "?"));
-        state._discShuffle = null;
-        paint();
-      } catch (e) {
-        if (st) st.textContent = "Erreur import: " + (e.message || e);
-      }
-      ev.target.value = "";
-    };
+  if ($("disc-open-import")) {
+    $("disc-open-import").onclick = () => renderImportHub();
   }
   $("view-discover").onclick = (e) => {
     const tag = e.target.closest(".tag-filter");

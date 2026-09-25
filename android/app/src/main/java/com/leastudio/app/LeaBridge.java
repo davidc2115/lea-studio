@@ -48,6 +48,88 @@ public class LeaBridge {
         }
     }
 
+
+    /** GET HTTP (texte) — pour APIs type Chub sans CORS WebView. */
+    @JavascriptInterface
+    public String httpGet(String url) {
+        return httpGetWithHeaders(url, "Accept: application/json\nOrigin: https://chub.ai\nReferer: https://chub.ai/");
+    }
+
+    @JavascriptInterface
+    public String httpGetWithHeaders(String url, String headersJoined) {
+        HttpURLConnection conn = null;
+        try {
+            if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
+            URL u = new URL(url);
+            conn = (HttpURLConnection) u.openConnection();
+            conn.setConnectTimeout(20000);
+            conn.setReadTimeout(45000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36");
+            if (headersJoined != null) {
+                for (String line : headersJoined.split("\n")) {
+                    int c = line.indexOf(':');
+                    if (c > 0) {
+                        conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+                    }
+                }
+            }
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            if (in == null) return "{\"error\":\"http " + code + "\"}";
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) sb.append(line).append('\n');
+            br.close();
+            if (code >= 400) return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(sb.toString().substring(0, Math.min(500, sb.length()))) + "}";
+            return sb.toString();
+        } catch (Exception e) {
+            return "{\"error\":" + JSONObject.quote(String.valueOf(e.getMessage())) + "}";
+        } finally {
+            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+        }
+    }
+
+    /** GET binaire → data URL base64 (ex: carte PNG Chub). */
+    @JavascriptInterface
+    public String httpGetDataUrl(String url) {
+        HttpURLConnection conn = null;
+        try {
+            if (url == null || url.isEmpty()) return "";
+            URL u = new URL(url);
+            conn = (HttpURLConnection) u.openConnection();
+            conn.setConnectTimeout(20000);
+            conn.setReadTimeout(60000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
+            conn.setRequestProperty("Referer", "https://chub.ai/");
+            int code = conn.getResponseCode();
+            if (code >= 400) return "";
+            InputStream in = conn.getInputStream();
+            java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[8192];
+            int n;
+            int total = 0;
+            while ((n = in.read(buf)) > 0) {
+                bos.write(buf, 0, n);
+                total += n;
+                if (total > 12_000_000) break; // max ~12 Mo
+            }
+            in.close();
+            byte[] bytes = bos.toByteArray();
+            String mime = "image/png";
+            String ct = conn.getContentType();
+            if (ct != null && ct.startsWith("image/")) mime = ct.split(";")[0].trim();
+            return "data:" + mime + ";base64," + android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP);
+        } catch (Exception e) {
+            return "";
+        } finally {
+            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+        }
+    }
+
+
     /** Enregistre une image (data URL ou base64) sur disque. Retourne une clé gallery:… stable. */
     @JavascriptInterface
     public String saveGalleryImage(String charId, String dataUrl) {
