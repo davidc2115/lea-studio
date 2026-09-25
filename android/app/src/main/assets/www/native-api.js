@@ -95,7 +95,7 @@
   }
   function pushVault(chat, tag, text, pin) {
     ensureVault(chat);
-    const tx = String(text || "").replace(/\s+/g, " ").trim().slice(0, 400);
+    const tx = String(text || "").replace(/\s+/g, " ").trim().slice(0, 600);
     if (!tx) return;
     const now = Date.now();
     const d = new Date(now);
@@ -126,13 +126,13 @@
     // limite ~800 entrées vault (quasi illimité usage normal)
     if (chat.vault.entries.length > 800) {
       const pinned = chat.vault.entries.filter((e) => e.pinned);
-      const rest = chat.vault.entries.filter((e) => !e.pinned).slice(-750);
-      chat.vault.entries = pinned.concat(rest).slice(-800);
+      const rest = chat.vault.entries.filter((e) => !e.pinned).slice(-4800);
+      chat.vault.entries = pinned.concat(rest).slice(-5000);
     }
     if (chat.memories.length > 800) {
       const pinned = chat.memories.filter((m) => m.pinned);
-      const rest = chat.memories.filter((m) => !m.pinned).slice(-750);
-      chat.memories = pinned.concat(rest).slice(-800);
+      const rest = chat.memories.filter((m) => !m.pinned).slice(-4800);
+      chat.memories = pinned.concat(rest).slice(-5000);
     }
   }
   /** Recherche vectorielle locale par tag optionnel + requête + récence. */
@@ -454,6 +454,13 @@
   /** Retire les fuites de prompt système / meta hors personnage. */
   function sanitizeReply(text) {
     let t = String(text || "");
+    // Normalise labels anglais du modèle
+    t = t.replace(/\(\s*thought\s*\)\s*/gi, "");
+    t = t.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
+    t = t.replace(/(^|\n)\s*Action\s*:\s*/gi, "$1*");
+    t = t.replace(/(^|\n)\s*Thought\s*:\s*/gi, "$1(");
+    t = t.replace(/(^|\n)\s*Speech\s*:\s*/gi, "$1");
+    t = t.replace(/(^|\n)\s*Pens[ée]e\s*:\s*/gi, "$1(");
     // Fuites méta / prompt système (anglais ou technique)
     const leakLine = /^(thought|action|speech|format|avoid|interdit|r[eè]gle|mode\s+nsfw|mode\s+sfw|apparence fixe|morphologie|system|prompt|hourglass|95d|identity|client-agent|style de r[eé]ponse|ne jamais|responds? only|you are)/i;
     const leakFrag = [
@@ -518,7 +525,7 @@
 
   /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
   function cleanHistory(messages) {
-    return (messages || []).slice(-10).map((m) => ({
+    return (messages || []).slice(-16).map((m) => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
     })).filter((m) => m.content && m.content.length > 1);
@@ -536,24 +543,30 @@
       sc.log = (sc.log || []).concat([{ t: now, field, from: prev || "", to: value }]).slice(-120);
     }
 
-    // —— LIEU ——
+    // —— LIEU (changement seulement si signal fort, sinon garde l'état) ——
+    const moveHint = /(on (va|passe|entre|sort|monte|descend)|je (vais|rentre|sors|arrive)|viens|suis (dans|au|à la)|retourn|partons|allons|téléport)/i.test(blob);
     const places = [
-      [/chambre|bedroom|au lit|dans le lit/, "chambre"],
-      [/salon|canapé|sofa|living/, "salon"],
-      [/cuisine|kitchen/, "cuisine"],
+      [/\b(dans la |au |à la )?chambre\b|bedroom|au lit|dans le lit/, "chambre"],
+      [/\b(dans le |au )?salon\b|canapé|sofa|living/, "salon"],
+      [/\b(dans la |en )?cuisine\b|kitchen/, "cuisine"],
       [/salle de bain|douche|bain|bathroom/, "salle de bain"],
-      [/porte|entrée|doorway|seuil/, "entrée"],
+      [/\b(dans l['']?|à l['']?)entrée\b|doorway|seuil/, "entrée"],
       [/balcon|terrasse/, "balcon"],
-      [/voiture|auto/, "voiture"],
-      [/jardin|dehors|extérieur|rue|parc/, "dehors"],
-      [/bureau|office|desk/, "bureau"],
+      [/\b(dans la |en )?voiture\b|\bauto\b/, "voiture"],
+      [/jardin|\bdehors\b|extérieur|\brue\b|\bparc\b/, "dehors"],
+      [/\b(au |dans le )?bureau\b|office/, "bureau"],
       [/hôtel|hotel/, "hôtel"],
     ];
+    // Si lieu déjà connu et pas de mouvement clair → ne pas changer sur simple mention
+    let newPlace = null;
     for (const [re, label] of places) {
-      if (re.test(blob)) {
-        setScene("place", label);
-        pushVault(chat, "lieu", "lieu: " + label + " — " + String(userTxt || replyTxt || "").replace(/\s+/g, " ").slice(0, 160));
-        break;
+      if (re.test(blob)) { newPlace = label; break; }
+    }
+    if (newPlace) {
+      const cur = sc.place || "";
+      if (!cur || cur === newPlace || moveHint || /(suis (dans|au)|on est (dans|au)|arrive|entre dans)/i.test(blob)) {
+        setScene("place", newPlace);
+        pushVault(chat, "lieu", "lieu: " + newPlace + " — " + String(userTxt || replyTxt || "").replace(/\s+/g, " ").slice(0, 160));
       }
     }
 
@@ -562,6 +575,15 @@
       sc.clothes = { top: true, bottom: true, bra: true, panties: true };
     }
     const cl = sc.clothes;
+    // Manteau / veste
+    if (/(enl[eè]ve|retire|ôte|remove).{0,20}(manteau|veste|blouson)|sans manteau|manteau (par terre|sur le canapé|accroché)/i.test(blob)) {
+      setScene("outfit", (sc.outfit || "").replace(/\bmanteau\b/gi, "").trim() + " sans manteau");
+      pushVault(chat, "tenue", "manteau enlevé — sans manteau", false);
+    }
+    if (/(remet|enfile|enfile).{0,20}(manteau|veste)|remet son manteau/i.test(blob)) {
+      pushVault(chat, "tenue", "manteau remis", false);
+    }
+
 
     function syncBodyFromClothes() {
       const topOn = !!cl.top && cl.top !== false;
@@ -792,41 +814,40 @@
     const sc = chat.scene || {};
     const rel = chat.relationship || {};
     const q = String(userTxt || "");
-    // Tags à aller chercher selon le message (sinon état courant seulement)
-    const need = new Set(["tenue", "lieu"]);
-    if (/(pose|position|à genoux|allong|debout|missionnaire|doggy|fesse|genou)/i.test(q)) need.add("pose");
-    if (/(sexe|baiser|baise|suce|doigt|orgasme|chatte|bite|nude|nue|cul|seins|caresse|touche)/i.test(q)) need.add("intime");
-    if (/(humeur|triste|colère|fatigue|timide|excité)/i.test(q)) need.add("humeur");
-    if (/(hier|avant|souviens|rappelle|la dernière fois)/i.test(q)) {
-      need.add("intime"); need.add("dialogue"); need.add("fait");
-    }
-    const last1 = (tag) => {
-      const e = lastByTag(chat, tag);
-      return e ? ("- [" + e.date + " " + e.hour + "] " + e.text) : null;
+    const by = (tag, n) => {
+      const list = chat.vault.entries.filter((e) => e.tag === tag).slice(-(n || 6));
+      if (!list.length) return "- (rien)";
+      return list.map((e) => "- [" + e.date + " " + e.hour + "] " + e.text).join("\n");
     };
-    // Vecteur : seulement ce qui est pertinent, limite basse
-    const relevant = searchVault(chat, q || (chat.messages || []).slice(-2).map((m) => m.content || "").join(" "), null, 5);
+    const relevant = searchVault(chat, q || (chat.messages || []).slice(-3).map((m) => m.content || "").join(" "), null, 8);
     const lines = [
       currentStateBlock(chat),
       "",
+      "⚠ VERROU : lieu=" + (sc.place || "?") + " | tenue=" + (sc.outfit || sc.body || "?") + " | pose=" + (sc.pose || sc.activity || "?"),
+      "Ne change lieu/tenue QUE si le joueur le demande clairement ou si une action explicite le justifie.",
+      "",
       "Relation: prox " + (rel.closeness || 1) + "/10 conf " + (rel.trust || 1) + "/10 heat " + (rel.heat || 0) + "/10 lien " + (rel.bond || "indéfini") + ".",
+      "",
+      "HISTORIQUE TENUES (récent):",
+      by("tenue", 8),
+      "HISTORIQUE LIEUX (récent):",
+      by("lieu", 6),
+      "HISTORIQUE INTIME:",
+      by("intime", 6),
     ];
-    for (const tag of need) {
-      const one = last1(tag);
-      if (one) lines.push("Dernier " + tag + ": " + one);
-    }
     if (relevant.length) {
-      lines.push("Mémoires utiles:");
-      for (const e of relevant.slice(0, 5)) {
-        lines.push("- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 160));
+      lines.push("Mémoires vectorielles utiles:");
+      for (const e of relevant.slice(0, 8)) {
+        lines.push("- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 180));
       }
     }
     lines.push(
       "",
-      "RÈGLES: respecter état actuel (tenue/lieu/pose). Ne change rien sans action claire. Physique = fiche personnage."
+      "RÈGLES: 1) état actuel = vérité 2) pas de téléportation 3) tenue ôtée reste ôtée 4) physique = fiche personnage"
     );
     return lines.join("\n");
   }
+
 
 
 
@@ -990,11 +1011,12 @@
         PERSONA.scenario || "",
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
         "N'invente PAS de liens familiaux absents du titre/scénario. INTERDIT MÉTA : n'écris JAMAIS en anglais de notes système (sister-in-law, refers to, mode SFW, heat, etc.). Uniquement le jeu de rôle en français.",
-        "FORMAT : pensées en (parentheses), actions entre *astérisques*, paroles normales.",
+        "FORMAT STRICT: ACTIONS uniquement entre *astérisques* (*elle enlève son manteau*). PENSÉES uniquement entre (parenthèses) ((Il me regarde…)). PAROLES = texte normal sans * ni (). INTERDIT de mélanger pensées/actions/dialogues. Exemple: *Elle croise les bras.* (Putain…) Je t'écoute.",
         "LONGUEUR : 4 à 9 phrases. Réponse vive mais incarnée. Termine toujours tes phrases.",
         "SCÉNARIO : reste dans le lieu et la situation en cours. Cohérence totale avec le titre et le scénario du personnage.",
 
-        "FORMAT RÉPONSE : 1) actions courtes entre *...* 2) pensées entre (...) 3) paroles normales.",
+        "FORMAT RÉPONSE STRICT : *action* puis (pensée) puis paroles. Jamais mélanger les trois.",
+        "VERROU SCÈNE : le lieu et la tenue de l'ÉTAT ACTUEL sont OBLIGATOIRES. Si elle est au salon sans manteau, elle RESTE au salon sans manteau tant que le joueur ne change pas clairement de lieu ou de vêtement. INTERDIT de téléporter (salon→entrée→voiture) sans action explicite du joueur.",
         "COHÉRENCE MAX (tous modèles) : ne contredis JAMAIS le titre, le scénario, l'apparence, la tenue/lieu/pose actuels de la mémoire. Réponds au DERNIER message. Pas de saut de scène magique. Pas d'invention de famille hors fiche.",
         "NSFW : si le joueur est explicite, sois clairement explicite (corps, sensations, actes) sans vulgarité gratuite hors contexte — mais sans censurer ni rester vague. Décris ce qui se passe vraiment.",
         "LONGUEUR : 4 à 9 phrases. Pas de pavé inutile. Termine la réponse.",

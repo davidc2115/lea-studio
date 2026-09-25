@@ -3652,15 +3652,16 @@ async function generateStudioImage(opts) {
         if (uploads.length > 1) {
           // Horde = 1 seule source img2img : choisir la BONNE base selon la demande
           const reqLow = String(rawPrompt || userPromptOriginal || prompt || "").toLowerCase();
-          const sexualAct = /(l[eè]che|lick|suce|embrass|kiss|chatte|pussy|seins?|breast|cul\b|ass\b|fesse|entre les|cunnilingus|oral|bite|cock|p[eé]n[eè]tre)/i.test(reqLow);
-          // Acte sexuel : en général la dernière image = corps/scène (jambes, seins…), la 1ère = personne qui agit
+          // Ordre naturel utilisateur : image 1 = base (corps/fesses), image 2 = visage/acteur
+          // Sauf si le texte dit explicitement le contraire
           let baseIdx = 0;
           let faceIdx = Math.min(1, uploads.length - 1);
-          if (sexualAct) {
-            baseIdx = uploads.length - 1;
+          if (/(homme|visage|face).{0,40}(premi[eè]re|1[eè]re|image 1)|(premi[eè]re|1[eè]re|image 1).{0,40}(homme|visage)/i.test(reqLow)
+              && /(fesse|cul|seins|chatte|corps|jambe).{0,40}(deuxi[eè]me|2[eè]me|image 2)|(deuxi[eè]me|2[eè]me).{0,40}(fesse|cul|seins)/i.test(reqLow)) {
+            baseIdx = Math.min(1, uploads.length - 1);
             faceIdx = 0;
-            $("studio-status").textContent = "Mix NSFW: corps = image " + (baseIdx + 1) + ", acteur = image " + (faceIdx + 1);
           }
+          $("studio-status").textContent = "Mix: base=img" + (baseIdx + 1) + " · visage/acteur=img" + (faceIdx + 1);
           sourceB64 = uploads[baseIdx];
           if (String(sourceB64).startsWith("data:")) {
             const comma = sourceB64.indexOf(",");
@@ -3672,7 +3673,7 @@ async function generateStudioImage(opts) {
             "BASE photo (keep body pose outfit scene): reference " + (baseIdx + 1) + ",",
             "SECOND person / face / action from reference " + (faceIdx + 1) + ",",
             "User wants EXACTLY: " + String(rawPrompt || userPromptOriginal || "").slice(0, 300),
-            "If oral sex / licking pussy: man's face between woman's spread thighs in fishnets, tongue on pussy, mouth on vulva, extreme close-up, explicit uncensored,",
+            "If kissing/licking ass/buttocks/fesses: man's face pressed against woman's bare buttocks, lips kissing the ass, tongue near anus/pussy from behind, extreme close-up POV, explicit uncensored, If oral sex / licking pussy: man's face between woman's spread thighs, tongue on pussy, mouth on vulva, extreme close-up, explicit uncensored,",
             "If face between breasts: mouth on cleavage licking nipples,",
             "same lighting as base, photorealistic coherent anatomy, adult 18+, no extra random people, no face covered by random fishnet unless in source,",
             "do NOT replace the whole scene with a different woman only"
@@ -3697,7 +3698,7 @@ async function generateStudioImage(opts) {
                   "Image " + (faceIdx + 1) + " = personne / visage à intégrer dans l'action.\n" +
                   "Demande: " + (rawPrompt || userPromptOriginal || "") + "\n" +
                   "Produis UN prompt anglais TRÈS explicite pour réaliser EXACTEMENT l'acte demandé " +
-                  "(ex: man licking woman's pussy through/between fishnet stockings, face buried in crotch, tongue on vulva, POV close-up).\n" +
+                  "(ex: man face kissing woman bare buttocks, lips on ass, or licking pussy, face buried in crotch, POV close-up).\n" +
                   "Décris: qui fait quoi, position des têtes/corps, tenue (fishnets, sweater…), angle caméra.\n" +
                   "Photorealistic, uncensored adult 18+. Réponds UNIQUEMENT avec le prompt final."
               }];
