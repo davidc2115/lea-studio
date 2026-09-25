@@ -125,45 +125,50 @@ jobs:
             -PversionCode="$CODE"
 
 
-      - name: Vérifier libsd.so dans APK
+      - name: Finaliser et vérifier l'APK
         run: |
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          echo "APK=$APK"
-          unzip -l "$APK" | grep -E "libsd|sd-arm64" || true
-          if ! unzip -l "$APK" | grep -q "lib/arm64-v8a/libsd.so"; then
-            echo "ERREUR: libsd.so absent de l'APK — injection forcée"
-            WORK=$(mktemp -d)
-            cp "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so" "$WORK/libsd.so" ||               cp "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64" "$WORK/libsd.so"
-            (
-              cd "$WORK"
-              mkdir -p lib/arm64-v8a
-              cp libsd.so lib/arm64-v8a/libsd.so
-              zip -u -X "$OLDPWD/$APK" lib/arm64-v8a/libsd.so
-            )
-            # re-sign
-            ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
-            APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort | tail -1)
-            ZIPALIGN=$(find "$ANDROID_SDK_ROOT/build-tools" -name zipalign | sort | tail -1)
-            "$ZIPALIGN" -f -p 4 "$APK" "$APK.aligned"
-            mv "$APK.aligned" "$APK"
-            "$APKSIGNER" sign --ks android/app/lea-release.keystore --ks-pass pass:leastudio --key-pass pass:leastudio --ks-key-alias lea "$APK"
-            unzip -l "$APK" | grep libsd.so
-          else
-            echo "OK libsd.so présent"
-          fi
-
-      - name: Renommer l'APK
-        run: |
-          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
-          CODE="${{ github.run_number }}"
+          set -e
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
           test -n "$APK"
-          cp "$APK" "lea-studio-v${VERSION}-b${CODE}.apk"
-          ls -lh "lea-studio-v${VERSION}-b${CODE}.apk"
-          echo "SD_BIN_OK=${SD_BIN_OK:-0}"
+          echo "APK source: $APK ($(du -h "$APK" | cut -f1))"
+          unzip -t "$APK" >/tmp/apk-test.txt 2>&1 || { echo "APK ZIP CORROMPU"; cat /tmp/apk-test.txt; exit 1; }
+          echo "ZIP integrity OK"
+          unzip -l "$APK" | grep -E "libsd|classes.dex|AndroidManifest" || true
+          ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+          APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort | tail -1)
+          ZIPALIGN=$(find "$ANDROID_SDK_ROOT/build-tools" -name zipalign | sort | tail -1)
+          # Injection libsd seulement si absente (sans casser le zip)
+          if ! unzip -l "$APK" | grep -q "lib/arm64-v8a/libsd.so"; then
+            LIB=""
+            [ -f android/app/src/main/jniLibs/arm64-v8a/libsd.so ] && LIB=android/app/src/main/jniLibs/arm64-v8a/libsd.so
+            [ -z "$LIB" ] && [ -f android/app/src/main/assets/native/sd-arm64 ] && LIB=android/app/src/main/assets/native/sd-arm64
+            if [ -n "$LIB" ]; then
+              WORK=$(mktemp -d)
+              mkdir -p "$WORK/lib/arm64-v8a"
+              cp "$LIB" "$WORK/lib/arm64-v8a/libsd.so"
+              ( cd "$WORK" && zip -0 -X "$OLDPWD/$APK" lib/arm64-v8a/libsd.so )
+              "$ZIPALIGN" -f -p 4 "$APK" "${APK}.aligned"
+              mv "${APK}.aligned" "$APK"
+              "$APKSIGNER" sign --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true                 --ks android/app/lea-release.keystore --ks-pass pass:leastudio --key-pass pass:leastudio --ks-key-alias lea "$APK"
+            else
+              echo "WARN: pas de libsd.so — APK sans SD local"
+            fi
+          fi
+          "$APKSIGNER" verify --verbose "$APK" || { echo "SIGNATURE INVALIDE"; exit 1; }
+          unzip -t "$APK" >/dev/null
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          CODE="${{ github.run_number }}"
+          OUT="lea-studio-v${VERSION}-b${CODE}.apk"
+          cp "$APK" "$OUT"
+          # Copie nom simple pour installation facile
+          cp "$APK" lea-studio.apk
+          ls -lh "$OUT" lea-studio.apk
+          echo "APK prêt: $OUT"
 
       - uses: actions/upload-artifact@v4
         with:
           name: lea-studio-apk
-          path: lea-studio-v*.apk
+          path: |
+            lea-studio.apk
+            lea-studio-v*.apk
           retention-days: 90
