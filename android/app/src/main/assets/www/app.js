@@ -1501,6 +1501,168 @@ function shuffleList(arr) {
   return a;
 }
 
+
+// ——— Import personnages (Character Card V2 / JSON / PNG Tavern — Janitor, SillyTavern, exports) ———
+function loadCustomChars() {
+  try {
+    const raw = localStorage.getItem("lea.customChars");
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (_) { return []; }
+}
+function saveCustomChars(list) {
+  try { localStorage.setItem("lea.customChars", JSON.stringify(list || [])); } catch (_) {}
+}
+function mergeCustomIntoCast() {
+  const custom = loadCustomChars();
+  if (!custom.length) return;
+  const base = (window.CAST && window.CAST.length) ? window.CAST.slice() : [];
+  const seen = new Set(base.map((c) => c.id));
+  for (const c of custom) {
+    if (c && c.id && !seen.has(c.id)) { base.push(c); seen.add(c.id); }
+  }
+  window.CAST = base;
+  if (state) state.characters = base;
+}
+function cardToCharacter(data, extra) {
+  extra = extra || {};
+  // Character Card V2
+  const d = data.data || data;
+  const name = d.name || data.name || "Importé";
+  const id = "imp_" + String(name).toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40) + "_" + Date.now().toString(36);
+  const desc = d.description || d.personality || data.description || "";
+  const scenario = d.scenario || data.scenario || "";
+  const first = d.first_mes || d.greeting || data.first_mes || data.greeting || "";
+  const personality = d.personality || d.mes_example || "";
+  const tags = [].concat(d.tags || data.tags || [], extra.tags || [], ["importé"]);
+  const system = d.system_prompt || d.creator_notes || "";
+  return {
+    id,
+    name: String(name).slice(0, 80),
+    age: Number(d.age) || 22,
+    title: (d.creator_notes || d.title || "Import Character Card").toString().slice(0, 80),
+    tags: tags.map(String).slice(0, 20),
+    cover: extra.cover || "",
+    gallery: extra.cover ? [extra.cover] : [],
+    greeting: String(first || ("*" + name + " te regarde.*\n…Salut.")).slice(0, 2000),
+    scenario: String(scenario || desc).slice(0, 2000),
+    personality: String(personality || desc).slice(0, 1500),
+    appearance: String(desc).slice(0, 1500),
+    looks_en: "",
+    ethnicity: "",
+    body: "",
+    system_extra: String(system).slice(0, 1500),
+    imported: true,
+    source: extra.source || "character_card",
+  };
+}
+function parseCharacterJSON(text) {
+  const data = JSON.parse(text);
+  // Array of cards
+  if (Array.isArray(data)) return data.map((x) => cardToCharacter(x));
+  // { characters: [...] }
+  if (Array.isArray(data.characters)) return data.characters.map((x) => cardToCharacter(x));
+  return [cardToCharacter(data)];
+}
+async function parseCharacterPNG(file) {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  // Scan tEXt / iTXt chunks for keyword "chara" or "ccv3"
+  let offset = 8; // skip PNG sig
+  const out = [];
+  while (offset + 8 < bytes.length) {
+    const len = (bytes[offset] << 24) | (bytes[offset+1] << 16) | (bytes[offset+2] << 8) | bytes[offset+3];
+    const type = String.fromCharCode(bytes[offset+4], bytes[offset+5], bytes[offset+6], bytes[offset+7]);
+    const dataStart = offset + 8;
+    const data = bytes.slice(dataStart, dataStart + len);
+    if (type === "tEXt" || type === "iTXt") {
+      let key = "";
+      let i = 0;
+      while (i < data.length && data[i] !== 0) { key += String.fromCharCode(data[i]); i++; }
+      i++; // null
+      if (type === "iTXt") {
+        // skip compression flag, method, language, translated keyword
+        i += 2;
+        while (i < data.length && data[i] !== 0) i++;
+        i++;
+        while (i < data.length && data[i] !== 0) i++;
+        i++;
+      }
+      if (/^chara$|^ccv3$/i.test(key)) {
+        let b64 = "";
+        for (; i < data.length; i++) b64 += String.fromCharCode(data[i]);
+        try {
+          const json = decodeURIComponent(escape(atob(b64.trim())));
+          const parsed = JSON.parse(json);
+          // cover = the PNG itself as data URL
+          const cover = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result);
+            r.onerror = rej;
+            r.readAsDataURL(file);
+          });
+          out.push(cardToCharacter(parsed, { cover, source: "png_card" }));
+        } catch (e) {
+          console.warn("chara parse", e);
+        }
+      }
+    }
+    offset = dataStart + len + 4; // data + CRC
+    if (type === "IEND") break;
+  }
+  return out;
+}
+async function importCharacterFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return { ok: 0, err: "aucun fichier" };
+  const imported = [];
+  for (const f of files) {
+    try {
+      if (/\.json$/i.test(f.name) || f.type === "application/json") {
+        const text = await f.text();
+        imported.push(...parseCharacterJSON(text));
+      } else if (/\.png$/i.test(f.name) || f.type === "image/png") {
+        const cards = await parseCharacterPNG(f);
+        if (cards.length) imported.push(...cards);
+        else {
+          // PNG sans chunk chara → avatar seul, demander JSON séparé plus tard
+          const cover = await new Promise((res, rej) => {
+            const r = new FileReader();
+            r.onload = () => res(r.result);
+            r.onerror = rej;
+            r.readAsDataURL(f);
+          });
+          imported.push(cardToCharacter({
+            name: f.name.replace(/\.png$/i, ""),
+            description: "Personnage importé (avatar PNG). Complète le scénario dans le profil.",
+            first_mes: "*te regarde*\n…Salut.",
+          }, { cover, source: "png_avatar", tags: ["importé", "avatar"] }));
+        }
+      } else if (/\.txt$/i.test(f.name)) {
+        const text = await f.text();
+        imported.push(cardToCharacter({
+          name: f.name.replace(/\.txt$/i, ""),
+          description: text.slice(0, 2000),
+          scenario: text.slice(0, 1500),
+          first_mes: "*soupire*\n…Hey.",
+        }, { source: "txt", tags: ["importé"] }));
+      }
+    } catch (e) {
+      console.warn("import fail", f.name, e);
+    }
+  }
+  if (!imported.length) return { ok: 0, err: "format non reconnu" };
+  const cur = loadCustomChars();
+  const seen = new Set(cur.map((c) => c.id));
+  for (const c of imported) {
+    if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); }
+  }
+  saveCustomChars(cur);
+  mergeCustomIntoCast();
+  return { ok: imported.length, names: imported.map((c) => c.name) };
+}
+
+
 function filterDiscoverList(q) {
   // Toujours fusionner CAST + EXTRA au cas où le script extra charge après
   let list = state.characters.length ? state.characters.slice() : [];
@@ -1584,9 +1746,17 @@ function renderDiscover() {
   const q0 = (state.discQuery || "");
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center">
+      <label class="cta" style="margin:0;cursor:pointer;padding:8px 12px;font-size:13px">
+        ＋ Importer personnage
+        <input type="file" id="disc-import" accept=".json,.png,.txt,application/json,image/png" multiple hidden />
+      </label>
+      <span style="color:var(--muted);font-size:11px;flex:1">JSON / PNG Character Card (Janitor, SillyTavern, exports SpicyChat…)</span>
+    </div>
+    <p id="disc-import-status" style="color:var(--muted);font-size:12px;margin:0 0 6px"></p>
     <input class="field" id="disc-search" type="search" placeholder="Rechercher nom, tag, corps, ethnie…" value="${q0.replace(/"/g, "&quot;")}" style="margin:10px 0 6px;width:100%" />
     <div class="tags" id="disc-quick" style="margin-bottom:10px;flex-wrap:wrap">
-      ${["aléatoire","belle-fille","belle-mère","belle-sœur","babysitter","amie","timide","nsfw",
+      ${["aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","timide","nsfw",
         "blonde","brune","rousse","cheveux noirs",
         "gros seins","petits seins","seins moyens","95D",
         "mince","ronde","sablier","athlétique","voluptueuse",
@@ -1607,6 +1777,21 @@ function renderDiscover() {
   if ($("disc-search")) {
     $("disc-search").oninput = paint;
     $("disc-search").focus();
+  }
+  if ($("disc-import")) {
+    $("disc-import").onchange = async (ev) => {
+      const st = $("disc-import-status");
+      if (st) st.textContent = "Import en cours…";
+      try {
+        const r = await importCharacterFiles(ev.target.files);
+        if (st) st.textContent = r.ok ? ("Importé : " + (r.names || []).join(", ")) : ("Échec : " + (r.err || "?"));
+        state._discShuffle = null;
+        paint();
+      } catch (e) {
+        if (st) st.textContent = "Erreur import: " + (e.message || e);
+      }
+      ev.target.value = "";
+    };
   }
   $("view-discover").onclick = (e) => {
     const tag = e.target.closest(".tag-filter");
@@ -3672,125 +3857,121 @@ async function generateStudioImage(opts) {
     if (useLast || opts.mode === "edit" || uploads.length) {
       $("studio-status").textContent = "Chargement image source…";
       if (uploads.length) {
-        // Image 1 = base composition (corps/scène) ; image 2+ = visage / 2e sujet à intégrer
-        sourceB64 = uploads[0];
-        if (String(sourceB64).startsWith("data:")) {
-          const comma = sourceB64.indexOf(",");
-          if (comma > 0) sourceB64 = sourceB64.slice(comma + 1);
+        // === MULTI-IMAGES : composition fiable ===
+        const reqLow = String(rawPrompt || userPromptOriginal || prompt || "").toLowerCase();
+        let baseIdx = 0;
+        let faceIdx = Math.min(1, uploads.length - 1);
+        if (/(homme|visage|face|man).{0,50}(premi[eè]re|1[eè]re|image\s*1)/i.test(reqLow)
+            || /(premi[eè]re|1[eè]re|image\s*1).{0,50}(homme|visage|face)/i.test(reqLow)) {
+          faceIdx = 0;
+          baseIdx = Math.min(1, uploads.length - 1);
         }
-        if (uploads.length > 1) {
-          // Horde = 1 seule source img2img : choisir la BONNE base selon la demande
-          const reqLow = String(rawPrompt || userPromptOriginal || prompt || "").toLowerCase();
-          // Ordre naturel utilisateur : image 1 = base (corps/fesses), image 2 = visage/acteur
-          // Sauf si le texte dit explicitement le contraire
-          let baseIdx = 0;
-          let faceIdx = Math.min(1, uploads.length - 1);
-          if (/(homme|visage|face).{0,40}(premi[eè]re|1[eè]re|image 1)|(premi[eè]re|1[eè]re|image 1).{0,40}(homme|visage)/i.test(reqLow)
-              && /(fesse|cul|seins|chatte|corps|jambe).{0,40}(deuxi[eè]me|2[eè]me|image 2)|(deuxi[eè]me|2[eè]me).{0,40}(fesse|cul|seins)/i.test(reqLow)) {
-            baseIdx = Math.min(1, uploads.length - 1);
-            faceIdx = 0;
-          }
-          $("studio-status").textContent = "Mix: base=img" + (baseIdx + 1) + " · visage/acteur=img" + (faceIdx + 1);
-          sourceB64 = uploads[baseIdx];
-          if (String(sourceB64).startsWith("data:")) {
-            const comma = sourceB64.indexOf(",");
-            if (comma > 0) sourceB64 = sourceB64.slice(comma + 1);
-          }
+        $("studio-status").textContent = "Mix: corps=img" + (baseIdx + 1) + " · visage=img" + (faceIdx + 1);
 
-          const composeHint = [
-            "CRITICAL COMPOSITION (img2img from multiple refs):",
-            "BASE photo (keep body pose outfit scene): reference " + (baseIdx + 1) + ",",
-            "SECOND person / face / action from reference " + (faceIdx + 1) + ",",
-            "User wants EXACTLY: " + String(rawPrompt || userPromptOriginal || "").slice(0, 300),
-            "MUST show a man's head/face in the frame doing the action. If kissing buttocks: insert a realistic adult man face against the woman's bare ass, lips touching the butt cheek, side profile of man visible, extreme close-up. If licking pussy: man's face between thighs, tongue on vulva. Photorealistic, high quality, sharp, uncensored.",
-            "If face between breasts: mouth on cleavage licking nipples,",
-            "same lighting as base, photorealistic coherent anatomy, adult 18+, no extra random people, no face covered by random fishnet unless in source,",
-            "do NOT replace the whole scene with a different woman only"
-          ].join(" ");
-          prompt = composeHint + ". Detailed request: " + prompt;
+        const stripB64 = (u) => {
+          let s = String(u || "");
+          if (s.startsWith("data:")) {
+            const c = s.indexOf(",");
+            if (c > 0) s = s.slice(c + 1);
+          }
+          return s;
+        };
 
-          // Gemini Vision : décrit les refs + prompt de mix explicite
-          try {
-            const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-            const keys = String(st.geminiKeys || st.gemini || "")
-              .split(/[\n,;]+/)
-              .map((k) => k.trim())
-              .filter((k) => k && k.length >= 10 && !/^sk-/.test(k));
-            if (keys.length) {
-              $("studio-status").textContent = "Gemini analyse les " + uploads.length + " images (mix NSFW)…";
-              const model = st.geminiTextModel || "gemini-2.0-flash";
-              const visionModel = /3\./.test(model) ? "gemini-2.0-flash" : (model || "gemini-2.0-flash");
-              const parts = [{
-                text:
-                  "Tu es un expert prompteur img2img NSFW. Analyse les images + la demande.\n" +
-                  "Image " + (baseIdx + 1) + " = BASE (corps/pose/tenue à conserver).\n" +
-                  "Image " + (faceIdx + 1) + " = personne / visage à intégrer dans l'action.\n" +
-                  "Demande: " + (rawPrompt || userPromptOriginal || "") + "\n" +
-                  "Produis UN prompt anglais TRÈS explicite pour réaliser EXACTEMENT l'acte demandé " +
-                  "(ex: man face kissing woman bare buttocks, lips on ass, or licking pussy, face buried in crotch, POV close-up).\n" +
-                  "Décris: qui fait quoi, position des têtes/corps, tenue (fishnets, sweater…), angle caméra.\n" +
-                  "Photorealistic, uncensored adult 18+. Réponds UNIQUEMENT avec le prompt final."
-              }];
-              for (let ui = 0; ui < Math.min(uploads.length, 3); ui++) {
-                let u = uploads[ui];
-                let mime = "image/jpeg";
-                let data = u;
-                if (String(u).startsWith("data:")) {
-                  const m = /^data:([^;]+);base64,(.+)$/s.exec(u);
-                  if (m) { mime = m[1]; data = m[2]; }
-                  else {
-                    const c = u.indexOf(",");
-                    if (c > 0) data = u.slice(c + 1);
-                  }
+        const needComposite = uploads.length > 1 && /(embrass|kiss|l[eè]che|lick|entre les|visage|face|homme|man|fesse|cul|ass|seins|breast|chatte|pussy|oral)/i.test(reqLow);
+
+        let visionDesc = "";
+        try {
+          const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+          const keys = String(st.geminiKeys || st.gemini || "")
+            .split(/[\n,;]+/).map((k) => k.trim())
+            .filter((k) => k && k.length >= 10 && !/^sk-/.test(k));
+          if (keys.length && uploads.length) {
+            $("studio-status").textContent = "Gemini Vision analyse les " + uploads.length + " images…";
+            const visionModel = "gemini-2.0-flash";
+            const parts = [{
+              text:
+                "Tu analyses des photos pour un prompt Stable Diffusion NSFW photoréaliste.\n" +
+                "Image " + (baseIdx + 1) + " = CORPS / SCÈNE (fesses, pose, lit, peau…).\n" +
+                "Image " + (faceIdx + 1) + " = VISAGE / PERSONNE à intégrer dans l'action.\n" +
+                "Demande utilisateur: " + String(rawPrompt || userPromptOriginal || "") + "\n\n" +
+                "Réponds en ANGLAIS, structure STRICTE:\n" +
+                "BODY: (describe body pose, buttocks, skin, bed, angle of image " + (baseIdx + 1) + " in detail)\n" +
+                "FACE: (describe the man's face from image " + (faceIdx + 1) + ": age, hair, glasses, beard, expression)\n" +
+                "ACTION: (exactly what user asked: e.g. man kissing bare buttocks, lips on ass cheek, face visible against butt)\n" +
+                "PROMPT: (ONE final English SD prompt, photorealistic, uncensored, MUST include both the body from BODY and the man face from FACE doing the ACTION, close-up, sharp, high detail)"
+            }];
+            for (let ui = 0; ui < Math.min(uploads.length, 3); ui++) {
+              let u = uploads[ui];
+              let mime = "image/jpeg";
+              let data = u;
+              if (String(u).startsWith("data:")) {
+                const m = /^data:([^;]+);base64,(.+)$/s.exec(u);
+                if (m) { mime = m[1]; data = m[2]; }
+                else {
+                  const c = u.indexOf(",");
+                  if (c > 0) data = u.slice(c + 1);
                 }
-                parts.push({ text: "Reference image " + (ui + 1) + ":" });
-                parts.push({ inline_data: { mime_type: mime, data: data } });
               }
-              let visionOk = false;
-              for (let ki = 0; ki < keys.length && !visionOk; ki++) {
-                try {
-                  const res = await fetch(
-                    "https://generativelanguage.googleapis.com/v1beta/models/" +
-                      encodeURIComponent(visionModel) +
-                      ":generateContent?key=" + encodeURIComponent(keys[ki]),
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        contents: [{ role: "user", parts }],
-                        generationConfig: { temperature: 0.3, maxOutputTokens: 500 },
-                        safetySettings: [
-                          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-                        ],
-                      }),
-                    }
-                  );
-                  const data = await res.json().catch(() => ({}));
-                  if (data.error) continue;
-                  const t =
-                    data &&
-                    data.candidates &&
-                    data.candidates[0] &&
-                    data.candidates[0].content &&
-                    data.candidates[0].content.parts &&
-                    data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("");
-                  if (t && t.trim().length > 20) {
-                    prompt = t.trim().replace(/^["']|["']$/g, "");
-                    visionOk = true;
-                    $("studio-status").textContent = "Prompt mix OK → génération…";
-                  }
-                } catch (_) {}
-              }
-              if (!visionOk) {
-                $("studio-status").textContent = "Vision skip → prompt composition manuelle…";
-              }
+              parts.push({ text: "Reference image " + (ui + 1) + ":" });
+              parts.push({ inline_data: { mime_type: mime, data: data } });
             }
-          } catch (ge) {
-            $("studio-status").textContent = "Analyse Gemini skip, composition manuelle…";
+            for (let ki = 0; ki < keys.length; ki++) {
+              try {
+                const res = await fetch(
+                  "https://generativelanguage.googleapis.com/v1beta/models/" +
+                    encodeURIComponent(visionModel) +
+                    ":generateContent?key=" + encodeURIComponent(keys[ki]),
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      contents: [{ role: "user", parts: parts }],
+                      generationConfig: { temperature: 0.2, maxOutputTokens: 700 },
+                    }),
+                  }
+                );
+                const dataJ = await res.json().catch(() => ({}));
+                if (dataJ.error) continue;
+                const t = (dataJ.candidates && dataJ.candidates[0] && dataJ.candidates[0].content &&
+                  dataJ.candidates[0].content.parts &&
+                  dataJ.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("")) || "";
+                if (t && t.trim().length > 40) {
+                  visionDesc = t.trim();
+                  const pm = /PROMPT\s*:\s*([\s\S]+)$/i.exec(visionDesc);
+                  if (pm && pm[1].trim().length > 30) {
+                    prompt = pm[1].trim().replace(/\n+/g, ", ");
+                  } else {
+                    prompt = visionDesc.replace(/\n+/g, ", ");
+                  }
+                  $("studio-status").textContent = "Vision OK → génération…";
+                  break;
+                }
+              } catch (_) {}
+            }
           }
+        } catch (_) {}
+
+        if (!visionDesc || String(prompt).length < 40) {
+          const act = String(rawPrompt || userPromptOriginal || "");
+          if (/fesse|cul|ass|buttock/i.test(act) && /(embrass|kiss|l[eè]che|lick|visage|homme)/i.test(act)) {
+            prompt = [
+              "photorealistic explicit NSFW adult photo",
+              "a man with a realistic face kissing a woman's bare buttocks from behind",
+              "man's face clearly visible pressed against the ass cheeks, lips on the butt",
+              "close-up of buttocks and man's head, woman on bed, realistic skin pores",
+              "sharp focus, high detail, natural light, uncensored",
+              act
+            ].join(", ");
+          } else {
+            prompt = (prompt || act) + ", photorealistic, detailed, uncensored adult";
+          }
+        }
+
+        if (needComposite) {
+          sourceB64 = null;
+          $("studio-status").textContent = "Composition multi → txt2img détaillé…";
+        } else {
+          sourceB64 = stripB64(uploads[baseIdx]);
         }
       } else {
         sourceB64 = await studioSourceBase64(true);
@@ -3816,20 +3997,13 @@ async function generateStudioImage(opts) {
     if (sourceB64) {
       payload.source_image = sourceB64;
       payload.source_processing = "img2img";
-      // Multi-images (ex: visage + fesses) = denoise HAUT sinon Horde garde juste la photo de base
-      payload.denoising = opts.mode === "edit" ? 0.58
-      : (uploads.length > 1
-          ? (/(l[eè]che|lick|embrass|kiss|chatte|pussy|seins|breast|oral|fesse|cul|ass)/i.test(String(rawPrompt || prompt || "")) ? 0.82 : 0.70)
-          : 0.48);
-      if (uploads.length > 1) {
-        payload.steps = 40;
-        // Force prompt composition explicite homme + action
-        const act = String(rawPrompt || userPromptOriginal || "").toLowerCase();
-        if (/fesse|cul|ass|buttock/.test(act) && /(embrass|kiss|l[eè]che|lick|visage|homme|face|man)/.test(act)) {
-          prompt = "photorealistic explicit NSFW, a man kissing a woman's bare buttocks from behind, man's face clearly visible pressed against the ass cheeks, lips on the butt, intimate close-up, realistic skin texture, sharp focus, high detail, uncensored adult, " + prompt;
-        }
-      }
+      payload.denoising = opts.mode === "edit" ? 0.58 : 0.48;
+    } else {
+      // txt2img composition : plus de steps pour qualité
+      payload.steps = 40;
     }
+    // Toujours mettre à jour le prompt dans le payload (vision a pu le enrichir)
+    payload.prompt = prompt;
 
     if (eng === "sd_cpp" && window.LeaAndroid && window.LeaAndroid.sdCppGenerate) {
       try {
@@ -4271,6 +4445,7 @@ document.querySelectorAll(".nav").forEach((b) => {
 (async function init() {
   // 1) Afficher IMMÉDIATEMENT les profils (évite écran noir)
   try {
+    if (typeof mergeCustomIntoCast === "function") mergeCustomIntoCast();
     if (window.CAST && window.CAST.length) state.characters = window.CAST;
   } catch (_) {}
   try {
