@@ -233,8 +233,23 @@
 
   async function callGemini(messages, keys) {
     const s = settings();
-    const pref = s.geminiTextModel || "gemini-3.5-flash-lite";
-    const models = [pref, "gemini-3.5-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"]
+    let pref = s.geminiTextModel || "gemini-3.5-flash-lite";
+    // Modèles retirés pour nouveaux comptes → remap
+    const deprecatedMap = {
+      "gemini-2.5-flash": "gemini-3.8-flash",
+      "gemini-2.5-flash-lite": "gemini-3.5-flash-lite",
+      "gemini-2.0-flash-lite": "gemini-2.0-flash",
+      "gemini-1.5-flash": "gemini-3.5-flash-lite",
+      "gemini-1.5-pro": "gemini-3.8-flash",
+    };
+    if (deprecatedMap[pref]) pref = deprecatedMap[pref];
+    const models = [
+      pref,
+      "gemini-3.5-flash-lite",
+      "gemini-3.8-flash",
+      "gemini-3.6-flash",
+      "gemini-2.0-flash",
+    ]
       .filter((m, idx, a) => a.indexOf(m) === idx)
       .slice(0, 5);
     const safetySettings = [
@@ -348,9 +363,9 @@
               console.warn("[lea] bad key", last);
               continue;
             }
-            if (/not found|NOT_FOUND|does not exist|is not supported/i.test(msg)) {
+            if (/not found|NOT_FOUND|does not exist|is not supported|no longer available|update your code/i.test(msg)) {
               console.warn("[lea] model skip", last);
-              break;
+              break; // modèle suivant
             }
             // role model ending / contents invalid → déjà corrigé côté payload
             if (/must alternate|last.*model|INVALID_ARGUMENT/i.test(msg)) {
@@ -886,6 +901,10 @@
       const s = settings();
       const rawMode = body.mode || "auto";
       const txt = String(body.text || "");
+      // Ne jamais traiter un prompt studio comme un message de chat
+      if (/^\[STUDIO_PROMPT\]/i.test(txt) || body._studioPrompt) {
+        return json({ error: "Utilise la section Générer, pas le chat." }, 400);
+      }
       const recent = (chat.messages || []).slice(-16).map((m) => m.content).join("\n") + "\n" + txt;
       const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant)/i.test(txt);
       const nsfwHint = !coolHint && (/(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)

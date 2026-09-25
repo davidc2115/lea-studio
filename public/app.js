@@ -1129,8 +1129,8 @@ function openFull(src, opts) {
   const img = $("lightbox-img");
   if (img) {
     img.src = src;
-    img.style.maxWidth = "100vw";
-    img.style.maxHeight = "92vh";
+    img.style.maxWidth = "92vw";
+    img.style.maxHeight = "62vh";
     img.style.width = "auto";
     img.style.height = "auto";
     img.style.objectFit = "contain";
@@ -2972,9 +2972,17 @@ async function send() {
   } catch (e) {
     const pending = $("pending");
     if (pending) pending.remove();
+    const errMsg = String(e.message || "erreur");
+    const short = /no longer available/i.test(errMsg)
+      ? "Modèle Gemini trop ancien — choisis 3.5 Flash-Lite ou 3.8 Flash dans Clés."
+      : /quota|429|exhausted/i.test(errMsg)
+      ? "Quota clé atteint — la rotation passe à la suivante, réessaie."
+      : /API key|invalid|PERMISSION/i.test(errMsg)
+      ? "Clé API invalide — vérifie dans Clés."
+      : errMsg.slice(0, 160);
     state.chat.messages.push({
       role: "assistant",
-      content: "*elle reste sur le seuil, trempée, la voix petite*\nJe… je t'écoute.\n(" + (e.message || "erreur") + " — ajoute une clé Gemini / OpenAI / Grok dans Réglages.)",
+      content: "*elle hésite*\n(Erreur: " + short + ")",
       ts: Date.now(),
     });
     paintMessages();
@@ -3730,15 +3738,14 @@ function renderSettings() {
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
       <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite ★ recommandé</option>
-      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
-      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-      <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      <option value="gemini-3.8-flash">Gemini 3.8 Flash (nouveau)</option>
+      <option value="gemini-3.6-flash">Gemini 3.6 Flash</option>
       <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
       <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
       <option value="gemini-flash-latest">Gemini Flash Latest</option>
     </select>
-    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Rotation auto des clés si quota. Mets plusieurs clés (une par ligne). Erreurs affichent n° de clé + modèle.</p>
+    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Évite 2.5-flash (plus dispo pour nouveaux comptes). Rotation auto des clés si quota.</p>
     <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
     <textarea class="field" id="gemini" rows="3" placeholder="aq... ou AIza... une par ligne"></textarea>
     <label>Clé Grok / xAI Imagine (xai-…)</label>
