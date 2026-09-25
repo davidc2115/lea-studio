@@ -234,7 +234,6 @@
   async function callGemini(messages, keys) {
     const s = settings();
     const pref = s.geminiTextModel || "gemini-3.5-flash-lite";
-    // Préféré d'abord, puis fallbacks stables (3.5-lite inclus)
     const models = [pref, "gemini-3.5-flash-lite", "gemini-2.5-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"]
       .filter((m, idx, a) => a.indexOf(m) === idx)
       .slice(0, 5);
@@ -249,25 +248,47 @@
     let last = "Aucune clé Gemini — ajoute des clés dans Clés (une par ligne)";
     const system = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
     const nonSys = messages.filter((m) => m.role !== "system");
-    const contents = nonSys.slice(-12).map((m) => ({
+    let contents = nonSys.slice(-12).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: String(m.content || "").slice(0, 1500) }],
     }));
+    // Gemini 3.x : INTERDIT de terminer contents par role "model" (HTTP 400)
     if (!contents.length) {
       contents.push({ role: "user", parts: [{ text: "(continue)" }] });
+    } else if (contents[contents.length - 1].role === "model") {
+      contents.push({ role: "user", parts: [{ text: "Continue naturellement en restant dans le personnage." }] });
     }
+    // Fusionner les rôles user/user ou model/model consécutifs (API strict)
+    const merged = [];
+    for (const c of contents) {
+      if (merged.length && merged[merged.length - 1].role === c.role) {
+        merged[merged.length - 1].parts[0].text += "\n" + c.parts[0].text;
+      } else {
+        merged.push({ role: c.role, parts: [{ text: c.parts[0].text }] });
+      }
+    }
+    contents = merged;
+    if (contents[0] && contents[0].role === "model") {
+      contents.unshift({ role: "user", parts: [{ text: "(début)" }] });
+    }
+
     function fetchTimeout(url, opts, ms) {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), ms);
       return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(t));
     }
-    async function tryOnce(key, model, withThinking) {
+
+    async function tryOnce(key, model) {
+      const is3x = /^gemini-3/.test(model);
       const genConfig = {
         temperature: 0.8,
         topP: 0.92,
         maxOutputTokens: 900,
       };
-      if (withThinking && /2\.5|3\./.test(model)) {
+      // 3.x : thinking_level minimal (thinkingBudget seul peut échouer)
+      if (is3x) {
+        genConfig.thinkingConfig = { thinkingBudget: 0, thinkingLevel: "minimal" };
+      } else if (/2\.5/.test(model)) {
         genConfig.thinkingConfig = { thinkingBudget: 0 };
       }
       const payload = {
@@ -286,41 +307,66 @@
         28000
       );
       const data = await res.json().catch(() => ({}));
-      return { res, data, genConfig };
+      return { data, genConfig, is3x };
     }
-    // Stratégie: pour chaque modèle préféré, tourner les CLÉS d'abord (quota),
-    // puis seulement ensuite passer au modèle suivant.
+
     for (const model of models) {
       for (let ki = 0; ki < keyList.length; ki++) {
         const key = keyList[ki];
         const keyHint = "clé " + (ki + 1) + "/" + keyList.length + " …" + String(key).slice(-4);
         try {
-          let { data } = await tryOnce(key, model, true);
-          if (data.error && /thinking|Unknown name|Invalid JSON|InvalidArgument/i.test(data.error.message || "")) {
-            ({ data } = await tryOnce(key, model, false));
+          let { data, is3x } = await tryOnce(key, model);
+          // Si thinkingConfig rejeté → réessayer sans
+          if (data.error && /thinking|Unknown name|Invalid JSON|InvalidArgument|thinkingLevel|thinkingBudget/i.test(data.error.message || "")) {
+            try {
+              const payload2 = {
+                systemInstruction: { parts: [{ text: system.slice(0, 12000) }] },
+                contents,
+                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 900 },
+                safetySettings,
+              };
+              const res2 = await fetchTimeout(
+                `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(key)}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payload2),
+                },
+                28000
+              );
+              data = await res2.json().catch(() => ({}));
+            } catch (_) {}
           }
           if (data.error) {
             const msg = data.error.message || "erreur";
             last = msg + " [" + model + " · " + keyHint + "]";
-            // Quota / rate → clé suivante (même modèle)
             if (/quota|rate|RESOURCE_EXHAUSTED|429|exhausted|limit/i.test(msg)) {
               console.warn("[lea] quota", last);
               continue;
             }
-            // Clé invalide → clé suivante
             if (/API key not valid|API_KEY_INVALID|PERMISSION_DENIED|invalid.*key|403/i.test(msg)) {
               console.warn("[lea] bad key", last);
               continue;
             }
-            // Modèle introuvable → modèle suivant
             if (/not found|NOT_FOUND|does not exist|is not supported/i.test(msg)) {
               console.warn("[lea] model skip", last);
-              break; // break key loop → next model
+              break;
+            }
+            // role model ending / contents invalid → déjà corrigé côté payload
+            if (/must alternate|last.*model|INVALID_ARGUMENT/i.test(msg)) {
+              console.warn("[lea] contents", last);
+              continue;
             }
             continue;
           }
           const cand = data.candidates?.[0];
-          let text = cand?.content?.parts?.map((p) => p.text || p.thought || "").filter(Boolean).join("") || "";
+          let text = "";
+          if (cand?.content?.parts) {
+            text = cand.content.parts
+              .map((p) => p.text || "")
+              .filter(Boolean)
+              .join("");
+          }
           const finish = cand?.finishReason || "";
           if (!text.trim()) {
             last = "Réponse vide (" + (finish || data.promptFeedback?.blockReason || "no text") + ") [" + model + " · " + keyHint + "]";

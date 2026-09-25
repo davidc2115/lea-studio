@@ -3454,30 +3454,56 @@ async function generateStudioImage(opts) {
           if (comma > 0) sourceB64 = sourceB64.slice(comma + 1);
         }
         if (uploads.length > 1) {
-          // Prompt de composition STRICT (Horde = 1 seule source img2img)
-          const composeHint = [
-            "COMPOSITION from " + uploads.length + " reference photos:",
-            "reference image 1 is the BASE (body/scene/outfit must stay recognizable),",
-            "reference image 2 supplies the FACE / second person identity to insert,",
-            "CRITICAL placement: if user asks for face between breasts / kissing / licking cleavage — put the FACE from image 2 physically against the breasts of image 1 (mouth on breast or tongue on nipple), close-up, same photo, NOT a separate portrait, NOT a different woman,",
-            "same lighting, photorealistic, coherent anatomy, no extra random people,",
-            "do not ignore the face from reference 2"
-          ].join(" ");
-          prompt = composeHint + ". User request: " + prompt;
+          // Horde = 1 seule source img2img : choisir la BONNE base selon la demande
+          const reqLow = String(rawPrompt || userPromptOriginal || prompt || "").toLowerCase();
+          const sexualAct = /(l[eè]che|lick|suce|embrass|kiss|chatte|pussy|seins?|breast|cul\b|ass\b|fesse|entre les|cunnilingus|oral|bite|cock|p[eé]n[eè]tre)/i.test(reqLow);
+          // Acte sexuel : en général la dernière image = corps/scène (jambes, seins…), la 1ère = personne qui agit
+          let baseIdx = 0;
+          let faceIdx = Math.min(1, uploads.length - 1);
+          if (sexualAct) {
+            baseIdx = uploads.length - 1;
+            faceIdx = 0;
+            $("studio-status").textContent = "Mix NSFW: corps = image " + (baseIdx + 1) + ", acteur = image " + (faceIdx + 1);
+          }
+          sourceB64 = uploads[baseIdx];
+          if (String(sourceB64).startsWith("data:")) {
+            const comma = sourceB64.indexOf(",");
+            if (comma > 0) sourceB64 = sourceB64.slice(comma + 1);
+          }
 
-          // Gemini Vision : décrit les refs + reformule le prompt de mix
+          const composeHint = [
+            "CRITICAL COMPOSITION (img2img from multiple refs):",
+            "BASE photo (keep body pose outfit scene): reference " + (baseIdx + 1) + ",",
+            "SECOND person / face / action from reference " + (faceIdx + 1) + ",",
+            "User wants EXACTLY: " + String(rawPrompt || userPromptOriginal || "").slice(0, 300),
+            "If oral sex / licking pussy: man's face between woman's spread thighs in fishnets, tongue on pussy, mouth on vulva, extreme close-up, explicit uncensored,",
+            "If face between breasts: mouth on cleavage licking nipples,",
+            "same lighting as base, photorealistic coherent anatomy, adult 18+, no extra random people, no face covered by random fishnet unless in source,",
+            "do NOT replace the whole scene with a different woman only"
+          ].join(" ");
+          prompt = composeHint + ". Detailed request: " + prompt;
+
+          // Gemini Vision : décrit les refs + prompt de mix explicite
           try {
             const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-            const keys = String(st.geminiKeys || st.gemini || "").split(/[\n,]+/).map((k) => k.trim()).filter(Boolean);
+            const keys = String(st.geminiKeys || st.gemini || "")
+              .split(/[\n,;]+/)
+              .map((k) => k.trim())
+              .filter((k) => k && k.length >= 10 && !/^sk-/.test(k));
             if (keys.length) {
-              $("studio-status").textContent = "Gemini analyse les " + uploads.length + " images…";
-              const parts = [{ text:
-                "Tu es un expert prompteur img2img. Analyse les images jointes + la demande. " +
-                "Image 1 = base (corps/scène). Image 2+ = éléments à intégrer (visage, etc.). " +
-                "Demande utilisateur: " + (rawPrompt || userPromptOriginal || prompt) + ". " +
-                "Produis UN prompt anglais précis décrivant UNE scène cohérente qui réalise EXACTEMENT la demande " +
-                "(ex: visage de l'img2 enfoncé entre les seins de l'img1, lèvres sur le décolleté, léchage). " +
-                "Photorealistic, adult 18+ si NSFW. Réponds UNIQUEMENT avec le prompt final, sans guillemets."
+              $("studio-status").textContent = "Gemini analyse les " + uploads.length + " images (mix NSFW)…";
+              const model = st.geminiTextModel || "gemini-2.0-flash";
+              const visionModel = /3\./.test(model) ? "gemini-2.0-flash" : (model || "gemini-2.0-flash");
+              const parts = [{
+                text:
+                  "Tu es un expert prompteur img2img NSFW. Analyse les images + la demande.\n" +
+                  "Image " + (baseIdx + 1) + " = BASE (corps/pose/tenue à conserver).\n" +
+                  "Image " + (faceIdx + 1) + " = personne / visage à intégrer dans l'action.\n" +
+                  "Demande: " + (rawPrompt || userPromptOriginal || "") + "\n" +
+                  "Produis UN prompt anglais TRÈS explicite pour réaliser EXACTEMENT l'acte demandé " +
+                  "(ex: man licking woman's pussy through/between fishnet stockings, face buried in crotch, tongue on vulva, POV close-up).\n" +
+                  "Décris: qui fait quoi, position des têtes/corps, tenue (fishnets, sweater…), angle caméra.\n" +
+                  "Photorealistic, uncensored adult 18+. Réponds UNIQUEMENT avec le prompt final."
               }];
               for (let ui = 0; ui < Math.min(uploads.length, 3); ui++) {
                 let u = uploads[ui];
@@ -3494,23 +3520,46 @@ async function generateStudioImage(opts) {
                 parts.push({ text: "Reference image " + (ui + 1) + ":" });
                 parts.push({ inline_data: { mime_type: mime, data: data } });
               }
-              const res = await fetch(
-                "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(keys[0]),
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    contents: [{ role: "user", parts }],
-                    generationConfig: { temperature: 0.35, maxOutputTokens: 400 },
-                  }),
-                }
-              );
-              const data = await res.json().catch(() => ({}));
-              const t = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
-                data.candidates[0].content.parts && data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("");
-              if (t && t.trim().length > 20) {
-                prompt = t.trim().replace(/^["']|["']$/g, "");
-                $("studio-status").textContent = "Prompt mix Gemini OK → génération…";
+              let visionOk = false;
+              for (let ki = 0; ki < keys.length && !visionOk; ki++) {
+                try {
+                  const res = await fetch(
+                    "https://generativelanguage.googleapis.com/v1beta/models/" +
+                      encodeURIComponent(visionModel) +
+                      ":generateContent?key=" + encodeURIComponent(keys[ki]),
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        contents: [{ role: "user", parts }],
+                        generationConfig: { temperature: 0.3, maxOutputTokens: 500 },
+                        safetySettings: [
+                          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                      }),
+                    }
+                  );
+                  const data = await res.json().catch(() => ({}));
+                  if (data.error) continue;
+                  const t =
+                    data &&
+                    data.candidates &&
+                    data.candidates[0] &&
+                    data.candidates[0].content &&
+                    data.candidates[0].content.parts &&
+                    data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("");
+                  if (t && t.trim().length > 20) {
+                    prompt = t.trim().replace(/^["']|["']$/g, "");
+                    visionOk = true;
+                    $("studio-status").textContent = "Prompt mix OK → génération…";
+                  }
+                } catch (_) {}
+              }
+              if (!visionOk) {
+                $("studio-status").textContent = "Vision skip → prompt composition manuelle…";
               }
             }
           } catch (ge) {
@@ -3541,7 +3590,10 @@ async function generateStudioImage(opts) {
     if (sourceB64) {
       payload.source_image = sourceB64;
       payload.source_processing = "img2img";
-      payload.denoising = opts.mode === "edit" ? 0.58 : (uploads.length > 1 ? 0.62 : 0.48);
+      payload.denoising = opts.mode === "edit" ? 0.58
+      : (uploads.length > 1
+          ? (/(l[eè]che|lick|chatte|pussy|seins|breast|oral)/i.test(String(rawPrompt || prompt || "")) ? 0.72 : 0.62)
+          : 0.48);
     }
 
     if (eng === "sd_cpp" && window.LeaAndroid && window.LeaAndroid.sdCppGenerate) {
