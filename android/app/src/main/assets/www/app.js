@@ -2831,6 +2831,105 @@ function currentImageEngine() {
 /** Poll sd.cpp jusqu'à image ou erreur. */
 
 /** Horde forcé après échec/timeout SD.cpp (même prompt profil). */
+
+async function nativeHttpPostJson(url, bodyObj, headerLines) {
+  const body = JSON.stringify(bodyObj || {});
+  try {
+    if (window.LeaAndroid && window.LeaAndroid.httpPostJson) {
+      const hdr = headerLines || "";
+      return String(window.LeaAndroid.httpPostJson(url, body, hdr) || "");
+    }
+  } catch (_) {}
+  const headers = { "Content-Type": "application/json" };
+  if (headerLines) {
+    headerLines.split("\n").forEach((line) => {
+      const c = line.indexOf(":");
+      if (c > 0) headers[line.slice(0, c).trim()] = line.slice(c + 1).trim();
+    });
+  }
+  const res = await fetch(url, { method: "POST", headers, body });
+  return await res.text();
+}
+
+/** Cloudflare Workers AI — FLUX 1 Schnell (quota gratuit journalier). */
+async function generateCloudflareImage(prompt, negative, width, height) {
+  width = width || 512;
+  height = height || 768;
+  let account = "";
+  let token = "";
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    account = String(st.cfAccount || "").trim();
+    token = String(st.cfToken || "").trim();
+  } catch (_) {}
+  if (!account || !token) {
+    throw new Error("Configure Account ID + API Token Cloudflare dans Réglages");
+  }
+  // FLUX Schnell — le plus accessible en free tier Workers AI
+  const models = [
+    "@cf/black-forest-labs/flux-1-schnell",
+    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+  ];
+  let lastErr = "";
+  const fullPrompt = String(prompt || "").slice(0, 2000);
+  for (const model of models) {
+    try {
+      const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(account) +
+        "/ai/run/" + model;
+      const payload = model.indexOf("flux") >= 0
+        ? { prompt: fullPrompt }
+        : {
+            prompt: fullPrompt,
+            negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
+            width: Math.min(1024, Math.max(256, width)),
+            height: Math.min(1024, Math.max(256, height)),
+            num_steps: 20,
+          };
+      const raw = await nativeHttpPostJson(
+        url,
+        payload,
+        "Authorization: Bearer " + token + "\nAccept: application/json"
+      );
+      let data;
+      try { data = JSON.parse(raw); } catch (_) {
+        lastErr = "réponse non-JSON: " + String(raw).slice(0, 120);
+        continue;
+      }
+      if (data.error) {
+        lastErr = typeof data.error === "string" ? data.error : (data.error.message || JSON.stringify(data.error));
+        // body embeds
+        if (data.body) lastErr += " " + String(data.body).slice(0, 200);
+        continue;
+      }
+      // Formats possibles :
+      // { result: { image: "<b64>" } }
+      // { result: "<b64>" }
+      // { image: "..." }
+      // { result: { images: ["..."] } }
+      let b64 = "";
+      const r = data.result;
+      if (typeof r === "string") b64 = r;
+      else if (r && typeof r.image === "string") b64 = r.image;
+      else if (r && Array.isArray(r.images) && r.images[0]) b64 = r.images[0];
+      else if (typeof data.image === "string") b64 = data.image;
+      if (!b64 && data.success === false) {
+        lastErr = (data.errors && data.errors[0] && data.errors[0].message) || "success=false";
+        continue;
+      }
+      if (!b64) {
+        lastErr = "pas d'image dans la réponse CF";
+        continue;
+      }
+      b64 = String(b64).replace(/^data:image\/\w+;base64,/, "").trim();
+      return "data:image/jpeg;base64," + b64;
+    } catch (e) {
+      lastErr = e.message || String(e);
+    }
+  }
+  throw new Error(lastErr || "Cloudflare FLUX échec");
+}
+
+
 async function generatePhotoHordeFallback(prompt, c) {
   c = c || character();
   window._leaGenBusy = true;
@@ -3251,7 +3350,13 @@ async function generatePhoto() {
         }
         return;
       } catch (e) {
-        setGenStatus("Cloudflare: " + (e.message || e) + " → bascule Horde…");
+        setGenStatus("Cloudflare: " + (e.message || e));
+        const msg = String(e.message || e);
+        if (/Configure Account|Token|Account ID/i.test(msg)) {
+          window._leaGenBusy = false;
+          return; // ne pas basculer Horde si credentials manquants
+        }
+        setGenStatus("Cloudflare: " + msg + " → bascule Horde…");
         // continue to Horde below by forcing engine path
       }
     }
@@ -4623,6 +4728,7 @@ function renderSettings() {
     <label>Moteur images</label>
     <select id="imgengine">
       <option value="horde">Horde (gratuit NSFW · recommandé)</option>
+      <option value="cloudflare">Cloudflare FLUX (gratuit · SFW/léger)</option>
       <option value="sd_cpp">SD.cpp (local · lent au 1er load)</option>
     </select>
     <p style="color:var(--muted);font-size:13px">
@@ -4677,6 +4783,8 @@ function renderSettings() {
     if ($("grok")) $("grok").value = s.settings.grokKeys || "";
     if ($("imgengine")) $("imgengine").value = s.settings.imageEngine || "horde";
     if ($("horde-key") && s.settings.hordeKey) $("horde-key").value = s.settings.hordeKey;
+    if ($("cf-account") && s.settings.cfAccount) $("cf-account").value = s.settings.cfAccount;
+    if ($("cf-token") && s.settings.cfToken) $("cf-token").value = s.settings.cfToken;
     $("st").textContent = `Clés Gemini : ${s.keys.gemini}`;
     $("st").style.color = "#9dffc2";
     try {

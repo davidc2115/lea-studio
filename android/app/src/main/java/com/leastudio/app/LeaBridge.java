@@ -91,6 +91,55 @@ public class LeaBridge {
         }
     }
 
+
+    /** POST JSON → réponse texte (ex: Cloudflare Workers AI). */
+    @JavascriptInterface
+    public String httpPostJson(String url, String jsonBody, String headersJoined) {
+        HttpURLConnection conn = null;
+        try {
+            if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
+            URL u = new URL(url);
+            conn = (HttpURLConnection) u.openConnection();
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(120000);
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
+            if (headersJoined != null) {
+                for (String line : headersJoined.split("\n")) {
+                    int c = line.indexOf(':');
+                    if (c > 0) {
+                        conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+                    }
+                }
+            }
+            byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
+            conn.setFixedLengthStreamingMode(body.length);
+            OutputStream os = conn.getOutputStream();
+            os.write(body);
+            os.close();
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            if (in == null) return "{\"error\":\"http " + code + "\"}";
+            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) sb.append(line).append('\n');
+            br.close();
+            String resp = sb.toString();
+            if (code >= 400) {
+                return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
+            }
+            return resp;
+        } catch (Exception e) {
+            return "{\"error\":" + JSONObject.quote(String.valueOf(e.getMessage())) + "}";
+        } finally {
+            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+        }
+    }
+
+
     /** GET binaire → data URL base64 (ex: carte PNG Chub). */
     @JavascriptInterface
     public String httpGetDataUrl(String url) {
