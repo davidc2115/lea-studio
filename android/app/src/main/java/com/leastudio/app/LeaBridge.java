@@ -73,7 +73,58 @@ public class LeaBridge {
     }
 
     /** Lit une clé gallery:… → data URL jpeg. */
+    
+    /** Enregistre une image (data URL) dans le dossier Téléchargements public. */
     @JavascriptInterface
+    public boolean saveBase64ToDownloads(String dataUrl, String filename) {
+        try {
+            if (dataUrl == null || dataUrl.length() < 32) return false;
+            String b64 = dataUrl;
+            int comma = dataUrl.indexOf(',');
+            if (dataUrl.startsWith("data:") && comma > 0) b64 = dataUrl.substring(comma + 1);
+            byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+            if (bytes == null || bytes.length < 100) return false;
+            if (filename == null || filename.isEmpty()) filename = "lea-" + System.currentTimeMillis() + ".jpg";
+            filename = filename.replaceAll("[^a-zA-Z0-9._-]", "_");
+            java.io.File downloads;
+            if (android.os.Build.VERSION.SDK_INT >= 29) {
+                // MediaStore
+                android.content.ContentValues values = new android.content.ContentValues();
+                values.put(android.provider.MediaStore.Downloads.DISPLAY_NAME, filename);
+                values.put(android.provider.MediaStore.Downloads.MIME_TYPE, "image/jpeg");
+                values.put(android.provider.MediaStore.Downloads.IS_PENDING, 1);
+                android.net.Uri uri = ctx.getContentResolver().insert(
+                    android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+                if (uri == null) return false;
+                try (java.io.OutputStream out = ctx.getContentResolver().openOutputStream(uri)) {
+                    if (out == null) return false;
+                    out.write(bytes);
+                }
+                values.clear();
+                values.put(android.provider.MediaStore.Downloads.IS_PENDING, 0);
+                ctx.getContentResolver().update(uri, values, null, null);
+                return true;
+            } else {
+                downloads = android.os.Environment.getExternalStoragePublicDirectory(
+                    android.os.Environment.DIRECTORY_DOWNLOADS);
+                if (!downloads.exists()) downloads.mkdirs();
+                java.io.File out = new java.io.File(downloads, filename);
+                try (java.io.FileOutputStream fos = new java.io.FileOutputStream(out)) {
+                    fos.write(bytes);
+                }
+                // Notifier le média scanner
+                android.content.Intent scan = new android.content.Intent(
+                    android.content.Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                scan.setData(android.net.Uri.fromFile(out));
+                ctx.sendBroadcast(scan);
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+@JavascriptInterface
     public String loadGalleryImage(String key) {
         try {
             if (key == null || !key.startsWith("gallery:")) return "";

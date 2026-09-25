@@ -1124,21 +1124,131 @@ const GALLERY = [
   { src: "images/lea-sortie-decollete.jpg", title: "Sortie, décolleté" },
 ];
 
+
+/** Résout et télécharge une image (data URL, gallery:, http). */
+async function downloadImage(src, filename) {
+  try {
+    let url = src;
+    try {
+      if (typeof resolvePhotoSrc === "function") {
+        const r = resolvePhotoSrc(src);
+        if (r) url = r;
+      }
+    } catch (_) {}
+    filename = filename || ("lea-" + Date.now() + ".jpg");
+
+    // Bridge Android natif si disponible
+    if (window.LeaAndroid) {
+      try {
+        if (window.LeaAndroid.saveImageToDownloads && String(src).startsWith("gallery:")) {
+          window.LeaAndroid.saveImageToDownloads(String(src));
+          return true;
+        }
+        if (window.LeaAndroid.downloadUrl && url) {
+          window.LeaAndroid.downloadUrl(String(url), filename);
+          return true;
+        }
+      } catch (_) {}
+    }
+
+    let blob = null;
+    if (String(url).startsWith("data:")) {
+      const res = await fetch(url);
+      blob = await res.blob();
+    } else if (String(url).startsWith("blob:")) {
+      const res = await fetch(url);
+      blob = await res.blob();
+    } else if (String(url).startsWith("http")) {
+      try {
+        const res = await fetch(url, { mode: "cors" });
+        if (res.ok) blob = await res.blob();
+      } catch (_) {}
+      if (!blob) {
+        // Fallback: ouvrir dans un onglet / intent
+        const a = document.createElement("a");
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        return true;
+      }
+    } else {
+      // gallery: non résolu — essayer canvas depuis img affichée
+      const shown = document.getElementById("lightbox-img");
+      if (shown && shown.src) {
+        const res = await fetch(shown.src);
+        blob = await res.blob();
+      }
+    }
+    if (!blob) return false;
+
+    // WebView Android: partager via data URL parfois plus fiable
+    if (window.LeaAndroid && window.LeaAndroid.saveBase64ToDownloads) {
+      try {
+        const reader = new FileReader();
+        const dataUrl = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        window.LeaAndroid.saveBase64ToDownloads(String(dataUrl), filename);
+        return true;
+      } catch (_) {}
+    }
+
+    const obj = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = obj;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(obj);
+    }, 1500);
+    return true;
+  } catch (e) {
+    console.warn("[lea] download", e);
+    return false;
+  }
+}
+
 function openFull(src, opts) {
   opts = opts || {};
+  const list = (opts.list && opts.list.length) ? opts.list.slice() : (window._lbList || null);
+  let idx = opts.idx != null ? opts.idx : (window._lbIdx || 0);
+  if (list && list.length) {
+    if (src) {
+      const found = list.findIndex((s) => s === src || (resolvePhotoSrc(s) || s) === src);
+      if (found >= 0) idx = found;
+    }
+    window._lbList = list;
+    window._lbIdx = ((idx % list.length) + list.length) % list.length;
+    src = list[window._lbIdx];
+  } else {
+    window._lbList = null;
+    window._lbIdx = 0;
+  }
+
+  const showSrc = (typeof resolvePhotoSrc === "function" ? resolvePhotoSrc(src) : null) || src;
   const img = $("lightbox-img");
   if (img) {
-    img.src = src;
+    img.src = showSrc;
     img.style.maxWidth = "92vw";
     img.style.maxHeight = "62vh";
     img.style.width = "auto";
     img.style.height = "auto";
     img.style.objectFit = "contain";
   }
-  $("lightbox").classList.remove("hidden");
+  const box = $("lightbox");
+  if (box) box.classList.remove("hidden");
+
   const btn = $("lb-bg");
   if (btn) {
-    // Section Générer / studio : pas de lien avec un personnage / chat
     if (opts.studio || state.view === "studio") {
       btn.style.display = "none";
       btn.onclick = null;
@@ -1146,18 +1256,71 @@ function openFull(src, opts) {
       btn.style.display = "";
       btn.onclick = (e) => {
         e.stopPropagation();
+        e.preventDefault();
         const id = state.current || null;
         if (!id) {
           btn.textContent = "Ouvre un chat d'abord";
           return;
         }
-        localStorage.setItem(chatBgKey(id), src);
+        localStorage.setItem(chatBgKey(id), showSrc);
         btn.textContent = "Fond du chat ✓";
       };
       btn.textContent = "Utiliser comme fond";
     }
   }
+
+  const dl = $("lb-dl");
+  if (dl) {
+    dl.style.display = "";
+    dl.textContent = "Télécharger";
+    dl.onclick = async (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      dl.textContent = "…";
+      const name = ((state.current || "photo") + "-" + Date.now() + ".jpg").replace(/\s+/g, "-");
+      const ok = await downloadImage(src, name);
+      dl.textContent = ok ? "OK ✓" : "Échec";
+      setTimeout(() => { dl.textContent = "Télécharger"; }, 1800);
+    };
+  }
+
+  const prev = $("lb-prev");
+  const next = $("lb-next");
+  const hasList = !!(window._lbList && window._lbList.length > 1);
+  if (prev) {
+    prev.style.display = hasList ? "" : "none";
+    prev.onclick = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (!window._lbList || window._lbList.length < 2) return;
+      window._lbIdx = (window._lbIdx - 1 + window._lbList.length) % window._lbList.length;
+      openFull(window._lbList[window._lbIdx], { list: window._lbList, idx: window._lbIdx, studio: opts.studio });
+    };
+  }
+  if (next) {
+    next.style.display = hasList ? "" : "none";
+    next.onclick = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (!window._lbList || window._lbList.length < 2) return;
+      window._lbIdx = (window._lbIdx + 1) % window._lbList.length;
+      openFull(window._lbList[window._lbIdx], { list: window._lbList, idx: window._lbIdx, studio: opts.studio });
+    };
+  }
+
+  // Swipe tactile
+  if (img && hasList) {
+    let sx = 0;
+    img.ontouchstart = (e) => { sx = e.touches[0].clientX; };
+    img.ontouchend = (e) => {
+      const dx = e.changedTouches[0].clientX - sx;
+      if (Math.abs(dx) < 50) return;
+      if (dx > 0) prev && prev.click();
+      else next && next.click();
+    };
+  }
 }
+
 
 const GALLERY_MAX = 48; // max images par personnage
 
@@ -3116,7 +3279,7 @@ function renderStudio() {
     <div class="studio-grid" id="studio-grid">
       ${photos.length ? photos.map((src, i) => {
         const r = resolvePhotoSrc(src) || src;
-        return '<img src="' + r + '" alt="gen ' + (i + 1) + '" data-full="' + r + '" data-raw="' + src + '" />';
+        return '<img src="' + r + '" alt="gen ' + (i + 1) + '" data-full="' + r + '" data-raw="' + src + '" data-gal-idx="' + i + '" />';
       }).join("") : '<p style="color:var(--muted);font-size:13px">Aucune image pour l\'instant.</p>'}
     </div>
   `;
@@ -3176,6 +3339,18 @@ function renderStudio() {
     };
   }
 
+  
+  // Clic résultat studio → lightbox avec navigation
+  const sg = $("studio-grid");
+  if (sg) {
+    sg.onclick = (e) => {
+      const im = e.target.closest("img[data-full]");
+      if (!im) return;
+      const list = Array.from(sg.querySelectorAll("img[data-full]")).map((x) => x.getAttribute("data-full"));
+      const idx = Number(im.getAttribute("data-gal-idx") || 0);
+      openFull(im.getAttribute("data-full"), { list, idx, studio: true });
+    };
+  }
   $("studio-gen").onclick = () => generateStudioImage({ mode: "gen" });
   $("studio-modify").onclick = () => generateStudioImage({ mode: "edit" });
   $("studio-clear").onclick = () => {
@@ -3186,8 +3361,11 @@ function renderStudio() {
   };
   document.querySelectorAll("#studio-grid img").forEach((img) => {
     img.onclick = () => {
-      openFull(img.dataset.full || img.src);
-      // sélection comme base
+      const list = Array.from(document.querySelectorAll("#studio-grid img")).map(
+        (x) => x.getAttribute("data-full") || x.src
+      );
+      const idx = Number(img.getAttribute("data-gal-idx") || list.indexOf(img.dataset.full || img.src));
+      openFull(img.dataset.full || img.src, { list, idx: idx >= 0 ? idx : 0, studio: true });
       if (img.dataset.raw) setStudioLast(img.dataset.raw);
     };
   });
