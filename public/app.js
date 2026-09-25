@@ -3284,45 +3284,90 @@ async function generateStudioImage(opts) {
   $("studio-status").textContent = "Préparation…";
 
   try {
-    // Option : Gemini reformule le prompt (SFW/NSFW) pour Horde
+        // Option : Gemini reformule le prompt — FIDÈLE à la demande (pas de perso Léa)
     const useGemini = $("studio-gemini") && $("studio-gemini").checked;
+    const userPromptOriginal = prompt;
     if (useGemini) {
       try {
-        $("studio-status").textContent = "Gemini analyse le prompt…";
-        const gemMsg = [
-          { role: "system", content: "Tu es un expert en prompts Stable Diffusion / AI Horde. Reformule la demande utilisateur en UN prompt anglais clair, précis, fidèle à l'intention (logo, paysage, objet, personne, NSFW…). N'ajoute PAS de femme nue si ce n'est pas demandé. Si logo: précise style graphique, couleurs, texte exact, forme. Réponds UNIQUEMENT avec le prompt final, sans guillemets ni commentaire." },
-          { role: "user", content: "Demande: " + prompt + (nsfw ? "\n(NSFW autorisé si pertinent)" : "\n(rester SFW)") }
-        ];
-        const refined = await api("/api/chat/lea/message", {
-          method: "POST",
-          body: JSON.stringify({ text: "[STUDIO_PROMPT] " + prompt, mode: nsfw ? "nsfw" : "sfw", _studioPrompt: true })
-        });
-        // Fallback: call generate via settings keys if dedicated endpoint missing
-      } catch (_) {}
-      try {
         const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        const keys = String(st.geminiKeys || st.gemini || "").split(/[\n,]+/).map((k) => k.trim()).filter(Boolean);
+        const keys = String(st.geminiKeys || st.gemini || "")
+          .split(/[\n,;]+/)
+          .map((k) => k.trim())
+          .filter((k) => k && k.length >= 10 && !/^sk-/.test(k) && !/^xai-/.test(k));
         if (keys.length) {
-          $("studio-status").textContent = "Gemini reformule le prompt…";
-          const sys = "Rewrite as a single English image-generation prompt for Stable Diffusion. Be faithful to the user intent. If they ask for a logo/icon, output a GRAPHIC LOGO prompt (no nude person). If NSFW scene, keep explicit. Reply with ONLY the prompt text.";
-          const body = {
-            contents: [{ role: "user", parts: [{ text: sys + "\n\nUser request: " + prompt }] }],
-            generationConfig: { temperature: 0.4, maxOutputTokens: 300 }
-          };
-          const res = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + encodeURIComponent(keys[0]),
-            { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
-          );
-          const data = await res.json();
-          const t = data && data.candidates && data.candidates[0] && data.candidates[0].content &&
-            data.candidates[0].content.parts && data.candidates[0].content.parts.map((p) => p.text).join("");
-          if (t && t.trim().length > 10) {
-            prompt = t.trim().replace(/^["']|["']$/g, "");
-            $("studio-status").textContent = "Prompt Gemini OK → Horde…";
+          $("studio-status").textContent = "Gemini reformule le prompt (fidèle)…";
+          const model = st.geminiTextModel || "gemini-3.5-flash-lite";
+          const sys =
+            "You convert the user request into ONE English Stable Diffusion / AI Horde prompt. " +
+            "RULES: Stay 100% faithful to the user intent. Keep every concrete detail (who, action, placement, clothes, objects). " +
+            "If they ask for a man's face between breasts kissing/licking — say exactly that. " +
+            "Do NOT invent a random woman if not asked. Do NOT turn a logo into a person. " +
+            "Do NOT mention Léa or any chatbot character. NSFW allowed if the user asks. " +
+            "Reply with ONLY the prompt text, no quotes, no explanation.";
+          let ok = false;
+          for (let ki = 0; ki < keys.length && !ok; ki++) {
+            try {
+              const res = await fetch(
+                "https://generativelanguage.googleapis.com/v1beta/models/" +
+                  encodeURIComponent(model) +
+                  ":generateContent?key=" +
+                  encodeURIComponent(keys[ki]),
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    systemInstruction: { parts: [{ text: sys }] },
+                    contents: [
+                      {
+                        role: "user",
+                        parts: [
+                          {
+                            text:
+                              "User request (keep all details):\n" +
+                              userPromptOriginal +
+                              (nsfw ? "\n(NSFW allowed)" : "\n(SFW unless request is explicit)"),
+                          },
+                        ],
+                      },
+                    ],
+                    generationConfig: { temperature: 0.25, maxOutputTokens: 400 },
+                  }),
+                }
+              );
+              const data = await res.json().catch(() => ({}));
+              if (data.error) {
+                $("studio-status").textContent =
+                  "Gemini clé " + (ki + 1) + ": " + (data.error.message || "err").slice(0, 80);
+                continue;
+              }
+              const t =
+                data &&
+                data.candidates &&
+                data.candidates[0] &&
+                data.candidates[0].content &&
+                data.candidates[0].content.parts &&
+                data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("");
+              if (t && t.trim().length > 8) {
+                // Toujours garder la demande user en tête pour Horde
+                prompt = t.trim().replace(/^["']|["']$/g, "");
+                if (!prompt.toLowerCase().includes(userPromptOriginal.slice(0, 40).toLowerCase()) && userPromptOriginal.length > 15) {
+                  prompt = userPromptOriginal + ", " + prompt;
+                }
+                ok = true;
+                $("studio-status").textContent = "Prompt Gemini OK → génération…";
+              }
+            } catch (ge) {
+              $("studio-status").textContent = "Gemini réseau… clé " + (ki + 1);
+            }
+          }
+          if (!ok) {
+            prompt = userPromptOriginal;
+            $("studio-status").textContent = "Gemini indisponible, prompt original…";
           }
         }
       } catch (ge) {
-        $("studio-status").textContent = "Gemini indisponible, prompt original…";
+        prompt = userPromptOriginal;
+        $("studio-status").textContent = "Gemini skip, prompt original…";
       }
     }
 
@@ -3553,16 +3598,16 @@ function renderSettings() {
     <p class="err" id="dlst"></p>
     <label>Modèle Gemini (texte / chat)</label>
     <select id="gemtextmodel">
-      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite ★ rapide / cohérent</option>
-      <option value="gemini-2.0-flash">Gemini 2.0 Flash ★ stable</option>
+      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite ★ recommandé</option>
+      <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash-Lite</option>
+      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
       <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash-Lite</option>
-      <option value="gemini-2.5-flash">Gemini 2.5 Flash (plus lent)</option>
-      <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (peut être lent)</option>
-      <option value="gemini-3.5-flash">Gemini 3.5 Flash (lent / parfois incohérent)</option>
+      <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
       <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite</option>
       <option value="gemini-flash-latest">Gemini Flash Latest</option>
     </select>
-    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Conseil : 2.5 Flash-Lite ou 2.0 Flash. Les modèles 3.5 peuvent être lents ou hors-sujet selon les clés.</p>
+    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Rotation auto des clés si quota. Mets plusieurs clés (une par ligne). Erreurs affichent n° de clé + modèle.</p>
     <label>Clés Gemini AI Studio (plusieurs, virgule ou ligne)</label>
     <textarea class="field" id="gemini" rows="3" placeholder="aq... ou AIza... une par ligne"></textarea>
     <label>Clé Grok / xAI Imagine (xai-…)</label>
@@ -3587,7 +3632,7 @@ function renderSettings() {
     <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
-    if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-2.5-flash-lite";
+    if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
