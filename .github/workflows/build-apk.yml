@@ -45,44 +45,50 @@ jobs:
           echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> "$GITHUB_ENV"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 
-      - name: Build stable-diffusion.cpp (arm64 CPU)
+      - name: Build stable-diffusion.cpp (arm64, optionnel, taille limitée)
         run: |
           set -e
           NDK="$ANDROID_NDK_HOME"
-          git clone --depth 1 --recursive https://github.com/leejet/stable-diffusion.cpp.git /tmp/sdcpp
-          mkdir -p /tmp/sdcpp/build-android
-          cd /tmp/sdcpp/build-android
-          cmake .. -G Ninja \
-            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI=arm64-v8a \
-            -DANDROID_PLATFORM=android-28 \
-            -DANDROID_STL=c++_shared \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DGGML_OPENMP=OFF \
-            -DSD_BUILD_EXAMPLES=ON \
-            -DSD_BUILD_SHARED_LIBS=OFF \
-            -DSD_CUDA=OFF -DSD_VULKAN=OFF -DSD_OPENCL=OFF -DSD_METAL=OFF
-          cmake --build . --config Release -j$(nproc) || cmake --build . --config Release -j2
-          # trouver le binaire sd
-          BIN=$(find . -type f -name sd -o -name sd-cli 2>/dev/null | head -1)
-          if [ -z "$BIN" ]; then
-            BIN=$(find . -type f -executable | grep -E '/sd$|/sd-cli$' | head -1 || true)
-          fi
-          mkdir -p "$GITHUB_WORKSPACE/android/app/src/main/assets/native"
-          # UNE SEULE copie : jni/prebuilt (évite Duplicate resources mergeReleaseJniLibFolders)
-          mkdir -p "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a"
-          rm -f "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so" 2>/dev/null || true
-          if [ -n "$BIN" ] && [ -f "$BIN" ]; then
-            cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/assets/native/sd-arm64"
-            cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
-            chmod +x "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
-            ls -lh "$GITHUB_WORKSPACE/android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so"
-            echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
+          mkdir -p android/app/src/main/jniLibs/arm64-v8a
+          mkdir -p android/app/src/main/assets/native
+          echo "SD local optionnel — on évite d'embarquer un binaire >40Mo (cause décompression impossible)." > android/app/src/main/assets/native/README.txt
+          # Ne PAS embarquer sd-arm64 dans assets (157Mo → échec install)
+          rm -f android/app/src/main/assets/native/sd-arm64
+          # Tentative build léger (peut échouer sans casser le job)
+          if git clone --depth 1 --recursive https://github.com/leejet/stable-diffusion.cpp.git /tmp/sdcpp 2>/dev/null; then
+            mkdir -p /tmp/sdcpp/build-android && cd /tmp/sdcpp/build-android
+            cmake .. -G Ninja \
+              -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI=arm64-v8a \
+              -DANDROID_PLATFORM=android-28 \
+              -DANDROID_STL=c++_shared \
+              -DCMAKE_BUILD_TYPE=MinSizeRel \
+              -DGGML_OPENMP=OFF \
+              -DSD_BUILD_EXAMPLES=OFF \
+              -DSD_BUILD_SHARED_LIBS=ON \
+              -DSD_CUDA=OFF -DSD_VULKAN=OFF -DSD_OPENCL=OFF -DSD_METAL=OFF \
+              || { echo "cmake SD skip"; exit 0; }
+            cmake --build . --config MinSizeRel -j$(nproc) || { echo "build SD skip"; exit 0; }
+            BIN=$(find . -name "libstable-diffusion.so" -o -name "libsd.so" | head -1)
+            if [ -n "$BIN" ]; then
+              "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" --strip-unneeded "$BIN" || true
+              SIZE=$(stat -c%s "$BIN")
+              echo "libsd size=$SIZE"
+              # Max 25 Mo pour rester installable sur la plupart des téléphones
+              if [ "$SIZE" -lt 26214400 ]; then
+                cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so"
+                echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
+              else
+                echo "libsd trop gros ($SIZE) — non embarqué"
+                echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
+              fi
+            else
+              echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
+            fi
           else
-            echo "WARN: binaire sd non trouvé — APK sans sd.cpp"
-            find . -type f | head -50
             echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
           fi
+          ls -la "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/" || true
 
       - uses: gradle/actions/setup-gradle@v4
         with:
@@ -97,15 +103,7 @@ jobs:
             unzip -qo /tmp/cast-covers.zip -d /tmp/cast_unpack
             cp -n /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
             cp -n /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
-            # also copy gallery slots from cover if missing
-            for f in public/images/cast/*.jpg; do
-              base=$(basename "$f" .jpg)
-              for i in 01 02 03 04 05; do
-                [ -f "public/images/cast/${base}-${i}.jpg" ] || cp "$f" "public/images/cast/${base}-${i}.jpg"
-                [ -f "android/app/src/main/assets/www/images/cast/${base}-${i}.jpg" ] || cp "$f" "android/app/src/main/assets/www/images/cast/${base}-${i}.jpg"
-              done
-            done
-            echo "covers: $(ls public/images/cast | wc -l)"
+            echo "covers: $(ls public/images/cast 2>/dev/null | wc -l)"
           else
             echo "WARN: pas de pack covers"
           fi
@@ -114,6 +112,19 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets/www
           cp -R public/. android/app/src/main/assets/www/
+          # Jamais de binaire SD monstre dans assets
+          rm -f android/app/src/main/assets/native/sd-arm64
+          rm -f android/app/src/main/assets/www/native/sd-arm64
+          find android/app/src/main/assets -name "sd-arm64" -delete 2>/dev/null || true
+          # jni prebuilt: retirer libsd trop gros s'il existe
+          if [ -f android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so ]; then
+            SZ=$(stat -c%s android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so)
+            if [ "$SZ" -gt 26214400 ]; then
+              echo "Retrait prebuilt libsd.so trop gros ($SZ)"
+              rm -f android/app/src/main/jni/prebuilt/arm64-v8a/libsd.so
+            fi
+          fi
+          du -sh android/app/src/main/assets android/app/src/main/jni 2>/dev/null || true
 
       - name: Assemble APK signé
         working-directory: android
@@ -131,44 +142,41 @@ jobs:
           APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
           test -n "$APK"
           echo "APK source: $APK ($(du -h "$APK" | cut -f1))"
-          unzip -t "$APK" >/tmp/apk-test.txt 2>&1 || { echo "APK ZIP CORROMPU"; cat /tmp/apk-test.txt; exit 1; }
+          # Interdire le monstre assets/native/sd-arm64
+          if unzip -l "$APK" | grep -q "assets/native/sd-arm64"; then
+            echo "Retrait sd-arm64 trop volumineux de l'APK..."
+            zip -d "$APK" "assets/native/sd-arm64" || true
+            ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
+            APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort | tail -1)
+            ZIPALIGN=$(find "$ANDROID_SDK_ROOT/build-tools" -name zipalign | sort | tail -1)
+            "$ZIPALIGN" -f -p 4 "$APK" "${APK}.aligned"
+            mv "${APK}.aligned" "$APK"
+            "$APKSIGNER" sign --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
+              --ks android/app/lea-release.keystore --ks-pass pass:leastudio --key-pass pass:leastudio --ks-key-alias lea "$APK"
+          fi
+          unzip -t "$APK" >/tmp/apk-test.txt
           echo "ZIP integrity OK"
-          unzip -l "$APK" | grep -E "libsd|classes.dex|AndroidManifest" || true
           ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/android-sdk}"
           APKSIGNER=$(find "$ANDROID_SDK_ROOT/build-tools" -name apksigner | sort | tail -1)
-          ZIPALIGN=$(find "$ANDROID_SDK_ROOT/build-tools" -name zipalign | sort | tail -1)
-          # Injection libsd seulement si absente (sans casser le zip)
-          if ! unzip -l "$APK" | grep -q "lib/arm64-v8a/libsd.so"; then
-            LIB=""
-            [ -f android/app/src/main/jniLibs/arm64-v8a/libsd.so ] && LIB=android/app/src/main/jniLibs/arm64-v8a/libsd.so
-            [ -z "$LIB" ] && [ -f android/app/src/main/assets/native/sd-arm64 ] && LIB=android/app/src/main/assets/native/sd-arm64
-            if [ -n "$LIB" ]; then
-              WORK=$(mktemp -d)
-              mkdir -p "$WORK/lib/arm64-v8a"
-              cp "$LIB" "$WORK/lib/arm64-v8a/libsd.so"
-              ( cd "$WORK" && zip -0 -X "$OLDPWD/$APK" lib/arm64-v8a/libsd.so )
-              "$ZIPALIGN" -f -p 4 "$APK" "${APK}.aligned"
-              mv "${APK}.aligned" "$APK"
-              "$APKSIGNER" sign --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true                 --ks android/app/lea-release.keystore --ks-pass pass:leastudio --key-pass pass:leastudio --ks-key-alias lea "$APK"
-            else
-              echo "WARN: pas de libsd.so — APK sans SD local"
-            fi
-          fi
           "$APKSIGNER" verify --verbose "$APK" || { echo "SIGNATURE INVALIDE"; exit 1; }
-          unzip -t "$APK" >/dev/null
+          # Taille max raisonnable (~80Mo)
+          SIZE=$(stat -c%s "$APK")
+          echo "APK bytes=$SIZE"
+          if [ "$SIZE" -gt 90000000 ]; then
+            echo "WARN: APK encore très gros ($SIZE)"
+            unzip -l "$APK" | sort -n -k1 | tail -20
+          fi
           VERSION="${{ github.event.inputs.version || '1.0.0' }}"
           CODE="${{ github.run_number }}"
           OUT="lea-studio-v${VERSION}-b${CODE}.apk"
           cp "$APK" "$OUT"
-          # Copie nom simple pour installation facile
           cp "$APK" lea-studio.apk
           ls -lh "$OUT" lea-studio.apk
-          echo "APK prêt: $OUT"
+          unzip -l lea-studio.apk | grep -E "sd-arm64|libsd|classes.dex" || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: lea-studio-apk
-          path: |
-            lea-studio.apk
-            lea-studio-v*.apk
+          path: lea-studio.apk
           retention-days: 90
+          compression-level: 0

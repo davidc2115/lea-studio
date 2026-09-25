@@ -51,6 +51,9 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+        resources {
+            excludes += ["**/sd-arm64", "**/assets/native/sd-arm64"]
+        }
     }
 }
 
