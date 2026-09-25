@@ -1515,8 +1515,9 @@ function saveCustomChars(list) {
 }
 function mergeCustomIntoCast() {
   const custom = loadCustomChars();
-  if (!custom.length) return;
-  const base = (window.CAST && window.CAST.length) ? window.CAST.slice() : [];
+  // Retirer les anciens imports du CAST, puis réinjecter la liste custom à jour
+  const base0 = (window.CAST && window.CAST.length) ? window.CAST.slice() : [];
+  const base = base0.filter((c) => c && c.id && !String(c.id).startsWith("imp_") && !c.imported);
   const seen = new Set(base.map((c) => c.id));
   for (const c of custom) {
     if (c && c.id && !seen.has(c.id)) { base.push(c); seen.add(c.id); }
@@ -1524,36 +1525,61 @@ function mergeCustomIntoCast() {
   window.CAST = base;
   if (state) state.characters = base;
 }
+function deleteCustomChar(id) {
+  if (!id) return false;
+  const next = loadCustomChars().filter((c) => c.id !== id);
+  saveCustomChars(next);
+  mergeCustomIntoCast();
+  try { localStorage.removeItem("lea.chat." + id); } catch (_) {}
+  try { localStorage.removeItem(chatKey(id)); } catch (_) {}
+  return true;
+}
+function updateCustomChar(id, patch) {
+  const list = loadCustomChars();
+  const i = list.findIndex((c) => c.id === id);
+  if (i < 0) return null;
+  list[i] = Object.assign({}, list[i], patch || {}, { id: list[i].id, imported: true });
+  saveCustomChars(list);
+  mergeCustomIntoCast();
+  return list[i];
+}
+function clearAllImportedChars() {
+  saveCustomChars([]);
+  mergeCustomIntoCast();
+}
 function cardToCharacter(data, extra) {
   extra = extra || {};
-  // Character Card V2
   const d = data.data || data;
   const name = d.name || data.name || "Importé";
   const id = "imp_" + String(name).toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40) + "_" + Date.now().toString(36);
-  const desc = d.description || d.personality || data.description || "";
+  const desc = d.description || data.description || "";
   const scenario = d.scenario || data.scenario || "";
   const first = d.first_mes || d.greeting || data.first_mes || data.greeting || "";
-  const personality = d.personality || d.mes_example || "";
-  const tags = [].concat(d.tags || data.tags || [], extra.tags || [], ["importé"]);
+  const personality = d.personality || "";
   const system = d.system_prompt || d.creator_notes || "";
+  const src = String(extra.source || "character_card");
+  const srcTag = /botbooru/i.test(src) ? "botbooru" : (/chub/i.test(src) ? "chub" : "url");
+  const rawTags = [].concat(d.tags || data.tags || [], extra.tags || [], ["importé", srcTag]);
+  const tags = Array.from(new Set(rawTags.map((t) => String(t).toLowerCase().trim()).filter(Boolean))).slice(0, 24);
+  const title = (d.title || d.creator_notes || (srcTag + " · " + name) || "Import").toString().slice(0, 100);
   return {
     id,
     name: String(name).slice(0, 80),
     age: Number(d.age) || 22,
-    title: (d.creator_notes || d.title || "Import Character Card").toString().slice(0, 80),
-    tags: tags.map(String).slice(0, 20),
+    title,
+    tags,
     cover: extra.cover || "",
     gallery: extra.cover ? [extra.cover] : [],
-    greeting: String(first || ("*" + name + " te regarde.*\n…Salut.")).slice(0, 2000),
-    scenario: String(scenario || desc).slice(0, 2000),
-    personality: String(personality || desc).slice(0, 1500),
-    appearance: String(desc).slice(0, 1500),
+    greeting: String(first || ("*" + name + " te regarde.*\n…Salut.")).slice(0, 2500),
+    scenario: String(scenario || desc).slice(0, 2500),
+    personality: String(personality || desc).slice(0, 2000),
+    appearance: String(desc || personality).slice(0, 2000),
     looks_en: "",
     ethnicity: "",
     body: "",
     system_extra: String(system).slice(0, 1500),
     imported: true,
-    source: extra.source || "character_card",
+    source: src,
   };
 }
 function parseCharacterJSON(text) {
@@ -1847,16 +1873,44 @@ async function translateCharacterToFrench(char) {
   return char;
 }
 
-async function persistImportedChars(chars) {
+async function persistImportedChars(chars, opts) {
+  opts = opts || {};
   const cur = loadCustomChars();
   const seen = new Set(cur.map((c) => c.id));
   const added = [];
   for (let c of chars) {
-    c = await translateCharacterToFrench(c);
-    if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); added.push(c); }
+    if (!c || !c.id) continue;
+    if (seen.has(c.id)) continue;
+    // Sauvegarder d'abord (import OK même si traduction échoue)
+    cur.push(c);
+    seen.add(c.id);
+    added.push(c);
   }
   saveCustomChars(cur);
   mergeCustomIntoCast();
+  // Traduction en arrière-plan (ne bloque pas l'import)
+  if (!opts.skipTranslate && added.length) {
+    (async () => {
+      for (const a of added) {
+        try {
+          const tr = await translateCharacterToFrench(a);
+          updateCustomChar(a.id, {
+            title: tr.title,
+            scenario: tr.scenario,
+            personality: tr.personality,
+            appearance: tr.appearance,
+            greeting: tr.greeting,
+            tags: tr.tags,
+          });
+        } catch (e) {
+          console.warn("[trad bg]", e);
+        }
+      }
+      try {
+        if (state && state.view === "discover") renderDiscover();
+      } catch (_) {}
+    })();
+  }
   return added;
 }
 
@@ -1899,12 +1953,8 @@ async function importChubNode(node) {
     if (!data || data.error) {
       throw new Error("BotBooru import échoué: " + (lastErr || (data && data.error) || "inconnu") + " — vérifie le dernier APK");
     }
-    let cover = node.avatar_url || "";
-    try {
-      const pngUrl = node.cardUrl || ("https://botbooru.com/download/png/" + encodeURIComponent(id));
-      const du = await nativeHttpDataUrl(pngUrl);
-      if (du && du.length > 500) cover = du;
-    } catch (_) {}
+    // Cover = URL image (pas de base64 massif)
+    const cover = node.avatar_url || (node.filename ? ("https://botbooru.com/images/" + node.filename) : "");
     const c = cardToCharacter(data, {
       cover,
       source: "botbooru:" + id,
@@ -1919,24 +1969,36 @@ async function importChubNode(node) {
     cardUrl = "https://avatars.charhub.io/avatars/" + path + "/chara_card_v2.png";
   }
   if (!cardUrl) throw new Error("Pas d'URL de carte");
-  const dataUrl = await nativeHttpDataUrl(cardUrl);
-  if (!dataUrl || dataUrl.length < 800) {
-    throw new Error("Téléchargement carte échoué — installe le dernier APK (pont HTTP)");
+  // Cover légère (URL avatar) — ne PAS stocker le PNG carte entier en base64 ( explose localStorage )
+  const lightCover = node.avatar_url || "";
+  let chars = [];
+  let dataUrl = "";
+  try {
+    dataUrl = await nativeHttpDataUrl(cardUrl);
+  } catch (e) {
+    console.warn("download card", e);
   }
-  let chars = await parsePngCharaFromDataUrl(dataUrl, {
-    cover: dataUrl,
-    source: (node.source || "chub") + ":" + path,
-    tags: ["importé", node.source || "chub"].concat(node.topics || []).slice(0, 16),
-  });
+  if (dataUrl && dataUrl.length > 800) {
+    chars = await parsePngCharaFromDataUrl(dataUrl, {
+      cover: lightCover || "",
+      source: (node.source || "chub") + ":" + path,
+      tags: ["importé", node.source || "chub"].concat(node.topics || []).slice(0, 16),
+    });
+    // Forcer cover légère après parse
+    chars = chars.map((c) => Object.assign({}, c, {
+      cover: lightCover || c.cover || "",
+      gallery: lightCover ? [lightCover] : (c.gallery || []).slice(0, 1),
+    }));
+  }
   if (!chars.length) {
     chars = [cardToCharacter({
       name: node.name || "Import",
       description: node.description || "",
       scenario: node.description || "",
-      first_mes: "*" + (node.name || "Elle") + " te regarde.*\\n…Salut.",
+      first_mes: "*" + (node.name || "Elle") + " te regarde.*\n…Salut.",
       tags: node.topics || [],
     }, {
-      cover: node.avatar_url || dataUrl,
+      cover: lightCover,
       source: (node.source || "chub") + ":" + path,
       tags: ["importé", node.source || "chub"],
     })];
@@ -2025,34 +2087,50 @@ async function importFromCardUrl(rawUrl) {
 
 function renderImportHub() {
   window._chubPage = window._chubPage || 1;
+  window._impSource = window._impSource || "chub";
+  const customs = loadCustomChars();
   $("view-discover").innerHTML = `
     <h1>Importer des personnages</h1>
     <p style="color:var(--muted);font-size:13px;line-height:1.45">
-      <b>Chub.ai</b> — recherche + tags + import 1 clic.<br/>
-      <b>BotBooru</b> — colle l’URL du personnage ou <code>/download/png/ID</code>.<br/>
-      <b>Janitor / SpicyChat / Polybuzz / RosyTalk</b> — pas d’API publique : exporte JSON/PNG puis Fichier.
+      Recherche <b>Chub.ai</b> ou <b>BotBooru</b>, puis Importer.<br/>
+      Après import : tags <code>importé</code> + <code>chub</code>/<code>botbooru</code>. Traduction FR en arrière-plan si clés Gemini.
     </p>
-    <div class="tags" style="margin:8px 0;flex-wrap:wrap">
-      <span class="tag" style="background:#5a2a6a">Chub.ai</span>
-      <span class="tag" style="background:#2a4a68">BotBooru (URL)</span>
-      <span class="tag" id="imp-file-btn" style="cursor:pointer">Fichier JSON/PNG</span>
+
+    <h2 style="font-size:15px;margin:12px 0 6px">Mes imports (${customs.length})</h2>
+    <div id="imp-mine" style="margin-bottom:12px">
+      ${customs.length ? customs.map((c) => `
+        <div class="card" style="padding:10px;margin:6px 0;display:flex;gap:10px;align-items:flex-start" data-impid="${c.id}">
+          <img src="${c.cover || ""}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:8px;background:#222" onerror="this.style.opacity=.2"/>
+          <div style="flex:1;min-width:0">
+            <strong>${escapeHtml(c.name)}</strong>
+            <div style="font-size:11px;color:var(--muted)">${escapeHtml((c.tags || []).join(" · "))}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+              <button type="button" class="cta imp-edit" data-id="${c.id}" style="padding:4px 8px;font-size:12px;background:#3a2048">Modifier</button>
+              <button type="button" class="cta imp-del" data-id="${c.id}" style="padding:4px 8px;font-size:12px;background:#5a2030">Supprimer</button>
+            </div>
+          </div>
+        </div>`).join("") : '<p style="color:var(--muted);font-size:13px">Aucun personnage importé.</p>'}
+      ${customs.length ? '<button type="button" class="cta" id="imp-clear-all" style="background:#4a1520;margin-top:6px">Tout supprimer</button>' : ""}
     </div>
 
+    <div class="tags" style="margin:8px 0;flex-wrap:wrap">
+      <span class="tag" id="imp-file-btn" style="cursor:pointer">Fichier JSON/PNG</span>
+    </div>
     <label class="lbl">Coller une URL de carte</label>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <input class="field" id="imp-url" type="url" placeholder="https://chub.ai/characters/… ou https://botbooru.com/character/…" style="flex:1" />
+      <input class="field" id="imp-url" type="url" placeholder="https://chub.ai/characters/… ou botbooru.com/character/…" style="flex:1" />
       <button class="cta" type="button" id="imp-url-btn">Importer URL</button>
     </div>
 
     <h2 style="font-size:16px;margin:14px 0 6px">Recherche en ligne</h2>
     <div class="tags" style="margin:6px 0;flex-wrap:wrap">
-      <span class="tag imp-src" data-impsrc="chub" style="cursor:pointer;background:#5a2a6a">Chub.ai</span>
-      <span class="tag imp-src" data-impsrc="botbooru" style="cursor:pointer;background:#2a4a68">BotBooru</span>
+      <span class="tag imp-src" data-impsrc="chub" style="cursor:pointer;background:#5a2a6a;outline:${window._impSource==="chub"?"2px solid #ff8fbf":"none"}">Chub.ai</span>
+      <span class="tag imp-src" data-impsrc="botbooru" style="cursor:pointer;background:#2a4a68;outline:${window._impSource==="botbooru"?"2px solid #ff8fbf":"none"}">BotBooru</span>
     </div>
     <input class="field" id="chub-q" type="search" placeholder="Nom, thème…" style="width:100%;margin:6px 0" />
     <div class="tags" id="chub-tags" style="margin:6px 0;flex-wrap:wrap">
-      ${["female","male","romance","nsfw","dominant","submissive","fantasy","school","girlfriend","milf","anime","scenario","french","office","roommate"].map((t) =>
-        `<span class="tag chub-tag" data-tag="${t}" style="cursor:pointer">${t}</span>`).join("")}
+      ${["female","male","romance","nsfw","dominant","submissive","fantasy","school","girlfriend","milf","anime","scenario","french"].map((t) =>
+        `<span class="tag chub-tag" data-tag="${t}" style="cursor:pointer">` + t + `</span>`).join("")}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
       <button class="cta" id="chub-search" type="button">Rechercher</button>
@@ -2071,22 +2149,46 @@ function renderImportHub() {
     el.style.outline = activeTags.includes(el.dataset.tag) ? "2px solid #ff8fbf" : "";
   });
 
+  function openEditImported(id) {
+    const c = loadCustomChars().find((x) => x.id === id);
+    if (!c) return;
+    const title = prompt("Titre / rôle", c.title || "");
+    if (title === null) return;
+    const scenario = prompt("Scénario / description", c.scenario || "");
+    if (scenario === null) return;
+    const personality = prompt("Personnalité", c.personality || "");
+    if (personality === null) return;
+    const appearance = prompt("Apparence", c.appearance || "");
+    if (appearance === null) return;
+    updateCustomChar(id, {
+      title: String(title).slice(0, 120),
+      scenario: String(scenario).slice(0, 2500),
+      personality: String(personality).slice(0, 2000),
+      appearance: String(appearance).slice(0, 2000),
+    });
+    setStatus("Modifié : " + c.name);
+    renderImportHub();
+  }
+
   async function runChubSearch(page) {
     page = page || 1;
     window._chubPage = page;
     const q = ($("chub-q") && $("chub-q").value) || "";
-    const src = (window._impSource || "chub");
+    const src = window._impSource || "chub";
     setStatus("Recherche " + (src === "botbooru" ? "BotBooru" : "Chub") + " (page " + page + ")…");
     try {
+      if (!window.LeaAndroid || !window.LeaAndroid.httpGetWithHeaders) {
+        setStatus("⚠ Pont HTTP manquant — installe le dernier APK (build avec LeaBridge).");
+      }
       const { nodes, count } = src === "botbooru"
         ? await searchBotBooruCharacters(q, activeTags.join(","), page)
         : await searchChubCharacters(q, activeTags.join(","), page);
       window._chubNodes = nodes;
-      setStatus(count + " résultat(s) — page " + page + " (" + nodes.length + " affichés)");
+      setStatus(count + " résultat(s) — page " + page + " (" + nodes.length + ")");
       const box = $("chub-results");
       if (!box) return;
       if (!nodes.length) {
-        box.innerHTML = "<p style='color:var(--muted)'>Aucun résultat. Essaie d’autres tags ou une autre page.</p>";
+        box.innerHTML = "<p style='color:var(--muted)'>Aucun résultat.</p>";
         return;
       }
       box.innerHTML = `<div class="grid">${nodes.map((n, i) => `
@@ -2100,7 +2202,7 @@ function renderImportHub() {
           </div>
         </article>`).join("")}</div>`;
     } catch (err) {
-      setStatus("Erreur Chub: " + (err.message || err));
+      setStatus("Erreur: " + (err.message || err));
     }
   }
 
@@ -2125,20 +2227,36 @@ function renderImportHub() {
       return;
     }
     if (e.target.closest("#imp-back")) { renderDiscover(); return; }
-    if (e.target.closest("#imp-file-btn")) {
-      $("disc-import") && $("disc-import").click();
-      return;
-    }
+    if (e.target.closest("#imp-file-btn")) { $("disc-import") && $("disc-import").click(); return; }
     if (e.target.closest("#chub-search")) { runChubSearch(1); return; }
     if (e.target.closest("#chub-prev")) { runChubSearch(Math.max(1, (window._chubPage || 1) - 1)); return; }
     if (e.target.closest("#chub-next")) { runChubSearch((window._chubPage || 1) + 1); return; }
+    if (e.target.closest("#imp-clear-all")) {
+      if (confirm("Supprimer TOUS les personnages importés ?")) {
+        clearAllImportedChars();
+        renderImportHub();
+      }
+      return;
+    }
+    const del = e.target.closest(".imp-del");
+    if (del) {
+      const id = del.dataset.id;
+      const c = loadCustomChars().find((x) => x.id === id);
+      if (c && confirm("Supprimer « " + c.name + " » ?")) {
+        deleteCustomChar(id);
+        renderImportHub();
+      }
+      return;
+    }
+    const ed = e.target.closest(".imp-edit");
+    if (ed) { openEditImported(ed.dataset.id); return; }
     if (e.target.closest("#imp-url-btn")) {
       const u = ($("imp-url") && $("imp-url").value) || "";
       setStatus("Import URL…");
       try {
         const added = await importFromCardUrl(u);
-        setStatus(added.length ? ("✓ Importé : " + added.map((c) => c.name).join(", ")) : "Déjà présent");
-        state._discShuffle = null;
+        setStatus(added.length ? ("✓ Importé : " + added.map((c) => c.name).join(", ") + " (traduction FR en cours si clés Gemini)") : "Déjà présent");
+        renderImportHub();
       } catch (err) {
         setStatus("Erreur URL: " + (err.message || err));
       }
@@ -2150,12 +2268,16 @@ function renderImportHub() {
       const node = (window._chubNodes || [])[idx];
       if (!node) return;
       setStatus("Import de " + (node.name || "") + "…");
+      imp.disabled = true;
       try {
         const added = await importChubNode(node);
-        setStatus(added.length ? ("✓ Importé : " + added.map((c) => c.name).join(", ")) : "Déjà présent ou échec");
-        state._discShuffle = null;
+        setStatus(added.length
+          ? ("✓ Importé : " + added.map((c) => c.name).join(", ") + " — tags: " + (added[0].tags || []).join(", "))
+          : "Déjà présent ou échec");
+        renderImportHub();
       } catch (err) {
-        setStatus("Erreur: " + (err.message || err));
+        setStatus("Erreur import: " + (err.message || err));
+        imp.disabled = false;
       }
     }
   };
@@ -2165,7 +2287,7 @@ function renderImportHub() {
       try {
         const r = await importCharacterFiles(ev.target.files);
         setStatus(r.ok ? ("Importé : " + (r.names || []).join(", ")) : ("Échec : " + (r.err || "?")));
-        state._discShuffle = null;
+        renderImportHub();
       } catch (e) {
         setStatus("Erreur: " + (e.message || e));
       }
@@ -2173,9 +2295,7 @@ function renderImportHub() {
     };
   }
   if ($("chub-q")) {
-    $("chub-q").onkeydown = (ev) => {
-      if (ev.key === "Enter") runChubSearch(1);
-    };
+    $("chub-q").onkeydown = (ev) => { if (ev.key === "Enter") runChubSearch(1); };
   }
 }
 
@@ -2410,6 +2530,9 @@ function renderProfile() {
     <p style="margin:10px 0 8px">
       <button type="button" class="cta" id="prof-chat">💬 Discuter</button>
       <button type="button" class="cta" id="prof-newchat" style="margin-left:8px;background:#3a2048">🔄 Nouvelle conversation</button>
+      ${c.imported || String(c.id||"").startsWith("imp_") ? `
+      <button type="button" class="cta" id="prof-edit-imp" style="margin-left:8px;background:#3a2048">✏️ Modifier fiche</button>
+      <button type="button" class="cta" id="prof-del-imp" style="margin-left:8px;background:#5a2030">🗑️ Supprimer</button>` : ""}
     </p>
     <p style="color:var(--muted);font-size:13px">Appuie sur ★ sous une photo pour en faire l’image de profil.</p>
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
@@ -2463,6 +2586,31 @@ function renderProfile() {
   if ($("prof-chat")) $("prof-chat").onclick = () => goChat(false);
   if ($("prof-newchat")) $("prof-newchat").onclick = () => {
     if (confirm("Recommencer une nouvelle conversation avec " + c.name + " ? L'historique local sera effacé.")) goChat(true);
+  };
+  if ($("prof-del-imp")) $("prof-del-imp").onclick = () => {
+    if (confirm("Supprimer définitivement « " + c.name + " » (import) ?")) {
+      deleteCustomChar(c.id);
+      state.current = null;
+      show("discover");
+      renderDiscover();
+    }
+  };
+  if ($("prof-edit-imp")) $("prof-edit-imp").onclick = () => {
+    const title = prompt("Titre / rôle", c.title || "");
+    if (title === null) return;
+    const scenario = prompt("Scénario", c.scenario || "");
+    if (scenario === null) return;
+    const personality = prompt("Personnalité", c.personality || "");
+    if (personality === null) return;
+    const appearance = prompt("Apparence", c.appearance || "");
+    if (appearance === null) return;
+    const updated = updateCustomChar(c.id, {
+      title: String(title).slice(0, 120),
+      scenario: String(scenario).slice(0, 2500),
+      personality: String(personality).slice(0, 2000),
+      appearance: String(appearance).slice(0, 2000),
+    });
+    if (updated) renderProfile();
   };
   $("view-profile").onclick = (e) => {
     const del = e.target.getAttribute("data-del");
