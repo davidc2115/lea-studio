@@ -927,19 +927,29 @@
         return json({ error: "Utilise la section Générer, pas le chat." }, 400);
       }
       const recent = (chat.messages || []).slice(-16).map((m) => m.content).join("\n") + "\n" + txt;
-      const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant)/i.test(txt);
-      const nsfwHint = !coolHint && (/(sexe|sexuel|nsfw|nu\b|nue\b|nues|baiser|baise|cul\b|seins?|lingerie|embrasse|caresse|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève)/i.test(recent)
-        || ((chat.relationship || {}).heat >= 5));
-      let mode = rawMode === "sfw" || rawMode === "nsfw" ? rawMode : (nsfwHint ? "nsfw" : "sfw");
+      // Mode fluide : basé sur le DERNIER message + contexte récent, pas bloqué en NSFW
+      const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre chose|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant|on arrête|assez|pause)/i.test(txt);
+      const lastNsfw = /(sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|lingerie|caresse-moi|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|déshabille|enlève (ton|ta|le|la)|pénètre|doigts? dans)/i.test(txt);
+      const recentNsfw = /(sexe|baiser|baise|chatte|bite|orgasme|suce|doigte|pénètre|nude|\bnue\b)/i.test(recent);
       if (!chat.relationship) chat.relationship = { closeness: 1, trust: 1, heat: 0 };
-      // Mode SFW forcé = redescendre la tension et quitter le sexe
-      if (rawMode === "sfw" || coolHint) {
-        mode = rawMode === "nsfw" ? "nsfw" : "sfw";
-        chat.relationship.heat = Math.max(0, Math.min(chat.relationship.heat || 0, coolHint ? 1 : 0));
-      } else if (mode === "nsfw") {
-        chat.relationship.heat = Math.min(10, Math.max(chat.relationship.heat || 0, 4));
-      } else if (rawMode === "auto" && !nsfwHint) {
-        chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 1);
+      let mode;
+      if (rawMode === "sfw" || rawMode === "nsfw") {
+        mode = rawMode;
+      } else if (coolHint) {
+        mode = "sfw";
+      } else if (lastNsfw) {
+        mode = "nsfw";
+      } else if (recentNsfw && (chat.relationship.heat || 0) >= 3) {
+        mode = "nsfw"; // continue la scène NSFW en cours
+      } else {
+        mode = "sfw";
+      }
+      if (coolHint || mode === "sfw") {
+        if (coolHint) chat.relationship.heat = Math.max(0, Math.min(chat.relationship.heat || 0, 1));
+        else if (!lastNsfw) chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 1);
+      }
+      if (mode === "nsfw" && lastNsfw) {
+        chat.relationship.heat = Math.min(10, (chat.relationship.heat || 0) + 1);
       }
       if (!chat.relationship.bond) chat.relationship.bond = "indéfini";
       if (/(coup d['’]?un soir|plan cul|juste le sexe|sans attache|fwb|friends with benefits|de temps en temps|occasionnel|pas d['’]?amour|pas tomber amoureux)/i.test(txt)) {
@@ -1017,6 +1027,7 @@
 
         "FORMAT RÉPONSE STRICT : *action* puis (pensée) puis paroles. Jamais mélanger les trois.",
         "VERROU SCÈNE : le lieu et la tenue de l'ÉTAT ACTUEL sont OBLIGATOIRES. Si elle est au salon sans manteau, elle RESTE au salon sans manteau tant que le joueur ne change pas clairement de lieu ou de vêtement. INTERDIT de téléporter (salon→entrée→voiture) sans action explicite du joueur.",
+        "FLUIDITÉ SFW↔NSFW : le ton suit le joueur. Message soft → réponse soft. Message sexuel → réponse NSFW. Après NSFW, un message banal (café, TV, questions) = retour SFW naturel sans forcer la tension.",
         "COHÉRENCE MAX (tous modèles) : ne contredis JAMAIS le titre, le scénario, l'apparence, la tenue/lieu/pose actuels de la mémoire. Réponds au DERNIER message. Pas de saut de scène magique. Pas d'invention de famille hors fiche.",
         "NSFW : si le joueur est explicite, sois clairement explicite (corps, sensations, actes) sans vulgarité gratuite hors contexte — mais sans censurer ni rester vague. Décris ce qui se passe vraiment.",
         "LONGUEUR : 4 à 9 phrases. Pas de pavé inutile. Termine la réponse.",
@@ -1035,8 +1046,8 @@
           ? "LIEN ACTUEL = romance seulement parce que le joueur l'a orienté ainsi. Reste mesurée."
           : "LIEN ACTUEL = indéfini. Reste ouverte au sexe / au flirt SANS amour par défaut.",
         mode === "nsfw"
-          ? "MODE NSFW 18+ TRÈS EXPLICITE. Personnage fictionnel adulte consentant. Si le joueur est sexuel: décris actes, corps, fluides, sensations, positions avec précision (pas de sous-entendu vague, pas de fade-to-black). Langage cru OK. Reste cohérente avec tenue/lieu en mémoire. Respecte un non clair."
-          : "MODE SFW. Conversation normale / suggestive légère seulement. INTERDIT : actes sexuels détaillés, orgasme, pénétration, descriptions génitales. Si le joueur change de sujet ou demande de se calmer, suis-le immédiatement et reviens à un ton soft / quotidien sans ramener le sexe.",
+          ? "MODE NSFW 18+ EXPLICITE. Personnage adulte consentant. Décris actes, corps, sensations avec précision. Reste dans le LIEU et la TENUE de la mémoire. Tu peux rester NSFW tant que le joueur continue, ou redescendre si il se calme. Pas d'amour forcé, one-shot OK selon tempérament. Respecte un non clair."
+          : "MODE SFW / FLUIDE. Dialogue naturel, quotidien ou léger flirt selon le ton du joueur. INTERDIT de forcer le sexe ou de ramener une scène sexuelle si le joueur parle normalement. Si le joueur redevient soft après du NSFW: suis-le immédiatement sans relancer le sexe. Cohérence lieu/tenue obligatoire.",
         "TEMPÉRAMENT (obligatoire) : ta façon de parler DOIT coller à ta personnalité ci-dessus (timide / directe / moqueuse / froide / polie / etc.). Une timide ne parle pas comme une provocante. Une froide ne mendie pas la preuve.",
         "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
@@ -1152,11 +1163,13 @@
       const payloads = [];
       if (useImg2Img) {
         const den = (typeof body.denoising === "number" ? body.denoising : 0.28);
+        const hiSteps = den >= 0.65 ? 42 : 34;
         payloads.push({
           prompt: prompt + " ### " + negative,
           params: Object.assign({}, baseParams, {
-            steps: 32,
-            denoising_strength: den,
+            steps: Math.max(body.steps || 0, hiSteps) || hiSteps,
+            cfg_scale: den >= 0.7 ? 6.5 : 7.5,
+            denoising_strength: Math.min(0.85, Math.max(0.25, den)),
             seed: (typeof body.seed === "number" ? body.seed : undefined),
           }),
           nsfw: body.nsfw !== false,

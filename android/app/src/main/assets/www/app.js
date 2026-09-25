@@ -3433,10 +3433,13 @@ function expandPromptLocal(userTxt, nsfw) {
   if (/entre les seins|cleavage|décolleté/.test(low)) {
     bits.push("man's face nestled between large breasts, mouth on cleavage, intimate close-up");
   }
-  if (/(l[eè]che|lick).*(chatte|pussy|vulve)|chatte|cunnilingus/.test(low)) {
-    bits.push("face between spread thighs, tongue licking pussy, mouth on vulva, extreme close-up POV, explicit");
+  if (/(l[eè]che|lick).*(chatte|pussy|vulve)|cunnilingus/.test(low)) {
+    bits.push("man's face between spread thighs, tongue licking pussy, mouth on vulva, extreme close-up POV, explicit");
   }
-  if (/embrass|kiss|bisou/.test(low)) bits.push("kissing, lips pressed on skin");
+  if (/(fesse|buttock|\bass\b|cul).*(embrass|kiss|l[eè]che|lick)|(embrass|kiss|l[eè]che).*(fesse|buttock|cul)/.test(low)) {
+    bits.push("photorealistic, a man kissing a woman's bare buttocks, man's face clearly visible against the ass, lips on butt cheek, intimate close-up from behind, realistic skin, sharp detail, uncensored NSFW");
+  }
+  if (/embrass|kiss|bisou/.test(low) && !/fesse|cul|sein|breast/.test(low)) bits.push("kissing, lips pressed on skin");
   if (/résille|fishnet/.test(low)) bits.push("black fishnet stockings");
   if (/logo|ic[oô]ne|badge|serveur/.test(low)) {
     return "professional logo design, " + t + ", clean vector graphic, centered emblem, no photorealistic person, high quality";
@@ -3699,7 +3702,7 @@ async function generateStudioImage(opts) {
             "BASE photo (keep body pose outfit scene): reference " + (baseIdx + 1) + ",",
             "SECOND person / face / action from reference " + (faceIdx + 1) + ",",
             "User wants EXACTLY: " + String(rawPrompt || userPromptOriginal || "").slice(0, 300),
-            "If kissing/licking ass/buttocks/fesses: man's face pressed against woman's bare buttocks, lips kissing the ass, tongue near anus/pussy from behind, extreme close-up POV, explicit uncensored, If oral sex / licking pussy: man's face between woman's spread thighs, tongue on pussy, mouth on vulva, extreme close-up, explicit uncensored,",
+            "MUST show a man's head/face in the frame doing the action. If kissing buttocks: insert a realistic adult man face against the woman's bare ass, lips touching the butt cheek, side profile of man visible, extreme close-up. If licking pussy: man's face between thighs, tongue on vulva. Photorealistic, high quality, sharp, uncensored.",
             "If face between breasts: mouth on cleavage licking nipples,",
             "same lighting as base, photorealistic coherent anatomy, adult 18+, no extra random people, no face covered by random fishnet unless in source,",
             "do NOT replace the whole scene with a different woman only"
@@ -3813,10 +3816,19 @@ async function generateStudioImage(opts) {
     if (sourceB64) {
       payload.source_image = sourceB64;
       payload.source_processing = "img2img";
+      // Multi-images (ex: visage + fesses) = denoise HAUT sinon Horde garde juste la photo de base
       payload.denoising = opts.mode === "edit" ? 0.58
       : (uploads.length > 1
-          ? (/(l[eè]che|lick|chatte|pussy|seins|breast|oral)/i.test(String(rawPrompt || prompt || "")) ? 0.72 : 0.62)
+          ? (/(l[eè]che|lick|embrass|kiss|chatte|pussy|seins|breast|oral|fesse|cul|ass)/i.test(String(rawPrompt || prompt || "")) ? 0.82 : 0.70)
           : 0.48);
+      if (uploads.length > 1) {
+        payload.steps = 40;
+        // Force prompt composition explicite homme + action
+        const act = String(rawPrompt || userPromptOriginal || "").toLowerCase();
+        if (/fesse|cul|ass|buttock/.test(act) && /(embrass|kiss|l[eè]che|lick|visage|homme|face|man)/.test(act)) {
+          prompt = "photorealistic explicit NSFW, a man kissing a woman's bare buttocks from behind, man's face clearly visible pressed against the ass cheeks, lips on the butt, intimate close-up, realistic skin texture, sharp focus, high detail, uncensored adult, " + prompt;
+        }
+      }
     }
 
     if (eng === "sd_cpp" && window.LeaAndroid && window.LeaAndroid.sdCppGenerate) {
