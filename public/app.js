@@ -1707,7 +1707,7 @@ async function searchChubCharacters(query, tags, page) {
   if (tags) params.set("include_tags", tags);
   params.set("sort", "default");
   const url = "https://api.chub.ai/search?" + params.toString();
-  const raw = await nativeHttpGet(url, "Accept: application/json\\nOrigin: https://chub.ai\\nReferer: https://chub.ai/");
+  const raw = await nativeHttpGet(url, "Accept: application/json\nOrigin: https://chub.ai\nReferer: https://chub.ai/");
   let data;
   try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse Chub invalide (installe le dernier APK)"); }
   if (data.error) throw new Error(String(data.error));
@@ -1741,7 +1741,7 @@ async function searchBotBooruCharacters(query, tags, page) {
   params.set("limit", "24");
   params.set("offset", String(offset));
   const url = "https://botbooru.com/posts/?" + params.toString();
-  const raw = await nativeHttpGet(url, "Accept: application/json\\nReferer: https://botbooru.com/");
+  const raw = await nativeHttpGet(url, "Accept: application/json\nReferer: https://botbooru.com/");
   let data;
   try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse BotBooru invalide (installe le dernier APK)"); }
   if (data.error) throw new Error(String(data.error));
@@ -1770,61 +1770,80 @@ async function searchBotBooruCharacters(query, tags, page) {
 /** Traduit description / scénario / greeting en français via Gemini */
 async function translateCharacterToFrench(char) {
   try {
-    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-    const keys = String(st.geminiKeys || st.gemini || "")
-      .split(/[\\n,;]+/).map((k) => k.trim())
-      .filter((k) => k && k.length >= 10 && !/^sk-/.test(k));
-    if (!keys.length) return char;
-    const payload = {
-      name: char.name,
-      title: char.title,
-      scenario: char.scenario,
-      personality: char.personality,
-      appearance: char.appearance,
-      greeting: char.greeting,
-    };
-    // Skip if already mostly French
-    const sample = String(char.scenario || char.appearance || "").slice(0, 200);
-    if (/[àâäéèêëïîôùûüç]/i.test(sample) && !/\b(the|you are|she is|character)\b/i.test(sample)) {
+    // Même source de clés que le chat (native-api load)
+    let keys = [];
+    let model = "gemini-2.5-flash";
+    try {
+      const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+      const raw = String(st.geminiKeys || st.gemini || "");
+      keys = raw.split(/[\n,;]+/).map((k) => k.trim()).filter((k) => k && k.length >= 10 && !/^sk-/.test(k) && !/^xai-/.test(k));
+      model = st.geminiTextModel || model;
+    } catch (_) {}
+    if (!keys.length) {
+      console.warn("[trad] aucune clé Gemini — fiche non traduite");
       return char;
     }
-    const sys = "Tu traduis des fiches de personnages roleplay en français naturel. "
-      + "Réponds UNIQUEMENT en JSON valide avec les clés: title, scenario, personality, appearance, greeting. "
-      + "Garde le sens, le ton NSFW si présent, les placeholders {{char}} {{user}}. Pas de markdown.";
-    const model = st.geminiTextModel || "gemini-2.0-flash";
-    for (let ki = 0; ki < keys.length; ki++) {
-      try {
-        const res = await fetch(
-          "https://generativelanguage.googleapis.com/v1beta/models/" +
-            encodeURIComponent(model) +
-            ":generateContent?key=" + encodeURIComponent(keys[ki]),
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: sys }] },
-              contents: [{ role: "user", parts: [{ text: JSON.stringify(payload) }] }],
-              generationConfig: { temperature: 0.2, maxOutputTokens: 2048 },
-            }),
-          }
-        );
-        const data = await res.json().catch(() => ({}));
-        if (data.error) continue;
-        let t = (data.candidates && data.candidates[0] && data.candidates[0].content &&
-          data.candidates[0].content.parts &&
-          data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("")) || "";
-        t = t.trim().replace(/^```json\\s*/i, "").replace(/```$/i, "").trim();
-        const j = JSON.parse(t);
-        if (j.title) char.title = String(j.title).slice(0, 120);
-        if (j.scenario) char.scenario = String(j.scenario).slice(0, 2500);
-        if (j.personality) char.personality = String(j.personality).slice(0, 2000);
-        if (j.appearance) char.appearance = String(j.appearance).slice(0, 2000);
-        if (j.greeting) char.greeting = String(j.greeting).slice(0, 2500);
-        char.tags = Array.from(new Set([].concat(char.tags || [], ["fr"])));
-        return char;
-      } catch (_) {}
+    const payload = {
+      name: char.name || "",
+      title: char.title || "",
+      scenario: String(char.scenario || "").slice(0, 1800),
+      personality: String(char.personality || "").slice(0, 1200),
+      appearance: String(char.appearance || "").slice(0, 1200),
+      greeting: String(char.greeting || "").slice(0, 1200),
+    };
+    const sample = (payload.scenario + " " + payload.appearance).slice(0, 250);
+    // Déjà en français et peu d'anglais
+    if (/[àâäéèêëïîôùûüç]/i.test(sample) && !/\b(the|you are|she is|character is|wears)\b/i.test(sample)) {
+      return char;
     }
-  } catch (_) {}
+    const sys = "Tu es un traducteur de fiches de personnages roleplay. "
+      + "Traduis en français naturel et fluide. "
+      + "Réponds UNIQUEMENT avec un objet JSON valide (sans markdown) contenant exactement les clés: "
+      + "title, scenario, personality, appearance, greeting. "
+      + "Conserve le ton (y compris NSFW), les placeholders {{char}} et {{user}}, les *actions* et (pensées).";
+    const models = [model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+    for (const m of models) {
+      for (let ki = 0; ki < keys.length; ki++) {
+        try {
+          const res = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+              encodeURIComponent(m) +
+              ":generateContent?key=" + encodeURIComponent(keys[ki]),
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                systemInstruction: { parts: [{ text: sys }] },
+                contents: [{ role: "user", parts: [{ text: JSON.stringify(payload) }] }],
+                generationConfig: { temperature: 0.15, maxOutputTokens: 4096 },
+              }),
+            }
+          );
+          const data = await res.json().catch(() => ({}));
+          if (data.error) {
+            console.warn("[trad] gemini", m, data.error.message || data.error);
+            continue;
+          }
+          let t = "";
+          const parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+          if (parts) t = parts.map((p) => p.text || "").join("");
+          t = String(t).trim().replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+          const j = JSON.parse(t);
+          if (j.title) char.title = String(j.title).slice(0, 120);
+          if (j.scenario) char.scenario = String(j.scenario).slice(0, 2500);
+          if (j.personality) char.personality = String(j.personality).slice(0, 2000);
+          if (j.appearance) char.appearance = String(j.appearance).slice(0, 2000);
+          if (j.greeting) char.greeting = String(j.greeting).slice(0, 2500);
+          char.tags = Array.from(new Set([].concat(char.tags || [], ["fr"])));
+          return char;
+        } catch (e) {
+          console.warn("[trad] fail", m, e && e.message);
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[trad]", e);
+  }
   return char;
 }
 
@@ -1843,23 +1862,52 @@ async function persistImportedChars(chars) {
 
 async function importChubNode(node) {
   if (!node) throw new Error("personnage vide");
-  // BotBooru: préférer JSON
-  if (node.source === "botbooru" && (node.jsonUrl || node.id)) {
-    const jsonUrl = node.jsonUrl || ("https://botbooru.com/download/json/" + encodeURIComponent(node.id));
-    const raw = await nativeHttpGet(jsonUrl, "Accept: application/json\\nReferer: https://botbooru.com/");
-    let data;
-    try { data = JSON.parse(raw); } catch (_) { throw new Error("JSON BotBooru illisible"); }
-    if (data.error) throw new Error(String(data.error));
+  // BotBooru: JSON d'abord, puis PNG
+  if (node.source === "botbooru" || (node.jsonUrl && /botbooru/i.test(String(node.jsonUrl)))) {
+    const id = node.id || "";
+    const jsonUrl = node.jsonUrl || ("https://botbooru.com/download/json/" + encodeURIComponent(id));
+    let data = null;
+    let lastErr = "";
+    // 1) JSON via pont natif
+    try {
+      const raw = await nativeHttpGet(jsonUrl, "Accept: application/json\nReferer: https://botbooru.com/\nUser-Agent: Mozilla/5.0");
+      if (raw && raw.trim().charAt(0) === "{") {
+        data = JSON.parse(raw);
+      } else {
+        lastErr = "réponse non-JSON (" + String(raw || "").slice(0, 80) + ")";
+      }
+    } catch (e) {
+      lastErr = e.message || String(e);
+    }
+    // 2) Fallback PNG carte
+    if (!data || data.error) {
+      const pngUrl = node.cardUrl || ("https://botbooru.com/download/png/" + encodeURIComponent(id));
+      try {
+        const dataUrl = await nativeHttpDataUrl(pngUrl);
+        if (dataUrl && dataUrl.length > 800) {
+          const chars = await parsePngCharaFromDataUrl(dataUrl, {
+            cover: dataUrl,
+            source: "botbooru:" + id,
+            tags: ["importé", "botbooru"].concat(node.topics || []).slice(0, 16),
+          });
+          if (chars.length) return persistImportedChars(chars);
+        }
+      } catch (e) {
+        lastErr = (lastErr ? lastErr + " · " : "") + (e.message || e);
+      }
+    }
+    if (!data || data.error) {
+      throw new Error("BotBooru import échoué: " + (lastErr || (data && data.error) || "inconnu") + " — vérifie le dernier APK");
+    }
     let cover = node.avatar_url || "";
     try {
-      if (node.cardUrl) {
-        const du = await nativeHttpDataUrl(node.cardUrl);
-        if (du && du.length > 500) cover = du;
-      }
+      const pngUrl = node.cardUrl || ("https://botbooru.com/download/png/" + encodeURIComponent(id));
+      const du = await nativeHttpDataUrl(pngUrl);
+      if (du && du.length > 500) cover = du;
     } catch (_) {}
     const c = cardToCharacter(data, {
       cover,
-      source: "botbooru:" + node.id,
+      source: "botbooru:" + id,
       tags: ["importé", "botbooru"].concat(node.topics || []).slice(0, 16),
     });
     return persistImportedChars([c]);
