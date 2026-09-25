@@ -1652,28 +1652,30 @@ async function importCharacterFiles(fileList) {
     }
   }
   if (!imported.length) return { ok: 0, err: "format non reconnu" };
-  const cur = loadCustomChars();
-  const seen = new Set(cur.map((c) => c.id));
-  for (const c of imported) {
-    if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); }
-  }
-  saveCustomChars(cur);
-  mergeCustomIntoCast();
-  return { ok: imported.length, names: imported.map((c) => c.name) };
+  const added = await persistImportedChars(imported);
+  return { ok: added.length, names: added.map((c) => c.name) };
 }
 
 
 
-async function nativeHttpGet(url) {
+async function nativeHttpGet(url, headerLines) {
   try {
+    if (window.LeaAndroid && window.LeaAndroid.httpGetWithHeaders) {
+      const hdr = headerLines || "Accept: application/json\nUser-Agent: Mozilla/5.0";
+      return String(window.LeaAndroid.httpGetWithHeaders(url, hdr) || "");
+    }
     if (window.LeaAndroid && window.LeaAndroid.httpGet) {
       return String(window.LeaAndroid.httpGet(url) || "");
     }
   } catch (_) {}
-  // Navigateur / fallback
-  const res = await fetch(url, {
-    headers: { Accept: "application/json", Origin: "https://chub.ai", Referer: "https://chub.ai/" },
-  });
+  const headers = { Accept: "application/json" };
+  if (headerLines) {
+    headerLines.split("\n").forEach((line) => {
+      const c = line.indexOf(":");
+      if (c > 0) headers[line.slice(0, c).trim()] = line.slice(c + 1).trim();
+    });
+  }
+  const res = await fetch(url, { headers });
   return await res.text();
 }
 async function nativeHttpDataUrl(url) {
@@ -1705,87 +1707,133 @@ async function searchChubCharacters(query, tags, page) {
   if (tags) params.set("include_tags", tags);
   params.set("sort", "default");
   const url = "https://api.chub.ai/search?" + params.toString();
-  const raw = await nativeHttpGet(url);
+  const raw = await nativeHttpGet(url, "Accept: application/json\\nOrigin: https://chub.ai\\nReferer: https://chub.ai/");
   let data;
-  try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse Chub invalide"); }
-  if (data.error) throw new Error(data.error);
+  try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse Chub invalide (installe le dernier APK)"); }
+  if (data.error) throw new Error(String(data.error));
   const nodes = (data.data && data.data.nodes) || data.nodes || [];
   const count = (data.data && data.data.count) || nodes.length;
-  return { nodes, count };
+  return {
+    nodes: nodes.map((n) => ({
+      source: "chub",
+      id: n.id,
+      name: n.name,
+      fullPath: n.fullPath,
+      description: n.description || n.tagline || "",
+      topics: n.topics || [],
+      avatar_url: n.avatar_url || "",
+      max_res_url: n.max_res_url || "",
+      cardUrl: n.max_res_url || (n.fullPath ? ("https://avatars.charhub.io/avatars/" + n.fullPath + "/chara_card_v2.png") : ""),
+    })),
+    count,
+  };
 }
 
-async function importChubNode(node) {
-  if (!node) throw new Error("personnage vide");
-  const path = node.fullPath || "";
-  // PNG carte embarquée (meilleure source)
-  let cardUrl = node.max_res_url || "";
-  if (!cardUrl && path) {
-    cardUrl = "https://avatars.charhub.io/avatars/" + path + "/chara_card_v2.png";
-  }
-  let cover = node.avatar_url || "";
-  let chars = [];
-  if (cardUrl) {
-    const dataUrl = await nativeHttpDataUrl(cardUrl);
-    if (dataUrl && dataUrl.length > 1000) {
-      // Parse PNG chara via existing logic — simulate File
-      try {
-        const bin = atob(dataUrl.split(",")[1] || "");
-        const bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        // Minimal PNG parser for chara tEXt
-        let offset = 8;
-        while (offset + 8 < bytes.length) {
-          const len = (bytes[offset] << 24) | (bytes[offset+1] << 16) | (bytes[offset+2] << 8) | bytes[offset+3];
-          const type = String.fromCharCode(bytes[offset+4], bytes[offset+5], bytes[offset+6], bytes[offset+7]);
-          const data = bytes.slice(offset + 8, offset + 8 + len);
-          if (type === "tEXt" || type === "iTXt") {
-            let key = "", i = 0;
-            while (i < data.length && data[i] !== 0) { key += String.fromCharCode(data[i]); i++; }
-            i++;
-            if (type === "iTXt") {
-              i += 2;
-              while (i < data.length && data[i] !== 0) i++; i++;
-              while (i < data.length && data[i] !== 0) i++; i++;
-            }
-            if (/^chara$|^ccv3$/i.test(key)) {
-              let b64 = "";
-              for (; i < data.length; i++) b64 += String.fromCharCode(data[i]);
-              const json = decodeURIComponent(escape(atob(b64.trim())));
-              const parsed = JSON.parse(json);
-              chars.push(cardToCharacter(parsed, {
-                cover: dataUrl,
-                source: "chub:" + path,
-                tags: ["importé", "chub"].concat(node.topics || []).slice(0, 15),
-              }));
-            }
-          }
-          offset = offset + 12 + len;
-          if (type === "IEND") break;
-        }
-      } catch (e) {
-        console.warn("chub png parse", e);
-      }
+async function searchBotBooruCharacters(query, tags, page) {
+  page = page || 1;
+  const offset = (page - 1) * 24;
+  const qParts = [];
+  if (query) qParts.push(query);
+  if (tags) qParts.push(String(tags).replace(/,/g, " "));
+  const params = new URLSearchParams();
+  params.set("sort", "downloaded");
+  params.set("q", qParts.join(" ").trim() || "female");
+  params.set("limit", "24");
+  params.set("offset", String(offset));
+  const url = "https://botbooru.com/posts/?" + params.toString();
+  const raw = await nativeHttpGet(url, "Accept: application/json\\nReferer: https://botbooru.com/");
+  let data;
+  try { data = JSON.parse(raw); } catch (_) { throw new Error("Réponse BotBooru invalide (installe le dernier APK)"); }
+  if (data.error) throw new Error(String(data.error));
+  const posts = data.posts || [];
+  const count = data.total || posts.length;
+  return {
+    nodes: posts.map((p) => {
+      const tagNames = (p.tags || []).map((t) => (typeof t === "string" ? t : t.name)).filter(Boolean);
+      return {
+        source: "botbooru",
+        id: p.id,
+        name: p.character_name || p.meta_name || ("Bot#" + p.id),
+        fullPath: String(p.id),
+        description: p.description_excerpt || p.creator_notes_excerpt || p.tagline || "",
+        topics: tagNames,
+        avatar_url: p.filename ? ("https://botbooru.com/images/" + p.filename) : "",
+        max_res_url: "",
+        cardUrl: "https://botbooru.com/download/png/" + encodeURIComponent(p.id),
+        jsonUrl: "https://botbooru.com/download/json/" + encodeURIComponent(p.id),
+      };
+    }),
+    count,
+  };
+}
+
+/** Traduit description / scénario / greeting en français via Gemini */
+async function translateCharacterToFrench(char) {
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    const keys = String(st.geminiKeys || st.gemini || "")
+      .split(/[\\n,;]+/).map((k) => k.trim())
+      .filter((k) => k && k.length >= 10 && !/^sk-/.test(k));
+    if (!keys.length) return char;
+    const payload = {
+      name: char.name,
+      title: char.title,
+      scenario: char.scenario,
+      personality: char.personality,
+      appearance: char.appearance,
+      greeting: char.greeting,
+    };
+    // Skip if already mostly French
+    const sample = String(char.scenario || char.appearance || "").slice(0, 200);
+    if (/[àâäéèêëïîôùûüç]/i.test(sample) && !/\b(the|you are|she is|character)\b/i.test(sample)) {
+      return char;
     }
-  }
-  if (!chars.length) {
-    // Fallback metadata seule
-    chars.push(cardToCharacter({
-      name: node.name || "Chub",
-      description: node.description || node.tagline || "",
-      scenario: node.tagline || node.description || "",
-      first_mes: "*" + (node.name || "Elle") + " te regarde.*\n…Salut.",
-      personality: (node.topics || []).join(", "),
-      tags: node.topics || [],
-    }, {
-      cover: cover,
-      source: "chub:" + path,
-      tags: ["importé", "chub"].concat(node.topics || []).slice(0, 15),
-    }));
-  }
+    const sys = "Tu traduis des fiches de personnages roleplay en français naturel. "
+      + "Réponds UNIQUEMENT en JSON valide avec les clés: title, scenario, personality, appearance, greeting. "
+      + "Garde le sens, le ton NSFW si présent, les placeholders {{char}} {{user}}. Pas de markdown.";
+    const model = st.geminiTextModel || "gemini-2.0-flash";
+    for (let ki = 0; ki < keys.length; ki++) {
+      try {
+        const res = await fetch(
+          "https://generativelanguage.googleapis.com/v1beta/models/" +
+            encodeURIComponent(model) +
+            ":generateContent?key=" + encodeURIComponent(keys[ki]),
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              systemInstruction: { parts: [{ text: sys }] },
+              contents: [{ role: "user", parts: [{ text: JSON.stringify(payload) }] }],
+              generationConfig: { temperature: 0.2, maxOutputTokens: 2048 },
+            }),
+          }
+        );
+        const data = await res.json().catch(() => ({}));
+        if (data.error) continue;
+        let t = (data.candidates && data.candidates[0] && data.candidates[0].content &&
+          data.candidates[0].content.parts &&
+          data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("")) || "";
+        t = t.trim().replace(/^```json\\s*/i, "").replace(/```$/i, "").trim();
+        const j = JSON.parse(t);
+        if (j.title) char.title = String(j.title).slice(0, 120);
+        if (j.scenario) char.scenario = String(j.scenario).slice(0, 2500);
+        if (j.personality) char.personality = String(j.personality).slice(0, 2000);
+        if (j.appearance) char.appearance = String(j.appearance).slice(0, 2000);
+        if (j.greeting) char.greeting = String(j.greeting).slice(0, 2500);
+        char.tags = Array.from(new Set([].concat(char.tags || [], ["fr"])));
+        return char;
+      } catch (_) {}
+    }
+  } catch (_) {}
+  return char;
+}
+
+async function persistImportedChars(chars) {
   const cur = loadCustomChars();
   const seen = new Set(cur.map((c) => c.id));
   const added = [];
-  for (const c of chars) {
+  for (let c of chars) {
+    c = await translateCharacterToFrench(c);
     if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); added.push(c); }
   }
   saveCustomChars(cur);
@@ -1793,7 +1841,60 @@ async function importChubNode(node) {
   return added;
 }
 
-
+async function importChubNode(node) {
+  if (!node) throw new Error("personnage vide");
+  // BotBooru: préférer JSON
+  if (node.source === "botbooru" && (node.jsonUrl || node.id)) {
+    const jsonUrl = node.jsonUrl || ("https://botbooru.com/download/json/" + encodeURIComponent(node.id));
+    const raw = await nativeHttpGet(jsonUrl, "Accept: application/json\\nReferer: https://botbooru.com/");
+    let data;
+    try { data = JSON.parse(raw); } catch (_) { throw new Error("JSON BotBooru illisible"); }
+    if (data.error) throw new Error(String(data.error));
+    let cover = node.avatar_url || "";
+    try {
+      if (node.cardUrl) {
+        const du = await nativeHttpDataUrl(node.cardUrl);
+        if (du && du.length > 500) cover = du;
+      }
+    } catch (_) {}
+    const c = cardToCharacter(data, {
+      cover,
+      source: "botbooru:" + node.id,
+      tags: ["importé", "botbooru"].concat(node.topics || []).slice(0, 16),
+    });
+    return persistImportedChars([c]);
+  }
+  // Chub / générique : PNG carte
+  const path = node.fullPath || "";
+  let cardUrl = node.cardUrl || node.max_res_url || "";
+  if (!cardUrl && path && node.source !== "botbooru") {
+    cardUrl = "https://avatars.charhub.io/avatars/" + path + "/chara_card_v2.png";
+  }
+  if (!cardUrl) throw new Error("Pas d'URL de carte");
+  const dataUrl = await nativeHttpDataUrl(cardUrl);
+  if (!dataUrl || dataUrl.length < 800) {
+    throw new Error("Téléchargement carte échoué — installe le dernier APK (pont HTTP)");
+  }
+  let chars = await parsePngCharaFromDataUrl(dataUrl, {
+    cover: dataUrl,
+    source: (node.source || "chub") + ":" + path,
+    tags: ["importé", node.source || "chub"].concat(node.topics || []).slice(0, 16),
+  });
+  if (!chars.length) {
+    chars = [cardToCharacter({
+      name: node.name || "Import",
+      description: node.description || "",
+      scenario: node.description || "",
+      first_mes: "*" + (node.name || "Elle") + " te regarde.*\\n…Salut.",
+      tags: node.topics || [],
+    }, {
+      cover: node.avatar_url || dataUrl,
+      source: (node.source || "chub") + ":" + path,
+      tags: ["importé", node.source || "chub"],
+    })];
+  }
+  return persistImportedChars(chars);
+}
 
 async function parsePngCharaFromDataUrl(dataUrl, extra) {
   extra = extra || {};
@@ -1838,61 +1939,40 @@ async function parsePngCharaFromDataUrl(dataUrl, extra) {
 async function importFromCardUrl(rawUrl) {
   let url = String(rawUrl || "").trim();
   if (!url) throw new Error("URL vide");
-  // Chub short path creator/name
   if (/^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/.test(url) && !/^https?:/i.test(url)) {
     url = "https://avatars.charhub.io/avatars/" + url + "/chara_card_v2.png";
   }
-  // Chub character page
   const chubPage = url.match(/chub\.ai\/characters\/([^?\s#]+)/i);
   if (chubPage) {
     url = "https://avatars.charhub.io/avatars/" + chubPage[1].replace(/\/+$/, "") + "/chara_card_v2.png";
   }
-  // BotBooru character / post / download
   const bb = url.match(/botbooru\.com\/(?:character|post|download\/(?:png|json))\/([^/?#]+)/i);
   if (bb) {
-    url = "https://botbooru.com/download/png/" + encodeURIComponent(bb[1]);
+    const id = bb[1];
+    return importChubNode({
+      source: "botbooru",
+      id,
+      name: "BotBooru " + id,
+      jsonUrl: "https://botbooru.com/download/json/" + encodeURIComponent(id),
+      cardUrl: "https://botbooru.com/download/png/" + encodeURIComponent(id),
+      topics: [],
+    });
   }
-  const lower = url.toLowerCase();
-  if (lower.includes("botbooru.com/download/json/")) {
-    // JSON text
-    const raw = await nativeHttpGet(url);
-    let data;
-    try { data = JSON.parse(raw); } catch (_) { throw new Error("JSON BotBooru invalide"); }
-    if (data.error) throw new Error(data.error);
-    const c = cardToCharacter(data, { source: "botbooru", tags: ["importé", "botbooru"] });
-    const cur = loadCustomChars();
-    cur.push(c);
-    saveCustomChars(cur);
-    mergeCustomIntoCast();
-    return [c];
+  if (/botbooru\.com\/download\/json\//i.test(url) || /\\.json(\\?|$)/i.test(url)) {
+    const raw = await nativeHttpGet(url, "Accept: application/json");
+    const data = JSON.parse(raw);
+    if (data.error) throw new Error(String(data.error));
+    const c = cardToCharacter(data, { source: "url", tags: ["importé", "url"] });
+    return persistImportedChars([c]);
   }
-  // PNG (or any image card)
   const dataUrl = await nativeHttpDataUrl(url);
   if (!dataUrl || dataUrl.length < 500) throw new Error("Téléchargement échoué");
   let chars = await parsePngCharaFromDataUrl(dataUrl, {
-    source: /botbooru/i.test(url) ? "botbooru" : (/chub|charhub/i.test(url) ? "chub" : "url"),
-    tags: ["importé", /botbooru/i.test(url) ? "botbooru" : (/chub|charhub/i.test(url) ? "chub" : "url")],
+    source: /chub|charhub/i.test(url) ? "chub" : "url",
+    tags: ["importé", /chub|charhub/i.test(url) ? "chub" : "url"],
   });
-  if (!chars.length) {
-    // Maybe plain JSON returned as text in data url? unlikely
-    // Try as JSON via httpGet
-    if (/\.json(\?|$)/i.test(url)) {
-      const raw = await nativeHttpGet(url);
-      const data = JSON.parse(raw);
-      chars = [cardToCharacter(data, { source: "url", tags: ["importé", "url"] })];
-    } else {
-      throw new Error("Pas de Character Card dans ce fichier (PNG sans chunk chara)");
-    }
-  }
-  const cur = loadCustomChars();
-  const seen = new Set(cur.map((c) => c.id));
-  const added = [];
-  for (const c of chars) {
-    if (!seen.has(c.id)) { cur.push(c); seen.add(c.id); added.push(c); }
-  }
-  saveCustomChars(cur);
-  mergeCustomIntoCast();
-  return added;
+  if (!chars.length) throw new Error("Pas de Character Card dans ce fichier");
+  return persistImportedChars(chars);
 }
 
 function renderImportHub() {
@@ -1916,7 +1996,11 @@ function renderImportHub() {
       <button class="cta" type="button" id="imp-url-btn">Importer URL</button>
     </div>
 
-    <h2 style="font-size:16px;margin:14px 0 6px">Recherche Chub.ai</h2>
+    <h2 style="font-size:16px;margin:14px 0 6px">Recherche en ligne</h2>
+    <div class="tags" style="margin:6px 0;flex-wrap:wrap">
+      <span class="tag imp-src" data-impsrc="chub" style="cursor:pointer;background:#5a2a6a">Chub.ai</span>
+      <span class="tag imp-src" data-impsrc="botbooru" style="cursor:pointer;background:#2a4a68">BotBooru</span>
+    </div>
     <input class="field" id="chub-q" type="search" placeholder="Nom, thème…" style="width:100%;margin:6px 0" />
     <div class="tags" id="chub-tags" style="margin:6px 0;flex-wrap:wrap">
       ${["female","male","romance","nsfw","dominant","submissive","fantasy","school","girlfriend","milf","anime","scenario","french","office","roommate"].map((t) =>
@@ -1943,9 +2027,12 @@ function renderImportHub() {
     page = page || 1;
     window._chubPage = page;
     const q = ($("chub-q") && $("chub-q").value) || "";
-    setStatus("Recherche Chub (page " + page + ")…");
+    const src = (window._impSource || "chub");
+    setStatus("Recherche " + (src === "botbooru" ? "BotBooru" : "Chub") + " (page " + page + ")…");
     try {
-      const { nodes, count } = await searchChubCharacters(q, activeTags.join(","), page);
+      const { nodes, count } = src === "botbooru"
+        ? await searchBotBooruCharacters(q, activeTags.join(","), page)
+        : await searchChubCharacters(q, activeTags.join(","), page);
       window._chubNodes = nodes;
       setStatus(count + " résultat(s) — page " + page + " (" + nodes.length + " affichés)");
       const box = $("chub-results");
@@ -1970,6 +2057,14 @@ function renderImportHub() {
   }
 
   $("view-discover").onclick = async (e) => {
+    const srcEl = e.target.closest(".imp-src");
+    if (srcEl) {
+      window._impSource = srcEl.dataset.impsrc || "chub";
+      document.querySelectorAll(".imp-src").forEach((el) => {
+        el.style.outline = el.dataset.impsrc === window._impSource ? "2px solid #ff8fbf" : "";
+      });
+      return;
+    }
     const tag = e.target.closest(".chub-tag");
     if (tag) {
       const t = tag.dataset.tag;
