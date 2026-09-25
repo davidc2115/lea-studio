@@ -194,9 +194,11 @@ body.chat-open #view-chat { margin: 0; }
 .seg.act { color: #ff8fbf; font-style: italic; }
 .seg.act::before { content: "✦ "; }
 .seg.say { color: #fff6fb; font-weight: 500; }
-.bubble.user .seg.think { color: #9fd4ff; }
-.bubble.user .seg.act { color: #7ec8ff; }
-.bubble.user .seg.say { color: #eef6ff; }
+.bubble.user .seg.think { color: #9fd4ff; font-style: italic; opacity: 0.92; }
+.bubble.user .seg.act { color: #7ec8ff; font-style: italic; }
+.bubble.user .seg.say { color: #eef6ff; font-style: normal; font-weight: 500; }
+.bubble.user .seg.think::before { content: "💭 "; }
+.bubble.user .seg.act::before { content: "✦ "; }
 .chat-full .composer {
   position: relative;
   z-index: 2;

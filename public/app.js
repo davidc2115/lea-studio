@@ -3036,60 +3036,65 @@ async function pollHordeJob(jobId, host, charId) {
 
 function formatBubble(text) {
   let raw = String(text || "").replace(/\r/g, "");
-  // Normalise formats cassés du modèle :
-  // 1) "(pensée) texte" → "(texte)"
-  // "(pensée) texte..." → "(texte...)"
-  raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*([^\n]+)/gi, function(_, t) {
-    t = String(t).trim().replace(/^\(|\)$/g, "");
-    return "(" + t + ")";
+  // Markdown gras **action** → *action*
+  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+  // Labels explicites
+  raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
+  raw = raw.replace(/\(\s*thought\s*\)\s*/gi, "");
+  raw = raw.replace(/(^|\n)\s*Action\s*:\s*/gi, "$1*");
+  raw = raw.replace(/(^|\n)\s*Pens[ée]e\s*:\s*/gi, "$1(");
+
+  // Action ouverte seulement à la fin : "texte…*" en fin de message → fermer si * ouvrant manquant
+  // Ex: "Évidemment *puis je verse…" déjà OK ; "Je verse le vin*" → "*Je verse le vin*"
+  raw = raw.replace(/(^|\n)([^*\n][^\n]{6,}?)\*(\s*$)/g, function(_, a, mid, end) {
+    // Ne pas double-fermer si déjà une * plus tôt dans la ligne
+    if (mid.indexOf("*") >= 0) return _[0];
+    return a + "*" + mid.trim() + "*" + end;
   });
-  raw = raw.replace(/\(\s*thought\s*\)\s*([^\n]+)/gi, function(_, t) {
-    t = String(t).trim().replace(/^\(|\)$/g, "");
-    return "(" + t + ")";
-  });
-  // 2) action ouverte sans * initial mais fermée : "Je fais…*" → "*Je fais…*"
-  raw = raw.replace(/(^|\n)([^*\n][^\n]{8,}?)\*(\s*($|\n))/g, "$1*$2*$3");
-  // 3) action sur ligne entière entre * manquants : ligne narrative entre pensée et dialogue
+
   const parts = [];
-  const re = /(\([^)]{3,}\)|~[^~]+~|\*[^*]+\*|_[^_]{3,}_)/g;
+  // Ordre: ** déjà normalisé. Match (pensée) ou *action* (non vide)
+  const re = /(\([^)]{1,}\)|\*[^*]{1,}\*)/g;
   let last = 0;
   let m;
   while ((m = re.exec(raw))) {
-    if (m.index > last) parts.push({ t: "say", v: raw.slice(last, m.index) });
+    if (m.index > last) {
+      const pre = raw.slice(last, m.index);
+      if (pre) parts.push({ t: "say", v: pre });
+    }
     const tok = m[0];
-    if (tok.startsWith("(") || tok.startsWith("~") || tok.startsWith("_")) {
-      let v = tok.slice(1, -1).trim();
-      if (/^(pens[ée]e|thought)$/i.test(v)) continue; // label seul
-      parts.push({ t: "think", v });
+    if (tok.startsWith("(")) {
+      const v = tok.slice(1, -1).trim();
+      if (v && !/^(pens[ée]e|thought)$/i.test(v)) parts.push({ t: "think", v });
     } else {
-      parts.push({ t: "act", v: tok.replace(/^\*|\*$/g, "").trim() });
+      const v = tok.replace(/^\*+|\*+$/g, "").trim();
+      if (v) parts.push({ t: "act", v });
     }
     last = m.index + tok.length;
   }
   if (last < raw.length) parts.push({ t: "say", v: raw.slice(last) });
   if (!parts.length) parts.push({ t: "say", v: raw });
 
-  // Heuristique : paragraphe "say" qui est clairement une action narrative (verbe 1re personne, pas de dialogue)
+  // Nettoyer espaces / fusionner says adjacents logiques
   const out = [];
   for (const p of parts) {
-    if (p.t === "say") {
-      const chunks = String(p.v).split(/\n+/);
-      for (const ch of chunks) {
-        const t = ch.trim();
-        if (!t) continue;
-        // Action narrative sans * : commence par Je/Elle + verbe, pas de ? final style dialogue court
-        if (/^(Je|J'|Elle|Me |M')[a-zàâäéèêëïîôùûüç].{15,}/i.test(t)
-            && !/[«"]/.test(t)
-            && !/^(Bonjour|Bonsoir|Salut|Oui|Non|Euh|Merci)/i.test(t)) {
-          out.push({ t: "act", v: t.replace(/^\*|\*$/g, "") });
-        } else {
-          out.push({ t: "say", v: t });
-        }
-      }
+    let v = String(p.v).replace(/\u00a0/g, " ");
+    // Enlever * orphelins restants dans say
+    if (p.t === "say") v = v.replace(/^\*+\s*|\s*\*+$/g, "");
+    v = v.trim();
+    if (!v) continue;
+    // Heuristique légère : phrase purement narrative 1re personne longue → action (messages user sans *)
+    if (p.t === "say"
+        && /^(Je |J'|Puis je |puis je |Et je )/i.test(v)
+        && v.length > 20
+        && !/[?？]/.test(v)
+        && !/^(Je sais|Je pense que|Je crois|Je veux dire)/i.test(v)) {
+      out.push({ t: "act", v: v });
     } else {
-      out.push(p);
+      out.push({ t: p.t, v });
     }
   }
+  if (!out.length) out.push({ t: "say", v: String(text || "") });
 
   return out.map((p) => {
     const v = escapeHtml(p.v).replace(/\n/g, "<br>");
@@ -3097,8 +3102,9 @@ function formatBubble(text) {
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;
     return `<span class="seg say">${v}</span>`;
-  }).join("");
+  }).join(" ");
 }
+
 
 
 function paintMessages() {
