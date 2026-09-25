@@ -1809,40 +1809,79 @@ async function adaptImportedCharacter(char) {
       keys = raw.split(/[\n,;]+/).map((k) => k.trim()).filter((k) => k && k.length >= 10 && !/^sk-/.test(k) && !/^xai-/.test(k));
       model = st.geminiTextModel || model;
     } catch (_) {}
+
+    const name = char.name || "Elle";
+    // Nettoyage local immédiat des placeholders (même sans Gemini)
+    const clean = (s) => String(s || "")
+      .replace(/\{\{char\}\}/gi, name)
+      .replace(/\{\{Char\}\}/g, name)
+      .replace(/<CHAR>/gi, name)
+      .replace(/\{\{user\}\}/gi, "{{user}}")
+      .replace(/\r/g, "")
+      .trim();
+
+    char.title = clean(char.title);
+    char.scenario = clean(char.scenario);
+    char.personality = clean(char.personality);
+    char.appearance = clean(char.appearance);
+    char.greeting = clean(char.greeting);
+
     if (!keys.length) {
-      console.warn("[adapt] aucune clé Gemini");
+      console.warn("[adapt] aucune clé Gemini — placeholders nettoyés seulement");
+      char.tags = Array.from(new Set([].concat(char.tags || [], ["importé"])));
       return char;
     }
-    const src = String(char.source || "");
+
+    // Cartes Chub souvent énormes : extraire l'essentiel
+    let appearance = char.appearance || "";
+    let scenario = char.scenario || "";
+    let personality = char.personality || "";
+    // Si appearance = pavé EN avec scénario mélangé, découper
+    if (appearance.length > 1200 && !scenario) {
+      scenario = appearance.slice(0, 1500);
+      // tenter de garder la partie physique
+      const phys = appearance.match(/(hair|eyes|breasts|height|weight|skin|lips|cheveux|yeux|seins|peau)[\s\S]{20,800}/i);
+      if (phys) appearance = phys[0];
+      else appearance = appearance.slice(0, 900);
+    }
+
     const payload = {
-      name: char.name || "",
-      title: char.title || "",
-      scenario: String(char.scenario || "").slice(0, 2000),
-      personality: String(char.personality || "").slice(0, 1500),
-      appearance: String(char.appearance || "").slice(0, 1500),
-      greeting: String(char.greeting || "").slice(0, 1500),
-      source: src,
-      tags: (char.tags || []).slice(0, 12),
+      name,
+      title: String(char.title || "").slice(0, 120),
+      scenario: String(scenario).slice(0, 1600),
+      personality: String(personality).slice(0, 1000),
+      appearance: String(appearance).slice(0, 1000),
+      greeting: String(char.greeting || "").slice(0, 900),
+      source: String(char.source || ""),
     };
+
     const sys = [
-      "Tu adaptes une fiche personnage (Chub/BotBooru/Character Card) pour l'app mobile de roleplay Léa Studio.",
-      "Réponds UNIQUEMENT en JSON valide (sans markdown) avec les clés exactes:",
+      "Tu adaptes une fiche personnage Chub/BotBooru pour l'app mobile Léa Studio (roleplay FR).",
+      "Réponds UNIQUEMENT en JSON valide sans markdown, clés exactes:",
       "title, scenario, personality, appearance, greeting",
-      "",
-      "Règles OBLIGATOIRES:",
-      "1) TOUT en français naturel (sauf noms propres).",
-      "2) scenario = situation de roleplay avec {{user}} (l'utilisateur). Adulte 18+. Cohérent, immersif, utilisable en SFW puis NSFW.",
-      "3) personality = traits de caractère clairs, tempérament, façon de parler.",
-      "4) appearance = description physique détaillée (cheveux, yeux, peau, morphologie, poitrine, style) pour génération d'images.",
-      "5) greeting = premier message du personnage au format Léa Studio:",
-      "   (une pensée entre parenthèses)",
-      "   *une action entre astérisques*",
-      "   puis les paroles normales",
-      "6) Remplace {{char}} par le prénom du personnage. Garde {{user}}.",
-      "7) Retire le jargon technique BotBooru/Chub (token counts, lorebook, card tags). Adapte le ton pour une conversation mobile intime.",
-      "8) title = court rôle en français (ex: « Voisine audacieuse », « Collègue de bureau »).",
+      "Règles:",
+      "1) TOUT en français fluide (sauf noms propres).",
+      "2) Remplace TOUTES les occurrences de {{char}} / le nom technique par le prénom « " + name + " ».",
+      "3) Garde {{user}} pour l'utilisateur.",
+      "4) scenario = situation de départ claire (lieu, qui est qui, pourquoi ils se parlent), 18+ ok.",
+      "5) appearance = UNIQUEMENT le physique (cheveux avec COULEUR exacte, yeux, peau, morphologie, poitrine). Pas de fantasmes narratifs.",
+      "6) personality = traits + façon de parler, condensé.",
+      "7) greeting = 1er message format Léa Studio:",
+      "   (pensée)",
+      "   *action*",
+      "   paroles",
+      "8) title = rôle court en français.",
+      "9) Interdit de laisser du texte anglais brut ou {{char}}.",
     ].join("\n");
+
     const models = [model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
+    const safetyOff = [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    ];
+
     for (const m of models) {
       for (let ki = 0; ki < keys.length; ki++) {
         try {
@@ -1856,13 +1895,8 @@ async function adaptImportedCharacter(char) {
               body: JSON.stringify({
                 systemInstruction: { parts: [{ text: sys }] },
                 contents: [{ role: "user", parts: [{ text: JSON.stringify(payload) }] }],
-                generationConfig: { temperature: 0.35, maxOutputTokens: 4096 },
-                safetySettings: [
-                  { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                  { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                  { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                  { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
-                ],
+                generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+                safetySettings: safetyOff,
               }),
             }
           );
@@ -1875,12 +1909,22 @@ async function adaptImportedCharacter(char) {
           const parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
           if (parts) t = parts.map((p) => p.text || "").join("");
           t = String(t).trim().replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+          // Extraire JSON même si texte autour
+          const jm = t.match(/\{[\s\S]*\}/);
+          if (jm) t = jm[0];
           const j = JSON.parse(t);
-          if (j.title) char.title = String(j.title).slice(0, 120);
-          if (j.scenario) char.scenario = String(j.scenario).slice(0, 2500);
-          if (j.personality) char.personality = String(j.personality).slice(0, 2000);
-          if (j.appearance) char.appearance = String(j.appearance).slice(0, 2000);
-          if (j.greeting) char.greeting = String(j.greeting).slice(0, 2500);
+          if (j.title) char.title = clean(j.title).slice(0, 120);
+          if (j.scenario) char.scenario = clean(j.scenario).slice(0, 2500);
+          if (j.personality) char.personality = clean(j.personality).slice(0, 2000);
+          if (j.appearance) char.appearance = clean(j.appearance).slice(0, 2000);
+          if (j.greeting) char.greeting = clean(j.greeting).slice(0, 2500);
+          // Vérifier qu'on n'a plus de {{char}} ni pavé anglais dominant
+          const stillEn = /\b(the|she is|character|cleans|house)\b/i.test(char.scenario + " " + char.appearance)
+            && !/[àâäéèêëïîôùûüç]/i.test((char.scenario || "").slice(0, 100));
+          if (stillEn) {
+            console.warn("[adapt] encore EN, retry autre modèle");
+            continue;
+          }
           char.tags = Array.from(new Set([].concat(char.tags || [], ["fr", "adapté"])));
           char.adapted = true;
           return char;
@@ -1892,8 +1936,11 @@ async function adaptImportedCharacter(char) {
   } catch (e) {
     console.warn("[adapt]", e);
   }
+  // Fallback minimal : au moins placeholders nettoyés
+  char.tags = Array.from(new Set([].concat(char.tags || [], ["importé"])));
   return char;
 }
+
 
 async function persistImportedChars(chars, opts) {
   opts = opts || {};
@@ -1910,30 +1957,33 @@ async function persistImportedChars(chars, opts) {
   }
   saveCustomChars(cur);
   mergeCustomIntoCast();
-  // Adaptation FR + format Léa Studio (arrière-plan, Chub ET BotBooru)
+  // Adaptation FR — attendue (Chub souvent long : on attend vraiment)
   if (!opts.skipTranslate && added.length) {
-    (async () => {
-      for (const a of added) {
-        try {
-          const tr = await adaptImportedCharacter(a);
-          updateCustomChar(a.id, {
-            title: tr.title,
-            scenario: tr.scenario,
-            personality: tr.personality,
-            appearance: tr.appearance,
-            greeting: tr.greeting,
-            tags: tr.tags,
-            adapted: true,
-          });
-        } catch (e) {
-          console.warn("[adapt bg]", e);
-        }
-      }
+    for (const a of added) {
       try {
-        if (state && state.view === "discover") renderDiscover();
-        if (state && state.view === "profile" && added.some((x) => x.id === state.current)) renderProfile();
-      } catch (_) {}
-    })();
+        if (typeof setStatus === "function") {
+          try { setStatus("Adaptation FR de " + (a.name || "") + "…"); } catch (_) {}
+        }
+        const tr = await adaptImportedCharacter(a);
+        updateCustomChar(a.id, {
+          title: tr.title,
+          scenario: tr.scenario,
+          personality: tr.personality,
+          appearance: tr.appearance,
+          greeting: tr.greeting,
+          tags: tr.tags,
+          adapted: !!tr.adapted,
+        });
+        // Mettre à jour la copie dans added pour le message UI
+        Object.assign(a, tr);
+      } catch (e) {
+        console.warn("[adapt]", e);
+      }
+    }
+    try {
+      if (state && state.view === "discover") renderDiscover();
+      if (state && state.view === "profile" && added.some((x) => x.id === state.current)) renderProfile();
+    } catch (_) {}
   }
   return added;
 }
@@ -2610,6 +2660,11 @@ function renderProfile() {
       <button type="button" class="cta" id="prof-del-imp" style="margin-left:8px;background:#5a2030">🗑️ Supprimer</button>` : ""}
     </p>
     <p style="color:var(--muted);font-size:13px">Appuie sur ★ sous une photo pour en faire l’image de profil.</p>
+    ${(c.imported || String(c.id||"").startsWith("imp_")) && (!c.adapted || /\{\{char\}\}/i.test((c.scenario||"")+(c.appearance||"")) || (/\b(the|she is|character)\b/i.test(c.scenario||"") && !/[éèàù]/i.test((c.scenario||"").slice(0,80)))) ? `
+    <p style="background:#3a2048;padding:10px;border-radius:10px;font-size:13px;margin:8px 0">
+      Fiche pas encore adaptée à Léa Studio (texte EN / {{char}}).
+      <button type="button" class="cta" id="prof-adapt-now" style="margin-top:8px">Adapter maintenant (Gemini FR)</button>
+    </p>` : ""}
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
     <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
       <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descriptif physique</div>
@@ -2671,6 +2726,26 @@ function renderProfile() {
     }
   };
   if ($("prof-edit-imp")) $("prof-edit-imp").onclick = () => openEditImported(c.id);
+  if ($("prof-adapt-now")) $("prof-adapt-now").onclick = async () => {
+    const btn = $("prof-adapt-now");
+    if (btn) { btn.disabled = true; btn.textContent = "Adaptation…"; }
+    try {
+      const tr = await adaptImportedCharacter(c);
+      updateCustomChar(c.id, {
+        title: tr.title,
+        scenario: tr.scenario,
+        personality: tr.personality,
+        appearance: tr.appearance,
+        greeting: tr.greeting,
+        tags: tr.tags,
+        adapted: !!tr.adapted,
+      });
+      renderProfile();
+    } catch (e) {
+      alert("Adaptation échouée: " + (e.message || e));
+      if (btn) { btn.disabled = false; btn.textContent = "Adapter maintenant (Gemini FR)"; }
+    }
+  };
   $("view-profile").onclick = (e) => {
     const del = e.target.getAttribute("data-del");
     if (del != null) {
@@ -2787,6 +2862,11 @@ function bodyNegatives(c) {
   ].filter(Boolean).join(" ").toLowerCase();
   const base = "child, teen, underage, middle-aged, elderly, 35 years old, 40 years old, wrong ethnicity, deformed, extra limbs, different face, different person";
   let neg = base;
+  // Couleur de cheveux : interdire les mauvaises teintes
+  try {
+    const hair = extractHairColorLock(c);
+    if (hair && hair.neg) neg += ", " + hair.neg + ", wrong hair color";
+  } catch (_) {}
 
   // Petite / plate poitrine
   const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
@@ -2876,6 +2956,74 @@ function morphWeights(c) {
 
 /** Traits OBLIGATOIRES par personnage (répétés dans le prompt). */
 /** Apparence 100% FIXE — seul change en scène : pose / tenue / lieu. */
+
+/** Verrouille la couleur de cheveux extraite de la fiche (argenté, roux, etc.). */
+function extractHairColorLock(c) {
+  const text = [
+    c && c.appearance,
+    c && c.looks_en,
+    c && c.body,
+    c && c.personality,
+    c && c.title,
+  ].map((x) => String(x || "")).join(" ");
+  const rules = [
+    {
+      re: /argent[eé]e?|silver\s*hair|cheveux\s*argent|gris\s*argent|metallic\s*silver|white[-\s]?silver/i,
+      pos: "(silver hair:1.55), (argenté silver hair:1.5), long silver metallic hair, cool-toned silver-white hair strands, NOT blonde, NOT golden, NOT brown, NOT black, NOT red, NOT auburn",
+      neg: "blonde hair, golden blonde, dirty blonde, brown hair, black hair, auburn hair, red hair, ginger hair, orange hair",
+    },
+    {
+      re: /platin(um|e)|cheveux\s*platine|platinum\s*blonde/i,
+      pos: "(platinum blonde hair:1.5), icy platinum hair, NOT yellow blonde, NOT brown, NOT black, NOT red, NOT silver metallic",
+      neg: "yellow blonde, golden hair, brown hair, black hair, red hair, ginger, silver metallic hair",
+    },
+    {
+      re: /\broux\b|\brousse\b|ginger|auburn|red\s*hair|cheveux\s*rouges|redhead|copper\s*hair|cheveux\s*cuivr/i,
+      pos: "(red hair:1.55), (ginger auburn hair:1.5), natural red copper hair, NOT blonde, NOT brown, NOT black, NOT silver",
+      neg: "blonde hair, brown hair, black hair, silver hair, platinum hair, pink hair",
+    },
+    {
+      re: /rose\s*hair|pink\s*hair|cheveux\s*roses|pastel\s*pink/i,
+      pos: "(pink hair:1.5), pastel pink hair, NOT natural blonde, NOT brown, NOT black",
+      neg: "blonde hair, brown hair, black hair, red hair, silver hair",
+    },
+    {
+      re: /bleu(e)?\s*(cheveux|hair)|blue\s*hair|cheveux\s*bleus/i,
+      pos: "(blue hair:1.5), vivid blue hair, NOT brown, NOT black, NOT blonde",
+      neg: "brown hair, black hair, blonde hair, red hair",
+    },
+    {
+      re: /violet|purple\s*hair|cheveux\s*violets|lavender\s*hair/i,
+      pos: "(purple hair:1.5), violet hair, NOT brown, NOT black, NOT blonde",
+      neg: "brown hair, black hair, blonde hair, red hair",
+    },
+    {
+      re: /blanc(he)?s?\s*(cheveux|hair)|white\s*hair|cheveux\s*blancs/i,
+      pos: "(white hair:1.5), pure white hair, NOT blonde yellow, NOT silver only, NOT brown",
+      neg: "yellow blonde, brown hair, black hair, red hair",
+    },
+    {
+      re: /noir(e)?s?\s*(cheveux|hair)|black\s*hair|cheveux\s*noirs|jet\s*black/i,
+      pos: "(black hair:1.45), jet black hair, NOT brown, NOT blonde, NOT red, NOT silver",
+      neg: "blonde hair, brown hair, red hair, silver hair, platinum",
+    },
+    {
+      re: /ch[aâ]tain|chestnut|brown\s*hair|cheveux\s*bruns|dark\s*brown\s*hair/i,
+      pos: "(brown hair:1.45), chestnut brown hair, NOT blonde, NOT black pure, NOT red, NOT silver",
+      neg: "blonde hair, pure black hair, red hair, silver hair, platinum",
+    },
+    {
+      re: /blond(e|s)?\b|cheveux\s*blonds|golden\s*blonde|honey\s*blonde/i,
+      pos: "(blonde hair:1.45), golden honey blonde hair, NOT brown, NOT black, NOT red, NOT silver",
+      neg: "brown hair, black hair, red hair, silver hair, platinum metallic",
+    },
+  ];
+  for (const r of rules) {
+    if (r.re.test(text)) return r;
+  }
+  return null;
+}
+
 function fixedAppearanceBlock(c) {
   if (!c) return "";
   const age = Number(c.age) || 21;
@@ -2883,16 +3031,18 @@ function fixedAppearanceBlock(c) {
   const looks = describeLooks(c);
   const body = String(c.body || "").trim();
   const eth = String(c.ethnicity || "").trim();
+  const hair = extractHairColorLock(c);
   return [
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
     "Person: " + name + ",",
     identityLock(c) + ",",
     looks + ",",
+    hair ? ("HAIR COLOR LOCK: " + hair.pos + ",") : "",
     morphWeights(c) + ",",
     body ? ("morphology: " + body + ",") : "",
     eth ? ("ethnicity: " + eth + ",") : "",
     "(" + age + " year old:1.45), (looks exactly " + age + ":1.4),",
-    "IDENTICAL face, hair color, hair style, eye color, skin tone, breast size, body type in EVERY image,",
+    "IDENTICAL face, (exact hair color from description:1.5), hair style, eye color, skin tone, breast size, body type in EVERY image,",
     "same person as cover photo and profile, consistent identity lock,",
     "=== END FIXED APPEARANCE — only pose, outfit, posture, environment may change below ===",
   ].filter(Boolean).join(" ");
