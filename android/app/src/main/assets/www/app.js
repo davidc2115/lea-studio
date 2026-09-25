@@ -1502,36 +1502,62 @@ function shuffleList(arr) {
 }
 
 function filterDiscoverList(q) {
-  const list = state.characters.length ? state.characters : [FALLBACK_LEA];
+  // Toujours fusionner CAST + EXTRA au cas où le script extra charge après
+  let list = state.characters.length ? state.characters.slice() : [];
+  if (window.CAST && window.CAST.length > list.length) list = window.CAST.slice();
+  if (window.EXTRA_CAST && window.EXTRA_CAST.length) {
+    const seen = new Set(list.map((c) => c.id));
+    for (const c of window.EXTRA_CAST) {
+      if (c && c.id && !seen.has(c.id)) { list.push(c); seen.add(c.id); }
+    }
+  }
+  if (!list.length) list = [FALLBACK_LEA];
+  // Sync state
+  if (list.length > (state.characters || []).length) state.characters = list;
+
   const s = String(q || "").trim().toLowerCase();
   let out;
   if (!s) {
-    // Affichage aléatoire à chaque ouverture / refresh Découvrir
     if (!state._discShuffle || state._discShuffle.length !== list.length) {
       state._discShuffle = shuffleList(list);
     }
     out = state._discShuffle;
   } else {
-    out = list.filter((c) => {
-      const blob = [
-        c.name, c.title, c.body, c.ethnicity, c.appearance, c.looks_en, c.scenario, c.personality,
-        ...(c.tags || []),
-      ].join(" ").toLowerCase();
-      const syn = (tok) => {
-        const t = tok.toLowerCase();
-        if (t === "blonde" || t === "blond") return /blond|platinum|cendr/.test(blob);
-        if (t === "brune" || t === "brun") return /brun|châtain|chatain|brown hair|chestnut/.test(blob);
-        if (t === "rousse" || t === "roux") return /roux|rousse|red hair|ginger|auburn|freckle|taches de rousseur/.test(blob);
-        if (t === "cheveux noirs" || t === "noire") return /cheveux noirs|black hair/.test(blob);
-        if (t === "gros seins" || t === "grosse poitrine") return /gros seins|généreuse|95d|100e|bonnet [def]|large|busty|voluptuous|heavy breast/.test(blob);
-        if (t === "petits seins" || t === "petite poitrine") return /petits seins|bonnet [ab]|small breast|flat|mince.*sein|a-cup|b-cup|modest chest/.test(blob);
-        if (t === "seins moyens") return /bonnet c|medium breast|seins moyens/.test(blob);
-        if (t === "latine" || t === "latino") return /latin|brésil|bresil|espagnol|mexic|argentin|colomb/.test(blob);
-        if (t === "voluptueuse") return /voluptueuse|curvy|sablier|généreuse|hourglass/.test(blob);
-        return blob.includes(t);
-      };
-      return s.split(/\s+/).every((tok) => syn(tok));
-    });
+    // Tags rôle : match exact tag ou title (évite "fille" trop large)
+    const roleExact = {
+      "belle-fille": (c) => (c.tags || []).includes("belle-fille") || /belle-fille/i.test(c.title || ""),
+      "belle-mère": (c) => (c.tags || []).includes("belle-mère") || /belle-m[eè]re/i.test(c.title || ""),
+      "belle-mere": (c) => (c.tags || []).includes("belle-mère") || /belle-m[eè]re/i.test(c.title || ""),
+      "belle-sœur": (c) => (c.tags || []).includes("belle-sœur") || (c.tags || []).includes("belle-soeur") || /belle-s[oœ]eur/i.test(c.title || ""),
+      "belle-soeur": (c) => (c.tags || []).includes("belle-sœur") || (c.tags || []).includes("belle-soeur") || /belle-s[oœ]eur/i.test(c.title || ""),
+      "babysitter": (c) => (c.tags || []).includes("babysitter") || /babysitter|baby-sitter|nounou/i.test(c.title || ""),
+      "amie": (c) => /amie|copine de (ta|sa) fille/i.test([c.title, ...(c.tags || [])].join(" ")),
+    };
+    if (roleExact[s]) {
+      out = list.filter(roleExact[s]);
+    } else {
+      out = list.filter((c) => {
+        const blob = [
+          c.name, c.title, c.body, c.ethnicity, c.appearance, c.looks_en, c.scenario, c.personality,
+          ...(c.tags || []),
+        ].join(" ").toLowerCase();
+        const syn = (tok) => {
+          const t = tok.toLowerCase();
+          if (roleExact[t]) return roleExact[t](c);
+          if (t === "blonde" || t === "blond") return /blond|platinum|cendr/.test(blob);
+          if (t === "brune" || t === "brun") return /brun|châtain|chatain|brown hair|chestnut/.test(blob);
+          if (t === "rousse" || t === "roux") return /roux|rousse|red hair|ginger|auburn|freckle|taches de rousseur/.test(blob);
+          if (t === "cheveux noirs" || t === "noire") return /cheveux noirs|black hair/.test(blob);
+          if (t === "gros seins" || t === "grosse poitrine") return /gros seins|généreuse|95d|100e|bonnet [def]|large|busty|voluptuous|heavy breast/.test(blob);
+          if (t === "petits seins" || t === "petite poitrine") return /petits seins|bonnet [ab]|small breast|flat|mince.*sein|a-cup|b-cup|modest chest/.test(blob);
+          if (t === "seins moyens") return /bonnet c|medium breast|seins moyens/.test(blob);
+          if (t === "latine" || t === "latino") return /latin|brésil|bresil|espagnol|mexic|argentin|colomb/.test(blob);
+          if (t === "voluptueuse") return /voluptueuse|curvy|sablier|généreuse|hourglass/.test(blob);
+          return blob.includes(t);
+        };
+        return s.split(/\s+/).every((tok) => syn(tok));
+      });
+    }
   }
   return out;
 }
