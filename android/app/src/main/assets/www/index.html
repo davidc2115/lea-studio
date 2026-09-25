@@ -28,9 +28,14 @@
   <script src="native-api.js"></script>
   <script src="app.js"></script>
   <div id="lightbox" class="lightbox hidden" onclick="if(event.target===this)this.classList.add('hidden')">
-    <img id="lightbox-img" alt="Léa" />
-    <button class="cta" id="lb-bg" type="button">Utiliser comme fond</button>
-    <button class="cta lb-close" onclick="document.getElementById('lightbox').classList.add('hidden')">Fermer</button>
+    <button type="button" class="lb-nav lb-prev" id="lb-prev" title="Précédente">‹</button>
+    <img id="lightbox-img" alt="Photo" />
+    <button type="button" class="lb-nav lb-next" id="lb-next" title="Suivante">›</button>
+    <div class="lb-actions">
+      <button class="cta" id="lb-dl" type="button">Télécharger</button>
+      <button class="cta" id="lb-bg" type="button">Utiliser comme fond</button>
+      <button class="cta lb-close" type="button" onclick="document.getElementById('lightbox').classList.add('hidden')">Fermer</button>
+    </div>
   </div>
 </body>
 </html>

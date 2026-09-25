@@ -1613,8 +1613,19 @@ function renderProfile() {
       renderProfile();
       return;
     }
+    const dl = e.target.getAttribute("data-dl");
+    if (dl != null) {
+      e.stopPropagation();
+      downloadImage(dl, (c.name || "photo").replace(/\s+/g, "-") + "-" + Date.now() + ".jpg");
+      return;
+    }
     const full = e.target.getAttribute("data-full");
-    if (full) openFull(full);
+    if (full) {
+      const galList = all.map((g) => g.src).filter(Boolean);
+      const gi = Number(e.target.getAttribute("data-gal-idx"));
+      const idx = Number.isFinite(gi) ? gi : Math.max(0, galList.indexOf(full));
+      openFull(full, { list: galList, idx: idx >= 0 ? idx : 0 });
+    }
   };
   try {
     const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
@@ -3201,34 +3212,33 @@ async function studioSourceBase64(preferLast) {
 function expandPromptLocal(userTxt, nsfw) {
   let t = String(userTxt || "").trim();
   if (!t) return t;
-  // Déjà un prompt technique (beaucoup de virgules / mots EN) → léger polish
-  const alreadyPrompt = (t.match(/,/g) || []).length >= 4 && /\b(photorealistic|masterpiece|detailed|8k|cinematic)\b/i.test(t);
+  const alreadyPrompt = (t.match(/,/g) || []).length >= 5 && /\b(photorealistic|masterpiece|cinematic|8k)\b/i.test(t);
   if (alreadyPrompt) {
     return t + (nsfw ? ", uncensored, explicit allowed" : "");
   }
   const low = t.toLowerCase();
-  const bits = [];
-  // Sujet / action
-  bits.push(t);
-  // Indices de composition
-  if (/entre les seins|entre ses seins|cleavage|décolleté/.test(low)) {
-    bits.push("man's face nestled deep between large breasts, mouth against cleavage, intimate close-up");
+  const bits = [t];
+  if (/entre les seins|cleavage|décolleté/.test(low)) {
+    bits.push("man's face nestled between large breasts, mouth on cleavage, intimate close-up");
   }
-  if (/embrass|embrasse|bisou|kiss/.test(low)) bits.push("kissing the skin, lips pressed on breast");
-  if (/l[eè]che|lick/.test(low)) bits.push("tongue licking nipple and cleavage");
+  if (/(l[eè]che|lick).*(chatte|pussy|vulve)|chatte|cunnilingus/.test(low)) {
+    bits.push("face between spread thighs, tongue licking pussy, mouth on vulva, extreme close-up POV, explicit");
+  }
+  if (/embrass|kiss|bisou/.test(low)) bits.push("kissing, lips pressed on skin");
+  if (/résille|fishnet/.test(low)) bits.push("black fishnet stockings");
   if (/logo|ic[oô]ne|badge|serveur/.test(low)) {
-    return "professional logo design, " + t + ", clean graphic, vector style, centered, no photorealistic person, high quality";
+    return "professional logo design, " + t + ", clean vector graphic, centered emblem, no photorealistic person, high quality";
   }
-  // Style photo
-  if (!/anime|cartoon|illustration|dessin/.test(low)) {
-    bits.push("photorealistic, realistic skin texture, natural lighting, detailed, high quality photo");
+  if (!/anime|cartoon|illustration|dessin|logo/.test(low)) {
+    bits.push("photorealistic, realistic skin texture, natural lighting, detailed photograph, sharp focus");
   }
-  if (nsfw || /nu|nue|seins|chatte|sexe|lingerie|nsfw/.test(low)) {
+  if (nsfw || /nu|nue|seins|chatte|sexe|lingerie|nsfw|l[eè]che/.test(low)) {
     bits.push("uncensored, adult 18+, explicit detail allowed");
   }
-  bits.push("sharp focus, coherent anatomy");
+  bits.push("coherent anatomy, high quality");
   return bits.join(", ");
 }
+
 
 async function generateStudioImage(opts) {
   opts = opts || { mode: "gen" };
@@ -3343,9 +3353,9 @@ async function generateStudioImage(opts) {
           $("studio-status").textContent = "Gemini transforme ta demande en prompt précis…";
           const model = st.geminiTextModel || "gemini-3.5-flash-lite";
           const sys = [
-            "Tu es un expert prompteur Stable Diffusion / AI Horde / photoréaliste.",
-            "L'utilisateur écrit souvent en français, en langage naturel (ex: « un homme qui embrasse les seins d'une femme »).",
-            "Ta tâche: transformer ça en UN SEUL prompt anglais TRÈS précis pour générer l'image.",
+            "You are an expert AI image prompt engineer (Stable Diffusion / AI Horde).",
+            "User writes natural language (often French). Output ONE precise English image prompt.",
+            "Keep every detail of WHO/WHAT/WHERE; expand composition, lighting, camera; NSFW explicit if asked.",
             "",
             "RÈGLES:",
             "1. Garde 100% l'intention: sujets, actions, positions, tenues, objets, ambiance, style demandé.",
