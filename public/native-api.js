@@ -516,9 +516,32 @@
     t = kept.join("\n");
     for (const re of leakFrag) t = t.replace(re, "");
     t = t.replace(/\n{3,}/g, "\n\n").replace(/^\s*[).,;:\-–*]+\s*/gm, "").trim();
-    // Pensée ouverte sans fermeture : on laisse si assez de contenu
+    // ——— Normalise format actions / pensées / paroles ———
+    // Ligne se terminant par * sans * ouvrant → action
+    t = t.replace(/(^|\n)([^\n*][^\n]{8,}?)\*(\s*)(?=\n|$)/g, function(full, a, mid, sp) {
+      if (mid.indexOf("*") >= 0) return full;
+      return a + "*" + mid.trim() + "*" + sp;
+    });
+    // * ouvrant non fermé sur la ligne
+    t = t.replace(/(^|\n)\*([^*\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
+      if (/\*$/.test(mid)) return full;
+      return a + "*" + mid.trim() + "*";
+    });
+    // Narration 1re personne hors * → entourer *
+    t = t.split("\n").map(function(line) {
+      const s = line.trim();
+      if (!s) return line;
+      if (/^\*/.test(s) || /^\(/.test(s)) return line;
+      if (/^(Je |J'|Elle )[a-zàâäéèêëïîôùûüç].{20,}/i.test(s)
+          && !/[?？]/.test(s)
+          && !/^(Je sais|Je pense|Je crois|Je t'|Je vous)/i.test(s)
+          && s.indexOf("*") < 0) {
+        return "*" + s.replace(/^\*|\*$/g, "") + "*";
+      }
+      return line;
+    }).join("\n");
     if (t.length < 12) {
-      t = "~…~\n*elle hésite un instant, mal à l'aise*\nPardon… je reprends.";
+      t = "(…)\n*elle hésite un instant, mal à l'aise*\nPardon… je reprends.";
     }
     return t;
   }
@@ -1022,11 +1045,11 @@
         PERSONA.scenario || "",
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
         "N'invente PAS de liens familiaux absents du titre/scénario. INTERDIT MÉTA : n'écris JAMAIS en anglais de notes système (sister-in-law, refers to, mode SFW, heat, etc.). Uniquement le jeu de rôle en français.",
-        "FORMAT STRICT: ACTIONS uniquement entre *astérisques* (*elle enlève son manteau*). PENSÉES uniquement entre (parenthèses) ((Il me regarde…)). PAROLES = texte normal sans * ni (). INTERDIT de mélanger pensées/actions/dialogues. Exemple: *Elle croise les bras.* (Putain…) Je t'écoute.",
+        "FORMAT STRICT — 3 blocs séparés, JAMAIS mélangés sur une même ligne :\n1) PENSÉE entre parenthèses : (Son audace me trouble.)\n2) ACTION entre *astérisques* : *Je glisse ma main le long de sa cuisse.*\n3) PAROLES en texte normal sans * ni () : Un poste de ce genre demande des avantages, non ?\nExemple exact :\n(Son audace commence à rendre l'atmosphère électrique.)\n*Je glisse lentement ma main le long de sa cuisse en maintenant son regard dans le mien.*\nUn poste de ce genre demande des avantages particuliers, non ?\nINTERDIT : action sans *, pensée sans (), * orphelin, action écrite comme du dialogue.",
         "LONGUEUR : 4 à 9 phrases. Réponse vive mais incarnée. Termine toujours tes phrases.",
         "SCÉNARIO : reste dans le lieu et la situation en cours. Cohérence totale avec le titre et le scénario du personnage.",
 
-        "FORMAT RÉPONSE STRICT : *action* puis (pensée) puis paroles. Jamais mélanger les trois.",
+        "FORMAT RÉPONSE STRICT : une ligne (pensée), une ligne *action*, puis paroles. Jamais mélanger les trois sur la même ligne.",
         "VERROU SCÈNE : le lieu et la tenue de l'ÉTAT ACTUEL sont OBLIGATOIRES. Si elle est au salon sans manteau, elle RESTE au salon sans manteau tant que le joueur ne change pas clairement de lieu ou de vêtement. INTERDIT de téléporter (salon→entrée→voiture) sans action explicite du joueur.",
         "FLUIDITÉ SFW↔NSFW : le ton suit le joueur. Message soft → réponse soft. Message sexuel → réponse NSFW. Après NSFW, un message banal (café, TV, questions) = retour SFW naturel sans forcer la tension.",
         "COHÉRENCE MAX (tous modèles) : ne contredis JAMAIS le titre, le scénario, l'apparence, la tenue/lieu/pose actuels de la mémoire. Réponds au DERNIER message. Pas de saut de scène magique. Pas d'invention de famille hors fiche.",

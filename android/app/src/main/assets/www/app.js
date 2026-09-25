@@ -3791,24 +3791,29 @@ async function pollHordeJob(jobId, host, charId) {
 
 function formatBubble(text) {
   let raw = String(text || "").replace(/\r/g, "");
-  // Markdown gras **action** → *action*
+  // **action** → *action*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // Labels explicites
+  // Labels
   raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
   raw = raw.replace(/\(\s*thought\s*\)\s*/gi, "");
   raw = raw.replace(/(^|\n)\s*Action\s*:\s*/gi, "$1*");
   raw = raw.replace(/(^|\n)\s*Pens[ée]e\s*:\s*/gi, "$1(");
+  raw = raw.replace(/(^|\n)\s*Thought\s*:\s*/gi, "$1(");
 
-  // Action ouverte seulement à la fin : "texte…*" en fin de message → fermer si * ouvrant manquant
-  // Ex: "Évidemment *puis je verse…" déjà OK ; "Je verse le vin*" → "*Je verse le vin*"
-  raw = raw.replace(/(^|\n)([^*\n][^\n]{6,}?)\*(\s*$)/g, function(_, a, mid, end) {
-    // Ne pas double-fermer si déjà une * plus tôt dans la ligne
-    if (mid.indexOf("*") >= 0) return _[0];
-    return a + "*" + mid.trim() + "*" + end;
+  // Ligne qui se termine par * sans * ouvrant → entourer en action
+  // Ex: "Je glisse ma main…mien.*" → "*Je glisse ma main…mien.*"
+  raw = raw.replace(/(^|\n)([^\n*][^\n]{8,}?)\*(\s*)(?=\n|$)/g, function(full, a, mid, sp) {
+    if (mid.indexOf("*") >= 0) return full;
+    return a + "*" + mid.trim() + "*" + sp;
+  });
+
+  // * ouvrant sans fermeture jusqu'à la fin de ligne
+  raw = raw.replace(/(^|\n)\*([^*\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
+    if (/\*$/.test(mid)) return full;
+    return a + "*" + mid.trim() + "*";
   });
 
   const parts = [];
-  // Ordre: ** déjà normalisé. Match (pensée) ou *action* (non vide)
   const re = /(\([^)]{1,}\)|\*[^*]{1,}\*)/g;
   let last = 0;
   let m;
@@ -3830,23 +3835,33 @@ function formatBubble(text) {
   if (last < raw.length) parts.push({ t: "say", v: raw.slice(last) });
   if (!parts.length) parts.push({ t: "say", v: raw });
 
-  // Nettoyer espaces / fusionner says adjacents logiques
   const out = [];
   for (const p of parts) {
-    let v = String(p.v).replace(/\u00a0/g, " ");
-    // Enlever * orphelins restants dans say
-    if (p.t === "say") v = v.replace(/^\*+\s*|\s*\*+$/g, "");
-    v = v.trim();
-    if (!v) continue;
-    // Heuristique légère : phrase purement narrative 1re personne longue → action (messages user sans *)
-    if (p.t === "say"
-        && /^(Je |J'|Puis je |puis je |Et je )/i.test(v)
-        && v.length > 20
-        && !/[?？]/.test(v)
-        && !/^(Je sais|Je pense que|Je crois|Je veux dire)/i.test(v)) {
-      out.push({ t: "act", v: v });
-    } else {
-      out.push({ t: p.t, v });
+    let chunks = String(p.v).replace(/\u00a0/g, " ").split(/\n+/);
+    for (let ch of chunks) {
+      ch = ch.trim();
+      if (!ch) continue;
+      if (p.t === "say") {
+        ch = ch.replace(/^\*+\s*|\s*\*+$/g, "").trim();
+        if (!ch) continue;
+        // Narration 1re personne = action (pas une question de dialogue)
+        const isNarr =
+          /^(Je |J'|Puis je |puis je |Et je |Elle |Me |M')/i.test(ch)
+          && ch.length > 18
+          && !/[?？]/.test(ch)
+          && !/^(Je sais|Je pense que|Je crois|Je veux dire|Je t'|Je vous)/i.test(ch);
+        // Phrase purement introspective sans () → pensée
+        const isInner =
+          /^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette|Cet )/i.test(ch)
+          && !/[?？!]/.test(ch)
+          && ch.length > 25
+          && !/^(Je |Tu |Oui|Non)/i.test(ch);
+        if (isNarr) out.push({ t: "act", v: ch });
+        else if (isInner && p.t === "say") out.push({ t: "think", v: ch });
+        else out.push({ t: "say", v: ch });
+      } else {
+        out.push({ t: p.t, v: ch.replace(/^\*+\s*|\s*\*+$/g, "").trim() });
+      }
     }
   }
   if (!out.length) out.push({ t: "say", v: String(text || "") });
@@ -3857,7 +3872,7 @@ function formatBubble(text) {
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;
     return `<span class="seg say">${v}</span>`;
-  }).join(" ");
+  }).join("<br>");
 }
 
 
