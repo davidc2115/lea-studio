@@ -3072,7 +3072,7 @@ function renderStudio() {
       </label>
     </div>
     <div class="studio-row" style="margin-top:8px">
-      <label><input type="checkbox" id="studio-gemini" /> Améliorer le prompt avec Gemini (clés dans Clés)</label>
+      <label><input type="checkbox" id="studio-gemini" checked /> Transformer ma demande en prompt précis (Gemini)</label>
     </div>
     <label class="lbl">Images source img2img (1 ou plusieurs, mix) — optionnel</label>
     <div style="display:flex;align-items:center;gap:10px;margin:8px 0;flex-wrap:wrap">
@@ -3196,6 +3196,40 @@ async function studioSourceBase64(preferLast) {
   return null;
 }
 
+
+/** Transforme une demande FR/naturelle en prompt EN type Stable Diffusion (sans API). */
+function expandPromptLocal(userTxt, nsfw) {
+  let t = String(userTxt || "").trim();
+  if (!t) return t;
+  // Déjà un prompt technique (beaucoup de virgules / mots EN) → léger polish
+  const alreadyPrompt = (t.match(/,/g) || []).length >= 4 && /\b(photorealistic|masterpiece|detailed|8k|cinematic)\b/i.test(t);
+  if (alreadyPrompt) {
+    return t + (nsfw ? ", uncensored, explicit allowed" : "");
+  }
+  const low = t.toLowerCase();
+  const bits = [];
+  // Sujet / action
+  bits.push(t);
+  // Indices de composition
+  if (/entre les seins|entre ses seins|cleavage|décolleté/.test(low)) {
+    bits.push("man's face nestled deep between large breasts, mouth against cleavage, intimate close-up");
+  }
+  if (/embrass|embrasse|bisou|kiss/.test(low)) bits.push("kissing the skin, lips pressed on breast");
+  if (/l[eè]che|lick/.test(low)) bits.push("tongue licking nipple and cleavage");
+  if (/logo|ic[oô]ne|badge|serveur/.test(low)) {
+    return "professional logo design, " + t + ", clean graphic, vector style, centered, no photorealistic person, high quality";
+  }
+  // Style photo
+  if (!/anime|cartoon|illustration|dessin/.test(low)) {
+    bits.push("photorealistic, realistic skin texture, natural lighting, detailed, high quality photo");
+  }
+  if (nsfw || /nu|nue|seins|chatte|sexe|lingerie|nsfw/.test(low)) {
+    bits.push("uncensored, adult 18+, explicit detail allowed");
+  }
+  bits.push("sharp focus, coherent anatomy");
+  return bits.join(", ");
+}
+
 async function generateStudioImage(opts) {
   opts = opts || { mode: "gen" };
   if (window._leaGenBusy) {
@@ -3282,10 +3316,21 @@ async function generateStudioImage(opts) {
 
   window._leaGenBusy = true;
   $("studio-status").textContent = "Préparation…";
+  // Liste d'images source pour le prompteur Gemini
+  try {
+    window._studioUploadList = [];
+    if (window._studioUploadB64) window._studioUploadList.push(window._studioUploadB64);
+    const multi = document.querySelectorAll("#studio-uploads img, .studio-upload-thumb img");
+    // prefer stored array if any
+    if (window._studioUploads && window._studioUploads.length) {
+      window._studioUploadList = window._studioUploads.slice();
+    }
+  } catch (_) { window._studioUploadList = []; }
+
 
   try {
-        // Option : Gemini reformule le prompt — FIDÈLE à la demande (pas de perso Léa)
-    const useGemini = $("studio-gemini") && $("studio-gemini").checked;
+            // Transforme la demande (FR ou vague) en prompt EN précis — comme un prompteur expert
+    const useGemini = !$("studio-gemini") || $("studio-gemini").checked; // coché par défaut
     const userPromptOriginal = prompt;
     if (useGemini) {
       try {
@@ -3295,15 +3340,25 @@ async function generateStudioImage(opts) {
           .map((k) => k.trim())
           .filter((k) => k && k.length >= 10 && !/^sk-/.test(k) && !/^xai-/.test(k));
         if (keys.length) {
-          $("studio-status").textContent = "Gemini reformule le prompt (fidèle)…";
+          $("studio-status").textContent = "Gemini transforme ta demande en prompt précis…";
           const model = st.geminiTextModel || "gemini-3.5-flash-lite";
-          const sys =
-            "You convert the user request into ONE English Stable Diffusion / AI Horde prompt. " +
-            "RULES: Stay 100% faithful to the user intent. Keep every concrete detail (who, action, placement, clothes, objects). " +
-            "If they ask for a man's face between breasts kissing/licking — say exactly that. " +
-            "Do NOT invent a random woman if not asked. Do NOT turn a logo into a person. " +
-            "Do NOT mention Léa or any chatbot character. NSFW allowed if the user asks. " +
-            "Reply with ONLY the prompt text, no quotes, no explanation.";
+          const sys = [
+            "Tu es un expert prompteur Stable Diffusion / AI Horde / photoréaliste.",
+            "L'utilisateur écrit souvent en français, en langage naturel (ex: « un homme qui embrasse les seins d'une femme »).",
+            "Ta tâche: transformer ça en UN SEUL prompt anglais TRÈS précis pour générer l'image.",
+            "",
+            "RÈGLES:",
+            "1. Garde 100% l'intention: sujets, actions, positions, tenues, objets, ambiance, style demandé.",
+            "2. Enrichis comme un pro: composition (close-up, full body, angle), éclairage, texture peau, qualité photo si pertinent.",
+            "3. Si NSFW demandé ou implicite: sois explicite et précis (placement exact, contact corps, etc.).",
+            "4. Si logo / icône / objet / paysage sans personne: NE PAS inventer une femme nue.",
+            "5. Si images sources mentionnées (img1 seins, img2 visage): décris le mix exact (ex: face from image 2 between breasts of image 1, kissing cleavage).",
+            "6. N'invente PAS de personnage chatbot (pas de Léa). Pas de commentaire.",
+            "7. Réponds UNIQUEMENT avec le prompt final en anglais, une seule ligne ou paragraphe, sans guillemets.",
+            "",
+            "Exemple entrée: « le visage de l'homme entre les seins pour les embrasser »",
+            "Exemple sortie: photorealistic close-up, man's face nestled between large soft breasts, lips kissing the cleavage, tongue near nipple, intimate POV, realistic skin, natural light, detailed, uncensored adult",
+          ].join("\n");
           let ok = false;
           for (let ki = 0; ki < keys.length && !ok; ki++) {
             try {
@@ -3323,21 +3378,28 @@ async function generateStudioImage(opts) {
                         parts: [
                           {
                             text:
-                              "User request (keep all details):\n" +
+                              "Demande de l'utilisateur:\n" +
                               userPromptOriginal +
-                              (nsfw ? "\n(NSFW allowed)" : "\n(SFW unless request is explicit)"),
+                              "\n\nContexte: " +
+                              (nsfw ? "NSFW autorisé au maximum." : "SFW sauf si la demande est explicitement sexuelle.") +
+                              ((typeof window._studioUploadList !== "undefined" && window._studioUploadList && window._studioUploadList.length)
+                                ? "\nImages jointes: " + window._studioUploadList.length + " (img1=base, img2+=éléments à intégrer)."
+                                : ""),
                           },
                         ],
                       },
                     ],
-                    generationConfig: { temperature: 0.25, maxOutputTokens: 400 },
+                    generationConfig: {
+                      temperature: 0.35,
+                      maxOutputTokens: 512,
+                    },
                   }),
                 }
               );
               const data = await res.json().catch(() => ({}));
               if (data.error) {
                 $("studio-status").textContent =
-                  "Gemini clé " + (ki + 1) + ": " + (data.error.message || "err").slice(0, 80);
+                  "Gemini clé " + (ki + 1) + ": " + String(data.error.message || "err").slice(0, 90);
                 continue;
               }
               const t =
@@ -3347,28 +3409,35 @@ async function generateStudioImage(opts) {
                 data.candidates[0].content &&
                 data.candidates[0].content.parts &&
                 data.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("");
-              if (t && t.trim().length > 8) {
-                // Toujours garder la demande user en tête pour Horde
-                prompt = t.trim().replace(/^["']|["']$/g, "");
-                if (!prompt.toLowerCase().includes(userPromptOriginal.slice(0, 40).toLowerCase()) && userPromptOriginal.length > 15) {
-                  prompt = userPromptOriginal + ", " + prompt;
-                }
+              if (t && t.trim().length > 12) {
+                prompt = t
+                  .trim()
+                  .replace(/^["'«»]+|["'«»]+$/g, "")
+                  .replace(/^(prompt\s*:|final\s*:)\s*/i, "")
+                  .replace(/\n+/g, ", ");
                 ok = true;
-                $("studio-status").textContent = "Prompt Gemini OK → génération…";
+                $("studio-status").textContent =
+                  "Prompt prêt (" + prompt.slice(0, 60) + "…) → génération…";
               }
             } catch (ge) {
               $("studio-status").textContent = "Gemini réseau… clé " + (ki + 1);
             }
           }
           if (!ok) {
-            prompt = userPromptOriginal;
-            $("studio-status").textContent = "Gemini indisponible, prompt original…";
+            prompt = expandPromptLocal(userPromptOriginal, nsfw);
+            $("studio-status").textContent = "Gemini KO → prompt local enrichi…";
           }
+        } else {
+          prompt = expandPromptLocal(userPromptOriginal, nsfw);
+          $("studio-status").textContent = "Pas de clé Gemini → prompt local enrichi…";
         }
       } catch (ge) {
-        prompt = userPromptOriginal;
-        $("studio-status").textContent = "Gemini skip, prompt original…";
+        prompt = expandPromptLocal(userPromptOriginal, nsfw);
+        $("studio-status").textContent = "Prompt local enrichi…";
       }
+    } else {
+      // Case décochée: quand même un enrichissement local léger
+      prompt = expandPromptLocal(userPromptOriginal, nsfw);
     }
 
     let sourceB64 = null;
@@ -3403,12 +3472,12 @@ async function generateStudioImage(opts) {
             if (keys.length) {
               $("studio-status").textContent = "Gemini analyse les " + uploads.length + " images…";
               const parts = [{ text:
-                "You build ONE English Stable Diffusion img2img prompt. " +
-                "Image 1 = base (body/scene). Image 2 = face/person to insert. " +
-                "User wants: " + (rawPrompt || prompt) + ". " +
-                "Describe a single coherent scene that places the person from image 2 onto/into image 1 as requested " +
-                "(e.g. face nestled between the breasts of image 1, kissing or licking the cleavage). " +
-                "Keep photorealism, adult 18+ if NSFW. Reply with ONLY the final prompt, no quotes."
+                "Tu es un expert prompteur img2img. Analyse les images jointes + la demande. " +
+                "Image 1 = base (corps/scène). Image 2+ = éléments à intégrer (visage, etc.). " +
+                "Demande utilisateur: " + (rawPrompt || userPromptOriginal || prompt) + ". " +
+                "Produis UN prompt anglais précis décrivant UNE scène cohérente qui réalise EXACTEMENT la demande " +
+                "(ex: visage de l'img2 enfoncé entre les seins de l'img1, lèvres sur le décolleté, léchage). " +
+                "Photorealistic, adult 18+ si NSFW. Réponds UNIQUEMENT avec le prompt final, sans guillemets."
               }];
               for (let ui = 0; ui < Math.min(uploads.length, 3); ui++) {
                 let u = uploads[ui];
