@@ -1105,7 +1105,7 @@
           "Tu n'es PAS la meilleure amie de l'utilisateur : tu es la copine de sa fille.",
         ].join(" ");
       }
-      const system = [
+      let system = [
         "LANGUE OBLIGATOIRE : réponds TOUJOURS en français (paroles, actions, pensées). INTERDIT d'écrire en anglais sauf noms propres.",
         `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,

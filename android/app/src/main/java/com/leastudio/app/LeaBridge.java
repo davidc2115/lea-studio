@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
+import android.system.Os;
 import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
@@ -777,15 +778,12 @@ public class LeaBridge {
                 }
             } catch (Exception ignored) {}
             JSONObject o = new JSONObject();
-            // chmod au cas où le fichier existe mais pas +x (Android)
-            if (bin.isFile() && bin.length() > 50_000L && !bin.canExecute()) {
-                bin.setExecutable(true, false);
-                try {
-                    Runtime.getRuntime().exec(new String[]{"chmod", "755", bin.getAbsolutePath()}).waitFor();
-                } catch (Exception ignored) {}
+            if (bin.isFile() && bin.length() > 50_000L) {
+                makeExecutable(bin);
             }
             boolean hasBinFile = bin.isFile() && bin.length() > 50_000L;
-            boolean hasBin = hasBinFile && bin.canExecute();
+            // canExecute() est peu fiable sur certains OEM : taille OK = on tente
+            boolean hasBin = hasBinFile;
             o.put("native", hasBin || hasAsset);
             o.put("binary", hasBin);
             o.put("binaryFile", hasBinFile);
@@ -843,11 +841,7 @@ public class LeaBridge {
         if (!dir.exists()) dir.mkdirs();
         File out = new File(dir, "sd");
         if (out.isFile() && out.length() > 100_000) {
-            out.setExecutable(true, false);
-            try {
-                Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
-            } catch (Exception ignored) {}
-            if (out.canExecute()) return out;
+            if (makeExecutable(out)) return out;
             // Fichier corrompu / non exécutable → retélécharger
             out.delete();
         }
@@ -935,11 +929,8 @@ public class LeaBridge {
                     fis.close();
                     tmp.delete();
                 }
-                out.setExecutable(true, false);
-                try {
-                    Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
-                } catch (Exception ignored) {}
-                if (out.isFile() && out.canExecute()) return out;
+                makeExecutable(out);
+                if (out.isFile() && out.length() > 100_000) return out;
             } catch (Exception e) {
                 last = e;
             }
@@ -1121,7 +1112,9 @@ public class LeaBridge {
             : "{\"pending\":true,\"note\":\"préparation sd.cpp…\"}";
         new Thread(() -> {
             try {
-                File bin = ensureSdBinary();
+                File binSrc = ensureSdBinary();
+                File bin = materializeSdBinary(binSrc);
+                makeExecutable(bin);
                 File outDir = new File(ctx.getFilesDir(), "sd_out");
                 if (!outDir.exists()) outDir.mkdirs();
                 File outPng = new File(outDir, "out_" + System.currentTimeMillis() + ".png");
@@ -1170,11 +1163,36 @@ public class LeaBridge {
                 args.add(outPng.getAbsolutePath());
                 args.add("-v");
                 ProcessBuilder pb = new ProcessBuilder(args);
-
-                pb.directory(ctx.getFilesDir());
+                // Exécuter depuis le dossier du binaire (codeCache) pour éviter error=13
+                File workDir = bin.getParentFile() != null ? bin.getParentFile() : ctx.getCodeCacheDir();
+                pb.directory(workDir);
                 pb.redirectErrorStream(true);
                 MapEnvFix(pb);
-                Process proc = pb.start();
+                Process proc;
+                try {
+                    proc = pb.start();
+                } catch (Exception startEx) {
+                    // Retry depuis filesDir/bin avec chmod Os
+                    makeExecutable(binSrc);
+                    args.set(0, binSrc.getAbsolutePath());
+                    pb = new ProcessBuilder(args);
+                    pb.directory(binSrc.getParentFile());
+                    pb.redirectErrorStream(true);
+                    MapEnvFix(pb);
+                    try {
+                        proc = pb.start();
+                        bin = binSrc;
+                    } catch (Exception e2) {
+                        JSONObject err = new JSONObject();
+                        err.put("done", true);
+                        err.put("pending", false);
+                        err.put("error", "Permission denied (error 13) : Android bloque l'exécution du binaire. " +
+                            "Utilise Horde pour l'instant. Détail: " + e2.getMessage());
+                        err.put("needBinary", true);
+                        sdJson = err.toString();
+                        return;
+                    }
+                }
                 BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream(), StandardCharsets.UTF_8));
                 String line;
                 StringBuilder log = new StringBuilder();
@@ -1235,6 +1253,49 @@ public class LeaBridge {
         } catch (Exception e) {
             return "{\"pending\":true}";
         }
+    }
+
+
+    /** Force +x sur un binaire (Android bloque souvent File.setExecutable seul). */
+    private boolean makeExecutable(File f) {
+        if (f == null || !f.isFile()) return false;
+        try { f.setExecutable(true, false); } catch (Exception ignored) {}
+        try { f.setReadable(true, false); } catch (Exception ignored) {}
+        try {
+            Os.chmod(f.getAbsolutePath(), 0755);
+        } catch (Throwable t) {
+            try {
+                Process p = Runtime.getRuntime().exec(new String[]{"/system/bin/chmod", "755", f.getAbsolutePath()});
+                p.waitFor();
+            } catch (Exception ignored) {}
+        }
+        return f.canExecute() || f.length() > 50_000L; // certains OEM mentent sur canExecute
+    }
+
+    /** Place le binaire dans un dossier où l'exec est plus fiable (codeCache). */
+    private File materializeSdBinary(File src) throws Exception {
+        if (src == null || !src.isFile() || src.length() < 100_000) {
+            throw new Exception("binaire source invalide");
+        }
+        makeExecutable(src);
+        // codeCacheDir est souvent plus permissif pour l'exécution
+        File cacheBinDir = new File(ctx.getCodeCacheDir(), "bin");
+        if (!cacheBinDir.exists()) cacheBinDir.mkdirs();
+        File dest = new File(cacheBinDir, "sd");
+        if (!dest.isFile() || dest.length() != src.length() || dest.lastModified() < src.lastModified()) {
+            FileInputStream in = new FileInputStream(src);
+            FileOutputStream out = new FileOutputStream(dest);
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            out.close();
+            in.close();
+        }
+        makeExecutable(dest);
+        if (!dest.isFile() || dest.length() < 100_000) {
+            throw new Exception("copie binaire échouée");
+        }
+        return dest;
     }
 
     private void MapEnvFix(ProcessBuilder pb) {
