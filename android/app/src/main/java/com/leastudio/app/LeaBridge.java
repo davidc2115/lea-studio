@@ -861,7 +861,7 @@ public class LeaBridge {
         Exception last = null;
         for (String u : urls) {
             try {
-                sdJson = "{"pending":true,"note":"téléchargement binaire sd.cpp…"}";
+                sdJson = "{\"pending\":true,\"note\":\"telechargement binaire sd.cpp...\"}";
                 HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
                 c.setConnectTimeout(20000);
                 c.setReadTimeout(300000);
