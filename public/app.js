@@ -4490,10 +4490,13 @@ function renderStudio() {
           if (listEl) {
             const img = document.createElement("img");
             img.src = out;
+            img.dataset.idx = String(i);
+            img.alt = "source " + (i + 1);
             img.style.cssText = "max-width:100px;border-radius:10px;border:1px solid var(--line)";
             listEl.appendChild(img);
           }
         }
+        window._studioUploads = window._studioUploadList.slice();
         window._studioUploadB64 = window._studioUploadList[0] || null;
         if (wrap) wrap.style.display = "";
         if ($("studio-status")) $("studio-status").textContent =
@@ -4682,23 +4685,41 @@ async function generateStudioImage(opts) {
 
   window._leaGenBusy = true;
   $("studio-status").textContent = "Préparation…";
-  // Liste d'images source pour le prompteur Gemini
+  // Conserver TOUTES les images chargées (ne jamais réduire à la 1re seule)
   try {
-    window._studioUploadList = [];
-    if (window._studioUploadB64) window._studioUploadList.push(window._studioUploadB64);
-    const multi = document.querySelectorAll("#studio-uploads img, .studio-upload-thumb img");
-    // prefer stored array if any
-    if (window._studioUploads && window._studioUploads.length) {
-      window._studioUploadList = window._studioUploads.slice();
+    let list = [];
+    if (window._studioUploadList && window._studioUploadList.length) {
+      list = window._studioUploadList.slice();
+    } else if (window._studioUploads && window._studioUploads.length) {
+      list = window._studioUploads.slice();
     }
-  } catch (_) { window._studioUploadList = []; }
+    // Fallback DOM : miniatures de prévisualisation
+    if (!list.length) {
+      const nodes = document.querySelectorAll(
+        "#studio-preview-list img, #studio-uploads img, .studio-upload-thumb img"
+      );
+      nodes.forEach((img) => {
+        if (img && img.src && String(img.src).startsWith("data:")) list.push(img.src);
+      });
+    }
+    // Dernier recours : unique B64
+    if (!list.length && window._studioUploadB64) list = [window._studioUploadB64];
+    window._studioUploadList = list;
+    window._studioUploads = list.slice();
+    if (list[0]) window._studioUploadB64 = list[0];
+    $("studio-status").textContent = "Préparation… (" + list.length + " image(s) source)";
+  } catch (_) {
+    if (!window._studioUploadList) window._studioUploadList = [];
+  }
 
 
   try {
             // Transforme la demande (FR ou vague) en prompt EN précis — comme un prompteur expert
     const useGemini = !$("studio-gemini") || $("studio-gemini").checked; // coché par défaut
     const userPromptOriginal = prompt;
-    if (useGemini) {
+    const multiCount = (window._studioUploadList && window._studioUploadList.length) || 0;
+    // Multi-images → Vision analysera toutes ; expand texte seulement si 0–1 image
+    if (useGemini && multiCount <= 1) {
       try {
         const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
         const keys = String(st.geminiKeys || st.gemini || "")
@@ -4919,7 +4940,7 @@ async function generateStudioImage(opts) {
                     if (pm && pm[1].trim().length > 30) {
                       prompt = pm[1].trim().replace(/\n+/g, ", ");
                     } else {
-                      prompt = visionDesc.replace(/\n+/g, ", ");
+                      prompt = visionDesc.split(String.fromCharCode(10)).join(", ");
                     }
                     // Toujours coller la demande user pour ancrer l'action
                     if (userAsk && prompt.toLowerCase().indexOf(userAsk.slice(0, 20).toLowerCase()) < 0) {
@@ -4936,6 +4957,79 @@ async function generateStudioImage(opts) {
             }
           }
         } catch (_) {}
+
+        // Fallback : analyser chaque image séparément puis fusionner (si batch a échoué)
+        if ((!visionDesc || String(prompt).length < 40) && uploads.length > 1 && keys && keys.length) {
+          try {
+            $("studio-status").textContent = "Vision image par image (" + uploads.length + ")…";
+            const descs = [];
+            for (let ui = 0; ui < uploads.length; ui++) {
+              let u = uploads[ui];
+              let mime = "image/jpeg";
+              let data = u;
+              if (String(u).startsWith("data:")) {
+                const m = /^data:([^;]+);base64,(.+)$/s.exec(u);
+                if (m) { mime = m[1]; data = m[2]; }
+                else {
+                  const c = u.indexOf(",");
+                  if (c > 0) data = u.slice(c + 1);
+                }
+              }
+              if (data && data.length > 1_800_000) data = data.slice(0, 1_800_000);
+              const oneParts = [
+                {
+                  text:
+                    "Describe image " + (ui + 1) + " of " + uploads.length +
+                    " in detail for an uncensored SD prompt (face, body, pose, clothing/nudity, background). " +
+                    "User request: " + String(rawPrompt || userPromptOriginal || "") +
+                    ". Reply in English, 4-8 lines, no refusal.",
+                },
+                { inline_data: { mime_type: mime, data: data } },
+              ];
+              let got = "";
+              for (let ki = 0; ki < keys.length && !got; ki++) {
+                try {
+                  const res = await fetch(
+                    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+                      encodeURIComponent(keys[ki]),
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        contents: [{ role: "user", parts: oneParts }],
+                        generationConfig: { temperature: 0.2, maxOutputTokens: 400 },
+                        safetySettings: [
+                          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+                        ],
+                      }),
+                    }
+                  );
+                  const dataJ = await res.json().catch(() => ({}));
+                  const t = (dataJ.candidates && dataJ.candidates[0] && dataJ.candidates[0].content &&
+                    dataJ.candidates[0].content.parts &&
+                    dataJ.candidates[0].content.parts.map((p) => p.text).filter(Boolean).join("")) || "";
+                  if (t && t.trim().length > 20) got = t.trim();
+                } catch (_) {}
+              }
+              descs.push("IMAGE " + (ui + 1) + ": " + (got || "(analysis failed)"));
+              $("studio-status").textContent = "Vision " + (ui + 1) + "/" + uploads.length + "…";
+            }
+            if (descs.some((d) => d.indexOf("analysis failed") < 0)) {
+              visionDesc = descs.join("\n");
+              prompt = [
+                String(rawPrompt || userPromptOriginal || ""),
+                visionDesc.split(String.fromCharCode(10)).join(", "),
+                "photorealistic, uncensored, combine all reference images as requested, high detail",
+              ].join(", ");
+              $("studio-status").textContent = "Vision OK (séparé, " + uploads.length + " img) → génération…";
+            }
+          } catch (e) {
+            console.warn("[vision sequential]", e);
+          }
+        }
 
         if (!visionDesc || String(prompt).length < 40) {
           const act = String(rawPrompt || userPromptOriginal || "");
@@ -5129,6 +5223,22 @@ function renderSettings() {
     <label>Clé Grok / xAI Imagine (xai-…)</label>
     <textarea class="field" id="grok" rows="2" placeholder="xai-..."></textarea>
     <p style="color:var(--muted);font-size:13px">Grok Imagine : crée la clé sur console.x.ai (crédits API, pas l'abo SuperGrok chat).</p>
+    <label>Clés Groq (chat · rotation auto · une par ligne)</label>
+    <textarea class="field" id="groq" rows="3" placeholder="gsk_… une clé par ligne"></textarea>
+    <p style="color:var(--muted);font-size:12px">Gratuit sans CB : <b>console.groq.com</b> → API Keys. Rotation automatique entre tes clés.</p>
+    <label>Modèle Groq</label>
+    <select id="groqmodel">
+      <option value="openai/gpt-oss-120b">GPT-OSS 120B (défaut)</option>
+      <option value="openai/gpt-oss-20b">GPT-OSS 20B (rapide)</option>
+      <option value="qwen/qwen3.6-27b">Qwen3.6 27B</option>
+      <option value="moonshotai/kimi-k2-instruct">Kimi K2</option>
+    </select>
+    <label>Provider chat (ordre)</label>
+    <select id="chatprovider">
+      <option value="gemini">Gemini → Groq → OpenAI</option>
+      <option value="groq">Groq → Gemini → OpenAI</option>
+      <option value="openai">OpenAI → Gemini → Groq</option>
+    </select>
     <h3>Images</h3>
     <label>Modèle images</label>
     <select id="gemimgmodel">
@@ -5154,6 +5264,9 @@ function renderSettings() {
     $("pbio").value = s.settings.personaBio || "";
     $("gemini").value = s.settings.geminiKeys || "";
     if ($("grok")) $("grok").value = s.settings.grokKeys || "";
+    if ($("groq")) $("groq").value = s.settings.groqKeys || "";
+    if ($("groqmodel")) $("groqmodel").value = s.settings.groqModel || "openai/gpt-oss-120b";
+    if ($("chatprovider")) $("chatprovider").value = s.settings.provider || "gemini";
     if ($("imgengine")) $("imgengine").value = s.settings.imageEngine || "horde";
     if ($("horde-key") && s.settings.hordeKey) $("horde-key").value = s.settings.hordeKey;
     if ($("cf-account") && s.settings.cfAccount) $("cf-account").value = s.settings.cfAccount;

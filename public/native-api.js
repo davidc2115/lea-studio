@@ -184,6 +184,8 @@
       personaBio: "La personne chez qui Léa se réfugie.",
       geminiKeys: "",
       openaiKeys: "",
+      groqKeys: "",
+      groqModel: "openai/gpt-oss-120b",
       grokKeys: "",
       imageKeys: "",
       imageProvider: "gemini",
@@ -431,6 +433,67 @@
       }
     }
     throw new Error(last);
+  }
+
+
+  let _groqKeyCursor = 0;
+  function allGroqKeys() {
+    return [...new Set(parseKeys(settings().groqKeys).filter((k) => k && k.length >= 8))];
+  }
+  function rotatedGroqKeys() {
+    const keys = allGroqKeys();
+    if (keys.length <= 1) return keys;
+    const start = _groqKeyCursor % keys.length;
+    _groqKeyCursor = (start + 1) % keys.length;
+    return keys.slice(start).concat(keys.slice(0, start));
+  }
+
+  /** Groq OpenAI-compatible — modèles gratuits 2026 (rotation clés) */
+  async function callGroq(messages, keys) {
+    const s = settings();
+    const preferred = s.groqModel || "openai/gpt-oss-120b";
+    const models = [
+      preferred,
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.6-27b",
+      "moonshotai/kimi-k2-instruct",
+    ].filter((m, i, a) => a.indexOf(m) === i);
+    let last = "Aucune clé Groq";
+    for (const key of keys) {
+      for (const model of models) {
+        try {
+          const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + key,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: model,
+              messages: messages,
+              temperature: 0.9,
+              max_tokens: 900,
+            }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            last = (data.error && (data.error.message || data.error)) || ("HTTP " + res.status + " " + model);
+            if (/decommission|not found|does not exist|invalid_model|model_not_found/i.test(String(last))) continue;
+            if (/rate limit|429|quota/i.test(String(last))) break;
+            continue;
+          }
+          const text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+          if (text && String(text).trim()) {
+            return sanitizeReply(String(text));
+          }
+          last = "réponse vide (" + model + ")";
+        } catch (e) {
+          last = e.message || String(e);
+        }
+      }
+    }
+    throw new Error("Groq: " + last);
   }
 
   async function generate(messages, provider) {
@@ -911,7 +974,7 @@
       save("lea.settings", s);
       return {
         settings: s,
-        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length, grok: parseKeys(s.grokKeys).length },
+        keys: { gemini: parseKeys(s.geminiKeys).length, openai: parseKeys(s.openaiKeys).length, image: parseKeys(s.imageKeys).length, grok: parseKeys(s.grokKeys).length, groq: parseKeys(s.groqKeys).length },
       };
     }
     if (path === "/api/characters") return allChars();
