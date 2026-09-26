@@ -338,6 +338,7 @@ function buildLeaImagePrompt(extra = "") {
       "natural skin pores, soft cinematic lighting, sharp detailed young face,",
       extra || "",
       "NOT middle-aged, NOT 30 years old, NOT 35, NOT mature face, NOT glamorous heavy makeup,",
+      "different pose from reference, new angle, not identical to cover photo,",
       "NOT different woman, NOT model face, NOT wavy voluminous salon hair, NOT dry clothes, NOT nude, NOT studio seamless"
     ].filter(Boolean).join(" ");
   }
@@ -454,6 +455,7 @@ function buildLeaImagePrompt(extra = "") {
     "Location: " + placeDetail + ",",
     "scenario: " + situation + ",",
     pose + ",",
+    "IMPORTANT: different pose and camera angle from any reference photo, new composition, not a copy of the cover,",
     "Natural skin pores, realistic DSLR photography, sharp detailed face matching identity, soft cinematic lighting,",
     "High-end photorealistic quality,",
     extra || "",
@@ -3399,8 +3401,8 @@ async function generateCloudflareImage(prompt, negative, width, height, sourceB6
           prompt: fullPrompt,
           negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
           image: [String(sourceB64).replace(/^data:[^;]+;base64,/, "")],
-          strength: 0.55,
-          num_steps: 20,
+          strength: 0.65,
+          num_steps: 24,
         };
       } else if (model.indexOf("flux") >= 0) {
         payload = { prompt: fullPrompt };
@@ -3472,8 +3474,9 @@ async function generatePhotoHordeFallback(prompt, c) {
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = c.id === "lea" ? 0.28 : 0.52;
-        setGenStatus("Horde secours img2img…");
+        payload.denoising = c.id === "lea" ? 0.62 : 0.68;
+        payload.seed = Math.floor(Math.random() * 2_000_000_000);
+        setGenStatus("Horde secours img2img denoise " + payload.denoising + "…");
       }
     } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
@@ -3643,7 +3646,7 @@ async function generateScenePhoto() {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-        payload.denoising = bigChange ? 0.48 : 0.38;
+        payload.denoising = bigChange ? 0.58 : 0.52;
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
       } else {
@@ -4013,7 +4016,7 @@ async function generatePhoto() {
       };
       if (sdRef) {
         sdPayload.source_image = sdRef;
-        sdPayload.strength = 0.55;
+        sdPayload.strength = 0.65;
       }
       const payloadJson = JSON.stringify(sdPayload);
       showPromptStatus(
@@ -4073,8 +4076,9 @@ async function generatePhoto() {
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = c.id === "lea" ? 0.28 : 0.52;
-        setGenStatus("Horde img2img (ref OK)…");
+        payload.denoising = c.id === "lea" ? 0.62 : 0.68;
+        payload.seed = Math.floor(Math.random() * 2_000_000_000);
+        setGenStatus("Horde img2img denoise " + payload.denoising + " (pose différente)…");
       } else {
         setGenStatus("Horde txt2img (pas de ref cover)…");
       }
@@ -5354,7 +5358,7 @@ async function generateStudioImage(opts) {
         payload.denoising = window._studioCompositeDenoise;
         payload.steps = 36;
       } else {
-        payload.denoising = opts.mode === "edit" ? 0.58 : 0.48;
+        payload.denoising = opts.mode === "edit" ? 0.55 : 0.62;
       }
     } else {
       payload.steps = 40;
