@@ -1541,6 +1541,17 @@ function updateCustomChar(id, patch) {
   list[i] = Object.assign({}, list[i], patch || {}, { id: list[i].id, imported: true });
   saveCustomChars(list);
   mergeCustomIntoCast();
+  // Mettre à jour aussi la référence active
+  try {
+    if (state && state.characters) {
+      const j = state.characters.findIndex((c) => c.id === id);
+      if (j >= 0) state.characters[j] = Object.assign({}, state.characters[j], list[i]);
+    }
+    if (window.CAST) {
+      const j = window.CAST.findIndex((c) => c.id === id);
+      if (j >= 0) window.CAST[j] = Object.assign({}, window.CAST[j], list[i]);
+    }
+  } catch (_) {}
   return list[i];
 }
 function clearAllImportedChars() {
@@ -1961,10 +1972,17 @@ async function persistImportedChars(chars, opts) {
   if (!opts.skipTranslate && added.length) {
     for (const a of added) {
       try {
-        if (typeof setStatus === "function") {
-          try { setStatus("Adaptation FR de " + (a.name || "") + "…"); } catch (_) {}
-        }
+        try {
+          const el = document.getElementById("chub-status");
+          if (el) el.textContent = "⏳ Adaptation FR (Gemini) de « " + (a.name || "") + " » — 30 à 90 s…";
+        } catch (_) {}
         const tr = await adaptImportedCharacter(a);
+        try {
+          const el = document.getElementById("chub-status");
+          if (el) el.textContent = tr.adapted
+            ? ("✓ « " + (a.name || "") + " » adapté en français")
+            : ("⚠ « " + (a.name || "") + " » importé mais adaptation incomplète — ouvre le profil → Adapter maintenant");
+        } catch (_) {}
         updateCustomChar(a.id, {
           title: tr.title,
           scenario: tr.scenario,
@@ -2692,6 +2710,7 @@ function renderProfile() {
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
       <option value="horde">Horde (gratuit NSFW · recommandé profil)</option>
+      <option value="gemini">Gemini Nano Banana (clés Studio · NSFW souvent filtré)</option>
       <option value="cloudflare">Cloudflare FLUX (gratuit ~150–230/j · SFW/léger)</option>
       <option value="sd_cpp">SD.cpp (local)</option>
     </select>
@@ -2862,11 +2881,6 @@ function bodyNegatives(c) {
   ].filter(Boolean).join(" ").toLowerCase();
   const base = "child, teen, underage, middle-aged, elderly, 35 years old, 40 years old, wrong ethnicity, deformed, extra limbs, different face, different person";
   let neg = base;
-  // Couleur de cheveux : interdire les mauvaises teintes
-  try {
-    const hair = extractHairColorLock(c);
-    if (hair && hair.neg) neg += ", " + hair.neg + ", wrong hair color";
-  } catch (_) {}
 
   // Petite / plate poitrine
   const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
@@ -2957,73 +2971,6 @@ function morphWeights(c) {
 /** Traits OBLIGATOIRES par personnage (répétés dans le prompt). */
 /** Apparence 100% FIXE — seul change en scène : pose / tenue / lieu. */
 
-/** Verrouille la couleur de cheveux extraite de la fiche (argenté, roux, etc.). */
-function extractHairColorLock(c) {
-  const text = [
-    c && c.appearance,
-    c && c.looks_en,
-    c && c.body,
-    c && c.personality,
-    c && c.title,
-  ].map((x) => String(x || "")).join(" ");
-  const rules = [
-    {
-      re: /argent[eé]e?|silver\s*hair|cheveux\s*argent|gris\s*argent|metallic\s*silver|white[-\s]?silver/i,
-      pos: "(silver hair:1.55), (argenté silver hair:1.5), long silver metallic hair, cool-toned silver-white hair strands, NOT blonde, NOT golden, NOT brown, NOT black, NOT red, NOT auburn",
-      neg: "blonde hair, golden blonde, dirty blonde, brown hair, black hair, auburn hair, red hair, ginger hair, orange hair",
-    },
-    {
-      re: /platin(um|e)|cheveux\s*platine|platinum\s*blonde/i,
-      pos: "(platinum blonde hair:1.5), icy platinum hair, NOT yellow blonde, NOT brown, NOT black, NOT red, NOT silver metallic",
-      neg: "yellow blonde, golden hair, brown hair, black hair, red hair, ginger, silver metallic hair",
-    },
-    {
-      re: /\broux\b|\brousse\b|ginger|auburn|red\s*hair|cheveux\s*rouges|redhead|copper\s*hair|cheveux\s*cuivr/i,
-      pos: "(red hair:1.55), (ginger auburn hair:1.5), natural red copper hair, NOT blonde, NOT brown, NOT black, NOT silver",
-      neg: "blonde hair, brown hair, black hair, silver hair, platinum hair, pink hair",
-    },
-    {
-      re: /rose\s*hair|pink\s*hair|cheveux\s*roses|pastel\s*pink/i,
-      pos: "(pink hair:1.5), pastel pink hair, NOT natural blonde, NOT brown, NOT black",
-      neg: "blonde hair, brown hair, black hair, red hair, silver hair",
-    },
-    {
-      re: /bleu(e)?\s*(cheveux|hair)|blue\s*hair|cheveux\s*bleus/i,
-      pos: "(blue hair:1.5), vivid blue hair, NOT brown, NOT black, NOT blonde",
-      neg: "brown hair, black hair, blonde hair, red hair",
-    },
-    {
-      re: /violet|purple\s*hair|cheveux\s*violets|lavender\s*hair/i,
-      pos: "(purple hair:1.5), violet hair, NOT brown, NOT black, NOT blonde",
-      neg: "brown hair, black hair, blonde hair, red hair",
-    },
-    {
-      re: /blanc(he)?s?\s*(cheveux|hair)|white\s*hair|cheveux\s*blancs/i,
-      pos: "(white hair:1.5), pure white hair, NOT blonde yellow, NOT silver only, NOT brown",
-      neg: "yellow blonde, brown hair, black hair, red hair",
-    },
-    {
-      re: /noir(e)?s?\s*(cheveux|hair)|black\s*hair|cheveux\s*noirs|jet\s*black/i,
-      pos: "(black hair:1.45), jet black hair, NOT brown, NOT blonde, NOT red, NOT silver",
-      neg: "blonde hair, brown hair, red hair, silver hair, platinum",
-    },
-    {
-      re: /ch[aâ]tain|chestnut|brown\s*hair|cheveux\s*bruns|dark\s*brown\s*hair/i,
-      pos: "(brown hair:1.45), chestnut brown hair, NOT blonde, NOT black pure, NOT red, NOT silver",
-      neg: "blonde hair, pure black hair, red hair, silver hair, platinum",
-    },
-    {
-      re: /blond(e|s)?\b|cheveux\s*blonds|golden\s*blonde|honey\s*blonde/i,
-      pos: "(blonde hair:1.45), golden honey blonde hair, NOT brown, NOT black, NOT red, NOT silver",
-      neg: "brown hair, black hair, red hair, silver hair, platinum metallic",
-    },
-  ];
-  for (const r of rules) {
-    if (r.re.test(text)) return r;
-  }
-  return null;
-}
-
 function fixedAppearanceBlock(c) {
   if (!c) return "";
   const age = Number(c.age) || 21;
@@ -3031,18 +2978,16 @@ function fixedAppearanceBlock(c) {
   const looks = describeLooks(c);
   const body = String(c.body || "").trim();
   const eth = String(c.ethnicity || "").trim();
-  const hair = extractHairColorLock(c);
   return [
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
     "Person: " + name + ",",
     identityLock(c) + ",",
     looks + ",",
-    hair ? ("HAIR COLOR LOCK: " + hair.pos + ",") : "",
     morphWeights(c) + ",",
     body ? ("morphology: " + body + ",") : "",
     eth ? ("ethnicity: " + eth + ",") : "",
     "(" + age + " year old:1.45), (looks exactly " + age + ":1.4),",
-    "IDENTICAL face, (exact hair color from description:1.5), hair style, eye color, skin tone, breast size, body type in EVERY image,",
+    "IDENTICAL face, hair color, hair style, eye color, skin tone, breast size, body type in EVERY image,",
     "same person as cover photo and profile, consistent identity lock,",
     "=== END FIXED APPEARANCE — only pose, outfit, posture, environment may change below ===",
   ].filter(Boolean).join(" ");
@@ -3688,6 +3633,32 @@ async function generatePhoto() {
   } catch (_) {}
   showPromptStatus("Moteur : " + engine + " · préparation…", prompt);
   try {
+    // —— Gemini Nano Banana (clés AI Studio, gratuit selon quota) ——
+    if (engine === "gemini" || engine === "nano") {
+      setGenStatus("Gemini Image…");
+      try {
+        const start = await api("/api/image", {
+          method: "POST",
+          body: JSON.stringify({
+            prompt,
+            negative: bodyNegatives(c),
+            engine: "gemini",
+            aspect: "3:4",
+            fallback_horde: false,
+          }),
+        });
+        const dataUrl = start && (start.image || start.url);
+        if (!dataUrl) throw new Error((start && start.error) || "pas d'image Gemini");
+        const stored = await addToGallery(dataUrl, c.id);
+        setGenStatus("Image Gemini prête");
+        window._leaGenBusy = false;
+        if (state.view === "profile") renderProfile();
+        return;
+      } catch (e) {
+        setGenStatus("Gemini Image: " + (e.message || e) + " → bascule Horde…");
+        // continue vers Horde
+      }
+    }
     // —— Cloudflare Workers AI (FLUX Schnell, quota gratuit journalier) ——
     if (engine === "cloudflare") {
       setGenStatus("Cloudflare FLUX…");
@@ -5043,20 +5014,20 @@ async function generateStudioImage(opts) {
 
     $("studio-status").textContent = sourceB64
       ? ("Horde img2img denoise " + payload.denoising + "…")
-      : "Horde txt2img…";
+      : ((eng === "gemini" || eng === "nano") ? "Gemini Image…" : "Horde txt2img…");
 
     const start = await api("/api/image", {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    if (!start || (!start.jobId && !start.url)) {
-      throw new Error((start && start.error) || "Pas de job Horde");
+    if (!start || (!start.jobId && !start.url && !start.image)) {
+      throw new Error((start && start.error) || "Pas de job / image");
     }
-    if (start.url) {
-      const stored = await addToGallery(start.url, "studio");
+    if (start.image || start.url) {
+      const stored = await addToGallery(start.image || start.url, "studio");
       setStudioLast(stored);
       window._leaGenBusy = false;
-      $("studio-status").textContent = "Image prête";
+      $("studio-status").textContent = "Image prête (" + (start.engine || eng || "ok") + ")";
       renderStudio();
       if (stored) { renderStudio(); openFull(resolvePhotoSrc(stored) || stored, { studio: true }); }
       return;
@@ -5200,11 +5171,13 @@ function renderSettings() {
     const data = await api("/api/settings", {
       method: "POST",
       body: JSON.stringify({
-        provider: "gemini",
+        provider: $("chatprovider") ? $("chatprovider").value : "gemini",
         personaName: $("pname").value,
         personaBio: $("pbio").value,
         geminiKeys: $("gemini").value,
         grokKeys: $("grok") ? $("grok").value : "",
+        groqKeys: $("groq") ? $("groq").value : "",
+        groqModel: $("groqmodel") ? $("groqmodel").value : "openai/gpt-oss-120b",
         imageProvider: "gemini",
         imageEngine: $("imgengine") ? $("imgengine").value : "horde",
         hordeKey: $("horde-key") ? $("horde-key").value.trim() : "",

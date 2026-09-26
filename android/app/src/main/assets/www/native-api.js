@@ -438,11 +438,17 @@
     const pref = (provider || s.provider || "gemini").toLowerCase();
     const g = rotatedGeminiKeys();
     const o = rotatedOpenAIKeys();
+    const q = rotatedGroqKeys();
     const errors = [];
-    const order = pref === "openai" ? ["openai", "gemini"] : ["gemini", "openai"];
+    // Rotation : provider préféré d'abord, puis les autres avec clés
+    let order;
+    if (pref === "groq") order = ["groq", "gemini", "openai"];
+    else if (pref === "openai") order = ["openai", "gemini", "groq"];
+    else order = ["gemini", "groq", "openai"];
     for (const p of order) {
       try {
         if (p === "gemini" && g.length) return await callGemini(messages, g);
+        if (p === "groq" && q.length) return await callGroq(messages, q);
         if (p === "openai" && o.length) return await callOpenAI(messages, o);
       } catch (e) {
         errors.push(p + ": " + (e.message || e));
@@ -1150,9 +1156,118 @@
       return { reply, chat };
     }
 
-            if (path === "/api/image" && method === "POST") {
-      // Prompt fidélité : corps en tête, répété, négatifs anti-physique
+            
+  /** Génération image native Gemini (Nano Banana / flash-image) — gratuit selon quota AI Studio */
+  async function generateGeminiNativeImage(prompt, opts) {
+    opts = opts || {};
+    const keys = rotatedGeminiKeys();
+    if (!keys.length) throw new Error("Ajoute des clés Gemini dans Clés");
+    const s = settings();
+    const pref = s.geminiImageModel || "auto";
+    const models = pref === "auto"
+      ? [
+          "gemini-2.5-flash-image",
+          "gemini-3.1-flash-image",
+          "gemini-3.1-flash-lite-image",
+          "gemini-2.0-flash-preview-image-generation",
+        ]
+      : [pref, "gemini-2.5-flash-image", "gemini-3.1-flash-image"];
+    const aspect = opts.aspect || "3:4";
+    const safetyOff = [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    ];
+    let last = "";
+    const partsIn = [{ text: String(prompt || "").slice(0, 3000) }];
+    // Références optionnelles (multi-img studio)
+    if (opts.refImages && opts.refImages.length) {
+      for (let i = 0; i < Math.min(opts.refImages.length, 3); i++) {
+        let u = opts.refImages[i];
+        let mime = "image/jpeg";
+        let data = u;
+        if (String(u).startsWith("data:")) {
+          const m = /^data:([^;]+);base64,(.+)$/s.exec(u);
+          if (m) { mime = m[1]; data = m[2]; }
+          else {
+            const c = u.indexOf(",");
+            if (c > 0) data = u.slice(c + 1);
+          }
+        }
+        partsIn.push({ text: "Reference image " + (i + 1) + ":" });
+        partsIn.push({ inline_data: { mime_type: mime, data: data } });
+      }
+    }
+    for (const key of keys) {
+      for (const model of models) {
+        try {
+          const body = {
+            contents: [{ role: "user", parts: partsIn }],
+            generationConfig: {
+              responseModalities: ["TEXT", "IMAGE"],
+              // imageConfig supporté selon modèle
+            },
+            safetySettings: safetyOff,
+          };
+          // Certains modèles acceptent imageConfig
+          try {
+            body.generationConfig.imageConfig = { aspectRatio: aspect };
+          } catch (_) {}
+          const res = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+              encodeURIComponent(model) +
+              ":generateContent?key=" + encodeURIComponent(key),
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
+            }
+          );
+          const data = await res.json().catch(() => ({}));
+          if (data.error) {
+            last = model + ": " + (data.error.message || JSON.stringify(data.error)).slice(0, 160);
+            if (/quota|billing|not available|PERMISSION/i.test(last)) continue;
+            continue;
+          }
+          const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+          for (const p of parts) {
+            const id = p.inlineData || p.inline_data;
+            if (id && (id.data || id.data)) {
+              const mime = id.mimeType || id.mime_type || "image/png";
+              const b64 = id.data;
+              return "data:" + mime + ";base64," + b64;
+            }
+          }
+          last = model + ": pas d'image dans la réponse (filtre NSFW Google ?)";
+        } catch (e) {
+          last = (e && e.message) || String(e);
+        }
+      }
+    }
+    throw new Error("Gemini Image: " + last);
+  }
+
+
+    if (path === "/api/image" && method === "POST") {
+      const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
+      // Gemini native image (Nano Banana) — gratuit selon quota, souvent filtre NSFW
+      if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
+        try {
+          const refs = body.ref_images || body.refImages || null;
+          const dataUrl = await generateGeminiNativeImage(prompt, {
+            aspect: body.aspect || "3:4",
+            refImages: refs,
+          });
+          return { ok: true, image: dataUrl, engine: "gemini" };
+        } catch (e) {
+          // fallback Horde si demandé
+          if (body.fallback_horde === false) throw e;
+          console.warn("[gemini-img]", e.message || e);
+        }
+      }
+      // Prompt fidélité : corps en tête, répété, négatifs anti-physique
       const extraNeg = String(body.negative || "");
       const negative = [
         "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
