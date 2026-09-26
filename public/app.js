@@ -314,17 +314,71 @@ function describeOutfitDetail(outfitStr, scenarioStr) {
 }
 
 
+
+/** Transforme le champ optionnel profil (FR/EN) en tokens forts pour le prompt image. */
+function expandProfileExtra(extra) {
+  const raw = String(extra || "").trim();
+  if (!raw) return { text: "", overridesPose: false, overridesOutfit: false };
+  let t = raw;
+  // Tenues / états fréquents (FR → EN pondéré)
+  const map = [
+    [/tremp[ée]e?s?|mouill[ée]e?s?|soaked|wet/gi, "soaked wet clothes, water droplets, wet hair, fabric clinging to body"],
+    [/nuisette/gi, "sheer short nightie lingerie"],
+    [/lingerie|soutien[- ]?gorge|culotte|string/gi, "sexy lingerie, bra and panties"],
+    [/porte[- ]?jarretelle|jarreti[eè]re/gi, "garter belt and stockings"],
+    [/mini[- ]?jupe/gi, "very short mini skirt"],
+    [/robe moulante|robe courte/gi, "tight short dress"],
+    [/d[eé]collet[ée]|d[eé]colleté/gi, "deep plunging cleavage neckline"],
+    [/topless|seins nus/gi, "topless, bare breasts"],
+    [/nue?\b|entirely nude|compl[eè]tement nu/gi, "fully nude"],
+    [/jean trou[ée]|ripped jeans/gi, "ripped distressed jeans"],
+    [/crop top|top court/gi, "short crop top"],
+    [/a quatre pattes|à quatre pattes|on all fours/gi, "on all fours pose, arched back"],
+    [/fesses (en l'air|tendues)|from behind|de dos/gi, "from behind, emphasizing hips and butt"],
+    [/[aà] genoux|on her knees/gi, "kneeling pose"],
+    [/allong[ée]e?|lying|on the bed/gi, "lying on the bed"],
+    [/canap[ée]|couch|sofa/gi, "on the sofa"],
+    [/pench[ée]e?|bent over/gi, "bent over pose"],
+    [/jambes [eé]cart[ée]es|legs spread/gi, "legs spread"],
+    [/sourire espi[eè]gle|mischievous/gi, "mischievous playful smile looking at camera"],
+    [/timide|shy/gi, "shy timid expression"],
+    [/provocante|provocative|sexy pose/gi, "provocative sexy pose"],
+  ];
+  let expanded = t;
+  let overridesPose = false;
+  let overridesOutfit = false;
+  for (const [re, en] of map) {
+    if (re.test(t)) {
+      expanded += ", " + en;
+      if (/pose|genoux|allong|canap|patte|pench|jambes|behind|lying|kneel|bent|spread|sofa|couch|bed/i.test(en)) overridesPose = true;
+      if (/clothes|lingerie|dress|skirt|jeans|top|nude|nightie|bra|panties|outfit|wet|soaked/i.test(en)) overridesOutfit = true;
+    }
+  }
+  // Détection générique pose / tenue dans le texte libre
+  if (/(pose|position|debout|assise|allong|genoux|canap|lit|dos|profil)/i.test(t)) overridesPose = true;
+  if (/(tenue|habit|robe|jupe|jean|top|lingerie|nuisette|soutien|culotte|v[eê]t)/i.test(t)) overridesOutfit = true;
+  return {
+    text: ("USER DETAIL (MUST FOLLOW, high priority): " + expanded).slice(0, 500),
+    overridesPose,
+    overridesOutfit,
+  };
+}
+
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
     // Même visage que la galerie Grok (jeune, soft, cheveux lisses, pas glamour MILF)
-    const pose = pick([
+    const ex0 = expandProfileExtra(extra);
+    const pose = ex0.overridesPose
+      ? "pose from user detail, follow USER DETAIL exactly"
+      : pick([
       "standing in doorway looking back over shoulder at camera, wet clothes",
       "facing camera shy in the hallway doorway, soaked crop top",
       "hand on doorframe, rain-soaked, timid soft expression",
       "leaning on doorframe, wet hair sticking to skin, eyes down shy",
     ]);
     return [
+      ex0.text ? (ex0.text + ", (user optional detail is mandatory:1.4),") : "",
       "ultra photorealistic DSLR photo of Léa, SAME face as reference gallery photos,",
       "(18-21 year old young French woman:1.35), (looks exactly 21:1.3), youthful soft face, baby face not mature,",
       "(long straight dark brown hair to lower back:1.25), NOT wavy, NOT hollywood waves,",
@@ -336,7 +390,10 @@ function buildLeaImagePrompt(extra = "") {
       "apartment hallway doorway at night, indoor lights,",
       pose + ",",
       "natural skin pores, soft cinematic lighting, sharp detailed young face,",
-      extra || "",
+      (function () {
+        const ex = expandProfileExtra(extra);
+        return ex.text ? (ex.text + ", (must match user detail:1.35),") : "";
+      })(),
       "NOT middle-aged, NOT 30 years old, NOT 35, NOT mature face, NOT glamorous heavy makeup,",
       "different pose from reference, new angle, not identical to cover photo,",
       "NOT different woman, NOT model face, NOT wavy voluminous salon hair, NOT dry clothes, NOT nude, NOT studio seamless"
@@ -386,7 +443,11 @@ function buildLeaImagePrompt(extra = "") {
       "slight over-the-shoulder look, still in the same outfit and location",
     ];
   }
-  const pose = pick(posePool);
+  const ex = expandProfileExtra(extra);
+  // Si l'utilisateur précise une pose, on ne force PAS une pose aléatoire qui contredit
+  const pose = ex.overridesPose
+    ? ("pose/position from user detail, follow USER DETAIL exactly")
+    : pick(posePool);
 
   const bodyLock = {
     ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
@@ -443,22 +504,25 @@ function buildLeaImagePrompt(extra = "") {
   else if (/panne|voiture/i.test(scenario)) situation = "car broke down, seeking help";
   else if (scenario) situation = scenario.slice(0, 160);
 
-  // Physique verrouillé + tenue/lieu scénario (pose seule varie un peu)
+  // Physique verrouillé + tenue/lieu scénario ; le détail optionnel utilisateur PRIME sur pose/tenue si précisé
   const phys = physicalLocksFromText(c);
+  const outfitLine = ex.overridesOutfit
+    ? ("OUTFIT FROM USER DETAIL (priority over scenario default): follow USER DETAIL, " + outfitDetail + ",")
+    : ("OUTFIT REQUIRED (match exactly): " + outfitDetail + ",");
   return [
     fixedAppearanceBlock(c) + ",",
     "Photorealistic photo,",
+    ex.text ? (ex.text + ", (user optional detail is mandatory:1.4),") : "",
     "body: " + body + ",",
     phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
-    "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",",
-    "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",",
+    outfitLine,
+    outfitLine,
     "Location: " + placeDetail + ",",
     "scenario: " + situation + ",",
     pose + ",",
     "IMPORTANT: different pose and camera angle from any reference photo, new composition, not a copy of the cover,",
     "Natural skin pores, realistic DSLR photography, sharp detailed face matching identity, soft cinematic lighting,",
     "High-end photorealistic quality,",
-    extra || "",
     anti,
     "No cartoon, no anime, no CGI, no illustration,",
     "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
