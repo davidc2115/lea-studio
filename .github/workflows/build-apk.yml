@@ -172,3 +172,21 @@ jobs:
           path: lea-studio.apk
           retention-days: 90
           compression-level: 0
+
+      - name: Upload sd-arm64 binary
+        if: env.SD_BIN_OK == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sd-arm64
+          path: sd-arm64
+          if-no-files-found: ignore
+
+      - name: Publish sd-arm64 release
+        if: env.SD_BIN_OK == '1' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: sd-bin
+          name: SD.cpp Android arm64 binary
+          files: sd-arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
