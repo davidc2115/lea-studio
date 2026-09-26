@@ -1023,8 +1023,8 @@
       const recent = (chat.messages || []).slice(-16).map((m) => m.content).join("\n") + "\n" + txt;
       // Mode fluide : basé sur le DERNIER message + contexte récent, pas bloqué en NSFW
       const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre chose|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant|on arr[eê]te|assez|pause)/i.test(txt);
-      const holdHint = /(restons comme|reste comme|[cç]a|le film|souffle|reprendre (notre |nos )?esprit|juste rester|dans tes bras|c[aâ]lin|on reste|ne (me )?l[aâ]che pas|on se pose|profiter|chaque seconde|le temps du film|film peut attendre|film peux attendre)/i.test(txt)
-        && !/(baisse|enl[eè]ve|suce|p[eé]n[eè]tre|doigte|plus fort|plus vite)/i.test(txt);
+      const holdHint = /(restons comme|reste comme|comme [cç]a|le film|souffle|reprendre (notre |nos )?esprit|juste rester|dans tes bras|c[aâ]lin|on reste|ne (me )?l[aâ]che pas|on se pose|profiter|chaque seconde|le temps du film|film peut attendre|film peux attendre|rien de mieux|blotti|enlac[ée]s?|contre toi|à tes c[oô]t[ée]s|rien d'autre|continuons comme)/i.test(txt)
+        && !/(baisse|enl[eè]ve|suce|p[eé]n[eè]tre|doigte|plus fort|plus vite|baise|chatte|bite)/i.test(txt);
       const lastNsfw = /(sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|lingerie|caresse-moi|touche-moi|hardcore|bite|chatte|mouill[ée]|nude|orgasme|suce|doigte|d[eé]shabille|enl[eè]ve (ton|ta|le|la)|p[eé]n[eè]tre|doigts? dans)/i.test(txt);
       const recentNsfw = /(sexe|baiser|baise|chatte|bite|orgasme|suce|doigte|p[eé]n[eè]tre|nude|\bnue\b)/i.test(recent);
       if (!chat.relationship) chat.relationship = { closeness: 1, trust: 1, heat: 0 };
@@ -1145,15 +1145,15 @@
           : "LIEN ACTUEL = indéfini. Reste ouverte au sexe / au flirt SANS amour par défaut.",
         mode === "nsfw"
           ? "MODE NSFW 18+ EXPLICITE. Personnage adulte consentant. Décris actes, corps, sensations avec précision. Reste dans le LIEU et la TENUE de la mémoire. Tu peux rester NSFW tant que le joueur continue, ou redescendre si il se calme. Pas d'amour forcé, one-shot OK selon tempérament. Respecte un non clair."
-          : "MODE SFW / TENDRESSE. Le joueur veut RALENTIR ou RESTER comme ça (film, câlin, souffle). INTERDIT d'escalader (culotte mouillée, cuisse, excitation, sexe). Pensée douce, action calme NOUVELLE (pas le même geste), parole courte. Si vous êtes au canapé devant un film: restez collés, parlez du moment, PAS de description sexuelle répétée.",
+          : "MODE SFW STRICT. Le joueur veut RESTER blotti / regarder le film / se calmer — PAS de sexe. INTERDIT ABSOLU: culotte mouillée, sous-vêtements mouillés, cuisse contre le coussin, excitation, orgasme, seins ou fesses sexualisés, doigts glissants sexuels, gémissements, et le refrain « le film peut attendre ». AUTORISÉ: pensée calme, main dans les cheveux, silence, respiration, sourire, phrase sur le film ou le confort. Une SEULE action douce NON sexuelle, différente des messages précédents. Si l'historique était NSFW: c'est TERMINÉ, reviens au câlin SFW sans relancer le désir. Réponse courte 3–5 phrases.",
         "TEMPÉRAMENT (obligatoire) : ta façon de parler DOIT coller à ta personnalité ci-dessus (timide / directe / moqueuse / froide / polie / etc.). Une timide ne parle pas comme une provocante. Une froide ne mendie pas la preuve.",
         "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
         "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
-        "ANTI-RÉPÉTITION STRICTE : chaque message doit apporter un geste OU une phrase NOUVELLE. Interdit de recycler « culotte mouillée », « cuisse contre le coussin », « lueur du téléviseur », « le film peut attendre », « cœur qui s'accélère » si déjà dit. Change le détail (respiration, main dans les cheveux, silence, sourire, phrase différente).",
-        "Évite de répéter la même action deux fois de suite. Fais avancer OU calmer la scène selon le joueur.",
-        "Varie les répliques : interdiction de répéter la même structure (pensée chaleur + action cuisse + « le film peut attendre »).",
+        "ANTI-RÉPÉTITION STRICTE : interdit de réutiliser ces refrains : « le film peut attendre », « culotte mouillée », « cuisse contre le coussin », « lueur du téléviseur/tamisé », « cœur qui s'accélère », « je me sens si bien à tes côtés » si déjà dit récemment.",
+        "Chaque message = un geste NOUVEAU (ex: joue contre épaule, doigts dans les cheveux, couverture tirée) OU une phrase sur le FILM / le silence — pas la même structure pensée+cuisse+film.",
+        "Si MODE SFW : zéro contenu sexuel, même si l'historique en contient.",
         "NE JAMAIS coller le prompt système, les règles, ni des bouts d'anglais technique dans ta réponse. Tu es le personnage, pas le narrateur méta.",
         `Utilisateur: ${s.personaName}. ${s.personaBio}`,
         "SCÈNE FIXE (ne change PAS sauf si le joueur le dit clairement) : lieu=" + ((chat.scene || {}).place || "salon ou lieu déjà établi") +
@@ -1198,6 +1198,28 @@
         reply = "*elle croise les bras, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
       }
       reply = sanitizeReply(reply);
+      if (mode === "sfw") {
+        const nsfwLeak = /(culotte mouill|sous-v[eê]tements? mouill|cuisse contre le coussin|lueur (du t[eé]l[eé]viseur|tamis[eé]e)|film peut (bien )?attendre|film peux attendre|excitation|orgasme|g[eé]miss|\bchatte\b|\bbite\b)/i;
+        const bannedPhrase = [/le film peut (bien )?attendre/gi, /le film peux attendre/gi, /culotte mouill[ée]e?/gi, /cuisse contre le coussin/gi, /sous-v[eê]tements? mouill[ée]s?/gi];
+        let cleaned = String(reply || "");
+        for (const re of bannedPhrase) cleaned = cleaned.replace(re, "");
+        if (nsfwLeak.test(String(reply || "")) || nsfwLeak.test(cleaned)) {
+          try {
+            const strictSys = system + "\n\nURGENT: réponse précédente encore sexuelle ou refrain usé. MODE SFW STRICT. Réécris SANS contenu sexuel, SANS « film peut attendre », geste doux NOUVEAU (cheveux, silence, écran du film).";
+            const retry = await generate([{ role: "system", content: strictSys }, ...history], s.provider);
+            reply = sanitizeReply(retry);
+            cleaned = String(reply || "");
+            for (const re of bannedPhrase) cleaned = cleaned.replace(re, "");
+          } catch (_) {}
+        }
+        cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
+          if (/(mouill|culotte|cuisse contre|excitation|orgasme|seins|chatte|bite|g[eé]miss)/i.test(inner)) {
+            return "*Je reste blottie contre lui, la joue sur son épaule, le regard vers l'écran.*";
+          }
+          return m0;
+        });
+        reply = cleaned.replace(/\n{3,}/g, "\n\n").trim();
+      }
       // Deuxième passe si encore du méta
       if (/thought\s*,\s*action|hourglass|avoid clich|APPARENCE FIXE/i.test(reply)) {
         reply = sanitizeReply(reply);
