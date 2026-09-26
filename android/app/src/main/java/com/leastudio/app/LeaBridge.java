@@ -777,25 +777,39 @@ public class LeaBridge {
                 }
             } catch (Exception ignored) {}
             JSONObject o = new JSONObject();
-            boolean hasBin = bin.isFile() && bin.length() > 50_000L && bin.canExecute();
+            // chmod au cas où le fichier existe mais pas +x (Android)
+            if (bin.isFile() && bin.length() > 50_000L && !bin.canExecute()) {
+                bin.setExecutable(true, false);
+                try {
+                    Runtime.getRuntime().exec(new String[]{"chmod", "755", bin.getAbsolutePath()}).waitFor();
+                } catch (Exception ignored) {}
+            }
+            boolean hasBinFile = bin.isFile() && bin.length() > 50_000L;
+            boolean hasBin = hasBinFile && bin.canExecute();
             o.put("native", hasBin || hasAsset);
             o.put("binary", hasBin);
-            o.put("binarySize", hasBin ? bin.length() : 0);
-            // Prêt UNIQUEMENT si binaire + modèle
+            o.put("binaryFile", hasBinFile);
+            o.put("binarySize", hasBinFile ? bin.length() : 0);
+            // Prêt UNIQUEMENT si binaire exécutable + modèle
             o.put("ready", hasBin && model != null && model.length() > 30_000_000L);
             o.put("model", model != null ? model.getName() : "");
             o.put("modelMb", model != null ? model.length() / (1024 * 1024) : 0);
             o.put("path", dir.getAbsolutePath());
-            if (!hasBin && !hasAsset) {
-                o.put("note", "Binaire sd.cpp manquant. Appuie sur « Pack SD.cpp » pour le télécharger (modèle + binaire).");
+            o.put("binPath", bin.getAbsolutePath());
+            if (!hasBinFile && !hasAsset) {
+                o.put("note", "Binaire sd.cpp absent. « Pack SD.cpp » télécharge binaire + modèle.");
+                o.put("needBinary", true);
+            } else if (hasBinFile && !hasBin) {
+                o.put("note", "Fichier binaire présent mais non exécutable. Relance Pack SD.cpp.");
                 o.put("needBinary", true);
             } else if (!hasBin && hasAsset) {
-                o.put("note", "Binaire en assets — extraction au 1er lancement.");
+                o.put("note", "Binaire en assets — extraction au 1er lancement via Pack SD.cpp.");
+                o.put("needBinary", true);
             } else if (model == null) {
-                o.put("note", "Binaire OK. Télécharge un modèle GGUF (bouton Pack SD.cpp).");
+                o.put("note", "Binaire OK (" + (bin.length()/1024) + " Ko). Manque le modèle GGUF → Pack SD.cpp.");
                 o.put("needModel", true);
             } else {
-                o.put("note", "Prêt : " + model.getName() + " + binaire");
+                o.put("note", "Prêt : " + model.getName() + " + binaire " + (bin.length()/1024) + " Ko");
             }
             return o.toString();
         } catch (Exception e) {
@@ -828,7 +842,15 @@ public class LeaBridge {
         File dir = new File(ctx.getFilesDir(), "bin");
         if (!dir.exists()) dir.mkdirs();
         File out = new File(dir, "sd");
-        if (out.isFile() && out.length() > 100_000 && out.canExecute()) return out;
+        if (out.isFile() && out.length() > 100_000) {
+            out.setExecutable(true, false);
+            try {
+                Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
+            } catch (Exception ignored) {}
+            if (out.canExecute()) return out;
+            // Fichier corrompu / non exécutable → retélécharger
+            out.delete();
+        }
 
         // 1) Assets APK
         String[] candidates = { "native/sd-arm64", "native/sd", "bin/sd-arm64" };
@@ -923,9 +945,9 @@ public class LeaBridge {
             }
         }
         throw new Exception(
-            "Binaire sd.cpp introuvable. " +
-            (last != null ? last.getMessage() : "") +
-            " → utilise Horde ou Local Dream, ou rebuild APK avec binaire CI."
+            "Binaire sd.cpp introuvable (release sd-bin). " +
+            (last != null ? last.getMessage() : "404") +
+            " Relance Pack SD.cpp après le prochain build CI, ou choisis Horde."
         );
     }
 

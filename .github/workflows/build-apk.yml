@@ -67,15 +67,21 @@ jobs:
               -DSD_CUDA=OFF -DSD_VULKAN=OFF -DSD_OPENCL=OFF -DSD_METAL=OFF \
               || { echo "cmake SD skip"; echo "SD_BIN_OK=0" >> "$GITHUB_ENV"; exit 0; }
             cmake --build . --config MinSizeRel -j$(nproc) || { echo "build SD skip"; echo "SD_BIN_OK=0" >> "$GITHUB_ENV"; exit 0; }
-            BIN=$(find . -type f -name "sd" -executable | head -1)
-            if [ -z "$BIN" ]; then BIN=$(find . -type f -name "sd" | head -1); fi
-            if [ -n "$BIN" ]; then
+            # leejet/stable-diffusion.cpp produit bin/sd-cli (plus "sd")
+            BIN=$(find . -type f \( -name "sd-cli" -o -name "sd" \) -executable 2>/dev/null | head -1)
+            if [ -z "$BIN" ]; then BIN=$(find . -type f \( -name "sd-cli" -o -name "sd" \) 2>/dev/null | head -1); fi
+            if [ -z "$BIN" ]; then BIN=$(find . -path "*/bin/*" -type f -executable 2>/dev/null | head -1); fi
+            echo "BIN trouvé: ${BIN:-aucun}"
+            find . -type f -name "sd*" 2>/dev/null | head -20 || true
+            if [ -n "$BIN" ] && [ -f "$BIN" ]; then
               "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" --strip-unneeded "$BIN" || true
               cp "$BIN" "$GITHUB_WORKSPACE/sd-arm64"
               chmod +x "$GITHUB_WORKSPACE/sd-arm64"
               echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
               ls -la "$GITHUB_WORKSPACE/sd-arm64"
+              file "$GITHUB_WORKSPACE/sd-arm64" || true
             else
+              echo "AUCUN binaire sd/sd-cli trouvé"
               echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
             fi
           else
@@ -187,6 +193,8 @@ jobs:
         with:
           tag_name: sd-bin
           name: SD.cpp Android arm64 binary
+          body: Binaire CLI arm64 pour Léa Studio (stable-diffusion.cpp sd-cli). Téléchargé par Pack SD.cpp.
           files: sd-arm64
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
