@@ -93,14 +93,127 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 /** Détails physiques EN forçant cheveux, yeux, freckles, peau (FR → EN prompt). */
 /** Physique complet : looks_en (CAST) prioritaire, sinon appearance. */
+
+/** Extrait cheveux / yeux / traits non-humains depuis appearance + looks_en (FR ou EN). */
+function physicalLocksFromText(c) {
+  const blob = [
+    c && c.looks_en,
+    c && c.appearance,
+    c && c.body,
+    c && c.ethnicity,
+    c && c.name,
+  ].filter(Boolean).join(" ").toLowerCase();
+
+  const out = { positive: [], negative: [], features: [] };
+
+  // —— Cheveux (couleur) ——
+  const hairMap = [
+    [/argent[ée]?s?|silver\s*hair|white\s*hair|cheveux\s*blancs|cheveux\s*argent/i, "silver white hair", "brown hair, black hair, blonde hair, red hair, green hair, blue hair, purple hair, pink hair"],
+    [/cheveux\s*roux|redhead|ginger|red\s*hair|roux/i, "natural red ginger hair", "blonde hair, brown hair, black hair, green hair, blue hair, purple hair, silver hair"],
+    [/blond|blonde|cheveux\s*blonds/i, "blonde hair", "brown hair, black hair, red hair, green hair, blue hair, purple hair, pink hair, silver hair"],
+    [/cheveux\s*noirs|black\s*hair|dark\s*black\s*hair/i, "black hair", "blonde hair, brown hair, red hair, green hair, blue hair, purple hair, pink hair, silver hair"],
+    [/ch[aâ]tain|chestnut|auburn/i, "chestnut brown hair", "blonde hair, black hair, red hair, green hair, blue hair, purple hair, pink hair"],
+    [/cheveux\s*bruns|brown\s*hair|dark\s*brown\s*hair|brune/i, "dark brown hair", "blonde hair, black hair, red hair, green hair, blue hair, purple hair, pink hair, silver hair, teal hair"],
+    [/cheveux\s*verts|green\s*hair/i, "green hair", "brown hair, blonde hair, black hair"],
+    [/cheveux\s*bleus|blue\s*hair/i, "blue hair", "brown hair, blonde hair, black hair"],
+    [/cheveux\s*roses|pink\s*hair/i, "pink hair", "brown hair, blonde hair, black hair"],
+    [/cheveux\s*violets|purple\s*hair|lavender\s*hair/i, "purple hair", "brown hair, blonde hair, black hair"],
+  ];
+  for (const [re, pos, neg] of hairMap) {
+    if (re.test(blob)) {
+      out.positive.push("(" + pos + ":1.45)");
+      out.negative.push(neg);
+      break;
+    }
+  }
+
+  // Style cheveux
+  if (/attach[ée]s?|en\s*chignon|bun|pony\s*tail|queue\s*de\s*cheval|tied\s*up/i.test(blob)) {
+    out.positive.push("hair tied up or in a bun or ponytail");
+  }
+  if (/longs?\s*(cheveux|hair)|long\s*(straight|wavy)|jusqu.?au\s*rein|lower\s*back/i.test(blob)) {
+    out.positive.push("long hair");
+  }
+  if (/lisse|straight\s*hair/i.test(blob)) out.positive.push("straight hair");
+  if (/ondul[ée]s?|wavy/i.test(blob)) out.positive.push("wavy hair");
+  if (/boucl[ée]s?|curly/i.test(blob)) out.positive.push("curly hair");
+
+  // Yeux
+  const eyeMap = [
+    [/yeux\s*verts|green\s*eyes/i, "green eyes"],
+    [/yeux\s*bleus|blue\s*eyes/i, "blue eyes"],
+    [/yeux\s*marron|brown\s*eyes|yeux\s*bruns/i, "brown eyes"],
+    [/yeux\s*noisette|hazel\s*eyes/i, "hazel eyes"],
+    [/yeux\s*gris|grey\s*eyes|gray\s*eyes/i, "grey eyes"],
+    [/yeux\s*noirs|black\s*eyes|dark\s*eyes/i, "dark brown eyes"],
+  ];
+  for (const [re, pos] of eyeMap) {
+    if (re.test(blob)) {
+      out.positive.push("(" + pos + ":1.3)");
+      break;
+    }
+  }
+
+  // Peau
+  if (/peau\s*claire|fair\s*skin|pale\s*skin|peau\s*p[aâ]le/i.test(blob)) out.positive.push("fair pale skin");
+  if (/peau\s*mate|tan\s*skin|olive\s*skin|golden\s*tan/i.test(blob)) out.positive.push("tan olive skin");
+  if (/peau\s*fonc[ée]e|dark\s*skin|brown\s*skin/i.test(blob)) out.positive.push("dark brown skin");
+
+  // —— Non-humain / kemonomimi (NE PAS ignorer) ——
+  const nh = [];
+  if (/oreille[s]?\s*de\s*renard|fox\s*ears|kitsune/i.test(blob)) nh.push("(fox ears on head:1.4)", "fluffy fox ears");
+  if (/oreille[s]?\s*de\s*chat|cat\s*ears|nekomimi/i.test(blob)) nh.push("(cat ears on head:1.4)", "cat ears");
+  if (/oreille[s]?\s*de\s*loup|wolf\s*ears/i.test(blob)) nh.push("(wolf ears on head:1.4)");
+  if (/oreille[s]?\s*de\s*lapin|bunny\s*ears|rabbit\s*ears/i.test(blob)) nh.push("(bunny rabbit ears:1.4)");
+  if (/oreille[s]?\s*(d.?animaux|animales)|animal\s*ears|kemonomimi/i.test(blob)) nh.push("(animal ears on head:1.35)");
+  if (/\bqueue\b|tail\b|fox\s*tail|cat\s*tail/i.test(blob)) nh.push("(animal tail:1.3)");
+  if (/cornes?|horns/i.test(blob)) nh.push("(horns on head:1.3)");
+  if (/ailes?|wings/i.test(blob)) nh.push("(wings:1.25)");
+  if (/elfe|elf\s*ears|pointed\s*ears/i.test(blob)) nh.push("(pointed elf ears:1.35)");
+  if (/vampire|fangs/i.test(blob)) nh.push("subtle fangs");
+  if (/succube|demon\s*girl|d[eé]mone/i.test(blob)) nh.push("succubus demon girl features");
+  if (nh.length) {
+    out.features = nh;
+    out.positive.push(...nh);
+    out.negative.push("plain human ears only, missing animal ears, no ears on head");
+  }
+
+  // Poitrine rapide
+  if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(blob)) {
+    out.positive.push("(small flat A-cup breasts:1.3)");
+    out.negative.push("large breasts, huge breasts, D-cup, E-cup");
+  } else if (/bonnet\s*b|b-cup/i.test(blob)) {
+    out.positive.push("(small-medium B-cup breasts:1.3)");
+    out.negative.push("huge breasts, E-cup, flat chest");
+  } else if (/bonnet\s*c|c-cup/i.test(blob)) {
+    out.positive.push("(medium C-cup breasts:1.25)");
+  } else if (/bonnet\s*d|d-cup|95d/i.test(blob)) {
+    out.positive.push("(large D-cup breasts:1.3)");
+  } else if (/bonnet\s*[ef]|e-cup|f-cup|100e/i.test(blob)) {
+    out.positive.push("(very large E-cup breasts:1.35)");
+  }
+
+  if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
+  if (/ronde|chubby|plus.?size|pulpeuse/i.test(blob)) out.positive.push("curvy plus-size soft body");
+  if (/athl[eé]tique|athletic|toned/i.test(blob)) out.positive.push("athletic toned body");
+
+  return out;
+}
+
 function describeLooks(c) {
   if (!c) return "";
   if (c.looks_en && String(c.looks_en).length > 20) {
     return String(c.looks_en).replace(/\s+/g, " ").trim();
   }
+  // Fallback: appearance FR + locks extraits (cheveux, non-humain) en anglais pour SD
   const a = String(c.appearance || "").replace(/\s+/g, " ").trim();
   const body = String(c.body || "").trim();
-  return [a, body].filter(Boolean).join(", ");
+  let extra = "";
+  try {
+    const phys = physicalLocksFromText(c);
+    if (phys.positive.length) extra = phys.positive.join(", ");
+  } catch (_) {}
+  return [a, body, extra].filter(Boolean).join(", ");
 }
 
 /** Place détaillée pour arrière-plan Horde (évite fond générique). */
@@ -239,7 +352,7 @@ function buildLeaImagePrompt(extra = "") {
 
   // Poses cohérentes avec le scénario (pas un shooting studio générique)
   let posePool;
-  if (/jade|lina|hana|mei|sasha/.test(c.id)) {
+  if (/^(jade|lina|hana|mei|sasha)$/.test(c.id)) {
     posePool = [
       "sitting at a desk with open textbooks, studying at night",
       "standing shy near the desk, arms loosely folded, glasses on",
@@ -330,10 +443,12 @@ function buildLeaImagePrompt(extra = "") {
   else if (scenario) situation = scenario.slice(0, 160);
 
   // Physique verrouillé + tenue/lieu scénario (pose seule varie un peu)
+  const phys = physicalLocksFromText(c);
   return [
     fixedAppearanceBlock(c) + ",",
     "Photorealistic photo,",
     "body: " + body + ",",
+    phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
     "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",",
     "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",",
     "Location: " + placeDetail + ",",
@@ -345,6 +460,7 @@ function buildLeaImagePrompt(extra = "") {
     anti,
     "No cartoon, no anime, no CGI, no illustration,",
     "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
+    phys.negative.length ? ("NOT " + phys.negative.join(", ") + ",") : "",
     "no wrong outfit, no missing wet/ripped/oversized details from the scenario outfit,",
     "NOT " + ageNegatives(c)
   ].filter(Boolean).join(" ");
@@ -1867,22 +1983,30 @@ async function adaptImportedCharacter(char) {
     };
 
     const sys = [
-      "Tu adaptes une fiche personnage Chub/BotBooru pour l'app mobile Léa Studio (roleplay FR).",
+      "Tu adaptes une fiche personnage Chub/BotBooru pour l'app mobile Léa Studio (roleplay FR + génération d'images).",
       "Réponds UNIQUEMENT en JSON valide sans markdown, clés exactes:",
-      "title, scenario, personality, appearance, greeting",
+      "title, scenario, personality, appearance, looks_en, greeting",
       "Règles:",
-      "1) TOUT en français fluide (sauf noms propres).",
+      "1) title, scenario, personality, appearance, greeting = français fluide (sauf noms propres).",
       "2) Remplace TOUTES les occurrences de {{char}} / le nom technique par le prénom « " + name + " ».",
       "3) Garde {{user}} pour l'utilisateur.",
-      "4) scenario = situation de départ claire (lieu, qui est qui, pourquoi ils se parlent), 18+ ok.",
-      "5) appearance = UNIQUEMENT le physique (cheveux avec COULEUR exacte, yeux, peau, morphologie, poitrine). Pas de fantasmes narratifs.",
-      "6) personality = traits + façon de parler, condensé.",
-      "7) greeting = 1er message format Léa Studio:",
+      "4) scenario = situation de départ claire (lieu, relation, pourquoi), 18+ ok.",
+      "5) appearance (FR) = physique COMPLET et fidèle à la fiche d'origine:",
+      "   - âge apparent, origine/type",
+      "   - cheveux: COULEUR exacte + style (longs, attachés, etc.)",
+      "   - yeux: COULEUR exacte",
+      "   - peau, morphologie, poitrine (bonnet si connu)",
+      "   - traits NON-HUMAINS s'ils existent: oreilles de renard/chat/loup, queue, cornes, ailes, oreilles d'elfe, etc. — NE JAMAIS les supprimer ni les inventer",
+      "6) looks_en (ANGLAIS, pour Stable Diffusion) = une seule phrase détaillée, ex:",
+      "   '18 year old european woman, long dark brown hair tied up, green eyes, fair skin, B-cup breasts, slim body, fox ears on head, fluffy fox tail'",
+      "   Doit coller à appearance. Inclure TOUS les traits non-humains. Couleur de cheveux obligatoire.",
+      "7) personality = traits + façon de parler, condensé FR.",
+      "8) greeting = 1er message format Léa Studio:",
       "   (pensée)",
       "   *action*",
       "   paroles",
-      "8) title = rôle court en français.",
-      "9) Interdit de laisser du texte anglais brut ou {{char}}.",
+      "9) title = rôle court en français.",
+      "10) Interdit: texte anglais dans appearance/scenario, {{char}}, inventer une couleur de cheveux différente, effacer oreilles/queue/cornes si présentes dans la source.",
     ].join("\n");
 
     const models = [model, "gemini-2.5-flash", "gemini-2.0-flash", "gemini-flash-latest"];
@@ -1928,7 +2052,16 @@ async function adaptImportedCharacter(char) {
           if (j.scenario) char.scenario = clean(j.scenario).slice(0, 2500);
           if (j.personality) char.personality = clean(j.personality).slice(0, 2000);
           if (j.appearance) char.appearance = clean(j.appearance).slice(0, 2000);
+          if (j.looks_en) char.looks_en = String(j.looks_en).replace(/\s+/g, " ").trim().slice(0, 1200);
           if (j.greeting) char.greeting = clean(j.greeting).slice(0, 2500);
+          // Tags non-humain si détectés
+          const physBlob = (char.appearance || "") + " " + (char.looks_en || "");
+          const extraTags = [];
+          if (/renard|fox\s*ear/i.test(physBlob)) extraTags.push("renard", "kemonomimi");
+          if (/oreille[s]?\s*de\s*chat|cat\s*ears/i.test(physBlob)) extraTags.push("nekomimi", "kemonomimi");
+          if (/elfe|elf\s*ear/i.test(physBlob)) extraTags.push("elfe");
+          if (/queue|tail/i.test(physBlob)) extraTags.push("queue");
+          if (extraTags.length) char.tags = Array.from(new Set([].concat(char.tags || [], extraTags)));
           // Vérifier qu'on n'a plus de {{char}} ni pavé anglais dominant
           const stillEn = /\b(the|she is|character|cleans|house)\b/i.test(char.scenario + " " + char.appearance)
             && !/[àâäéèêëïîôùûüç]/i.test((char.scenario || "").slice(0, 100));
@@ -2881,6 +3014,11 @@ function bodyNegatives(c) {
   ].filter(Boolean).join(" ").toLowerCase();
   const base = "child, teen, underage, middle-aged, elderly, 35 years old, 40 years old, wrong ethnicity, deformed, extra limbs, different face, different person";
   let neg = base;
+  // Couleurs de cheveux / traits non-humains
+  try {
+    const phys = physicalLocksFromText(c);
+    if (phys.negative && phys.negative.length) neg += ", " + phys.negative.join(", ");
+  } catch (_) {}
 
   // Petite / plate poitrine
   const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
@@ -2978,16 +3116,19 @@ function fixedAppearanceBlock(c) {
   const looks = describeLooks(c);
   const body = String(c.body || "").trim();
   const eth = String(c.ethnicity || "").trim();
+  const phys = physicalLocksFromText(c);
   return [
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
     "Person: " + name + ",",
     identityLock(c) + ",",
     looks + ",",
+    phys.positive.join(", ") + ",",
     morphWeights(c) + ",",
     body ? ("morphology: " + body + ",") : "",
     eth ? ("ethnicity: " + eth + ",") : "",
     "(" + age + " year old:1.45), (looks exactly " + age + ":1.4),",
-    "IDENTICAL face, hair color, hair style, eye color, skin tone, breast size, body type in EVERY image,",
+    "IDENTICAL face, EXACT hair color, hair style, eye color, skin tone, breast size, body type,",
+    phys.features.length ? ("MUST show: " + phys.features.join(", ") + ",") : "",
     "same person as cover photo and profile, consistent identity lock,",
     "=== END FIXED APPEARANCE — only pose, outfit, posture, environment may change below ===",
   ].filter(Boolean).join(" ");
