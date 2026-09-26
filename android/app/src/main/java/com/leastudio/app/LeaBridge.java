@@ -776,19 +776,25 @@ public class LeaBridge {
                 }
             } catch (Exception ignored) {}
             JSONObject o = new JSONObject();
-            o.put("native", bin.isFile() || hasAsset);
-            o.put("binary", bin.isFile());
-            o.put("binarySize", bin.isFile() ? bin.length() : 0);
-            o.put("ready", model != null && model.length() > 30_000_000L);
+            boolean hasBin = bin.isFile() && bin.length() > 50_000L && bin.canExecute();
+            o.put("native", hasBin || hasAsset);
+            o.put("binary", hasBin);
+            o.put("binarySize", hasBin ? bin.length() : 0);
+            // Prêt UNIQUEMENT si binaire + modèle
+            o.put("ready", hasBin && model != null && model.length() > 30_000_000L);
             o.put("model", model != null ? model.getName() : "");
             o.put("modelMb", model != null ? model.length() / (1024 * 1024) : 0);
             o.put("path", dir.getAbsolutePath());
-            if (!(bin.isFile() || hasAsset)) {
-                o.put("note", "Binaire sd absent de l'APK (rebuild avec étape CI sd.cpp).");
+            if (!hasBin && !hasAsset) {
+                o.put("note", "Binaire sd.cpp manquant. Appuie sur « Pack SD.cpp » pour le télécharger (modèle + binaire).");
+                o.put("needBinary", true);
+            } else if (!hasBin && hasAsset) {
+                o.put("note", "Binaire en assets — extraction au 1er lancement.");
             } else if (model == null) {
-                o.put("note", "Binaire OK. Télécharge un modèle GGUF/safetensors (bouton pack SD).");
+                o.put("note", "Binaire OK. Télécharge un modèle GGUF (bouton Pack SD.cpp).");
+                o.put("needModel", true);
             } else {
-                o.put("note", "Prêt : " + model.getName());
+                o.put("note", "Prêt : " + model.getName() + " + binaire");
             }
             return o.toString();
         } catch (Exception e) {
@@ -823,6 +829,7 @@ public class LeaBridge {
         File out = new File(dir, "sd");
         if (out.isFile() && out.length() > 100_000 && out.canExecute()) return out;
 
+        // 1) Assets APK
         String[] candidates = { "native/sd-arm64", "native/sd", "bin/sd-arm64" };
         InputStream in = null;
         for (String c : candidates) {
@@ -831,23 +838,94 @@ public class LeaBridge {
                 break;
             } catch (Exception ignored) {}
         }
-        if (in == null) {
-            throw new Exception("Binaire sd.cpp absent (assets/native/sd-arm64). Rebuild APK avec CI sd.cpp.");
+        if (in != null) {
+            FileOutputStream fos = new FileOutputStream(out);
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
+            fos.close();
+            in.close();
+            out.setExecutable(true, false);
+            out.setReadable(true, false);
+            try {
+                Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
+            } catch (Exception ignored) {}
+            if (out.isFile() && out.length() > 100_000) return out;
         }
-        FileOutputStream fos = new FileOutputStream(out);
-        byte[] buf = new byte[8192];
-        int n;
-        while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
-        fos.close();
-        in.close();
-        out.setExecutable(true, false);
-        out.setReadable(true, false);
-        // Android 10+ : aussi essayer chmod
-        try {
-            Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
-        } catch (Exception ignored) {}
-        if (!out.isFile()) throw new Exception("Échec extraction binaire sd");
-        return out;
+
+        // 2) Téléchargement depuis releases lea-studio (binaire arm64 précompilé CI)
+        String[] urls = new String[] {
+            "https://github.com/davidc2115/lea-studio/releases/latest/download/sd-arm64",
+            "https://github.com/davidc2115/lea-studio/releases/download/sd-bin/sd-arm64"
+        };
+        Exception last = null;
+        for (String u : urls) {
+            try {
+                sdJson = "{"pending":true,"note":"téléchargement binaire sd.cpp…"}";
+                HttpURLConnection c = (HttpURLConnection) new URL(u).openConnection();
+                c.setConnectTimeout(20000);
+                c.setReadTimeout(300000);
+                c.setInstanceFollowRedirects(true);
+                c.setRequestProperty("User-Agent", "LeaStudio/1.0");
+                c.connect();
+                int code = c.getResponseCode();
+                int redirects = 0;
+                while (code >= 300 && code < 400 && redirects < 5) {
+                    String loc = c.getHeaderField("Location");
+                    c.disconnect();
+                    if (loc == null) break;
+                    c = (HttpURLConnection) new URL(loc).openConnection();
+                    c.setConnectTimeout(20000);
+                    c.setReadTimeout(300000);
+                    c.setInstanceFollowRedirects(true);
+                    c.setRequestProperty("User-Agent", "LeaStudio/1.0");
+                    c.connect();
+                    code = c.getResponseCode();
+                    redirects++;
+                }
+                if (code != 200) {
+                    c.disconnect();
+                    last = new Exception("HTTP " + code + " " + u);
+                    continue;
+                }
+                File tmp = new File(dir, "sd.part");
+                FileOutputStream fos = new FileOutputStream(tmp);
+                InputStream is = c.getInputStream();
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = is.read(buf)) > 0) fos.write(buf, 0, n);
+                fos.close();
+                is.close();
+                c.disconnect();
+                if (tmp.length() < 100_000) {
+                    tmp.delete();
+                    last = new Exception("binaire trop petit");
+                    continue;
+                }
+                if (out.exists()) out.delete();
+                if (!tmp.renameTo(out)) {
+                    // copy fallback
+                    FileInputStream fis = new FileInputStream(tmp);
+                    FileOutputStream fos2 = new FileOutputStream(out);
+                    while ((n = fis.read(buf)) > 0) fos2.write(buf, 0, n);
+                    fos2.close();
+                    fis.close();
+                    tmp.delete();
+                }
+                out.setExecutable(true, false);
+                try {
+                    Runtime.getRuntime().exec(new String[]{"chmod", "755", out.getAbsolutePath()}).waitFor();
+                } catch (Exception ignored) {}
+                if (out.isFile() && out.canExecute()) return out;
+            } catch (Exception e) {
+                last = e;
+            }
+        }
+        throw new Exception(
+            "Binaire sd.cpp introuvable. " +
+            (last != null ? last.getMessage() : "") +
+            " → utilise Horde ou Local Dream, ou rebuild APK avec binaire CI."
+        );
     }
 
         @JavascriptInterface
@@ -865,6 +943,14 @@ public class LeaBridge {
             "https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors"
         };
         new Thread(() -> {
+            // D'abord tenter d'obtenir le binaire
+            try {
+                dlStatus = "sd.cpp : binaire…";
+                ensureSdBinary();
+                dlStatus = "Binaire sd OK";
+            } catch (Exception e) {
+                dlStatus = "Binaire: " + (e.getMessage() != null ? e.getMessage() : "échec");
+            }
             File dir = new File(ctx.getFilesDir(), "models/sdcpp");
             if (!dir.exists()) dir.mkdirs();
             Exception last = null;

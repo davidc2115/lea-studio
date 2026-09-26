@@ -3504,15 +3504,11 @@ async function pollSdCppJob(charId) {
     }
     window._leaGenBusy = false;
     if (data.error) {
-      setGenStatus("SD.cpp échec → Horde auto…\n" + data.error);
-      try {
-        const c = (state.characters || []).find((x) => x.id === cid) || character();
-        const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
-        const prompt = buildLeaImagePrompt(extra);
-        await generatePhotoHordeFallback(prompt, c);
-      } catch (e) {
-        setGenStatus("Horde fallback: " + (e.message || e));
-      }
+      setGenStatus(
+        "SD.cpp échec (pas de bascule auto Horde)\n" +
+        data.error +
+        "\n→ Vérifie Pack SD.cpp (binaire+modèle) ou choisis Horde manuellement."
+      );
       return;
     }
     if (data.url) {
@@ -3984,10 +3980,14 @@ async function generatePhoto() {
       try {
         const st = JSON.parse(window.LeaAndroid.sdCppStatus() || "{}");
         if (!st.ready) {
-          setGenStatus(
-            (st.note || "SD.cpp pas prêt") +
-            "\n→ Télécharge un modèle avec « Pack SD.cpp », puis réessaie."
-          );
+          let msg = st.note || "SD.cpp pas prêt";
+          if (st.needBinary || !st.binary) {
+            msg += "\n→ Binaire manquant : « Pack SD.cpp » (binaire + modèle).";
+          } else if (st.needModel || !st.model) {
+            msg += "\n→ Modèle manquant : « Pack SD.cpp ».";
+          }
+          msg += "\nSinon choisis Horde manuellement.";
+          setGenStatus(msg);
           window._leaGenBusy = false;
           return;
         }
@@ -4029,10 +4029,12 @@ async function generatePhoto() {
       let data = {};
       try { data = typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch (_) { data = { error: String(raw) }; }
       if (data.error && !data.pending) {
-        setGenStatus("SD.cpp échec → Horde auto…\n" + data.error);
-        // Fallback Horde automatique
+        setGenStatus(
+          "SD.cpp échec (pas de bascule auto)\n" +
+          data.error +
+          "\n→ Pack SD.cpp (binaire+modèle) ou moteur Horde."
+        );
         window._leaGenBusy = false;
-        await generatePhotoHordeFallback(prompt, c);
         return;
       }
       if (data.url) {

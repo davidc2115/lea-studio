@@ -45,16 +45,14 @@ jobs:
           echo "ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/26.1.10909125" >> "$GITHUB_ENV"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
 
-      - name: Build stable-diffusion.cpp (arm64, optionnel, taille limitée)
+      - name: Build stable-diffusion.cpp CLI (arm64, upload séparé)
         run: |
           set -e
           NDK="$ANDROID_NDK_HOME"
           mkdir -p android/app/src/main/jniLibs/arm64-v8a
           mkdir -p android/app/src/main/assets/native
-          echo "SD local optionnel — on évite d'embarquer un binaire >40Mo (cause décompression impossible)." > android/app/src/main/assets/native/README.txt
-          # Ne PAS embarquer sd-arm64 dans assets (157Mo → échec install)
+          echo "Binaire CLI téléchargé à la demande (Pack SD.cpp), pas embarqué dans l'APK." > android/app/src/main/assets/native/README.txt
           rm -f android/app/src/main/assets/native/sd-arm64
-          # Tentative build léger (peut échouer sans casser le job)
           if git clone --depth 1 --recursive https://github.com/leejet/stable-diffusion.cpp.git /tmp/sdcpp 2>/dev/null; then
             mkdir -p /tmp/sdcpp/build-android && cd /tmp/sdcpp/build-android
             cmake .. -G Ninja \
@@ -64,31 +62,25 @@ jobs:
               -DANDROID_STL=c++_shared \
               -DCMAKE_BUILD_TYPE=MinSizeRel \
               -DGGML_OPENMP=OFF \
-              -DSD_BUILD_EXAMPLES=OFF \
-              -DSD_BUILD_SHARED_LIBS=ON \
+              -DSD_BUILD_EXAMPLES=ON \
+              -DSD_BUILD_SHARED_LIBS=OFF \
               -DSD_CUDA=OFF -DSD_VULKAN=OFF -DSD_OPENCL=OFF -DSD_METAL=OFF \
-              || { echo "cmake SD skip"; exit 0; }
-            cmake --build . --config MinSizeRel -j$(nproc) || { echo "build SD skip"; exit 0; }
-            BIN=$(find . -name "libstable-diffusion.so" -o -name "libsd.so" | head -1)
+              || { echo "cmake SD skip"; echo "SD_BIN_OK=0" >> "$GITHUB_ENV"; exit 0; }
+            cmake --build . --config MinSizeRel -j$(nproc) || { echo "build SD skip"; echo "SD_BIN_OK=0" >> "$GITHUB_ENV"; exit 0; }
+            BIN=$(find . -type f -name "sd" -executable | head -1)
+            if [ -z "$BIN" ]; then BIN=$(find . -type f -name "sd" | head -1); fi
             if [ -n "$BIN" ]; then
               "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" --strip-unneeded "$BIN" || true
-              SIZE=$(stat -c%s "$BIN")
-              echo "libsd size=$SIZE"
-              # Max 25 Mo pour rester installable sur la plupart des téléphones
-              if [ "$SIZE" -lt 26214400 ]; then
-                cp "$BIN" "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/libsd.so"
-                echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
-              else
-                echo "libsd trop gros ($SIZE) — non embarqué"
-                echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
-              fi
+              cp "$BIN" "$GITHUB_WORKSPACE/sd-arm64"
+              chmod +x "$GITHUB_WORKSPACE/sd-arm64"
+              echo "SD_BIN_OK=1" >> "$GITHUB_ENV"
+              ls -la "$GITHUB_WORKSPACE/sd-arm64"
             else
               echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
             fi
           else
             echo "SD_BIN_OK=0" >> "$GITHUB_ENV"
           fi
-          ls -la "$GITHUB_WORKSPACE/android/app/src/main/jniLibs/arm64-v8a/" || true
 
       - uses: gradle/actions/setup-gradle@v4
         with:
