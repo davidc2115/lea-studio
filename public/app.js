@@ -3189,6 +3189,73 @@ function identityLock(c) {
   ].filter(Boolean).join(", ");
 }
 
+
+/** Cover / 1ère photo → base64 brut (sans data: prefix) pour img2img tous moteurs. */
+async function resolveCharacterRefB64(c) {
+  if (!c) return null;
+  const strip = (s) => {
+    s = String(s || "");
+    const i = s.indexOf(",");
+    return i >= 0 ? s.slice(i + 1) : s;
+  };
+  const trySrc = async (src) => {
+    if (!src || /placeholder|default|empty/i.test(String(src))) return null;
+    try {
+      if (String(src).startsWith("data:")) {
+        const b = strip(src);
+        return b.length > 500 ? b : null;
+      }
+      if (String(src).startsWith("gallery:")) {
+        const d = resolvePhotoSrc(src);
+        if (d && String(d).startsWith("data:")) {
+          const b = strip(d);
+          return b.length > 500 ? b : null;
+        }
+      }
+      let b = await imageToBase64(src);
+      if (b && b.length > 500) return b;
+      if (window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
+        try {
+          const du = window.LeaAndroid.httpGetDataUrl(src);
+          if (du && String(du).startsWith("data:")) {
+            b = strip(du);
+            if (b.length > 500) return b;
+          }
+        } catch (_) {}
+      }
+    } catch (_) {}
+    return null;
+  };
+  // Léa : assets orage en priorité
+  if (c.id === "lea") {
+    const refs = [
+      "images/lea-orage.jpg",
+      "images/lea-orage-timide.jpg",
+      "images/lea-portrait.jpg",
+      "images/lea-feu.jpg",
+    ];
+    for (const r of refs) {
+      const b = await trySrc(r);
+      if (b) return b;
+    }
+  }
+  const cover = resolvedCover(c);
+  let b = await trySrc(cover);
+  if (b) return b;
+  try {
+    const extras = extraPhotos(c.id);
+    if (extras && extras[0]) {
+      b = await trySrc(extras[0]);
+      if (b) return b;
+    }
+  } catch (_) {}
+  if (c.gallery && c.gallery[0]) {
+    b = await trySrc(c.gallery[0]);
+    if (b) return b;
+  }
+  return null;
+}
+
 async function imageToBase64(src) {
   if (!src) return null;
   const strip = (dataUrl) => {
@@ -3295,7 +3362,7 @@ async function nativeHttpPostJson(url, bodyObj, headerLines) {
 }
 
 /** Cloudflare Workers AI — FLUX 1 Schnell (quota gratuit journalier). */
-async function generateCloudflareImage(prompt, negative, width, height) {
+async function generateCloudflareImage(prompt, negative, width, height, sourceB64) {
   width = width || 512;
   height = height || 768;
   let account = "";
@@ -3308,26 +3375,44 @@ async function generateCloudflareImage(prompt, negative, width, height) {
   if (!account || !token) {
     throw new Error("Configure Account ID + API Token Cloudflare dans Réglages");
   }
-  // FLUX Schnell — le plus accessible en free tier Workers AI
-  const models = [
-    "@cf/black-forest-labs/flux-1-schnell",
-    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-  ];
-  let lastErr = "";
   const fullPrompt = String(prompt || "").slice(0, 2000);
+  let lastErr = "";
+  // Si source → tenter img2img d'abord, sinon txt2img
+  const models = [];
+  if (sourceB64 && String(sourceB64).length > 500) {
+    models.push(
+      "@cf/runwayml/stable-diffusion-v1-5-img2img",
+      "@cf/stabilityai/stable-diffusion-xl-base-1.0"
+    );
+  }
+  models.push(
+    "@cf/black-forest-labs/flux-1-schnell",
+    "@cf/stabilityai/stable-diffusion-xl-base-1.0"
+  );
   for (const model of models) {
     try {
       const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(account) +
         "/ai/run/" + model;
-      const payload = model.indexOf("flux") >= 0
-        ? { prompt: fullPrompt }
-        : {
-            prompt: fullPrompt,
-            negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
-            width: Math.min(1024, Math.max(256, width)),
-            height: Math.min(1024, Math.max(256, height)),
-            num_steps: 20,
-          };
+      let payload;
+      if (model.indexOf("img2img") >= 0 && sourceB64) {
+        payload = {
+          prompt: fullPrompt,
+          negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
+          image: [String(sourceB64).replace(/^data:[^;]+;base64,/, "")],
+          strength: 0.55,
+          num_steps: 20,
+        };
+      } else if (model.indexOf("flux") >= 0) {
+        payload = { prompt: fullPrompt };
+      } else {
+        payload = {
+          prompt: fullPrompt,
+          negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
+          width: Math.min(1024, Math.max(256, width)),
+          height: Math.min(1024, Math.max(256, height)),
+          num_steps: 20,
+        };
+      }
       const raw = await nativeHttpPostJson(
         url,
         payload,
@@ -3382,6 +3467,15 @@ async function generatePhotoHordeFallback(prompt, c) {
     if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
+    try {
+      const ref = await resolveCharacterRefB64(c);
+      if (ref) {
+        payload.source_image = ref;
+        payload.source_processing = "img2img";
+        payload.denoising = c.id === "lea" ? 0.28 : 0.52;
+        setGenStatus("Horde secours img2img…");
+      }
+    } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde job lancé (après échec SD.cpp)…");
@@ -3541,61 +3635,13 @@ async function generateScenePhoto() {
       nsfw: true,
     };
 
-    // Référence visage : Léa = photos orage/feu ; autres = cover / 1ère photo générée
+    // Référence visage unifiée (tous moteurs / tous personnages)
     setSceneProgress("🖼 Chargement référence visage…", 10);
     try {
-      let ref = null;
-      if (c.id === "lea") {
-        const refs = [
-          "images/lea-orage.jpg",
-          "images/lea-orage-timide.jpg",
-          "images/lea-orage-dentelle.jpg",
-          "images/lea-feu.jpg",
-          "images/lea-portrait.jpg",
-        ];
-        for (const r of refs) {
-          ref = await imageToBase64(r);
-          if (ref && ref.length > 800) break;
-          ref = null;
-        }
-      }
-      if (!ref) {
-        const cover = resolvedCover(c);
-        if (cover) {
-          if (String(cover).startsWith("data:")) {
-            const ix = cover.indexOf(",");
-            ref = ix >= 0 ? cover.slice(ix + 1) : cover;
-          } else {
-            ref = await imageToBase64(cover);
-            if ((!ref || ref.length < 800) && window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
-              try {
-                const du = window.LeaAndroid.httpGetDataUrl(cover);
-                if (du && String(du).startsWith("data:")) {
-                  const ix = du.indexOf(",");
-                  ref = ix >= 0 ? du.slice(ix + 1) : du;
-                }
-              } catch (_) {}
-            }
-          }
-          if (ref && ref.length < 800) ref = null;
-        }
-      }
-      if (!ref) {
-        try {
-          const extras = extraPhotos(c.id);
-          if (extras && extras[0]) {
-            ref = await imageToBase64(extras[0]);
-            if (ref && ref.length < 800) ref = null;
-          }
-        } catch (_) {}
-      }
+      const ref = await resolveCharacterRefB64(c);
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        // Denoising HAUT pour scènes : sinon pose/tenue/lieu restent identiques à la ref
-        // 0.62–0.72 = change posture + vêtements + décor, garde un air de visage
-        // Tenue proche de la ref orage → denoise bas pour garder visage + top trempé
-        // Denoise bas = visage/morphologie collés à la ref ; un peu plus haut seulement si scène très différente
         const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
         payload.denoising = bigChange ? 0.48 : 0.38;
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
@@ -3604,8 +3650,10 @@ async function generateScenePhoto() {
         setSceneProgress("📡 Horde txt2img scène…", 12);
       }
     } catch (e) {
-      setSceneProgress("📡 Horde (ref échouée)…", 12);
+      console.warn("[scene ref]", e);
+      setSceneProgress("📡 Horde txt2img scène…", 12);
     }
+
 
     let start;
     try {
@@ -3798,18 +3846,11 @@ async function generatePhoto() {
           aspect: "3:4",
           fallback_horde: false,
         };
-        // Référence cover si dispo
         try {
-          const cover = resolvedCover(c);
-          if (cover) {
-            let du = cover;
-            if (!String(cover).startsWith("data:")) {
-              const b = await imageToBase64(cover);
-              if (b) du = "data:image/jpeg;base64," + b;
-            }
-            if (String(du).startsWith("data:")) gemBody.ref_images = [du];
-          }
+          const refB64 = await resolveCharacterRefB64(c);
+          if (refB64) gemBody.ref_images = ["data:image/jpeg;base64," + refB64];
         } catch (_) {}
+        setGenStatus(gemBody.ref_images ? "Gemini Image + img2img (cover)…" : "Gemini Image…");
         const start = await api("/api/image", {
           method: "POST",
           body: JSON.stringify(gemBody),
@@ -3830,7 +3871,10 @@ async function generatePhoto() {
     if (engine === "cloudflare") {
       setGenStatus("Cloudflare FLUX…");
       try {
-        const dataUrl = await generateCloudflareImage(prompt, bodyNegatives(c), 512, 768);
+        let cfRef = null;
+        try { cfRef = await resolveCharacterRefB64(c); } catch (_) {}
+        setGenStatus(cfRef ? "Cloudflare FLUX/SD + img2img…" : "Cloudflare FLUX…");
+        const dataUrl = await generateCloudflareImage(prompt, bodyNegatives(c), 512, 768, cfRef);
         const stored = await addToGallery(dataUrl, c.id);
         setGenStatus("Image Cloudflare prête");
         window._leaGenBusy = false;
@@ -3954,18 +3998,30 @@ async function generatePhoto() {
           " · lancement…"
         );
       } catch (_) {}
-      // Prompt = physique détaillé + tenue scénario (buildLeaImagePrompt) + négatifs
+      // Prompt = physique détaillé + tenue scénario + img2img cover si dispo
       const neg = bodyNegatives(c) + ", cartoon, anime, deformed, child, underage, blurry, watermark, text, wrong body type";
-      const payloadJson = JSON.stringify({
+      let sdRef = null;
+      try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
+      const sdPayload = {
         prompt: String(prompt).slice(0, 1800),
         negative: String(neg).slice(0, 500),
         charId: c.id || "lea",
-        steps: 8,
-        cfg: 5,
-        width: 320,
-        height: 448,
-      });
-      showPromptStatus("SD.cpp (lent au 1er load · 320×448 · 8 steps)…", prompt);
+        steps: sdRef ? 16 : 12,
+        cfg: 7,
+        width: 512,
+        height: 640,
+      };
+      if (sdRef) {
+        sdPayload.source_image = sdRef;
+        sdPayload.strength = 0.55;
+      }
+      const payloadJson = JSON.stringify(sdPayload);
+      showPromptStatus(
+        sdRef
+          ? "SD.cpp img2img (cover) · 512×640…"
+          : "SD.cpp txt2img · 512×640…",
+        prompt
+      );
       const raw = window.LeaAndroid.sdCppGenerate(payloadJson);
       let data = {};
       try { data = typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch (_) { data = { error: String(raw) }; }
@@ -4006,67 +4062,25 @@ async function generatePhoto() {
     if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, large breasts, D-cup, no freckles, brown hair";
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, white bra only, lingerie set, nude, seamless studio, middle-aged, 30 years old";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
-    // Léa : img2img depuis photo ORAGE
+        // img2img unifié : cover / assets pour TOUS les personnages
     if (c.id === "lea") {
-      setGenStatus("Chargement ref orage Léa…");
-      const refs = [
-        "images/lea-orage-timide.jpg",
-        "images/lea-portrait.jpg",
-        "images/lea-orage.jpg",
-        "images/lea-nuisette-timide.jpg",
-        "images/lea-orage-dentelle.jpg",
-        "images/lea-feu.jpg",
-        "images/lea-feu-genoux.jpg",
-      ];
-      let ref = null;
-      for (const r of refs) {
-        setGenStatus("Ref… " + r.split("/").pop());
-        ref = await imageToBase64(r);
-        if (ref && ref.length > 800) break;
-        ref = null;
-      }
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, dry fabric, matte dry skin, sports bra, black top, gym clothes, fully dry";
       payload.nsfw = true;
+    }
+    try {
+      setGenStatus("Chargement référence visage…");
+      const ref = await resolveCharacterRefB64(c);
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = 0.22;
-        setGenStatus("Horde img2img orage (ref OK, vêtements trempés)…");
+        payload.denoising = c.id === "lea" ? 0.28 : 0.52;
+        setGenStatus("Horde img2img (ref OK)…");
       } else {
-        setGenStatus("Pas de ref asset — txt2img orage forcé (top+jean TREMPÉS)…");
+        setGenStatus("Horde txt2img (pas de ref cover)…");
       }
-    } else {
-      // Autres personnages : img2img depuis cover (URL ou data:) pour fidélité visage
-      try {
-        const cover = resolvedCover(c);
-        if (cover && !/placeholder|default|empty/i.test(String(cover))) {
-          let cref = null;
-          if (String(cover).startsWith("data:")) {
-            const i = cover.indexOf(",");
-            cref = i >= 0 ? cover.slice(i + 1) : cover;
-          } else {
-            cref = await imageToBase64(cover);
-            // Fallback pont natif pour URLs https (CORS)
-            if ((!cref || cref.length < 500) && window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
-              try {
-                const du = window.LeaAndroid.httpGetDataUrl(cover);
-                if (du && String(du).startsWith("data:")) {
-                  const i = du.indexOf(",");
-                  cref = i >= 0 ? du.slice(i + 1) : du;
-                }
-              } catch (_) {}
-            }
-          }
-          if (cref && cref.length > 500) {
-            payload.source_image = cref;
-            payload.source_processing = "img2img";
-            payload.denoising = 0.52;
-          }
-        }
-      } catch (e) {
-        console.warn("[img2img cover]", e);
-      }
-      setGenStatus(payload.source_image ? "Horde img2img (cover + scénario)…" : "Horde txt2img scénario…");
+    } catch (e) {
+      console.warn("[img2img]", e);
+      setGenStatus("Horde txt2img…");
     }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
@@ -5344,6 +5358,13 @@ async function generateStudioImage(opts) {
       }
     } else {
       payload.steps = 40;
+    }
+    // Gemini : envoyer toutes les images uploadées comme références
+    if ((eng === "gemini" || eng === "nano") && uploads && uploads.length) {
+      payload.ref_images = uploads.slice(0, 3).map((u) =>
+        String(u).startsWith("data:") ? u : ("data:image/jpeg;base64," + u)
+      );
+      payload.engine = "gemini";
     }
     // Toujours mettre à jour le prompt dans le payload (vision a pu le enrichir)
     payload.prompt = prompt;

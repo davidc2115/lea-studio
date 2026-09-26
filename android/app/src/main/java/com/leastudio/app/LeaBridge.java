@@ -957,7 +957,39 @@ public class LeaBridge {
 
     @JavascriptInterface
     public String sdCppGenerate(String prompt) {
-        final String p = prompt == null ? "a woman" : prompt;
+        // JSON {prompt, negative, source_image, strength, steps, width, height, cfg} ou texte simple
+        String p = prompt == null ? "a woman" : prompt;
+        String negative = "child, teen, underage, cartoon, deformed, blurry, low quality";
+        String sourceB64 = null;
+        float strength = 0.55f;
+        int steps = 16;
+        int width = 512;
+        int height = 640;
+        float cfg = 7f;
+        try {
+            if (p.trim().startsWith("{")) {
+                JSONObject j = new JSONObject(p);
+                p = j.optString("prompt", p);
+                if (j.has("negative") && j.optString("negative").length() > 2)
+                    negative = j.optString("negative");
+                if (j.has("source_image"))
+                    sourceB64 = j.optString("source_image", null);
+                if (j.has("strength")) strength = (float) j.optDouble("strength", 0.55);
+                if (j.has("steps")) steps = j.optInt("steps", 16);
+                if (j.has("width")) width = j.optInt("width", 512);
+                if (j.has("height")) height = j.optInt("height", 640);
+                if (j.has("cfg")) cfg = (float) j.optDouble("cfg", 7);
+            }
+        } catch (Exception ignored) {}
+        final String fp = p;
+        final String fNeg = negative;
+        final String fSrc = sourceB64;
+        final float fStr = strength;
+        final int fSteps = steps;
+        final int fW = width;
+        final int fH = height;
+        final float fCfg = cfg;
+
         if (sdBusy) return "{\"pending\":true,\"note\":\"déjà en cours\"}";
         File modelDir = new File(ctx.getFilesDir(), "models/sdcpp");
         final File model = findSdModel(modelDir);
@@ -975,7 +1007,9 @@ public class LeaBridge {
         }
 
         sdBusy = true;
-        sdJson = "{\"pending\":true,\"note\":\"préparation sd.cpp…\"}";
+        sdJson = fSrc != null && fSrc.length() > 500
+            ? "{\"pending\":true,\"note\":\"sd.cpp img2img…\"}"
+            : "{\"pending\":true,\"note\":\"préparation sd.cpp…\"}";
         new Thread(() -> {
             try {
                 File bin = ensureSdBinary();
@@ -983,20 +1017,51 @@ public class LeaBridge {
                 if (!outDir.exists()) outDir.mkdirs();
                 File outPng = new File(outDir, "out_" + System.currentTimeMillis() + ".png");
 
-                // CLI stable-diffusion.cpp
-                ProcessBuilder pb = new ProcessBuilder(
-                    bin.getAbsolutePath(),
-                    "-m", model.getAbsolutePath(),
-                    "-p", p,
-                    "--negative-prompt", "child, teen, underage, cartoon, deformed, blurry, low quality",
-                    "-H", "640",
-                    "-W", "512",
-                    "--steps", "20",
-                    "--cfg-scale", "7",
-                    "--sampling-method", "euler_a",
-                    "-o", outPng.getAbsolutePath(),
-                    "-v"
-                );
+                File initImg = null;
+                if (fSrc != null && fSrc.length() > 500) {
+                    try {
+                        String b64 = fSrc;
+                        int comma = b64.indexOf(',');
+                        if (comma > 0) b64 = b64.substring(comma + 1);
+                        byte[] bytes = android.util.Base64.decode(b64, android.util.Base64.DEFAULT);
+                        initImg = new File(outDir, "init_" + System.currentTimeMillis() + ".jpg");
+                        java.io.FileOutputStream fos = new java.io.FileOutputStream(initImg);
+                        fos.write(bytes);
+                        fos.close();
+                    } catch (Exception e) {
+                        initImg = null;
+                    }
+                }
+
+                java.util.ArrayList<String> args = new java.util.ArrayList<>();
+                args.add(bin.getAbsolutePath());
+                args.add("-m");
+                args.add(model.getAbsolutePath());
+                args.add("-p");
+                args.add(fp);
+                args.add("--negative-prompt");
+                args.add(fNeg);
+                args.add("-H");
+                args.add(String.valueOf(fH));
+                args.add("-W");
+                args.add(String.valueOf(fW));
+                args.add("--steps");
+                args.add(String.valueOf(fSteps));
+                args.add("--cfg-scale");
+                args.add(String.valueOf(fCfg));
+                args.add("--sampling-method");
+                args.add("euler_a");
+                if (initImg != null && initImg.isFile()) {
+                    args.add("--init-img");
+                    args.add(initImg.getAbsolutePath());
+                    args.add("--strength");
+                    args.add(String.valueOf(fStr));
+                }
+                args.add("-o");
+                args.add(outPng.getAbsolutePath());
+                args.add("-v");
+                ProcessBuilder pb = new ProcessBuilder(args);
+
                 pb.directory(ctx.getFilesDir());
                 pb.redirectErrorStream(true);
                 MapEnvFix(pb);
