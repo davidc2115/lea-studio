@@ -3419,10 +3419,23 @@ async function generateScenePhoto() {
         }
       }
       if (!ref) {
-        // Cover custom (étoile) ou cover cast
         const cover = resolvedCover(c);
         if (cover) {
-          ref = await imageToBase64(cover);
+          if (String(cover).startsWith("data:")) {
+            const ix = cover.indexOf(",");
+            ref = ix >= 0 ? cover.slice(ix + 1) : cover;
+          } else {
+            ref = await imageToBase64(cover);
+            if ((!ref || ref.length < 800) && window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
+              try {
+                const du = window.LeaAndroid.httpGetDataUrl(cover);
+                if (du && String(du).startsWith("data:")) {
+                  const ix = du.indexOf(",");
+                  ref = ix >= 0 ? du.slice(ix + 1) : du;
+                }
+              } catch (_) {}
+            }
+          }
           if (ref && ref.length < 800) ref = null;
         }
       }
@@ -3637,15 +3650,28 @@ async function generatePhoto() {
     if (engine === "gemini" || engine === "nano") {
       setGenStatus("Gemini Image…");
       try {
+        const gemBody = {
+          prompt,
+          negative: bodyNegatives(c),
+          engine: "gemini",
+          aspect: "3:4",
+          fallback_horde: false,
+        };
+        // Référence cover si dispo
+        try {
+          const cover = resolvedCover(c);
+          if (cover) {
+            let du = cover;
+            if (!String(cover).startsWith("data:")) {
+              const b = await imageToBase64(cover);
+              if (b) du = "data:image/jpeg;base64," + b;
+            }
+            if (String(du).startsWith("data:")) gemBody.ref_images = [du];
+          }
+        } catch (_) {}
         const start = await api("/api/image", {
           method: "POST",
-          body: JSON.stringify({
-            prompt,
-            negative: bodyNegatives(c),
-            engine: "gemini",
-            aspect: "3:4",
-            fallback_horde: false,
-          }),
+          body: JSON.stringify(gemBody),
         });
         const dataUrl = start && (start.image || start.url);
         if (!dataUrl) throw new Error((start && start.error) || "pas d'image Gemini");
@@ -3760,7 +3786,10 @@ async function generatePhoto() {
     // —— SD.cpp local (prompt physique + tenue scénario complets) ——
     if (engine === "sd_cpp" || selectedImageEngineRaw() === "sd_cpp") {
       if (!window.LeaAndroid || !window.LeaAndroid.sdCppGenerate) {
-        setGenStatus("Pont SD.cpp manquant — rebuild APK.");
+        setGenStatus(
+          "Pont SD.cpp manquant dans cet APK.\n" +
+          "Installe le dernier build (sdCppGenerate exposé), ou utilise Horde / Local Dream."
+        );
         window._leaGenBusy = false;
         return;
       }
@@ -3866,18 +3895,36 @@ async function generatePhoto() {
         setGenStatus("Pas de ref asset — txt2img orage forcé (top+jean TREMPÉS)…");
       }
     } else {
-      // Autres personnages : img2img léger depuis cover si dispo (fidélité visage)
+      // Autres personnages : img2img depuis cover (URL ou data:) pour fidélité visage
       try {
         const cover = resolvedCover(c);
-        if (cover && !String(cover).startsWith("data:") && !/placeholder|default/i.test(cover)) {
-          const cref = await imageToBase64(cover);
+        if (cover && !/placeholder|default|empty/i.test(String(cover))) {
+          let cref = null;
+          if (String(cover).startsWith("data:")) {
+            const i = cover.indexOf(",");
+            cref = i >= 0 ? cover.slice(i + 1) : cover;
+          } else {
+            cref = await imageToBase64(cover);
+            // Fallback pont natif pour URLs https (CORS)
+            if ((!cref || cref.length < 500) && window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
+              try {
+                const du = window.LeaAndroid.httpGetDataUrl(cover);
+                if (du && String(du).startsWith("data:")) {
+                  const i = du.indexOf(",");
+                  cref = i >= 0 ? du.slice(i + 1) : du;
+                }
+              } catch (_) {}
+            }
+          }
           if (cref && cref.length > 500) {
             payload.source_image = cref;
             payload.source_processing = "img2img";
-            payload.denoising = 0.55;
+            payload.denoising = 0.52;
           }
         }
-      } catch (_) {}
+      } catch (e) {
+        console.warn("[img2img cover]", e);
+      }
       setGenStatus(payload.source_image ? "Horde img2img (cover + scénario)…" : "Horde txt2img scénario…");
     }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
@@ -4599,6 +4646,54 @@ function expandPromptLocal(userTxt, nsfw) {
 }
 
 
+
+/** Assemble 2–4 images côte à côte en une seule source img2img (meilleure fidélité multi-personnes). */
+async function compositeRefsToDataUrl(dataUrls, maxW) {
+  maxW = maxW || 768;
+  const urls = (dataUrls || []).filter((u) => u && String(u).startsWith("data:")).slice(0, 4);
+  if (!urls.length) return null;
+  if (urls.length === 1) return urls[0];
+  const load = (src) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+  try {
+    const imgs = [];
+    for (const u of urls) {
+      try { imgs.push(await load(u)); } catch (_) {}
+    }
+    if (!imgs.length) return urls[0];
+    if (imgs.length === 1) return urls[0];
+    const targetH = 512;
+    const scaled = imgs.map((im) => {
+      const r = targetH / im.height;
+      return { im, w: Math.max(64, Math.round(im.width * r)), h: targetH };
+    });
+    let totalW = scaled.reduce((s, x) => s + x.w, 0);
+    const scale = totalW > maxW ? maxW / totalW : 1;
+    totalW = Math.round(totalW * scale);
+    const h = Math.round(targetH * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = totalW;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#111";
+    ctx.fillRect(0, 0, totalW, h);
+    let x = 0;
+    for (const s of scaled) {
+      const w = Math.round(s.w * scale);
+      ctx.drawImage(s.im, x, 0, w, h);
+      x += w;
+    }
+    return canvas.toDataURL("image/jpeg", 0.88);
+  } catch (e) {
+    console.warn("[composite]", e);
+    return urls[0];
+  }
+}
+
 async function generateStudioImage(opts) {
   opts = opts || { mode: "gen" };
   if (window._leaGenBusy) {
@@ -5057,11 +5152,24 @@ async function generateStudioImage(opts) {
         }
 
         if (needComposite || uploads.length > 1) {
-          // IMPORTANT : ne pas img2img sur la 1re seule (sinon les autres images sont ignorées)
-          sourceB64 = null;
-          $("studio-status").textContent = "Composition " + uploads.length + " images → txt2img (les 2 personnes)…";
+          // Planche contact de TOUTES les refs → img2img (Horde voit les 2 personnes)
+          $("studio-status").textContent = "Assemblage " + uploads.length + " images en planche…";
+          try {
+            const sheet = await compositeRefsToDataUrl(uploads, 768);
+            if (sheet) {
+              sourceB64 = stripB64(sheet);
+              $("studio-status").textContent = "Composition " + uploads.length + " imgs → img2img planche…";
+            } else {
+              sourceB64 = null;
+            }
+          } catch (_) {
+            sourceB64 = null;
+          }
+          // Denoising élevé pour changer la pose tout en gardant les traits
+          window._studioCompositeDenoise = 0.72;
         } else {
           sourceB64 = stripB64(uploads[baseIdx]);
+          window._studioCompositeDenoise = null;
         }
       } else {
         sourceB64 = await studioSourceBase64(true);
@@ -5087,9 +5195,13 @@ async function generateStudioImage(opts) {
     if (sourceB64) {
       payload.source_image = sourceB64;
       payload.source_processing = "img2img";
-      payload.denoising = opts.mode === "edit" ? 0.58 : 0.48;
+      if (window._studioCompositeDenoise) {
+        payload.denoising = window._studioCompositeDenoise;
+        payload.steps = 36;
+      } else {
+        payload.denoising = opts.mode === "edit" ? 0.58 : 0.48;
+      }
     } else {
-      // txt2img composition : plus de steps pour qualité
       payload.steps = 40;
     }
     // Toujours mettre à jour le prompt dans le payload (vision a pu le enrichir)

@@ -855,6 +855,7 @@ public class LeaBridge {
         return downloadSdCppModel(url);
     }
 
+    @JavascriptInterface
     public String downloadSdCppModel(String url) {
         // URLs valides (le nom Q4_0 sans "pruned-emaonly" renvoyait 404)
         final String[] fallbacks = new String[] {
@@ -954,6 +955,7 @@ public class LeaBridge {
         return "Téléchargement modèle sd.cpp (plusieurs miroirs)…";
     }
 
+    @JavascriptInterface
     public String sdCppGenerate(String prompt) {
         final String p = prompt == null ? "a woman" : prompt;
         if (sdBusy) return "{\"pending\":true,\"note\":\"déjà en cours\"}";
