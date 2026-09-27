@@ -2830,6 +2830,7 @@ function filterDiscoverList(q) {
   }  if (!list.length) list = [FALLBACK_LEA];
   // Sync state
   if (list.length > (state.characters || []).length) state.characters = list;
+  try { window.CAST = list.slice(); } catch (_) {}
 
   const s = String(q || "").trim().toLowerCase();
   let out;
@@ -4841,6 +4842,9 @@ async function pollHordeJob(jobId, host, charId) {
 
 function formatBubble(text) {
   let raw = String(text || "").replace(/\r/g, "");
+  // **Prénom:** (duo) → speaker AVANT de convertir ** en *
+  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*\*\*\s*:\s*/g, "$1«SPEAKER:$2»");
+  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*:\s*\*\*\s*/g, "$1«SPEAKER:$2»");
   // **action** → *action*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
   // [Prénom] : ou Prénom : en début de ligne → label locuteur (duo / 3e personne)

@@ -975,8 +975,52 @@
   window.leaNativeApi = async function (path, opts = {}) {
     const method = (opts.method || "GET").toUpperCase();
     const body = opts.body ? JSON.parse(opts.body) : {};
-    function allChars() { return (window.CAST && window.CAST.length) ? window.CAST : [LEA]; }
-    function findChar(id) { return allChars().find((c) => c.id === id) || LEA; }
+    function allChars() {
+      const out = [];
+      const seen = new Set();
+      const push = (arr) => {
+        if (!arr || !arr.length) return;
+        for (const c of arr) {
+          if (c && c.id && !seen.has(c.id)) { out.push(c); seen.add(c.id); }
+        }
+      };
+      push(window.CAST);
+      push(window.LEA_CAST_NEW);
+      push(window.LEA_CAST_SPECIAL);
+      push(window.LEA_CAST_DIRECT);
+      push(window.LEA_CAST_CUPS);
+      push(window.LEA_CAST_COLLEGUES);
+      push(window.EXTRA_CAST);
+      push(window.LEA_CAST_EXTRA);
+      try {
+        const raw = localStorage.getItem("lea.customChars");
+        if (raw) push(JSON.parse(raw));
+      } catch (_) {}
+      if (!out.length) out.push(LEA);
+      return out;
+    }
+    function findChar(id) {
+      const list = allChars();
+      const found = list.find((c) => c.id === id);
+      if (found) return found;
+      // NE JAMAIS renvoyer Léa pour un autre id (évite confusion orage / meilleure amie)
+      if (id && id !== "lea") {
+        return {
+          id: id,
+          name: String(id).replace(/_/g, " "),
+          age: 25,
+          title: "Personnage",
+          scenario: "Conversation libre avec " + String(id) + ". Adultes 18+.",
+          personality: "Naturelle, cohérente avec son identité.",
+          appearance: "Femme adulte 18+.",
+          body: "",
+          tags: [],
+          greeting: "Salut.",
+          system_extra: "Tu es UNIQUEMENT ce personnage. INTERDIT de te faire passer pour Léa Moreau ou une autre.",
+        };
+      }
+      return LEA;
+    }
     const who = (path.match(/^\/api\/chat\/([^/]+)/) || [])[1] || "lea";
     const PERSONA = findChar(who);
     const chatKey = "lea.chat." + who;
@@ -1131,10 +1175,26 @@
       }
       let system = [
         "LANGUE OBLIGATOIRE : réponds TOUJOURS en français (paroles, actions, pensées). INTERDIT d'écrire en anglais sauf noms propres.",
-        `Tu incarnes ${PERSONA.name}, ${PERSONA.age} ans.`,
+        `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
-        `SCÉNARIO EXACT (cadre de la scène) : ${PERSONA.scenario || ""}.`,
+        `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
+        `IDENTITÉ VERROUILLÉE : tu n'es PAS la meilleure amie de la fille de l'utilisateur SAUF si le titre/scénario le dit explicitement. Tu n'arrives PAS trempée par un orage SAUF si le scénario le décrit.`,
         relationLock,
+        // Duo multi-voix
+        (function () {
+          const nm = String(PERSONA.name || "");
+          const isDuo = /\s&\s|\s+et\s+/i.test(nm) || /^duo_/i.test(String(PERSONA.id || ""));
+          if (!isDuo) return "";
+          const parts = nm.split(/\s*&\s*|\s+et\s+/i).map((s) => s.trim()).filter(Boolean);
+          const a = parts[0] || "Elle1";
+          const b = parts[1] || "Elle2";
+          return [
+            "DUO OBLIGATOIRE : tu incarnes DEUX femmes (" + a + " et " + b + ") qui parlent à tour de rôle dans CHAQUE réponse.",
+            "Chaque bloc DOIT être préfixé par **" + a + ":** ou **" + b + ":**",
+            "Les DEUX doivent parler dans la même réponse. INTERDIT une seule voix.",
+            "Format: **" + a + ":** (pensée) *action* paroles puis **" + b + ":** (pensée) *action* paroles.",
+          ].join(" ");
+        })(),
         PERSONA.personality || "",
         "APPARENCE FIXE (ne change JAMAIS — cheveux, yeux, peau, morphologie, taches de rousseur, lunettes) :",
         PERSONA.appearance || "",
