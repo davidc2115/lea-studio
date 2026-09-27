@@ -3515,6 +3515,15 @@ function morphWeights(c) {
     Array.isArray(c.tags) ? c.tags.join(" ") : "",
   ].filter(Boolean).join(" ").toLowerCase();
   const parts = [];
+  // Duo: ne PAS forcer une seule taille (géré dans duoCompositionBlock)
+  try {
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+      if (/a-cup|bonnet\s*a|flat/.test(blob) && /e-cup|bonnet\s*e|d-cup|large/.test(blob)) {
+        return "(two women different breast sizes:1.5), (one small flat A-cup and one large heavy E-cup:1.55), obvious bust contrast";
+      }
+      return "(two women with their own distinct bust sizes:1.35)";
+    }
+  } catch (_) {}
   // Extreme cups FIRST (priority over small-chest heuristics)
   if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
     parts.push(
@@ -3584,45 +3593,128 @@ function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   const looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
+  const body = String(c.body || "").replace(/\s+/g, " ").trim();
   const eth = String(c.ethnicity || "").toLowerCase();
-  // Extraire traits individuels si "1)" / "2)" ou "first woman" / "second woman"
+  const blob = (looks + " " + body + " " + (c.appearance || "")).toLowerCase();
+
+  // Découpe par femme (EN ou FR)
   let p1 = "", p2 = "";
-  const m1 = looks.match(/first woman[^:]*:\s*([^]+?)(?=,?\s*second woman|$)/i)
-    || looks.match(/1\)\s*[^:]+:\s*([^.]+)/i);
-  const m2 = looks.match(/second woman[^:]*:\s*([^]+?)(?=,\s*side by|,\s*photoreal|,\s*18\+|$)/i)
-    || looks.match(/2\)\s*[^:]+:\s*([^.]+)/i);
-  if (m1) p1 = (m1[1] || "").replace(/\s+/g, " ").trim().slice(0, 280);
-  if (m2) p2 = (m2[1] || "").replace(/\s+/g, " ").trim().slice(0, 280);
-  // Contraste poitrine si A+E / small+large dans looks
-  let bustContrast = "";
-  if (/small|a-cup|flat/i.test(p1 + looks) && /large|e-cup|d-cup|heavy/i.test(p2 + looks)) {
-    bustContrast = "(contrasting breast sizes:1.4), left woman small flat chest, right woman large heavy breasts,";
-  } else if (/large|e-cup|d-cup/i.test(p1) && /small|a-cup/i.test(p2)) {
-    bustContrast = "(contrasting breast sizes:1.4), left woman large heavy breasts, right woman small flat chest,";
+  let m1 = looks.match(/first woman[^:]*:\s*([^]+?)(?=,\s*second woman|$)/i)
+    || looks.match(/1\)\s*([^:]+):\s*([^.]+)/i)
+    || (c.appearance || "").match(/1\)\s*([^:]+):\s*([^.]+)/i);
+  let m2 = looks.match(/second woman[^:]*:\s*([^]+?)(?=,\s*side by|,\s*photoreal|,\s*18\+|$)/i)
+    || looks.match(/2\)\s*([^:]+):\s*([^.]+)/i)
+    || (c.appearance || "").match(/2\)\s*([^:]+):\s*([^.]+)/i);
+  if (m1) p1 = ((m1.length > 2 ? m1[2] : m1[1]) || "").replace(/\s+/g, " ").trim().slice(0, 300);
+  if (m2) p2 = ((m2.length > 2 ? m2[2] : m2[1]) || "").replace(/\s+/g, " ").trim().slice(0, 300);
+
+  // Noms individuels
+  let n1 = "", n2 = "";
+  const nm = names.split(/\s*&\s*|\s+et\s+/i);
+  if (nm.length >= 2) { n1 = nm[0].trim(); n2 = nm[1].trim(); }
+
+  function cupOf(text) {
+    const t = String(text || "").toLowerCase();
+    if (/bonnet\s*j|\bj-cup\b/.test(t)) return "j";
+    if (/bonnet\s*i|\bi-cup\b/.test(t)) return "i";
+    if (/bonnet\s*h|\bh-cup\b/.test(t)) return "h";
+    if (/bonnet\s*g|\bg-cup\b/.test(t)) return "g";
+    if (/bonnet\s*f|\bf-cup\b|heavy f/.test(t)) return "f";
+    if (/bonnet\s*e|\be-cup\b|large e|généreuse bonnet e/.test(t)) return "e";
+    if (/bonnet\s*d|\bd-cup\b|large d|95d/.test(t)) return "d";
+    if (/bonnet\s*c|\bc-cup\b|medium c/.test(t)) return "c";
+    if (/bonnet\s*b|\bb-cup\b|small-medium b/.test(t)) return "b";
+    if (/bonnet\s*a|\ba-cup\b|flat|small a|très petite|presque plate|nearly flat|petite poitrine/.test(t)) return "a";
+    if (/small\s*(flat\s*)?(a-cup|breast)|flat chest/.test(t)) return "a";
+    if (/large\s*(heavy\s*)?(e-cup|breast)|huge breast|heavy breast/.test(t)) return "e";
+    return "";
   }
-  // Ethnie forte pour les deux
+  const cupLock = {
+    a: "(very small flat A-cup breasts:1.55), (petite almost flat chest:1.45), slim upper body, NOT large breasts",
+    b: "(small B-cup breasts:1.4), modest chest, NOT large",
+    c: "(medium C-cup breasts:1.35)",
+    d: "(large full D-cup breasts:1.45), generous cleavage",
+    e: "(very large heavy E-cup breasts:1.6), (huge E-cup:1.5), deep cleavage, fabric strained",
+    f: "(huge heavy F-cup breasts:1.6), deep cleavage",
+    g: "(extremely large G-cup breasts:1.6)",
+    h: "(huge heavy H-cup breasts:1.65), hyper busty",
+    i: "(enormous I-cup breasts:1.7), hyper busty",
+    j: "(massive J-cup breasts:1.7), hyper busty",
+  };
+  const cupNeg = {
+    a: "NOT large breasts, NOT huge breasts, NOT D-cup, NOT E-cup, NOT busty, NOT heavy chest on this woman",
+    b: "NOT huge breasts, NOT E-cup, NOT H-cup on this woman",
+    e: "NOT flat chest, NOT A-cup, NOT small breasts, NOT petite bust on this woman",
+    d: "NOT flat chest, NOT A-cup, NOT small breasts on this woman",
+    f: "NOT flat chest, NOT small breasts on this woman",
+    g: "NOT flat chest, NOT small breasts on this woman",
+    h: "NOT flat chest, NOT small breasts on this woman",
+    i: "NOT flat chest, NOT small breasts on this woman",
+    j: "NOT flat chest, NOT small breasts on this woman",
+  };
+
+  let c1 = cupOf(p1) || cupOf(blob.split(/second woman|2\)/i)[0] || "");
+  let c2 = cupOf(p2);
+  if (!c2) {
+    // body field: "Mei small A-cup ... + Yuki large E-cup"
+    const parts = body.split(/\+|\/|,/);
+    if (parts.length >= 2) {
+      c1 = c1 || cupOf(parts[0]);
+      c2 = cupOf(parts[1]) || cupOf(parts.slice(1).join(" "));
+    }
+  }
+  // Fallback from full blob: if both a and e mentioned
+  if (!c1 && /a-cup|bonnet a|flat/.test(blob)) c1 = "a";
+  if (!c2 && /e-cup|bonnet e|large heavy/.test(blob)) c2 = "e";
+
+  const leftName = n1 || "first woman";
+  const rightName = n2 || "second woman";
+  const leftCup = c1 && cupLock[c1] ? cupLock[c1] : "";
+  const rightCup = c2 && cupLock[c2] ? cupLock[c2] : "";
+  const leftNeg = c1 && cupNeg[c1] ? cupNeg[c1] : "";
+  const rightNeg = c2 && cupNeg[c2] ? cupNeg[c2] : "";
+
+  let bustContrast = "";
+  if (c1 && c2 && c1 !== c2) {
+    const rank = { a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:10 };
+    const diff = Math.abs((rank[c1]||3) - (rank[c2]||3));
+    if (diff >= 2) {
+      bustContrast = [
+        "(clearly different breast sizes between the two women:1.55)",
+        "(one woman much smaller bust than the other:1.5)",
+        "VERY OBVIOUS bust size contrast, do NOT give them the same chest size,",
+      ].join(", ");
+    }
+  }
+
   let ethLock = "";
-  if (/asiatique|asian|korean|japanese|chinese|east asian/.test(eth + " " + looks)) {
-    ethLock = "(two East Asian women:1.45), East Asian facial features both,";
-  } else if (/africaine|black|ebony|african/.test(eth + " " + looks)) {
+  if (/asiatique|asian|korean|japanese|chinese|east asian/.test(eth + " " + blob)) {
+    ethLock = "(two East Asian women:1.5), both East Asian facial features, fair porcelain skin, NOT Caucasian,";
+  } else if (/africaine|black|ebony|african/.test(eth + " " + blob)) {
     ethLock = "(two Black women:1.4), dark skin both,";
-  } else if (/latine|latina|brésil/.test(eth + " " + looks)) {
+  } else if (/latine|latina|brésil/.test(eth + " " + blob)) {
     ethLock = "(two Latina women:1.35),";
   }
+
   return [
     "=== DUO / TWO PEOPLE REQUIRED (MANDATORY) ===",
-    "(2girls:1.55), (two adult women:1.55), (two people:1.5), (both women fully visible head to toe:1.45),",
+    "(2girls:1.55), (two adult women:1.55), (both women fully visible:1.45),",
     ethLock,
     bustContrast,
-    p1 ? ("woman on the left / first: " + p1 + ",") : "",
-    p2 ? ("woman on the right / second: " + p2 + ",") : "",
-    looks ? ("duo physical detail: " + looks.slice(0, 320) + ",") : "",
-    "wide shot showing TWO distinct adult women side by side or interacting in the same frame,",
-    "two faces, two bodies, pair of women, double female subjects,",
-    "NOT solo, NOT 1girl, NOT single woman, NOT only one person, NOT one girl only, NOT cropped to one face, NOT portrait of one,",
-    "NOT same face clone unless twins specified,",
-    "pair names: " + names + ",",
-    "same scene same lighting photorealistic duo photo,",
+    // Femme 1
+    "LEFT / first woman " + leftName + ": " + (p1 || leftName) + ",",
+    leftCup ? ("LEFT woman bust: " + leftCup + ",") : "",
+    leftNeg ? ("LEFT woman: " + leftNeg + ",") : "",
+    // Femme 2
+    "RIGHT / second woman " + rightName + ": " + (p2 || rightName) + ",",
+    rightCup ? ("RIGHT woman bust: " + rightCup + ",") : "",
+    rightNeg ? ("RIGHT woman: " + rightNeg + ",") : "",
+    looks ? ("full duo lock: " + looks.slice(0, 400) + ",") : "",
+    "wide shot, two distinct bodies, different proportions as described,",
+    "NOT same breast size on both, NOT identical body clones,",
+    "NOT solo, NOT 1girl, NOT single woman, NOT only one person,",
+    "pair: " + names + ",",
+    "photorealistic duo photo,",
   ].filter(Boolean).join(" ");
 }
 
