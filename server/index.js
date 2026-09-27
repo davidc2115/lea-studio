@@ -182,7 +182,7 @@ app.post("/api/chat/:id/message", async (req, res) => {
     `Utilisateur: ${settings.personaName}. ${settings.personaBio}`,
     "Exemples:\n" + character.example_dialogue,
     buildMemoryBlock(chat),
-    "Format: ~pensée~ *action* puis la parole. Toujours une pensée et une action.",
+    "Format STRICT: (pensée entre parenthèses) **action entre astérisques** puis la parole. Toujours une pensée et une action. En NSFW, décris les actes sexuels explicitement si le joueur le fait.",
   ].join("\n\n");
 
   const history = recentWindow(chat.messages, 10).map((m) => ({

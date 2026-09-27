@@ -339,49 +339,68 @@ function describeOutfitDetail(outfitStr, scenarioStr) {
 /** Transforme le champ optionnel profil (FR/EN) en tokens forts pour le prompt image. */
 function expandProfileExtra(extra) {
   const raw = String(extra || "").trim();
-  if (!raw) return { text: "", overridesPose: false, overridesOutfit: false };
+  if (!raw) return { text: "", overridesPose: false, overridesOutfit: false, overridesAct: false };
   let t = raw;
-  // Tenues / états fréquents (FR → EN pondéré)
+  // Tenues / poses / actes (FR → EN). Pas de flag /g pour éviter le bug lastIndex de RegExp.test
   const map = [
-    [/tremp[ée]e?s?|mouill[ée]e?s?|soaked|wet/gi, "soaked wet clothes, water droplets, wet hair, fabric clinging to body"],
-    [/nuisette/gi, "sheer short nightie lingerie"],
-    [/lingerie|soutien[- ]?gorge|culotte|string/gi, "sexy lingerie, bra and panties"],
-    [/porte[- ]?jarretelle|jarreti[eè]re/gi, "garter belt and stockings"],
-    [/mini[- ]?jupe/gi, "very short mini skirt"],
-    [/robe moulante|robe courte/gi, "tight short dress"],
-    [/d[eé]collet[ée]|d[eé]colleté/gi, "deep plunging cleavage neckline"],
-    [/topless|seins nus/gi, "topless, bare breasts"],
-    [/nue?\b|entirely nude|compl[eè]tement nu/gi, "fully nude"],
-    [/jean trou[ée]|ripped jeans/gi, "ripped distressed jeans"],
-    [/crop top|top court/gi, "short crop top"],
-    [/a quatre pattes|à quatre pattes|on all fours/gi, "on all fours pose, arched back"],
-    [/fesses (en l'air|tendues)|from behind|de dos/gi, "from behind, emphasizing hips and butt"],
-    [/[aà] genoux|on her knees/gi, "kneeling pose"],
-    [/allong[ée]e?|lying|on the bed/gi, "lying on the bed"],
-    [/canap[ée]|couch|sofa/gi, "on the sofa"],
-    [/pench[ée]e?|bent over/gi, "bent over pose"],
-    [/jambes [eé]cart[ée]es|legs spread/gi, "legs spread"],
-    [/sourire espi[eè]gle|mischievous/gi, "mischievous playful smile looking at camera"],
-    [/timide|shy/gi, "shy timid expression"],
-    [/provocante|provocative|sexy pose/gi, "provocative sexy pose"],
+    [/tremp[ée]e?s?|mouill[ée]e?s?|soaked|\bwet\b/i, "soaked wet clothes, water droplets, wet hair, fabric clinging to body"],
+    [/nuisette/i, "sheer short nightie lingerie"],
+    [/lingerie|soutien[- ]?gorge|culotte|string/i, "sexy lingerie, bra and panties"],
+    [/porte[- ]?jarretelle|jarreti[eè]re/i, "garter belt and stockings"],
+    [/mini[- ]?jupe/i, "very short mini skirt"],
+    [/robe moulante|robe courte/i, "tight short dress"],
+    [/d[eé]collet[ée]|d[eé]colleté/i, "deep plunging cleavage neckline"],
+    [/topless|seins nus/i, "topless, bare breasts"],
+    [/\bnue?\b|entirely nude|compl[eè]tement nu/i, "fully nude"],
+    [/jean trou[ée]|ripped jeans/i, "ripped distressed jeans"],
+    [/crop top|top court/i, "short crop top"],
+    [/a quatre pattes|[àa] quatre pattes|on all fours/i, "on all fours pose, arched back"],
+    [/fesses (en l'air|tendues)|from behind|de dos/i, "from behind, emphasizing hips and butt"],
+    [/[àa] genoux|on her knees/i, "kneeling pose"],
+    [/allong[ée]e?|lying|on the bed/i, "lying on the bed"],
+    [/canap[ée]|couch|sofa/i, "on the sofa"],
+    [/pench[ée]e?|bent over/i, "bent over pose"],
+    [/jambes [eé]cart[ée]es|legs spread/i, "legs spread"],
+    [/sourire espi[eè]gle|mischievous/i, "mischievous playful smile looking at camera"],
+    [/timide|\bshy\b/i, "shy timid expression"],
+    [/provocante|provocative|sexy pose/i, "provocative sexy pose"],
+    // Actes explicites + partenaire masculin
+    [/suce|fellation|blowjob|pipe\b|gaine la bite|prend .{0,12}(bite|queue|sexe) (dans|en) bouche/i, "explicit oral sex fellatio, she is on her knees sucking a man's penis, male partner visible, uncensored NSFW"],
+    [/l[eè]che.{0,20}(chatte|sexe)|cunnilingus/i, "explicit cunnilingus, male partner between her thighs, uncensored"],
+    [/missionnaire|missionary/i, "explicit missionary sex, she on her back, male partner on top penetrating her, uncensored"],
+    [/levrette|doggy|par derri[eè]re|from behind/i, "explicit doggy style penetrative sex, male partner behind her, uncensored"],
+    [/cowgirl|califourchon|[àa] cheval sur/i, "explicit cowgirl sex, she straddling male partner, uncensored"],
+    [/p[eé]n[eè]tr|baise|baiser|je te prends|je la prends|fait l'amour|acte sexuel/i, "explicit penetrative vaginal sex with male partner, full body, uncensored"],
+    [/sperme|joui|orgasme|remplis/i, "explicit climax, visible sexual fluids, uncensored NSFW"],
+    [/branle|handjob|masturb(e|ation).{0,15}(bite|queue)/i, "explicit handjob, she stroking male partner's penis, uncensored"],
+    [/entre les seins|titjob|texas/i, "explicit titjob, penis between her breasts, male partner, uncensored"],
   ];
   let expanded = t;
   let overridesPose = false;
   let overridesOutfit = false;
+  let overridesAct = false;
   for (const [re, en] of map) {
+    // reset lastIndex just in case
+    re.lastIndex = 0;
     if (re.test(t)) {
-      expanded += ", " + en;
-      if (/pose|genoux|allong|canap|patte|pench|jambes|behind|lying|kneel|bent|spread|sofa|couch|bed/i.test(en)) overridesPose = true;
+      expanded += ", (" + en + ":1.35)";
+      if (/pose|genoux|allong|canap|patte|pench|jambes|behind|lying|kneel|bent|spread|sofa|couch|bed|oral|sex|penetrat|doggy|missionary|cowgirl|straddl/i.test(en)) overridesPose = true;
       if (/clothes|lingerie|dress|skirt|jeans|top|nude|nightie|bra|panties|outfit|wet|soaked/i.test(en)) overridesOutfit = true;
+      if (/explicit|fellatio|penetrat|sex|oral|uncensored/i.test(en)) overridesAct = true;
     }
   }
-  // Détection générique pose / tenue dans le texte libre
   if (/(pose|position|debout|assise|allong|genoux|canap|lit|dos|profil)/i.test(t)) overridesPose = true;
   if (/(tenue|habit|robe|jupe|jean|top|lingerie|nuisette|soutien|culotte|v[eê]t)/i.test(t)) overridesOutfit = true;
+  if (/(suce|baise|p[eé]n[eè]tr|fellation|levrette|missionnaire|sperme|bite|queue)/i.test(t)) {
+    overridesPose = true;
+    overridesAct = true;
+  }
+  // Toujours prioritaire si l'utilisateur a écrit quelque chose
   return {
-    text: ("USER DETAIL (MUST FOLLOW, high priority): " + expanded).slice(0, 500),
-    overridesPose,
-    overridesOutfit,
+    text: ("USER OPTIONAL DETAIL (HIGHEST PRIORITY, MUST FOLLOW EXACTLY:1.5): " + expanded).slice(0, 700),
+    overridesPose: true, // toute consigne libre peut changer la pose
+    overridesOutfit: overridesOutfit || overridesAct,
+    overridesAct,
   };
 }
 
@@ -541,11 +560,15 @@ function buildLeaImagePrompt(extra = "") {
   const duoExtra = isDuoCharacter(c)
     ? "(two adult women in one photo:1.5), (2girls:1.45), both fully visible, interacting, NOT solo, NOT 1girl,"
     : "";
+  const actExtra = (ex.overridesAct)
+    ? "(include adult male partner in the scene when the act requires it:1.4), explicit uncensored NSFW allowed,"
+    : "";
   return [
     fixedAppearanceBlock(c) + ",",
     duoExtra,
+    actExtra,
     "Photorealistic photo,",
-    ex.text ? (ex.text + ", (user optional detail is mandatory:1.4),") : "",
+    ex.text ? (ex.text + ", (USER OPTIONAL DETAIL overrides pose/outfit/scene:1.5),") : "",
     "body: " + body + ",",
     phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
     outfitLine,
@@ -721,7 +744,25 @@ function analyzeSceneFromMessages(chat, sc0) {
     if (re.test(last2) || re.test(recent)) { sc.gaze = desc; break; }
   }
 
-  // —— TENUE : compose plusieurs pièces depuis les messages (pas un seul match) ——
+  
+  // —— ACTIVITÉ SEXUELLE (pour génération scène + homme) ——
+  sc.activity = sc.activity || "";
+  const sexWin = last2 + "\n" + recent;
+  if (/suce|fellation|blowjob|\bpipe\b/i.test(sexWin)) sc.activity = "fellation";
+  else if (/levrette|doggy|par derrière|à quatre pattes/i.test(sexWin)) sc.activity = "levrette";
+  else if (/missionnaire|missionary/i.test(sexWin)) sc.activity = "missionnaire";
+  else if (/cowgirl|califourchon|à cheval sur/i.test(sexWin)) sc.activity = "cowgirl";
+  else if (/cunnilingus|lèche.{0,20}(chatte|sexe)/i.test(sexWin)) sc.activity = "cunnilingus";
+  else if (/branle|handjob/i.test(sexWin)) sc.activity = "handjob";
+  else if (/baise|pénètr|je te prend|je la prend|acte sexuel|fait l'amour|enfonce/i.test(sexWin)) sc.activity = "acte sexuel";
+  if (sc.activity) {
+    sc.pose = sc.pose || sc.activity;
+    if (!sc.poseDetail || sc.poseDetail.length < 8) {
+      sc.poseDetail = sc.activity;
+    }
+  }
+
+// —— TENUE : compose plusieurs pièces depuis les messages (pas un seul match) ——
   const win = (last2 + "\n" + recent).toLowerCase();
   const pieces = [];
   let isNude = false;
@@ -1133,51 +1174,62 @@ function buildSceneImagePrompt() {
   const act = (sc.activity || "") + " " + (sc.pose || "");
   const sexBlob = blob + " " + act;
 
+  // —— Actes NSFW avec partenaire masculin (homme visible quand l'acte le demande) ——
+  // Fellation / pipe (prioritaire avant "genoux" générique)
+  if (/suce|fellation|blowjob|\bpipe\b|gaine la bite|dans (ta|sa) bouche|prend .{0,15}(bite|queue|sexe) (dans|en) (ta|sa)?\s*bouche/i.test(sexBlob)) {
+    pose = "full body kneeling on the floor or sofa, looking up, adult male partner in front of her, both fully visible in the room";
+    explicitAct = "explicit oral sex fellatio, she is sucking the man's erect penis, male partner clearly visible, hands on him, uncensored NSFW adult content, 1girl 1boy";
+  }
   // Prise par derrière / doggy / levrette
-  if (/par derrière|from behind|doggy|à quatre pattes|on all fours|en levrette|levrette/i.test(sexBlob)) {
+  else if (/par derrière|from behind|doggy|à quatre pattes|on all fours|en levrette|levrette/i.test(sexBlob)) {
     pose = "full body doggy style on all fours on the sofa or bed, arched back, hips back, looking over shoulder, entire body and furniture visible";
-    explicitAct = "explicit penetrative sex from behind, doggy style, male partner behind her, adult uncensored intercourse";
+    explicitAct = "explicit penetrative sex from behind doggy style, adult male partner behind her thrusting, penis penetrating her, both bodies visible, uncensored 1girl 1boy";
   }
   // Penchée
   else if (/penchée|bent over|plié en deux/i.test(sexBlob)) {
     pose = "full body bent over the sofa arm or bed, hands bracing, hips raised, entire body in frame";
-    explicitAct = "explicit sex from behind bent over, penetration, adult uncensored";
+    explicitAct = "explicit sex from behind bent over, adult male partner penetrating her from behind, uncensored 1girl 1boy";
   }
   // Contre le mur
   else if (/contre le mur|pinned (to|against) the wall/i.test(sexBlob)) {
     pose = "full body standing sex against the wall, one leg raised, partner holding her, room visible";
-    explicitAct = "explicit standing penetrative sex against wall, adult uncensored";
+    explicitAct = "explicit standing penetrative sex against wall, adult male partner holding her, uncensored 1girl 1boy";
   }
-  // Missionnaire / sur le dos / jambes
+  // Missionnaire
   else if (/missionnaire|missionary|sur le dos|jambes (é|e)cart|position missionnaire/i.test(sexBlob)) {
-    pose = "full body lying on her BACK on the sofa in missionary position, legs open, looking up at partner, entire body and sofa visible, NOT standing, NOT arms crossed portrait";
-    explicitAct = "explicit missionary sex on sofa, woman on her back, adult uncensored";
+    pose = "full body lying on her BACK on the sofa or bed in missionary position, legs open, looking up at partner, entire body and furniture visible";
+    explicitAct = "explicit missionary penetrative sex, adult male partner on top between her legs penetrating her, uncensored 1girl 1boy";
   }
   // Cowgirl
   else if (/califourchon|cowgirl|à cheval sur|straddl|monte sur (toi|moi)/i.test(sexBlob)) {
     pose = "full body cowgirl, she straddles on top facing partner, hips moving, entire bodies visible on sofa or bed";
-    explicitAct = "explicit cowgirl penetrative sex, woman on top, adult uncensored";
-  }
-  // Fellation
-  else if (/suce|fellation|blowjob|genoux devant/i.test(sexBlob)) {
-    pose = "full body kneeling oral sex, looking up, partner standing or sitting, room visible";
-    explicitAct = "explicit oral sex, fellatio, adult uncensored";
+    explicitAct = "explicit cowgirl penetrative sex, she on top of adult male partner, penis inside her, uncensored 1girl 1boy";
   }
   // Cunnilingus
   else if (/cunnilingus|lèche.{0,20}(chatte|sexe)/i.test(sexBlob)) {
     pose = "full body reclined with legs open, partner between her thighs, sofa or bed visible";
-    explicitAct = "explicit cunnilingus, adult uncensored";
+    explicitAct = "explicit cunnilingus, adult male partner licking her, face between her thighs, uncensored 1girl 1boy";
+  }
+  // Handjob
+  else if (/branle|handjob|masturb(e|ation).{0,20}(bite|queue|sexe)|caresse.{0,15}(bite|queue)/i.test(sexBlob)) {
+    pose = "full body sitting or kneeling beside partner, hand on his penis, both visible";
+    explicitAct = "explicit handjob, she stroking adult male partner's erect penis with her hand, uncensored 1girl 1boy";
+  }
+  // Titjob
+  else if (/entre les seins|titjob|texas|bite entre/i.test(sexBlob)) {
+    pose = "full body on her knees or sitting, breasts pressed together around partner, both visible";
+    explicitAct = "explicit titjob, man's penis between her breasts, uncensored 1girl 1boy";
   }
   // Doigté
   else if (/doigt[eé]|doigts? (dans|en)/i.test(sexBlob)) {
     pose = "full body reclining, legs open, intimate hand between legs, aroused face, full body in frame";
-    explicitAct = "explicit fingering, adult uncensored";
+    explicitAct = "explicit fingering, fingers inside her, adult uncensored";
   }
-  // Orgasm / pénétration / sperme / "je te prends" sans position nommée
-  else if (/orgasme|jouis|sperme|remplis|chatte|pénètr|je te prend|je la prend|plus fort|plus rapidement|baise|baiser|fait l'amour|acte sexuel/i.test(sexBlob)
+  // Orgasm / pénétration générique
+  else if (/orgasme|jouis|sperme|remplis|chatte|pénètr|je te prend|je la prend|plus fort|plus rapidement|baise|baiser|fait l'amour|acte sexuel|enfonce|profondeur/i.test(sexBlob)
            || sc.activity === "acte sexuel") {
-    pose = "full body during penetrative sex on the sofa or bed, legs wrapped or open, hips moving, partner engaged, entire scene and room visible, not a portrait";
-    explicitAct = "explicit penetrative vaginal sex in progress, orgasm, adult uncensored intercourse, full bodies";
+    pose = "full body during penetrative sex on the sofa or bed, legs wrapped or open, hips moving, adult male partner engaged, entire scene and room visible, not a portrait";
+    explicitAct = "explicit penetrative vaginal sex in progress with adult male partner, orgasm, uncensored intercourse, full bodies, 1girl 1boy";
   }
   else if (/allong|couch[eé]|sur le lit/i.test(blob)) {
     pose = "full body lying on the bed or sofa, head to toe visible";
@@ -3189,7 +3241,7 @@ function renderProfile() {
     </div>
     <h3 style="margin-top:18px">Photo du scénario (tenue + lieu du personnage)</h3>
     <p style="color:var(--muted);font-size:13px">${c.id === 'lea' ? 'Toujours Léa orage : top court blanc MOUILLÉ + jean moulant + porte la nuit. Horde gratuit = visage variable. Tu peux supprimer les générées avec ×.' : ('Scénario de ' + c.name + ' · × pour supprimer une générée.')}</p>
-    <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel : détail en plus (ex: elle frappe à la porte)"></textarea>
+    <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel PRIORITAIRE : pose, tenue, acte… (ex: à genoux, lingerie rouge, elle suce…) — pris en compte dans la génération"></textarea>
     <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
