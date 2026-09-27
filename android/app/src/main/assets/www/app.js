@@ -2780,39 +2780,130 @@ function filterDiscoverList(q) {
     out = state._discShuffle;
   } else {
     // Tags rôle : match exact tag ou title (évite "fille" trop large)
-    const roleExact = {
-      "belle-fille": (c) => (c.tags || []).includes("belle-fille") || /belle-fille/i.test(c.title || ""),
-      "belle-mère": (c) => (c.tags || []).includes("belle-mère") || /belle-m[eè]re/i.test(c.title || ""),
-      "belle-mere": (c) => (c.tags || []).includes("belle-mère") || /belle-m[eè]re/i.test(c.title || ""),
-      "belle-sœur": (c) => (c.tags || []).includes("belle-sœur") || (c.tags || []).includes("belle-soeur") || /belle-s[oœ]eur/i.test(c.title || ""),
-      "belle-soeur": (c) => (c.tags || []).includes("belle-sœur") || (c.tags || []).includes("belle-soeur") || /belle-s[oœ]eur/i.test(c.title || ""),
-      "babysitter": (c) => (c.tags || []).includes("babysitter") || /babysitter|baby-sitter|nounou/i.test(c.title || ""),
-      "amie": (c) => /amie|copine de (ta|sa) fille/i.test([c.title, ...(c.tags || [])].join(" ")),
+    // Normalise espaces / accents légers pour les tags multi-mots
+    const norm = (x) => String(x || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    const tagsOf = (c) => (c.tags || []).map((t) => norm(t));
+    const hasTag = (c, ...cands) => {
+      const ts = tagsOf(c);
+      return cands.some((cand) => ts.includes(norm(cand)));
     };
-    if (roleExact[s]) {
-      out = list.filter(roleExact[s]);
+    const titleOf = (c) => norm(c.title || "");
+    const blobOf = (c) => norm([
+      c.name, c.title, c.body, c.ethnicity, c.appearance, c.looks_en,
+      ...(c.tags || []),
+    ].join(" "));
+
+    // Matchers exacts (phrase complète de recherche)
+    const exactMatchers = {
+      "belle-fille": (c) => hasTag(c, "belle-fille") || /belle-fille/.test(titleOf(c)),
+      "belle-mere": (c) => hasTag(c, "belle-mere", "belle-mère") || /belle-mere/.test(titleOf(c)),
+      "belle-soeur": (c) => hasTag(c, "belle-soeur", "belle-sœur") || /belle-s[oœ]eur/.test(titleOf(c)),
+      "babysitter": (c) => hasTag(c, "babysitter") || /babysitter|baby-sitter|nounou/.test(titleOf(c)),
+      "fille d'ami": (c) => hasTag(c, "fille d'ami", "fille dami") || /fille d.?ami/.test(titleOf(c)),
+      "fille dami": (c) => hasTag(c, "fille d'ami") || /fille d.?ami/.test(titleOf(c)),
+      "maman d'ami": (c) => hasTag(c, "maman d'ami") || /maman d.?ami/.test(titleOf(c)),
+      "maman dami": (c) => hasTag(c, "maman d'ami") || /maman d.?ami/.test(titleOf(c)),
+      "bonnet a": (c) => hasTag(c, "bonnet a", "petits seins") || /bonnet a\b|a-cup|flat a-cup|tres petite bonnet a/.test(blobOf(c)),
+      "bonnet b": (c) => hasTag(c, "bonnet b") || /bonnet b\b|b-cup|petite bonnet b/.test(blobOf(c)),
+      "bonnet c": (c) => hasTag(c, "bonnet c", "seins moyens") || /bonnet c\b|c-cup|moyenne bonnet c/.test(blobOf(c)),
+      "bonnet d": (c) => hasTag(c, "bonnet d", "95d") || /bonnet d\b|d-cup|95d|genereuse bonnet d/.test(blobOf(c)),
+      "bonnet e": (c) => hasTag(c, "bonnet e") || /bonnet e\b|e-cup/.test(blobOf(c)),
+      "bonnet f": (c) => hasTag(c, "bonnet f") || /bonnet f\b|f-cup/.test(blobOf(c)),
+      "bonnet g": (c) => hasTag(c, "bonnet g") || /bonnet g\b|g-cup/.test(blobOf(c)),
+      "bonnet h": (c) => hasTag(c, "bonnet h") || /bonnet h\b|h-cup|extreme bonnet h/.test(blobOf(c)),
+      "bonnet i": (c) => hasTag(c, "bonnet i") || /bonnet i\b|i-cup|extreme bonnet i/.test(blobOf(c)),
+      "bonnet j": (c) => hasTag(c, "bonnet j") || /bonnet j\b|j-cup|extreme bonnet j/.test(blobOf(c)),
+      "gros seins": (c) => hasTag(c, "gros seins") || /gros seins|bonnet [defghij]\b|[defghij]-cup|95d|100e|genereuse bonnet|extreme bonnet/.test(blobOf(c)),
+      "petits seins": (c) => hasTag(c, "petits seins") || /petits seins|bonnet [ab]\b|[ab]-cup|flat a-cup|tres petite bonnet/.test(blobOf(c)),
+      "seins moyens": (c) => hasTag(c, "seins moyens") || /seins moyens|bonnet c\b|c-cup|moyenne bonnet c/.test(blobOf(c)),
+      "grosses fesses": (c) => hasTag(c, "grosses fesses") || /grosses fesses|fessier|large round butt|very large round buttocks/.test(blobOf(c)),
+      "collegue": (c) => hasTag(c, "collegue", "collègue") || /collegue/.test(titleOf(c)),
+      "secretaire": (c) => hasTag(c, "secretaire", "secrétaire") || /secretaire/.test(titleOf(c)),
+      "voisine": (c) => hasTag(c, "voisine") || /voisine/.test(titleOf(c)),
+      "tante": (c) => hasTag(c, "tante") || /tante/.test(titleOf(c)),
+      "directe": (c) => hasTag(c, "directe"),
+      "tactile": (c) => hasTag(c, "tactile"),
+      "fantasy": (c) => hasTag(c, "fantasy", "non-humain"),
+      "non-humain": (c) => hasTag(c, "non-humain", "fantasy"),
+      "duo": (c) => hasTag(c, "duo", "plan a trois", "plan à trois"),
+      "jeu": (c) => hasTag(c, "jeu", "defis", "défis"),
+      "special": (c) => hasTag(c, "special", "spécial"),
+      "mariee": (c) => hasTag(c, "mariee", "mariée"),
+      "celibataire": (c) => hasTag(c, "celibataire", "célibataire"),
+      "veuve": (c) => hasTag(c, "veuve"),
+      "divorcee": (c) => hasTag(c, "divorcee", "divorcée"),
+      "blonde": (c) => /blond|platinum|cendr/.test(blobOf(c)),
+      "brune": (c) => /brun|chatain|brown hair|chestnut/.test(blobOf(c)),
+      "rousse": (c) => /roux|rousse|red hair|ginger|auburn/.test(blobOf(c)),
+      "cheveux noirs": (c) => /cheveux noirs|black hair/.test(blobOf(c)),
+      "mince": (c) => hasTag(c, "mince") || /mince|slim slender|slim frame/.test(blobOf(c)),
+      "ronde": (c) => hasTag(c, "ronde", "plus-size") || /ronde|plus-size|voluptueuse|full voluptuous/.test(blobOf(c)),
+      "sablier": (c) => hasTag(c, "sablier") || /sablier|hourglass/.test(blobOf(c)),
+      "athletique": (c) => hasTag(c, "athletique", "athlétique") || /athletique|athletic/.test(blobOf(c)),
+      "petite": (c) => hasTag(c, "petite") || /silhouette petite|petite slim|1m50/.test(blobOf(c)),
+      "tres grande": (c) => hasTag(c, "tres grande", "très grande") || /tres grande|very tall|1m85/.test(blobOf(c)),
+      "mature": (c) => hasTag(c, "mature") || (Number(c.age) >= 35),
+      "jeune": (c) => hasTag(c, "jeune") || (Number(c.age) > 0 && Number(c.age) <= 28),
+      "nsfw": (c) => hasTag(c, "nsfw"),
+      "importe": (c) => !!(c.imported || String(c.id || "").startsWith("imp_")),
+      "aleatoire": (c) => true,
+    };
+    // alias avec accents
+    exactMatchers["belle-mère"] = exactMatchers["belle-mere"];
+    exactMatchers["belle-sœur"] = exactMatchers["belle-soeur"];
+    exactMatchers["collègue"] = exactMatchers["collegue"];
+    exactMatchers["secrétaire"] = exactMatchers["secretaire"];
+    exactMatchers["spécial"] = exactMatchers["special"];
+    exactMatchers["mariée"] = exactMatchers["mariee"];
+    exactMatchers["célibataire"] = exactMatchers["celibataire"];
+    exactMatchers["divorcée"] = exactMatchers["divorcee"];
+    exactMatchers["athlétique"] = exactMatchers["athletique"];
+    exactMatchers["très grande"] = exactMatchers["tres grande"];
+    exactMatchers["aléatoire"] = exactMatchers["aleatoire"];
+    exactMatchers["importé"] = exactMatchers["importe"];
+
+    const sn = norm(s);
+    if (exactMatchers[sn]) {
+      out = list.filter(exactMatchers[sn]);
+    } else if (exactMatchers[s]) {
+      out = list.filter(exactMatchers[s]);
     } else {
-      out = list.filter((c) => {
-        const blob = [
-          c.name, c.title, c.body, c.ethnicity, c.appearance, c.looks_en, c.scenario, c.personality,
-          ...(c.tags || []),
-        ].join(" ").toLowerCase();
-        const syn = (tok) => {
-          const t = tok.toLowerCase();
-          if (roleExact[t]) return roleExact[t](c);
-          if (t === "blonde" || t === "blond") return /blond|platinum|cendr/.test(blob);
-          if (t === "brune" || t === "brun") return /brun|châtain|chatain|brown hair|chestnut/.test(blob);
-          if (t === "rousse" || t === "roux") return /roux|rousse|red hair|ginger|auburn|freckle|taches de rousseur/.test(blob);
-          if (t === "cheveux noirs" || t === "noire") return /cheveux noirs|black hair/.test(blob);
-          if (t === "gros seins" || t === "grosse poitrine") return /gros seins|généreuse|95d|100e|bonnet [def]|large|busty|voluptuous|heavy breast/.test(blob);
-          if (t === "petits seins" || t === "petite poitrine") return /petits seins|bonnet [ab]|small breast|flat|mince.*sein|a-cup|b-cup|modest chest/.test(blob);
-          if (t === "seins moyens") return /bonnet c|medium breast|seins moyens/.test(blob);
-          if (t === "latine" || t === "latino") return /latin|brésil|bresil|espagnol|mexic|argentin|colomb/.test(blob);
-          if (t === "voluptueuse") return /voluptueuse|curvy|sablier|généreuse|hourglass/.test(blob);
-          return blob.includes(t);
-        };
-        return s.split(/\s+/).every((tok) => syn(tok));
-      });
+      // Tokens : ne pas casser "bonnet h" — d'abord essayer phrases connues dans la query
+      let matchedPhrase = false;
+      const phrases = Object.keys(exactMatchers).sort((a, b) => b.length - a.length);
+      for (const ph of phrases) {
+        const pn = norm(ph);
+        if (pn.length >= 3 && (sn === pn || sn.includes(pn))) {
+          // Si la query est exactement la phrase ou la contient comme tag principal
+          if (sn === pn) {
+            out = list.filter(exactMatchers[ph]);
+            matchedPhrase = true;
+            break;
+          }
+        }
+      }
+      if (!matchedPhrase) {
+        // Multi-mots : AND sur tokens, mais ignore les tokens 1 lettre (évite "i" de "bonnet i")
+        const toks = sn.split(/\s+/).filter((t) => t.length >= 2 || /^\d{2}$/.test(t));
+        if (!toks.length) {
+          out = list;
+        } else {
+          out = list.filter((c) => {
+            const blob = blobOf(c);
+            const ts = tagsOf(c);
+            return toks.every((t) => {
+              if (exactMatchers[t]) return exactMatchers[t](c);
+              // match tag exact
+              if (ts.some((tg) => tg === t || tg.includes(t))) return true;
+              // match nom / titre prioritaire
+              if (norm(c.name).includes(t) || titleOf(c).includes(t)) return true;
+              // blob seulement si token assez long (>= 3) pour éviter faux positifs
+              if (t.length >= 3 && blob.includes(t)) return true;
+              return false;
+            });
+          });
+        }
+      }
     }
   }
   return out;
