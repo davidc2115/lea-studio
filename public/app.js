@@ -538,8 +538,12 @@ function buildLeaImagePrompt(extra = "") {
   const outfitLine = ex.overridesOutfit
     ? ("OUTFIT FROM USER DETAIL (priority over scenario default): follow USER DETAIL, " + outfitDetail + ",")
     : ("OUTFIT REQUIRED (match exactly): " + outfitDetail + ",");
+  const duoExtra = isDuoCharacter(c)
+    ? "(two adult women in one photo:1.5), (2girls:1.45), both fully visible, interacting, NOT solo, NOT 1girl,"
+    : "";
   return [
     fixedAppearanceBlock(c) + ",",
+    duoExtra,
     "Photorealistic photo,",
     ex.text ? (ex.text + ", (user optional detail is mandatory:1.4),") : "",
     "body: " + body + ",",
@@ -1243,10 +1247,12 @@ function buildSceneImagePrompt() {
   const name = c.name || "the woman";
   const outfitDetail = describeOutfitDetail(outfit);
   const phys = fixedAppearanceBlock(c);
+  const duoScene = duoCompositionBlock(c);
 
   if (midSex) {
     return [
       phys,
+      duoScene,
       "explicit NSFW sex scene, full body wide shot head to toe,",
       "NOT a close-up portrait, NOT bust crop, NOT headshot,",
       "wearing/state: " + outfit + ",",
@@ -3473,6 +3479,38 @@ function morphWeights(c) {
 /** Traits OBLIGATOIRES par personnage (répétés dans le prompt). */
 /** Apparence 100% FIXE — seul change en scène : pose / tenue / lieu. */
 
+function duoDenoise(base) {
+  try {
+    if (isDuoCharacter(character())) return Math.max(Number(base) || 0.55, 0.72);
+  } catch (_) {}
+  return base;
+}
+
+function isDuoCharacter(c) {
+  if (!c) return false;
+  const tags = (c.tags || []).map((t) => String(t).toLowerCase());
+  const id = String(c.id || "").toLowerCase();
+  const name = String(c.name || "");
+  if (tags.some((t) => /duo|jumelles?|s[oœ]eurs?|plan\s*[àa]\s*trois|amies|couple/.test(t))) return true;
+  if (/^duo_|_twins|_sisters|_friends|_couple|_md|_wlw/.test(id)) return true;
+  if (/\s*&\s*|\set\s/.test(name) && /duo|jumelle|sœur|soeur|amies|couple|mère|mere/i.test([name, ...(c.tags || [])].join(" "))) return true;
+  if (/\s*&\s*/.test(name)) return true;
+  return false;
+}
+
+function duoCompositionBlock(c) {
+  if (!isDuoCharacter(c)) return "";
+  const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
+  return [
+    "=== DUO / TWO PEOPLE REQUIRED ===",
+    "(two adult women together in the same photo:1.45), (2girls:1.4), (both women fully visible:1.35),",
+    "both subjects in frame from head to mid-thigh, side by side or interacting closely,",
+    "NOT solo, NOT 1girl, NOT single woman, NOT only one person, NOT cropped to one face,",
+    "pair: " + names + ",",
+    "same scene, same lighting, photorealistic couple/duo portrait,",
+  ].join(" ");
+}
+
 function fixedAppearanceBlock(c) {
   if (!c) return "";
   const age = Number(c.age) || 21;
@@ -3481,9 +3519,11 @@ function fixedAppearanceBlock(c) {
   const body = String(c.body || "").trim();
   const eth = String(c.ethnicity || "").trim();
   const phys = physicalLocksFromText(c);
+  const duo = duoCompositionBlock(c);
   return [
+    duo,
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
-    "Person: " + name + ",",
+    isDuoCharacter(c) ? ("Pair: " + name + " (TWO adult women),") : ("Person: " + name + ","),
     identityLock(c) + ",",
     looks + ",",
     phys.positive.join(", ") + ",",
@@ -3836,7 +3876,7 @@ async function generatePhotoHordeFallback(prompt, c) {
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = c.id === "lea" ? 0.62 : 0.68;
+        payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setGenStatus("Horde secours img2img denoise " + payload.denoising + "…");
       }
@@ -4004,7 +4044,7 @@ async function generateScenePhoto() {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-        payload.denoising = bigChange ? 0.58 : 0.52;
+        payload.denoising = duoDenoise(bigChange ? 0.58 : 0.52);
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
       } else {
@@ -4440,7 +4480,7 @@ async function generatePhoto() {
       if (ref) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
-        payload.denoising = c.id === "lea" ? 0.62 : 0.68;
+        payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setGenStatus("Horde img2img denoise " + payload.denoising + " (pose différente)…");
       } else {
@@ -5728,10 +5768,10 @@ async function generateStudioImage(opts) {
       payload.source_image = sourceB64;
       payload.source_processing = "img2img";
       if (window._studioCompositeDenoise) {
-        payload.denoising = window._studioCompositeDenoise;
+        payload.denoising = duoDenoise(window._studioCompositeDenoise);
         payload.steps = 36;
       } else {
-        payload.denoising = opts.mode === "edit" ? 0.55 : 0.62;
+        payload.denoising = duoDenoise(opts.mode === "edit" ? 0.55 : 0.62);
       }
     } else {
       payload.steps = 40;
