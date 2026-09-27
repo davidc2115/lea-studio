@@ -3802,6 +3802,30 @@ function identityLock(c) {
 
 
 /** Cover / 1ère photo → base64 brut (sans data: prefix) pour img2img tous moteurs. */
+
+async function applyCharacterRefToPayload(payload, c, statusFn) {
+  const setS = statusFn || setGenStatus;
+  try {
+    if (isDuoCharacter(c)) {
+      setS("Horde txt2img duo (2 personnes, sans img2img mono)…");
+      return payload;
+    }
+    const ref = await resolveCharacterRefB64(c);
+    if (ref) {
+      payload.source_image = ref;
+      payload.source_processing = "img2img";
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
+      if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
+      setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
+    } else {
+      setS("Horde txt2img (pas encore de photo de ref — la 1ère image servira ensuite)…");
+    }
+  } catch (e) {
+    setS("Horde txt2img (ref indisponible)…");
+  }
+  return payload;
+}
+
 async function resolveCharacterRefB64(c) {
   if (!c) return null;
   const strip = (s) => {
@@ -3810,58 +3834,103 @@ async function resolveCharacterRefB64(c) {
     return i >= 0 ? s.slice(i + 1) : s;
   };
   const trySrc = async (src) => {
-    if (!src || /placeholder|default|empty/i.test(String(src))) return null;
+    if (!src || /placeholder|default|empty|null|undefined/i.test(String(src))) return null;
     try {
       if (String(src).startsWith("data:")) {
         const b = strip(src);
-        return b.length > 500 ? b : null;
+        return b.length > 800 ? b : null;
       }
       if (String(src).startsWith("gallery:")) {
         const d = resolvePhotoSrc(src);
         if (d && String(d).startsWith("data:")) {
           const b = strip(d);
-          return b.length > 500 ? b : null;
+          return b.length > 800 ? b : null;
+        }
+        // clé gallery non résolue en data — essayer disk via LeaAndroid
+        if (window.LeaAndroid && window.LeaAndroid.readGallery) {
+          try {
+            const raw = window.LeaAndroid.readGallery(String(src).replace(/^gallery:/, ""));
+            if (raw && String(raw).startsWith("data:")) {
+              const b = strip(raw);
+              if (b.length > 800) return b;
+            }
+          } catch (_) {}
         }
       }
       let b = await imageToBase64(src);
-      if (b && b.length > 500) return b;
+      if (b && b.length > 800) return b;
       if (window.LeaAndroid && window.LeaAndroid.httpGetDataUrl) {
         try {
           const du = window.LeaAndroid.httpGetDataUrl(src);
           if (du && String(du).startsWith("data:")) {
             b = strip(du);
-            if (b.length > 500) return b;
+            if (b.length > 800) return b;
           }
         } catch (_) {}
       }
     } catch (_) {}
     return null;
   };
-  // Léa : assets orage en priorité
-  if (c.id === "lea") {
-    const refs = [
+
+  const id = c.id || "";
+  const candidates = [];
+
+  // 1) Cover custom (étoile / choisie par user)
+  try {
+    const custom = customCover(id);
+    if (custom) candidates.push(custom);
+  } catch (_) {}
+
+  // 2) Cover résolue (resolvedCover)
+  try {
+    const cov = resolvedCover(c);
+    if (cov) candidates.push(cov);
+  } catch (_) {}
+
+  // 3) Galerie générée (toutes les photos, pas seulement la 1ère)
+  try {
+    const extras = extraPhotos(id) || [];
+    for (const e of extras.slice(0, 6)) {
+      if (e) candidates.push(e);
+    }
+  } catch (_) {}
+
+  // 4) Gallery déclarée dans le personnage
+  if (Array.isArray(c.gallery)) {
+    for (const g of c.gallery.slice(0, 4)) if (g) candidates.push(g);
+  }
+  if (c.cover) candidates.push(c.cover);
+
+  // 5) Assets APK / cast par id
+  if (id) {
+    const base = String(id).replace(/[^a-zA-Z0-9_\-]/g, "");
+    candidates.push(
+      "images/cast/" + base + ".jpg",
+      "images/cast/" + base + ".png",
+      "images/cast/" + base + "-01.jpg",
+      "images/" + base + ".jpg",
+      "images/" + base + "-portrait.jpg"
+    );
+  }
+
+  // 6) Léa assets historiques
+  if (id === "lea") {
+    candidates.push(
       "images/lea-orage.jpg",
       "images/lea-orage-timide.jpg",
       "images/lea-portrait.jpg",
       "images/lea-feu.jpg",
-    ];
-    for (const r of refs) {
-      const b = await trySrc(r);
-      if (b) return b;
-    }
+      "images/cast/lea.jpg"
+    );
   }
-  const cover = resolvedCover(c);
-  let b = await trySrc(cover);
-  if (b) return b;
-  try {
-    const extras = extraPhotos(c.id);
-    if (extras && extras[0]) {
-      b = await trySrc(extras[0]);
-      if (b) return b;
-    }
-  } catch (_) {}
-  if (c.gallery && c.gallery[0]) {
-    b = await trySrc(c.gallery[0]);
+
+  // Déduplique en gardant l'ordre
+  const seen = new Set();
+  for (const src of candidates) {
+    const key = String(src).slice(0, 120);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const b = await trySrc(src);
     if (b) return b;
   }
   return null;
@@ -4079,14 +4148,7 @@ async function generatePhotoHordeFallback(prompt, c) {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
     try {
-      const ref = await resolveCharacterRefB64(c);
-      if (ref && !isDuoCharacter(c)) {
-        payload.source_image = ref;
-        payload.source_processing = "img2img";
-        payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
-        payload.seed = Math.floor(Math.random() * 2_000_000_000);
-        setGenStatus("Horde secours img2img denoise " + payload.denoising + "…");
-      }
+      await applyCharacterRefToPayload(payload, c);
     } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
@@ -4683,16 +4745,7 @@ async function generatePhoto() {
     }
     try {
       setGenStatus("Chargement référence visage…");
-      const ref = await resolveCharacterRefB64(c);
-      if (ref && !isDuoCharacter(c)) {
-        payload.source_image = ref;
-        payload.source_processing = "img2img";
-        payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
-        payload.seed = Math.floor(Math.random() * 2_000_000_000);
-        setGenStatus("Horde img2img denoise " + payload.denoising + " (pose différente)…");
-      } else {
-        setGenStatus("Horde txt2img (pas de ref cover)…");
-      }
+      await applyCharacterRefToPayload(payload, c);
     } catch (e) {
       console.warn("[img2img]", e);
       setGenStatus("Horde txt2img…");
