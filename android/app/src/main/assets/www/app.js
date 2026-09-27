@@ -1539,12 +1539,35 @@ function extraPhotos(id) {
     if (src.startsWith("file:")) return false;
     return false;
   });
-  // Dédupliquer en gardant l'ordre
+  // Dédupliquer clés identiques + empreinte contenu (évite doublons au redémarrage)
   const seen = new Set();
+  const seenFp = new Set();
   const out = [];
   for (const s of clean) {
     if (seen.has(s)) continue;
+    let fp = s;
+    if (s.startsWith("gallery:")) {
+      // gallery:cid/g123.jpg → empreinte = nom fichier
+      const base = s.split("/").pop() || s;
+      fp = "file:" + base;
+      // Vérifier que le fichier charge encore
+      try {
+        const data = resolvePhotoSrc(s);
+        if (!data || data.length < 100) continue; // orphelin
+        // empreinte légère sur le début du jpeg base64
+        const head = data.slice(0, 120) + ":" + data.length;
+        if (seenFp.has(head)) continue;
+        seenFp.add(head);
+      } catch (_) { continue; }
+    } else if (s.startsWith("data:image")) {
+      const head = s.slice(0, 120) + ":" + s.length;
+      if (seenFp.has(head)) continue;
+      seenFp.add(head);
+      fp = head;
+    }
+    if (seen.has(fp)) continue;
     seen.add(s);
+    seen.add(fp);
     out.push(s);
   }
   return out.slice(0, GALLERY_MAX);
@@ -1638,7 +1661,20 @@ async function addToGallery(src, charId) {
       }
     } catch (_) {}
   }
-  const list = extraPhotos(cid).filter((x) => x !== stored);
+  let list = extraPhotos(cid).filter((x) => x !== stored);
+  // Éviter doublon visuel : même taille data URL déjà présente
+  try {
+    const fp = String(stored).startsWith("data:")
+      ? (stored.slice(0, 100) + ":" + stored.length)
+      : stored;
+    list = list.filter((x) => {
+      if (x === stored) return false;
+      if (String(x).startsWith("data:") && String(stored).startsWith("data:")) {
+        return !(x.length === stored.length && x.slice(0, 80) === stored.slice(0, 80));
+      }
+      return true;
+    });
+  } catch (_) {}
   list.unshift(stored);
   saveExtra(list, cid);
   // Première génération = cover auto (Découvrir / chat) si pas déjà choisie
@@ -2859,12 +2895,22 @@ async function migrateGalleryToDisk(charId) {
 function renderProfile() {
   const c = character();
   const extras = extraPhotos();
-  const base = (c.gallery && c.gallery.length ? c.gallery : GALLERY.map((g) => g.src)).map((src, i) => ({ src, title: "Photo " + (i + 1) }));
+  const base = (c.gallery && c.gallery.length ? c.gallery : []).map((src, i) => ({ src, title: "Photo " + (i + 1) }))
+    .filter((g) => g.src && String(g.src).length > 2);
   const genItems = extras.map((src, i) => {
     const resolved = resolvePhotoSrc(src);
     return { src: resolved || "", raw: src, title: "Générée " + (i + 1), gen: true, idx: i };
-  }).filter((g) => g.src);
-  const all = base.map((g) => ({ ...g, gen: false, raw: g.src })).concat(genItems);
+  }).filter((g) => g.src && g.src.length > 50);
+  // Fusion sans doublon (même URL / même data head)
+  const all = [];
+  const seenSrc = new Set();
+  for (const g of base.map((x) => ({ ...x, gen: false, raw: x.src })).concat(genItems)) {
+    const key = (g.src || "").slice(0, 96) + ":" + (g.src || "").length;
+    if (!g.src || seenSrc.has(key) || seenSrc.has(g.src)) continue;
+    seenSrc.add(key);
+    seenSrc.add(g.src);
+    all.push(g);
+  }
   const hero = c.cover || (all[0] && all[0].src) || "";
   $("view-profile").innerHTML = `
     <h1>${c.name}</h1>
@@ -5531,11 +5577,11 @@ function renderSettings() {
     <label class="lbl">Dépôt (owner/repo)</label>
     <input class="field" id="gh-repo" type="text" placeholder="davidc2115/lea-studio" />
     <label class="lbl">Dossier dans le repo</label>
-    <input class="field" id="gh-path" type="text" placeholder="gallery-backup" value="gallery-backup" />
+    <input class="field" id="gh-path" type="text" placeholder="public/images/cast" value="public/images/cast" />
     <button type="button" class="cta" id="gh-save-gallery" style="margin-top:10px">☁ Sauvegarder toute la galerie sur GitHub</button>
     <button type="button" class="cta" id="gh-save-current" style="margin-top:8px;background:#3a2048">☁ Sauvegarder le personnage actuel</button>
     <button type="button" class="cta" id="gh-restore" style="margin-top:8px;background:#2a4a38">⬇ Restaurer depuis GitHub (après réinstall)</button>
-    <p style="color:var(--muted);font-size:12px">Après réinstall APK : clique Restaurer pour récupérer les images du dossier gallery-backup. Les photos assets (Léa orage, etc.) sont déjà dans l'APK.</p>
+    <p style="color:var(--muted);font-size:12px">Backup = dossier public/images/cast (mêmes chemins que les covers personnages). Après réinstall : Restaurer. Les photos Léa assets restent dans l'APK.</p>
     <pre id="gh-st" style="color:var(--muted);font-size:12px;white-space:pre-wrap;margin-top:8px"></pre>
 
     <label>Clé AI Horde (optionnel — plus de kudos gratuits sur aihorde.net)</label>
@@ -5668,7 +5714,7 @@ function renderSettings() {
   async function restoreGalleryFromGithub() {
     const token = ($("gh-token") && $("gh-token").value || "").trim();
     const repo = ($("gh-repo") && $("gh-repo").value || "").trim();
-    const basePath = ($("gh-path") && $("gh-path").value || "gallery-backup").trim().replace(/^\/+|\/+$/g, "");
+    const basePath = ($("gh-path") && $("gh-path").value || "public/images/cast").trim().replace(/^\/+|\/+$/g, "");
     const stEl = $("gh-st");
     if (!repo || !repo.includes("/")) {
       if (stEl) stEl.textContent = "Indique dépôt owner/repo (ex. davidc2115/lea-studio).";
@@ -5754,7 +5800,7 @@ function renderSettings() {
 async function uploadGalleryToGithub(onlyCharId) {
     const token = ($("gh-token") && $("gh-token").value || "").trim();
     const repo = ($("gh-repo") && $("gh-repo").value || "").trim();
-    const basePath = ($("gh-path") && $("gh-path").value || "gallery-backup").trim().replace(/^\/+|\/+$/g, "");
+    const basePath = ($("gh-path") && $("gh-path").value || "public/images/cast").trim().replace(/^\/+|\/+$/g, "");
     const stEl = $("gh-st");
     if (!token || !repo || !repo.includes("/")) {
       if (stEl) stEl.textContent = "Indique token GitHub (ghp_…) et dépôt owner/repo.";
@@ -5945,7 +5991,7 @@ document.querySelectorAll(".nav").forEach((b) => {
       const already = localStorage.getItem("lea.gallery.restored");
       const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
       const repo = (st.githubRepo || "davidc2115/lea-studio").trim();
-      const basePath = (st.githubPath || "gallery-backup").replace(/^\/+|\/+$/g, "");
+      const basePath = (st.githubPath || "public/images/cast").replace(/^\/+|\/+$/g, "");
       const leaEmpty = !(extraPhotos("lea") || []).length;
       if (already || !leaEmpty) return;
       console.log("[lea] auto-restore gallery (bg)…", repo);
