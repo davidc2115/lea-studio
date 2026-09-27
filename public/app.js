@@ -432,7 +432,7 @@ function expandProfileExtra(extra) {
     [/piscine|pool/i, "by the swimming pool"],
     // --- Actes explicites ---
     [/elle suce|suce (ma |sa |la )?(bite|queue)|fellation|blowjob|pipe\b|en train de sucer|gaine la bite/i,
-      "MASTER ACT: (fellatio:1.55), (penis in her mouth:1.55), (erect penis clearly visible:1.5), she sucking a man's cock, (1boy:1.45), (1girl:1.2), male partner in frame, uncensored explicit NSFW"],
+      "MASTER ACT: (fellatio:1.55), (penis in her mouth:1.5), she on her knees sucking a fully visible adult man, (1boy:1.55), (1girl:1.2), man's torso hips and thighs visible behind the act, hetero couple, full scene, NOT disembodied penis, NOT floating cock only, uncensored explicit NSFW"],
     [/l[eè]che.{0,20}(chatte|sexe)|cunnilingus/i,
       "MASTER ACT: explicit cunnilingus, male face between her thighs, (1boy:1.4), uncensored"],
     [/missionnaire|missionary/i,
@@ -533,6 +533,57 @@ function expandProfileExtra(extra) {
     raw: t0,
   };
 }
+
+/** Description du partenaire masculin pour scènes explicites (bio persona utilisateur). */
+function getUserPartnerImagePrompt() {
+  let name = "";
+  let bio = "";
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    name = String(st.personaName || "").trim();
+    bio = String(st.personaBio || "").trim();
+  } catch (_) {}
+  // Fallback depuis le statut serveur mis en cache si besoin
+  try {
+    if ((!name && !bio) && window._leaStatus && window._leaStatus.settings) {
+      name = String(window._leaStatus.settings.personaName || "").trim();
+      bio = String(window._leaStatus.settings.personaBio || "").trim();
+    }
+  } catch (_) {}
+  const bits = [];
+  bits.push("(1boy:1.55)", "(adult male partner fully visible:1.5)", "(male body in frame:1.45)");
+  bits.push("man's torso legs and head partially or fully visible", "NOT disembodied penis", "NOT floating penis only", "NOT penis without male body");
+  if (name) bits.push("male partner is " + name);
+  if (bio) {
+    // Extraire indices physiques simples de la bio FR
+    let desc = bio.slice(0, 280);
+    const map = [
+      [/barbe|beard/i, "bearded man"],
+      [/chauve|bald/i, "bald man"],
+      [/cheveux (bruns|brown)/i, "brown-haired man"],
+      [/cheveux (blonds|blond)/i, "blond man"],
+      [/cheveux (noirs|black)/i, "black-haired man"],
+      [/muscl[eé]|athletic|sportif/i, "athletic muscular man"],
+      [/barbe de 3 jours|stubble/i, "man with stubble"],
+      [/yeux (bleus|blue)/i, "blue-eyed man"],
+      [/grand|tall/i, "tall man"],
+      [/peau mate|olive|bronze/i, "olive-skinned man"],
+      [/peau claire|fair skin/i, "fair-skinned man"],
+      [/(\d{2})\s*ans/i, null], // age handled below
+    ];
+    for (const [re, en] of map) {
+      if (en && re.test(bio)) bits.push(en);
+    }
+    const ageM = bio.match(/(\d{2})\s*ans/i);
+    if (ageM) bits.push("man about " + ageM[1] + " years old");
+    bits.push("partner appearance from user bio: " + desc.replace(/[",]/g, " "));
+  } else {
+    bits.push("realistic adult man, natural body hair, detailed male anatomy");
+  }
+  return bits.join(", ");
+}
+
+
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
@@ -711,10 +762,14 @@ function buildLeaImagePrompt(extra = "") {
     ? "(2girls:1.55), (two adult women:1.55), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
     : "";
 
-  const actHead = (ex.overridesAct)
-    ? ((ex.actLine || "explicit adult sex act with male partner") +
-       ", (1boy:1.45), (male partner visible in frame:1.4), (erect penis when the act needs it:1.35), hetero, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only,")
-    : "";
+  let actHead = "";
+  if (ex.overridesAct) {
+    let partner = "";
+    try { partner = getUserPartnerImagePrompt(); } catch (_) { partner = "(1boy:1.55), adult male partner fully visible"; }
+    actHead = (ex.actLine || "explicit adult sex act with male partner") +
+      ", " + partner +
+      ", (erect penis when the act needs it:1.35), hetero couple both people visible, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only, NOT disembodied penis, NOT floating penis, NOT penis without male body,";
+  }
 
   // Ordre: vêtements user EN PREMIER (poids max), puis reste
   const clothesHead = (hasUser && ex.overridesOutfit && ex.outfitLine)
@@ -1341,7 +1396,8 @@ function buildSceneImagePrompt() {
   // Fellation / pipe (prioritaire avant "genoux" générique)
   if (/suce|fellation|blowjob|\bpipe\b|gaine la bite|dans (ta|sa) bouche|prend .{0,15}(bite|queue|sexe) (dans|en) (ta|sa)?\s*bouche/i.test(sexBlob)) {
     pose = "full body kneeling on the floor or sofa, looking up, adult male partner in front of her, both fully visible in the room";
-    explicitAct = "(fellatio:1.5), (penis in mouth:1.5), (erect penis visible:1.45), she on her knees sucking a man's cock, (1girl:1.2), (1boy:1.4), male partner standing, male body and penis clearly visible in frame, hetero sex, uncensored explicit NSFW";
+    explicitAct = "(fellatio:1.55), (penis in mouth:1.45), she on her knees sucking a fully visible adult man, (1boy:1.55), (1girl:1.2), man's torso hips thighs visible, hetero couple, NOT disembodied penis, NOT floating cock, uncensored explicit NSFW";
+    try { explicitAct += ", " + getUserPartnerImagePrompt(); } catch (_) {}
   }
   // Prise par derrière / doggy / levrette
   else if (/par derrière|from behind|doggy|à quatre pattes|on all fours|en levrette|levrette/i.test(sexBlob)) {
@@ -1469,8 +1525,8 @@ function buildSceneImagePrompt() {
       phys,
       duoScene,
       "explicit NSFW sex scene, full body wide shot head to toe,",
-      explicitAct ? "(1boy:1.4), (male partner visible:1.35), (erect penis:1.3)," : "",
-      explicitAct ? "NOT solo female only, NOT alone, NOT no penis, NOT censored, NOT covered crotch, NOT mosaic censor, NOT bar censor, NOT hidden genitals, NOT softcore only," : "",
+      explicitAct ? ((function(){ try { return getUserPartnerImagePrompt(); } catch(_){ return "(1boy:1.55), adult male partner fully visible"; } })() + ", (erect penis:1.3),") : "",
+      explicitAct ? "NOT solo female only, NOT alone, NOT disembodied penis, NOT floating penis, NOT penis without male body, NOT no penis, NOT censored, NOT mosaic, NOT softcore only," : "",
       "NOT a close-up portrait, NOT bust crop, NOT headshot,",
       "wearing/state: " + outfit + ",",
       pose + ",",
@@ -4967,7 +5023,7 @@ async function generatePhoto() {
       payload.denoising = Math.max(payload.denoising || 0, 0.74);
     }
     if (userEx.overridesAct) {
-      payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing penis, censored, mosaic censor, bar censor, softcore only, portrait selfie";
+      payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing male body, disembodied penis, floating penis, penis without man, severed cock, censored, mosaic censor, bar censor, softcore only, portrait selfie, bust crop only";
       payload.nsfw = true;
       payload.denoising = Math.max(payload.denoising || 0, 0.78);
     }
@@ -6481,6 +6537,15 @@ function renderSettings() {
     <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;
   api("/api/status").then((s) => {
+    try {
+      window._leaStatus = s;
+      const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+      if (s.settings) {
+        if (s.settings.personaName != null) cur.personaName = s.settings.personaName;
+        if (s.settings.personaBio != null) cur.personaBio = s.settings.personaBio;
+        localStorage.setItem("lea.settings", JSON.stringify(cur));
+      }
+    } catch (_) {}
     if ($("gemtextmodel")) $("gemtextmodel").value = s.settings.geminiTextModel || "gemini-3.5-flash-lite";
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
@@ -6504,6 +6569,12 @@ function renderSettings() {
     } catch (_) {}
   });
   $("save").onclick = async () => {
+    try {
+      const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+      cur.personaName = $("pname").value;
+      cur.personaBio = $("pbio").value;
+      localStorage.setItem("lea.settings", JSON.stringify(cur));
+    } catch (_) {}
     const data = await api("/api/settings", {
       method: "POST",
       body: JSON.stringify({
