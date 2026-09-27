@@ -404,7 +404,7 @@ function expandProfileExtra(extra) {
     [/fesses (en l'air|tendues)|de dos|from behind/i, "from behind view, hips and butt emphasized"],
     [/[àa] genoux|on her knees|kneeling/i, "kneeling on her knees"],
     [/allong[ée]e? sur le ventre/i, "lying face down on her stomach"],
-    [/allong[ée]e?|lying|on the bed/i, "lying down full body"],
+    [/allong[ée]e?(?!.*quatre)|lying on (her )?back/i, "lying on her back full body"],
     [/canap[ée]|sofa|couch/i, "on the sofa"],
     [/pench[ée]e?|bent over/i, "bent over pose"],
     [/jambes [eé]cart[ée]es|legs spread/i, "legs spread open"],
@@ -487,15 +487,48 @@ function expandProfileExtra(extra) {
   }
 
   // Heuristiques larges si mots-clés libres
-  if (/(pose|position|debout|assise|allong|genoux|canap|lit|dos|profil|pench)/i.test(t0)) overridesPose = true;
+  if (/(pose|position|debout|assise|allong|genoux|canap|dos|profil|pench|quatre pattes)/i.test(t0)) overridesPose = true;
   if (/(tenue|habit|v[eê]t|robe|jupe|jean|top|lingerie|nuisette|soutien|culotte|chemise|collant|secr[eé]taire|bureau|maillot|short|pantalon|sweat)/i.test(t0)) overridesOutfit = true;
   if (/(suce|baise|p[eé]n[eè]tr|fellation|levrette|missionnaire|sperme|bite|queue|branle|l[eè]che)/i.test(t0)) {
     overridesPose = true;
     overridesAct = true;
   }
-  if (/(salon|chambre|cuisine|bureau|douche|bain|balcon|voiture|dehors|plage|piscine)/i.test(t0)) overridesPlace = true;
+  if (/(salon|chambre|cuisine|bureau|douche|bain|balcon|voiture|dehors|plage|piscine|\blit\b|bed|sofa|canap)/i.test(t0)) overridesPlace = true;
 
-  // Composition secrétaire si mots combinés
+  // Lieux explicites (poids fort + négatifs anti-piscine etc.)
+  let poseLine = "";
+  if (/\blit\b|sur le lit|on the bed|bed\b/i.test(t0)) {
+    placeBits.push("(on a bed:1.6), bedroom interior, bed sheets pillows mattress visible, indoor bedroom");
+    overridesPlace = true;
+  }
+  if (/canap[eé]|sofa|couch/i.test(t0) && !/\blit\b/i.test(t0)) {
+    placeBits.push("(on a sofa:1.55), living room sofa, indoor");
+    overridesPlace = true;
+  }
+  if (/piscine|pool/i.test(t0)) {
+    placeBits.push("at a swimming pool");
+    overridesPlace = true;
+  }
+
+  // Poses explicites
+  if (/a quatre pattes|[àa] quatre pattes|on all fours/i.test(t0)) {
+    poseLine = "(on all fours:1.65), doggy-style pose, hands and knees on the surface, arched back, looking forward or up, NOT lying on her back, NOT missionary pose, NOT sitting";
+    overridesPose = true;
+  } else if (/[àa] genoux|on her knees|kneeling/i.test(t0)) {
+    poseLine = "(kneeling on her knees:1.55), upright on knees";
+    overridesPose = true;
+  } else if (/pench[ée]e?|bent over/i.test(t0)) {
+    poseLine = "(bent over:1.55), torso forward, hips back";
+    overridesPose = true;
+  } else if (/allong[ée]e? sur le ventre/i.test(t0)) {
+    poseLine = "lying face down on her stomach";
+    overridesPose = true;
+  } else if (/allong[ée]e?|lying on her back|sur le dos/i.test(t0)) {
+    poseLine = "lying on her back";
+    overridesPose = true;
+  }
+
+  // Composition secrétaire
   if (/secr[eé]taire|bureau/i.test(t0) && /chemise|jupe|collant/i.test(t0)) {
     const sec = "wearing full secretary outfit: fitted button-up blouse and tight pencil skirt"
       + (/collant/i.test(t0) ? ", sheer pantyhose covering legs" : "")
@@ -504,14 +537,12 @@ function expandProfileExtra(extra) {
     expanded += ", (" + sec + ":1.55)";
     overridesOutfit = true;
   }
-  // Combo fréquent: jupe + collants (sans autre contexte)
   if (/\bjupe\b/i.test(t0) && /collants?/i.test(t0)) {
     const jc = "(wearing a skirt and sheer pantyhose:1.65), (skirt:1.55), (pantyhose on legs:1.6), lower body clothed with skirt over pantyhose, NOT bare legs, NOT nude legs, NOT pants";
     outfitBits.push(jc);
     expanded += ", " + jc;
     overridesOutfit = true;
   }
-  // Chemise seule
   if (/\bchemise\b/i.test(t0) && !/secr[eé]taire/i.test(t0)) {
     const ch = "(wearing a button-up blouse:1.5), collared shirt blouse on upper body";
     outfitBits.push(ch);
@@ -519,16 +550,60 @@ function expandProfileExtra(extra) {
     overridesOutfit = true;
   }
 
-  // TOUTE saisie libre = priorité absolue (même sans mot-clé connu)
+  // SCÈNE COMPOSÉE acte + pose + lieu (évite piscine / mauvais plan)
+  let sceneLine = "";
+  const wantsOral = /(suce|fellation|blowjob|pipe\b)/i.test(t0);
+  const wantsAllFours = /quatre pattes|on all fours/i.test(t0);
+  const wantsBed = /\blit\b|sur le lit|on the bed/i.test(t0);
+  const wantsKnees = /[àa] genoux|kneeling/i.test(t0) && !wantsAllFours;
+
+  if (wantsOral && wantsAllFours && wantsBed) {
+    sceneLine = "MASTER SCENE (1.7): she is on all fours ON A BED performing fellatio, hands and knees on bed sheets, adult male partner kneeling or standing in front of her on the bed, man's body fully visible, bedroom interior, pillows and sheets visible, NOT in a pool, NOT outdoors, NOT on the floor only, NOT lying on her back, NOT solo";
+    actLine = sceneLine;
+    poseLine = "on all fours on the bed";
+    placeBits.push("on a bed, bedroom");
+    overridesAct = overridesPose = overridesPlace = true;
+  } else if (wantsOral && wantsAllFours) {
+    sceneLine = "MASTER SCENE (1.7): she is on all fours performing fellatio, hands and knees on the surface, adult male partner in front of her, man's torso and legs visible, NOT lying on her back, NOT pool, NOT solo woman";
+    actLine = sceneLine;
+    overridesAct = overridesPose = true;
+  } else if (wantsOral && wantsBed) {
+    sceneLine = "MASTER SCENE (1.7): fellatio scene ON A BED in a bedroom, she and adult male partner on the bed, sheets pillows visible, man's body visible, NOT pool, NOT beach, NOT outdoor, NOT solo";
+    actLine = sceneLine;
+    overridesAct = overridesPlace = true;
+  } else if (wantsOral && wantsKnees) {
+    sceneLine = "MASTER SCENE (1.65): she kneeling performing fellatio, adult male standing in front, full male body visible, indoor, NOT disembodied penis, NOT solo";
+    actLine = sceneLine;
+    overridesAct = overridesPose = true;
+  } else if (wantsOral) {
+    sceneLine = "MASTER SCENE (1.6): fellatio with adult male partner fully visible in frame, couple shot, NOT disembodied penis, NOT floating cock, NOT solo female portrait";
+    if (!actLine) actLine = sceneLine;
+    overridesAct = true;
+  }
+
+  if (wantsBed && !wantsOral) {
+    placeBits.push("(on a bed in bedroom:1.6), bed sheets, NOT swimming pool, NOT outdoor, NOT beach");
+    overridesPlace = true;
+  }
+
+  // Négatifs de lieu si lit demandé
+  let placeNeg = "";
+  if (wantsBed) {
+    placeNeg = "NOT swimming pool, NOT pool water, NOT beach, NOT outdoor garden, NOT street, NOT car interior";
+  }
+
   return {
-    text: ("USER REQUEST (ABSOLUTE PRIORITY 1.6 — follow every detail): " + expanded).slice(0, 1000),
+    text: ("USER REQUEST (ABSOLUTE PRIORITY 1.65 — follow every detail of pose place and act): " + expanded).slice(0, 1100),
     overridesPose: true,
     overridesOutfit: overridesOutfit || overridesAct,
     overridesAct,
     overridesPlace,
-    actLine,
+    actLine: actLine || sceneLine,
     outfitLine: outfitBits.join(", "),
     placeLine: placeBits.join(", "),
+    poseLine: poseLine,
+    sceneLine: sceneLine,
+    placeNeg: placeNeg,
     hasAny: true,
     raw: t0,
   };
@@ -771,24 +846,36 @@ function buildLeaImagePrompt(extra = "") {
       ", (erect penis when the act needs it:1.35), hetero couple both people visible, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only, NOT disembodied penis, NOT floating penis, NOT penis without male body,";
   }
 
-  // Ordre: vêtements user EN PREMIER (poids max), puis reste
+  // Ordre: scène user (acte+pose+lieu) EN PREMIER, puis physique
   const clothesHead = (hasUser && ex.overridesOutfit && ex.outfitLine)
     ? ("CRITICAL CLOTHING MUST APPEAR: " + ex.outfitLine + ",")
     : "";
+  const sceneHead = (hasUser && (ex.sceneLine || ex.actLine))
+    ? ((ex.sceneLine || ex.actLine) + ",")
+    : "";
+  const poseHead = (hasUser && ex.poseLine)
+    ? ("POSE MANDATORY: " + ex.poseLine + ",")
+    : "";
+  // Si l'user impose pose/lieu, ne pas coller la pose aléatoire du scénario
+  const finalPose = (hasUser && (ex.overridesPose || ex.poseLine || ex.sceneLine))
+    ? "follow USER pose exactly"
+    : (pose + ",");
   return [
+    sceneHead,
+    poseHead,
     clothesHead,
     hasUser ? (ex.text + ",") : "",
     actHead,
     fixedAppearanceBlock(c) + ",",
     duoExtra,
     "Photorealistic photo,",
-    ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner visible," : "",
+    ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner body visible in frame," : "",
     "body: " + body + ",",
     phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
     outfitLine,
     placeLine,
     hasUser ? "EVERY detail of USER REQUEST is mandatory (clothes, pose, place, act)," : ("scenario: " + situation + ","),
-    pose + ",",
+    finalPose,
     "IMPORTANT: different pose and camera angle from any reference photo, new composition, not a copy of the cover,",
     "Natural skin pores, realistic DSLR photography, sharp detailed face matching identity, soft cinematic lighting,",
     "High-end photorealistic quality,",
@@ -797,10 +884,11 @@ function buildLeaImagePrompt(extra = "") {
     "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
     phys.negative.length ? ("NOT " + phys.negative.join(", ") + ",") : "",
     hasUser
-      ? "NOT ignore USER REQUEST, NOT default scenario clothes when user asked other clothes, NOT copy cover pose,"
+      ? "NOT ignore USER REQUEST, NOT wrong location, NOT swimming pool when bed requested, NOT lying on back when all fours requested, NOT copy cover pose,"
       : "no wrong outfit, no missing wet/ripped/oversized details from the scenario outfit,",
+    ex.placeNeg ? (ex.placeNeg + ",") : "",
     ex.overridesAct
-      ? "NOT solo woman only, NOT missing male partner, NOT censored, NOT mosaic, NOT softcore only,"
+      ? "NOT solo woman only, NOT missing male partner, NOT disembodied penis, NOT floating penis, NOT censored, NOT mosaic, NOT softcore only,"
       : "",
     "NOT " + ageNegatives(c)
   ].filter(Boolean).join(" ");
@@ -5048,10 +5136,18 @@ async function generatePhoto() {
         setGenStatus("Horde txt2img · tenue optionnelle (sans img2img pour respecter jupe/collants/chemise)…");
         // pas de source_image
       } else if (userEx.overridesAct) {
+        if (userEx.placeNeg) payload.negative = (payload.negative || "") + ", " + userEx.placeNeg;
+        if (/pool|piscine|beach|outdoor/i.test(userEx.placeNeg || "") || userEx.overridesPlace) {
+          payload.negative = (payload.negative || "") + ", swimming pool, pool water, beach, outdoor only, garden";
+        }
+        if (userEx.poseLine && /all fours|quatre/i.test(userEx.poseLine + userEx.raw)) {
+          payload.negative = (payload.negative || "") + ", lying on her back, missionary, sitting only, standing portrait";
+        }
+        // Acte + lieu imposés → denoise très haut ou txt2img pour ne pas garder le décor de la ref
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.max(Number(payload.denoising) || 0, 0.82);
-        setGenStatus("Horde img2img · acte · denoise " + payload.denoising + "…");
+        payload.denoising = Math.max(Number(payload.denoising) || 0, 0.85);
+        setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
       } else {
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
