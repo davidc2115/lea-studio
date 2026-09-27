@@ -2816,52 +2816,101 @@ function renderDiscoverCards(list) {
   if (!list.length) {
     return `<p style="color:var(--muted);margin-top:24px;text-align:center">Aucun personnage pour « ${($("disc-search") && $("disc-search").value) || ""} ».</p>`;
   }
-  return `<div class="grid">${list.map((c) => `
-      <article class="card discover-card">
-        <div class="cover-frame"><img class="cover-img" src="${discoverCover(c)}" alt="${c.name}" /></div>
-        <div class="body">
-          <strong>${c.name}</strong>
-          <div style="color:var(--muted);font-size:13px">${c.age || ""} ans · ${c.title || ""}</div>
-          <div class="tags">${[c.body, c.ethnicity].filter(Boolean).concat(c.tags || []).slice(0, 8).map((t) => `<span class="tag tag-filter" data-tag="${t}">${t}</span>`).join("")}</div>
-          <p style="color:#d7c8dc;font-size:14px">${(c.scenario || "").slice(0, 140)}${(c.scenario || "").length > 140 ? "…" : ""}</p>
-          <button class="cta start-chat" data-id="${c.id}">Discuter</button>
-          <button class="cta open-profile" data-id="${c.id}" style="margin-left:8px;background:#3a2048">Profil</button>
+  return `<div class="disc-grid">${list.map((c) => {
+    const cover = discoverCover(c) || "";
+    const tags = (c.tags || []).slice(0, 5);
+    const blurb = String(c.scenario || c.title || "").replace(/\s+/g, " ").trim().slice(0, 100);
+    const tagsHtml = tags.map((t) => `<span class="disc-tag">${String(t)}</span>`).join("");
+    return `
+      <article class="disc-hero-card open-profile" data-id="${c.id}">
+        <div class="disc-hero-media">
+          ${cover
+            ? `<img class="disc-hero-img" src="${cover}" alt="${c.name}" loading="lazy" onerror="this.style.opacity=.25" />`
+            : `<div class="disc-hero-placeholder"></div>`}
+          <div class="disc-hero-fade"></div>
+          <div class="disc-hero-meta">
+            <h2 class="disc-hero-name">${c.name}</h2>
+            <div class="disc-hero-sub">${c.age || ""} ans${c.title ? " · " + c.title : ""}</div>
+            <div class="disc-hero-tags">${tagsHtml}</div>
+            <p class="disc-hero-blurb">${blurb}${String(c.scenario || "").length > 100 ? "…" : ""}</p>
+            <button type="button" class="cta disc-hero-chat start-chat" data-id="${c.id}">💬 Chat</button>
+          </div>
         </div>
-      </article>`).join("")}</div>`;
+      </article>`;
+  }).join("")}</div>`;
 }
 
 function renderDiscover() {
   const q0 = (state.discQuery || "");
+  const SUGGEST_TAGS = [
+    "aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","fille d'ami",
+    "voisine","collègue","secrétaire","tante","maman d'ami","jeu","duo","fantasy","non-humain",
+    "directe","tactile","timide","nsfw","spécial",
+    "blonde","brune","rousse","cheveux noirs",
+    "gros seins","petits seins","seins moyens","95D","bonnet H","bonnet I","bonnet J",
+    "grosses fesses","mince","ronde","sablier","athlétique","voluptueuse","petite","très grande",
+    "française","maghrébine","asiatique","africaine","latine","métisse",
+    "mariée","célibataire","veuve","divorcée",
+    "18","20","21","22","mature","jeune",
+    "elfe","kitsune","succube","catgirl","vampire"
+  ];
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center">
       <button type="button" class="cta" id="disc-open-import" style="margin:0;padding:8px 12px;font-size:13px">＋ Importer (Chub / fichier)</button>
-      <span style="color:var(--muted);font-size:11px;flex:1">Chub.ai en direct · ou JSON/PNG (Janitor, SpicyChat…)</span>
+      <span style="color:var(--muted);font-size:11px;flex:1">Chub.ai · JSON/PNG</span>
     </div>
     <p id="disc-import-status" style="color:var(--muted);font-size:12px;margin:0 0 6px"></p>
-    <input class="field" id="disc-search" type="search" placeholder="Rechercher nom, tag, corps, ethnie…" value="${q0.replace(/"/g, "&quot;")}" style="margin:10px 0 6px;width:100%" />
-    <div class="tags" id="disc-quick" style="margin-bottom:10px;flex-wrap:wrap">
-      ${["aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","timide","nsfw",
-        "blonde","brune","rousse","cheveux noirs",
-        "gros seins","petits seins","seins moyens","95D",
-        "mince","ronde","sablier","athlétique","voluptueuse",
-        "française","maghrébine","asiatique","africaine","latine",
-        "18","20","21","22"].map((t) =>
-        `<span class="tag tag-filter" data-tag="${t}" style="cursor:pointer">${t}</span>`).join("")}
+    <div class="disc-search-wrap">
+      <input class="field" id="disc-search" type="search" placeholder="Rechercher nom, tag, corps, ethnie…" value="${q0.replace(/"/g, "&quot;")}" autocomplete="off" />
+      <div class="disc-suggest hidden" id="disc-suggest"></div>
     </div>
-    <p style="color:var(--muted);font-size:12px;margin-bottom:8px" id="disc-count"></p>
+    <p style="color:var(--muted);font-size:12px;margin:10px 0 8px" id="disc-count"></p>
     <div id="disc-list"></div>`;
+  const paintSuggest = (q) => {
+    const box = $("disc-suggest");
+    if (!box) return;
+    const s = String(q || "").trim().toLowerCase();
+    if (s.length < 1) {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+    const hits = SUGGEST_TAGS.filter((t) => t.toLowerCase().includes(s) || s.split(/\s+/).some((w) => w.length > 1 && t.toLowerCase().includes(w))).slice(0, 14);
+    // aussi tags dynamiques des personnages si peu de hits
+    if (hits.length < 8 && state.characters) {
+      const extra = new Set();
+      for (const c of state.characters) {
+        for (const t of (c.tags || [])) {
+          const tl = String(t).toLowerCase();
+          if (tl.includes(s) && !SUGGEST_TAGS.includes(t)) extra.add(t);
+        }
+        if (extra.size > 10) break;
+      }
+      hits.push(...extra);
+    }
+    if (!hits.length) {
+      box.classList.add("hidden");
+      box.innerHTML = "";
+      return;
+    }
+    box.classList.remove("hidden");
+    box.innerHTML = hits.slice(0, 16).map((t) =>
+      `<button type="button" class="disc-suggest-item tag-filter" data-tag="${String(t).replace(/"/g, "&quot;")}">${t}</button>`
+    ).join("");
+  };
   const paint = () => {
     const q = ($("disc-search") && $("disc-search").value) || "";
     state.discQuery = q;
     const list = filterDiscoverList(q);
     if ($("disc-count")) $("disc-count").textContent = list.length + " personnage(s)";
     if ($("disc-list")) $("disc-list").innerHTML = renderDiscoverCards(list);
+    paintSuggest(q);
   };
   paint();
   if ($("disc-search")) {
     $("disc-search").oninput = paint;
-    $("disc-search").focus();
+    $("disc-search").onfocus = () => paintSuggest($("disc-search").value);
   }
   if ($("disc-open-import")) {
     $("disc-open-import").onclick = () => renderImportHub();
@@ -2885,8 +2934,9 @@ function renderDiscover() {
     }
     const start = e.target.closest(".start-chat");
     const prof = e.target.closest(".open-profile");
-    const card = e.target.closest(".discover-card");
+    const card = e.target.closest(".discover-card, .disc-hero-card");
     if (start) {
+      e.stopPropagation();
       state.current = start.dataset.id || "lea";
       state.chat = loadChat(state.current) || { messages: [], memories: [], summaries: [], relationship: { closeness: 1, trust: 1, heat: 0 } };
       show("chat"); renderChat();
