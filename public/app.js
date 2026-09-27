@@ -182,17 +182,17 @@ function physicalLocksFromText(c) {
   }
 
   // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
-  if (/bonnet\s*j|j-cup|bonnet\s*j\b/i.test(blob)) {
-    out.positive.push("(massive enormous J-cup breasts:1.55)", "(extremely huge heavy breasts:1.5)", "(deep heavy cleavage:1.35)", "top stretched by huge breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest");
+  if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
+    out.positive.push("(massive enormous J-cup breasts:1.7)", "(extremely huge heavy breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "top fabric stretched by massive breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest, small bust");
     out.features.push("J-cup breasts");
-  } else if (/bonnet\s*i|i-cup|bonnet\s*i\b/i.test(blob)) {
-    out.positive.push("(enormous heavy I-cup breasts:1.55)", "(extremely large I-cup breasts:1.5)", "(deep heavy cleavage:1.35)", "blouse strained by huge breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts");
+  } else if (/bonnet\s*i|\bi-cup\b/i.test(blob)) {
+    out.positive.push("(enormous heavy I-cup breasts:1.7)", "(extremely large I-cup breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "blouse strained by huge breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest");
     out.features.push("I-cup breasts");
-  } else if (/bonnet\s*h|h-cup|bonnet\s*h\b/i.test(blob)) {
-    out.positive.push("(huge heavy H-cup breasts:1.5)", "(extremely large H-cup breasts:1.45)", "(deep cleavage:1.3)", "fabric stretched over large breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts");
+  } else if (/bonnet\s*h|\bh-cup\b/i.test(blob)) {
+    out.positive.push("(huge heavy H-cup breasts:1.65)", "(extremely large H-cup breasts:1.6)", "(hyper busty:1.5)", "(deep heavy cleavage:1.4)", "fabric stretched by huge breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest, petite chest");
     out.features.push("H-cup breasts");
   } else if (/bonnet\s*g|g-cup/i.test(blob)) {
     out.positive.push("(very large heavy G-cup breasts:1.45)", "(deep cleavage:1.25)");
@@ -526,9 +526,9 @@ function buildLeaImagePrompt(extra = "") {
   // Forçage bonnet H/I/J depuis tags/title si bodyLock générique
   (function forceCup() {
     const t = [c.tags && c.tags.join(" "), c.title, c.body, c.appearance].filter(Boolean).join(" ");
-    if (/bonnet\s*j|j-cup/i.test(t)) bodyLock = "massive enormous J-cup breasts, extremely huge heavy chest, deep cleavage, top strained";
-    else if (/bonnet\s*i|i-cup/i.test(t)) bodyLock = "enormous heavy I-cup breasts, extremely large chest, deep cleavage, blouse strained";
-    else if (/bonnet\s*h|h-cup/i.test(t)) bodyLock = "huge heavy H-cup breasts, extremely large chest, deep cleavage, fabric stretched";
+    if (/bonnet\s*j|j-cup/i.test(t)) bodyLock = "(massive enormous J-cup breasts:1.7), hyper busty, extremely huge heavy chest, deep heavy cleavage, top strained by breast volume";
+    else if (/bonnet\s*i|i-cup/i.test(t)) bodyLock = "(enormous heavy I-cup breasts:1.7), hyper busty, extremely large chest, deep heavy cleavage, blouse strained";
+    else if (/bonnet\s*h|h-cup/i.test(t)) bodyLock = "(huge heavy H-cup breasts:1.65), hyper busty, extremely large chest, deep heavy cleavage, fabric stretched by breast volume";
   })();
   // bodyLock was const - need let
   const smallChest = /jade|aya|lina|hana|mei|sasha|thea|zoe|chloe/.test(c.id);
@@ -558,7 +558,7 @@ function buildLeaImagePrompt(extra = "") {
     ? ("OUTFIT FROM USER DETAIL (priority over scenario default): follow USER DETAIL, " + outfitDetail + ",")
     : ("OUTFIT REQUIRED (match exactly): " + outfitDetail + ",");
   const duoExtra = isDuoCharacter(c)
-    ? "(two adult women in one photo:1.5), (2girls:1.45), both fully visible, interacting, NOT solo, NOT 1girl,"
+    ? "(2girls:1.55), (two adult women:1.55), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
     : "";
   const actExtra = (ex.overridesAct)
     ? "(include adult male partner in the scene when the act requires it:1.4), explicit uncensored NSFW allowed,"
@@ -3430,6 +3430,11 @@ function bodyNegatives(c) {
   ].filter(Boolean).join(" ").toLowerCase();
   const base = "child, teen, underage, middle-aged, elderly, 35 years old, 40 years old, wrong ethnicity, deformed, extra limbs, different face, different person";
   let neg = base;
+  try {
+    if (isDuoCharacter(c)) {
+      neg += ", solo, 1girl, single woman, only one person, one girl only, portrait of one woman, cropped single face";
+    }
+  } catch (_) {}
   // Couleurs de cheveux / traits non-humains
   try {
     const phys = physicalLocksFromText(c);
@@ -3440,8 +3445,9 @@ function bodyNegatives(c) {
   const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
     || /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe|marine|noemie)$/.test(id);
   // Grosse poitrine
-  const hugeChest = /gros\s*seins|généreuse|95d|100e|bonnet\s*[def]|large\s*(full\s*)?(d|e|f)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse/i.test(blob)
-    || /^(sofia|amelie|fatou|elise|olga|yasmine|priya|myriam|keisha|lea|lucia)$/.test(id);
+  const hugeChest = /gros\s*seins|généreuse|95d|100e|bonnet\s*[defghij]|\b[defghij]-cup\b|large\s*(full\s*)?(d|e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob)
+    || /^(sofia|amelie|fatou|elise|olga|yasmine|priya|myriam|keisha|lea|lucia)$/.test(id)
+    || (Array.isArray(c.tags) && c.tags.some((t) => /bonnet\s*[hij]|gros seins/i.test(String(t))));
   // Gros fessier
   const bigButt = /gros(se)?\s*fess|fessier|round butt|thick\s*(round\s*)?butt|brazilian butt|huge\s*round\s*butt|fesses\s*rondes|very round butt|thick hips/i.test(blob)
     || /^(bruna|camila|keisha|fatou)$/.test(id);
@@ -3455,7 +3461,7 @@ function bodyNegatives(c) {
     neg += ", large breasts, huge breasts, heavy breasts, massive breasts, busty, voluptuous, deep cleavage, 95D, 100E, F-cup, DD-cup, curvy hourglass bust, enhanced breasts, implants";
   }
   if (hugeChest) {
-    neg += ", flat chest, small breasts, A-cup, nearly flat, boyish chest, skinny torso";
+    neg += ", small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest, petite bust, tiny chest, small bust, underboob only, subtle cleavage";
   }
   if (bigButt) {
     neg += ", flat butt, skinny hips, boyish hips, no curves, thin flat backside";
@@ -3502,28 +3508,49 @@ function bodyNegatives(c) {
 function morphWeights(c) {
   if (!c) return "";
   const id = c.id || "";
-  const blob = [c.body, c.appearance, c.looks_en].filter(Boolean).join(" ").toLowerCase();
+  const blob = [
+    c.body, c.appearance, c.looks_en, c.title,
+    Array.isArray(c.tags) ? c.tags.join(" ") : "",
+  ].filter(Boolean).join(" ").toLowerCase();
   const parts = [];
-  if (/petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|small breast|poitrine\s*petite/i.test(blob)
+  // Extreme cups FIRST (priority over small-chest heuristics)
+  if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
+    parts.push(
+      "(massive enormous J-cup breasts:1.7)",
+      "(extremely huge heavy breasts:1.65)",
+      "(hyper busty J-cup:1.55)",
+      "(deep heavy cleavage:1.45)",
+      "fabric stretched tight over massive breasts"
+    );
+  } else if (/bonnet\s*i|\bi-cup\b/i.test(blob)) {
+    parts.push(
+      "(enormous heavy I-cup breasts:1.7)",
+      "(extremely large I-cup breasts:1.65)",
+      "(hyper busty I-cup:1.55)",
+      "(deep heavy cleavage:1.45)",
+      "blouse strained by huge breasts"
+    );
+  } else if (/bonnet\s*h|\bh-cup\b/i.test(blob)) {
+    parts.push(
+      "(huge heavy H-cup breasts:1.65)",
+      "(extremely large H-cup breasts:1.6)",
+      "(hyper busty H-cup:1.5)",
+      "(deep heavy cleavage:1.4)",
+      "top stretched by huge breasts"
+    );
+  } else if (/petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|small breast|poitrine\s*petite/i.test(blob)
       || /^(jade|aya|lina|hana|mei|sasha|thea|zoe)$/.test(id)) {
     parts.push("(very small flat A-cup breasts:1.35)", "(petite chest:1.2)", "slim upper body");
   } else if (/bonnet\s*b|small-medium b|seins\s*moyens?\s*b|modest chest/i.test(blob)
       || /^(chloe|marine|noemie|thea)$/.test(id)) {
     parts.push("(small-medium B-cup breasts:1.25)", "modest chest, NOT large");
+  } else if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[defg]|extremely large|d-cup|e-cup|f-cup/i.test(blob)
+      || /^(sofia|lea|fatou|amelie)$/.test(id)) {
+    parts.push("(large full breasts:1.4)", "(generous D-E cup:1.3)");
   }
   if (/gros(se)?\s*fess|fessier|round butt|thick\s*butt|brazilian|fesses\s*rondes|huge\s*round\s*butt/i.test(blob)
       || /^(bruna|camila|keisha|fatou)$/.test(id)) {
     parts.push("(very large round thick butt:1.4)", "(wide hips:1.25)", "emphasize rear curves");
-  }
-  if (/bonnet\s*j|j-cup/i.test(blob)) {
-    parts.push("(massive enormous J-cup breasts:1.55)", "(extremely huge heavy breasts:1.5)");
-  } else if (/bonnet\s*i|i-cup/i.test(blob)) {
-    parts.push("(enormous heavy I-cup breasts:1.55)", "(extremely large I-cup breasts:1.5)");
-  } else if (/bonnet\s*h|h-cup/i.test(blob)) {
-    parts.push("(huge heavy H-cup breasts:1.5)", "(extremely large H-cup breasts:1.45)");
-  } else if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[defg]|extremely large/i.test(blob)
-      || /^(sofia|lea|fatou|amelie)$/.test(id)) {
-    parts.push("(large full breasts:1.35)");
   }
   return parts.join(", ");
 }
@@ -3533,7 +3560,8 @@ function morphWeights(c) {
 
 function duoDenoise(base) {
   try {
-    if (isDuoCharacter(character())) return Math.max(Number(base) || 0.55, 0.72);
+    // Duo: dénose très haut pour ne pas coller à une ref mono-personne
+    if (isDuoCharacter(character())) return Math.max(Number(base) || 0.55, 0.82);
   } catch (_) {}
   return base;
 }
@@ -3554,12 +3582,13 @@ function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   return [
-    "=== DUO / TWO PEOPLE REQUIRED ===",
-    "(two adult women together in the same photo:1.45), (2girls:1.4), (both women fully visible:1.35),",
-    "both subjects in frame from head to mid-thigh, side by side or interacting closely,",
-    "NOT solo, NOT 1girl, NOT single woman, NOT only one person, NOT cropped to one face,",
-    "pair: " + names + ",",
-    "same scene, same lighting, photorealistic couple/duo portrait,",
+    "=== DUO / TWO PEOPLE REQUIRED (MANDATORY) ===",
+    "(2girls:1.55), (two adult women:1.55), (two people:1.5), (both women fully visible head to toe:1.45),",
+    "wide shot showing TWO distinct adult women side by side or interacting in the same frame,",
+    "two faces, two bodies, pair of women, double female subjects,",
+    "NOT solo, NOT 1girl, NOT single woman, NOT only one person, NOT one girl only, NOT cropped to one face, NOT portrait of one,",
+    "pair names: " + names + ",",
+    "same scene same lighting photorealistic duo photo,",
   ].join(" ");
 }
 
@@ -3925,7 +3954,7 @@ async function generatePhotoHordeFallback(prompt, c) {
     }
     try {
       const ref = await resolveCharacterRefB64(c);
-      if (ref) {
+      if (ref && !isDuoCharacter(c)) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
@@ -4092,7 +4121,7 @@ async function generateScenePhoto() {
     setSceneProgress("🖼 Chargement référence visage…", 10);
     try {
       const ref = await resolveCharacterRefB64(c);
-      if (ref) {
+      if (ref && !isDuoCharacter(c)) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
@@ -4529,7 +4558,7 @@ async function generatePhoto() {
     try {
       setGenStatus("Chargement référence visage…");
       const ref = await resolveCharacterRefB64(c);
-      if (ref) {
+      if (ref && !isDuoCharacter(c)) {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         payload.denoising = duoDenoise(c.id === "lea" ? 0.62 : 0.68);
