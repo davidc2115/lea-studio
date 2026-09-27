@@ -339,94 +339,184 @@ function describeOutfitDetail(outfitStr, scenarioStr) {
 /** Transforme le champ optionnel profil (FR/EN) en tokens forts pour le prompt image. */
 function expandProfileExtra(extra) {
   const raw = String(extra || "").trim();
-  if (!raw) return { text: "", overridesPose: false, overridesOutfit: false, overridesAct: false, actLine: "", outfitLine: "" };
-  let t = raw;
-  // Tenues / poses / actes (FR → EN). Pas de flag /g pour éviter le bug lastIndex de RegExp.test
+  if (!raw) {
+    return {
+      text: "",
+      overridesPose: false,
+      overridesOutfit: false,
+      overridesAct: false,
+      overridesPlace: false,
+      actLine: "",
+      outfitLine: "",
+      placeLine: "",
+      hasAny: false,
+    };
+  }
+  const t0 = raw;
+  // Dictionnaire large FR → EN (toute option utilisateur)
   const map = [
-    [/tremp[ée]e?s?|mouill[ée]e?s?|soaked|\bwet\b/i, "soaked wet clothes, water droplets, wet hair, fabric clinging to body"],
-    [/nuisette/i, "sheer short nightie lingerie"],
-    [/lingerie|soutien[- ]?gorge|culotte|string/i, "sexy lingerie, bra and panties"],
+    // --- Météo / état tissus ---
+    [/tremp[ée]e?s?|mouill[ée]e?s?|soaked|\bwet\b/i, "soaked wet clothes, water droplets on skin, wet hair, fabric clinging to body"],
+    [/s[eè]che?s?|dry clothes/i, "dry clothes, no water, dry fabric"],
+    // --- Lingerie / nuit ---
+    [/nuisette/i, "sheer short satin nightie"],
+    [/peignoir|robe de chambre/i, "open bathrobe"],
+    [/lingerie/i, "sexy lingerie set"],
+    [/soutien[- ]?gorge|\bbra\b/i, "wearing a bra"],
+    [/culotte|string|tanga|thong/i, "wearing panties or thong"],
     [/porte[- ]?jarretelle|jarreti[eè]re/i, "garter belt and stockings"],
-    [/mini[- ]?jupe/i, "very short mini skirt"],
-    // Secrétaire / bureau
-    [/secr[eé]taire|tenue de bureau|office (outfit|wear)|business (outfit|attire)/i, "secretary office outfit, professional work clothes"],
-    [/\bchemise\b|blouse|shirt blouse/i, "button-up blouse shirt, collared blouse"],
-    [/\bjupe\b(?!\s*crayon)/i, "pencil skirt or fitted skirt"],
-    [/jupe crayon|pencil skirt/i, "tight pencil skirt"],
-    [/jupe moulante|jupe collante|tight skirt/i, "very tight form-fitting skirt hugging hips"],
-    [/collant(?!e)|bas r[eé]sille|pantyhose|stockings/i, "sheer pantyhose stockings on legs"],
-    [/talon|escarpin|high heels/i, "high heel pumps"],
+    [/bas r[eé]sille|fishnet/i, "fishnet stockings"],
+    [/corset|gu[eê]pi[eè]re/i, "tight corset"],
+    // --- Bureau / secrétaire ---
+    [/secr[eé]taire|tenue de bureau|office (outfit|wear)|business (outfit|attire)/i, "professional secretary office outfit"],
+    [/\bchemise\b|blouse/i, "button-up collared blouse"],
+    [/jupe crayon/i, "tight pencil skirt"],
+    [/jupe moulante|jupe collante/i, "very tight form-fitting skirt"],
+    [/\bjupe\b/i, "fitted skirt"],
+    [/pantalon de costume|suit pants/i, "tailored trousers"],
+    [/collants?|pantyhose/i, "sheer pantyhose on legs"],
+    [/talon|escarpin/i, "high heel pumps"],
     [/costume|tailleur/i, "women's business suit"],
-    [/robe moulante|robe courte/i, "tight short dress"],
-    [/d[eé]collet[ée]|d[eé]colleté/i, "deep plunging cleavage neckline"],
-    [/topless|seins nus/i, "topless, bare breasts"],
-    [/\bnue?\b|entirely nude|compl[eè]tement nu/i, "fully nude"],
-    [/jean trou[ée]|ripped jeans/i, "ripped distressed jeans"],
+    [/lunettes de bureau|glasses/i, "wearing glasses"],
+    // --- Casual / sport / soirée ---
+    [/mini[- ]?jupe/i, "very short mini skirt"],
+    [/robe moulante/i, "tight bodycon dress"],
+    [/robe courte/i, "short dress"],
+    [/robe longue|long dress/i, "long elegant dress"],
+    [/d[eé]collet[ée]|d[eé]colleté|plunging/i, "deep plunging cleavage neckline"],
     [/crop top|top court/i, "short crop top"],
-    [/a quatre pattes|[àa] quatre pattes|on all fours/i, "on all fours pose, arched back"],
-    [/fesses (en l'air|tendues)|from behind|de dos/i, "from behind, emphasizing hips and butt"],
-    [/[àa] genoux|on her knees/i, "kneeling pose on her knees"],
-    [/allong[ée]e?|lying|on the bed/i, "lying on the bed"],
-    [/canap[ée]|couch|sofa/i, "on the sofa"],
+    [/jean trou[ée]|ripped jeans/i, "ripped distressed jeans"],
+    [/\bjean\b|jeans/i, "fitted jeans"],
+    [/legging|yoga pants/i, "tight leggings"],
+    [/short/i, "short shorts"],
+    [/t[- ]?shirt|tee[- ]?shirt/i, "casual t-shirt"],
+    [/sweat|hoodie|capuche/i, "hoodie sweatshirt"],
+    [/maillot de bain|bikini/i, "bikini swimsuit"],
+    [/serviette|towel only/i, "wearing only a towel"],
+    [/uniforme|nurse|infirmi[eè]re|hostess|h[oô]tesse/i, "thematic uniform matching the request"],
+    [/tablier|apron/i, "wearing an apron"],
+    // --- Nu / partiel ---
+    [/topless|seins nus|poitrine nue/i, "topless, bare breasts"],
+    [/fesses nues|bottomless/i, "bottomless, bare hips"],
+    [/\bnue?\b|compl[eè]tement nu|fully nude|entirely nude/i, "fully nude, no clothes"],
+    // --- Poses ---
+    [/a quatre pattes|[àa] quatre pattes|on all fours/i, "on all fours, arched back"],
+    [/fesses (en l'air|tendues)|de dos|from behind/i, "from behind view, hips and butt emphasized"],
+    [/[àa] genoux|on her knees|kneeling/i, "kneeling on her knees"],
+    [/allong[ée]e? sur le ventre/i, "lying face down on her stomach"],
+    [/allong[ée]e?|lying|on the bed/i, "lying down full body"],
+    [/canap[ée]|sofa|couch/i, "on the sofa"],
     [/pench[ée]e?|bent over/i, "bent over pose"],
-    [/jambes [eé]cart[ée]es|legs spread/i, "legs spread"],
-    [/sourire espi[eè]gle|mischievous/i, "mischievous playful smile looking at camera"],
-    [/timide|\bshy\b/i, "shy timid expression"],
-    [/provocante|provocative|sexy pose/i, "provocative sexy pose"],
-    // Actes explicites + partenaire masculin (poids forts)
-    [/elle suce|suce (ma |sa |la )?(bite|queue)|fellation|blowjob|pipe\b|gaine la bite|prend .{0,12}(bite|queue|sexe) (dans|en) bouche|en train de sucer/i, "MASTER ACT: (fellatio:1.55), (penis in her mouth:1.55), (erect penis clearly visible:1.5), she on her knees sucking a man's cock, (1boy:1.45), (1girl:1.2), male partner standing in frame, hetero, uncensored explicit NSFW"],
-    [/l[eè]che.{0,20}(chatte|sexe)|cunnilingus/i, "MASTER ACT: explicit cunnilingus, male partner face between her thighs licking, (1boy:1.4), uncensored"],
-    [/missionnaire|missionary/i, "MASTER ACT: explicit missionary sex, she on her back, male partner on top penetrating her, (erect penis:1.4), (1boy:1.4), uncensored"],
-    [/levrette|doggy|par derri[eè]re|from behind/i, "MASTER ACT: explicit doggy style penetrative sex, male partner behind her, (erect penis:1.4), (1boy:1.4), uncensored"],
-    [/cowgirl|califourchon|[àa] cheval sur/i, "MASTER ACT: explicit cowgirl sex, she straddling male partner, (erect penis:1.4), (1boy:1.4), uncensored"],
-    [/p[eé]n[eè]tr|baise|baiser|je te prends|je la prends|fait l'amour|acte sexuel/i, "MASTER ACT: explicit penetrative vaginal sex with male partner, full body, (erect penis:1.4), (1boy:1.4), uncensored"],
-    [/sperme|joui|orgasme|remplis/i, "explicit climax, visible sexual fluids, uncensored NSFW"],
-    [/branle|handjob|masturb(e|ation).{0,15}(bite|queue)|elle (le )?branle/i, "MASTER ACT: (handjob:1.55), (erect penis clearly visible:1.55), penis in her hand stroking, (1boy:1.45), (1girl:1.2), uncensored"],
-    [/entre les seins|titjob|texas/i, "MASTER ACT: explicit titjob, penis between her breasts, male partner, (1boy:1.4), uncensored"],
+    [/jambes [eé]cart[ée]es|legs spread/i, "legs spread open"],
+    [/debout|standing/i, "standing upright full body"],
+    [/assise|sitting/i, "sitting pose full body"],
+    [/contre le mur|against the wall/i, "pressed against the wall"],
+    [/sur le dos|on her back/i, "lying on her back"],
+    [/regard cam[eé]ra|looking at (the )?camera|nous regard/i, "looking at the camera"],
+    [/sourire espi[eè]gle|mischievous/i, "mischievous playful smile"],
+    [/timide|\bshy\b/i, "shy timid expression, blushing"],
+    [/provocante|provocative/i, "provocative sexy pose"],
+    [/se caressant|touching herself|doigts? sur/i, "touching herself intimately"],
+    [/mains sur les seins|holding breasts/i, "hands on her breasts"],
+    // --- Lieux ---
+    [/bureau|office desk/i, "in an office interior, desk visible"],
+    [/salon|living room/i, "in the living room"],
+    [/chambre|bedroom/i, "in the bedroom"],
+    [/cuisine|kitchen/i, "in the kitchen"],
+    [/salle de bain|bathroom/i, "in the bathroom"],
+    [/douche|shower/i, "in the shower"],
+    [/balcon|balcony/i, "on the balcony"],
+    [/voiture|car interior/i, "inside a car"],
+    [/ext[eé]rieur|outdoor|dehors|jardin|street/i, "outdoor setting"],
+    [/plage|beach/i, "on the beach"],
+    [/piscine|pool/i, "by the swimming pool"],
+    // --- Actes explicites ---
+    [/elle suce|suce (ma |sa |la )?(bite|queue)|fellation|blowjob|pipe\b|en train de sucer|gaine la bite/i,
+      "MASTER ACT: (fellatio:1.55), (penis in her mouth:1.55), (erect penis clearly visible:1.5), she sucking a man's cock, (1boy:1.45), (1girl:1.2), male partner in frame, uncensored explicit NSFW"],
+    [/l[eè]che.{0,20}(chatte|sexe)|cunnilingus/i,
+      "MASTER ACT: explicit cunnilingus, male face between her thighs, (1boy:1.4), uncensored"],
+    [/missionnaire|missionary/i,
+      "MASTER ACT: missionary sex, she on her back, male on top penetrating, (erect penis:1.4), (1boy:1.4), uncensored"],
+    [/levrette|doggy|par derri[eè]re/i,
+      "MASTER ACT: doggy style sex, male behind her penetrating, (erect penis:1.4), (1boy:1.4), uncensored"],
+    [/cowgirl|califourchon|[àa] cheval sur/i,
+      "MASTER ACT: cowgirl sex, she straddling him, (erect penis:1.4), (1boy:1.4), uncensored"],
+    [/branle|handjob|elle (le )?branle/i,
+      "MASTER ACT: (handjob:1.55), (erect penis clearly visible:1.55), stroking his cock with her hand, (1boy:1.45), uncensored"],
+    [/entre les seins|titjob|texas/i,
+      "MASTER ACT: titjob, penis between her breasts, (1boy:1.4), uncensored"],
+    [/p[eé]n[eè]tr|baise|baiser|je te prends|je la prends|fait l'amour|acte sexuel|enfonce/i,
+      "MASTER ACT: penetrative vaginal sex with male partner, (erect penis:1.4), (1boy:1.4), full bodies, uncensored"],
+    [/sperme|joui|orgasme|remplis|creampie/i,
+      "explicit climax, visible sexual fluids, uncensored NSFW"],
+    [/doigt[eé]|fingering/i, "explicit fingering, fingers between her legs, aroused"],
   ];
-  let expanded = t;
+
+  let expanded = t0;
   let overridesPose = false;
   let overridesOutfit = false;
   let overridesAct = false;
+  let overridesPlace = false;
   let actLine = "";
-  let outfitBits = [];
-  for (const [re, en] of map) {
+  const outfitBits = [];
+  const placeBits = [];
+
+  for (let i = 0; i < map.length; i++) {
+    const re = map[i][0];
+    const en = map[i][1];
     re.lastIndex = 0;
-    if (re.test(t)) {
-      expanded += ", (" + en + ":1.4)";
-      if (/pose|genoux|allong|canap|patte|pench|jambes|behind|lying|kneel|bent|spread|sofa|couch|bed|oral|sex|penetrat|doggy|missionary|cowgirl|straddl|MASTER ACT/i.test(en)) overridesPose = true;
-      if (/clothes|lingerie|dress|skirt|jeans|top|nude|nightie|bra|panties|outfit|wet|soaked|blouse|shirt|pantyhose|secretary|office|suit|heel/i.test(en)) {
+    if (re.test(t0)) {
+      expanded += ", (" + en + ":1.45)";
+      if (/MASTER ACT|penis|1boy|fellatio|sex|penetrat|oral|uncensored/i.test(en)) {
+        overridesAct = true;
+        overridesPose = true;
+        if (/MASTER ACT/i.test(en)) actLine = en;
+      }
+      if (/clothes|lingerie|dress|skirt|jeans|top|nude|nightie|bra|panties|outfit|wet|soaked|blouse|shirt|pantyhose|secretary|office|suit|heel|towel|bikini|legging|corset|apron|uniform|robe|t-shirt|hoodie/i.test(en)) {
         overridesOutfit = true;
         outfitBits.push(en);
       }
-      if (/explicit|fellatio|penetrat|sex|oral|uncensored|MASTER ACT|penis|1boy/i.test(en)) {
-        overridesAct = true;
-        if (/MASTER ACT/i.test(en)) actLine = en;
+      if (/pose|kneel|lying|sit|stand|bent|spread|all fours|behind|wall|camera|smile|shy|provoc|touching|hands on/i.test(en)) {
+        overridesPose = true;
+      }
+      if (/office|living room|bedroom|kitchen|bathroom|shower|balcony|car|outdoor|beach|pool/i.test(en)) {
+        overridesPlace = true;
+        placeBits.push(en);
       }
     }
   }
-  if (/(pose|position|debout|assise|allong|genoux|canap|lit|dos|profil)/i.test(t)) overridesPose = true;
-  if (/(tenue|habit|robe|jupe|jean|top|lingerie|nuisette|soutien|culotte|v[eê]t|chemise|collant|secr[eé]taire|bureau)/i.test(t)) overridesOutfit = true;
-  if (/(suce|baise|p[eé]n[eè]tr|fellation|levrette|missionnaire|sperme|bite|queue|branle)/i.test(t)) {
+
+  // Heuristiques larges si mots-clés libres
+  if (/(pose|position|debout|assise|allong|genoux|canap|lit|dos|profil|pench)/i.test(t0)) overridesPose = true;
+  if (/(tenue|habit|v[eê]t|robe|jupe|jean|top|lingerie|nuisette|soutien|culotte|chemise|collant|secr[eé]taire|bureau|maillot|short|pantalon|sweat)/i.test(t0)) overridesOutfit = true;
+  if (/(suce|baise|p[eé]n[eè]tr|fellation|levrette|missionnaire|sperme|bite|queue|branle|l[eè]che)/i.test(t0)) {
     overridesPose = true;
     overridesAct = true;
   }
-  // Composition tenue secrétaire si mots-clés présents sans map complet
-  if (/secr[eé]taire|bureau/i.test(t) && /chemise|jupe|collant/i.test(t)) {
-    const sec = "wearing secretary office outfit: fitted button-up blouse and tight pencil skirt" +
-      (/collant/i.test(t) ? ", sheer pantyhose" : "") +
-      (/talon|escarpin/i.test(t) ? ", high heels" : "");
+  if (/(salon|chambre|cuisine|bureau|douche|bain|balcon|voiture|dehors|plage|piscine)/i.test(t0)) overridesPlace = true;
+
+  // Composition secrétaire si mots combinés
+  if (/secr[eé]taire|bureau/i.test(t0) && /chemise|jupe|collant/i.test(t0)) {
+    const sec = "wearing full secretary outfit: fitted button-up blouse and tight pencil skirt"
+      + (/collant/i.test(t0) ? ", sheer pantyhose" : "")
+      + (/talon|escarpin/i.test(t0) ? ", high heels" : "");
     outfitBits.push(sec);
-    expanded += ", (" + sec + ":1.5)";
+    expanded += ", (" + sec + ":1.55)";
     overridesOutfit = true;
   }
+
+  // TOUTE saisie libre = priorité absolue (même sans mot-clé connu)
   return {
-    text: ("USER OPTIONAL DETAIL (HIGHEST PRIORITY, MUST FOLLOW EXACTLY:1.55): " + expanded).slice(0, 900),
+    text: ("USER REQUEST (ABSOLUTE PRIORITY 1.6 — follow every detail): " + expanded).slice(0, 1000),
     overridesPose: true,
     overridesOutfit: overridesOutfit || overridesAct,
     overridesAct,
+    overridesPlace,
     actLine,
     outfitLine: outfitBits.join(", "),
+    placeLine: placeBits.join(", "),
+    hasAny: true,
+    raw: t0,
   };
 }
 
@@ -436,33 +526,33 @@ function buildLeaImagePrompt(extra = "") {
     // Même visage que la galerie Grok (jeune, soft, cheveux lisses, pas glamour MILF)
     const ex0 = expandProfileExtra(extra);
     const pose = ex0.overridesPose
-      ? "pose from user detail, follow USER DETAIL exactly"
+      ? "pose from USER REQUEST, follow exactly"
       : pick([
       "standing in doorway looking back over shoulder at camera, wet clothes",
       "facing camera shy in the hallway doorway, soaked crop top",
       "hand on doorframe, rain-soaked, timid soft expression",
       "leaning on doorframe, wet hair sticking to skin, eyes down shy",
     ]);
+    // Si l'user impose une tenue → ne pas forcer crop top mouillé
+    const defaultWetOutfit = !(ex0.overridesOutfit || ex0.overridesAct);
     return [
-      ex0.text ? (ex0.text + ", (user optional detail is mandatory:1.4),") : "",
+      ex0.text ? (ex0.text + ",") : "",
+      ex0.overridesAct ? ((ex0.actLine || "explicit act") + ", (1boy:1.4), uncensored,") : "",
       "ultra photorealistic DSLR photo of Léa, SAME face as reference gallery photos,",
       "(18-21 year old young French woman:1.35), (looks exactly 21:1.3), youthful soft face, baby face not mature,",
       "(long straight dark brown hair to lower back:1.25), NOT wavy, NOT hollywood waves,",
       "brown eyes, fair pale skin, natural soft makeup or none, natural brows,",
       "(large 95D breasts:1.2), hourglass waist,",
-      "(soaked wet white short crop top:1.3), thin wet fabric clinging to breasts, water droplets on skin,",
-      "(tight wet dark blue skinny jeans:1.2), wet denim,",
-      "wet skin sheen, water droplets, wet hair strands on face,",
-      "apartment hallway doorway at night, indoor lights,",
+      defaultWetOutfit ? "(soaked wet white short crop top:1.3), thin wet fabric clinging to breasts, water droplets on skin," : "",
+      defaultWetOutfit ? "(tight wet dark blue skinny jeans:1.2), wet denim," : "",
+      defaultWetOutfit ? "wet skin sheen, water droplets, wet hair strands on face," : "",
+      defaultWetOutfit ? "apartment hallway doorway at night, indoor lights," : (ex0.overridesPlace ? "" : "indoor scene,"),
       pose + ",",
       "natural skin pores, soft cinematic lighting, sharp detailed young face,",
-      (function () {
-        const ex = expandProfileExtra(extra);
-        return ex.text ? (ex.text + ", (must match user detail:1.35),") : "";
-      })(),
       "NOT middle-aged, NOT 30 years old, NOT 35, NOT mature face, NOT glamorous heavy makeup,",
       "different pose from reference, new angle, not identical to cover photo,",
-      "NOT different woman, NOT model face, NOT wavy voluminous salon hair, NOT dry clothes, NOT nude, NOT studio seamless"
+      ex0.hasAny ? "MUST follow USER REQUEST for clothes/pose/act," : "NOT dry clothes,",
+      "NOT different woman, NOT model face, NOT wavy voluminous salon hair, NOT studio seamless"
     ].filter(Boolean).join(" ");
   }
   // —— PROFIL = scène du SCÉNARIO (tenue + lieu + situation) ——
@@ -578,40 +668,53 @@ function buildLeaImagePrompt(extra = "") {
   else if (/panne|voiture/i.test(scenario)) situation = "car broke down, seeking help";
   else if (scenario) situation = scenario.slice(0, 160);
 
-  // Physique verrouillé ; le détail optionnel utilisateur PRIME sur pose/tenue/acte
+  // Physique verrouillé ; TOUTE option utilisateur PRIME (tenue, pose, lieu, acte)
   const phys = physicalLocksFromText(c);
-  // Si l'utilisateur impose une tenue → NE PAS coller la tenue scénario (conflit lingerie vs chemise)
+  const hasUser = !!(ex && ex.hasAny);
+
   let outfitLine;
-  if (ex.overridesOutfit && (ex.outfitLine || ex.text)) {
-    outfitLine = "OUTFIT MANDATORY FROM USER (ignore default scenario clothes): " +
-      (ex.outfitLine || "follow USER OPTIONAL DETAIL outfit exactly") +
-      ", NOT lingerie unless user asked lingerie, NOT nude unless user asked nude,";
+  if (hasUser && ex.overridesOutfit) {
+    outfitLine = "OUTFIT MANDATORY FROM USER (ignore scenario default clothes): " +
+      (ex.outfitLine || "exactly as described in USER REQUEST") +
+      ", NOT default lingerie, NOT wrong clothes,";
+  } else if (hasUser) {
+    // Texte libre sans mot-clé tenue → quand même priorité au texte user
+    outfitLine = "OUTFIT: follow USER REQUEST if it describes clothes, otherwise: " + outfitDetail + ",";
   } else {
     outfitLine = "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",";
   }
+
+  let placeLine;
+  if (hasUser && ex.overridesPlace) {
+    placeLine = "LOCATION FROM USER: " + (ex.placeLine || "as in USER REQUEST") + ",";
+  } else if (hasUser && ex.overridesAct) {
+    placeLine = ""; // l'acte définit souvent la scène
+  } else {
+    placeLine = "Location: " + placeDetail + ",";
+  }
+
   const duoExtra = isDuoCharacter(c)
     ? "(2girls:1.55), (two adult women:1.55), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
     : "";
-  // Acte explicite en TÊTE du prompt (Horde suit mieux le début)
+
   const actHead = (ex.overridesAct)
     ? ((ex.actLine || "explicit adult sex act with male partner") +
        ", (1boy:1.45), (male partner visible in frame:1.4), (erect penis when the act needs it:1.35), hetero, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only,")
     : "";
-  const actExtra = (ex.overridesAct)
-    ? "MUST show the sexual act requested by USER DETAIL, male body partially visible, full scene,"
-    : "";
+
+  // Ordre: USER REQUEST en premier (Horde suit le début), puis physique, puis reste
   return [
+    hasUser ? (ex.text + ",") : "",
     actHead,
     fixedAppearanceBlock(c) + ",",
     duoExtra,
     "Photorealistic photo,",
-    ex.text ? (ex.text + ",") : "",
-    actExtra,
+    ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner visible," : "",
     "body: " + body + ",",
     phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
     outfitLine,
-    ex.overridesAct ? "" : ("Location: " + placeDetail + ","),
-    ex.overridesOutfit || ex.overridesAct ? "scene follows USER DETAIL not the default scenario clothes," : ("scenario: " + situation + ","),
+    placeLine,
+    hasUser ? "EVERY detail of USER REQUEST is mandatory (clothes, pose, place, act)," : ("scenario: " + situation + ","),
     pose + ",",
     "IMPORTANT: different pose and camera angle from any reference photo, new composition, not a copy of the cover,",
     "Natural skin pores, realistic DSLR photography, sharp detailed face matching identity, soft cinematic lighting,",
@@ -620,11 +723,11 @@ function buildLeaImagePrompt(extra = "") {
     "No cartoon, no anime, no CGI, no illustration,",
     "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
     phys.negative.length ? ("NOT " + phys.negative.join(", ") + ",") : "",
-    ex.overridesOutfit
-      ? "NOT wrong outfit, NOT ignore user requested clothes, NOT default lingerie if user asked blouse or skirt,"
+    hasUser
+      ? "NOT ignore USER REQUEST, NOT default scenario clothes when user asked other clothes, NOT copy cover pose,"
       : "no wrong outfit, no missing wet/ripped/oversized details from the scenario outfit,",
     ex.overridesAct
-      ? "NOT solo woman only, NOT missing male partner, NOT censored, NOT mosaic, NOT softcore only when explicit act requested,"
+      ? "NOT solo woman only, NOT missing male partner, NOT censored, NOT mosaic, NOT softcore only,"
       : "",
     "NOT " + ageNegatives(c)
   ].filter(Boolean).join(" ");
@@ -4834,17 +4937,21 @@ async function generatePhoto() {
     if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, large breasts, D-cup, no freckles, brown hair";
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, white bra only, lingerie set, nude, seamless studio, middle-aged, 30 years old";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
-    // Options utilisateur (tenue / acte) → négatifs + denoise plus fort pour ne pas coller à la ref lingerie
-    let userEx = { overridesOutfit: false, overridesAct: false };
+    // Toute option utilisateur → denoise plus fort + négatifs adaptés
+    let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
+    if (userEx.hasAny) {
+      payload.denoising = Math.max(Number(payload.denoising) || 0, 0.7);
+      payload.negative = (payload.negative || "") + ", ignore user request, copy of reference pose only, wrong scene";
+    }
     if (userEx.overridesOutfit) {
-      payload.negative = (payload.negative || "") + ", wrong outfit, lingerie only when blouse or skirt requested, nude when clothes requested, bikini, sportswear";
-      payload.denoising = 0.72;
+      payload.negative = (payload.negative || "") + ", wrong outfit, default lingerie when other clothes requested, nude when clothes requested";
+      payload.denoising = Math.max(payload.denoising || 0, 0.74);
     }
     if (userEx.overridesAct) {
       payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing penis, censored, mosaic censor, bar censor, softcore only, portrait selfie";
       payload.nsfw = true;
-      payload.denoising = Math.max(payload.denoising || 0, 0.75);
+      payload.denoising = Math.max(payload.denoising || 0, 0.78);
     }
         // img2img unifié : cover / assets pour TOUS les personnages
     if (c.id === "lea") {
