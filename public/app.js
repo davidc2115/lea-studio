@@ -370,11 +370,11 @@ function expandProfileExtra(extra) {
     // --- Bureau / secrétaire ---
     [/secr[eé]taire|tenue de bureau|office (outfit|wear)|business (outfit|attire)/i, "professional secretary office outfit"],
     [/\bchemise\b|blouse/i, "button-up collared blouse"],
-    [/jupe crayon/i, "tight pencil skirt"],
-    [/jupe moulante|jupe collante/i, "very tight form-fitting skirt"],
-    [/\bjupe\b/i, "fitted skirt"],
+    [/jupe crayon/i, "(pencil skirt:1.55), tight pencil skirt"],
+    [/jupe moulante|jupe collante/i, "(tight skirt:1.55), very tight form-fitting skirt hugging hips"],
+    [/\bjupe\b/i, "(wearing a skirt:1.55), fitted skirt on lower body, NOT pants"],
     [/pantalon de costume|suit pants/i, "tailored trousers"],
-    [/collants?|pantyhose/i, "sheer pantyhose on legs"],
+    [/collants?|pantyhose/i, "(sheer pantyhose fully covering both legs:1.6), (visible nylon pantyhose:1.55), legs not bare"],
     [/talon|escarpin/i, "high heel pumps"],
     [/costume|tailleur/i, "women's business suit"],
     [/lunettes de bureau|glasses/i, "wearing glasses"],
@@ -498,10 +498,24 @@ function expandProfileExtra(extra) {
   // Composition secrétaire si mots combinés
   if (/secr[eé]taire|bureau/i.test(t0) && /chemise|jupe|collant/i.test(t0)) {
     const sec = "wearing full secretary outfit: fitted button-up blouse and tight pencil skirt"
-      + (/collant/i.test(t0) ? ", sheer pantyhose" : "")
+      + (/collant/i.test(t0) ? ", sheer pantyhose covering legs" : "")
       + (/talon|escarpin/i.test(t0) ? ", high heels" : "");
     outfitBits.push(sec);
     expanded += ", (" + sec + ":1.55)";
+    overridesOutfit = true;
+  }
+  // Combo fréquent: jupe + collants (sans autre contexte)
+  if (/\bjupe\b/i.test(t0) && /collants?/i.test(t0)) {
+    const jc = "(wearing a skirt and sheer pantyhose:1.65), (skirt:1.55), (pantyhose on legs:1.6), lower body clothed with skirt over pantyhose, NOT bare legs, NOT nude legs, NOT pants";
+    outfitBits.push(jc);
+    expanded += ", " + jc;
+    overridesOutfit = true;
+  }
+  // Chemise seule
+  if (/\bchemise\b/i.test(t0) && !/secr[eé]taire/i.test(t0)) {
+    const ch = "(wearing a button-up blouse:1.5), collared shirt blouse on upper body";
+    outfitBits.push(ch);
+    expanded += ", " + ch;
     overridesOutfit = true;
   }
 
@@ -702,8 +716,12 @@ function buildLeaImagePrompt(extra = "") {
        ", (1boy:1.45), (male partner visible in frame:1.4), (erect penis when the act needs it:1.35), hetero, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only,")
     : "";
 
-  // Ordre: USER REQUEST en premier (Horde suit le début), puis physique, puis reste
+  // Ordre: vêtements user EN PREMIER (poids max), puis reste
+  const clothesHead = (hasUser && ex.overridesOutfit && ex.outfitLine)
+    ? ("CRITICAL CLOTHING MUST APPEAR: " + ex.outfitLine + ",")
+    : "";
   return [
+    clothesHead,
     hasUser ? (ex.text + ",") : "",
     actHead,
     fixedAppearanceBlock(c) + ",",
@@ -4959,12 +4977,32 @@ async function generatePhoto() {
       payload.nsfw = true;
     }
     try {
-      setGenStatus("Chargement référence visage…");
-      await applyCharacterRefToPayload(payload, c);
-      // Si tenue/acte user : forcer denoise élevé même après applyCharacterRefToPayload
-      if (userEx.overridesOutfit || userEx.overridesAct) {
-        payload.denoising = Math.max(Number(payload.denoising) || 0, userEx.overridesAct ? 0.78 : 0.72);
-        setGenStatus("Horde img2img · options user · denoise " + payload.denoising + "…");
+      // Tenue imposée par l'utilisateur → txt2img (la ref lingerie écrase sinon jupe/collants)
+      if (userEx.overridesOutfit && !userEx.overridesAct) {
+        // Négatifs vêtements pour collants / jupe
+        if (/collant|pantyhose/i.test(extra)) {
+          payload.negative = (payload.negative || "") + ", bare legs, nude legs, no pantyhose, skin legs without hosiery, stockings only on thighs without pantyhose";
+        }
+        if (/\bjupe\b|skirt/i.test(extra)) {
+          payload.negative = (payload.negative || "") + ", pants only, jeans only, no skirt, trousers instead of skirt, fully nude lower body";
+        }
+        if (/chemise|blouse/i.test(extra)) {
+          payload.negative = (payload.negative || "") + ", topless, bra only, no blouse, sports bra";
+        }
+        setGenStatus("Horde txt2img · tenue optionnelle (sans img2img pour respecter jupe/collants/chemise)…");
+        // pas de source_image
+      } else if (userEx.overridesAct) {
+        setGenStatus("Chargement référence visage…");
+        await applyCharacterRefToPayload(payload, c);
+        payload.denoising = Math.max(Number(payload.denoising) || 0, 0.82);
+        setGenStatus("Horde img2img · acte · denoise " + payload.denoising + "…");
+      } else {
+        setGenStatus("Chargement référence visage…");
+        await applyCharacterRefToPayload(payload, c);
+        if (userEx.hasAny) {
+          payload.denoising = Math.max(Number(payload.denoising) || 0, 0.72);
+          setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
+        }
       }
     } catch (e) {
       console.warn("[img2img]", e);
