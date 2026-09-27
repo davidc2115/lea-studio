@@ -1683,6 +1683,26 @@ async function addToGallery(src, charId) {
 }
 
 /** Résout une clé gallery: ou data URL pour affichage. */
+
+function hiddenPhotos(id) {
+  try {
+    const a = JSON.parse(localStorage.getItem("lea.hidden." + (id || state.current || "lea")) || "[]");
+    return Array.isArray(a) ? a : [];
+  } catch { return []; }
+}
+function hidePhoto(id, src) {
+  const k = id || state.current || "lea";
+  const list = hiddenPhotos(k);
+  const s = String(src || "");
+  if (s && !list.includes(s)) list.push(s);
+  try { localStorage.setItem("lea.hidden." + k, JSON.stringify(list.slice(0, 200))); } catch (_) {}
+}
+function isHiddenPhoto(id, src) {
+  const s = String(src || "");
+  const base = s.split("/").pop();
+  return hiddenPhotos(id).some((h) => h === s || (base && String(h).endsWith(base)) || (s && String(h) && s.endsWith(String(h).split("/").pop())));
+}
+
 function resolvePhotoSrc(src) {
   if (!src) return "";
   if (src.startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.loadGalleryImage) {
@@ -2688,6 +2708,12 @@ function filterDiscoverList(q) {
       if (c && c.id && !seen.has(c.id)) { list.push(c); seen.add(c.id); }
     }
   }
+  if (window.LEA_CAST_NEW && window.LEA_CAST_NEW.length) {
+    const seen2 = new Set(list.map((c) => c.id));
+    for (const c of window.LEA_CAST_NEW) {
+      if (c && c.id && !seen2.has(c.id)) { list.push(c); seen2.add(c.id); }
+    }
+  }
   if (!list.length) list = [FALLBACK_LEA];
   // Sync state
   if (list.length > (state.characters || []).length) state.characters = list;
@@ -2896,11 +2922,12 @@ function renderProfile() {
   const c = character();
   const extras = extraPhotos();
   const base = (c.gallery && c.gallery.length ? c.gallery : []).map((src, i) => ({ src, title: "Photo " + (i + 1) }))
-    .filter((g) => g.src && String(g.src).length > 2);
+    .filter((g) => g.src && String(g.src).length > 2 && !isHiddenPhoto(c.id, g.src));
   const genItems = extras.map((src, i) => {
+    if (isHiddenPhoto(c.id, src)) return null;
     const resolved = resolvePhotoSrc(src);
     return { src: resolved || "", raw: src, title: "Générée " + (i + 1), gen: true, idx: i };
-  }).filter((g) => g.src && g.src.length > 50);
+  }).filter((g) => g && g.src && g.src.length > 50);
   // Fusion sans doublon (même URL / même data head)
   const all = [];
   const seenSrc = new Set();
@@ -2912,17 +2939,29 @@ function renderProfile() {
     all.push(g);
   }
   const hero = c.cover || (all[0] && all[0].src) || "";
+  const tagsHtml = (c.tags || []).slice(0, 8).map((t) =>
+    `<span class="prof-tag">${String(t)}</span>`).join("");
+  const blurb = (c.scenario || c.title || "").replace(/\s+/g, " ").trim().slice(0, 120);
   $("view-profile").innerHTML = `
-    <h1>${c.name}</h1>
-    <img class="profile-hero" src="${hero}" alt="${c.name}" data-full="${hero}" />
+    <div class="prof-card">
+      <div class="prof-hero-wrap">
+        ${hero ? `<img class="profile-hero" src="${hero}" alt="${c.name}" data-full="${hero}" onerror="this.style.opacity=.3" />` : `<div class="profile-hero prof-hero-empty"></div>`}
+        <div class="prof-hero-fade"></div>
+        <div class="prof-hero-meta">
+          <h1 class="prof-name">${c.name}</h1>
+          <div class="prof-tags">${tagsHtml}</div>
+          <p class="prof-blurb">${blurb}${(c.scenario||"").length > 120 ? "…" : ""}</p>
+          <button type="button" class="cta prof-chat-btn" id="prof-chat">💬 Chat</button>
+        </div>
+      </div>
+    </div>
     <p style="margin:10px 0 8px">
-      <button type="button" class="cta" id="prof-chat">💬 Discuter</button>
-      <button type="button" class="cta" id="prof-newchat" style="margin-left:8px;background:#3a2048">🔄 Nouvelle conversation</button>
+      <button type="button" class="cta" id="prof-newchat" style="background:#3a2048">🔄 Nouvelle conversation</button>
       ${c.imported || String(c.id||"").startsWith("imp_") ? `
       <button type="button" class="cta" id="prof-edit-imp" style="margin-left:8px;background:#3a2048">✏️ Modifier fiche</button>
       <button type="button" class="cta" id="prof-del-imp" style="margin-left:8px;background:#5a2030">🗑️ Supprimer</button>` : ""}
     </p>
-    <p style="color:var(--muted);font-size:13px">Appuie sur ★ sous une photo pour en faire l’image de profil.</p>
+    <p style="color:var(--muted);font-size:13px">★ = image de profil · × = masquer (y compris images APK)</p>
     ${(c.imported || String(c.id||"").startsWith("imp_")) && (!c.adapted || /\{\{char\}\}/i.test((c.scenario||"")+(c.appearance||"")) || (/\b(the|she is|character)\b/i.test(c.scenario||"") && !/[éèàù]/i.test((c.scenario||"").slice(0,80)))) ? `
     <p style="background:#3a2048;padding:10px;border-radius:10px;font-size:13px;margin:8px 0">
       Fiche pas encore adaptée à Léa Studio (texte EN / {{char}}).
@@ -2944,7 +2983,7 @@ function renderProfile() {
         return `<div class="gal-item">
           <img src="${g.src}" alt="${g.title}" title="${g.title}" data-full="${g.src}" onerror="this.parentNode.style.display='none'" />
           <button type="button" class="gal-cover" data-cover="${String(key).replace(/"/g, "&quot;")}" title="Image de profil">${isCover ? "★" : "☆"}</button>
-          ${g.gen ? `<button type="button" class="gal-del" data-del="${g.idx}" title="Supprimer">×</button>` : ""}
+          <button type="button" class="gal-del" data-del="${g.gen ? g.idx : -1}" data-raw="${String(key).replace(/"/g, "&quot;")}" title="Masquer / supprimer">×</button>
         </div>`;
       }).join("")}
     </div>
@@ -3014,6 +3053,7 @@ function renderProfile() {
     const del = e.target.getAttribute("data-del");
     if (del != null) {
       e.stopPropagation();
+      const raw = e.target.getAttribute("data-raw") || "";
       const list = extraPhotos();
       const i = Number(del);
       if (i >= 0 && i < list.length) {
@@ -3021,8 +3061,20 @@ function renderProfile() {
         if (removed && String(removed).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.deleteGalleryImage) {
           try { window.LeaAndroid.deleteGalleryImage(removed); } catch (_) {}
         }
+        hidePhoto(c.id, removed);
         if (customCover(c.id) === removed) setCustomCover(c.id, "");
         saveExtra(list);
+        renderProfile();
+        return;
+      }
+      // Image assets APK / cover : masquage local (ne peut pas effacer le fichier APK)
+      if (raw) {
+        hidePhoto(c.id, raw);
+        if (customCover(c.id) === raw) setCustomCover(c.id, "");
+        if (c.cover && (raw === c.cover || String(raw).endsWith(String(c.cover).split("/").pop()))) {
+          try { setCustomCover(c.id, ""); } catch (_) {}
+        }
+        setGenStatus("Image masquée (y compris si elle vient de l'APK)");
         renderProfile();
       }
       return;
@@ -4291,6 +4343,13 @@ function formatBubble(text) {
   let raw = String(text || "").replace(/\r/g, "");
   // **action** → *action*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+  // [Prénom] : ou Prénom : en début de ligne → label locuteur (duo / 3e personne)
+  raw = raw.replace(/(^|\n)\s*\[([^\]\n]{1,40})\]\s*:\s*/g, "$1«SPEAKER:$2»");
+  raw = raw.replace(/(^|\n)\s*([A-ZÉÈÊÀÂÎÔÙÛÄÖÜÇ][a-zàâäéèêëïîôùûüçA-ZÉÈÊÀÂÎÔÙÛ\-]{1,20})\s*:\s+/g, (m, pre, name) => {
+    // Évite de capturer "http:" etc.
+    if (/^(http|https|Note|Mode|ACTION|Action)$/i.test(name)) return m;
+    return pre + "«SPEAKER:" + name + "»";
+  });
   // Labels
   raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
   raw = raw.replace(/\(\s*thought\s*\)\s*/gi, "");
@@ -4365,8 +4424,10 @@ function formatBubble(text) {
   if (!out.length) out.push({ t: "say", v: String(text || "") });
 
   return out.map((p) => {
-    const v = escapeHtml(p.v).replace(/\n/g, "<br>");
+    let v = escapeHtml(p.v).replace(/\n/g, "<br>");
     if (!v.trim()) return "";
+    // Labels locuteurs duo / 3e personne
+    v = v.replace(/«SPEAKER:([^»]+)»/g, '<span class="speaker-label">$1</span> ');
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;
     return `<span class="seg say">${v}</span>`;
