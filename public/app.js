@@ -2761,7 +2761,13 @@ function filterDiscoverList(q) {
       if (c && c.id && !seen5.has(c.id)) { list.push(c); seen5.add(c.id); }
     }
   }
-  if (!list.length) list = [FALLBACK_LEA];
+
+  if (window.LEA_CAST_COLLEGUES && window.LEA_CAST_COLLEGUES.length) {
+    const seenC = new Set(list.map((c) => c.id));
+    for (const c of window.LEA_CAST_COLLEGUES) {
+      if (c && c.id && !seenC.has(c.id)) { list.push(c); seenC.add(c.id); }
+    }
+  }  if (!list.length) list = [FALLBACK_LEA];
   // Sync state
   if (list.length > (state.characters || []).length) state.characters = list;
 
