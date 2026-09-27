@@ -102,6 +102,9 @@ function physicalLocksFromText(c) {
     c && c.body,
     c && c.ethnicity,
     c && c.name,
+    c && c.title,
+    c && Array.isArray(c.tags) ? c.tags.join(" ") : "",
+    c && c.scenario,
   ].filter(Boolean).join(" ").toLowerCase();
 
   const out = { positive: [], negative: [], features: [] };
@@ -178,19 +181,37 @@ function physicalLocksFromText(c) {
     out.negative.push("plain human ears only, missing animal ears, no ears on head");
   }
 
-  // Poitrine rapide
-  if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(blob)) {
+  // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
+  if (/bonnet\s*j|j-cup|bonnet\s*j\b/i.test(blob)) {
+    out.positive.push("(massive enormous J-cup breasts:1.55)", "(extremely huge heavy breasts:1.5)", "(deep heavy cleavage:1.35)", "top stretched by huge breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest");
+    out.features.push("J-cup breasts");
+  } else if (/bonnet\s*i|i-cup|bonnet\s*i\b/i.test(blob)) {
+    out.positive.push("(enormous heavy I-cup breasts:1.55)", "(extremely large I-cup breasts:1.5)", "(deep heavy cleavage:1.35)", "blouse strained by huge breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts");
+    out.features.push("I-cup breasts");
+  } else if (/bonnet\s*h|h-cup|bonnet\s*h\b/i.test(blob)) {
+    out.positive.push("(huge heavy H-cup breasts:1.5)", "(extremely large H-cup breasts:1.45)", "(deep cleavage:1.3)", "fabric stretched over large breasts");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts");
+    out.features.push("H-cup breasts");
+  } else if (/bonnet\s*g|g-cup/i.test(blob)) {
+    out.positive.push("(very large heavy G-cup breasts:1.45)", "(deep cleavage:1.25)");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup");
+  } else if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(blob)) {
     out.positive.push("(small flat A-cup breasts:1.3)");
-    out.negative.push("large breasts, huge breasts, D-cup, E-cup");
+    out.negative.push("large breasts, huge breasts, D-cup, E-cup, H-cup");
   } else if (/bonnet\s*b|b-cup/i.test(blob)) {
     out.positive.push("(small-medium B-cup breasts:1.3)");
-    out.negative.push("huge breasts, E-cup, flat chest");
+    out.negative.push("huge breasts, E-cup, H-cup, flat chest");
   } else if (/bonnet\s*c|c-cup/i.test(blob)) {
     out.positive.push("(medium C-cup breasts:1.25)");
   } else if (/bonnet\s*d|d-cup|95d/i.test(blob)) {
     out.positive.push("(large D-cup breasts:1.3)");
   } else if (/bonnet\s*[ef]|e-cup|f-cup|100e/i.test(blob)) {
     out.positive.push("(very large E-cup breasts:1.35)");
+  } else if (/gros\s*seins|huge\s*breasts|extremely\s*large\s*breast|busty\s*extreme/i.test(blob)) {
+    out.positive.push("(extremely large heavy breasts:1.4)", "(deep cleavage:1.25)");
+    out.negative.push("small breasts, flat chest, A-cup, B-cup");
   }
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
@@ -449,7 +470,7 @@ function buildLeaImagePrompt(extra = "") {
     ? ("pose/position from user detail, follow USER DETAIL exactly")
     : pick(posePool);
 
-  const bodyLock = {
+  let bodyLock = {
     ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
     aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
     sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
@@ -483,6 +504,14 @@ function buildLeaImagePrompt(extra = "") {
     lea: "hourglass figure, generous 95D large breasts, long straight brown hair",
   }[c.id] || (c.body || "");
 
+  // Forçage bonnet H/I/J depuis tags/title si bodyLock générique
+  (function forceCup() {
+    const t = [c.tags && c.tags.join(" "), c.title, c.body, c.appearance].filter(Boolean).join(" ");
+    if (/bonnet\s*j|j-cup/i.test(t)) bodyLock = "massive enormous J-cup breasts, extremely huge heavy chest, deep cleavage, top strained";
+    else if (/bonnet\s*i|i-cup/i.test(t)) bodyLock = "enormous heavy I-cup breasts, extremely large chest, deep cleavage, blouse strained";
+    else if (/bonnet\s*h|h-cup/i.test(t)) bodyLock = "huge heavy H-cup breasts, extremely large chest, deep cleavage, fabric stretched";
+  })();
+  // bodyLock was const - need let
   const smallChest = /jade|aya|lina|hana|mei|sasha|thea|zoe|chloe/.test(c.id);
   const anti = smallChest
     ? "NOT large breasts, NOT huge cleavage, NOT voluptuous, NOT 95D"
@@ -2726,6 +2755,12 @@ function filterDiscoverList(q) {
       if (c && c.id && !seen4.has(c.id)) { list.push(c); seen4.add(c.id); }
     }
   }
+  if (window.LEA_CAST_CUPS && window.LEA_CAST_CUPS.length) {
+    const seen5 = new Set(list.map((c) => c.id));
+    for (const c of window.LEA_CAST_CUPS) {
+      if (c && c.id && !seen5.has(c.id)) { list.push(c); seen5.add(c.id); }
+    }
+  }
   if (!list.length) list = [FALLBACK_LEA];
   // Sync state
   if (list.length > (state.characters || []).length) state.characters = list;
@@ -3275,9 +3310,15 @@ function morphWeights(c) {
       || /^(bruna|camila|keisha|fatou)$/.test(id)) {
     parts.push("(very large round thick butt:1.4)", "(wide hips:1.25)", "emphasize rear curves");
   }
-  if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[def]|extremely large/i.test(blob)
+  if (/bonnet\s*j|j-cup/i.test(blob)) {
+    parts.push("(massive enormous J-cup breasts:1.55)", "(extremely huge heavy breasts:1.5)");
+  } else if (/bonnet\s*i|i-cup/i.test(blob)) {
+    parts.push("(enormous heavy I-cup breasts:1.55)", "(extremely large I-cup breasts:1.5)");
+  } else if (/bonnet\s*h|h-cup/i.test(blob)) {
+    parts.push("(huge heavy H-cup breasts:1.5)", "(extremely large H-cup breasts:1.45)");
+  } else if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[defg]|extremely large/i.test(blob)
       || /^(sofia|lea|fatou|amelie)$/.test(id)) {
-    parts.push("(large full breasts:1.3)");
+    parts.push("(large full breasts:1.35)");
   }
   return parts.join(", ");
 }
