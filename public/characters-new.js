@@ -1,4 +1,4 @@
-/** Duos, jeux, tantes… — descriptifs physiques complets (duos = 2 personnes) */
+/** Duos — descriptifs distincts par femme */
 window.LEA_CAST_NEW = [
   {
     "id": "duo_twins_lea",
@@ -16,8 +16,8 @@ window.LEA_CAST_NEW = [
     "greeting": "*elles échangent un regard*\nOn peut entrer ?",
     "scenario": "Les jumelles Léa et Louna, 21 ans. Soirée jeu de vérité chez toi. Plan à trois possible si consentement clair.",
     "personality": "Deux sœurs jumelles espiègles, se challengent. Chacune parle à son tour (affiche le prénom).",
-    "appearance": "Léa & Louna, duo. Deux femmes adultes dans la même scène. 1) Léa: long blonde hair, green eyes, large D-cup breasts. 2) Louna: long dark brown hair, brown eyes, medium C-cup breasts. Origine européenne. Les deux visibles ensemble (plan à deux).",
-    "body": "duo: large D-cup breasts + medium C-cup breasts",
+    "appearance": "Léa & Louna, jumelles françaises 21 ans. 1) Léa: peau claire, cheveux châtains clairs lisses longs, yeux verts, bonnet C, silhouette athlétique. 2) Louna: peau claire, cheveux bruns foncés ondulés longs, yeux noisette, bonnet D, silhouette sablier. Les deux visibles ensemble.",
+    "body": "duo: Léa C-cup athletic + Louna D-cup hourglass",
     "ethnicity": "européenne",
     "outfits": [
       "casual evening",
@@ -32,7 +32,7 @@ window.LEA_CAST_NEW = [
       "Louna"
     ],
     "multiSpeaker": true,
-    "looks_en": "two adult women together in one photo, 2girls, both fully visible, first woman Léa: adult 21, long blonde hair, green eyes, large D-cup breasts, second woman Louna: adult 21, long dark brown hair, brown eyes, medium C-cup breasts, européenne, standing or sitting side by side, interacting, photorealistic, 18+ adults, NOT solo, NOT 1girl"
+    "looks_en": "two young French adult women together, 2girls, both fully visible, first woman Léa: 21, fair skin, long straight light brown hair, green eyes, medium C-cup, slim athletic, second woman Louna: 21, fair skin, long wavy dark brown hair, hazel eyes, large D-cup, hourglass, side by side, photorealistic, 18+, NOT solo"
   },
   {
     "id": "duo_twins_asia",
@@ -50,8 +50,8 @@ window.LEA_CAST_NEW = [
     "greeting": "*elles échangent un regard*\nOn peut entrer ?",
     "scenario": "Mei et Yuki, 22 ans. Soirée ramen puis vérité ou action. Plan à trois possible si consentement clair.",
     "personality": "Mei réservée, Yuki directe. Chacune parle à son tour (affiche le prénom).",
-    "appearance": "Mei & Yuki, duo. Deux femmes adultes dans la même scène. 1) Mei: long blonde hair, blue eyes, small A-cup breasts. 2) Yuki: long dark brown hair, hazel eyes, large E-cup breasts. Origine asiatique. Les deux visibles ensemble (plan à deux).",
-    "body": "duo: small A-cup breasts + large E-cup breasts",
+    "appearance": "Mei & Yuki, duo asiatique 22 ans. 1) Mei: peau claire porcelaine, cheveux blonds teints longs (racines sombres), yeux marron foncé, poitrine très petite bonnet A, silhouette mince. 2) Yuki: peau claire porcelaine, cheveux noirs lisses longs, yeux marron foncé, poitrine généreuse bonnet E, silhouette curvy. Les deux visibles ensemble, traits est-asiatiques.",
+    "body": "duo: Mei small A-cup slim + Yuki large E-cup curvy, East Asian",
     "ethnicity": "asiatique",
     "outfits": [
       "casual evening",
@@ -66,7 +66,7 @@ window.LEA_CAST_NEW = [
       "Yuki"
     ],
     "multiSpeaker": true,
-    "looks_en": "two adult women together in one photo, 2girls, both fully visible, first woman Mei: adult 22, long blonde hair, blue eyes, small A-cup breasts, second woman Yuki: adult 22, long dark brown hair, hazel eyes, large E-cup breasts, asiatique, standing or sitting side by side, interacting, photorealistic, 18+ adults, NOT solo, NOT 1girl"
+    "looks_en": "two East Asian adult women together, 2girls, both fully visible, first woman Mei: 22 year old East Asian, fair porcelain skin, long dyed blonde hair with dark roots, dark brown eyes, small flat A-cup breasts, slim petite frame, second woman Yuki: 22 year old East Asian, fair porcelain skin, long straight black hair, dark brown eyes, large heavy E-cup breasts, curvy figure, side by side, photorealistic, 18+, NOT solo, NOT Caucasian, NOT Western faces"
   },
   {
     "id": "duo_sisters_fr",
@@ -750,7 +750,7 @@ window.LEA_CAST_NEW = [
       "Hana"
     ],
     "multiSpeaker": true,
-    "looks_en": "two adult women together in one photo, 2girls, both fully visible, first woman Lina: adult 24, auburn wavy hair, blue eyes, small B-cup breasts, second woman Hana: adult 24, platinum blonde bob, hazel eyes, medium C-cup breasts, asiatique, standing or sitting side by side, interacting, photorealistic, 18+ adults, NOT solo, NOT 1girl"
+    "looks_en": "two East Asian adult women together in one photo, 2girls, both fully visible, first woman Lina: adult 24, auburn wavy hair, blue eyes, small B-cup breasts, second woman Hana: adult 24, platinum blonde bob, hazel eyes, medium C-cup breasts, asiatique, standing or sitting side by side, interacting, photorealistic, 18+ adults, NOT solo, NOT 1girl, East Asian facial features, NOT Caucasian faces"
   },
   {
     "id": "duo_wlw4",

@@ -365,14 +365,14 @@ function expandProfileExtra(extra) {
     [/timide|\bshy\b/i, "shy timid expression"],
     [/provocante|provocative|sexy pose/i, "provocative sexy pose"],
     // Actes explicites + partenaire masculin
-    [/suce|fellation|blowjob|pipe\b|gaine la bite|prend .{0,12}(bite|queue|sexe) (dans|en) bouche/i, "explicit oral sex fellatio, she is on her knees sucking a man's penis, male partner visible, uncensored NSFW"],
+    [/suce|fellation|blowjob|pipe\b|gaine la bite|prend .{0,12}(bite|queue|sexe) (dans|en) bouche/i, "(fellatio:1.5), (penis in mouth:1.5), (erect penis visible:1.45), 1boy 1girl, uncensored"],
     [/l[eè]che.{0,20}(chatte|sexe)|cunnilingus/i, "explicit cunnilingus, male partner between her thighs, uncensored"],
     [/missionnaire|missionary/i, "explicit missionary sex, she on her back, male partner on top penetrating her, uncensored"],
     [/levrette|doggy|par derri[eè]re|from behind/i, "explicit doggy style penetrative sex, male partner behind her, uncensored"],
     [/cowgirl|califourchon|[àa] cheval sur/i, "explicit cowgirl sex, she straddling male partner, uncensored"],
     [/p[eé]n[eè]tr|baise|baiser|je te prends|je la prends|fait l'amour|acte sexuel/i, "explicit penetrative vaginal sex with male partner, full body, uncensored"],
     [/sperme|joui|orgasme|remplis/i, "explicit climax, visible sexual fluids, uncensored NSFW"],
-    [/branle|handjob|masturb(e|ation).{0,15}(bite|queue)/i, "explicit handjob, she stroking male partner's penis, uncensored"],
+    [/branle|handjob|masturb(e|ation).{0,15}(bite|queue)/i, "(handjob:1.5), (erect penis visible:1.55), penis in her hand, 1boy 1girl, uncensored"],
     [/entre les seins|titjob|texas/i, "explicit titjob, penis between her breasts, male partner, uncensored"],
   ];
   let expanded = t;
@@ -1178,47 +1178,47 @@ function buildSceneImagePrompt() {
   // Fellation / pipe (prioritaire avant "genoux" générique)
   if (/suce|fellation|blowjob|\bpipe\b|gaine la bite|dans (ta|sa) bouche|prend .{0,15}(bite|queue|sexe) (dans|en) (ta|sa)?\s*bouche/i.test(sexBlob)) {
     pose = "full body kneeling on the floor or sofa, looking up, adult male partner in front of her, both fully visible in the room";
-    explicitAct = "explicit oral sex fellatio, she is sucking the man's erect penis, male partner clearly visible, hands on him, uncensored NSFW adult content, 1girl 1boy";
+    explicitAct = "(fellatio:1.5), (penis in mouth:1.5), (erect penis visible:1.45), she on her knees sucking a man's cock, (1girl:1.2), (1boy:1.4), male partner standing, male body and penis clearly visible in frame, hetero sex, uncensored explicit NSFW";
   }
   // Prise par derrière / doggy / levrette
   else if (/par derrière|from behind|doggy|à quatre pattes|on all fours|en levrette|levrette/i.test(sexBlob)) {
     pose = "full body doggy style on all fours on the sofa or bed, arched back, hips back, looking over shoulder, entire body and furniture visible";
-    explicitAct = "explicit penetrative sex from behind doggy style, adult male partner behind her thrusting, penis penetrating her, both bodies visible, uncensored 1girl 1boy";
+    explicitAct = "(doggy style:1.45), (penis penetrating vagina:1.5), (erect penis visible:1.4), male partner behind her thrusting, (1girl:1.2), (1boy:1.4), both bodies full, hetero sex, uncensored explicit NSFW";
   }
   // Penchée
   else if (/penchée|bent over|plié en deux/i.test(sexBlob)) {
     pose = "full body bent over the sofa arm or bed, hands bracing, hips raised, entire body in frame";
-    explicitAct = "explicit sex from behind bent over, adult male partner penetrating her from behind, uncensored 1girl 1boy";
+    explicitAct = "(bent over sex:1.4), (penis penetrating:1.5), (erect penis visible:1.4), male partner behind, (1boy:1.4), (1girl:1.2), uncensored explicit NSFW";
   }
   // Contre le mur
   else if (/contre le mur|pinned (to|against) the wall/i.test(sexBlob)) {
     pose = "full body standing sex against the wall, one leg raised, partner holding her, room visible";
-    explicitAct = "explicit standing penetrative sex against wall, adult male partner holding her, uncensored 1girl 1boy";
+    explicitAct = "(standing sex:1.4), (penis penetrating:1.5), (erect penis visible:1.35), male partner holding her against wall, (1boy:1.4), (1girl:1.2), uncensored explicit NSFW";
   }
   // Missionnaire
   else if (/missionnaire|missionary|sur le dos|jambes (é|e)cart|position missionnaire/i.test(sexBlob)) {
     pose = "full body lying on her BACK on the sofa or bed in missionary position, legs open, looking up at partner, entire body and furniture visible";
-    explicitAct = "explicit missionary penetrative sex, adult male partner on top between her legs penetrating her, uncensored 1girl 1boy";
+    explicitAct = "(missionary:1.45), (penis penetrating vagina:1.5), (erect penis visible:1.4), male on top between her legs, (1boy:1.4), (1girl:1.2), uncensored explicit NSFW";
   }
   // Cowgirl
   else if (/califourchon|cowgirl|à cheval sur|straddl|monte sur (toi|moi)/i.test(sexBlob)) {
     pose = "full body cowgirl, she straddles on top facing partner, hips moving, entire bodies visible on sofa or bed";
-    explicitAct = "explicit cowgirl penetrative sex, she on top of adult male partner, penis inside her, uncensored 1girl 1boy";
+    explicitAct = "(cowgirl:1.45), (penis penetrating:1.5), (erect penis visible:1.4), she straddling male partner, (1boy:1.4), (1girl:1.2), uncensored explicit NSFW";
   }
   // Cunnilingus
   else if (/cunnilingus|lèche.{0,20}(chatte|sexe)/i.test(sexBlob)) {
     pose = "full body reclined with legs open, partner between her thighs, sofa or bed visible";
-    explicitAct = "explicit cunnilingus, adult male partner licking her, face between her thighs, uncensored 1girl 1boy";
+    explicitAct = "(cunnilingus:1.45), male partner face between her thighs licking, (1boy:1.35), (1girl:1.2), uncensored explicit NSFW";
   }
   // Handjob
   else if (/branle|handjob|masturb(e|ation).{0,20}(bite|queue|sexe)|caresse.{0,15}(bite|queue)/i.test(sexBlob)) {
     pose = "full body sitting or kneeling beside partner, hand on his penis, both visible";
-    explicitAct = "explicit handjob, she stroking adult male partner's erect penis with her hand, uncensored 1girl 1boy";
+    explicitAct = "(handjob:1.5), (erect penis visible:1.55), (penis in her hand:1.5), she stroking man's cock, (1boy:1.45), (1girl:1.2), male partner visible, uncensored explicit NSFW";
   }
   // Titjob
   else if (/entre les seins|titjob|texas|bite entre/i.test(sexBlob)) {
     pose = "full body on her knees or sitting, breasts pressed together around partner, both visible";
-    explicitAct = "explicit titjob, man's penis between her breasts, uncensored 1girl 1boy";
+    explicitAct = "(titjob:1.5), (erect penis visible:1.5), (penis between breasts:1.5), (1boy:1.4), (1girl:1.2), uncensored explicit NSFW";
   }
   // Doigté
   else if (/doigt[eé]|doigts? (dans|en)/i.test(sexBlob)) {
@@ -1229,7 +1229,7 @@ function buildSceneImagePrompt() {
   else if (/orgasme|jouis|sperme|remplis|chatte|pénètr|je te prend|je la prend|plus fort|plus rapidement|baise|baiser|fait l'amour|acte sexuel|enfonce|profondeur/i.test(sexBlob)
            || sc.activity === "acte sexuel") {
     pose = "full body during penetrative sex on the sofa or bed, legs wrapped or open, hips moving, adult male partner engaged, entire scene and room visible, not a portrait";
-    explicitAct = "explicit penetrative vaginal sex in progress with adult male partner, orgasm, uncensored intercourse, full bodies, 1girl 1boy";
+    explicitAct = "(penetrative sex:1.5), (erect penis visible:1.45), (penis penetrating vagina:1.5), adult male partner engaged, (1boy:1.4), (1girl:1.2), full bodies, uncensored explicit NSFW";
   }
   else if (/allong|couch[eé]|sur le lit/i.test(blob)) {
     pose = "full body lying on the bed or sofa, head to toe visible";
@@ -1306,6 +1306,8 @@ function buildSceneImagePrompt() {
       phys,
       duoScene,
       "explicit NSFW sex scene, full body wide shot head to toe,",
+      explicitAct ? "(1boy:1.4), (male partner visible:1.35), (erect penis:1.3)," : "",
+      explicitAct ? "NOT solo female only, NOT alone, NOT no penis, NOT censored, NOT covered crotch, NOT mosaic censor, NOT bar censor, NOT hidden genitals, NOT softcore only," : "",
       "NOT a close-up portrait, NOT bust crop, NOT headshot,",
       "wearing/state: " + outfit + ",",
       pose + ",",
@@ -3581,15 +3583,47 @@ function isDuoCharacter(c) {
 function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
+  const looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
+  const eth = String(c.ethnicity || "").toLowerCase();
+  // Extraire traits individuels si "1)" / "2)" ou "first woman" / "second woman"
+  let p1 = "", p2 = "";
+  const m1 = looks.match(/first woman[^:]*:\s*([^]+?)(?=,?\s*second woman|$)/i)
+    || looks.match(/1\)\s*[^:]+:\s*([^.]+)/i);
+  const m2 = looks.match(/second woman[^:]*:\s*([^]+?)(?=,\s*side by|,\s*photoreal|,\s*18\+|$)/i)
+    || looks.match(/2\)\s*[^:]+:\s*([^.]+)/i);
+  if (m1) p1 = (m1[1] || "").replace(/\s+/g, " ").trim().slice(0, 280);
+  if (m2) p2 = (m2[1] || "").replace(/\s+/g, " ").trim().slice(0, 280);
+  // Contraste poitrine si A+E / small+large dans looks
+  let bustContrast = "";
+  if (/small|a-cup|flat/i.test(p1 + looks) && /large|e-cup|d-cup|heavy/i.test(p2 + looks)) {
+    bustContrast = "(contrasting breast sizes:1.4), left woman small flat chest, right woman large heavy breasts,";
+  } else if (/large|e-cup|d-cup/i.test(p1) && /small|a-cup/i.test(p2)) {
+    bustContrast = "(contrasting breast sizes:1.4), left woman large heavy breasts, right woman small flat chest,";
+  }
+  // Ethnie forte pour les deux
+  let ethLock = "";
+  if (/asiatique|asian|korean|japanese|chinese|east asian/.test(eth + " " + looks)) {
+    ethLock = "(two East Asian women:1.45), East Asian facial features both,";
+  } else if (/africaine|black|ebony|african/.test(eth + " " + looks)) {
+    ethLock = "(two Black women:1.4), dark skin both,";
+  } else if (/latine|latina|brésil/.test(eth + " " + looks)) {
+    ethLock = "(two Latina women:1.35),";
+  }
   return [
     "=== DUO / TWO PEOPLE REQUIRED (MANDATORY) ===",
     "(2girls:1.55), (two adult women:1.55), (two people:1.5), (both women fully visible head to toe:1.45),",
+    ethLock,
+    bustContrast,
+    p1 ? ("woman on the left / first: " + p1 + ",") : "",
+    p2 ? ("woman on the right / second: " + p2 + ",") : "",
+    looks ? ("duo physical detail: " + looks.slice(0, 320) + ",") : "",
     "wide shot showing TWO distinct adult women side by side or interacting in the same frame,",
     "two faces, two bodies, pair of women, double female subjects,",
     "NOT solo, NOT 1girl, NOT single woman, NOT only one person, NOT one girl only, NOT cropped to one face, NOT portrait of one,",
+    "NOT same face clone unless twins specified,",
     "pair names: " + names + ",",
     "same scene same lighting photorealistic duo photo,",
-  ].join(" ");
+  ].filter(Boolean).join(" ");
 }
 
 function fixedAppearanceBlock(c) {
@@ -6010,7 +6044,8 @@ function renderSettings() {
     <p style="color:var(--muted);font-size:12px">Gratuit sans CB : <b>console.groq.com</b> → API Keys. Rotation automatique entre tes clés.</p>
     <label>Modèle Groq</label>
     <select id="groqmodel">
-      <option value="openai/gpt-oss-120b">GPT-OSS 120B (défaut)</option>
+      <option value="llama-3.3-70b-versatile">Llama 3.3 70B (NSFW roleplay)</option>
+      <option value="openai/gpt-oss-120b">GPT-OSS 120B</option>
       <option value="openai/gpt-oss-20b">GPT-OSS 20B (rapide)</option>
       <option value="qwen/qwen3.6-27b">Qwen3.6 27B</option>
       <option value="moonshotai/kimi-k2-instruct">Kimi K2</option>
@@ -6047,7 +6082,7 @@ function renderSettings() {
     $("gemini").value = s.settings.geminiKeys || "";
     if ($("grok")) $("grok").value = s.settings.grokKeys || "";
     if ($("groq")) $("groq").value = s.settings.groqKeys || "";
-    if ($("groqmodel")) $("groqmodel").value = s.settings.groqModel || "openai/gpt-oss-120b";
+    if ($("groqmodel")) $("groqmodel").value = s.settings.groqModel || "llama-3.3-70b-versatile";
     if ($("chatprovider")) $("chatprovider").value = s.settings.provider || "gemini";
     if ($("imgengine")) $("imgengine").value = s.settings.imageEngine || "horde";
     if ($("horde-key") && s.settings.hordeKey) $("horde-key").value = s.settings.hordeKey;
