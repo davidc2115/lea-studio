@@ -2714,6 +2714,12 @@ function filterDiscoverList(q) {
       if (c && c.id && !seen2.has(c.id)) { list.push(c); seen2.add(c.id); }
     }
   }
+  if (window.LEA_CAST_SPECIAL && window.LEA_CAST_SPECIAL.length) {
+    const seen3 = new Set(list.map((c) => c.id));
+    for (const c of window.LEA_CAST_SPECIAL) {
+      if (c && c.id && !seen3.has(c.id)) { list.push(c); seen3.add(c.id); }
+    }
+  }
   if (!list.length) list = [FALLBACK_LEA];
   // Sync state
   if (list.length > (state.characters || []).length) state.characters = list;
