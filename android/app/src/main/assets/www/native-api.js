@@ -1877,67 +1877,79 @@
         karras: true,
         clip_skip: 1,
       };
-      const payloads = [];
+      // img2img d'abord UNIQUEMENT (pas de txt2img parallèle qui change le visage)
+      const img2imgPayloads = [];
+      const txtPayloads = [];
       if (useImg2Img) {
-        const den = (typeof body.denoising === "number" ? body.denoising : 0.40);
-        // Denoise bas = visage plus fidèle (Horde morph au-dessus de ~0.55)
-        const denClamped = Math.min(0.58, Math.max(0.32, den));
-        const hiSteps = denClamped >= 0.50 ? 40 : 36;
-        const faceBoost = "(identical face to reference:1.5), (same facial features:1.45), consistent identity, ";
-        payloads.push({
-          prompt: faceBoost + prompt + " ### " + negative,
-          params: Object.assign({}, baseParams, {
-            steps: Math.max(body.steps || 0, hiSteps) || hiSteps,
-            cfg_scale: denClamped >= 0.50 ? 7.0 : 7.5,
-            denoising_strength: denClamped,
-            seed: (typeof body.seed === "number" ? body.seed : undefined),
-          }),
+        // Denoise BAS = garde le visage de la ref (au-dessus de 0.48 le visage change souvent)
+        let den = (typeof body.denoising === "number" ? body.denoising : 0.38);
+        den = Math.min(0.48, Math.max(0.30, den));
+        const faceBoost = "(identical face to reference photo:1.6), (same woman same face:1.55), same eyes same nose same lips, consistent identity, ";
+        // Prompt img2img : visage + changements (pose/tenue), sans réécrire un autre visage
+        const imgPrompt = faceBoost + String(prompt || "").slice(0, 900);
+        const dens = [den, Math.min(0.48, den + 0.06)].filter(function (d, i, a) { return a.indexOf(d) === i; });
+        dens.forEach(function (d) {
+          img2imgPayloads.push({
+            prompt: imgPrompt + " ### " + negative + ", different face, different person, face morph",
+            params: Object.assign({}, baseParams, {
+              steps: 38,
+              cfg_scale: 6.5,
+              denoising_strength: d,
+              seed: (typeof body.seed === "number" ? body.seed : undefined),
+            }),
+            nsfw: body.nsfw !== false,
+            censor_nsfw: false,
+            models: photoModels,
+            r2: true,
+            slow_workers: true,
+            trusted_workers: false,
+            source_image: src,
+            source_processing: "img2img",
+          });
+        });
+      }
+      // txt2img seulement si PAS de ref (sinon on refuse de sacrifier le visage)
+      if (!useImg2Img) {
+        txtPayloads.push({
+          prompt: prompt + " ### " + negative,
+          params: baseParams,
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
           models: photoModels,
           r2: true,
           slow_workers: true,
           trusted_workers: false,
-          source_image: src,
-          source_processing: "img2img",
+        });
+        txtPayloads.push({
+          prompt: prompt + " ### " + negative,
+          params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5, karras: true },
+          nsfw: body.nsfw !== false,
+          censor_nsfw: false,
+          models: ["stable_diffusion", "Deliberate", "Dreamshaper"],
+          r2: true,
+          slow_workers: true,
+          trusted_workers: false,
         });
       }
-      payloads.push({
-        prompt: prompt + " ### " + negative,
-        params: baseParams,
-        nsfw: body.nsfw !== false,
-        censor_nsfw: false,
-        models: photoModels,
-        r2: true,
-        slow_workers: true,
-        trusted_workers: false,
-      });
-      // Fallback plus large si file d'attente / modèles absents
-      payloads.push({
-        prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 768, steps: 25, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5, karras: true },
-        nsfw: body.nsfw !== false,
-        censor_nsfw: false,
-        models: ["stable_diffusion", "Deliberate", "Dreamshaper"],
-        r2: true,
-        slow_workers: true,
-        trusted_workers: false,
-      });
+      const payloads = img2imgPayloads.concat(txtPayloads);
       let hordeKey = "0000000000";
       try {
         const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
         if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
       } catch (_) {}
-      payloads.push({
-        prompt: prompt + " ### " + negative,
-        params: { width: 512, height: 512, steps: 15, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, karras: false },
-        nsfw: body.nsfw !== false,
-        censor_nsfw: false,
-        models: ["AbsoluteReality", "Realistic Vision", "Dreamshaper", "stable_diffusion"],
-        r2: true,
-        slow_workers: true,
-        trusted_workers: false,
-      });
+      // Fallback txt2img ultime UNIQUEMENT si aucune ref img2img
+      if (!useImg2Img) {
+        payloads.push({
+          prompt: prompt + " ### " + negative,
+          params: { width: 512, height: 512, steps: 15, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, karras: false },
+          nsfw: body.nsfw !== false,
+          censor_nsfw: false,
+          models: ["AbsoluteReality", "Realistic Vision", "Dreamshaper", "stable_diffusion"],
+          r2: true,
+          slow_workers: true,
+          trusted_workers: false,
+        });
+      }
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {

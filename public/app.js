@@ -665,12 +665,24 @@ function getUserPartnerImagePrompt() {
 /** Verrou visage fort pour img2img (Horde). */
 function faceIdentityLock(c) {
   const n = (c && c.name) ? String(c.name).split(/\s|&/)[0] : "her";
+  const id = c && c.id;
+  // Léa : traits exacts de la galerie (longs cheveux, yeux verts/marron, visage ovale)
+  if (id === "lea") {
+    return [
+      "(identical face to reference photo:1.65)",
+      "same young French woman as source image,",
+      "soft oval face, fair skin with light freckles, full lips,",
+      "(long straight dark brown hair to lower back:1.4),",
+      "brown-green eyes, same jawline same nose,",
+      "NOT short hair, NOT shoulder-length bob, NOT different woman,",
+    ].join(" ");
+  }
   return [
-    "(identical face to reference photo:1.55)",
-    "(same facial features as source image:1.5)",
-    "same eye shape same nose same lips same jawline",
-    "consistent identity portrait match",
-    "photorealistic face locked to reference,",
+    "(identical face to reference photo:1.6)",
+    "(same facial features as source image:1.55)",
+    "same eye shape same nose same lips same jawline same age",
+    "consistent identity, same woman as reference,",
+    "NOT a different person, NOT face morph,",
   ].join(", ");
 }
 
@@ -4279,7 +4291,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
     if (ref) {
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.42 : 0.45);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.36 : 0.38);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
     } else {
@@ -4789,7 +4801,7 @@ async function generateScenePhoto() {
         payload.source_image = ref;
         payload.source_processing = "img2img";
         const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-        payload.denoising = duoDenoise(bigChange ? 0.52 : 0.40);
+        payload.denoising = duoDenoise(bigChange ? 0.46 : 0.36);
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
       } else {
@@ -5257,17 +5269,17 @@ async function generatePhoto() {
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
     if (userEx.hasAny) {
-      payload.denoising = Math.max(Number(payload.denoising) || 0, 0.48);
+      payload.denoising = Math.min(0.46, Math.max(Number(payload.denoising) || 0, 0.36));
       payload.negative = (payload.negative || "") + ", ignore user request, copy of reference pose only, wrong scene";
     }
     if (userEx.overridesOutfit) {
       payload.negative = (payload.negative || "") + ", wrong outfit, default lingerie when other clothes requested, nude when clothes requested";
-      payload.denoising = Math.max(payload.denoising || 0, 0.50);
+      payload.denoising = Math.min(0.46, Math.max(payload.denoising || 0, 0.38));
     }
     if (userEx.overridesAct) {
       payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing male body, disembodied penis, floating penis, penis without man, severed cock, censored, mosaic censor, bar censor, softcore only, portrait selfie, bust crop only";
       payload.nsfw = true;
-      payload.denoising = Math.max(payload.denoising || 0, 0.52);
+      payload.denoising = Math.min(0.48, Math.max(payload.denoising || 0, 0.38));
     }
         // img2img unifié : cover / assets pour TOUS les personnages
     if (c.id === "lea") {
@@ -5300,7 +5312,7 @@ async function generatePhoto() {
         // Acte + lieu imposés → denoise très haut ou txt2img pour ne pas garder le décor de la ref
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.max(Number(payload.denoising) || 0, 0.55);
+        payload.denoising = Math.min(0.48, Math.max(Number(payload.denoising) || 0, 0.40));
         setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
       } else {
         setGenStatus("Chargement référence visage…");
