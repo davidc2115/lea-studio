@@ -692,6 +692,33 @@ function faceIdentityLock(c) {
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
+  if (c.id === "duo_twins_lea") {
+    return `Femme 1 : Léa (brunette aux cheveux lisses)
+Âge et origine : 21 ans, type européen / français.
+Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
+Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
+Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
+Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
+Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
+Morphologie : Silhouette élancée et harmonieuse.
+Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
+Taille : Fine et dessinée de façon fluide.
+Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
+Peau : Claire, satinée et uniforme sur tout le corps.
+
+Femme 2 : Louna (châtain clair aux reflets dorés)
+Âge et origine : 21 ans, type européen.
+Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
+Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
+Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
+Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
+Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
+Morphologie : Silhouette en sablier très affirmée.
+Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
+Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
+Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
+Peau : Claire, texture veloutée et uniforme.`;
+  }
   if (c.id === "lea") {
     const ex0 = expandProfileExtra(extra || "");
     const leaPosePool = [
@@ -4224,6 +4251,33 @@ function duoCompositionBlock(c) {
 /** Descriptif physique FR détaillé affiché dans le profil (tous personnages). */
 function formatPhysicalFR(c) {
   if (!c) return "";
+  if (c.id === "duo_twins_lea") {
+    return `Femme 1 : Léa (brunette aux cheveux lisses)
+Âge et origine : 21 ans, type européen / français.
+Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
+Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
+Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
+Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
+Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
+Morphologie : Silhouette élancée et harmonieuse.
+Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
+Taille : Fine et dessinée de façon fluide.
+Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
+Peau : Claire, satinée et uniforme sur tout le corps.
+
+Femme 2 : Louna (châtain clair aux reflets dorés)
+Âge et origine : 21 ans, type européen.
+Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
+Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
+Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
+Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
+Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
+Morphologie : Silhouette en sablier très affirmée.
+Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
+Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
+Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
+Peau : Claire, texture veloutée et uniforme.`;
+  }
   if (c.id === "lea") {
     return `Sujet : Une jeune femme de 21 ans, d'apparence délicate et sophistiquée, avec une allure posée et mature pour son âge, mais dont la silhouette présente des proportions voluptueuses et généreuses.
 Tête et Visage : (Totalement identiques à l'image)
@@ -4484,13 +4538,6 @@ function identityLock(c) {
 async function applyCharacterRefToPayload(payload, c, statusFn) {
   const setS = statusFn || setGenStatus;
   try {
-    // Autres personnages : txt2img seulement (img2img réservé à Léa)
-    if (!c || c.id !== "lea") {
-      delete payload.source_image;
-      delete payload.source_processing;
-      setS("Horde txt2img · " + ((c && c.name) || "personnage") + "…");
-      return payload;
-    }
     if (isDuoCharacter(c)) {
       setS("Horde txt2img duo (2 personnes, sans img2img mono)…");
       return payload;
@@ -4853,7 +4900,34 @@ async function generatePhotoHordeFallback(prompt, c) {
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
-    if (c.id === "lea") {
+    if (c.id === "duo_twins_lea") {
+    return `Femme 1 : Léa (brunette aux cheveux lisses)
+Âge et origine : 21 ans, type européen / français.
+Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
+Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
+Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
+Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
+Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
+Morphologie : Silhouette élancée et harmonieuse.
+Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
+Taille : Fine et dessinée de façon fluide.
+Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
+Peau : Claire, satinée et uniforme sur tout le corps.
+
+Femme 2 : Louna (châtain clair aux reflets dorés)
+Âge et origine : 21 ans, type européen.
+Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
+Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
+Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
+Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
+Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
+Morphologie : Silhouette en sablier très affirmée.
+Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
+Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
+Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
+Peau : Claire, texture veloutée et uniforme.`;
+  }
+  if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
     try {
@@ -5020,10 +5094,9 @@ async function generateScenePhoto() {
       charId: c.id || "",
     };
 
-    // img2img uniquement pour Léa ; les autres = txt2img
-    if (c.id === "lea") {
-      setSceneProgress("🖼 Chargement référence visage Léa…", 10);
-      try {
+    setSceneProgress("🖼 Chargement référence visage…", 10);
+    try {
+      if (!isDuoCharacter(c)) {
         const ref = await resolveCharacterRefB64(c);
         if (ref) {
           payload.source_image = ref;
@@ -5031,16 +5104,16 @@ async function generateScenePhoto() {
           const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
           payload.denoising = bigChange ? 0.42 : 0.38;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
-          setSceneProgress("📡 Horde img2img Léa denoise " + payload.denoising + "…", 14);
+          setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
         } else {
-          setSceneProgress("📡 Horde txt2img Léa (pas de ref)…", 12);
+          setSceneProgress("📡 Horde txt2img (pas de photo de ref)…", 12);
         }
-      } catch (e) {
-        console.warn("[scene ref]", e);
-        setSceneProgress("📡 Horde txt2img Léa…", 12);
+      } else {
+        setSceneProgress("📡 Horde txt2img duo…", 12);
       }
-    } else {
-      setSceneProgress("📡 Horde txt2img · " + (c.name || "personnage") + "…", 12);
+    } catch (e) {
+      console.warn("[scene ref]", e);
+      setSceneProgress("📡 Horde txt2img scène…", 12);
     }
 
 
@@ -5430,7 +5503,7 @@ async function generatePhoto() {
                 width: 512,
                 height: 640,
               };
-              if (sdRef && c && c.id === "lea") { sdPayload.source_image = sdRef; sdPayload.strength = 0.55; }
+              if (sdRef) { sdPayload.source_image = sdRef; sdPayload.strength = 0.55; }
               setGenStatus("SD.cpp…");
               const raw = window.LeaAndroid.sdCppGenerate(JSON.stringify(sdPayload));
               let data = {};
@@ -5500,7 +5573,34 @@ async function generatePhoto() {
       payload.denoising = Math.min(0.42, Math.max(payload.denoising || 0.32, 0.34));
     }
         // img2img unifié : cover / assets pour TOUS les personnages
-    if (c.id === "lea") {
+    if (c.id === "duo_twins_lea") {
+    return `Femme 1 : Léa (brunette aux cheveux lisses)
+Âge et origine : 21 ans, type européen / français.
+Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
+Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
+Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
+Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
+Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
+Morphologie : Silhouette élancée et harmonieuse.
+Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
+Taille : Fine et dessinée de façon fluide.
+Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
+Peau : Claire, satinée et uniforme sur tout le corps.
+
+Femme 2 : Louna (châtain clair aux reflets dorés)
+Âge et origine : 21 ans, type européen.
+Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
+Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
+Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
+Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
+Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
+Morphologie : Silhouette en sablier très affirmée.
+Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
+Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
+Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
+Peau : Claire, texture veloutée et uniforme.`;
+  }
+  if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, dry fabric, matte dry skin, sports bra, black top, gym clothes, fully dry";
       payload.nsfw = true;
     }

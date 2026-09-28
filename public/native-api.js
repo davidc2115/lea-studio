@@ -1908,8 +1908,7 @@
 
       // Ref img2img optionnelle (base64 pur, max ~900k pour éviter SourceImageSizeExceeded)
       let src = null;
-      const allowImg2 = (String(body.charId || body.characterId || "") === "lea") || body.force_img2img === true;
-      if (allowImg2 && body.source_image && body.source_processing === "img2img") {
+      if (body.source_image && body.source_processing === "img2img") {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
