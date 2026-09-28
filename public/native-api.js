@@ -576,20 +576,25 @@
     const o = rotatedOpenAIKeys();
     const q = rotatedGroqKeys();
     const errors = [];
-    // Détection NSFW → Gemini en premier (Groq refuse souvent)
+    // NSFW: on respecte le provider choisi. Groq d'abord si sélectionné ;
+    // en cas de refus policy, callGroq passe au modèle suivant puis generate() bascule Gemini.
     let nsfwLikely = false;
     try {
       const blob = (messages || []).map((m) => m.content || "").join("\n");
       nsfwLikely = /(bite|queue|suce|baise|p[eé]n[eè]tr|orgasme|chatte|nsfw|sexe|seins|culotte|branle|fellation|nude|\bnu[e]?\b)/i.test(blob);
     } catch (_) {}
     let order;
-    if (nsfwLikely) {
-      // NSFW: Gemini d'abord, Groq en dernier recours
-      if (pref === "openai") order = ["openai", "gemini", "groq"];
-      else order = ["gemini", "openai", "groq"];
-    } else if (pref === "groq") order = ["groq", "gemini", "openai"];
-    else if (pref === "openai") order = ["openai", "gemini", "groq"];
-    else order = ["gemini", "groq", "openai"];
+    if (pref === "groq") {
+      // Toujours tenter Groq en premier si l'utilisateur l'a choisi (SFW ou NSFW)
+      order = ["groq", "gemini", "openai"];
+    } else if (pref === "openai") {
+      order = ["openai", "gemini", "groq"];
+    } else if (pref === "gemini") {
+      order = ["gemini", "groq", "openai"];
+    } else {
+      // auto: Gemini puis Groq (NSFW ou non)
+      order = nsfwLikely ? ["gemini", "groq", "openai"] : ["gemini", "groq", "openai"];
+    }
     for (const p of order) {
       try {
         if (p === "gemini" && g.length) return await callGemini(messages, g);

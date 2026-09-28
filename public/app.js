@@ -3985,21 +3985,31 @@ function duoCompositionBlock(c) {
   let p2 = sliceWoman(2);
 
   function hairOf(text) {
-    // Ne garder que la zone "hair/cheveux" pour éviter "dark brown eyes" → brown hair
+    // IMPORTANT: retirer "brown eyes" / "dark eyes" avant toute détection de cheveux
     let t = String(text || "").toLowerCase();
-    const hairChunk = (t.match(/(?:long\s+|short\s+|straight\s+|wavy\s+|curly\s+|dyed\s+|jet\s+)?(?:blonde?|blond|black|brown|auburn|red|ginger|silver|white|platinum|noir\w*|brun\w*|châtain\w*|roux|argent\w*)(?:\s+\w+){0,3}\s*(?:hair|cheveux)?/gi) || []).join(" ");
-    if (hairChunk) t = hairChunk + " " + t;
-    // Priorité netteté : noir / blond teint avant "brown eyes"
-    if (/jet\s*black|black\s*hair|cheveux\s*noirs|straight\s*(jet\s*)?black|noir\s*de\s*jais|long\s*straight\s*black/.test(t))
+    t = t.replace(/\b(dark\s+)?(brown|hazel|green|blue|black|grey|gray)\s+eyes?\b/gi, " ");
+    t = t.replace(/\byeux?\s+(marron|bruns?|verts?|bleus?|noirs?|hazel)\b/gi, " ");
+    // Extraire uniquement les segments liés aux cheveux
+    const chunks = t.match(
+      /(?:long|short|straight|wavy|curly|dyed|jet|platinum)?\s*(?:blonde?|blond|black|light\s+brown|dark\s+brown|brown|auburn|red|ginger|silver|white|platinum|noir\w*|brun\w*|ch[aâ]tain\w*|roux|argent\w*)(?:\s+(?:straight|wavy|curly|long|short|dyed|roots?)){0,3}\s*(?:hair|cheveux)/gi
+    ) || [];
+    const focus = (chunks.join(" ") || t).toLowerCase();
+    if (/jet\s*black|black\s*hair|cheveux\s*noirs|straight\s*(jet\s*)?black|noir\s*de\s*jais/.test(focus))
       return "long jet black hair";
-    if (/platinum\s*blonde|blonde?\s*platine/.test(t)) return "platinum blonde hair";
-    if (/dyed\s*blonde|blonde?\s*teint|cheveux\s*blonds?\s*teints/.test(t)) return "long dyed blonde hair";
-    if (/\bblonde?\b|cheveux\s*blonds?/.test(t)) return "blonde hair";
-    if (/auburn|redhead|ginger|red\s*hair|cheveux\s*roux|\broux\b/.test(t)) return "auburn red hair";
-    if (/dark\s*brown\s*hair|brun\s*fonc|chestnut\s*hair|châtain\s*fonc/.test(t)) return "dark brown hair";
-    if (/light\s*brown\s*hair|châtain\s*clair/.test(t)) return "light brown hair";
-    if (/brown\s*hair|cheveux\s*bruns?/.test(t)) return "brown hair";
-    if (/silver|argent|white\s*hair/.test(t)) return "silver white hair";
+    if (/platinum\s*blonde|blonde?\s*platine/.test(focus)) return "platinum blonde bob hair";
+    if (/dyed\s*blonde|blonde?\s*(hair)?\s*dark\s*roots|cheveux\s*blonds?\s*teints/.test(focus))
+      return "long dyed blonde hair with dark roots";
+    if (/\bblonde?\b|cheveux\s*blonds?/.test(focus)) return "long blonde hair";
+    if (/auburn|redhead|ginger|red\s*hair|cheveux\s*roux|\broux\b/.test(focus)) return "auburn red hair";
+    // light/dark brown AVANT brown générique (mots possibles entre brown et hair)
+    if (/light\s*brown|ch[aâ]tain\s*clair/.test(focus)) return "long light brown straight hair";
+    if (/dark\s*brown|brun\s*fonc|chestnut|ch[aâ]tain\s*fonc|wavy\s*dark/.test(focus))
+      return "long dark brown wavy hair";
+    if (/brown\s*hair|cheveux\s*bruns?|short\s*brown|\bbrown\b/.test(focus) && /hair|cheveux|short/.test(focus))
+      return "brown hair";
+    if (/silver|argent|white\s*hair/.test(focus)) return "silver white hair";
+    if (/black/.test(focus) && /hair|cheveux/.test(focus)) return "long black hair";
+    if (/blond/.test(focus) && /hair|cheveux/.test(focus)) return "blonde hair";
     return "";
   }
   function cupOf(text) {
@@ -4043,18 +4053,32 @@ function duoCompositionBlock(c) {
     j: "(J-cup:1.7)",
   };
 
-  let h1 = hairOf(p1) || hairOf(p1 + " " + (looks.split(/RIGHT|second woman|2\)/i)[0] || ""));
+  let h1 = hairOf(p1);
   let h2 = hairOf(p2);
-  // Fallback from body "Mei ... + Yuki ..."
+  // Bloc LEFT seul (avant RIGHT) pour h1
+  if (!h1) {
+    const leftOnly = (looks.split(/RIGHT\s/i)[0] || looks);
+    h1 = hairOf(leftOnly);
+  }
+  if (!h2) {
+    const ri = looks.search(/RIGHT\s/i);
+    if (ri >= 0) h2 = hairOf(looks.slice(ri));
+  }
   if (!h1 || !h2) {
     const parts = body.split(/\+|\//);
     if (!h1 && parts[0]) h1 = hairOf(parts[0]);
     if (!h2 && parts[1]) h2 = hairOf(parts.slice(1).join(" "));
   }
-  // From full looks LEFT/RIGHT keywords
-  if (!h1) h1 = hairOf(looks);
-  if (!h2 && /black|noir/.test(blob) && /blond/.test(blob)) {
-    h2 = /blond/.test(h1) ? "long jet black hair" : "blonde hair";
+  // Contraste blond/noir explicite dans le texte
+  if ((!h1 || !h2) && /blond/i.test(looks) && /black|noir/i.test(looks)) {
+    if (!h1) h1 = /LEFT[^.]{0,80}blond/i.test(looks) ? "long dyed blonde hair" : "long jet black hair";
+    if (!h2) h2 = /RIGHT[^.]{0,80}blond/i.test(looks) ? "long blonde hair" : "long jet black hair";
+  }
+  if ((!h1 || !h2) && /auburn|platinum/i.test(looks)) {
+    if (!h1 && /LEFT[^.]{0,60}auburn/i.test(looks)) h1 = "auburn red hair";
+    if (!h2 && /RIGHT[^.]{0,60}platinum/i.test(looks)) h2 = "platinum blonde bob hair";
+    if (!h1 && /LEFT[^.]{0,60}platinum/i.test(looks)) h1 = "platinum blonde hair";
+    if (!h2 && /RIGHT[^.]{0,60}auburn/i.test(looks)) h2 = "auburn red hair";
   }
 
   let c1 = cupOf(p1);
@@ -4063,6 +4087,25 @@ function duoCompositionBlock(c) {
   if (!c2) {
     const bp2 = body.split(/\+|\//);
     if (bp2.length >= 2) c2 = cupOf(bp2[1]) || cupOf(bp2.slice(1).join(" "));
+  }
+  // Extraction directe depuis looks_en LEFT/RIGHT (fiable)
+  if (!c1) {
+    const m = looks.match(/LEFT[^:]{0,50}:[^)]{0,80}?(A-cup|B-cup|C-cup|D-cup|E-cup|F-cup|H-cup|I-cup|J-cup|flat)/i);
+    if (m) c1 = cupOf(m[1]);
+  }
+  if (!c2) {
+    const m = looks.match(/RIGHT[^:]{0,50}:[^)]{0,80}?(A-cup|B-cup|C-cup|D-cup|E-cup|F-cup|H-cup|I-cup|J-cup|flat)/i);
+    if (m) c2 = cupOf(m[1]);
+  }
+  // Tous les cups mentionnés dans l'ordre
+  if (!c1 || !c2) {
+    const allCups = [];
+    const reC = /(A-cup|B-cup|C-cup|D-cup|E-cup|F-cup|G-cup|H-cup|I-cup|J-cup|flat chest|very small flat)/gi;
+    let mm;
+    while ((mm = reC.exec(looks + " " + body))) allCups.push(cupOf(mm[1]));
+    const uniq = allCups.filter(Boolean);
+    if (!c1 && uniq[0]) c1 = uniq[0];
+    if (!c2 && uniq[1]) c2 = uniq[1];
   }
   if (!c1 && /a-cup|bonnet a|flat/.test(blob)) c1 = "a";
   if (!c2 && /e-cup|bonnet e|heavy/.test(blob)) c2 = "e";
@@ -4110,22 +4153,50 @@ function duoCompositionBlock(c) {
     ? ("(different breast sizes:1.65), (strong bust contrast:1.6), LEFT woman " + w1cup2.split(",")[0] + ", RIGHT woman " + w2cup2.split(",")[0] + ",")
     : bustContrast;
 
+  // Négatifs cheveux selon ce qui est décrit
+  function hairNeg(h) {
+    const x = String(h || "").toLowerCase();
+    const neg = [];
+    if (/black|noir/.test(x)) neg.push("blonde hair", "brown hair", "auburn hair", "red hair", "ginger hair");
+    else if (/platinum|blonde|blond/.test(x)) neg.push("black hair", "brown hair", "auburn hair", "red hair", "brunette");
+    else if (/auburn|red|ginger|roux/.test(x)) neg.push("black hair", "blonde hair", "jet black hair");
+    else if (/light brown|ch[aâ]tain clair/.test(x)) neg.push("black hair", "blonde hair", "auburn hair", "red hair");
+    else if (/dark brown|brown/.test(x)) neg.push("blonde hair", "black hair", "auburn red hair", "ginger");
+    else if (/silver|white|argent/.test(x)) neg.push("brown hair", "black hair", "blonde hair");
+    return neg;
+  }
+  const hn1 = hairNeg(h1);
+  const hn2 = hairNeg(h2);
+  const hairNegLine = Array.from(new Set(
+    ["same hair color both women", "both auburn", "both red hair", "both brown hair unless described"]
+      .concat(h1 && h2 && h1 !== h2 ? ["matching hair color", "identical hair"] : [])
+  )).join(", ");
+
   return [
     "=== TWO DISTINCT WOMEN (MANDATORY) ===",
-    "(2girls:1.65), (two women:1.6), both fully visible in frame from head to thighs,",
+    "(2girls:1.7), (two women:1.65), both fully visible head to mid-thigh,",
     ethLine,
-    hairContrast,
+    // Contraste cheveux EN PREMIER avec poids forts
+    h1 ? ("(LEFT hair MUST be " + h1 + ":1.7),") : "",
+    h2 ? ("(RIGHT hair MUST be " + h2 + ":1.7),") : "",
+    (h1 && h2 && h1 !== h2) ? ("(different hair colors:1.7), one with " + h1 + " other with " + h2 + ",") : hairContrast,
+    // Contraste poitrine
     bustContrast2,
+    c1 && c2 && c1 !== c2
+      ? ("(LEFT bust " + w1cup2.split(",")[0] + ":1.65), (RIGHT bust " + w2cup2.split(",")[0] + ":1.65),")
+      : "",
     // Woman 1 LEFT
-    "(LEFT woman " + n1 + ":1.5): " + (h1 || "distinct hair") + ", (" + w1cup2 + ":1.55), " + w1cw2 + ",",
-    p1 ? ("LEFT detail: " + p1.slice(0, 220) + ",") : "",
+    "(LEFT woman " + n1 + ":1.55): (" + (h1 || "distinct hair") + ":1.65), " + w1cw2 + ", " + w1cup2 + ",",
+    p1 ? ("LEFT detail: " + p1.slice(0, 200) + ",") : "",
     // Woman 2 RIGHT
-    "(RIGHT woman " + n2 + ":1.5): " + (h2 || "different hair from left woman") + ", (" + w2cup2 + ":1.55), " + w2cw2 + ",",
-    p2 ? ("RIGHT detail: " + p2.slice(0, 220) + ",") : "",
+    "(RIGHT woman " + n2 + ":1.55): (" + (h2 || "different hair from left") + ":1.65), " + w2cw2 + ", " + w2cup2 + ",",
+    p2 ? ("RIGHT detail: " + p2.slice(0, 200) + ",") : "",
     "side by side, two faces two bodies clearly different,",
-    "NOT identical twins with same hair, NOT same breast size on both, NOT matching cup sizes, NOT same body type,",
-    "NOT two blondes unless both blonde in description, NOT two same bust sizes,",
-    "NOT solo, NOT 1girl, NOT single woman portrait, NOT one person only,",
+    "NOT identical twins, NOT same breast size, NOT matching cup sizes,",
+    "NOT " + hairNegLine + ",",
+    hn1.length ? ("LEFT must NOT have: " + hn1.join(", ") + ",") : "",
+    hn2.length ? ("RIGHT must NOT have: " + hn2.join(", ") + ",") : "",
+    "NOT solo, NOT 1girl, NOT single woman, NOT one person only,",
     "pair names: " + names + ",",
     "photorealistic DSLR photo,",
   ].filter(Boolean).join(" ");
