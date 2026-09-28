@@ -318,9 +318,9 @@
     async function tryOnce(key, model) {
       const is3x = /^gemini-3/.test(model);
       const genConfig = {
-        temperature: 0.88,
-        topP: 0.92,
-        maxOutputTokens: 850,
+        temperature: 0.95,
+        topP: 0.95,
+        maxOutputTokens: 1000,
       };
       // 3.x : thinking_level minimal (thinkingBudget seul peut échouer)
       if (is3x) {
@@ -591,11 +591,11 @@
             body: JSON.stringify({
               model: model,
               messages: msgs,
-              temperature: 0.82,
-              max_tokens: 1000,
-              top_p: 0.9,
-              frequency_penalty: 0.7,
-              presence_penalty: 0.45,
+              temperature: 0.92,
+              max_tokens: 1100,
+              top_p: 0.95,
+              frequency_penalty: 0.75,
+              presence_penalty: 0.5,
             }),
           }).finally(function () { clearTimeout(timer); });
           const data = await res.json().catch(function () { return {}; });
@@ -1590,11 +1590,43 @@
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
         "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
-        "ANTI-RÉPÉTITION STRICTE : INTERDIT de répéter ou paraphraser les mêmes phrases. INTERDIT les refrains : « continuez si vous le désirez », « continue si tu veux », « j'aime ce moment », « c'est tellement bon », « Euh… », « le film peut attendre », « culotte mouillée », « je reste blottie », « cœur qui s'emballe », « mon corps s'enflamme ». Chaque message doit apporter un geste OU une information NOUVELLE. Varie le vocabulaire. Pas de boucle.",
+        "ANTI-RÉPÉTITION STRICTE : INTERDIT de répéter ou paraphraser les mêmes phrases. INTERDIT les refrains : « continuez si vous le désirez », « continue si tu veux », « j'aime ce moment », « c'est tellement bon », « Euh… », « le film peut attendre », « culotte mouillée », « je reste blottie », « cœur qui s'emballe », « mon corps s'enflamme », « mon corps brûle », « je ne peux plus me retenir », « chaque vague me submerger », « plus fort » répété seul, « David… oui » en boucle. Chaque message doit apporter un geste OU une information NOUVELLE. Varie le vocabulaire. Pas de boucle.",
         "Chaque message = un geste NOUVEAU (ex: joue contre épaule, doigts dans les cheveux, couverture tirée) OU une phrase sur le FILM / le silence — pas la même structure pensée+cuisse+film.",
         "Si MODE SFW : zéro contenu sexuel, même si l'historique en contient.",
         "NE JAMAIS coller le prompt système, les règles, ni des bouts d'anglais technique dans ta réponse. Tu es le personnage, pas le narrateur méta.",
-        `Utilisateur: ${s.personaName}. ${s.personaBio}`,
+        (function () {
+          const uname = String(s.personaName || "lui").trim() || "lui";
+          const ubio = String(s.personaBio || "").trim();
+          if (!ubio) {
+            return "UTILISATEUR : prénom " + uname + ". (aucune bio enregistrée — reste générique sur son physique/maison.)";
+          }
+          // Indices extraits pour cohérence
+          const ageM = ubio.match(/(\d{2})\s*ans?/i);
+          const age = ageM ? ageM[1] : "";
+          const rich = /riche|fortune|argent|luxe|maison|villa|piscine|jacuzzi|business|affaires/i.test(ubio);
+          const hung = /bite|queue|cm|épaisse|bien monté|sexe|membre/i.test(ubio);
+          const lines = [
+            "=== BIOGRAPHIE UTILISATEUR (OBLIGATOIRE — utilise-la naturellement) ===",
+            "Prénom / nom d'adresse : " + uname + (age ? (" · " + age + " ans") : "") + ".",
+            "Bio complète : " + ubio,
+            "RÈGLES BIO :",
+            "- Adresse-le par son prénom (" + uname + ") quand c'est naturel.",
+            "- Si la bio mentionne son physique (cheveux, âge, corpulence) : tu PEUX le remarquer (regard, commentaire discret) — sans réciter la fiche.",
+            rich ? "- Cadre de vie (maison, piscine, jacuzzi, richesse) : tu peux y faire allusion si le lieu/scène le permet (pas d'invention contraire)." : "",
+            hung ? "- Attributs intimes décrits dans la bio : en NSFW, tu peux y réagir (sensation, taille, épaisseur) de façon cohérente — pas de contradiction." : "",
+            "- N'invente PAS d'autres détails sur lui qui contredisent la bio.",
+            "- En SFW : pas de focus sexuel sur la bio ; reste dans le ton du moment.",
+          ].filter(Boolean);
+          return lines.join("\n");
+        })(),
+        "=== CRÉATIVITÉ DIALOGUE (tout en restant fidèle au tempérament) ===",
+        "1) Chaque réponse doit apporter du NOUVEAU : un détail sensoriel, un micro-geste, une réaction émotionnelle, une remarque liée au lieu OU à la bio de l'utilisateur — pas seulement « oui continue ».",
+        "2) Varie le rythme : parfois une phrase courte + action ; parfois une pensée plus personnelle ; parfois une question inattendue liée au contexte.",
+        "3) Utilise le décor (canapé, pluie dehors, lumière, bruit de la maison, piscine si bio) et le corps (respiration, frisson, regard) de façon DIFFÉRENTE à chaque message.",
+        "4) INTERDIT de recycler les mêmes 3 structures (gémir + serrer le bord + « plus fort »).",
+        "5) Tempérament d'abord : timide = hésitation inventive ; directe = désir clair mais formulations neuves ; espiègle = teasing original.",
+        "6) Tu peux inventer de petits détails cohérents (odeur, texture, souvenir flash) tant qu'ils ne contredisent pas scénario / tenue / lieu / bio.",
+        "7) NSFW : décris sensations et actions avec vocabulaire varié (pas toujours les mêmes mots). Lie éventuellement la bio utilisateur (ex. taille, force, âge) si pertinent.",
         "SCÈNE FIXE (ne change PAS sauf si le joueur le dit clairement) : lieu=" + ((chat.scene || {}).place || "salon ou lieu déjà établi") +
           " · tenue ACTUELLE=" + ((chat.scene || {}).outfitDetail || (chat.scene || {}).outfit || (chat.scene || {}).body || "tenue du scénario de départ") +
           " · pose=" + ((chat.scene || {}).poseDetail || (chat.scene || {}).pose || (chat.scene || {}).activity || "naturelle") +
@@ -1612,7 +1644,7 @@
         "- Si la conversation redevient calme, reste SFW.",
         memoryBlock(chat, typeof txt !== "undefined" ? txt : ""),
         "LANGUE : français uniquement (paroles, *actions*, (pensées)). Aucune phrase en anglais. Réponds uniquement en tant que le personnage.",
-        "LONGUEUR : 4 à 7 phrases max.",
+        "LONGUEUR : 3 à 8 phrases. Privilégie la qualité et la variété, pas le remplissage.",
         "RAPPEL FORMAT : (pensée) puis *action* puis paroles — voir bloc FORMAT en tête. Une pensée, une action, 1-3 phrases.",
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
@@ -1713,7 +1745,9 @@
           .replace(/\bcontinuez?\s+si\s+tu\s+veux\.?/gi, "")
           .replace(/\bj['']aime ce (que vous faites|moment)[^.!?\n]{0,40}[.!?]?/gi, "")
           .replace(/\bc['']est tellement bon[^.!?\n]{0,50}[.!?]?/gi, "")
-          .replace(/\b(mon c[oœ]ur s['']emballe|mon corps s['']enflamme)[^.!?\n]{0,20}[.!?]?/gi, "")
+          .replace(/\b(mon c[oœ]ur s['']emballe|mon corps s['']enflamme|mon corps br[uû]le)[^.!?\n]{0,30}[.!?]?/gi, "")
+          .replace(/\bje ne peux plus me retenir[^.!?\n]{0,20}[.!?]?/gi, "")
+          .replace(/\bchaque (vague|pouss[eé]e) me submerger[^.!?\n]{0,40}[.!?]?/gi, "")
           .replace(/(^|\n)\s*Euh\.\.\.\s*/gi, "$1")
           .replace(/\n{3,}/g, "\n\n")
           .trim();
