@@ -834,9 +834,12 @@ function buildLeaImagePrompt(extra = "") {
     placeLine = "Location: " + placeDetail + ",";
   }
 
-  const duoExtra = isDuoCharacter(c)
-    ? "(2girls:1.55), (two adult women:1.55), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
+  const isDuo = isDuoCharacter(c);
+  const duoExtra = isDuo
+    ? "(2girls:1.6), (two adult women:1.6), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
     : "";
+  // Pour duo: composition LEFT/RIGHT prioritaire — JAMAIS un seul body/cup
+  const duoBlock = isDuo ? duoCompositionBlock(c) : "";
 
   let actHead = "";
   if (ex.overridesAct) {
@@ -847,7 +850,6 @@ function buildLeaImagePrompt(extra = "") {
       ", (erect penis when the act needs it:1.35), hetero couple both people visible, uncensored explicit NSFW, NOT solo female, NOT alone, NOT 1girl only, NOT disembodied penis, NOT floating penis, NOT penis without male body,";
   }
 
-  // Ordre: scène user (acte+pose+lieu) EN PREMIER, puis physique
   const clothesHead = (hasUser && ex.overridesOutfit && ex.outfitLine)
     ? ("CRITICAL CLOTHING MUST APPEAR: " + ex.outfitLine + ",")
     : "";
@@ -857,22 +859,24 @@ function buildLeaImagePrompt(extra = "") {
   const poseHead = (hasUser && ex.poseLine)
     ? ("POSE MANDATORY: " + ex.poseLine + ",")
     : "";
-  // Si l'user impose pose/lieu, ne pas coller la pose aléatoire du scénario
   const finalPose = (hasUser && (ex.overridesPose || ex.poseLine || ex.sceneLine))
     ? "follow USER pose exactly"
     : (pose + ",");
   return [
+    // DUO: composition en PREMIER pour que Horde suive les deux morphologies
+    isDuo ? duoBlock : "",
     sceneHead,
     poseHead,
     clothesHead,
     hasUser ? (ex.text + ",") : "",
     actHead,
-    fixedAppearanceBlock(c) + ",",
+    isDuo ? "" : (fixedAppearanceBlock(c) + ","),
     duoExtra,
     "Photorealistic photo,",
     ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner body visible in frame," : "",
-    "body: " + body + ",",
-    phys.positive.length ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
+    // Mono seulement si PAS duo
+    isDuo ? "" : ("body: " + body + ","),
+    (!isDuo && phys.positive.length) ? ("PHYSICAL LOCK: " + phys.positive.join(", ") + ",") : "",
     outfitLine,
     placeLine,
     hasUser ? "EVERY detail of USER REQUEST is mandatory (clothes, pose, place, act)," : ("scenario: " + situation + ","),
@@ -882,8 +886,10 @@ function buildLeaImagePrompt(extra = "") {
     "High-end photorealistic quality,",
     anti,
     "No cartoon, no anime, no CGI, no illustration,",
-    "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
-    phys.negative.length ? ("NOT " + phys.negative.join(", ") + ",") : "",
+    isDuo
+      ? "NOT same breast size on both women, NOT identical bust, NOT matching cup sizes, NOT same hair color unless described, NOT solo portrait,"
+      : "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
+    (!isDuo && phys.negative.length) ? ("NOT " + phys.negative.join(", ") + ",") : "",
     hasUser
       ? "NOT ignore USER REQUEST, NOT wrong location, NOT swimming pool when bed requested, NOT lying on back when all fours requested, NOT copy cover pose,"
       : "no wrong outfit, no missing wet/ripped/oversized details from the scenario outfit,",
@@ -1611,8 +1617,8 @@ function buildSceneImagePrompt() {
 
   if (midSex) {
     return [
-      phys,
-      duoScene,
+      duoScene || phys,
+      duoScene ? "" : phys,
       "explicit NSFW sex scene, full body wide shot head to toe,",
       explicitAct ? ((function(){ try { return getUserPartnerImagePrompt(); } catch(_){ return "(1boy:1.55), adult male partner fully visible"; } })() + ", (erect penis:1.3),") : "",
       explicitAct ? "NOT solo female only, NOT alone, NOT disembodied penis, NOT floating penis, NOT penis without male body, NOT no penis, NOT censored, NOT mosaic, NOT softcore only," : "",
@@ -3791,6 +3797,10 @@ function bodyNegatives(c) {
     }
   } catch (_) {}
 
+  // Pour les DUOS : ne jamais appliquer négatifs mono-poitrine (conflit A+E)
+  let _duoSkipChest = false;
+  try { _duoSkipChest = isDuoCharacter(c); } catch (_) {}
+  if (!_duoSkipChest) {
   // Petite / plate poitrine
   const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
     || /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe|marine|noemie)$/.test(id);
@@ -3824,6 +3834,8 @@ function bodyNegatives(c) {
   } else if (thin) {
     neg += ", plus-size, obese, heavy belly";
   }
+  } // fin mono-poitrine (skip si duo)
+
 
   if (id === "jade") {
     neg += ", no glasses, missing glasses, long loose wavy hair past shoulders, glamorous makeup, mature woman, soccer mom, C-cup, D-cup";
@@ -4079,24 +4091,43 @@ function duoCompositionBlock(c) {
     ? "(different breast sizes:1.55), (contrasting bust:1.5), one woman " + w1cup.split(",")[0] + " other woman " + w2cup.split(",")[0] + ","
     : "";
 
+  // Forcer contraste si une seule taille détectée sur le blob global
+  if (c1 && !c2) {
+    if (c1 === "a" || c1 === "b") c2 = "e";
+    else if (c1 === "e" || c1 === "d") c2 = "a";
+    else c2 = (c1 === "c") ? "e" : "c";
+  }
+  if (c2 && !c1) {
+    if (c2 === "a" || c2 === "b") c1 = "e";
+    else if (c2 === "e" || c2 === "d") c1 = "a";
+    else c1 = (c2 === "c") ? "a" : "c";
+  }
+  const w1cup2 = c1 && cupDesc[c1] ? cupDesc[c1] : w1cup;
+  const w2cup2 = c2 && cupDesc[c2] ? cupDesc[c2] : w2cup;
+  const w1cw2 = c1 && cupWeight[c1] ? cupWeight[c1] : w1cw;
+  const w2cw2 = c2 && cupWeight[c2] ? cupWeight[c2] : w2cw;
+  const bustContrast2 = (c1 && c2 && c1 !== c2)
+    ? ("(different breast sizes:1.65), (strong bust contrast:1.6), LEFT woman " + w1cup2.split(",")[0] + ", RIGHT woman " + w2cup2.split(",")[0] + ",")
+    : bustContrast;
+
   return [
     "=== TWO DISTINCT WOMEN (MANDATORY) ===",
-    "(2girls:1.6), (two women:1.55), both fully visible in frame,",
+    "(2girls:1.65), (two women:1.6), both fully visible in frame from head to thighs,",
     ethLine,
     hairContrast,
-    bustContrast,
-    // Woman 1
-    "woman 1 (" + n1 + "): " + (h1 || "distinct hair") + ", " + w1cup + ", " + w1cw + ",",
-    p1 ? ("woman 1 detail: " + p1.slice(0, 200) + ",") : "",
-    // Woman 2
-    "woman 2 (" + n2 + "): " + (h2 || "different hair from woman 1") + ", " + w2cup + ", " + w2cw + ",",
-    p2 ? ("woman 2 detail: " + p2.slice(0, 200) + ",") : "",
-    "side by side or interacting, two faces two bodies,",
-    "NOT identical twins with same hair, NOT same breast size, NOT matching bodies,",
-    "NOT two blondes, NOT two brunettes unless both described as such,",
-    "NOT solo, NOT 1girl, NOT single woman,",
+    bustContrast2,
+    // Woman 1 LEFT
+    "(LEFT woman " + n1 + ":1.5): " + (h1 || "distinct hair") + ", (" + w1cup2 + ":1.55), " + w1cw2 + ",",
+    p1 ? ("LEFT detail: " + p1.slice(0, 220) + ",") : "",
+    // Woman 2 RIGHT
+    "(RIGHT woman " + n2 + ":1.5): " + (h2 || "different hair from left woman") + ", (" + w2cup2 + ":1.55), " + w2cw2 + ",",
+    p2 ? ("RIGHT detail: " + p2.slice(0, 220) + ",") : "",
+    "side by side, two faces two bodies clearly different,",
+    "NOT identical twins with same hair, NOT same breast size on both, NOT matching cup sizes, NOT same body type,",
+    "NOT two blondes unless both blonde in description, NOT two same bust sizes,",
+    "NOT solo, NOT 1girl, NOT single woman portrait, NOT one person only,",
     "pair names: " + names + ",",
-    "photorealistic,",
+    "photorealistic DSLR photo,",
   ].filter(Boolean).join(" ");
 }
 
@@ -4542,7 +4573,13 @@ async function generatePhotoHordeFallback(prompt, c) {
   window._leaGenBusy = true;
   setGenStatus("Horde (secours) · même prompt profil…");
   try {
-    const payload = { prompt, negative: bodyNegatives(c), nsfw: true };
+    let duoNeg = "";
+    try {
+      if (isDuoCharacter(c)) {
+        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, solo woman, 1girl, single person, identical twins same hair same chest";
+      }
+    } catch (_) {}
+    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true };
     if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
@@ -5127,7 +5164,13 @@ async function generatePhoto() {
     }
 
     // —— Horde ——
-    const payload = { prompt, negative: bodyNegatives(c), nsfw: true };
+    let duoNeg = "";
+    try {
+      if (isDuoCharacter(c)) {
+        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, solo woman, 1girl, single person, identical twins same hair same chest";
+      }
+    } catch (_) {}
+    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
