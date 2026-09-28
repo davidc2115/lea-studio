@@ -300,7 +300,7 @@
       const genConfig = {
         temperature: 0.8,
         topP: 0.92,
-        maxOutputTokens: 900,
+        maxOutputTokens: 1400,
       };
       // 3.x : thinking_level minimal (thinkingBudget seul peut échouer)
       if (is3x) {
@@ -339,7 +339,7 @@
               const payload2 = {
                 systemInstruction: { parts: [{ text: system.slice(0, 12000) }] },
                 contents,
-                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 900 },
+                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 1400 },
                 safetySettings,
               };
               const res2 = await fetchTimeout(
@@ -389,11 +389,26 @@
             last = "Réponse vide (" + (finish || data.promptFeedback?.blockReason || "no text") + ") [" + model + " · " + keyHint + "]";
             continue;
           }
-          if (finish === "MAX_TOKENS" && !/[.!?…*)]$/.test(text.trim())) {
-            text = text.trim() + "…";
+          if (finish === "MAX_TOKENS") {
+            let tt = text.trim();
+            // Fermer blocs ouverts (pensée / action)
+            const openParen = (tt.match(/\(/g) || []).length;
+            const closeParen = (tt.match(/\)/g) || []).length;
+            if (openParen > closeParen) tt += ")";
+            const stars = (tt.match(/\*/g) || []).length;
+            if (stars % 2 === 1) tt += "*";
+            // Si phrase coupée : terminer proprement sans laisser un mot en suspens
+            if (!/[.!?…)]$/.test(tt) && !/\*$/.test(tt)) {
+              // couper au dernier espace pour éviter un mot tronqué
+              const lastSpace = tt.lastIndexOf(" ");
+              if (lastSpace > tt.length - 40 && lastSpace > 20) tt = tt.slice(0, lastSpace);
+              tt = tt.replace(/[,:;\-—]\s*$/, "") + ".";
+            }
+            text = tt;
+            console.warn("[lea] MAX_TOKENS — réponse coupée, fermeture forcée");
           }
           console.log("[lea] Gemini OK", model, keyHint, finish);
-          return text.trim();
+          return ensureCompleteReply(text);
         } catch (e) {
           last = (e.name === "AbortError" ? "timeout 28s" : (e.message || "réseau")) + " [" + model + " · " + keyHint + "]";
           continue;
@@ -419,7 +434,7 @@
             model: "gpt-4o-mini",
             messages,
             temperature: 0.9,
-            max_tokens: 560,
+            max_tokens: 1200,
           }),
         });
         const data = await res.json();
@@ -427,7 +442,7 @@
           last = data.error?.message || res.statusText;
           continue;
         }
-        return data.choices?.[0]?.message?.content?.trim() || "";
+        return ensureCompleteReply(data.choices?.[0]?.message?.content?.trim() || "");
       } catch (e) {
         last = e.message;
       }
@@ -490,7 +505,7 @@
               model: model,
               messages: messages,
               temperature: 0.72,
-              max_tokens: 700,
+              max_tokens: 1200,
               frequency_penalty: 0.55,
               presence_penalty: 0.4,
             }),
@@ -511,7 +526,7 @@
               last = "refus policy (" + model + ")";
               continue; // modèle suivant, puis provider suivant
             }
-            return sanitizeReply(raw);
+            return ensureCompleteReply(sanitizeReply(raw));
           }
           last = "réponse vide (" + model + ")";
         } catch (e) {
@@ -520,6 +535,23 @@
       }
     }
     throw new Error("Groq: " + last);
+  }
+
+
+  function ensureCompleteReply(text) {
+    let tt = String(text || "").trim();
+    if (!tt) return tt;
+    const openParen = (tt.match(/\(/g) || []).length;
+    const closeParen = (tt.match(/\)/g) || []).length;
+    if (openParen > closeParen) tt += ")";
+    const stars = (tt.match(/\*/g) || []).length;
+    if (stars % 2 === 1) tt += "*";
+    if (!/[.!?…)*]$/.test(tt)) {
+      const lastSpace = tt.lastIndexOf(" ");
+      if (lastSpace > 30 && lastSpace > tt.length - 50) tt = tt.slice(0, lastSpace);
+      tt = tt.replace(/[,:;\-—]\s*$/, "") + ".";
+    }
+    return tt;
   }
 
   async function generate(messages, provider) {
@@ -1219,6 +1251,38 @@
           "N'invente PAS d'autre lien (pas d'amie de la fille, pas d'orage) si le scénario ne le dit pas.",
         ].join(" ");
       }
+      // --- Tempérament forcé depuis tags + personality ---
+      const tagStr = (Array.isArray(PERSONA.tags) ? PERSONA.tags.join(" ") : "") + " " + String(PERSONA.personality || "") + " " + String(PERSONA.title || "");
+      const temperBits = [];
+      if (/timide|maladroite|rougit|gênée|réservée|discrète/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT TIMIDE : phrases COURTES, hésitations (euh, …), regard baissé, voix douce. INTERDIT le ton provocant ou direct. Tu rougis facilement. Tu ne prends PAS d'initiative physique.");
+      }
+      if (/directe|tactile|cash|tranchante|cassante/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT DIRECTE/TACTILE : tu dis clairement ce que tu veux, phrases affirmatives, contact physique possible sans tourner autour du pot. Pas de fausse pudeur.");
+      }
+      if (/flirt|espiègle|taquine|coquine|provocante|chaude/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT FLIRT/ESPIÈGLE : sous-entendus, sourires en coin, ton joueur, teasing léger. Tu t'amuses de la situation.");
+      }
+      if (/froide|distante|froideur/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT FROIDE : peu d'émotion affichée, phrases mesurées, distance. Tu ne te confies pas facilement.");
+      }
+      if (/autoritaire|exigeante|dominante|stricte/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT AUTORITAIRE : ton ferme, tu donnes le tempo, tu n'es pas en demande.");
+      }
+      if (/fragile|besoin d'attention|câline|douce/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT SENSIBLE : émotion visible, besoin de réassurance, ton doux. Pas agressive.");
+      }
+      if (/extravertie|ouverte|rieuse|bavarde/i.test(tagStr)) {
+        temperBits.push("TEMPÉRAMENT EXTRAVERTIE : à l'aise, parle facilement, humour possible, pas de grandes silences gênés.");
+      }
+      if (/calme|protectrice|polie/i.test(tagStr) && !temperBits.length) {
+        temperBits.push("TEMPÉRAMENT CALME/POLI : ton posé, courtois, pas d'excès.");
+      }
+      if (!temperBits.length) {
+        temperBits.push("TEMPÉRAMENT : suis STRICTEMENT ta personnalité écrite ci-dessus dans chaque phrase et chaque action.");
+      }
+      const temperBlock = temperBits.join(" ");
+
       let system = [
         "LANGUE OBLIGATOIRE : réponds TOUJOURS en français (paroles, actions, pensées). INTERDIT d'écrire en anglais sauf noms propres.",
         `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
@@ -1290,7 +1354,7 @@
               : "Proximité douce possible SEULEMENT si le joueur l'a initiée. ")
             + "INTERDIT: culotte mouillée, excitation, gémissements, « le film peut attendre ». Réponse 3–6 phrases."),
         "DIRECTE / TACTILE : si tags directe ou tactile, le personnage dit et fait ce qu'elle veut SANS tourner autour du pot : phrases claires, contact physique assumé, pas de fausse pudeur inutile. Respecte toujours un non explicite. NON-HUMAIN / FANTASY : si tags fantasy ou non-humain (oreilles, queues, ailes, écailles, cornes, etc.), conserve TOUJOURS ces traits dans le rôle et les descriptions. Ne les humanise pas. SPEAKERS / PLAN À TROIS : si le personnage est un DUO (multiSpeaker) ou si une 3e personne est dans la scène, chaque réplique DOIT indiquer qui parle : [Prénom] : dialogue Tu peux alterner les voix. Actions *...* peuvent impliquer l'une ou les deux. N'invente pas de 3e sans le joueur.",
-        "TEMPÉRAMENT (obligatoire) : ta façon de parler DOIT coller à ta personnalité ci-dessus (timide / directe / moqueuse / froide / polie / etc.). Une timide ne parle pas comme une provocante. Une froide ne mendie pas la preuve.",
+        temperBlock,
         "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
@@ -1327,7 +1391,7 @@
         "*Je franchis la porte en essuyant mes chaussures trempées sur le paillasson.*",
         "Bonsoir… Désolée d'arriver comme ça.",
         "INTERDIT : écrire (pensée), laisser un * ou une ( non fermés, couper une phrase au milieu, répéter 95D/morphologie.",
-        "Message TOUJOURS complet : ne coupe jamais une pensée ou une action en plein milieu.",
+        "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
       const prevAsst = (chat.messages || []).filter((m) => m.role === "assistant").slice(-2)
