@@ -1651,6 +1651,7 @@
           chat.relationship.heat = Math.max(0, (chat.relationship.heat || 0) - 1);
         }
       }
+      chat.updatedAt = Date.now();
       save(chatKey, chat);
       return { reply, chat };
     }

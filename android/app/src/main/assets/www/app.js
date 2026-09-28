@@ -3463,25 +3463,59 @@ function hasStartedChat(id) {
   return !!(chat && Array.isArray(chat.messages) && chat.messages.length > 0);
 }
 
+function chatLastActivity(chat) {
+  if (!chat) return 0;
+  if (chat.updatedAt) return Number(chat.updatedAt) || 0;
+  const msgs = chat.messages || [];
+  for (let i = msgs.length - 1; i >= 0; i--) {
+    const ts = msgs[i] && msgs[i].ts;
+    if (ts) return Number(ts) || 0;
+  }
+  return msgs.length ? 1 : 0;
+}
+
+function formatChatTime(ts) {
+  if (!ts || ts < 2) return "";
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return "";
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const yest = new Date(now); yest.setDate(now.getDate() - 1);
+  if (sameDay) {
+    return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+  }
+  if (d.toDateString() === yest.toDateString()) return "Hier";
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+}
+
 function renderChats() {
   const all = state.characters.length ? state.characters : [FALLBACK_LEA];
-  const list = all.filter((c) => hasStartedChat(c.id));
+  const list = all
+    .filter((c) => hasStartedChat(c.id))
+    .map((c) => {
+      const chat = loadChat(c.id);
+      return { c, chat, last: chatLastActivity(chat) };
+    })
+    .sort((a, b) => b.last - a.last);
   $("view-chats").innerHTML = `
     <h1>Chats</h1>
-    <p style="color:var(--muted);font-size:13px">Uniquement les conversations déjà commencées.</p>
+    <p style="color:var(--muted);font-size:13px">Conversations commencées · les plus récentes en haut.</p>
     ${list.length
-      ? list.map((c) => `
+      ? list.map(({ c, chat, last }) => `
       <article class="card" style="margin-top:12px">
         <div class="body" style="display:flex;gap:12px;align-items:center">
-          <img src="${resolvedCover(c)}" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover;background:#1a1220" onerror="this.onerror=null;this.style.background=\'#2a1838\'" />
+          <img src="${resolvedCover(c)}" alt="" style="width:56px;height:56px;border-radius:14px;object-fit:cover;background:#1a1220" onerror="this.onerror=null;this.style.background='#2a1838'" />
           <div style="flex:1;min-width:0">
-            <strong>${c.name}</strong>
-            <div style="color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${chatPreview(loadChat(c.id))}</div>
+            <div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline">
+              <strong style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</strong>
+              <span style="color:var(--muted);font-size:11px;flex-shrink:0">${formatChatTime(last)}</span>
+            </div>
+            <div style="color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${chatPreview(chat)}</div>
           </div>
           <button class="cta resume-chat" data-id="${c.id}">Ouvrir</button>
         </div>
       </article>`).join("")
-      : `<p style="color:var(--muted);margin-top:24px;text-align:center">Aucune conversation pour l’instant.<br/>Ouvre un personnage dans Découvrir pour commencer.</p>`}`;
+      : `<p style="color:var(--muted);margin-top:24px;text-align:center">Aucune conversation pour l'instant.<br/>Ouvre un personnage dans Découvrir pour commencer.</p>`}`;
   $("view-chats").onclick = (e) => {
     const b = e.target.closest(".resume-chat");
     if (!b) return;
@@ -4875,7 +4909,14 @@ async function finishSceneImage(url, charId, pendingId, engineLabel) {
 function saveChatLocal() {
   try {
     const id = state.current || "lea";
-    localStorage.setItem("lea.chat." + id, JSON.stringify(state.chat || {}));
+    if (!state.chat) state.chat = {};
+    state.chat.updatedAt = Date.now();
+    const msgs = state.chat.messages || [];
+    if (msgs.length) {
+      const last = msgs[msgs.length - 1];
+      if (last && !last.ts) last.ts = Date.now();
+    }
+    localStorage.setItem("lea.chat." + id, JSON.stringify(state.chat));
   } catch (_) {}
 }
 
