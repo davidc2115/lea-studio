@@ -3636,7 +3636,7 @@ function renderProfile() {
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
     <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
       <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descriptif physique</div>
-      <p style="margin:0 0 8px;line-height:1.45">${formatPhysicalFR(c)}</p>
+      <p style="margin:0 0 8px;line-height:1.5;white-space:pre-wrap;font-size:13px">${formatPhysicalFR(c)}</p>
       <p style="margin:0;color:#b9a8c4;font-size:13px;line-height:1.4">${c.body ? ("Morphologie : " + c.body) : ""}${c.ethnicity ? (" · " + c.ethnicity) : ""}${c.age ? (" · " + c.age + " ans") : ""}</p>
     </div>
     <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
@@ -4202,53 +4202,79 @@ function duoCompositionBlock(c) {
 function formatPhysicalFR(c) {
   if (!c) return "";
   if (c.id === "lea") {
-    return "Jeune femme de 21 ans, allure délicate et sophistiquée, proportions voluptueuses. "
-      + "Visage ovale, mâchoire douce, pommettes subtiles, teint porcelaine uniforme. "
-      + "Yeux amande vert-noisette lumineux (reflets dorés et verts), cils longs, sourcils châtain foncé bien dessinés. "
-      + "Nez fin et droit, lèvres pleines rose naturel mat, léger sourire en coin. "
-      + "Cheveux longs bruns foncés jusqu'aux reins, lisses, reflets miel ; souvent mouillés (scénario orage). "
-      + "Silhouette sablier : épaules étroites, poitrine généreuse 95D au décolleté marqué, taille fine, hanches arrondies, fesses pleines, jambes longues et toniques. "
-      + "Peau claire et soignée sur les épaules et le buste.";
+    return `Sujet : Une jeune femme de 21 ans, d'apparence délicate et sophistiquée, avec une allure posée et mature pour son âge, mais dont la silhouette présente des proportions voluptueuses et généreuses.
+Tête et Visage : (Totalement identiques à l'image)
+Visage : La forme du visage est ovale, avec une structure osseuse délicate. La mâchoire est définie mais douce, et les pommettes sont subtilement sculptées. Le teint est de porcelaine, très clair, uniforme, avec un éclat naturel et une texture de peau impeccable (flawless), sans imperfections visibles.
+Yeux : Les yeux sont grands, en amande, et d'un vert-noisette lumineux et captivant (hazel-green). L'iris a des reflets chauds dorés et verts. Les cils sont longs, sombres et bien définis, sans paraître excessifs. Les sourcils sont d'un châtain foncé, épais, bien fournis et méticuleusement architecturés, avec une arche naturelle parfaite qui structure le visage.
+Nez : Le nez est fin, droit et parfaitement proportionné à l'ovale du visage.
+Bouche : Les lèvres sont pleines, d'un rose naturel doux et mat. La lèvre supérieure est bien dessinée, avec un arc de Cupidon subtil. L'expression est calme, avec un léger sourire en coin très discret.
+Cheveux : Les cheveux sont longs (jusqu'aux reins), d'une couleur brun foncé avec des reflets dorés chauds et subtils (honey-brown). Souvent mouillés dans le scénario orage. Texture douce et soignée.
+Corps et Silhouette :
+Silhouette : Gracieuse, avec des proportions qui dessinent une forme en sablier très marquée.
+Cou : Fin, long et gracieux.
+Épaules : Délicates, étroites et bien définies, avec des clavicules subtilement visibles.
+Poitrine : La poitrine est proéminente, généreuse et très développée (95D / bonnet D, volume marqué), décolleté profond et très visible, accentué par des épaules étroites.
+Taille : Fine et bien définie, contraste marqué avec la poitrine.
+Hanches et fesses : Hanches bien formées et arrondies, fesses pleines et dessinées.
+Jambes : Longues, fines et toniques, genoux et chevilles délicats.
+Peau (Corps) : Claire, soignée, douce et lisse sur les épaules et le buste.
+Mains : Doigts longs, fins et soignés.`;
   }
   const base = String(c.appearance || "").trim();
   const looks = String(c.looks_en || "").trim();
-  // Enrichir en FR à partir des tags physiques
   const blob = (base + " " + looks + " " + (c.body || "")).toLowerCase();
-  const parts = [];
-  parts.push((c.age || "?") + " ans" + (c.ethnicity ? (", " + c.ethnicity) : "") + ".");
-  if (base) parts.push(base);
-  else if (looks) {
-    // résumé FR simple
-    let hair = "cheveux bruns";
-    if (/platinum|blond platine/.test(blob)) hair = "cheveux blond platine";
-    else if (/blonde|blond/.test(blob)) hair = "cheveux blonds";
-    else if (/auburn|roux|redhead|red hair/.test(blob)) hair = "cheveux auburn / roux";
-    else if (/black|jet black|noir/.test(blob)) hair = "cheveux noirs";
-    else if (/dark brown|brun fonc/.test(blob)) hair = "cheveux bruns foncés";
-    let eyes = "yeux marron";
-    if (/hazel-green|vert-noisette/.test(blob)) eyes = "yeux vert-noisette";
-    else if (/green|vert/.test(blob)) eyes = "yeux verts";
-    else if (/blue|bleu/.test(blob)) eyes = "yeux bleus";
-    else if (/hazel|noisette/.test(blob)) eyes = "yeux noisette";
-    let bust = "poitrine moyenne";
-    if (/j-cup|bonnet j/.test(blob)) bust = "poitrine très généreuse bonnet J";
-    else if (/i-cup|bonnet i/.test(blob)) bust = "poitrine très généreuse bonnet I";
-    else if (/h-cup|bonnet h/.test(blob)) bust = "poitrine très généreuse bonnet H";
-    else if (/95d|d-cup|large full d/.test(blob)) bust = "poitrine généreuse 95D";
-    else if (/e-cup|100e|very large heavy/.test(blob)) bust = "poitrine très généreuse E";
-    else if (/c-cup/.test(blob)) bust = "poitrine moyenne C";
-    else if (/b-cup/.test(blob)) bust = "petite poitrine B";
-    else if (/a-cup|flat|nearly flat/.test(blob)) bust = "poitrine très petite A / plate";
-    let morph = "";
-    if (/hourglass|sablier/.test(blob)) morph = "silhouette sablier, taille fine";
-    else if (/athletic/.test(blob)) morph = "corps athlétique";
-    else if (/slim|slender|mince/.test(blob)) morph = "silhouette mince";
-    else if (/curvy|voluptuous|plus-size|ronde/.test(blob)) morph = "formes généreuses / voluptueuses";
-    parts.push(hair + ", " + eyes + ", " + bust + (morph ? (", " + morph) : "") + ".");
-  }
-  if (c.body) parts.push("Morphologie : " + c.body + ".");
-  return parts.join(" ").replace(/\s+/g, " ").trim();
+  const age = c.age || "?";
+  const eth = c.ethnicity || "";
+  const name = c.name || "Personnage";
+  let hair = "cheveux bruns";
+  if (/platinum|blond platine/.test(blob)) hair = "cheveux blond platine";
+  else if (/blonde|blond/.test(blob)) hair = "cheveux blonds";
+  else if (/auburn|roux|redhead|red hair/.test(blob)) hair = "cheveux auburn / roux";
+  else if (/black|jet|noir/.test(blob)) hair = "cheveux noirs";
+  else if (/dark brown|brun fonc/.test(blob)) hair = "cheveux bruns foncés";
+  else if (/light brown|châtain clair|honey/.test(blob)) hair = "cheveux châtain clair (honey-brown)";
+  let eyes = "yeux marron";
+  if (/hazel-green|vert-noisette/.test(blob)) eyes = "yeux amande vert-noisette (hazel-green)";
+  else if (/green|vert/.test(blob)) eyes = "yeux verts";
+  else if (/blue|bleu/.test(blob)) eyes = "yeux bleus";
+  else if (/hazel|noisette/.test(blob)) eyes = "yeux noisette";
+  let bust = "poitrine moyenne";
+  if (/j-cup|bonnet j/.test(blob)) bust = "poitrine très généreuse bonnet J";
+  else if (/i-cup|bonnet i/.test(blob)) bust = "poitrine très généreuse bonnet I";
+  else if (/h-cup|bonnet h/.test(blob)) bust = "poitrine très généreuse bonnet H";
+  else if (/95d|d-cup|large full d/.test(blob)) bust = "poitrine généreuse 95D (bonnet D)";
+  else if (/e-cup|100e|very large heavy/.test(blob)) bust = "poitrine très généreuse E";
+  else if (/c-cup/.test(blob)) bust = "poitrine moyenne C";
+  else if (/b-cup/.test(blob)) bust = "petite poitrine B";
+  else if (/a-cup|flat|nearly flat/.test(blob)) bust = "poitrine très petite A / plate";
+  let morph = "silhouette féminine";
+  if (/hourglass|sablier/.test(blob)) morph = "silhouette sablier, taille fine, hanches marquées";
+  else if (/athletic/.test(blob)) morph = "corps athlétique tonique";
+  else if (/slim|slender|mince/.test(blob)) morph = "silhouette mince et élancée";
+  else if (/curvy|voluptuous|plus-size|ronde/.test(blob)) morph = "formes voluptueuses / généreuses";
+  const skin = /porcelain|porcelaine/.test(blob) ? "teint porcelaine"
+    : /olive/.test(blob) ? "peau olive"
+    : /caramel|tan|mate|dorée/.test(blob) ? "peau mate / caramel"
+    : /dark skin|ebony/.test(blob) ? "peau foncée"
+    : "peau claire";
+  // Structure type Léa (sections)
+  let out = [
+    "Sujet : " + name + ", " + age + " ans" + (eth ? (", " + eth) : "") + ". " + morph + ".",
+    "Tête et Visage : (identité stable, fidèle à la photo de profil)",
+    "Visage : Ovale, traits féminins détaillés, " + skin + ".",
+    "Yeux : " + eyes + ", cils définis, sourcils naturels.",
+    "Nez : Fin et proportionné.",
+    "Bouche : Lèvres naturelles.",
+    "Cheveux : " + hair + ".",
+    "Corps et Silhouette :",
+    "Silhouette : " + morph + ".",
+    "Poitrine : " + bust + ".",
+    c.body ? ("Morphologie : " + c.body + ".") : "",
+    base && base.length > 40 ? ("Détails : " + base.slice(0, 400)) : "",
+  ].filter(Boolean).join("\n");
+  return out;
 }
+
 
 function enrichLooksDetail(c) {
   if (!c) return "";
@@ -5322,96 +5348,72 @@ async function generatePhoto() {
       return;
     }
 
-    // —— SD.cpp local (prompt physique + tenue scénario complets) ——
+        // —— SD.cpp local (si échec → bascule Horde auto) ——
     if (engine === "sd_cpp" || selectedImageEngineRaw() === "sd_cpp") {
-      if (!window.LeaAndroid || !window.LeaAndroid.sdCppGenerate) {
-        setGenStatus(
-          "Pont SD.cpp manquant dans cet APK.\n" +
-          "Installe le dernier build (sdCppGenerate exposé), ou utilise Horde / Local Dream."
-        );
-        window._leaGenBusy = false;
-        return;
-      }
+      let sdOk = false;
       try {
-        const st = JSON.parse(window.LeaAndroid.sdCppStatus() || "{}");
-        if (!st.ready) {
-          let msg = st.note || "SD.cpp pas prêt";
-          if (st.needBinary || !st.binary) {
-            msg += "\n→ Binaire manquant : « Pack SD.cpp » (binaire + modèle).";
-          } else if (st.needModel || !st.model) {
-            msg += "\n→ Modèle manquant : « Pack SD.cpp ».";
-          }
-          msg += "\nSinon choisis Horde manuellement.";
-          setGenStatus(msg);
-          window._leaGenBusy = false;
-          return;
-        }
-        // Relancer preload si pas encore warm
-        if (!st.warm && window.LeaAndroid.sdCppPreload) {
-          try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
-        }
-        setGenStatus(
-          "SD.cpp · " + (st.model || "modèle") +
-          (st.warm ? " · cache OK" : " · 1er load plus long") +
-          " · lancement…"
-        );
-      } catch (_) {}
-      // Prompt = physique détaillé + tenue scénario + img2img cover si dispo
-      const neg = bodyNegatives(c) + ", cartoon, anime, deformed, child, underage, blurry, watermark, text, wrong body type";
-      let sdRef = null;
-      try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
-      const sdPayload = {
-        prompt: String(prompt).slice(0, 1800),
-        negative: String(neg).slice(0, 500),
-        charId: c.id || "lea",
-        steps: sdRef ? 16 : 12,
-        cfg: 7,
-        width: 512,
-        height: 640,
-      };
-      if (sdRef) {
-        sdPayload.source_image = sdRef;
-        sdPayload.strength = 0.65;
-      }
-      const payloadJson = JSON.stringify(sdPayload);
-      showPromptStatus(
-        sdRef
-          ? "SD.cpp img2img (cover) · 512×640…"
-          : "SD.cpp txt2img · 512×640…",
-        prompt
-      );
-      const raw = window.LeaAndroid.sdCppGenerate(payloadJson);
-      let data = {};
-      try { data = typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch (_) { data = { error: String(raw) }; }
-      if (data.error && !data.pending) {
-        setGenStatus(
-          "SD.cpp échec (pas de bascule auto)\n" +
-          data.error +
-          "\n→ Pack SD.cpp (binaire+modèle) ou moteur Horde."
-        );
-        window._leaGenBusy = false;
-        return;
-      }
-      if (data.url) {
-        const stored = await addToGallery(data.url, c.id);
-        setGenStatus("Image SD.cpp prête");
-        window._leaGenBusy = false;
-        if (state.view === "profile") renderProfile();
-        // Reste sur le profil : n'ouvre PAS la conversation
-        if (state.view === "profile") {
-          renderProfile();
-        } else if (state.view !== "chat") {
-          openFull(resolvePhotoSrc(stored) || stored);
+        if (!window.LeaAndroid || !window.LeaAndroid.sdCppGenerate) {
+          setGenStatus("SD.cpp indisponible → bascule Horde…");
         } else {
-          // déjà en chat : ne change pas de vue, juste galerie
+          let ready = false;
+          try {
+            const st = JSON.parse(window.LeaAndroid.sdCppStatus() || "{}");
+            ready = !!st.ready;
+            if (!ready) {
+              setGenStatus((st.note || "SD.cpp pas prêt") + " → bascule Horde…");
+            } else {
+              if (!st.warm && window.LeaAndroid.sdCppPreload) {
+                try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
+              }
+              const neg = bodyNegatives(c) + ", cartoon, anime, deformed, child, underage, blurry, watermark";
+              let sdRef = null;
+              try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
+              const sdPayload = {
+                prompt: String(prompt).slice(0, 1800),
+                negative: String(neg).slice(0, 500),
+                charId: c.id || "lea",
+                steps: sdRef ? 16 : 12,
+                cfg: 7,
+                width: 512,
+                height: 640,
+              };
+              if (sdRef) { sdPayload.source_image = sdRef; sdPayload.strength = 0.55; }
+              setGenStatus("SD.cpp…");
+              const raw = window.LeaAndroid.sdCppGenerate(JSON.stringify(sdPayload));
+              let data = {};
+              try { data = typeof raw === "string" ? JSON.parse(raw) : (raw || {}); } catch (_) { data = { error: String(raw) }; }
+              if (data && data.url) {
+                const stored = await addToGallery(data.url, c.id);
+                setGenStatus("Image SD.cpp prête");
+                window._leaGenBusy = false;
+                if (state.view === "profile") renderProfile();
+                return;
+              }
+              if (data && data.pending) {
+                pollSdCppJob(c.id);
+                return;
+              }
+              const err = (data && data.error) ? String(data.error) : "échec SD.cpp";
+              setGenStatus("SD.cpp : " + err.slice(0, 120) + " → bascule Horde…");
+            }
+          } catch (e) {
+            setGenStatus("SD.cpp erreur → Horde… (" + (e.message || e) + ")");
+          }
         }
-        return;
+      } catch (e) {
+        setGenStatus("SD.cpp → Horde (" + (e.message || e) + ")");
       }
-      pollSdCppJob(c.id);
-      return;
+      // continue vers Horde (ne pas return)
+      try {
+        const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        st.imageEngine = "horde";
+        localStorage.setItem("lea.settings", JSON.stringify(st));
+        if ($("imgengine-profile")) $("imgengine-profile").value = "horde";
+      } catch (_) {}
     }
 
     // —— Horde ——
+
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {

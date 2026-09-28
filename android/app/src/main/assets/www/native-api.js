@@ -1862,30 +1862,25 @@
           console.warn("[gemini-img]", e.message || e);
         }
       }
-      // ——— Horde txt2img / img2img (payload strict, fallback si validation) ———
-      const extraNeg = String(body.negative || "");
-      const negative = [
-        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
-        "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
-        "watermark, text, logo, signature, child, teen, underage, loli,",
-        "wrong body type, inconsistent proportions, different face, different person, face morph,",
-        extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
+      // ——— Horde : payloads minimaux valides (évite "Input payload validation failed") ———
+      const extraNeg = String(body.negative || "").replace(/\s+/g, " ").trim().slice(0, 500);
+      const negative = (
+        "cartoon, anime, deformed, blurry, lowres, watermark, text, child, teen, underage, " +
+        "different face, different person, " + extraNeg
+      ).replace(/\s+/g, " ").trim().slice(0, 800);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
-      if (!promptSafe) promptSafe = "photorealistic portrait of an adult woman, 21 years old";
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1000);
+      if (!promptSafe) promptSafe = "photorealistic photo of a 21 year old woman, detailed face";
 
-      // source_image : base64 pur uniquement (sans data: prefix), taille limitée
+      // Ref img2img optionnelle (base64 pur, max ~900k pour éviter SourceImageSizeExceeded)
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
-        if (raw.startsWith("data:") && comma >= 0) raw = raw.slice(comma + 1);
-        raw = raw.replace(/\s/g, "");
-        // Horde refuse souvent > ~1.5–2 Mo en base64
-        if (raw.length > 400 && raw.length < 1_800_000) src = raw;
+        if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
+        raw = raw.replace(/\s+/g, "");
+        if (raw.length > 800 && raw.length < 900000) src = raw;
       }
-      const useImg2Img = Boolean(src);
 
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
@@ -1895,78 +1890,76 @@
         if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
       } catch (_) {}
 
-      // Modèles courts connus (noms trop longs / introuvables → validation failed)
-      const photoModels = ["AbsoluteReality", "Dreamshaper", "Realistic Vision", "Deliberate"];
-      const anyModels = ["stable_diffusion"];
+      // Client-Agent obligatoire format name:version:contact
+      const clientAgent = "LeaStudio:2.2:https://github.com/davidc2115/lea-studio";
 
-      function buildPayload(opts) {
-        const den = opts.denoise != null ? opts.denoise : null;
-        const params = {
-          width: 512,
-          height: 768,
-          steps: opts.steps || 25,
-          n: 1,
-          sampler_name: opts.sampler || "k_euler_a",
-          cfg_scale: opts.cfg || 7,
-          karras: true,
-        };
-        if (den != null) {
-          params.denoising_strength = Math.round(Math.min(0.55, Math.max(0.30, den)) * 100) / 100;
-        }
-        if (typeof body.seed === "number" && isFinite(body.seed)) {
-          params.seed = Math.floor(body.seed) % 2147483647;
-        }
-        const pl = {
-          prompt: (opts.faceBoost || "") + promptSafe + " ### " + negative,
-          params: params,
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: opts.models || photoModels,
-          r2: true,
-          slow_workers: true,
-          trusted_workers: false,
-        };
-        if (opts.src) {
-          pl.source_image = opts.src;
-          pl.source_processing = "img2img";
-        }
-        return pl;
-      }
-
+      // Payloads du plus simple au plus riche
       const payloads = [];
-      if (useImg2Img) {
-        const den = (typeof body.denoising === "number") ? body.denoising : 0.38;
-        payloads.push(buildPayload({
-          src: src,
-          denoise: den,
-          steps: 26,
-          cfg: 6.5,
-          faceBoost: "(identical face to reference:1.45), same woman, ",
-          models: photoModels,
-        }));
-        // 2e essai denoise un peu plus haut si workers stricts
-        payloads.push(buildPayload({
-          src: src,
-          denoise: Math.min(0.48, den + 0.08),
-          steps: 24,
-          cfg: 7,
-          faceBoost: "same face as reference, ",
-          models: anyModels,
-        }));
+
+      // 1) txt2img minimal (le plus fiable)
+      payloads.push({
+        prompt: promptSafe + (negative ? (" ### " + negative) : ""),
+        params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        nsfw: true,
+        censor_nsfw: false,
+        models: ["stable_diffusion"],
+        r2: true,
+      });
+
+      // 2) txt2img modèles photo
+      payloads.push({
+        prompt: promptSafe + (negative ? (" ### " + negative) : ""),
+        params: { width: 512, height: 768, steps: 25, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        nsfw: true,
+        censor_nsfw: false,
+        models: ["Dreamshaper", "AbsoluteReality", "Deliberate"],
+        r2: true,
+        slow_workers: true,
+      });
+
+      // 3) img2img si ref OK
+      if (src) {
+        let den = typeof body.denoising === "number" ? body.denoising : 0.4;
+        den = Math.min(0.5, Math.max(0.35, den));
+        payloads.push({
+          prompt: "same face as reference, " + promptSafe.slice(0, 700) + (negative ? (" ### " + negative) : ""),
+          params: {
+            width: 512,
+            height: 768,
+            steps: 22,
+            n: 1,
+            sampler_name: "k_euler_a",
+            cfg_scale: 6.5,
+            denoising_strength: den,
+          },
+          nsfw: true,
+          censor_nsfw: false,
+          models: ["stable_diffusion", "Dreamshaper"],
+          r2: true,
+          source_image: src,
+          source_processing: "img2img",
+        });
       }
-      // txt2img toujours en secours (sinon "validation failed" bloque tout)
-      payloads.push(buildPayload({ steps: 25, cfg: 7, models: photoModels }));
-      payloads.push(buildPayload({ steps: 20, cfg: 6.5, sampler: "k_euler_a", models: anyModels }));
+
+      // 4) ultime secours sans negative, sans models spécifiques
+      payloads.push({
+        prompt: promptSafe.slice(0, 500),
+        params: { width: 512, height: 512, steps: 15, n: 1 },
+        nsfw: true,
+        censor_nsfw: false,
+        r2: true,
+      });
 
       for (const host of hosts) {
-        for (const bodyPayload of payloads) {
+        for (let i = 0; i < payloads.length; i++) {
+          const bodyPayload = payloads[i];
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
                 "apikey": hordeKey,
-                "Client-Agent": "LeaStudio:2.0:android",
+                "Client-Agent": clientAgent,
               },
               body: JSON.stringify(bodyPayload),
             });
@@ -1977,12 +1970,11 @@
                 host,
                 pending: true,
                 mode: bodyPayload.source_processing || "txt2img",
-                models: (bodyPayload.models || []).slice(0, 3),
+                models: (bodyPayload.models || ["any"]).slice(0, 3),
               };
             }
-            last = data.message || data.error || (data.errors && JSON.stringify(data.errors)) || JSON.stringify(data).slice(0, 220) || ("HTTP " + res.status);
-            // validation failed → essayer payload suivant (souvent img2img ref trop lourde)
-            continue;
+            last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 180) : "") || ("HTTP " + res.status);
+            console.warn("[horde] payload", i, host, last);
           } catch (e) {
             last = String(e.message || e);
           }
