@@ -318,9 +318,9 @@
     async function tryOnce(key, model) {
       const is3x = /^gemini-3/.test(model);
       const genConfig = {
-        temperature: 0.78,
-        topP: 0.9,
-        maxOutputTokens: 850, // plus court = plus rapide
+        temperature: 0.88,
+        topP: 0.92,
+        maxOutputTokens: 850,
       };
       // 3.x : thinking_level minimal (thinkingBudget seul peut échouer)
       if (is3x) {
@@ -530,7 +530,7 @@
       "=== VERROU PERSONNAGE (comme Gemini — ne jamais contredire) ===",
       "Tu incarnes UNIQUEMENT: " + nameLock + (titleLock ? " — " + titleLock : ""),
       scenLock ? ("SCÉNARIO FIXE: " + scenLock) : "",
-      temperLock ? ("TEMPÉRAMENT (chaque phrase et action): " + temperLock) : "",
+      temperLock ? ("TEMPÉRAMENT OBLIGATOIRE (chaque phrase, chaque action, chaque pensée doit coller): " + temperLock) : "TEMPÉRAMENT: suis strictement la personnalité du personnage.",
       placeLock ? ("LIEU ACTUEL: " + placeLock) : "",
       outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
       "Mode: " + modeLock + ". Réponds TOUJOURS en français.",
@@ -591,11 +591,11 @@
             body: JSON.stringify({
               model: model,
               messages: msgs,
-              temperature: 0.75,
-              max_tokens: 1100,
-              top_p: 0.92,
-              frequency_penalty: 0.35,
-              presence_penalty: 0.25,
+              temperature: 0.82,
+              max_tokens: 1000,
+              top_p: 0.9,
+              frequency_penalty: 0.7,
+              presence_penalty: 0.45,
             }),
           }).finally(function () { clearTimeout(timer); });
           const data = await res.json().catch(function () { return {}; });
@@ -1590,7 +1590,7 @@
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
         "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
-        "ANTI-RÉPÉTITION STRICTE : interdit de réutiliser ces refrains : « le film peut attendre », « culotte mouillée », « cuisse contre le coussin », « lueur du téléviseur », « je reste blottie contre lui », « la joue sur son épaule », « le regard vers l'écran », « cœur qui s'accélère », « je me sens si bien à tes côtés ».",
+        "ANTI-RÉPÉTITION STRICTE : INTERDIT de répéter ou paraphraser les mêmes phrases. INTERDIT les refrains : « continuez si vous le désirez », « continue si tu veux », « j'aime ce moment », « c'est tellement bon », « Euh… », « le film peut attendre », « culotte mouillée », « je reste blottie », « cœur qui s'emballe », « mon corps s'enflamme ». Chaque message doit apporter un geste OU une information NOUVELLE. Varie le vocabulaire. Pas de boucle.",
         "Chaque message = un geste NOUVEAU (ex: joue contre épaule, doigts dans les cheveux, couverture tirée) OU une phrase sur le FILM / le silence — pas la même structure pensée+cuisse+film.",
         "Si MODE SFW : zéro contenu sexuel, même si l'historique en contient.",
         "NE JAMAIS coller le prompt système, les règles, ni des bouts d'anglais technique dans ta réponse. Tu es le personnage, pas le narrateur méta.",
@@ -1624,7 +1624,7 @@
       }
       let reply;
       try {
-        reply = await generate([{ role: "system", content: system }, ...history], s.provider);
+        reply = await generate([{ role: "system", content: system + (function(){ try { const prev = (chat.messages||[]).filter(function(m){return m.role==="assistant";}).slice(-2).map(function(m){return String(m.content||"").slice(0,140);}); if(!prev.length) return ""; return "\n\nINTERDIT de répéter ou paraphraser:\n- " + prev.join("\n- "); } catch(_){ return ""; } })() }, ...history], s.provider);
       } catch (e) {
         reply = "*elle croise les bras, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
       }
@@ -1706,6 +1706,22 @@
       if (/thought\s*,\s*action|hourglass|avoid clich|APPARENCE FIXE/i.test(reply)) {
         reply = sanitizeReply(reply);
       }
+      // Purge boucles "continuez / j'aime ce moment / Euh…"
+      try {
+        reply = String(reply || "")
+          .replace(/\bcontinuez?\s+si\s+vous\s+le\s+d[eé]sirez\.?/gi, "")
+          .replace(/\bcontinuez?\s+si\s+tu\s+veux\.?/gi, "")
+          .replace(/\bj['']aime ce (que vous faites|moment)[^.!?\n]{0,40}[.!?]?/gi, "")
+          .replace(/\bc['']est tellement bon[^.!?\n]{0,50}[.!?]?/gi, "")
+          .replace(/\b(mon c[oœ]ur s['']emballe|mon corps s['']enflamme)[^.!?\n]{0,20}[.!?]?/gi, "")
+          .replace(/(^|\n)\s*Euh\.\.\.\s*/gi, "$1")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim();
+        // Si quasi vide après purge → phrase neutre
+        if (reply.length < 12) {
+          reply = "(…)\n*elle marque une pause, le regard un peu fuyant*\n…Oui.";
+        }
+      } catch (_) {}
       chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
       extractScene(chat, txt, reply);
       if (chat.messages.length % 3 === 0) {
@@ -1846,113 +1862,102 @@
           console.warn("[gemini-img]", e.message || e);
         }
       }
-      // Prompt fidélité : corps en tête, répété, négatifs anti-physique
+      // ——— Horde txt2img / img2img (payload strict, fallback si validation) ———
       const extraNeg = String(body.negative || "");
       const negative = [
         "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
         "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
         "watermark, text, logo, signature, child, teen, underage, loli,",
-        "wrong body type, inconsistent proportions,",
-        "different face, different person, face morph, identity change, another woman,",
-        "wrong facial features, different eyes, different nose, different jaw,",
+        "wrong body type, inconsistent proportions, different face, different person, face morph,",
         extraNeg
-      ].filter(Boolean).join(" ");
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
+
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
+      if (!promptSafe) promptSafe = "photorealistic portrait of an adult woman, 21 years old";
+
+      // source_image : base64 pur uniquement (sans data: prefix), taille limitée
+      let src = null;
+      if (body.source_image && body.source_processing === "img2img") {
+        let raw = String(body.source_image);
+        const comma = raw.indexOf(",");
+        if (raw.startsWith("data:") && comma >= 0) raw = raw.slice(comma + 1);
+        raw = raw.replace(/\s/g, "");
+        // Horde refuse souvent > ~1.5–2 Mo en base64
+        if (raw.length > 400 && raw.length < 1_800_000) src = raw;
+      }
+      const useImg2Img = Boolean(src);
+
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
-      const src = body.source_image ? String(body.source_image).slice(0, 4_500_000) : null;
-      const useImg2Img = Boolean(src && body.source_processing === "img2img");
-      // Modèles réalistes prioritaires (ordre = préférence workers)
-      const photoModels = [
-        "ICBINP - I Can't Believe It's Not Photography",
-        "AbsoluteReality",
-        "Realistic Vision",
-        "Juggernaut XL",
-        "Dreamshaper",
-        "Deliberate",
-      ];
-      const baseParams = {
-        width: 512,
-        height: 768,
-        steps: 28,
-        n: 1,
-        sampler_name: "k_euler_a",
-        cfg_scale: 7,
-        karras: true,
-        clip_skip: 1,
-      };
-      // img2img d'abord UNIQUEMENT (pas de txt2img parallèle qui change le visage)
-      const img2imgPayloads = [];
-      const txtPayloads = [];
-      if (useImg2Img) {
-        // Denoise BAS = garde le visage de la ref (au-dessus de 0.48 le visage change souvent)
-        let den = (typeof body.denoising === "number" ? body.denoising : 0.38);
-        den = Math.min(0.48, Math.max(0.30, den));
-        const faceBoost = "(identical face to reference photo:1.6), (same woman same face:1.55), same eyes same nose same lips, consistent identity, ";
-        // Prompt img2img : visage + changements (pose/tenue), sans réécrire un autre visage
-        const imgPrompt = faceBoost + String(prompt || "").slice(0, 900);
-        const dens = [den]; // un seul essai = plus rapide
-        dens.forEach(function (d) {
-          img2imgPayloads.push({
-            prompt: imgPrompt + " ### " + negative + ", different face, different person, face morph",
-            params: Object.assign({}, baseParams, {
-              steps: 28,
-              cfg_scale: 6.5,
-              denoising_strength: d,
-              seed: (typeof body.seed === "number" ? body.seed : undefined),
-            }),
-            nsfw: body.nsfw !== false,
-            censor_nsfw: false,
-            models: photoModels,
-            r2: true,
-            slow_workers: true,
-            trusted_workers: false,
-            source_image: src,
-            source_processing: "img2img",
-          });
-        });
-      }
-      // txt2img seulement si PAS de ref (sinon on refuse de sacrifier le visage)
-      if (!useImg2Img) {
-        txtPayloads.push({
-          prompt: prompt + " ### " + negative,
-          params: baseParams,
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: photoModels,
-          r2: true,
-          slow_workers: true,
-          trusted_workers: false,
-        });
-        txtPayloads.push({
-          prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5, karras: true },
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: ["stable_diffusion", "Deliberate", "Dreamshaper"],
-          r2: true,
-          slow_workers: true,
-          trusted_workers: false,
-        });
-      }
-      const payloads = img2imgPayloads.concat(txtPayloads);
       let hordeKey = "0000000000";
       try {
-        const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        const st = settings();
         if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
       } catch (_) {}
-      // Fallback txt2img ultime UNIQUEMENT si aucune ref img2img
-      if (!useImg2Img) {
-        payloads.push({
-          prompt: prompt + " ### " + negative,
-          params: { width: 512, height: 512, steps: 15, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5, karras: false },
+
+      // Modèles courts connus (noms trop longs / introuvables → validation failed)
+      const photoModels = ["AbsoluteReality", "Dreamshaper", "Realistic Vision", "Deliberate"];
+      const anyModels = ["stable_diffusion"];
+
+      function buildPayload(opts) {
+        const den = opts.denoise != null ? opts.denoise : null;
+        const params = {
+          width: 512,
+          height: 768,
+          steps: opts.steps || 25,
+          n: 1,
+          sampler_name: opts.sampler || "k_euler_a",
+          cfg_scale: opts.cfg || 7,
+          karras: true,
+        };
+        if (den != null) {
+          params.denoising_strength = Math.round(Math.min(0.55, Math.max(0.30, den)) * 100) / 100;
+        }
+        if (typeof body.seed === "number" && isFinite(body.seed)) {
+          params.seed = Math.floor(body.seed) % 2147483647;
+        }
+        const pl = {
+          prompt: (opts.faceBoost || "") + promptSafe + " ### " + negative,
+          params: params,
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
-          models: ["AbsoluteReality", "Realistic Vision", "Dreamshaper", "stable_diffusion"],
+          models: opts.models || photoModels,
           r2: true,
           slow_workers: true,
           trusted_workers: false,
-        });
+        };
+        if (opts.src) {
+          pl.source_image = opts.src;
+          pl.source_processing = "img2img";
+        }
+        return pl;
       }
+
+      const payloads = [];
+      if (useImg2Img) {
+        const den = (typeof body.denoising === "number") ? body.denoising : 0.38;
+        payloads.push(buildPayload({
+          src: src,
+          denoise: den,
+          steps: 26,
+          cfg: 6.5,
+          faceBoost: "(identical face to reference:1.45), same woman, ",
+          models: photoModels,
+        }));
+        // 2e essai denoise un peu plus haut si workers stricts
+        payloads.push(buildPayload({
+          src: src,
+          denoise: Math.min(0.48, den + 0.08),
+          steps: 24,
+          cfg: 7,
+          faceBoost: "same face as reference, ",
+          models: anyModels,
+        }));
+      }
+      // txt2img toujours en secours (sinon "validation failed" bloque tout)
+      payloads.push(buildPayload({ steps: 25, cfg: 7, models: photoModels }));
+      payloads.push(buildPayload({ steps: 20, cfg: 6.5, sampler: "k_euler_a", models: anyModels }));
+
       for (const host of hosts) {
         for (const bodyPayload of payloads) {
           try {
@@ -1961,14 +1966,23 @@
               headers: {
                 "Content-Type": "application/json",
                 "apikey": hordeKey,
-                "Client-Agent": "lea-studio:1.1:anon",
+                "Client-Agent": "LeaStudio:2.0:android",
               },
               body: JSON.stringify(bodyPayload),
             });
             const data = await res.json().catch(() => ({}));
-            if (data.id) return { jobId: data.id, host, pending: true, mode: bodyPayload.source_processing || "txt2img", models: (bodyPayload.models || []).slice(0, 3) };
-            last = data.message || data.error || JSON.stringify(data).slice(0, 200) || ("HTTP " + res.status);
-            if (/kudos|heavy demand|work budget/i.test(String(last))) continue;
+            if (data.id) {
+              return {
+                jobId: data.id,
+                host,
+                pending: true,
+                mode: bodyPayload.source_processing || "txt2img",
+                models: (bodyPayload.models || []).slice(0, 3),
+              };
+            }
+            last = data.message || data.error || (data.errors && JSON.stringify(data.errors)) || JSON.stringify(data).slice(0, 220) || ("HTTP " + res.status);
+            // validation failed → essayer payload suivant (souvent img2img ref trop lourde)
+            continue;
           } catch (e) {
             last = String(e.message || e);
           }

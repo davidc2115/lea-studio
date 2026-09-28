@@ -4176,6 +4176,89 @@ function duoCompositionBlock(c) {
 }
 
 
+
+/** Enrichit looks_en en descriptif ultra-détaillé (visage + corps) pour TOUS les personnages. */
+function enrichLooksDetail(c) {
+  if (!c) return "";
+  const age = Number(c.age) || 21;
+  const eth = String(c.ethnicity || "").trim();
+  const body = String(c.body || "").trim();
+  const looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
+  const name = String(c.name || "the woman").split(/\s|&/)[0];
+  // Déjà très détaillé ?
+  if (looks.length > 400 && /oval|porcelain|almond|jawline|cheekbone|iris/i.test(looks)) {
+    return looks;
+  }
+  const blob = (looks + " " + body + " " + (c.appearance || "")).toLowerCase();
+  // Cheveux
+  let hair = "long brown hair";
+  if (/platinum|blond platine/.test(blob)) hair = "platinum blonde hair";
+  else if (/blonde|blond/.test(blob)) hair = "blonde hair";
+  else if (/auburn|roux|redhead|ginger|red hair/.test(blob)) hair = "auburn red hair";
+  else if (/black|noir|jet/.test(blob)) hair = "long jet black hair";
+  else if (/silver|argent|white hair|gris/.test(blob)) hair = "silver white hair";
+  else if (/light brown|châtain clair|chatain clair/.test(blob)) hair = "light brown honey hair";
+  else if (/dark brown|brun fonc|chestnut/.test(blob)) hair = "long dark brown hair";
+  else if (/brown|brun|châtain|chatain/.test(blob)) hair = "long brown hair";
+  if (/straight|lisse/.test(blob)) hair += " straight";
+  else if (/wavy|ondul/.test(blob)) hair += " wavy";
+  else if (/curly|boucl/.test(blob)) hair += " curly";
+  if (/lower back|rein|waist length|jusqu/.test(blob)) hair += " to lower back";
+  else if (/shoulder|épaule/.test(blob)) hair += " shoulder-length";
+  // Yeux
+  let eyes = "brown eyes";
+  if (/hazel-green|vert-noisette|green-hazel/.test(blob)) eyes = "large almond hazel-green eyes with golden reflections";
+  else if (/green|vert/.test(blob)) eyes = "large green eyes";
+  else if (/blue|bleu/.test(blob)) eyes = "large blue eyes";
+  else if (/hazel|noisette/.test(blob)) eyes = "hazel eyes";
+  else if (/dark brown|marron fonc/.test(blob)) eyes = "dark brown eyes";
+  else if (/brown|marron/.test(blob)) eyes = "brown eyes";
+  // Poitrine
+  let bust = "medium natural breasts";
+  if (/j-cup|bonnet j/.test(blob)) bust = "(enormous J-cup breasts:1.5)";
+  else if (/i-cup|bonnet i/.test(blob)) bust = "(huge I-cup breasts:1.5)";
+  else if (/h-cup|bonnet h/.test(blob)) bust = "(huge H-cup breasts:1.5)";
+  else if (/g-cup|bonnet g/.test(blob)) bust = "(very large G-cup breasts:1.45)";
+  else if (/f-cup|bonnet f|100e|e-cup|very large heavy/.test(blob)) bust = "(very large heavy E-cup breasts:1.45)";
+  else if (/95d|d-cup|large full d|généreuse 95d|poitrine généreuse/.test(blob)) bust = "(large prominent 95D breasts:1.5), deep cleavage";
+  else if (/c-cup|medium c|poitrine moyenne/.test(blob)) bust = "(medium natural C-cup breasts:1.3)";
+  else if (/b-cup|small b/.test(blob)) bust = "(small B-cup breasts:1.3)";
+  else if (/a-cup|flat|nearly flat|petite poitrine/.test(blob)) bust = "(very small flat A-cup breasts:1.4)";
+  // Corps
+  let morph = "feminine figure";
+  if (/hourglass|sablier/.test(blob)) morph = "marked hourglass figure, narrow waist, rounded hips";
+  else if (/athletic|athlétique/.test(blob)) morph = "athletic toned figure";
+  else if (/slim|mince|slender/.test(blob)) morph = "slim slender figure";
+  else if (/curvy|voluptuous|plus-size|chubby|ronde/.test(blob)) morph = "voluptuous curvy figure";
+  else if (/petite/.test(blob)) morph = "petite short stature";
+  // Peau
+  let skin = "fair skin";
+  if (/porcelain|porcelaine/.test(blob)) skin = "porcelain fair clear skin";
+  else if (/olive/.test(blob)) skin = "olive mediterranean skin";
+  else if (/caramel|tan|dorée|mate/.test(blob)) skin = "golden caramel tan skin";
+  else if (/dark skin|ebony|black skin/.test(blob)) skin = "dark smooth skin";
+  else if (/pale|pâle/.test(blob)) skin = "pale fair skin";
+  const freckles = /freckle|rousseur/.test(blob) ? "visible freckles on face," : "";
+  const glasses = /glasses|lunettes/.test(blob) ? "wearing glasses," : "";
+
+  return [
+    age + " year old woman who looks exactly " + age + " not older not younger,",
+    eth ? (eth + " woman,") : "",
+    "oval face, delicate bone structure, soft defined jawline, subtle cheekbones,",
+    skin + ", natural skin texture,",
+    freckles,
+    eyes + ", long dark lashes, well-shaped brows,",
+    "fine proportional nose, full natural lips,",
+    hair + ",",
+    glasses,
+    bust + ",",
+    morph + ",",
+    "graceful neck, feminine shoulders,",
+    looks ? ("details: " + looks.slice(0, 280) + ",") : "",
+    "same face identity locked, photorealistic",
+  ].filter(Boolean).join(" ");
+}
+
 function fixedAppearanceBlock(c) {
   if (!c) return "";
   const age = Number(c.age) || 21;
@@ -4206,7 +4289,7 @@ function fixedAppearanceBlock(c) {
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
     "Person: " + name + ",",
     identityLock(c) + ",",
-    looks + ",",
+    enrichLooksDetail(c) + ",",
     phys.positive.join(", ") + ",",
     morphWeights(c) + ",",
     body ? ("morphology: " + body + ",") : "",
