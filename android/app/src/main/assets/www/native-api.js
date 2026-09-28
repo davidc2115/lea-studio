@@ -527,26 +527,29 @@
     const modeLock = /MODE NSFW/i.test(fullSys) ? "NSFW" : "SFW";
 
     const roleLock = [
-      "VERROU PERSONNAGE (OBLIGATOIRE — ne jamais contredire) :",
-      "Nom: " + nameLock + (titleLock ? " | Rôle: " + titleLock : ""),
-      scenLock ? ("Scénario: " + scenLock) : "",
-      temperLock ? ("Tempérament: " + temperLock) : "",
-      placeLock ? ("Lieu actuel: " + placeLock) : "",
-      outfitLock ? ("Tenue actuelle: " + outfitLock) : "",
-      "Mode: " + modeLock,
-      "Réponds TOUJOURS en français. Format: (pensée) puis *action* puis paroles.",
-      "Reste DANS le scénario et le tempérament. Pas d'orage/trempé sauf si le scénario le dit.",
-      "Début SFW: polie/timide selon tempérament, PAS de câlin ni tête sur l'épaule.",
+      "=== VERROU PERSONNAGE (comme Gemini — ne jamais contredire) ===",
+      "Tu incarnes UNIQUEMENT: " + nameLock + (titleLock ? " — " + titleLock : ""),
+      scenLock ? ("SCÉNARIO FIXE: " + scenLock) : "",
+      temperLock ? ("TEMPÉRAMENT (chaque phrase et action): " + temperLock) : "",
+      placeLock ? ("LIEU ACTUEL: " + placeLock) : "",
+      outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
+      "Mode: " + modeLock + ". Réponds TOUJOURS en français.",
+      "COHÉRENCE: réponds au dernier message, un cran de progression max, pas de téléportation de lieu.",
+      "FORMAT STRICT: (pensée courte) puis *action physique* puis paroles naturelles.",
+      "Reste DANS le scénario et le tempérament. Orage/trempé SEULEMENT si le scénario le dit.",
+      "Début SFW heat bas: polie/timide selon tempérament — PAS de câlin, PAS de tête sur l'épaule, PAS d'amour déclaré.",
+      "Qualité dialogue: phrases naturelles, pas de refrains, pas de méta, pas d'anglais.",
       FORMAT_REMINDER,
+      "=== FIN VERROU ===",
     ].filter(Boolean).join("\n");
 
     // System compact pour Groq : verrou + extrait utile du system long (évite de noyer le modèle)
-    let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 5500);
+    let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
-    const nonSys = messages.filter((m) => m.role !== "system").slice(-8).map((m) => ({
+    const nonSys = messages.filter((m) => m.role !== "system").slice(-10).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
-      content: String(m.content || "").slice(0, 900),
+      content: String(m.content || "").slice(0, 1200),
     }));
     const msgs = [{ role: "system", content: compactSys }].concat(nonSys);
 
@@ -588,11 +591,11 @@
             body: JSON.stringify({
               model: model,
               messages: msgs,
-              temperature: 0.62,
-              max_tokens: 700,
-              top_p: 0.9,
-              frequency_penalty: 0.45,
-              presence_penalty: 0.35,
+              temperature: 0.75,
+              max_tokens: 1100,
+              top_p: 0.92,
+              frequency_penalty: 0.35,
+              presence_penalty: 0.25,
             }),
           }).finally(function () { clearTimeout(timer); });
           const data = await res.json().catch(function () { return {}; });
@@ -1870,10 +1873,10 @@
       const baseParams = {
         width: 512,
         height: 768,
-        steps: 36,
+        steps: 28,
         n: 1,
-        sampler_name: "k_dpmpp_2m",
-        cfg_scale: 8,
+        sampler_name: "k_euler_a",
+        cfg_scale: 7,
         karras: true,
         clip_skip: 1,
       };
@@ -1887,12 +1890,12 @@
         const faceBoost = "(identical face to reference photo:1.6), (same woman same face:1.55), same eyes same nose same lips, consistent identity, ";
         // Prompt img2img : visage + changements (pose/tenue), sans réécrire un autre visage
         const imgPrompt = faceBoost + String(prompt || "").slice(0, 900);
-        const dens = [den, Math.min(0.48, den + 0.06)].filter(function (d, i, a) { return a.indexOf(d) === i; });
+        const dens = [den]; // un seul essai = plus rapide
         dens.forEach(function (d) {
           img2imgPayloads.push({
             prompt: imgPrompt + " ### " + negative + ", different face, different person, face morph",
             params: Object.assign({}, baseParams, {
-              steps: 38,
+              steps: 28,
               cfg_scale: 6.5,
               denoising_strength: d,
               seed: (typeof body.seed === "number" ? body.seed : undefined),

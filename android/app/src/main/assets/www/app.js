@@ -669,12 +669,16 @@ function faceIdentityLock(c) {
   // Léa : traits exacts de la galerie (longs cheveux, yeux verts/marron, visage ovale)
   if (id === "lea") {
     return [
-      "(identical face to reference photo:1.65)",
-      "same young French woman as source image,",
-      "soft oval face, fair skin with light freckles, full lips,",
-      "(long straight dark brown hair to lower back:1.4),",
-      "brown-green eyes, same jawline same nose,",
-      "NOT short hair, NOT shoulder-length bob, NOT different woman,",
+      "(identical face to reference photo:1.7)",
+      "same young French woman as source,",
+      "oval porcelain face, delicate bone structure, soft defined jaw,",
+      "(large almond hazel-green eyes:1.45), golden green iris,",
+      "dark chestnut thick arched brows, fine straight nose,",
+      "full soft natural rose lips, calm faint smile,",
+      "(long straight dark brown hair to lower back:1.5), subtle honey highlights,",
+      "(large prominent 95D breasts:1.5), deep cleavage, narrow waist hourglass,",
+      "delicate narrow shoulders, fair flawless skin,",
+      "NOT short hair, NOT bob, NOT small breasts, NOT flat chest, NOT different woman,",
     ].join(" ");
   }
   return [
@@ -689,36 +693,29 @@ function faceIdentityLock(c) {
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
-    // Même visage que la galerie Grok (jeune, soft, cheveux lisses, pas glamour MILF)
-    const ex0 = expandProfileExtra(extra);
-    const pose = ex0.overridesPose
-      ? "pose from USER REQUEST, follow exactly"
-      : pick([
-      "standing in doorway looking back over shoulder at camera, wet clothes",
-      "facing camera shy in the hallway doorway, soaked crop top",
-      "hand on doorframe, rain-soaked, timid soft expression",
-      "leaning on doorframe, wet hair sticking to skin, eyes down shy",
-    ]);
-    // Si l'user impose une tenue → ne pas forcer crop top mouillé
-    const defaultWetOutfit = !(ex0.overridesOutfit || ex0.overridesAct);
+    const defaultWetOutfit = !(ex0 && ex0.overridesOutfit);
     return [
-      ex0.text ? (ex0.text + ",") : "",
-      ex0.overridesAct ? ((ex0.actLine || "explicit act") + ", (1boy:1.4), uncensored,") : "",
-      "ultra photorealistic DSLR photo of Léa, SAME face as reference gallery photos,",
-      "(18-21 year old young French woman:1.35), (looks exactly 21:1.3), youthful soft face, baby face not mature,",
-      "(long straight dark brown hair to lower back:1.25), NOT wavy, NOT hollywood waves,",
-      "brown eyes, fair pale skin, natural soft makeup or none, natural brows,",
-      "(large 95D breasts:1.2), hourglass waist,",
-      defaultWetOutfit ? "(soaked wet white short crop top:1.3), thin wet fabric clinging to breasts, water droplets on skin," : "",
-      defaultWetOutfit ? "(tight wet dark blue skinny jeans:1.2), wet denim," : "",
-      defaultWetOutfit ? "wet skin sheen, water droplets, wet hair strands on face," : "",
-      defaultWetOutfit ? "apartment hallway doorway at night, indoor lights," : (ex0.overridesPlace ? "" : "indoor scene,"),
+      "ultra photorealistic DSLR photo of Léa,",
+      faceIdentityLock(c) + ",",
+      "(18-21 year old young French woman:1.4), (looks exactly 21:1.35),",
+      "oval porcelain face, delicate bone structure, soft jaw, subtle cheekbones,",
+      "(large almond hazel-green eyes:1.4), golden-green iris, long dark lashes,",
+      "dark chestnut thick arched brows, fine straight nose, full soft matte rose lips,",
+      "(long straight dark brown hair to lower back:1.45), subtle honey highlights,",
+      "NOT wavy salon hair, NOT short hair, NOT shoulder-length bob,",
+      "(large prominent generous 95D breasts:1.55), deep full cleavage, narrow defined waist hourglass,",
+      "delicate narrow shoulders, subtle collarbones, rounded hips, full buttocks, long slim legs,",
+      "fair flawless porcelain skin, natural soft makeup,",
+      defaultWetOutfit ? "(soaked wet white short crop top:1.35), thin wet fabric clinging to 95D breasts, water droplets," : "",
+      defaultWetOutfit ? "(tight wet dark blue skinny jeans:1.25), wet denim clinging," : "",
+      defaultWetOutfit ? "wet skin sheen, water droplets, wet hair strands on face and shoulders," : "",
+      defaultWetOutfit ? "apartment hallway doorway at night, indoor warm lights," : (ex0.overridesPlace ? "" : "indoor scene,"),
       pose + ",",
       "natural skin pores, soft cinematic lighting, sharp detailed young face,",
-      "NOT middle-aged, NOT 30 years old, NOT 35, NOT mature face, NOT glamorous heavy makeup,",
-      "different pose from reference, new angle, not identical to cover photo,",
-      ex0.hasAny ? "MUST follow USER REQUEST for clothes/pose/act," : "NOT dry clothes,",
-      "NOT different woman, NOT model face, NOT wavy voluminous salon hair, NOT studio seamless"
+      "NOT middle-aged, NOT 30+, NOT mature face, NOT small breasts, NOT flat chest, NOT A-cup, NOT B-cup,",
+      "NOT different woman, NOT model stock face, NOT dry clothes when wet scenario,",
+      "different pose from reference, new angle,",
+      ex0.hasAny ? "MUST follow USER REQUEST for clothes/pose/act," : "",
     ].filter(Boolean).join(" ");
   }
   // —— PROFIL = scène du SCÉNARIO (tenue + lieu + situation) ——
@@ -802,7 +799,7 @@ function buildLeaImagePrompt(extra = "") {
     yasmine: "glamorous, large 95D breasts, NOT plus-size",
     olga: "plump Russian, heavy E breasts, full hips",
     maya: "slim waist, medium C-cup, caramel skin",
-    lea: "hourglass figure, generous 95D large breasts, long straight brown hair",
+    lea: "SAME face as Léa reference, oval porcelain face, large almond hazel-green eyes golden reflections, dark chestnut arched brows, fine straight nose, full soft rose lips, long straight dark brown hair to lower back honey highlights, large prominent 95D breasts deep cleavage, narrow waist hourglass, delicate narrow shoulders, fair flawless skin",
   }[c.id] || (c.body || "");
 
   // Forçage bonnet H/I/J depuis tags/title si bodyLock générique
@@ -1357,7 +1354,7 @@ function buildSceneImagePrompt() {
     yasmine: "glamorous, large 95D breasts, NOT plus-size",
     olga: "plump Russian, heavy E breasts, full hips",
     maya: "slim waist, medium C-cup, caramel skin",
-    lea: "hourglass figure, generous 95D large breasts, long straight brown hair to lower back, brown eyes, fair French skin",
+    lea: "SAME face as Léa reference, oval porcelain face, large almond hazel-green eyes golden reflections, dark chestnut arched brows, fine straight nose, full soft rose lips, long straight dark brown hair to lower back honey highlights, large prominent 95D breasts deep cleavage, narrow waist hourglass, delicate narrow shoulders, fair flawless skin",
   }[c.id] || (c.body || "");
 
   const appearance = (c.appearance || "").replace(/\s+/g, " ").trim();
@@ -4249,7 +4246,7 @@ function identityLock(c) {
     aya: "athletic mixed-race, small firm A-B cup, caramel skin, pigtails or afro texture",
     chloe: "honey blonde hair, green eyes, freckles on nose and cheeks, small-medium B-cup, slim petite youthful face",
     sofia: "Italian olive skin, chestnut hair, extremely large 100E breasts, tiny waist",
-    lea: "SAME face as Léa gallery refs, long STRAIGHT dark brown hair to lower back NOT wavy, brown eyes, fair pale skin, soft oval youthful face, natural light makeup, large 95D breasts hourglass",
+    lea: "SAME face as Léa reference, oval porcelain face, large almond hazel-green eyes golden reflections, dark chestnut arched brows, fine straight nose, full soft rose lips, long straight dark brown hair to lower back honey highlights, large prominent 95D breasts deep cleavage, narrow waist hourglass, delicate narrow shoulders, fair flawless skin",
     ines: "Algerian, golden tan, long wavy black hair, hazel eyes, medium C-cup, wide hips",
     nina: "Slavic, platinum blonde long hair, grey eyes, very pale, tall, medium C-cup",
     bruna: "Brazilian, TINY waist, HUGE round butt, medium C-cup",
@@ -5387,7 +5384,7 @@ async function persistImageUrl(url) {
 async function pollHordeJob(jobId, host, charId) {
   const cid = charId || state.current || "lea";
   for (let i = 0; i < 240; i++) {
-    await new Promise((r) => setTimeout(r, 3000));
+    await new Promise((r) => setTimeout(r, 2500));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
       if (!st.done) {
