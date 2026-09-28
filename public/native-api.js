@@ -1850,6 +1850,8 @@
         "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
         "watermark, text, logo, signature, child, teen, underage, loli,",
         "wrong body type, inconsistent proportions,",
+        "different face, different person, face morph, identity change, another woman,",
+        "wrong facial features, different eyes, different nose, different jaw,",
         extraNeg
       ].filter(Boolean).join(" ");
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
@@ -1877,14 +1879,17 @@
       };
       const payloads = [];
       if (useImg2Img) {
-        const den = (typeof body.denoising === "number" ? body.denoising : 0.28);
-        const hiSteps = den >= 0.65 ? 42 : 34;
+        const den = (typeof body.denoising === "number" ? body.denoising : 0.40);
+        // Denoise bas = visage plus fidèle (Horde morph au-dessus de ~0.55)
+        const denClamped = Math.min(0.58, Math.max(0.32, den));
+        const hiSteps = denClamped >= 0.50 ? 40 : 36;
+        const faceBoost = "(identical face to reference:1.5), (same facial features:1.45), consistent identity, ";
         payloads.push({
-          prompt: prompt + " ### " + negative,
+          prompt: faceBoost + prompt + " ### " + negative,
           params: Object.assign({}, baseParams, {
             steps: Math.max(body.steps || 0, hiSteps) || hiSteps,
-            cfg_scale: den >= 0.7 ? 6.5 : 7.5,
-            denoising_strength: Math.min(0.85, Math.max(0.25, den)),
+            cfg_scale: denClamped >= 0.50 ? 7.0 : 7.5,
+            denoising_strength: denClamped,
             seed: (typeof body.seed === "number" ? body.seed : undefined),
           }),
           nsfw: body.nsfw !== false,
