@@ -1860,6 +1860,16 @@ function openFull(src, opts) {
           return;
         }
         localStorage.setItem(chatBgKey(id), showSrc);
+        try { applyChatLook(); } catch (_) {}
+        // Si on est dans le chat, rafraîchir le fond tout de suite
+        try {
+          const el = document.querySelector(".chat-bg");
+          if (el) el.style.backgroundImage = "url('" + showSrc + "')";
+          // Marquer sélection dans le sheet si ouvert
+          document.querySelectorAll(".bg-pick img").forEach((im) => {
+            im.classList.toggle("on", im.getAttribute("data-bg") === showSrc || im.src === showSrc);
+          });
+        } catch (_) {}
         btn.textContent = "Fond du chat ✓";
       };
       btn.textContent = "Utiliser comme fond";
@@ -5419,29 +5429,43 @@ function paintMessages() {
   }
 }
 
-/** Fonds autorisés = uniquement images de CE personnage (cover + galerie + générées). */
+/** Fonds autorisés = cover + galerie assets + toutes photos générées du personnage. */
 function characterBgOptions(c) {
   const char = c || character();
   const id = char.id || "lea";
   const opts = [];
   const seen = new Set();
   const push = (src, title) => {
-    if (!src || seen.has(src)) return;
-    seen.add(src);
-    opts.push({ src, title: title || "Photo" });
+    if (!src || typeof src !== "string") return;
+    // Résoudre gallery: → data URL affichable
+    let url = src;
+    if (src.startsWith("gallery:")) {
+      try { url = resolvePhotoSrc(src) || ""; } catch (_) { url = ""; }
+    }
+    if (!url || url.length < 4) return;
+    // Clé de dédup : chemin original ou tête data
+    const key = src.startsWith("data:") ? (src.slice(0, 80) + ":" + src.length) : src;
+    if (seen.has(key) || seen.has(url)) return;
+    seen.add(key);
+    seen.add(url);
+    opts.push({ src: url, raw: src, title: title || "Photo" });
   };
-  push(resolvedCover(char), "Profil");
-  const gal = char.gallery && char.gallery.length
-    ? char.gallery
-    : (id === "lea" ? GALLERY.map((g) => g.src) : []);
-  (gal || []).forEach((src, i) => {
-    const r = String(src).startsWith("gallery:") ? (resolvePhotoSrc(src) || "") : src;
-    if (r) push(r, "Photo " + (i + 1));
-  });
-  extraPhotos(id).forEach((src, i) => {
-    const resolved = resolvePhotoSrc(src) || src;
-    if (resolved && !String(resolved).startsWith("gallery:")) push(resolved, "Générée " + (i + 1));
-  });
+  // 1) Cover profil
+  try { push(resolvedCover(char), "Profil"); } catch (_) {}
+  if (char.cover) push(char.cover, "Cover");
+  // 2) Galerie statique (assets APK)
+  let gal = Array.isArray(char.gallery) ? char.gallery.slice() : [];
+  if (id === "lea" && typeof GALLERY !== "undefined") {
+    for (const g of GALLERY) {
+      const s = g && g.src ? g.src : g;
+      if (s && !gal.includes(s)) gal.push(s);
+    }
+  }
+  gal.forEach((src, i) => push(src, "Photo " + (i + 1)));
+  // 3) Photos générées / sauvegardées (localStorage + disque)
+  try {
+    extraPhotos(id).forEach((src, i) => push(src, "Générée " + (i + 1)));
+  } catch (_) {}
   return opts;
 }
 
@@ -5453,14 +5477,25 @@ function chatBg(id) {
   const cid = id || state.current || "lea";
   const c = (state.characters || []).find((x) => x.id === cid) || character();
   const opts = characterBgOptions(c);
-  const allowed = new Set(opts.map((o) => o.src));
+  const allowed = new Set();
+  opts.forEach((o) => { if (o.src) allowed.add(o.src); if (o.raw) allowed.add(o.raw); });
   let saved = localStorage.getItem(chatBgKey(cid));
-  // Ancien fond global Léa : ne l’appliquer qu’à Léa
   if (!saved && cid === "lea") {
     const legacy = localStorage.getItem("lea.chatBg");
-    if (legacy && allowed.has(legacy)) saved = legacy;
+    if (legacy) saved = legacy;
   }
-  if (saved && allowed.has(saved)) return saved;
+  // Résoudre gallery: sauvegardé
+  if (saved && String(saved).startsWith("gallery:")) {
+    try { const r = resolvePhotoSrc(saved); if (r) saved = r; } catch (_) {}
+  }
+  if (saved && (allowed.has(saved) || String(saved).startsWith("data:image") || String(saved).startsWith("images/"))) {
+    return saved;
+  }
+  // Défaut : cover résolue puis 1ère option galerie
+  try {
+    const cov = resolvedCover(c);
+    if (cov) return cov;
+  } catch (_) {}
   return (opts[0] && opts[0].src) || c.cover || "images/lea-portrait.jpg";
 }
 
