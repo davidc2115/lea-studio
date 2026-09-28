@@ -1898,45 +1898,55 @@
       const negFull = (negative ? (" ### " + negative) : "") +
         " ### watermark, text, logo, signature, dreamstime, shutterstock, getty, stock photo, studio headshot, plain background, shoulder-length bob, auburn hair, red hair, different woman";
 
-      // 1) img2img prioritaires (garde le visage de la photo de profil)
+      // 1) img2img prioritaires — denoise BAS + steps HAUTS = visage stable
       if (src) {
-        let den = typeof body.denoising === "number" ? body.denoising : 0.38;
-        den = Math.min(0.48, Math.max(0.32, den));
-        const facePrompt = "(identical face to reference photo:1.5), same woman as source image, " + promptSafe.slice(0, 750);
+        let den = typeof body.denoising === "number" ? body.denoising : 0.33;
+        // Ne jamais monter trop haut (visage change au-dessus de ~0.42)
+        den = Math.min(0.40, Math.max(0.28, den));
+        const facePrompt = [
+          "(identical face to reference photo:1.65)",
+          "(same woman same face identity:1.55)",
+          "same eye color same nose same lips same jaw,",
+          "long dark brown hair to lower back NOT light brown NOT auburn NOT bob,",
+          promptSafe.slice(0, 700),
+        ].join(" ");
+        // Essai A : denoise bas, steps élevés
         payloads.push({
           prompt: facePrompt + negFull,
           params: {
             width: 512,
             height: 768,
-            steps: 24,
+            steps: 30,
             n: 1,
             sampler_name: "k_euler_a",
-            cfg_scale: 6.5,
+            cfg_scale: 7,
             denoising_strength: den,
           },
           nsfw: true,
           censor_nsfw: false,
-          models: ["Dreamshaper", "AbsoluteReality", "stable_diffusion"],
+          models: ["Dreamshaper", "AbsoluteReality", "Realistic Vision"],
           r2: true,
           slow_workers: true,
           source_image: src,
           source_processing: "img2img",
         });
+        // Essai B : denoise un peu plus bas encore
         payloads.push({
           prompt: facePrompt + negFull,
           params: {
             width: 512,
             height: 768,
-            steps: 20,
+            steps: 28,
             n: 1,
             sampler_name: "k_euler_a",
-            cfg_scale: 7,
-            denoising_strength: Math.min(0.5, den + 0.08),
+            cfg_scale: 6.5,
+            denoising_strength: Math.max(0.28, den - 0.04),
           },
           nsfw: true,
           censor_nsfw: false,
-          models: ["stable_diffusion"],
+          models: ["stable_diffusion", "Dreamshaper"],
           r2: true,
+          slow_workers: true,
           source_image: src,
           source_processing: "img2img",
         });

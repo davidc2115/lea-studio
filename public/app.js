@@ -4465,11 +4465,29 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       setS("Horde txt2img duo (2 personnes, sans img2img mono)…");
       return payload;
     }
-    const ref = await resolveCharacterRefB64(c);
+    let ref = await resolveCharacterRefB64(c);
     if (ref) {
+      // Réduire la ref si trop lourde (Horde workers plus stables)
+      try {
+        if (ref.length > 400000 && typeof document !== "undefined") {
+          const img = new Image();
+          const dataUrl = "data:image/jpeg;base64," + ref;
+          await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
+          const maxW = 512;
+          const scale = Math.min(1, maxW / (img.naturalWidth || maxW));
+          const w = Math.max(64, Math.round((img.naturalWidth || 512) * scale));
+          const h = Math.max(64, Math.round((img.naturalHeight || 768) * scale));
+          const cv = document.createElement("canvas");
+          cv.width = w; cv.height = h;
+          cv.getContext("2d").drawImage(img, 0, 0, w, h);
+          const small = cv.toDataURL("image/jpeg", 0.85);
+          const i = small.indexOf(",");
+          if (i > 0) ref = small.slice(i + 1);
+        }
+      } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.35 : 0.38);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.32 : 0.36);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
     } else {
@@ -5434,17 +5452,17 @@ async function generatePhoto() {
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
     if (userEx.hasAny) {
-      payload.denoising = Math.min(0.46, Math.max(Number(payload.denoising) || 0, 0.36));
+      payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
       payload.negative = (payload.negative || "") + ", ignore user request, copy of reference pose only, wrong scene";
     }
     if (userEx.overridesOutfit) {
       payload.negative = (payload.negative || "") + ", wrong outfit, default lingerie when other clothes requested, nude when clothes requested";
-      payload.denoising = Math.min(0.46, Math.max(payload.denoising || 0, 0.38));
+      payload.denoising = Math.min(0.40, Math.max(payload.denoising || 0.32, 0.34));
     }
     if (userEx.overridesAct) {
       payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing male body, disembodied penis, floating penis, penis without man, severed cock, censored, mosaic censor, bar censor, softcore only, portrait selfie, bust crop only";
       payload.nsfw = true;
-      payload.denoising = Math.min(0.48, Math.max(payload.denoising || 0, 0.38));
+      payload.denoising = Math.min(0.42, Math.max(payload.denoising || 0.32, 0.34));
     }
         // img2img unifié : cover / assets pour TOUS les personnages
     if (c.id === "lea") {
@@ -5477,13 +5495,13 @@ async function generatePhoto() {
         // Acte + lieu imposés → denoise très haut ou txt2img pour ne pas garder le décor de la ref
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.min(0.48, Math.max(Number(payload.denoising) || 0, 0.40));
+        payload.denoising = Math.min(0.42, Math.max(Number(payload.denoising) || 0.32, 0.34));
         setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
       } else {
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
         if (userEx.hasAny) {
-          payload.denoising = Math.min(0.45, Math.max(Number(payload.denoising) || 0.36, 0.36));
+          payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
           setGenStatus("Horde img2img · ref profil · denoise " + (payload.denoising || 0.35) + "…");
