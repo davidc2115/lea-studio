@@ -693,6 +693,10 @@ function faceIdentityLock(c) {
 function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
+    const ex0 = expandProfileExtra(extra || "");
+    const pose = (ex0 && ex0.overridesPose)
+      ? "pose from user request"
+      : "standing in doorway or kneeling by fireplace, looking at viewer";
     const defaultWetOutfit = !(ex0 && ex0.overridesOutfit);
     return [
       "ultra photorealistic DSLR photo of Léa,",
@@ -3632,7 +3636,7 @@ function renderProfile() {
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
     <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
       <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descriptif physique</div>
-      <p style="margin:0 0 8px;line-height:1.45">${c.appearance || ""}</p>
+      <p style="margin:0 0 8px;line-height:1.45">${formatPhysicalFR(c)}</p>
       <p style="margin:0;color:#b9a8c4;font-size:13px;line-height:1.4">${c.body ? ("Morphologie : " + c.body) : ""}${c.ethnicity ? (" · " + c.ethnicity) : ""}${c.age ? (" · " + c.age + " ans") : ""}</p>
     </div>
     <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
@@ -3772,7 +3776,22 @@ function renderProfile() {
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     };
   } catch (_) {}
-  $("genimg").onclick = generatePhoto;
+  $("genimg").onclick = () => {
+    try {
+      const r = generatePhoto();
+      if (r && typeof r.catch === "function") {
+        r.catch((e) => {
+          window._leaGenBusy = false;
+          setGenStatus("Erreur génération : " + (e && e.message ? e.message : e));
+          console.error("[lea gen]", e);
+        });
+      }
+    } catch (e) {
+      window._leaGenBusy = false;
+      setGenStatus("Erreur : " + (e && e.message ? e.message : e));
+      console.error("[lea gen sync]", e);
+    }
+  };
   migrateGalleryToDisk(state.current).catch(() => {});
   const refreshPreview = () => {
     if (!$("prompt-preview")) return;
@@ -4178,6 +4197,59 @@ function duoCompositionBlock(c) {
 
 
 /** Enrichit looks_en en descriptif ultra-détaillé (visage + corps) pour TOUS les personnages. */
+
+/** Descriptif physique FR détaillé affiché dans le profil (tous personnages). */
+function formatPhysicalFR(c) {
+  if (!c) return "";
+  if (c.id === "lea") {
+    return "Jeune femme de 21 ans, allure délicate et sophistiquée, proportions voluptueuses. "
+      + "Visage ovale, mâchoire douce, pommettes subtiles, teint porcelaine uniforme. "
+      + "Yeux amande vert-noisette lumineux (reflets dorés et verts), cils longs, sourcils châtain foncé bien dessinés. "
+      + "Nez fin et droit, lèvres pleines rose naturel mat, léger sourire en coin. "
+      + "Cheveux longs bruns foncés jusqu'aux reins, lisses, reflets miel ; souvent mouillés (scénario orage). "
+      + "Silhouette sablier : épaules étroites, poitrine généreuse 95D au décolleté marqué, taille fine, hanches arrondies, fesses pleines, jambes longues et toniques. "
+      + "Peau claire et soignée sur les épaules et le buste.";
+  }
+  const base = String(c.appearance || "").trim();
+  const looks = String(c.looks_en || "").trim();
+  // Enrichir en FR à partir des tags physiques
+  const blob = (base + " " + looks + " " + (c.body || "")).toLowerCase();
+  const parts = [];
+  parts.push((c.age || "?") + " ans" + (c.ethnicity ? (", " + c.ethnicity) : "") + ".");
+  if (base) parts.push(base);
+  else if (looks) {
+    // résumé FR simple
+    let hair = "cheveux bruns";
+    if (/platinum|blond platine/.test(blob)) hair = "cheveux blond platine";
+    else if (/blonde|blond/.test(blob)) hair = "cheveux blonds";
+    else if (/auburn|roux|redhead|red hair/.test(blob)) hair = "cheveux auburn / roux";
+    else if (/black|jet black|noir/.test(blob)) hair = "cheveux noirs";
+    else if (/dark brown|brun fonc/.test(blob)) hair = "cheveux bruns foncés";
+    let eyes = "yeux marron";
+    if (/hazel-green|vert-noisette/.test(blob)) eyes = "yeux vert-noisette";
+    else if (/green|vert/.test(blob)) eyes = "yeux verts";
+    else if (/blue|bleu/.test(blob)) eyes = "yeux bleus";
+    else if (/hazel|noisette/.test(blob)) eyes = "yeux noisette";
+    let bust = "poitrine moyenne";
+    if (/j-cup|bonnet j/.test(blob)) bust = "poitrine très généreuse bonnet J";
+    else if (/i-cup|bonnet i/.test(blob)) bust = "poitrine très généreuse bonnet I";
+    else if (/h-cup|bonnet h/.test(blob)) bust = "poitrine très généreuse bonnet H";
+    else if (/95d|d-cup|large full d/.test(blob)) bust = "poitrine généreuse 95D";
+    else if (/e-cup|100e|very large heavy/.test(blob)) bust = "poitrine très généreuse E";
+    else if (/c-cup/.test(blob)) bust = "poitrine moyenne C";
+    else if (/b-cup/.test(blob)) bust = "petite poitrine B";
+    else if (/a-cup|flat|nearly flat/.test(blob)) bust = "poitrine très petite A / plate";
+    let morph = "";
+    if (/hourglass|sablier/.test(blob)) morph = "silhouette sablier, taille fine";
+    else if (/athletic/.test(blob)) morph = "corps athlétique";
+    else if (/slim|slender|mince/.test(blob)) morph = "silhouette mince";
+    else if (/curvy|voluptuous|plus-size|ronde/.test(blob)) morph = "formes généreuses / voluptueuses";
+    parts.push(hair + ", " + eyes + ", " + bust + (morph ? (", " + morph) : "") + ".");
+  }
+  if (c.body) parts.push("Morphologie : " + c.body + ".");
+  return parts.join(" ").replace(/\s+/g, " ").trim();
+}
+
 function enrichLooksDetail(c) {
   if (!c) return "";
   const age = Number(c.age) || 21;
@@ -5069,7 +5141,18 @@ async function generatePhoto() {
   }
   const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
   const c = character();
-  let prompt = buildLeaImagePrompt(extra);
+  let prompt;
+  try {
+    prompt = buildLeaImagePrompt(extra);
+  } catch (e) {
+    setGenStatus("Erreur prompt : " + (e.message || e));
+    console.error("[lea prompt]", e);
+    return;
+  }
+  if (!prompt || prompt.length < 20) {
+    setGenStatus("Prompt vide — réessaie.");
+    return;
+  }
   // DUO: prompt COURT centré sur contraste cheveux + poitrine (Horde ignore les pavés)
   try {
     if (isDuoCharacter(c)) {
