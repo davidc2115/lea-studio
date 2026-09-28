@@ -4484,6 +4484,13 @@ function identityLock(c) {
 async function applyCharacterRefToPayload(payload, c, statusFn) {
   const setS = statusFn || setGenStatus;
   try {
+    // Autres personnages : txt2img seulement (img2img réservé à Léa)
+    if (!c || c.id !== "lea") {
+      delete payload.source_image;
+      delete payload.source_processing;
+      setS("Horde txt2img · " + ((c && c.name) || "personnage") + "…");
+      return payload;
+    }
     if (isDuoCharacter(c)) {
       setS("Horde txt2img duo (2 personnes, sans img2img mono)…");
       return payload;
@@ -4845,7 +4852,7 @@ async function generatePhotoHordeFallback(prompt, c) {
         duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both red hair, both auburn hair, both blonde, both brunette, matching hair, solo woman, 1girl, single person, three women, six women, group of clones, identical twins same hair same chest, bright orange red hair on both";
       }
     } catch (_) {}
-    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true };
+    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
@@ -5010,25 +5017,30 @@ async function generateScenePhoto() {
           ? "completely nude, fully naked, bare breasts, exposed nipples, topless, no clothes, nude standing, glamorous different face"
           : ""),
       nsfw: true,
+      charId: c.id || "",
     };
 
-    // Référence visage unifiée (tous moteurs / tous personnages)
-    setSceneProgress("🖼 Chargement référence visage…", 10);
-    try {
-      const ref = await resolveCharacterRefB64(c);
-      if (ref && !isDuoCharacter(c)) {
-        payload.source_image = ref;
-        payload.source_processing = "img2img";
-        const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-        payload.denoising = duoDenoise(bigChange ? 0.46 : 0.36);
-        payload.seed = Math.floor(Math.random() * 2_000_000_000);
-        setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
-      } else {
-        setSceneProgress("📡 Horde txt2img scène…", 12);
+    // img2img uniquement pour Léa ; les autres = txt2img
+    if (c.id === "lea") {
+      setSceneProgress("🖼 Chargement référence visage Léa…", 10);
+      try {
+        const ref = await resolveCharacterRefB64(c);
+        if (ref) {
+          payload.source_image = ref;
+          payload.source_processing = "img2img";
+          const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
+          payload.denoising = bigChange ? 0.42 : 0.38;
+          payload.seed = Math.floor(Math.random() * 2_000_000_000);
+          setSceneProgress("📡 Horde img2img Léa denoise " + payload.denoising + "…", 14);
+        } else {
+          setSceneProgress("📡 Horde txt2img Léa (pas de ref)…", 12);
+        }
+      } catch (e) {
+        console.warn("[scene ref]", e);
+        setSceneProgress("📡 Horde txt2img Léa…", 12);
       }
-    } catch (e) {
-      console.warn("[scene ref]", e);
-      setSceneProgress("📡 Horde txt2img scène…", 12);
+    } else {
+      setSceneProgress("📡 Horde txt2img · " + (c.name || "personnage") + "…", 12);
     }
 
 
@@ -5418,7 +5430,7 @@ async function generatePhoto() {
                 width: 512,
                 height: 640,
               };
-              if (sdRef) { sdPayload.source_image = sdRef; sdPayload.strength = 0.55; }
+              if (sdRef && c && c.id === "lea") { sdPayload.source_image = sdRef; sdPayload.strength = 0.55; }
               setGenStatus("SD.cpp…");
               const raw = window.LeaAndroid.sdCppGenerate(JSON.stringify(sdPayload));
               let data = {};
@@ -5461,7 +5473,7 @@ async function generatePhoto() {
         duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both red hair, both auburn hair, both blonde, both brunette, matching hair, solo woman, 1girl, single person, three women, six women, group of clones, identical twins same hair same chest, bright orange red hair on both";
       }
     } catch (_) {}
-    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true };
+    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
