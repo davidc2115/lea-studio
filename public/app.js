@@ -694,9 +694,31 @@ function buildLeaImagePrompt(extra = "") {
   const c = character();
   if (c.id === "lea") {
     const ex0 = expandProfileExtra(extra || "");
-    const pose = (ex0 && ex0.overridesPose)
-      ? "pose from user request"
-      : "standing in doorway or kneeling by fireplace, looking at viewer";
+    const leaPosePool = [
+      "standing in the apartment doorway, one hand on the doorframe, looking at viewer, three-quarter view",
+      "kneeling on the living room rug by the fireplace, looking up at viewer, wet hair falling forward",
+      "leaning back against the closed door, arms behind her, chest forward, shy look",
+      "sitting on the hallway floor with knees up, looking over her shoulder, wet hair",
+      "standing weight on one hip, looking back over the shoulder toward the viewer",
+      "bending slightly forward in the doorway, looking up with a timid mischievous glance",
+      "sitting on the arm of the sofa near the fireplace, legs together, looking at camera",
+      "on her knees in the hallway, hands on her thighs, looking up",
+      "standing in profile then turning her face to camera, wet long hair down her back",
+      "leaning in the doorframe from the side, one knee bent, looking at viewer",
+    ];
+    let pose;
+    if (ex0 && ex0.overridesPose) {
+      pose = "POSE FROM USER REQUEST, follow exactly";
+    } else {
+      try {
+        const last = localStorage.getItem("lea.lastPose.lea") || "";
+        const pool = leaPosePool.filter((p) => p !== last);
+        pose = pool[Math.floor(Math.random() * pool.length)] || leaPosePool[0];
+        localStorage.setItem("lea.lastPose.lea", pose);
+      } catch (_) {
+        pose = leaPosePool[Math.floor(Math.random() * leaPosePool.length)];
+      }
+    }
     const defaultWetOutfit = !(ex0 && ex0.overridesOutfit);
     return [
       "ultra photorealistic DSLR photo of Léa,",
@@ -718,7 +740,8 @@ function buildLeaImagePrompt(extra = "") {
       "natural skin pores, soft cinematic lighting, sharp detailed young face,",
       "NOT middle-aged, NOT 30+, NOT mature face, NOT small breasts, NOT flat chest, NOT A-cup, NOT B-cup,",
       "NOT different woman, NOT model stock face, NOT dry clothes when wet scenario,",
-      "different pose from reference, new angle,",
+      "NEW pose different from the reference photo, different camera angle, different body position,",
+      "NOT the same pose as source, NOT arms crossed looking down, NOT static copy of reference pose,",
       ex0.hasAny ? "MUST follow USER REQUEST for clothes/pose/act," : "",
     ].filter(Boolean).join(" ");
   }
@@ -4487,7 +4510,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.32 : 0.36);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.38 : 0.40);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
     } else {
@@ -5504,7 +5527,8 @@ async function generatePhoto() {
           payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
-          setGenStatus("Horde img2img · ref profil · denoise " + (payload.denoising || 0.35) + "…");
+          payload.denoising = Math.min(0.42, Math.max(Number(payload.denoising) || 0.38, 0.38));
+          setGenStatus("Horde img2img · nouvelle pose · denoise " + payload.denoising + "…");
         }
       }
     } catch (e) {

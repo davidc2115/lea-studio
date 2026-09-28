@@ -1934,9 +1934,9 @@
 
       // 1) img2img prioritaires — denoise BAS + steps HAUTS = visage stable
       if (src) {
-        let den = typeof body.denoising === "number" ? body.denoising : 0.33;
+        let den = typeof body.denoising === "number" ? body.denoising : 0.38;
         // Ne jamais monter trop haut (visage change au-dessus de ~0.42)
-        den = Math.min(0.40, Math.max(0.28, den));
+        den = Math.min(0.44, Math.max(0.32, den));
         const facePrompt = [
           "(identical face to reference photo:1.65)",
           "(same woman same face identity:1.55)",
