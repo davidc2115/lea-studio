@@ -4251,6 +4251,10 @@ function duoCompositionBlock(c) {
 /** Descriptif physique FR détaillé affiché dans le profil (tous personnages). */
 function formatPhysicalFR(c) {
   if (!c) return "";
+  const stored = String(c.appearance || "").trim();
+  if (stored.indexOf("Sujet") >= 0 && stored.indexOf("Yeux") >= 0 && stored.length > 250) {
+    return stored;
+  }
   if (c.id === "duo_twins_lea") {
     return `Femme 1 : Léa (brunette aux cheveux lisses)
 Âge et origine : 21 ans, type européen / français.
