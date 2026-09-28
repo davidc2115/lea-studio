@@ -4469,7 +4469,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
     if (ref) {
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.36 : 0.38);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.35 : 0.38);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
     } else {
@@ -5428,7 +5428,7 @@ async function generatePhoto() {
     if (c.id === "mei") payload.negative = (payload.negative || "") + ", large breasts, busty, blonde, european only features";
     if (c.id === "sofia") payload.negative = (payload.negative || "") + ", flat chest, small breasts, A-cup, skinny boyish";
     if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, large breasts, D-cup, no freckles, brown hair";
-    if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, white bra only, lingerie set, nude, seamless studio, middle-aged, 30 years old";
+    if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, auburn hair, red hair, shoulder-length bob, short hair, white bra only, lingerie set, nude, seamless studio, plain background, stock photo, dreamstime, watermark, middle-aged, 30 years old, different face, different woman";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
     // Toute option utilisateur → denoise plus fort + négatifs adaptés
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
@@ -5483,8 +5483,10 @@ async function generatePhoto() {
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
         if (userEx.hasAny) {
-          payload.denoising = Math.max(Number(payload.denoising) || 0, 0.50);
+          payload.denoising = Math.min(0.45, Math.max(Number(payload.denoising) || 0.36, 0.36));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
+        } else {
+          setGenStatus("Horde img2img · ref profil · denoise " + (payload.denoising || 0.35) + "…");
         }
       }
     } catch (e) {
@@ -5492,8 +5494,8 @@ async function generatePhoto() {
       setGenStatus("Horde txt2img…");
     }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
-    if (!start.jobId) throw new Error("Pas de job Horde");
-    setGenStatus("Horde job lancé — file d’attente… (reste sur l’écran ou reviens)");
+    if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
+    setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
     pollHordeJob(start.jobId, start.host, c.id);
   } catch (e) {
     window._leaGenBusy = false;

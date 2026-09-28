@@ -1879,7 +1879,7 @@
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
-        if (raw.length > 800 && raw.length < 900000) src = raw;
+        if (raw.length > 800 && raw.length < 1200000) src = raw;
       }
 
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
@@ -1893,40 +1893,22 @@
       // Client-Agent obligatoire format name:version:contact
       const clientAgent = "LeaStudio:2.2:https://github.com/davidc2115/lea-studio";
 
-      // Payloads du plus simple au plus riche
+      // Payloads : img2img EN PREMIER si ref (sinon visage aléatoire stock)
       const payloads = [];
+      const negFull = (negative ? (" ### " + negative) : "") +
+        " ### watermark, text, logo, signature, dreamstime, shutterstock, getty, stock photo, studio headshot, plain background, shoulder-length bob, auburn hair, red hair, different woman";
 
-      // 1) txt2img minimal (le plus fiable)
-      payloads.push({
-        prompt: promptSafe + (negative ? (" ### " + negative) : ""),
-        params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
-        nsfw: true,
-        censor_nsfw: false,
-        models: ["stable_diffusion"],
-        r2: true,
-      });
-
-      // 2) txt2img modèles photo
-      payloads.push({
-        prompt: promptSafe + (negative ? (" ### " + negative) : ""),
-        params: { width: 512, height: 768, steps: 25, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
-        nsfw: true,
-        censor_nsfw: false,
-        models: ["Dreamshaper", "AbsoluteReality", "Deliberate"],
-        r2: true,
-        slow_workers: true,
-      });
-
-      // 3) img2img si ref OK
+      // 1) img2img prioritaires (garde le visage de la photo de profil)
       if (src) {
-        let den = typeof body.denoising === "number" ? body.denoising : 0.4;
-        den = Math.min(0.5, Math.max(0.35, den));
+        let den = typeof body.denoising === "number" ? body.denoising : 0.38;
+        den = Math.min(0.48, Math.max(0.32, den));
+        const facePrompt = "(identical face to reference photo:1.5), same woman as source image, " + promptSafe.slice(0, 750);
         payloads.push({
-          prompt: "same face as reference, " + promptSafe.slice(0, 700) + (negative ? (" ### " + negative) : ""),
+          prompt: facePrompt + negFull,
           params: {
             width: 512,
             height: 768,
-            steps: 22,
+            steps: 24,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 6.5,
@@ -1934,19 +1916,48 @@
           },
           nsfw: true,
           censor_nsfw: false,
-          models: ["stable_diffusion", "Dreamshaper"],
+          models: ["Dreamshaper", "AbsoluteReality", "stable_diffusion"],
+          r2: true,
+          slow_workers: true,
+          source_image: src,
+          source_processing: "img2img",
+        });
+        payloads.push({
+          prompt: facePrompt + negFull,
+          params: {
+            width: 512,
+            height: 768,
+            steps: 20,
+            n: 1,
+            sampler_name: "k_euler_a",
+            cfg_scale: 7,
+            denoising_strength: Math.min(0.5, den + 0.08),
+          },
+          nsfw: true,
+          censor_nsfw: false,
+          models: ["stable_diffusion"],
           r2: true,
           source_image: src,
           source_processing: "img2img",
         });
       }
 
-      // 4) ultime secours sans negative, sans models spécifiques
+      // 2) txt2img secours UNIQUEMENT si pas de ref ou img2img refusé
       payloads.push({
-        prompt: promptSafe.slice(0, 500),
-        params: { width: 512, height: 512, steps: 15, n: 1 },
+        prompt: promptSafe + negFull,
+        params: { width: 512, height: 768, steps: 22, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
         nsfw: true,
         censor_nsfw: false,
+        models: ["Dreamshaper", "AbsoluteReality", "Deliberate"],
+        r2: true,
+        slow_workers: true,
+      });
+      payloads.push({
+        prompt: promptSafe.slice(0, 600) + " ### watermark, stock photo, dreamstime",
+        params: { width: 512, height: 768, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        nsfw: true,
+        censor_nsfw: false,
+        models: ["stable_diffusion"],
         r2: true,
       });
 
