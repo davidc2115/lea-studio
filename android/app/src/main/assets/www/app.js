@@ -4004,6 +4004,10 @@ function duoCompositionBlock(c) {
   }
   function cupOf(text) {
     const t = String(text || "").toLowerCase();
+    // Petites poitrines EN PREMIER (sinon "large E" dans un blob global écrase A-cup du LEFT)
+    if (/a-cup|bonnet\s*a|flat chest|nearly flat|almost flat|very small flat|small a-cup|petit(s)? seins? plats?/.test(t)
+        && !/e-cup|d-cup|large heavy|huge/.test(t)) return "a";
+    if (/b-cup|bonnet\s*b|athletic b-cup|small b/.test(t) && !/e-cup|d-cup|large heavy/.test(t)) return "b";
     if (/j-cup|bonnet\s*j/.test(t)) return "j";
     if (/i-cup|bonnet\s*i/.test(t)) return "i";
     if (/h-cup|bonnet\s*h/.test(t)) return "h";
@@ -4012,8 +4016,8 @@ function duoCompositionBlock(c) {
     if (/e-cup|bonnet\s*e|large e|heavy e|huge.*e-cup|very large heavy e/.test(t)) return "e";
     if (/d-cup|bonnet\s*d|large d|95d/.test(t)) return "d";
     if (/c-cup|bonnet\s*c|medium c/.test(t)) return "c";
-    if (/b-cup|bonnet\s*b/.test(t)) return "b";
     if (/a-cup|bonnet\s*a|flat|nearly flat|almost flat|very small flat|small a/.test(t)) return "a";
+    if (/b-cup|bonnet\s*b/.test(t)) return "b";
     return "";
   }
   const cupDesc = {
