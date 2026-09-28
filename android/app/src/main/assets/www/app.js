@@ -5335,35 +5335,41 @@ function formatBubble(text) {
   // **Prénom:** (duo) → speaker AVANT de convertir ** en *
   raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*\*\*\s*:\s*/g, "$1«SPEAKER:$2»");
   raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*:\s*\*\*\s*/g, "$1«SPEAKER:$2»");
-  // **action** → *action*
+  // **action** → *action* (après speakers)
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // [Prénom] : ou Prénom : en début de ligne → label locuteur (duo / 3e personne)
+  // ~pensée~ → (pensée)
+  raw = raw.replace(/~{1,2}([^~\n]{2,200}?)~{1,2}/g, "($1)");
+  // [Prénom] : ou Prénom : en début de ligne → label locuteur
   raw = raw.replace(/(^|\n)\s*\[([^\]\n]{1,40})\]\s*:\s*/g, "$1«SPEAKER:$2»");
   raw = raw.replace(/(^|\n)\s*([A-ZÉÈÊÀÂÎÔÙÛÄÖÜÇ][a-zàâäéèêëïîôùûüçA-ZÉÈÊÀÂÎÔÙÛ\-]{1,20})\s*:\s+/g, (m, pre, name) => {
-    // Évite de capturer "http:" etc.
-    if (/^(http|https|Note|Mode|ACTION|Action)$/i.test(name)) return m;
+    if (/^(http|https|Note|Mode|ACTION|Action|Pensée|Thought)$/i.test(name)) return m;
     return pre + "«SPEAKER:" + name + "»";
   });
-  // Labels
+  // Labels explicites
   raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
   raw = raw.replace(/\(\s*thought\s*\)\s*/gi, "");
   raw = raw.replace(/(^|\n)\s*Action\s*:\s*/gi, "$1*");
   raw = raw.replace(/(^|\n)\s*Pens[ée]e\s*:\s*/gi, "$1(");
   raw = raw.replace(/(^|\n)\s*Thought\s*:\s*/gi, "$1(");
+  raw = raw.replace(/(^|\n)\s*(Paroles?|Dialogue|Speech)\s*:\s*/gi, "$1");
 
-  // Ligne qui se termine par * sans * ouvrant → entourer en action
-  // Ex: "Je glisse ma main…mien.*" → "*Je glisse ma main…mien.*"
+  // Ligne qui se termine par * sans * ouvrant → action
   raw = raw.replace(/(^|\n)([^\n*][^\n]{8,}?)\*(\s*)(?=\n|$)/g, function(full, a, mid, sp) {
     if (mid.indexOf("*") >= 0) return full;
     return a + "*" + mid.trim() + "*" + sp;
   });
-
-  // * ouvrant sans fermeture jusqu'à la fin de ligne
+  // * ouvrant sans fermeture jusqu'à fin de ligne
   raw = raw.replace(/(^|\n)\*([^*\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
     if (/\*$/.test(mid)) return full;
     return a + "*" + mid.trim() + "*";
   });
+  // ( ouverte non fermée
+  raw = raw.replace(/(^|\n)\(([^)\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
+    if (/\)\s*$/.test(mid)) return full;
+    return a + "(" + mid.trim() + ")";
+  });
 
+  // Extraire tokens : (pensée) | *action* | texte parole
   const parts = [];
   const re = /(\([^)]{1,}\)|\*[^*]{1,}\*)/g;
   let last = 0;
@@ -5395,20 +5401,20 @@ function formatBubble(text) {
       if (p.t === "say") {
         ch = ch.replace(/^\*+\s*|\s*\*+$/g, "").trim();
         if (!ch) continue;
-        // Narration 1re personne = action (pas une question de dialogue)
+        // Narration 1re personne = action
         const isNarr =
           /^(Je |J'|Puis je |puis je |Et je |Elle |Me |M')/i.test(ch)
           && ch.length > 18
           && !/[?？]/.test(ch)
-          && !/^(Je sais|Je pense que|Je crois|Je veux dire|Je t'|Je vous)/i.test(ch);
-        // Phrase purement introspective sans () → pensée
+          && !/^(Je sais|Je pense que|Je crois|Je veux dire|Je t'|Je vous|Je veux|Oui|Non)/i.test(ch);
+        // Introspection sans () → pensée
         const isInner =
-          /^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette|Cet )/i.test(ch)
+          /^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette sensation|Ce regard)/i.test(ch)
           && !/[?？!]/.test(ch)
-          && ch.length > 25
+          && ch.length > 22
           && !/^(Je |Tu |Oui|Non)/i.test(ch);
         if (isNarr) out.push({ t: "act", v: ch });
-        else if (isInner && p.t === "say") out.push({ t: "think", v: ch });
+        else if (isInner) out.push({ t: "think", v: ch });
         else out.push({ t: "say", v: ch });
       } else {
         out.push({ t: p.t, v: ch.replace(/^\*+\s*|\s*\*+$/g, "").trim() });
@@ -5420,7 +5426,6 @@ function formatBubble(text) {
   return out.map((p) => {
     let v = escapeHtml(p.v).replace(/\n/g, "<br>");
     if (!v.trim()) return "";
-    // Labels locuteurs duo / 3e personne
     v = v.replace(/«SPEAKER:([^»]+)»/g, '<span class="speaker-label">$1</span> ');
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;

@@ -668,6 +668,14 @@
     for (const re of leakFrag) t = t.replace(re, "");
     t = t.replace(/\n{3,}/g, "\n\n").replace(/^\s*[).,;:\-–*]+\s*/gm, "").trim();
     // ——— Normalise format actions / pensées / paroles ———
+    // ~pensée~ ou ~~pensée~~ → (pensée)
+    t = t.replace(/~{1,2}([^~\n]{2,200}?)~{1,2}/g, "($1)");
+    // **action** → *action*
+    t = t.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+    // Labels Action:/Pensée:/Dialogue: en début de ligne
+    t = t.replace(/(^|\n)\s*(Action|ACTION)\s*:\s*/gi, "$1*");
+    t = t.replace(/(^|\n)\s*(Pens[ée]e|Thought|THOUGHT)\s*:\s*/gi, "$1(");
+    t = t.replace(/(^|\n)\s*(Paroles?|Dialogue|Speech|Dit)\s*:\s*/gi, "$1");
     // Ligne se terminant par * sans * ouvrant → action
     t = t.replace(/(^|\n)([^\n*][^\n]{8,}?)\*(\s*)(?=\n|$)/g, function(full, a, mid, sp) {
       if (mid.indexOf("*") >= 0) return full;
@@ -678,16 +686,50 @@
       if (/\*$/.test(mid)) return full;
       return a + "*" + mid.trim() + "*";
     });
-    // Narration 1re personne hors * → entourer *
+    // ( ouverte non fermée sur la ligne
+    t = t.replace(/(^|\n)\(([^)\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
+      if (/\)\s*$/.test(mid)) return full;
+      return a + "(" + mid.trim() + ")";
+    });
+    // Séparer mélange sur une même ligne : (pensée)*action*paroles ou *action*(pensée)
     t = t.split("\n").map(function(line) {
-      const s = line.trim();
+      var s = line.trim();
       if (!s) return line;
+      // Si la ligne contient à la fois () et *...*, découper
+      var hasThink = /\([^)]{2,}\)/.test(s);
+      var hasAct = /\*[^*]{2,}\*/.test(s);
+      if (hasThink && hasAct) {
+        var parts = [];
+        var re = /(\([^)]+\)|\*[^*]+\*)/g;
+        var last = 0, m;
+        while ((m = re.exec(s))) {
+          if (m.index > last) {
+            var pre = s.slice(last, m.index).trim();
+            if (pre) parts.push(pre);
+          }
+          parts.push(m[0]);
+          last = m.index + m[0].length;
+        }
+        if (last < s.length) {
+          var post = s.slice(last).trim();
+          if (post) parts.push(post);
+        }
+        if (parts.length > 1) return parts.join("\n");
+      }
+      // Narration 1re personne hors * → entourer * (action, pas parole)
       if (/^\*/.test(s) || /^\(/.test(s)) return line;
-      if (/^(Je |J'|Elle )[a-zàâäéèêëïîôùûüç].{20,}/i.test(s)
+      if (/^(Je |J'|Elle |Puis je |Et je |Me |M')[a-zàâäéèêëïîôùûüç].{18,}/i.test(s)
           && !/[?？]/.test(s)
-          && !/^(Je sais|Je pense|Je crois|Je t'|Je vous)/i.test(s)
-          && s.indexOf("*") < 0) {
+          && !/^(Je sais|Je pense|Je crois|Je t'|Je vous|Je veux|Oui|Non)/i.test(s)
+          && s.indexOf("*") < 0 && s.indexOf("(") < 0) {
         return "*" + s.replace(/^\*|\*$/g, "") + "*";
+      }
+      // Introspection pure sans () → (pensée)
+      if (/^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette sensation|Ce regard)/i.test(s)
+          && !/[?？!]/.test(s) && s.length > 22
+          && s.indexOf("*") < 0 && s.indexOf("(") < 0
+          && !/^(Je |Tu |Oui|Non)/i.test(s)) {
+        return "(" + s + ")";
       }
       return line;
     }).join("\n");
@@ -1345,7 +1387,7 @@
         PERSONA.scenario || "",
         PERSONA.system_extra || "Actions entre *astérisques*. Adulte 18+ consentant.",
         "N'invente PAS de liens familiaux absents du titre/scénario. INTERDIT MÉTA : n'écris JAMAIS en anglais de notes système (sister-in-law, refers to, mode SFW, heat, etc.). Uniquement le jeu de rôle en français.",
-        "FORMAT STRICT — 3 blocs séparés, JAMAIS mélangés sur une même ligne :\n1) PENSÉE entre parenthèses : (Son audace me trouble.)\n2) ACTION entre *astérisques* : *Je glisse ma main le long de sa cuisse.*\n3) PAROLES en texte normal sans * ni () : Un poste de ce genre demande des avantages, non ?\nExemple exact :\n(Son audace commence à rendre l'atmosphère électrique.)\n*Je glisse lentement ma main le long de sa cuisse en maintenant son regard dans le mien.*\nUn poste de ce genre demande des avantages particuliers, non ?\nINTERDIT : action sans *, pensée sans (), * orphelin, action écrite comme du dialogue.",
+        "FORMAT STRICT — 3 lignes séparées :\n(pensée entre parenthèses)\n*action entre astérisques*\nparoles sans * ni ()\nExemple:\n(Son audace me trouble.)\n*Je glisse ma main le long de sa cuisse.*\nUn poste de ce genre demande des avantages, non ?\nINTERDIT : mélanger les 3 sur une ligne, action sans *, pensée sans (), labels Action:/Pensée:.",
         "LONGUEUR : 4 à 9 phrases. Réponse vive mais incarnée. Termine toujours tes phrases.",
         "SCÉNARIO : reste dans le lieu et la situation en cours. Cohérence totale avec le titre et le scénario du personnage.",
 
@@ -1406,15 +1448,21 @@
         memoryBlock(chat, typeof txt !== "undefined" ? txt : ""),
         "LANGUE : français uniquement (paroles, *actions*, (pensées)). Aucune phrase en anglais. Réponds uniquement en tant que le personnage.",
         "LONGUEUR : 4 à 7 phrases max.",
-        "Format OBLIGATOIRE (3 blocs) :",
-        "(Une seule pensée ENTRE parenthèses — TOUJOURS fermer la parenthèse)",
-        "*Une seule action entre deux astérisques, ouvrir ET fermer*",
-        "Dialogue parlé sans * ni ().",
-        "EXEMPLE EXACT :",
-        "(Il fait un temps affreux.)",
-        "*Je franchis la porte en essuyant mes chaussures trempées sur le paillasson.*",
-        "Bonsoir… Désolée d'arriver comme ça.",
-        "INTERDIT : écrire (pensée), laisser un * ou une ( non fermés, couper une phrase au milieu, répéter 95D/morphologie.",
+        "FORMAT STRICT OBLIGATOIRE — 3 BLOCS SUR 3 LIGNES SÉPARÉES (jamais mélangés) :",
+        "1) PENSÉE uniquement entre parenthèses : (Il me regarde trop intensément.)",
+        "2) ACTION uniquement entre *astérisques* : *Je pose mon verre sur la table.*",
+        "3) PAROLES en texte normal SANS * et SANS () : Tu es sûr de toi ?",
+        "EXEMPLE EXACT À COPIER :",
+        "(Son regard me déstabilise un peu.)",
+        "*Je croise les bras, le menton relevé.*",
+        "Tu exagères… mais continue.",
+        "RÈGLES :",
+        "- TOUJOURS ouvrir ET fermer () et **.",
+        "- INTERDIT de mettre une action dans les paroles ou une pensée sans parenthèses.",
+        "- INTERDIT d'écrire Action: ou Pensée: en label.",
+        "- INTERDIT ~pensée~ — uniquement (pensée).",
+        "- Une réponse = 1 pensée + 1 action + 1 à 3 phrases de dialogue max.",
+        "- INTERDIT de couper une phrase, un * ou une ( au milieu.",
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
