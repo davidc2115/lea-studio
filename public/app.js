@@ -53,7 +53,8 @@ function maybeAutoCover(charId, storedSrc) {
 }
 
 function character() {
-  const list = state.characters.length ? state.characters : window.CAST || [FALLBACK_LEA];
+  let list = state.characters.length ? state.characters : window.CAST || [FALLBACK_LEA];
+  try { list = ensureLeaGallery(list); } catch (_) {}
   const base = list.find((c) => c.id === state.current) || list[0] || FALLBACK_LEA;
   const key = customCover(base.id) || base.cover;
   const resolved = resolvedCover(base);
@@ -1702,6 +1703,24 @@ const GALLERY = [
   { src: "images/lea-sortie-decollete.jpg", title: "Sortie, décolleté" },
 ];
 
+function ensureLeaGallery(list) {
+  const LEA_ASSETS = (typeof GALLERY !== "undefined" && Array.isArray(GALLERY))
+    ? GALLERY.map((g) => g.src || g).filter(Boolean)
+    : [];
+  return (list || []).map((c) => {
+    if (!c || c.id !== "lea") return c;
+    const gal = Array.isArray(c.gallery) ? c.gallery.slice() : [];
+    const seen = new Set(gal);
+    for (const src of LEA_ASSETS) {
+      if (src && !seen.has(src)) { gal.push(src); seen.add(src); }
+    }
+    return Object.assign({}, c, {
+      gallery: gal,
+      cover: c.cover || "images/lea-orage-dentelle.jpg",
+    });
+  });
+}
+
 
 /** Résout et télécharge une image (data URL, gallery:, http). */
 async function downloadImage(src, filename) {
@@ -2157,7 +2176,7 @@ function mergeCustomIntoCast() {
     if (c && c.id && !seen.has(c.id)) { base.push(c); seen.add(c.id); }
   }
   window.CAST = base;
-  if (state) state.characters = base;
+  if (state) state.characters = ensureLeaGallery(base);
 }
 function deleteCustomChar(id) {
   if (!id) return false;
@@ -3136,7 +3155,7 @@ function filterDiscoverList(q) {
     }
   }  if (!list.length) list = [FALLBACK_LEA];
   // Sync state
-  if (list.length > (state.characters || []).length) state.characters = list;
+  if (list.length > (state.characters || []).length) 
   try { window.CAST = list.slice(); } catch (_) {}
 
   const s = String(q || "").trim().toLowerCase();
@@ -3483,7 +3502,16 @@ async function migrateGalleryToDisk(charId) {
 function renderProfile() {
   const c = character();
   const extras = extraPhotos();
-  const base = (c.gallery && c.gallery.length ? c.gallery : []).map((src, i) => ({ src, title: "Photo " + (i + 1) }))
+  // Léa : toujours fusionner la galerie assets APK (GALLERY) pour ne perdre aucune photo
+  let galList = (c.gallery && c.gallery.length ? c.gallery.slice() : []);
+  if (c.id === "lea" && typeof GALLERY !== "undefined" && Array.isArray(GALLERY)) {
+    const seen = new Set(galList.map(String));
+    for (const g of GALLERY) {
+      const src = g && g.src ? g.src : g;
+      if (src && !seen.has(src)) { galList.push(src); seen.add(src); }
+    }
+  }
+  const base = galList.map((src, i) => ({ src, title: "Photo " + (i + 1) }))
     .filter((g) => g.src && String(g.src).length > 2 && !isHiddenPhoto(c.id, g.src));
   const genItems = extras.map((src, i) => {
     if (isHiddenPhoto(c.id, src)) return null;
@@ -6940,7 +6968,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   // 1) Afficher IMMÉDIATEMENT les profils (évite écran noir)
   try {
     if (typeof mergeCustomIntoCast === "function") mergeCustomIntoCast();
-    if (window.CAST && window.CAST.length) state.characters = window.CAST;
+    if (window.CAST && window.CAST.length) state.characters = ensureLeaGallery(window.CAST);
   } catch (_) {}
   try {
     renderDiscover();
@@ -6956,7 +6984,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   try {
     const chars = await api("/api/characters");
     if (Array.isArray(chars) && chars[0]) {
-      state.characters = chars;
+      state.characters = ensureLeaGallery(chars);
       try { renderDiscover(); } catch (_) {}
     }
   } catch { /* CAST déjà chargé */ }
