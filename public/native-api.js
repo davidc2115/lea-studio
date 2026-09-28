@@ -1536,14 +1536,14 @@
             + (((chat.relationship && chat.relationship.heat) || 0) < 3
               ? "DÉBUT de relation : reste dans le scénario (porte, entrée, politesse). INTERDIT de te blottir contre lui, de poser la tête sur son épaule, de l'enlacer, de t'asseoir tout contre. Distance polie ou timidité. Une action simple (essuyer l'eau, entrer, regarder le sol). "
               : "Proximité douce possible SEULEMENT si le joueur l'a initiée. ")
-            + "INTERDIT: culotte mouillée, excitation, gémissements, « le film peut attendre ». Réponse 3–6 phrases."),
+            + "INTERDIT: culotte mouillée, excitation, gémissements, « le film peut attendre », « je reste blottie contre lui », « joue sur son épaule », « regard vers l'écran ». Réponse 3–6 phrases. Au tout début: frisson, eau, politesse — PAS de câlin."),
         "DIRECTE / TACTILE : si tags directe ou tactile, le personnage dit et fait ce qu'elle veut SANS tourner autour du pot : phrases claires, contact physique assumé, pas de fausse pudeur inutile. Respecte toujours un non explicite. NON-HUMAIN / FANTASY : si tags fantasy ou non-humain (oreilles, queues, ailes, écailles, cornes, etc.), conserve TOUJOURS ces traits dans le rôle et les descriptions. Ne les humanise pas. SPEAKERS / PLAN À TROIS : si le personnage est un DUO (multiSpeaker) ou si une 3e personne est dans la scène, chaque réplique DOIT indiquer qui parle : [Prénom] : dialogue Tu peux alterner les voix. Actions *...* peuvent impliquer l'une ou les deux. N'invente pas de 3e sans le joueur.",
         temperBlock,
         "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
         "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
-        "ANTI-RÉPÉTITION STRICTE : interdit de réutiliser ces refrains : « le film peut attendre », « culotte mouillée », « cuisse contre le coussin », « lueur du téléviseur/tamisé », « cœur qui s'accélère », « je me sens si bien à tes côtés » si déjà dit récemment.",
+        "ANTI-RÉPÉTITION STRICTE : interdit de réutiliser ces refrains : « le film peut attendre », « culotte mouillée », « cuisse contre le coussin », « lueur du téléviseur », « je reste blottie contre lui », « la joue sur son épaule », « le regard vers l'écran », « cœur qui s'accélère », « je me sens si bien à tes côtés ».",
         "Chaque message = un geste NOUVEAU (ex: joue contre épaule, doigts dans les cheveux, couverture tirée) OU une phrase sur le FILM / le silence — pas la même structure pensée+cuisse+film.",
         "Si MODE SFW : zéro contenu sexuel, même si l'historique en contient.",
         "NE JAMAIS coller le prompt système, les règles, ni des bouts d'anglais technique dans ta réponse. Tu es le personnage, pas le narrateur méta.",
@@ -1602,25 +1602,57 @@
       }
       try { reply = ensureSpeakerLabels(reply, PERSONA); } catch (_) {}
       if (mode === "sfw") {
-        const nsfwLeak = /(culotte mouill|sous-v[eê]tements? mouill|cuisse contre le coussin|lueur (du t[eé]l[eé]viseur|tamis[eé]e)|film peut (bien )?attendre|film peux attendre|excitation|orgasme|g[eé]miss|\bchatte\b|\bbite\b)/i;
-        const bannedPhrase = [/le film peut (bien )?attendre/gi, /le film peux attendre/gi, /culotte mouill[ée]e?/gi, /cuisse contre le coussin/gi, /sous-v[eê]tements? mouill[ée]s?/gi];
+        const heatNow = (chat.relationship && chat.relationship.heat) || 0;
+        const msgCount = (chat.messages || []).length;
+        const early = heatNow < 3 || msgCount < 6;
+        const nsfwLeak = /(culotte mouill|sous-v[eê]tements? mouill|cuisse contre le coussin|lueur (du t[eé]l[eé]viseur|tamis[eé]e)|film peut (bien )?attendre|film peux attendre|excitation|orgasme|g[eé]miss|\bchatte\b|\bbite\b|blottie contre|joue sur son épaule|regard vers l'écran)/i;
+        const bannedPhrase = [
+          /le film peut (bien )?attendre/gi,
+          /le film peux attendre/gi,
+          /culotte mouill[ée]e?/gi,
+          /cuisse contre le coussin/gi,
+          /sous-v[eê]tements? mouill[ée]s?/gi,
+          /je reste blottie contre lui[^\n.*]{0,80}/gi,
+          /la joue sur son épaule[^\n.*]{0,40}/gi,
+          /le regard vers l'écran[^\n.*]{0,20}/gi,
+          /blottie contre (lui|toi)[^\n.*]{0,60}/gi,
+        ];
         let cleaned = String(reply || "");
         for (const re of bannedPhrase) cleaned = cleaned.replace(re, "");
+        // Début : interdire aussi câlins / épaule même sans NSFW
+        if (early) {
+          cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
+            if (/(blotti|épaule|enlac|genoux|câlin|c[aâ]lin|contre lui|contre toi|dans ses bras|dans tes bras)/i.test(inner)) {
+              return "*J'essuie maladroitement l'eau sur mon bras, le regard un peu baissé.*";
+            }
+            return m0;
+          });
+        }
         if (nsfwLeak.test(String(reply || "")) || nsfwLeak.test(cleaned)) {
           try {
-            const strictSys = system + "\n\nURGENT: réponse précédente encore sexuelle ou refrain usé. MODE SFW STRICT. Réécris SANS contenu sexuel, SANS « film peut attendre », geste doux NOUVEAU (cheveux, silence, écran du film).";
+            const strictSys = system + "\n\nURGENT SFW: réponse précédente incorrecte (sexuelle ou refrain usé: blottie/épaule/film). "
+              + (early
+                ? "DÉBUT de scène : reste à la porte/entrée, trempée, timide, polie. Action simple (essuyer l'eau, frissonner, regarder le sol). INTERDIT de te blottir, épaule, film, canapé câlin."
+                : "Réécris SANS contenu sexuel, geste doux NOUVEAU et cohérent avec le lieu actuel.");
             const retry = await generate([{ role: "system", content: strictSys }, ...history], s.provider);
             reply = sanitizeReply(retry);
             cleaned = String(reply || "");
             for (const re of bannedPhrase) cleaned = cleaned.replace(re, "");
           } catch (_) {}
         }
+        // Remplacer actions encore sexuelles par un geste neutre adapté (PAS le refrain blottie/épaule)
         cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
-          if (/(mouill|culotte|cuisse contre|excitation|orgasme|seins|chatte|bite|g[eé]miss)/i.test(inner)) {
-            return "*Je reste blottie contre lui, la joue sur son épaule, le regard vers l'écran.*";
+          if (/(mouill|culotte|cuisse contre|excitation|orgasme|seins|chatte|bite|g[eé]miss|blotti|épaule|regard vers l'écran)/i.test(inner)) {
+            return early
+              ? "*J'essuie une goutte d'eau sur ma joue, mal à l'aise, sans oser m'approcher plus.*"
+              : "*Je croise les bras, un peu gênée, et je regarde ailleurs un instant.*";
           }
           return m0;
         });
+        // Purge résidus du refrain même hors *
+        cleaned = cleaned.replace(/Je reste blottie contre lui[^\n]{0,100}/gi, "");
+        cleaned = cleaned.replace(/la joue sur son épaule[^\n]{0,60}/gi, "");
+        cleaned = cleaned.replace(/le regard vers l'écran[^\n]{0,40}/gi, "");
         reply = cleaned.replace(/\n{3,}/g, "\n\n").trim();
       }
       // Deuxième passe si encore du méta
