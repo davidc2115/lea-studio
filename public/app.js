@@ -4073,14 +4073,23 @@ function duoCompositionBlock(c) {
   const d2 = cupDesc[c2] || "natural breasts";
 
   let ethLine = "";
-  if (/asiatique|asian|korean|japanese|chinese|east asian/.test(eth + " " + blob)) {
-    ethLine = "both East Asian women, fair porcelain skin,";
-  } else if (/africaine|black|ebony|african/.test(eth + " " + blob)) {
-    ethLine = "both Black women, dark skin,";
-  } else if (/latine|latina|brésil/.test(eth + " " + blob)) {
-    ethLine = "Latina women,";
+  const ethBlob = (eth + " " + blob + " " + looks + " " + names).toLowerCase();
+  if (/east asian|asiatique|korean|japanese|chinese|japon|corée|chine/.test(ethBlob)) {
+    ethLine = "(both East Asian women:1.5), fair porcelain skin, East Asian facial features, NOT Caucasian faces,";
+  } else if (/black|ebony|africaine|african|dark skin/.test(ethBlob) && !/black hair/.test(ethBlob.replace(/black hair/g, ""))) {
+    ethLine = "(both Black women:1.5), dark skin, African features,";
+  } else if (/latina|latine|brésil|brazilian|hispanic/.test(ethBlob)) {
+    ethLine = "(both Latina women:1.5), sun-kissed skin,";
+  } else if (/indian|indien|south asian/.test(ethBlob)) {
+    ethLine = "(both Indian women:1.5), brown skin,";
+  } else if (/russian|russe|slavic/.test(ethBlob)) {
+    ethLine = "(both Slavic women:1.5), fair skin,";
+  } else if (/italian|italien/.test(ethBlob)) {
+    ethLine = "(both Italian women:1.5), olive skin,";
+  } else if (/french|français|european|européen/.test(ethBlob)) {
+    ethLine = "(both European French women:1.45), fair skin, Caucasian features,";
   } else {
-    ethLine = "European women,";
+    ethLine = "(two European women:1.3), fair skin,";
   }
 
   // Prompt COURT et TRÈS pondéré (Horde ignore les pavés longs)
@@ -5331,93 +5340,110 @@ async function pollHordeJob(jobId, host, charId) {
 
 function formatBubble(text) {
   let raw = String(text || "").replace(/\r/g, "");
-  // **Prénom:** (duo) → speaker AVANT de convertir ** en *
-  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*\*\*\s*:\s*/g, "$1«SPEAKER:$2»");
-  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*:\s*\*\*\s*/g, "$1«SPEAKER:$2»");
-  // **action** → *action* (après speakers)
-  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // ~pensée~ → (pensée)
-  raw = raw.replace(/~{1,2}([^~\n]{2,200}?)~{1,2}/g, "($1)");
-  // [Prénom] : ou Prénom : en début de ligne → label locuteur
-  raw = raw.replace(/(^|\n)\s*\[([^\]\n]{1,40})\]\s*:\s*/g, "$1«SPEAKER:$2»");
+
+  // Speakers duo : [Name] : / **Name:** / Name :
+  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*\*\*\s*:\s*/g, "$1«SPEAKER:$2»\n");
+  raw = raw.replace(/(^|\n)\s*\*\*\s*([^*:\n]{1,40})\s*:\s*\*\*\s*/g, "$1«SPEAKER:$2»\n");
+  raw = raw.replace(/(^|\n)\s*\[([^\]\n]{1,40})\]\s*:\s*/g, "$1«SPEAKER:$2»\n");
   raw = raw.replace(/(^|\n)\s*([A-ZÉÈÊÀÂÎÔÙÛÄÖÜÇ][a-zàâäéèêëïîôùûüçA-ZÉÈÊÀÂÎÔÙÛ\-]{1,20})\s*:\s+/g, (m, pre, name) => {
-    if (/^(http|https|Note|Mode|ACTION|Action|Pensée|Thought)$/i.test(name)) return m;
-    return pre + "«SPEAKER:" + name + "»";
+    if (/^(http|https|Note|Mode|ACTION|Action|Pensée|Thought|Tu|Je|Elle)$/i.test(name)) return m;
+    return pre + "«SPEAKER:" + name + "»\n";
   });
-  // Labels explicites
+
+  // *(pensée)* → (pensée)
+  raw = raw.replace(/\*\s*(\([^)]{3,}\))\s*\*/g, "$1");
+  // **action** → *action*
+  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+  // ~pensée~
+  raw = raw.replace(/~{1,2}([^~\n]{2,200}?)~{1,2}/g, "($1)");
+
+  // Labels
   raw = raw.replace(/\(\s*pens[ée]e\s*\)\s*/gi, "");
-  raw = raw.replace(/\(\s*thought\s*\)\s*/gi, "");
   raw = raw.replace(/(^|\n)\s*Action\s*:\s*/gi, "$1*");
   raw = raw.replace(/(^|\n)\s*Pens[ée]e\s*:\s*/gi, "$1(");
   raw = raw.replace(/(^|\n)\s*Thought\s*:\s*/gi, "$1(");
-  raw = raw.replace(/(^|\n)\s*(Paroles?|Dialogue|Speech)\s*:\s*/gi, "$1");
 
-  // Ligne qui se termine par * sans * ouvrant → action
+  // Fermer * et ( orphelins sur la ligne
   raw = raw.replace(/(^|\n)([^\n*][^\n]{8,}?)\*(\s*)(?=\n|$)/g, function(full, a, mid, sp) {
     if (mid.indexOf("*") >= 0) return full;
+    // Ne pas transformer une pensée
+    if (/^\s*\(/.test(mid) && /\)\s*$/.test(mid)) return a + mid + sp;
     return a + "*" + mid.trim() + "*" + sp;
   });
-  // * ouvrant sans fermeture jusqu'à fin de ligne
   raw = raw.replace(/(^|\n)\*([^*\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
     if (/\*$/.test(mid)) return full;
+    if (/^\s*\(/.test(mid) && /\)\s*$/.test(mid)) return a + mid;
     return a + "*" + mid.trim() + "*";
   });
-  // ( ouverte non fermée
   raw = raw.replace(/(^|\n)\(([^)\n]{6,}?)(?=\n|$)/g, function(full, a, mid) {
     if (/\)\s*$/.test(mid)) return full;
     return a + "(" + mid.trim() + ")";
   });
 
-  // Extraire tokens : (pensée) | *action* | texte parole
-  const parts = [];
-  const re = /(\([^)]{1,}\)|\*[^*]{1,}\*)/g;
-  let last = 0;
-  let m;
-  while ((m = re.exec(raw))) {
-    if (m.index > last) {
-      const pre = raw.slice(last, m.index);
-      if (pre) parts.push({ t: "say", v: pre });
-    }
-    const tok = m[0];
-    if (tok.startsWith("(")) {
-      const v = tok.slice(1, -1).trim();
-      if (v && !/^(pens[ée]e|thought)$/i.test(v)) parts.push({ t: "think", v });
-    } else {
-      const v = tok.replace(/^\*+|\*+$/g, "").trim();
-      if (v) parts.push({ t: "act", v });
-    }
-    last = m.index + tok.length;
-  }
-  if (last < raw.length) parts.push({ t: "say", v: raw.slice(last) });
-  if (!parts.length) parts.push({ t: "say", v: raw });
-
+  // Extraire tokens ligne par ligne pour ne pas tout fusionner
   const out = [];
-  for (const p of parts) {
-    let chunks = String(p.v).replace(/\u00a0/g, " ").split(/\n+/);
-    for (let ch of chunks) {
-      ch = ch.trim();
-      if (!ch) continue;
-      if (p.t === "say") {
-        ch = ch.replace(/^\*+\s*|\s*\*+$/g, "").trim();
-        if (!ch) continue;
-        // Narration 1re personne = action
-        const isNarr =
-          /^(Je |J'|Puis je |puis je |Et je |Elle |Me |M')/i.test(ch)
-          && ch.length > 18
-          && !/[?？]/.test(ch)
-          && !/^(Je sais|Je pense que|Je crois|Je veux dire|Je t'|Je vous|Je veux|Oui|Non)/i.test(ch);
-        // Introspection sans () → pensée
-        const isInner =
-          /^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette sensation|Ce regard)/i.test(ch)
-          && !/[?？!]/.test(ch)
-          && ch.length > 22
-          && !/^(Je |Tu |Oui|Non)/i.test(ch);
-        if (isNarr) out.push({ t: "act", v: ch });
-        else if (isInner) out.push({ t: "think", v: ch });
-        else out.push({ t: "say", v: ch });
-      } else {
-        out.push({ t: p.t, v: ch.replace(/^\*+\s*|\s*\*+$/g, "").trim() });
+  const lines = raw.split(/\n/);
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+
+    // Speaker seul
+    const sp = line.match(/^«SPEAKER:([^»]+)»\s*(.*)$/);
+    if (sp) {
+      out.push({ t: "speaker", v: sp[1].trim() });
+      line = (sp[2] || "").trim();
+      if (!line) continue;
+    }
+
+    // Découper la ligne en (pensée) | *action* | texte
+    const re = /(\([^)]{2,}\)|\*[^*]{2,}\*)/g;
+    let last = 0, m;
+    const chunks = [];
+    while ((m = re.exec(line))) {
+      if (m.index > last) {
+        const pre = line.slice(last, m.index).trim();
+        if (pre) chunks.push({ t: "say", v: pre });
       }
+      const tok = m[0];
+      if (tok.startsWith("(")) {
+        let v = tok.slice(1, -1).trim();
+        if (v && !/^(pens[ée]e|thought)$/i.test(v)) chunks.push({ t: "think", v });
+      } else {
+        let v = tok.replace(/^\*+|\*+$/g, "").trim();
+        // Si le contenu de * * est en fait une pensée ( ... )
+        if (/^\([^)]+\)$/.test(v)) {
+          chunks.push({ t: "think", v: v.slice(1, -1).trim() });
+        } else if (v) {
+          chunks.push({ t: "act", v });
+        }
+      }
+      last = m.index + tok.length;
+    }
+    if (last < line.length) {
+      const post = line.slice(last).trim();
+      if (post) chunks.push({ t: "say", v: post });
+    }
+    if (!chunks.length) chunks.push({ t: "say", v: line });
+
+    for (const ch of chunks) {
+      let v = ch.v.replace(/^\*+\s*|\s*\*+$/g, "").trim();
+      if (!v) continue;
+      if (ch.t === "think" || ch.t === "act" || ch.t === "speaker") {
+        out.push({ t: ch.t, v });
+        continue;
+      }
+      // say : reclasser seulement narration physique claire
+      const isDialogue =
+        /^(Tu |T'|Vous |Oui|Non|Attends|Continue|Arrête|Pardon|Merci|Bonjour|Salut)/i.test(v)
+        || /[?？]/.test(v)
+        || /^(Je te |Je t'|Je vous )/i.test(v);
+      const isPhysAct =
+        !isDialogue
+        && /^(Je |J'|Elle |Puis je |Et je )/i.test(v)
+        && v.length > 20
+        && /(glisse|pose|enlève|ouvre|m'enfonce|laisse|croise|approche|caresse|retire|lève|baisse|embrasse|mords)/i.test(v);
+      if (isPhysAct) out.push({ t: "act", v });
+      else out.push({ t: "say", v });
     }
   }
   if (!out.length) out.push({ t: "say", v: String(text || "") });
@@ -5425,8 +5451,7 @@ function formatBubble(text) {
   return out.map((p) => {
     let v = escapeHtml(p.v).replace(/\n/g, "<br>");
     if (!v.trim()) return "";
-    // Label locuteur en tête de segment
-    v = v.replace(/«SPEAKER:([^»]+)»/g, '<span class="speaker-label">$1</span>');
+    if (p.t === "speaker") return `<span class="speaker-label">${v}</span>`;
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;
     return `<span class="seg say">${v}</span>`;

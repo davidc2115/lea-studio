@@ -748,8 +748,12 @@
     // ——— Normalise format actions / pensées / paroles ———
     // ~pensée~ ou ~~pensée~~ → (pensée)
     t = t.replace(/~{1,2}([^~\n]{2,200}?)~{1,2}/g, "($1)");
-    // **action** → *action*
-    t = t.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+    // **action** → *action* (sauf **Name:** speakers duo)
+    t = t.replace(/\*\*(?!\s*[A-ZÉÈÊÀÂÎÔÙÛ][^*:]{0,30}\s*\*\*\s*:)([^*]+)\*\*/g, "*$1*");
+    // *(pensée entre parenthèses)* → (pensée)  [modèles qui mettent * autour des pensées]
+    t = t.replace(/\*\s*(\([^)]{3,}\))\s*\*/g, "$1");
+    // Lignes * (pensée) * sur plusieurs tokens
+    t = t.replace(/(^|\n)\*\s*(\([^\n)]{3,}\))\s*\*(?=\n|$)/g, "$1$2");
     // Labels Action:/Pensée:/Dialogue: en début de ligne
     t = t.replace(/(^|\n)\s*(Action|ACTION)\s*:\s*/gi, "$1*");
     t = t.replace(/(^|\n)\s*(Pens[ée]e|Thought|THOUGHT)\s*:\s*/gi, "$1(");
@@ -794,13 +798,20 @@
         }
         if (parts.length > 1) return parts.join("\n");
       }
-      // Narration 1re personne hors * → entourer * (action, pas parole)
+      // Narration 1re personne hors * → action (PAS si c'est du dialogue adressé)
       if (/^\*/.test(s) || /^\(/.test(s)) return line;
+      if (/^\[/.test(s) || /^«SPEAKER/.test(s)) return line;
+      // Dialogue : "Tu ...", questions, phrases courtes adressées
+      if (/^(Tu |T'|Vous |Oui|Non|Attends|Continue|Arrête)/i.test(s)) return line;
       if (/^(Je |J'|Elle |Puis je |Et je |Me |M')[a-zàâäéèêëïîôùûüç].{18,}/i.test(s)
           && !/[?？]/.test(s)
-          && !/^(Je sais|Je pense|Je crois|Je t'|Je vous|Je veux|Oui|Non)/i.test(s)
+          && !/^(Je sais|Je pense|Je crois|Je t'|Je te |Je vous|Je veux|Oui|Non|Je vais te)/i.test(s)
+          && !/\b(continue|queue|bite|chatte)\b/i.test(s)  // souvent dialogue NSFW direct
           && s.indexOf("*") < 0 && s.indexOf("(") < 0) {
-        return "*" + s.replace(/^\*|\*$/g, "") + "*";
+        // Uniquement si verbes d'action physique typiques
+        if (/(glisse|pose|enlève|ouvre|ferme|approche|recule|mords|embrasse|caresse|retire|lève|baisse|m'enfonce|laisse|croise)/i.test(s)) {
+          return "*" + s.replace(/^\*|\*$/g, "") + "*";
+        }
       }
       // Introspection pure sans () → (pensée)
       if (/^(Son |Sa |Ses |L'atmosphère|L'air|Le silence|Cette sensation|Ce regard)/i.test(s)
