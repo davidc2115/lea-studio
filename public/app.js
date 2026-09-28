@@ -5497,7 +5497,8 @@ function formatBubble(text) {
   return out.map((p) => {
     let v = escapeHtml(p.v).replace(/\n/g, "<br>");
     if (!v.trim()) return "";
-    v = v.replace(/«SPEAKER:([^»]+)»/g, '<span class="speaker-label">$1</span> ');
+    // Label locuteur en tête de segment
+    v = v.replace(/«SPEAKER:([^»]+)»/g, '<span class="speaker-label">$1</span>');
     if (p.t === "think") return `<span class="seg think">${v}</span>`;
     if (p.t === "act") return `<span class="seg act">${v}</span>`;
     return `<span class="seg say">${v}</span>`;

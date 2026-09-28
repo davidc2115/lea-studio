@@ -608,6 +608,45 @@
   }
 
   /** Retire les fuites de prompt système / meta hors personnage. */
+
+  /** Force les labels [Prénom] : pour duos / multi-voix si le modèle les oublie. */
+  function ensureSpeakerLabels(text, persona) {
+    let t = String(text || "").trim();
+    if (!t || !persona) return t;
+    const nm = String(persona.name || "");
+    const parts = nm.split(/\s*&\s*|\s+et\s+/i).map((s) => s.trim()).filter(Boolean);
+    const isDuo = parts.length >= 2 || /^duo_/i.test(String(persona.id || ""));
+    if (!isDuo && parts.length < 2) return t;
+    const a = parts[0];
+    const b = parts[1] || "";
+    // Déjà des labels ?
+    const hasLabel = new RegExp("\\[\\s*(" + [a, b].filter(Boolean).map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\s*\\]\\s*:", "i").test(t)
+      || new RegExp("\\*\\*\\s*(" + [a, b].filter(Boolean).map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\s*\\*\\*\\s*:", "i").test(t)
+      || new RegExp("(^|\\n)\\s*(" + [a, b].filter(Boolean).map((x) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")\\s*:", "i").test(t);
+    if (hasLabel) {
+      // Normaliser **Name:** et Name: → [Name] :
+      if (a) t = t.replace(new RegExp("(^|\\n)\\s*\\*\\*\\s*" + a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\*\\*\\s*:", "gi"), "$1[" + a + "] :");
+      if (b) t = t.replace(new RegExp("(^|\\n)\\s*\\*\\*\\s*" + b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*\\*\\*\\s*:", "gi"), "$1[" + b + "] :");
+      if (a) t = t.replace(new RegExp("(^|\\n)\\s*" + a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*:", "gi"), "$1[" + a + "] :");
+      if (b) t = t.replace(new RegExp("(^|\\n)\\s*" + b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*:", "gi"), "$1[" + b + "] :");
+      return t;
+    }
+    // Pas de labels : découper en deux blocs si possible
+    if (!a || !b) return t;
+    const lines = t.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    if (lines.length >= 4) {
+      const mid = Math.ceil(lines.length / 2);
+      const b1 = lines.slice(0, mid).join("\n");
+      const b2 = lines.slice(mid).join("\n");
+      return "[" + a + "] :\n" + b1 + "\n[" + b + "] :\n" + b2;
+    }
+    if (lines.length >= 2) {
+      return "[" + a + "] :\n" + lines[0] + "\n[" + b + "] :\n" + lines.slice(1).join("\n");
+    }
+    // Une seule ligne : attribuer à a, puis courte réplique b
+    return "[" + a + "] :\n" + t + "\n[" + b + "] :\n*elle hoche la tête*\n…Oui.";
+  }
+
   function sanitizeReply(text) {
     let t = String(text || "");
     // Normalise labels anglais du modèle
@@ -1483,6 +1522,7 @@
         reply = "*elle croise les bras, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
       }
       reply = sanitizeReply(reply);
+      try { reply = ensureSpeakerLabels(reply, PERSONA); } catch (_) {}
       // Si un provider a renvoyé un refus policy, forcer Gemini
       if (isPolicyRefusal(reply)) {
         console.warn("[lea] refus détecté après generate — retry Gemini");
@@ -1500,6 +1540,7 @@
           reply = "(Son souffle se coupe un instant.)\n*elle mord sa lèvre, les joues chaudes*\n…Continue. Je… je t'écoute.";
         }
       }
+      try { reply = ensureSpeakerLabels(reply, PERSONA); } catch (_) {}
       if (mode === "sfw") {
         const nsfwLeak = /(culotte mouill|sous-v[eê]tements? mouill|cuisse contre le coussin|lueur (du t[eé]l[eé]viseur|tamis[eé]e)|film peut (bien )?attendre|film peux attendre|excitation|orgasme|g[eé]miss|\bchatte\b|\bbite\b)/i;
         const bannedPhrase = [/le film peut (bien )?attendre/gi, /le film peux attendre/gi, /culotte mouill[ée]e?/gi, /cuisse contre le coussin/gi, /sous-v[eê]tements? mouill[ée]s?/gi];

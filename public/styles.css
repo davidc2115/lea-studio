@@ -370,7 +370,17 @@ body.chat-open #view-chat { margin: 0; }
 .prof-tag { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.18); color: #f2e8f8; font-size: 12px; padding: 4px 10px; border-radius: 999px; backdrop-filter: blur(6px); }
 .prof-blurb { margin: 0 0 12px; color: #e6d8ef; font-size: 13px; line-height: 1.4; opacity: .95; }
 .prof-chat-btn { width: 100%; border-radius: 999px; padding: 12px 16px; font-size: 16px; }
-.speaker-label { display: inline-block; font-size: 11px; font-weight: 600; color: #e8b4d4; margin-bottom: 4px; letter-spacing: .02em; }
+.speaker-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #ffb3d9;
+  margin: 8px 0 2px 0;
+  letter-spacing: .03em;
+  text-transform: none;
+}
+.speaker-label::after { content: " :"; }
+.seg.say .speaker-label:first-child { margin-top: 0; }
 
 
 /* Découvrir — cartes type profil Rosytalk */
