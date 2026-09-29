@@ -2138,23 +2138,39 @@
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x768 si compte, sinon 512x512 gratuit
       const W = 512;
-      const H = hasHordeAccount ? 768 : 512;
-      const steps = hasHordeAccount ? 28 : 20;
+      const H = hasHordeAccount ? 768 : 640;
+      // Plus de steps = moins d'images "flash" moches (16 steps = 2-5s, mauvais rendu)
+      const steps = hasHordeAccount ? 32 : 26;
       const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "Realistic Vision"];
       const payloads = [];
 
-      // Denoise modéré : assez pour changer pose/tenue, pas trop pour flou
-      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      den = Math.min(0.50, Math.max(0.35, den));
+      // Denoise HAUT si img2img : sinon la pose de la ref est recopié (0.35-0.45 = quasi copie)
+      let den = typeof body.denoising === "number" ? body.denoising : 0.62;
+      den = Math.min(0.78, Math.max(0.55, den));
+
+      // txt2img EN PREMIER (meilleure variété de poses + identité via prompt)
+      // sauf si le client FORCE img2img avec denoise explicite élevé
+      const forceImg2 = useImg2Img && typeof body.denoising === "number" && body.denoising >= 0.5;
+      if (!forceImg2) {
+        payloads.push({
+          prompt: promptSafe + " ### " + negative,
+          params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
+          nsfw: body.nsfw !== false,
+          censor_nsfw: false,
+          models: photoModels,
+          r2: true,
+          slow_workers: true,
+        });
+      }
 
       if (useImg2Img) {
-        const faceBoost = "(identical face:1.55), (same woman as reference photo:1.45), same hair color, same eye color, ";
+        const faceBoost = "(identical face:1.5), (same woman as reference photo:1.4), same hair color, same eye color, (completely new pose:1.5), (different camera angle:1.4), ";
         const imgPrompt = (faceBoost + promptSafe).slice(0, 950);
         payloads.push({
-          prompt: imgPrompt + " ### " + negative,
+          prompt: imgPrompt + " ### " + negative + ", same pose as reference, identical composition, copy of source pose, static portrait",
           params: {
             width: W, height: H, steps: steps, n: 1,
-            sampler_name: "k_euler_a", cfg_scale: 7,
+            sampler_name: "k_euler_a", cfg_scale: 7.5,
             denoising_strength: den,
           },
           nsfw: body.nsfw !== false,
@@ -2165,41 +2181,17 @@
           source_image: src,
           source_processing: "img2img",
         });
-        // Fallback lighter
-        payloads.push({
-          prompt: imgPrompt + " ### " + negative,
-          params: {
-            width: 512, height: 512, steps: 18, n: 1,
-            sampler_name: "k_euler_a", cfg_scale: 6.5,
-            denoising_strength: Math.min(0.48, den + 0.03),
-          },
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: ["stable_diffusion", "Dreamshaper"],
-          r2: true,
-          slow_workers: true,
-          source_image: src,
-          source_processing: "img2img",
-        });
       }
 
-      // txt2img (pas de ref ou secours)
+      // Secours txt2img (sans le modèle basique 16 steps qui sort en 3s)
       payloads.push({
-        prompt: promptSafe + " ### " + negative,
-        params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        prompt: promptSafe.slice(0, 900) + " ### " + negative.slice(0, 500),
+        params: { width: 512, height: 640, steps: 24, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
         nsfw: body.nsfw !== false,
         censor_nsfw: false,
         models: photoModels,
         r2: true,
         slow_workers: true,
-      });
-      payloads.push({
-        prompt: promptSafe.slice(0, 700) + " ### " + negative.slice(0, 400),
-        params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
-        nsfw: true,
-        censor_nsfw: false,
-        models: ["stable_diffusion"],
-        r2: true,
       });
 
       for (const host of hosts) {

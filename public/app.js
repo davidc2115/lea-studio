@@ -1104,8 +1104,8 @@ function buildLeaImagePrompt(extra = "") {
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
     const short = [
       // Composition d'abord = variation réelle + corps entier
-      "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
-      "(new pose:1.45), (new camera angle:1.35), " + pos + ",",
+      "(full body shot from head to mid-thigh:1.55), (wide shot not portrait crop:1.45),",
+      "(completely different pose:1.55), (new camera angle:1.45), (unique body position:1.4), " + pos + ",",
       clothed ? ("(wearing " + wear + ":1.5), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
       "in " + loc + ",",
       "photorealistic photo of the same adult woman,",
@@ -5096,7 +5096,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.42 : 0.44);
+      if (payload.denoising == null) payload.denoising = duoDenoise(0.62);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
@@ -5639,7 +5639,7 @@ async function generateScenePhoto() {
           payload.source_image = ref;
           payload.source_processing = "img2img";
           const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-          payload.denoising = bigChange ? 0.42 : 0.38;
+          payload.denoising = bigChange ? 0.68 : 0.58;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
         } else {
@@ -6165,17 +6165,17 @@ async function generatePhoto() {
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
     if (userEx.hasAny) {
-      payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
+      payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
       payload.negative = (payload.negative || "") + ", ignore user request, copy of reference pose only, wrong scene";
     }
     if (userEx.overridesOutfit) {
       payload.negative = (payload.negative || "") + ", wrong outfit, default lingerie when other clothes requested, nude when clothes requested";
-      payload.denoising = Math.min(0.40, Math.max(payload.denoising || 0.32, 0.34));
+      payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
     }
     if (userEx.overridesAct) {
       payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing male body, disembodied penis, floating penis, penis without man, severed cock, censored, mosaic censor, bar censor, softcore only, portrait selfie, bust crop only";
       payload.nsfw = true;
-      payload.denoising = Math.min(0.42, Math.max(payload.denoising || 0.32, 0.34));
+      payload.denoising = Math.max(0.60, Number(payload.denoising) || 0.65);
     }
     if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, dry fabric, matte dry skin, sports bra, black top, gym clothes, fully dry";
@@ -6207,20 +6207,20 @@ async function generatePhoto() {
         // Acte + lieu imposés → denoise très haut ou txt2img pour ne pas garder le décor de la ref
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.min(0.42, Math.max(Number(payload.denoising) || 0.32, 0.34));
+        payload.denoising = Math.max(0.60, Number(payload.denoising) || 0.65);
         setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
       } else if (userEx.hasAny) {
         // Options partielles → img2img léger
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.min(0.45, Math.max(Number(payload.denoising) || 0.38, 0.38));
+        payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
       } else {
-        // ALÉATOIRE profil : txt2img UNIQUEMENT
-        // img2img sur une ref nude = toujours la même pose (denoise insuffisant pour changer)
+        // ALÉATOIRE profil : txt2img UNIQUEMENT (pas d'img2img = poses vraiment différentes)
         delete payload.source_image;
         delete payload.source_processing;
+        delete payload.denoising;
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         payload.negative = (payload.negative || "") +
           ", blurry, out of focus, same pose every time, static nude portrait only, " +
