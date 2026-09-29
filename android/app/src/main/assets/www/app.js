@@ -842,35 +842,52 @@ function buildLeaImagePrompt(extra = "") {
   const ex = expandProfileExtra(extra);
   // Variété FORTE : pose + angle caméra (anti-copie de la ref ★)
   const extraPoses = [
+    // Debout / pleine longueur
     "standing full body three-quarter view, weight on one hip, one hand on hip, looking at camera",
+    "standing in doorway, one hand on doorframe, body angled, looking at viewer, full body",
+    "standing with back partly to camera, looking back over shoulder, teasing look, full body",
+    "walking toward camera mid-step, dynamic motion, full body visible",
+    "standing arms crossed, leaning on doorframe, full body visible from head to heels",
+    "standing legs apart confident pose, hands on hips, full body",
+    "leaning against a wall, one knee bent, looking at camera, full body",
+    // Allongée / lit
+    "lying on her back on a bed, propped on elbows, looking at camera, full body on sheets",
+    "lying on her side on a bed, legs slightly bent, looking at viewer, full body",
+    "lying on stomach on bed, chin on hands, legs bent up, looking at camera",
+    "reclining on bed pillows, one knee raised, seductive look, full body",
+    "sitting on the edge of a bed, legs slightly apart, leaning forward, looking at camera",
+    // À quatre pattes / penchée
+    "on all fours on a bed, arched back, looking back over shoulder at camera",
+    "on all fours on the floor, hips raised, looking back at viewer",
+    "bending forward at the waist, hands on thighs, looking up at viewer, full body",
+    "bending over a sofa arm, looking back over shoulder, arched posture",
+    "kneeling on the bed facing away, looking back at camera over shoulder",
+    // Genoux / assise
+    "kneeling on the floor on a rug, looking up at viewer, hands on thighs, full body",
+    "kneeling on bed, sitting back on heels, hands behind, chest forward, looking at camera",
     "sitting on a sofa, legs crossed, leaning forward slightly, looking at viewer",
-    "leaning against a wall, looking over the shoulder, profile of body face toward camera",
-    "kneeling on the floor on a rug, looking up at viewer, hands on thighs",
-    "standing in doorway, one hand on doorframe, body angled, looking at viewer",
-    "sitting on the edge of a bed, legs slightly apart, looking at camera",
-    "bending slightly forward from the waist, looking up at viewer, playful expression",
-    "from the side, body in profile, head turned toward camera, over-shoulder glance",
-    "lying on her side on a couch, propped on one elbow, looking at camera",
-    "hands in hair lifting it, arms up, looking at viewer, dynamic angle",
-    "sitting cross-legged on the floor, looking up, casual relaxed pose",
-    "standing with back partly to camera, looking back over shoulder, teasing look",
-    "crouching slightly, elbows on knees, looking up at viewer",
-    "walking toward camera mid-step, dynamic motion, looking at viewer",
+    "sitting on floor against wall, one knee up, looking at camera, full body",
     "sitting on a kitchen counter edge, legs dangling, looking at camera",
-    "lying on stomach on bed, chin on hands, looking at camera, legs up",
-    "standing arms crossed, leaning on doorframe, full body visible",
-    "sitting on floor against wall, one knee up, looking at camera",
-    "twirling, skirt or hair motion, mid-turn looking back",
-    "reaching up to shelf, body stretched, side view",
+    "straddling a chair backwards, arms on chair back, looking at camera",
+    // Dos / profil
+    "from behind, standing, looking back over shoulder at camera, full body rear view",
+    "from the side, body in profile, head turned toward camera, over-shoulder glance, full body",
+    "standing back to camera, glancing over shoulder, hand on hip, rear three-quarter view",
+    // Dynamique
+    "hands in hair lifting it, arms up, looking at viewer, dynamic angle, full body",
+    "twirling mid-turn, hair and fabric motion, looking back at camera",
+    "reaching up to a shelf, body stretched, side view full body",
+    "crouching slightly, elbows on knees, looking up at viewer, full body",
+    "leaning over a table, cleavage forward, looking at camera, upper body emphasis but torso visible",
   ];
   const cameraAngles = [
-    "shot from slightly below, low angle",
-    "eye-level medium shot",
-    "slight high angle looking down",
-    "close three-quarter body crop",
-    "full body from head to toes visible",
-    "side angle 45 degrees",
-    "dutch angle slight tilt cinematic",
+    "full body from head to toes visible, wide shot",
+    "full body head to mid-thigh, eye-level",
+    "shot from slightly below, low angle, full body",
+    "slight high angle looking down, full body visible",
+    "side angle 45 degrees, full body",
+    "rear three-quarter view, looking back at camera",
+    "dutch angle slight tilt cinematic, full body",
   ];
   const fullPool = (posePool || []).concat(extraPoses);
   let pose;
@@ -879,44 +896,69 @@ function buildLeaImagePrompt(extra = "") {
     pose = "pose/position from user detail, follow USER DETAIL exactly";
   } else {
     try {
-      const last = localStorage.getItem("lea.lastPose." + (c.id || "x")) || "";
-      const pool = fullPool.filter((p) => p !== last);
-      pose = pool[Math.floor(Math.random() * pool.length)] || fullPool[0];
-      localStorage.setItem("lea.lastPose." + (c.id || "x"), pose);
+      let recent = [];
+      try { recent = JSON.parse(localStorage.getItem("lea.lastPoses." + (c.id || "x")) || "[]"); } catch (_) { recent = []; }
+      if (!Array.isArray(recent)) recent = [];
+      const pool = fullPool.filter((p) => recent.indexOf(p) < 0);
+      pose = (pool.length ? pool : fullPool)[Math.floor(Math.random() * (pool.length || fullPool.length))];
+      recent = (recent.concat([pose])).slice(-4);
+      try { localStorage.setItem("lea.lastPoses." + (c.id || "x"), JSON.stringify(recent)); } catch (_) {}
     } catch (_) {
       pose = fullPool[Math.floor(Math.random() * fullPool.length)];
     }
   }
   // Tenues aléatoires si l'utilisateur n'impose rien (évite de rester nue comme la ref)
   const randomOutfits = [
+    // Lingerie / déshabillé
     "red lace lingerie set bra and panties",
-    "black sheer babydoll nightie",
-    "tight white crop top and blue jeans",
-    "short black mini skirt and tight blouse",
-    "silk robe loosely tied, cleavage visible",
-    "wet white t-shirt clinging to body",
-    "red cocktail dress deep neckline",
-    "oversized man shirt only, thigh length",
-    "sports bra and tight leggings",
-    "lace bodysuit",
-    "towel wrapped around body after shower",
-    "open cardigan over lingerie",
-    "green satin slip dress",
-    "denim shorts and tied shirt",
-    "black leather mini skirt and crop top",
+    "black sheer babydoll nightie, sheer fabric",
+    "white lace bodysuit, deep cleavage",
+    "black lace teddy with garter straps",
+    "silk robe loosely tied, cleavage visible, bare legs",
+    "sheer black négligé open at the front",
+    "pink satin chemise, thin straps",
+    "red corset with black lace trim and matching panties",
+    "black mesh lingerie with straps",
+    // Robes moulantes / décolleté
+    "tight red cocktail dress, deep plunging neckline, short hem",
+    "black bodycon mini dress, tight fit, cleavage",
+    "white tight dress with deep V neckline",
+    "green satin slip dress, clinging fabric",
+    "gold sequin party dress, short, sparkling",
+    "backless black evening dress, side slit",
+    // Jupes / bas / talons
+    "short black mini skirt, tight blouse unbuttoned low, fishnet stockings, stiletto heels",
+    "plaid micro skirt, white crop top, thigh-high stockings",
+    "leather mini skirt, lace bralette, garter belt, stilettos",
+    "pencil skirt with slit, silk blouse, open toes heels",
+    "denim mini skirt, tied crop shirt, ankle boots",
+    // Hauts / casual sexy
+    "tight white crop top and high-waist blue jeans",
+    "wet white t-shirt clinging to body, denim shorts",
+    "oversized man shirt only, thigh length, bare legs",
+    "black leather mini skirt and tight crop top",
     "white blouse unbuttoned low with pencil skirt",
-    "pink pajama shorts and tank top",
-    "gold sequin party dress",
+    "knit sweater falling off one shoulder, shorts",
+    // Sport / autre
+    "sports bra and tight leggings",
     "yoga pants and sports bra after workout",
     "bikini top and sarong skirt near window",
+    "towel wrapped around body after shower",
+    "open cardigan over lingerie only",
+    "schoolgirl-style short skirt and tied shirt (adult 21+)",
+    "nurse-style tight dress short hem (adult costume)",
+    "secretary outfit: tight blouse, pencil skirt, stockings, heels",
   ];
   let randomOutfitPick = null;
   if (!ex.overridesOutfit) {
     try {
-      const lastO = localStorage.getItem("lea.lastOutfit." + (c.id || "x")) || "";
-      const op = randomOutfits.filter((o) => o !== lastO);
-      randomOutfitPick = op[Math.floor(Math.random() * op.length)] || randomOutfits[0];
-      localStorage.setItem("lea.lastOutfit." + (c.id || "x"), randomOutfitPick);
+      let recentO = [];
+      try { recentO = JSON.parse(localStorage.getItem("lea.lastOutfits." + (c.id || "x")) || "[]"); } catch (_) { recentO = []; }
+      if (!Array.isArray(recentO)) recentO = [];
+      const op = randomOutfits.filter((o) => recentO.indexOf(o) < 0);
+      randomOutfitPick = (op.length ? op : randomOutfits)[Math.floor(Math.random() * (op.length || randomOutfits.length))];
+      recentO = (recentO.concat([randomOutfitPick])).slice(-5);
+      try { localStorage.setItem("lea.lastOutfits." + (c.id || "x"), JSON.stringify(recentO)); } catch (_) {}
     } catch (_) {
       randomOutfitPick = randomOutfits[Math.floor(Math.random() * randomOutfits.length)];
     }
@@ -5552,30 +5594,40 @@ async function generatePhoto() {
       const ex = expandProfileExtra(extra);
       const outfits = [
         "casual fitted tops and blue jeans",
-        "different colored evening dresses",
-        "lingerie: different bras and panties each",
-        "summer sundresses different colors",
-        "office blouse and skirt vs pants",
-        "silk robes loosely tied different colors",
-        "crop tops and mini skirts",
-        "one in black dress one in white blouse",
+        "different colored tight evening dresses, deep necklines",
+        "lingerie: different bras and panties each, lace and satin",
+        "summer sundresses different colors, short hems",
+        "office blouses and pencil skirts, stockings",
+        "silk robes loosely tied different colors, bare legs",
+        "crop tops and mini skirts, heels",
+        "one in black bodycon dress one in white blouse and skirt",
+        "matching sheer babydolls different colors",
+        "corsets and garter belts, stilettos",
+        "fishnet stockings, mini skirts, heels",
+        "one in red cocktail dress one in black lace lingerie",
       ];
       const poses = [
         "(full body standing side by side:1.45), looking at camera, weight on hip",
-        "(sitting on a sofa together:1.4), legs crossed differently, looking at viewer",
-        "(one standing one sitting on arm of sofa:1.4), both looking at camera",
-        "(leaning on a kitchen counter side by side:1.35), three-quarter view",
-        "(walking toward camera mid-step:1.35), dynamic, side by side",
+        "(sitting on a sofa together:1.4), legs crossed differently, looking at viewer, full bodies",
+        "(one standing one sitting on arm of sofa:1.4), both looking at camera, full body",
+        "(leaning on a kitchen counter side by side:1.35), three-quarter view full body",
+        "(walking toward camera mid-step:1.35), dynamic, side by side, full body",
         "(standing in doorway together:1.4), one hand on frame, looking at viewer",
-        "(sitting on bed edge side by side:1.35), leaning slightly toward each other",
-        "(from behind looking over shoulders:1.35), backs partly to camera",
+        "(sitting on bed edge side by side:1.35), leaning slightly toward each other, full body",
+        "(from behind looking over shoulders:1.4), backs partly to camera, full body rear view",
+        "(lying on a bed together:1.35), propped on elbows, looking at camera, full bodies on sheets",
+        "(kneeling on bed side by side:1.35), looking at camera, full body",
+        "(one on all fours on bed looking back, other sitting beside:1.35), both looking at camera",
+        "(standing back to back looking over shoulders:1.35), full body",
       ];
       const places = [
         "indoor modern living room warm light",
         "apartment hallway near door",
-        "bedroom soft lamp light",
+        "bedroom soft lamp light, bed visible",
         "kitchen island evening light",
         "hotel suite large window",
+        "luxury bathroom doorway",
+        "dimly lit lounge with sofa",
       ];
       let outfitBit = (ex && ex.outfitLine) ? ex.outfitLine : outfits[Math.floor(Math.random() * outfits.length)];
       let poseBit = (ex && ex.poseLine) ? ex.poseLine : poses[Math.floor(Math.random() * poses.length)];
@@ -5610,7 +5662,13 @@ async function generatePhoto() {
   try {
     if (!isDuoCharacter(c)) {
       // Cadre corps entier EN TÊTE (Horde bias portrait sinon)
-      const frame = "(full body shot head to mid-thigh visible:1.5), (wide composition not face crop:1.4), ";
+      const frames = [
+        "(full body shot from head to toes:1.5), (wide composition not face crop:1.45), ",
+        "(full body head to mid-thigh:1.5), (wide shot not portrait:1.4), ",
+        "(full body three-quarter length:1.45), (environment visible:1.3), ",
+        "(full body rear three-quarter view:1.45), (looking back at camera:1.35), ",
+      ];
+      const frame = frames[Math.floor(Math.random() * frames.length)];
       prompt = frame + faceIdentityLock(c) + " " + prompt;
       if (!/NOT face crop|NOT portrait only/i.test(prompt)) {
         prompt += ", NOT face crop only, NOT close-up portrait only, NOT head and shoulders only,";
