@@ -4013,14 +4013,13 @@ function renderProfile() {
     </div>
     <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
       <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descriptif physique</div>
-      <p style="margin:0 0 8px;line-height:1.5;white-space:pre-wrap;font-size:13px">${formatPhysicalFR(c)}</p>
+      <p style="margin:0 0 8px;line-height:1.55;white-space:pre-wrap;font-size:13px">${escapeHtml(formatPhysicalFR(c))}</p>
       <p style="margin:0;color:#b9a8c4;font-size:13px;line-height:1.4">${c.body ? ("Morphologie : " + c.body) : ""}${c.ethnicity ? (" · " + c.ethnicity) : ""}${c.age ? (" · " + c.age + " ans") : ""}</p>
     </div>
     <div style="background:linear-gradient(135deg,#1a1028,#241830);border-radius:12px;padding:12px;margin:10px 0;border:1px solid #4a2860">
       <div style="color:#ff9ec8;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">🎬 Scénario</div>
       <p style="margin:0;line-height:1.55;white-space:pre-wrap;font-size:14px;color:#f0e4f5">${escapeHtml(c.scenario || "Aucun scénario défini.")}</p>
     </div>
-    <p style="color:#a898b0;font-size:13px">${c.personality || ""}</p>
     <h3>Photos</h3>
     <div class="gallery">
       ${all.map((g) => {
@@ -4664,32 +4663,74 @@ function duoCompositionBlock(c) {
 
 function formatTemperamentFR(c) {
   if (!c) return "";
-  const p = String(c.personality || "").trim();
-  if (p.length > 40) return p;
+  let p = String(c.personality || "").trim();
+  // Retirer le texte générique / boilerplate
+  p = p.replace(/Réagit au contexte[^.]*\.?/gi, "");
+  p = p.replace(/Passe du SFW au NSFW[^.]*\.?/gi, "");
+  p = p.replace(/One-shot possible[^.]*\.?/gi, "");
+  p = p.replace(/pas d'amour déclaré forcé\.?/gi, "");
+  p = p.replace(/Naturelle et cohérente avec son rôle\.?/gi, "");
+  p = p.replace(/SFW\s*[↔<>]+\s*NSFW[^.]*\.?/gi, "");
+  p = p.replace(/\s{2,}/g, " ").trim();
+  if (p.length > 30) return p;
   const tags = (c.tags || []).map(String);
   const blob = (tags.join(" ") + " " + (c.title || "")).toLowerCase();
-  const bits = [];
-  if (/timide|réserv|maladroite|gênée/.test(blob)) bits.push("Timide et réservée : hésite, rougit facilement, phrases courtes, peu d'initiatives physiques au début.");
-  if (/directe|tactile|cash/.test(blob)) bits.push("Directe et tactile : dit clairement ce qu'elle veut, n'a pas peur du contact, peut prendre l'initiative (main, baiser, geste osé) sans tourner autour du pot.");
-  if (/flirt|espiègle|taquine|coquine|provoc/.test(blob)) bits.push("Flirt / espiègle : teasing, sourires en coin, provocations légères, s'amuse de la tension.");
-  if (/froide|distante/.test(blob)) bits.push("Froide / distante : peu d'émotion affichée, garde le contrôle, se livre lentement.");
-  if (/autoritaire|dominante|stricte/.test(blob)) bits.push("Autoritaire : mène la danse, ton ferme, n'est pas en demande.");
-  if (/fragile|câline|douce|sensible/.test(blob)) bits.push("Sensible / douce : besoin de réassurance, ton doux, émotion visible.");
-  if (/extravert|ouverte|rieuse|bavarde|joueuse/.test(blob)) bits.push("Ouverte et joueuse : à l'aise, parle facilement, humour, peut lancer des défis.");
-  if (!bits.length) bits.push("Naturelle et cohérente avec son rôle : réagit selon le contexte, sans forcer l'amour ni la distance.");
-  bits.push("SFW ↔ NSFW fluide selon le joueur. One-shot ou attachement progressif selon le tempérament, jamais d'amour forcé.");
-  return bits.join(" ");
+  if (/timide|réserv/.test(blob)) return "Timide : hésite, rougit, peut refuser ou faire attendre.";
+  if (/directe|tactile/.test(blob)) return "Directe : dit ce qu'elle veut, peut aussi dire non net.";
+  if (/flirt|espiègle|provoc/.test(blob)) return "Espiègle / flirt : teasing, négocie selon l'envie.";
+  if (/dominante|autoritaire/.test(blob)) return "Dominante : mène la danse, peut imposer ou refuser.";
+  if (/sensible|douce/.test(blob)) return "Sensible : cherche la complicité, freine si trop vite.";
+  return "Personnalité propre au rôle — peut accepter, refuser ou négocier.";
 }
 
 function formatPhysicalFR(c) {
   if (!c) return "";
-  const stored = String(c.appearance || "").trim();
+  let stored = String(c.appearance || "").trim();
+  // Corriger les \n littéraux affichés
+  stored = stored.replace(/\\n/g, "\n").replace(/\r/g, "");
+  function prettyPhys(text) {
+    let t = String(text || "").trim();
+    if (!t) return t;
+    t = t.replace(/\\n/g, "\n");
+    // Titres de section → emojis + tirets
+    const map = [
+      [/^Sujet\s*:/gim, "👤 Sujet :"],
+      [/^Visage\s*:/gim, "— 😊 Visage :"],
+      [/^Yeux\s*:/gim, "— 👁 Yeux :"],
+      [/^Sourcils\s*:/gim, "— Sourcils :"],
+      [/^Nez et bouche\s*:/gim, "— Nez & bouche :"],
+      [/^Cheveux\s*:/gim, "— 💇 Cheveux :"],
+      [/^Corps et silhouette\s*:/gim, "— 💃 Corps :"],
+      [/^Silhouette\s*:/gim, "— 💃 Silhouette :"],
+      [/^Poitrine\s*:/gim, "— 🍒 Poitrine :"],
+      [/^Taille\s*:/gim, "— Taille :"],
+      [/^Hanches[\s\S]*?:/gim, "— Hanches & jambes :"],
+      [/^Jambes\s*:/gim, "— Jambes :"],
+      [/^Peau[\s\S]*?:/gim, "— ✨ Peau :"],
+      [/^Traits non-humains\s*:/gim, "— ✨ Traits non-humains :"],
+      [/^Origine[\s\S]*?:/gim, "— 🌍 Origine :"],
+      [/^Cadre\s*:/gim, "— Cadre :"],
+      [/^Morphologie\s*:/gim, "— Morphologie :"],
+      [/^Femme\s*1\s*:/gim, "👩 Femme 1 :"],
+      [/^Femme\s*2\s*:/gim, "👩 Femme 2 :"],
+      [/^Âge et origine\s*:/gim, "— Âge & origine :"],
+    ];
+    for (const [re, rep] of map) t = t.replace(re, rep);
+    // Si tout est sur une ligne, tenter de couper après les ":"
+    if (t.indexOf("\n") < 0 && t.length > 180) {
+      t = t.replace(/\s*[—-]\s+/g, "\n— ").replace(/(👤|👩)/g, "\n$1").trim();
+    }
+    return t.trim();
+  }
   // Duo : afficher tel quel si déjà séparé (Femme 1 / Femme — / LEFT)
   if (stored.length > 200 && (/Femme\s*[1—–-]|Femme 1|LEFT woman|Femme\s*—/i.test(stored)) && /Yeux|Cheveux|Poitrine/i.test(stored)) {
-    return stored;
+    return prettyPhys(stored);
   }
   if (stored.indexOf("Sujet") >= 0 && stored.indexOf("Yeux") >= 0 && stored.length > 250) {
-    return stored;
+    return prettyPhys(stored);
+  }
+  if (stored.indexOf("Sujet") >= 0 && stored.length > 120) {
+    return prettyPhys(stored);
   }
   // Duo générique : reconstruire depuis looks_en si possible
   try {
