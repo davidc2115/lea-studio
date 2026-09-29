@@ -12,8 +12,7 @@
     tags: ["timide", "amie de ta fille", "orage", "nsfw"],
     greeting:
       "~Il va me trouver ridicule comme ça…~\n*elle se serre contre le chambranle, trempée*\nEuh… désolée… je suis une copine de ta fille…\nL'orage m'a surprise… elle n'est pas là…\nTu… tu pourrais me laisser entrer ?",
-    scenario:
-      "Léa, 21 ans, est la meilleure amie de TA FILLE. Surprise par l'orage, elle frappe chez TOI (le parent), trempée, jean moulant et top court.",
+    scenario: "Léa, 21 ans, meilleure amie de TA FILLE. Surprise par l'orage, elle frappe chez TOI trempée, jean moulant et top court.",
     personality:
       "Timide, maladroite, voix douce. Rougit facilement. Peut devenir espiègle si elle se sent en confiance.",
     appearance:
@@ -2016,11 +2015,11 @@
     if (b64.length > 900000) b64 = b64.slice(0, 900000);
     const mime = "image/jpeg";
     const instruction = [
-      "You are an expert at describing faces for Stable Diffusion / AI image generation.",
-      "Analyze the woman in this photo. Output ONLY a single English prompt line (no markdown, no bullets).",
-      "Include: exact age look, face shape, skin tone/texture, eye color and shape, eyebrow style,",
-      "nose shape, lip shape/color, hair color length texture and parting, distinctive marks.",
-      "Be very specific and photographic. Max 80 words. Start with: same woman as reference photo,",
+      "You are an expert at describing FACE IDENTITY for Stable Diffusion.",
+      "Analyze ONLY the face and hair of the woman. Output ONE English prompt line (no markdown).",
+      "Include: apparent age, face shape, skin tone, eye color and shape, brows, nose, lips, hair color length texture parting, marks.",
+      "FORBIDDEN: pose, posture, body position, clothing, outfit, camera angle, background, nude, standing, sitting.",
+      "Max 70 words. Start with: same woman as reference photo, face only,",
     ].join(" ");
     const models = ["gemini-2.0-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
     let last = "";
@@ -2101,9 +2100,14 @@
         extraNeg
       ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1000);
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
       if (body.face_lock && String(body.face_lock).length > 20) {
-        promptSafe = ("(identical face to reference:1.5), " + String(body.face_lock).slice(0, 350) + ", " + promptSafe).slice(0, 1100);
+        let fl = String(body.face_lock)
+          .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 280);
+        promptSafe = ("(identical face to reference:1.55), " + fl + ", " + promptSafe).slice(0, 1200);
       }
       if (!promptSafe) promptSafe = "photorealistic photo of an adult woman, sharp focus, detailed face";
 
@@ -2139,21 +2143,32 @@
       // 512x768 si compte, sinon 512x512 gratuit
       const W = 512;
       const H = hasHordeAccount ? 768 : 640;
-      // Plus de steps = moins d'images "flash" moches (16 steps = 2-5s, mauvais rendu)
-      const steps = hasHordeAccount ? 32 : 26;
-      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "Realistic Vision"];
+      // Steps élevés = moins d'images "flash" (2-5s) floues / hors-identité
+      const steps = hasHordeAccount ? 36 : 30;
+      // Noms reconnus sur AI Horde (évite turbo/lightning qui sortent en 3s)
+      const photoModels = [
+        "ICBINP - I Can't Believe It's Not Photography",
+        "AbsoluteReality",
+        "Dreamshaper",
+        "Realistic Vision",
+        "Deliberate",
+      ];
       const payloads = [];
 
-      // Denoise HAUT si img2img : sinon la pose de la ref est recopié (0.35-0.45 = quasi copie)
-      let den = typeof body.denoising === "number" ? body.denoising : 0.62;
-      den = Math.min(0.78, Math.max(0.55, den));
+      // Denoise HAUT si img2img : sinon la pose de la ref est recopié
+      let den = typeof body.denoising === "number" ? body.denoising : 0.68;
+      den = Math.min(0.82, Math.max(0.62, den));
 
-      // txt2img EN PREMIER (meilleure variété de poses + identité via prompt)
-      // sauf si le client FORCE img2img avec denoise explicite élevé
-      const forceImg2 = useImg2Img && typeof body.denoising === "number" && body.denoising >= 0.5;
+      // Négatifs anti-clone + anti-âge + anti-pose figée
+      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
+      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
+      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
+
+      // txt2img EN PREMIER (variété poses)
+      const forceImg2 = useImg2Img && body.force_img2img === true;
       if (!forceImg2) {
         payloads.push({
-          prompt: promptSafe + " ### " + negative,
+          prompt: promptSafe + " ### " + negFull,
           params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
@@ -2164,10 +2179,10 @@
       }
 
       if (useImg2Img) {
-        const faceBoost = "(identical face:1.5), (same woman as reference photo:1.4), same hair color, same eye color, (completely new pose:1.5), (different camera angle:1.4), ";
+        const faceBoost = "(identical face:1.55), (same woman as reference photo:1.45), same hair color, same eye color, (completely new pose:1.55), (different camera angle:1.45), ";
         const imgPrompt = (faceBoost + promptSafe).slice(0, 950);
         payloads.push({
-          prompt: imgPrompt + " ### " + negative + ", same pose as reference, identical composition, copy of source pose, static portrait",
+          prompt: imgPrompt + " ### " + negFull + ", same pose as reference, identical composition, copy of source pose, static portrait",
           params: {
             width: W, height: H, steps: steps, n: 1,
             sampler_name: "k_euler_a", cfg_scale: 7.5,
@@ -2186,7 +2201,7 @@
       // Secours txt2img (sans le modèle basique 16 steps qui sort en 3s)
       payloads.push({
         prompt: promptSafe.slice(0, 900) + " ### " + negative.slice(0, 500),
-        params: { width: 512, height: 640, steps: 24, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        params: { width: 512, height: 640, steps: 30, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
         nsfw: body.nsfw !== false,
         censor_nsfw: false,
         models: photoModels,

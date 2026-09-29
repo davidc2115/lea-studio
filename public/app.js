@@ -1102,17 +1102,24 @@ function buildLeaImagePrompt(extra = "") {
       ? ex.placeLine
       : (placeDetail || "indoor apartment");
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
+    const ageN = Number(c.age) || 21;
+    const ageLock = "(looks exactly " + ageN + " years old:1.5), (" + ageN + " year old woman:1.45), age-appropriate face,";
     const short = [
-      // Composition d'abord = variation réelle + corps entier
-      "(full body shot from head to mid-thigh:1.55), (wide shot not portrait crop:1.45),",
+      // Identité + âge EN TÊTE (Horde tronque la fin)
+      "(1girl:1.55), (solo:1.5), single woman only,",
+      ageLock,
+      faceBits.slice(0, 280) + ",",
+      // Composition + pose variée
+      "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
       "(completely different pose:1.55), (new camera angle:1.45), (unique body position:1.4), " + pos + ",",
       clothed ? ("(wearing " + wear + ":1.5), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
       "in " + loc + ",",
       "photorealistic photo of the same adult woman,",
-      faceBits.slice(0, 220) + ",",
       "sharp focus, natural skin, realistic lighting,",
       "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
       "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
+      "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
+      ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,",
       hasUser ? ((ex.text || "").slice(0, 100) + ",") : "",
       anti,
     ].filter(Boolean).join(" ");
@@ -4018,7 +4025,7 @@ function renderProfile() {
     </div>
     <div style="background:linear-gradient(135deg,#1a1028,#241830);border-radius:12px;padding:12px;margin:10px 0;border:1px solid #4a2860">
       <div style="color:#ff9ec8;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">🎬 Scénario</div>
-      <p style="margin:0;line-height:1.55;white-space:pre-wrap;font-size:14px;color:#f0e4f5">${escapeHtml(c.scenario || "Aucun scénario défini.")}</p>
+      <p style="margin:0;line-height:1.55;white-space:pre-wrap;font-size:14px;color:#f0e4f5">${escapeHtml(String(c.scenario || "Aucun scénario défini.").replace(/\s*Cadre adulte,?\s*consentement[^.]{0,40}\.?/gi,"").replace(/\s*Pas d'orage générique[^.]{0,40}\.?/gi,"").trim())}</p>
     </div>
     <h3>Photos</h3>
     <div class="gallery">
@@ -4974,13 +4981,15 @@ function fixedAppearanceBlock(c) {
 
 function ageNegatives(c) {
   const age = Number(c && c.age) || 21;
-  let n = "different face, different person, wrong age";
+  let n = "different face, different person, wrong age, looks " + (age + 15) + " years old";
   if (age <= 22) {
-    n += ", middle-aged, 30 years old, 35 years old, 40 years old, mature face, wrinkles, crow feet, heavy glamorous makeup, soccer mom, MILF face";
-  } else if (age <= 35) {
-    n += ", elderly, 50 years old, teenage underage look";
+    n += ", middle-aged, 28 years old, 30 years old, 35 years old, 40 years old, mature face, wrinkles, crow feet, heavy glamorous makeup, soccer mom, MILF face, aged face";
+  } else if (age <= 28) {
+    n += ", elderly, 45 years old, 50 years old, teenage underage look, child face";
+  } else if (age <= 40) {
+    n += ", teenage, underage, child face, very young 18 year old face only";
   } else {
-    n += ", teenage, underage, child face";
+    n += ", teenage, underage, child face, 20 year old face, youthful teen";
   }
   return n;
 }
@@ -6224,7 +6233,13 @@ async function generatePhoto() {
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         payload.negative = (payload.negative || "") +
           ", blurry, out of focus, same pose every time, static nude portrait only, " +
-          "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body";
+          "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
+          "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person";
+        // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
+        payload.force_img2img = false;
+        delete payload.source_image;
+        delete payload.source_processing;
+        delete payload.denoising;
         // Analyse Gemini du visage ★ → face_lock SANS coller la pose de la ref
         try {
           if (!isDuoCharacter(c)) {
