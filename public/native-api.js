@@ -1966,24 +1966,27 @@
           console.warn("[gemini-img]", e.message || e);
         }
       }
-      // ——— Horde gratuit : rester sous le budget kudos anonyme (<576px, steps bas) ———
+      // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
       const negative = [
+        "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
         "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
-        "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
-        "watermark, text, logo, signature, dreamstime, stock photo, child, teen, underage, loli,",
-        "wrong body type, inconsistent proportions,",
-        "different face, different person, face morph, identity change, another woman,",
-        "wrong facial features, different eyes, different nose, different jaw,",
+        "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
+        "child, teen, underage, different face, different person, face morph,",
+        "same pose as reference, identical composition, copy of source pose,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 800);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
-      // Enrichissement visage depuis analyse Gemini (côté client) si fourni
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1000);
       if (body.face_lock && String(body.face_lock).length > 20) {
-        promptSafe = ("(identical face:1.45), " + String(body.face_lock).slice(0, 400) + ", " + promptSafe).slice(0, 1400);
+        promptSafe = ("(identical face to reference:1.5), " + String(body.face_lock).slice(0, 350) + ", " + promptSafe).slice(0, 1100);
       }
-      if (!promptSafe) promptSafe = "photorealistic portrait of an adult woman";
+      if (!promptSafe) promptSafe = "photorealistic photo of an adult woman, sharp focus, detailed face";
+
+      // Prefer sharp quality keywords at end
+      if (!/sharp focus|photorealistic/i.test(promptSafe)) {
+        promptSafe = (promptSafe + ", sharp focus, photorealistic, detailed skin, natural lighting").slice(0, 1100);
+      }
 
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
@@ -2007,29 +2010,27 @@
         if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
       } catch (_) {}
 
-      const clientAgent = "LeaStudio:2.4:https://github.com/davidc2115/lea-studio";
-      // 512x512 = gratuit sans kudos ; 512x768 demande souvent des kudos
+      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
-      // Compte Horde = 512x768 possible ; anonyme = 512x512 gratuit
-      const freeW = 512;
-      const freeH = hasHordeAccount ? 768 : 512;
-      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "stable_diffusion"];
+      // 512x768 si compte, sinon 512x512 gratuit
+      const W = 512;
+      const H = hasHordeAccount ? 768 : 512;
+      const steps = hasHordeAccount ? 28 : 20;
+      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "Realistic Vision"];
       const payloads = [];
 
+      // Denoise modéré : assez pour changer pose/tenue, pas trop pour flou
+      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
+      den = Math.min(0.50, Math.max(0.35, den));
+
       if (useImg2Img) {
-        let den = typeof body.denoising === "number" ? body.denoising : 0.45;
-        den = Math.min(0.65, Math.max(0.32, den));
-        const faceBoost = "(identical face to reference photo:1.6), (same woman as source:1.5), same eyes same nose same lips same hair color, ";
-        const imgPrompt = faceBoost + promptSafe.slice(0, 800);
+        const faceBoost = "(identical face:1.55), (same woman as reference photo:1.45), same hair color, same eye color, ";
+        const imgPrompt = (faceBoost + promptSafe).slice(0, 950);
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
-            width: freeW,
-            height: freeH,
-            steps: hasHordeAccount ? 22 : 16,
-            n: 1,
-            sampler_name: "k_euler_a",
-            cfg_scale: 7,
+            width: W, height: H, steps: steps, n: 1,
+            sampler_name: "k_euler_a", cfg_scale: 7,
             denoising_strength: den,
           },
           nsfw: body.nsfw !== false,
@@ -2040,20 +2041,17 @@
           source_image: src,
           source_processing: "img2img",
         });
+        // Fallback lighter
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
-            width: 512,
-            height: 512,
-            steps: 14,
-            n: 1,
-            sampler_name: "k_euler_a",
-            cfg_scale: 6.5,
-            denoising_strength: Math.min(0.55, den + 0.05),
+            width: 512, height: 512, steps: 18, n: 1,
+            sampler_name: "k_euler_a", cfg_scale: 6.5,
+            denoising_strength: Math.min(0.48, den + 0.03),
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
-          models: ["stable_diffusion"],
+          models: ["stable_diffusion", "Dreamshaper"],
           r2: true,
           slow_workers: true,
           source_image: src,
@@ -2061,10 +2059,10 @@
         });
       }
 
-      // txt2img gratuit 512x512
+      // txt2img (pas de ref ou secours)
       payloads.push({
         prompt: promptSafe + " ### " + negative,
-        params: { width: freeW, height: freeH, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
         nsfw: body.nsfw !== false,
         censor_nsfw: false,
         models: photoModels,
@@ -2072,8 +2070,8 @@
         slow_workers: true,
       });
       payloads.push({
-        prompt: promptSafe.slice(0, 700) + " ### " + negative.slice(0, 350),
-        params: { width: freeW, height: freeH, steps: 12, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
+        prompt: promptSafe.slice(0, 700) + " ### " + negative.slice(0, 400),
+        params: { width: 512, height: 512, steps: 16, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
         nsfw: true,
         censor_nsfw: false,
         models: ["stable_diffusion"],
@@ -2102,19 +2100,16 @@
                 models: (bodyPayload.models || []).slice(0, 3),
               };
             }
-            last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 180) : "") || ("HTTP " + res.status);
-            // Si kudos : essayer payload suivant (plus léger)
+            last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
             console.warn("[horde]", host, last);
           } catch (e) {
             last = String(e.message || e);
           }
         }
       }
-      // Message plus clair pour l'utilisateur
       if (/kudos|heavy demand|work budget/i.test(String(last))) {
         throw new Error(
-          "Horde : quota gratuit insuffisant (kudos). Réessaie dans 1–2 min, ou ajoute une clé API Horde gratuite sur aihorde.net (compte gratuit = plus de kudos). Détail : " +
-          String(last).slice(0, 120)
+          "Horde quota (kudos). Réessaie plus tard ou ajoute une clé gratuite aihorde.net. " + String(last).slice(0, 100)
         );
       }
       throw new Error(last || "Horde indisponible");
