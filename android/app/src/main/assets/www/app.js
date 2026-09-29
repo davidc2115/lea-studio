@@ -12,6 +12,8 @@ function customCover(id) {
   try { return localStorage.getItem("lea.cover." + (id || state.current || "lea")) || ""; } catch { return ""; }
 }
 function setCustomCover(id, src) {
+  try { if (arguments[0]) localStorage.removeItem("lea.faceLock." + arguments[0]); } catch (_) {}
+
   if (!src) localStorage.removeItem("lea.cover." + id);
   else localStorage.setItem("lea.cover." + id, src);
 }
@@ -4539,6 +4541,43 @@ function identityLock(c) {
 
 /** Cover / 1ère photo → base64 brut (sans data: prefix) pour img2img tous moteurs. */
 
+
+/** Analyse Gemini de la photo ★ → face_lock cache localStorage (par personnage). */
+async function ensureFaceLockFromGemini(c, refB64, statusFn) {
+  const setS = statusFn || setGenStatus;
+  if (!c || !c.id || !refB64) return "";
+  const key = "lea.faceLock." + c.id;
+  try {
+    const cached = localStorage.getItem(key);
+    if (cached && cached.length > 40) return cached;
+  } catch (_) {}
+  // Vérifier qu'il y a une clé Gemini
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    if (!String(st.geminiKeys || "").trim()) {
+      setS("Pas de clé Gemini — génération sans analyse visage…");
+      return "";
+    }
+  } catch (_) {}
+  setS("Gemini analyse le visage (réf. profil)…");
+  try {
+    const dataUrl = refB64.startsWith("data:") ? refB64 : ("data:image/jpeg;base64," + refB64);
+    const res = await api("/api/analyze-face", {
+      method: "POST",
+      body: JSON.stringify({ image: dataUrl }),
+    });
+    const desc = (res && (res.facePrompt || res.desc || res.text)) || "";
+    if (desc && desc.length > 30) {
+      try { localStorage.setItem(key, desc); } catch (_) {}
+      setS("Visage analysé · " + desc.slice(0, 60) + "…");
+      return desc;
+    }
+  } catch (e) {
+    setS("Analyse visage ignorée : " + (e.message || e));
+  }
+  return "";
+}
+
 async function applyCharacterRefToPayload(payload, c, statusFn) {
   const setS = statusFn || setGenStatus;
   try {
@@ -4570,7 +4609,12 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       payload.source_processing = "img2img";
       if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.38 : 0.40);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
-      setS("Horde img2img · ref OK · denoise " + payload.denoising + "…");
+      // Analyse Gemini → prompt visage cohérent avec la photo
+      try {
+        const faceLock = await ensureFaceLockFromGemini(c, ref, setS);
+        if (faceLock) payload.face_lock = faceLock;
+      } catch (_) {}
+      setS("Horde img2img · ref OK · denoise " + payload.denoising + (payload.face_lock ? " · visage Gemini" : "") + "…");
     } else {
       setS("Horde txt2img (pas encore de photo de ref — la 1ère image servira ensuite)…");
     }

@@ -1878,6 +1878,77 @@
   }
 
 
+
+  /** Analyse une photo de référence via Gemini Vision → prompt EN visage ultra-détaillé. */
+  async function analyzeFaceWithGemini(b64OrDataUrl) {
+    const keys = rotatedGeminiKeys();
+    if (!keys.length) throw new Error("Ajoute une clé Gemini (Clés) pour analyser le visage");
+    let b64 = String(b64OrDataUrl || "");
+    const comma = b64.indexOf(",");
+    if (b64.startsWith("data:") && comma >= 0) b64 = b64.slice(comma + 1);
+    b64 = b64.replace(/\s+/g, "");
+    if (b64.length < 400) throw new Error("Image de référence trop petite");
+    // Limiter taille pour l'API
+    if (b64.length > 900000) b64 = b64.slice(0, 900000);
+    const mime = "image/jpeg";
+    const instruction = [
+      "You are an expert at describing faces for Stable Diffusion / AI image generation.",
+      "Analyze the woman in this photo. Output ONLY a single English prompt line (no markdown, no bullets).",
+      "Include: exact age look, face shape, skin tone/texture, eye color and shape, eyebrow style,",
+      "nose shape, lip shape/color, hair color length texture and parting, distinctive marks.",
+      "Be very specific and photographic. Max 80 words. Start with: same woman as reference photo,",
+    ].join(" ");
+    const models = ["gemini-2.0-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
+    let last = "";
+    for (const key of keys) {
+      for (const model of models) {
+        try {
+          const res = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/models/" +
+              encodeURIComponent(model) +
+              ":generateContent?key=" + encodeURIComponent(key),
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{
+                  role: "user",
+                  parts: [
+                    { text: instruction },
+                    { inlineData: { mimeType: mime, data: b64 } },
+                  ],
+                }],
+                generationConfig: { temperature: 0.2, maxOutputTokens: 220 },
+              }),
+            }
+          );
+          const data = await res.json().catch(() => ({}));
+          if (data.error) {
+            last = data.error.message || JSON.stringify(data.error);
+            continue;
+          }
+          const parts = (((data.candidates || [])[0] || {}).content || {}).parts || [];
+          const text = parts.map((p) => p.text || "").join(" ").replace(/\s+/g, " ").trim();
+          if (text.length > 30) {
+            return text.replace(/^["'`]+|["'`]+$/g, "").slice(0, 500);
+          }
+          last = "réponse vide";
+        } catch (e) {
+          last = String(e.message || e);
+        }
+      }
+    }
+    throw new Error(last || "Analyse Gemini échouée");
+  }
+
+
+    if (path === "/api/analyze-face" && method === "POST") {
+      const img = body.image || body.source_image || body.ref || "";
+      if (!img) throw new Error("image manquante");
+      const desc = await analyzeFaceWithGemini(img);
+      return { ok: true, facePrompt: desc };
+    }
+
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
@@ -1895,7 +1966,7 @@
           console.warn("[gemini-img]", e.message || e);
         }
       }
-      // ——— Horde (version stable post-personnages) ———
+      // ——— Horde gratuit : rester sous le budget kudos anonyme (<576px, steps bas) ———
       const extraNeg = String(body.negative || "");
       const negative = [
         "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
@@ -1905,19 +1976,22 @@
         "different face, different person, face morph, identity change, another woman,",
         "wrong facial features, different eyes, different nose, different jaw,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 800);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1500);
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
+      // Enrichissement visage depuis analyse Gemini (côté client) si fourni
+      if (body.face_lock && String(body.face_lock).length > 20) {
+        promptSafe = ("(identical face:1.45), " + String(body.face_lock).slice(0, 400) + ", " + promptSafe).slice(0, 1400);
+      }
       if (!promptSafe) promptSafe = "photorealistic portrait of an adult woman";
 
-      // source_image: base64 pur, taille limitée (évite validation failed)
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
-        if (raw.length > 800 && raw.length < 1_200_000) src = raw;
+        if (raw.length > 800 && raw.length < 1_000_000) src = raw;
       }
       const useImg2Img = Boolean(src);
 
@@ -1933,21 +2007,23 @@
         if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
       } catch (_) {}
 
-      const clientAgent = "LeaStudio:2.3:https://github.com/davidc2115/lea-studio";
-      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "Realistic Vision"];
+      const clientAgent = "LeaStudio:2.4:https://github.com/davidc2115/lea-studio";
+      // 512x512 = gratuit sans kudos ; 512x768 demande souvent des kudos
+      const freeW = 512, freeH = 512;
+      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "stable_diffusion"];
       const payloads = [];
 
       if (useImg2Img) {
         let den = typeof body.denoising === "number" ? body.denoising : 0.38;
         den = Math.min(0.48, Math.max(0.32, den));
         const faceBoost = "(identical face to reference photo:1.5), same woman as source, ";
-        const imgPrompt = faceBoost + promptSafe.slice(0, 900);
+        const imgPrompt = faceBoost + promptSafe.slice(0, 800);
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
-            width: 512,
-            height: 768,
-            steps: 30,
+            width: freeW,
+            height: freeH,
+            steps: 18,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 7,
@@ -1964,17 +2040,17 @@
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
-            width: 512,
-            height: 768,
-            steps: 26,
+            width: freeW,
+            height: freeH,
+            steps: 15,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 6.5,
-            denoising_strength: Math.min(0.48, den + 0.06),
+            denoising_strength: Math.min(0.48, den + 0.05),
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
-          models: ["stable_diffusion", "Dreamshaper"],
+          models: ["stable_diffusion"],
           r2: true,
           slow_workers: true,
           source_image: src,
@@ -1982,10 +2058,10 @@
         });
       }
 
-      // txt2img si pas de ref, ou secours après échec img2img
+      // txt2img gratuit 512x512
       payloads.push({
         prompt: promptSafe + " ### " + negative,
-        params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
+        params: { width: freeW, height: freeH, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
         nsfw: body.nsfw !== false,
         censor_nsfw: false,
         models: photoModels,
@@ -1993,8 +2069,8 @@
         slow_workers: true,
       });
       payloads.push({
-        prompt: promptSafe.slice(0, 800) + " ### " + negative.slice(0, 400),
-        params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        prompt: promptSafe.slice(0, 700) + " ### " + negative.slice(0, 350),
+        params: { width: freeW, height: freeH, steps: 12, n: 1, sampler_name: "k_euler_a", cfg_scale: 6.5 },
         nsfw: true,
         censor_nsfw: false,
         models: ["stable_diffusion"],
@@ -2024,11 +2100,19 @@
               };
             }
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 180) : "") || ("HTTP " + res.status);
+            // Si kudos : essayer payload suivant (plus léger)
             console.warn("[horde]", host, last);
           } catch (e) {
             last = String(e.message || e);
           }
         }
+      }
+      // Message plus clair pour l'utilisateur
+      if (/kudos|heavy demand|work budget/i.test(String(last))) {
+        throw new Error(
+          "Horde : quota gratuit insuffisant (kudos). Réessaie dans 1–2 min, ou ajoute une clé API Horde gratuite sur aihorde.net (compte gratuit = plus de kudos). Détail : " +
+          String(last).slice(0, 120)
+        );
       }
       throw new Error(last || "Horde indisponible");
     }
