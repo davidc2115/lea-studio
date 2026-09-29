@@ -285,7 +285,7 @@
     system = FORMAT_REMINDER + "\n\n" + system;
     const nonSys = messages.filter((m) => m.role !== "system");
     // Historique court = réponses plus rapides
-    let contents = nonSys.slice(-8).map((m) => ({
+    let contents = nonSys.slice(-24).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: String(m.content || "").slice(0, 900) }],
     }));
@@ -549,7 +549,7 @@
     let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
-    const nonSys = messages.filter((m) => m.role !== "system").slice(-10).map((m) => ({
+    const nonSys = messages.filter((m) => m.role !== "system").slice(-22).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content || "").slice(0, 1200),
     }));
@@ -907,7 +907,7 @@
 
   /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
   function cleanHistory(messages) {
-    return (messages || []).slice(-16).map((m) => ({
+    return (messages || []).slice(-36).map((m) => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
     })).filter((m) => m.content && m.content.length > 1);
@@ -1191,6 +1191,23 @@
     }
   }
 
+  function maybeEpisodeSummary(chat) {
+    try {
+      ensureVault(chat);
+      var n = (chat.messages || []).length;
+      if (n < 8 || n % 8 !== 0) return;
+      var slice = (chat.messages || []).slice(-8);
+      var sc = chat.scene || {};
+      var userBits = slice.filter(function(m) { return m.role === "user"; }).map(function(m) { return String(m.content || "").slice(0, 70); }).join(" / ");
+      var asstBits = slice.filter(function(m) { return m.role === "assistant"; }).map(function(m) { return String(m.content || "").replace(/[()*]/g, " ").slice(0, 70); }).join(" / ");
+      var text = ("Episode " + (n - 7) + "-" + n + " lieu=" + (sc.place || "?") + " tenue=" + (sc.outfit || sc.body || "?") + " | J: " + userBits + " | Elle: " + asstBits).slice(0, 480);
+      if (!chat.summaries) chat.summaries = [];
+      chat.summaries.push({ text: text, createdAt: Date.now() });
+      if (chat.summaries.length > 40) chat.summaries = chat.summaries.slice(-40);
+      pushVault(chat, "fait", text.slice(0, 400));
+    } catch (_) {}
+  }
+
   function memoryBlock(chat, userTxt) {
     ensureVault(chat);
     const sc = chat.scene || {};
@@ -1210,22 +1227,29 @@
       "",
       "Relation: prox " + (rel.closeness || 1) + "/10 conf " + (rel.trust || 1) + "/10 heat " + (rel.heat || 0) + "/10 lien " + (rel.bond || "indéfini") + ".",
       "",
+      "=== JOURNAL CHRONOLOGIQUE (25 derniers) ===",
+      ((chat.vault.entries || []).slice(-25).map(function(e) {
+        return "- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 160);
+      }).join("\n") || "- (debut)"),
+      "",
       "HISTORIQUE TENUES (récent):",
-      by("tenue", 8),
+      by("tenue", 12),
       "HISTORIQUE LIEUX (récent):",
-      by("lieu", 6),
+      by("lieu", 10),
       "HISTORIQUE INTIME:",
-      by("intime", 6),
+      by("intime", 10),
     ];
     if (relevant.length) {
-      lines.push("Mémoires vectorielles utiles:");
+      lines.push("RAPPELS UTILES (recherche):");
       for (const e of relevant.slice(0, 8)) {
         lines.push("- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 180));
       }
     }
     lines.push(
       "",
-      "RÈGLES: 1) état actuel = vérité 2) pas de téléportation 3) tenue ôtée reste ôtée 4) physique = fiche personnage"
+      ((chat.summaries || []).length ? ("RESUMES EPISODES:\n" + (chat.summaries || []).slice(-12).map(function(s) { return "- " + String(s.text || s).slice(0, 280); }).join("\n")) : ""),
+      "",
+      "REGLES MEMOIRE: 1) etat actuel = verite 2) pas de teleportation 3) tenue otee reste otee 4) physique = fiche 5) journal = source longue"
     );
     return lines.join("\n");
   }
@@ -1539,6 +1563,8 @@
         "4) Progression : chaque message avance d'UN cran max (regarder → sourire → s'asseoir → accepter un verre). Jamais trois cran d'un coup.",
         "5) Si le joueur reste soft/SFW, reste soft. Si explicite, suis. Si il freine, freine immédiatement.",
         "6) INTERDIT de répéter la même structure (pensée + même geste + même phrase) deux messages de suite.",
+        "6b) ACTION OU VÉRITÉ / jeux de soirée : ALTERNANCE des tours OBLIGATOIRE. Après le tour du joueur, c'est TOI qui poses une action, une vérité, ou joues ta carte. Annonce clairement Action ou vérité ? quand c'est ton tour. Ne laisse pas toujours la main au joueur.",
+        "6c) Ne réutilise JAMAIS la même action (*...*) ni la même phrase d'ouverture que tes 3 derniers messages.",
         "7) Reste fidèle au RÔLE (belle-mère ≠ secrétaire ≠ amie de la fille). Vocabulaire et attitude adaptés.",
         relationLock,
         // Duo multi-voix
@@ -1662,7 +1688,7 @@
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
-      const prevAsst = (chat.messages || []).filter((m) => m.role === "assistant").slice(-2)
+      const prevAsst = (chat.messages || []).filter((m) => m.role === "assistant").slice(-3)
         .map((m) => String(m.content || "").replace(/\s+/g, " ").slice(0, 280));
       if (prevAsst.length) {
         system += "\n\nINTERDIT DE RECOPIER ces derniers messages (change les mots ET les gestes) :\n- " + prevAsst.join("\n- ");
@@ -1714,8 +1740,15 @@
         // Début : interdire aussi câlins / épaule même sans NSFW
         if (early) {
           cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
-            if (/(blotti|épaule|enlac|genoux|câlin|c[aâ]lin|contre lui|contre toi|dans ses bras|dans tes bras)/i.test(inner)) {
-              return "*J'essuie maladroitement l'eau sur mon bras, le regard un peu baissé.*";
+            if (/(blotti|épaule|enlac|câlin|c[aâ]lin|contre lui|contre toi|dans ses bras|dans tes bras|essuie.{0,30}(eau|goutte))/i.test(inner)) {
+              const pool = [
+                "*Je croise les bras, un peu maladroite, et je détourne le regard.*",
+                "*Je joue nerveusement avec le bord de mon vêtement, un sourire gêné.*",
+                "*Je me redresse légèrement, sans m'approcher plus.*",
+                "*Je secoue la tête, amusée, en gardant mes distances.*",
+                "*Je pose une main sur mon cou, l'air un peu troublée mais réservée.*",
+              ];
+              return pool[Math.floor(Math.random() * pool.length)];
             }
             return m0;
           });
@@ -1724,7 +1757,7 @@
           try {
             const strictSys = system + "\n\nURGENT SFW: réponse précédente incorrecte (sexuelle ou refrain usé: blottie/épaule/film). "
               + (early
-                ? "DÉBUT de scène : reste à la porte/entrée, trempée, timide, polie. Action simple (essuyer l'eau, frissonner, regarder le sol). INTERDIT de te blottir, épaule, film, canapé câlin."
+                ? "DÉBUT de scène : reste dans le cadre du scénario (pas de câlin forcé). Action simple et NOUVELLE. INTERDIT de te blottir, épaule, refrain usé, essuyer une goutte d'eau en boucle."
                 : "Réécris SANS contenu sexuel, geste doux NOUVEAU et cohérent avec le lieu actuel.");
             const retry = await generate([{ role: "system", content: strictSys }, ...history], s.provider);
             reply = sanitizeReply(retry);
@@ -1770,7 +1803,7 @@
         }
       } catch (_) {}
       chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
-      extractScene(chat, txt, reply);
+      extractScene(chat, txt, reply); try { maybeEpisodeSummary(chat); } catch (_) {};
       if (chat.messages.length % 3 === 0) {
         const sc = chat.scene || {};
         pushVault(chat, "fait",

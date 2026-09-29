@@ -708,13 +708,35 @@ function faceIdentityLock(c) {
       "NOT short hair, NOT bob, NOT small breasts, NOT flat chest, NOT different woman,",
     ].join(" ");
   }
+  // Tous personnages non-Léa : verrou physique fiche (cheveux, yeux, poitrine, âge)
+  const locks = [];
+  try {
+    const pl = typeof physicalLocksFromText === "function" ? physicalLocksFromText(c) : null;
+    if (pl && pl.positive && pl.positive.length) locks.push(...pl.positive);
+    const blob = [c && c.appearance, c && c.looks_en, c && c.body, c && c.title].filter(Boolean).join(" ").toLowerCase();
+    if (/bonnet\s*h|h-cup|huge heavy h/.test(blob)) locks.push("(huge heavy H-cup breasts:1.55)", "deep cleavage", "hourglass waist");
+    else if (/bonnet\s*i|i-cup/.test(blob)) locks.push("(enormous I-cup breasts:1.55)");
+    else if (/bonnet\s*j|j-cup/.test(blob)) locks.push("(massive J-cup breasts:1.55)");
+    else if (/bonnet\s*g|g-cup/.test(blob)) locks.push("(extremely large G-cup breasts:1.5)");
+    else if (/bonnet\s*f|f-cup/.test(blob)) locks.push("(huge heavy F-cup breasts:1.5)");
+    else if (/bonnet\s*e|e-cup|95e/.test(blob)) locks.push("(very large heavy E-cup breasts:1.5)");
+    else if (/bonnet\s*d|d-cup|95d/.test(blob)) locks.push("(large full D-cup breasts:1.45)");
+    else if (/bonnet\s*c|c-cup/.test(blob)) locks.push("(medium C-cup breasts:1.35)");
+    else if (/bonnet\s*b|b-cup/.test(blob)) locks.push("(small B-cup breasts:1.4)");
+    else if (/bonnet\s*a|a-cup|flat chest/.test(blob)) locks.push("(very small flat A-cup breasts:1.45)");
+    const age = Number(c && c.age) || 0;
+    if (age && age <= 22) locks.push("young adult woman " + age + " years old", "youthful face");
+    else if (age && age <= 30) locks.push("woman about " + age + " years old");
+    else if (age) locks.push("mature woman about " + age + " years old");
+  } catch (_) {}
   return [
-    "(identical face to reference photo:1.6)",
+    "(identical face to reference photo:1.65)",
     "(same facial features as source image:1.55)",
     "same eye shape same nose same lips same jawline same age",
     "consistent identity, same woman as reference,",
-    "NOT a different person, NOT face morph,",
-  ].join(", ");
+    locks.join(", "),
+    "NOT a different person, NOT face morph, NOT older celebrity look, NOT different hair color,",
+  ].filter(Boolean).join(", ");
 }
 
 function buildLeaImagePrompt(extra = "") {
@@ -5855,6 +5877,14 @@ async function generatePhoto() {
             }
           }
         } catch (e) { console.warn("[face_lock]", e); }
+        try {
+          const idLock = faceIdentityLock(c);
+          if (idLock) payload.prompt = idLock + ", " + (payload.prompt || prompt || "");
+          const pl = physicalLocksFromText(c);
+          if (pl && pl.negative && pl.negative.length) {
+            payload.negative = (payload.negative || "") + ", " + pl.negative.join(", ");
+          }
+        } catch (_) {}
         setGenStatus("Horde txt2img · pose/tenue libre · seed " + payload.seed +
           (payload.face_lock ? " · visage Gemini" : "") + "…");
       }
