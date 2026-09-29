@@ -772,6 +772,7 @@ function buildLeaImagePrompt(extra = "") {
     const defaultWetOutfit = !(ex0 && ex0.overridesOutfit);
     return [
       "ultra photorealistic DSLR photo of Léa,",
+      "(1girl:1.55), (solo:1.5), single woman only, NOT 2girls, NOT twins, NOT clones, NOT mirror,",
       faceIdentityLock(c) + ",",
       "(18-21 year old young French woman:1.4), (looks exactly 21:1.35),",
       "oval porcelain face, delicate bone structure, soft jaw, subtle cheekbones,",
@@ -4251,6 +4252,8 @@ function bodyNegatives(c) {
       neg += ", identical twins same hair, two women same hair color, matching blonde hair both, both brunette, both red hair, both auburn, both bright red hair, same breast size both, identical bust, same body type both, clone pair, mirror twins same features, matching cup sizes";
       // Ne PAS ajouter les négatifs mono-cheveux de physicalLocks (ils interdisent la 2e couleur)
     } else {
+      // SOLO strict : une seule femme, pas de clones / miroir / multi
+      neg += ", 2girls, 3girls, multiple women, two women, three women, twins, identical twins, clone, clones, mirror image, mirror symmetry, double exposure, split screen, side by side duplicate, same woman twice, duplicated person, collage, grid of faces, multiple poses of same person, second person, extra person, crowd";
       try {
         const phys = physicalLocksFromText(c);
         if (phys.negative && phys.negative.length) neg += ", " + phys.negative.join(", ");
@@ -5881,9 +5884,14 @@ async function generatePhoto() {
         "(full body rear three-quarter view:1.45), (looking back at camera:1.35), ",
       ];
       const frame = frames[Math.floor(Math.random() * frames.length)];
-      prompt = frame + faceIdentityLock(c) + " " + prompt;
+      // FORCE une seule personne (sauf duo géré plus haut)
+      const soloLock = "(1girl:1.55), (solo:1.5), (single woman:1.45), only one person in frame, ";
+      prompt = soloLock + frame + faceIdentityLock(c) + " " + prompt;
       if (!/NOT face crop|NOT portrait only/i.test(prompt)) {
         prompt += ", NOT face crop only, NOT close-up portrait only, NOT head and shoulders only,";
+      }
+      if (!/NOT 2girls|NOT twins|NOT clones/i.test(prompt)) {
+        prompt += ", NOT 2girls, NOT 3girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women, NOT duplicate, NOT same person twice,";
       }
     }
   } catch (_) {}
