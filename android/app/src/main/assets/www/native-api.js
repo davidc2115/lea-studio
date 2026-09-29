@@ -2009,21 +2009,24 @@
 
       const clientAgent = "LeaStudio:2.4:https://github.com/davidc2115/lea-studio";
       // 512x512 = gratuit sans kudos ; 512x768 demande souvent des kudos
-      const freeW = 512, freeH = 512;
+      const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
+      // Compte Horde = 512x768 possible ; anonyme = 512x512 gratuit
+      const freeW = 512;
+      const freeH = hasHordeAccount ? 768 : 512;
       const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "stable_diffusion"];
       const payloads = [];
 
       if (useImg2Img) {
-        let den = typeof body.denoising === "number" ? body.denoising : 0.38;
-        den = Math.min(0.48, Math.max(0.32, den));
-        const faceBoost = "(identical face to reference photo:1.5), same woman as source, ";
+        let den = typeof body.denoising === "number" ? body.denoising : 0.45;
+        den = Math.min(0.55, Math.max(0.32, den));
+        const faceBoost = "(identical face to reference photo:1.55), same woman as source, same eyes same nose same lips, ";
         const imgPrompt = faceBoost + promptSafe.slice(0, 800);
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
             width: freeW,
             height: freeH,
-            steps: 18,
+            steps: hasHordeAccount ? 22 : 16,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 7,
@@ -2040,13 +2043,13 @@
         payloads.push({
           prompt: imgPrompt + " ### " + negative,
           params: {
-            width: freeW,
-            height: freeH,
-            steps: 15,
+            width: 512,
+            height: 512,
+            steps: 14,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 6.5,
-            denoising_strength: Math.min(0.48, den + 0.05),
+            denoising_strength: Math.min(0.55, den + 0.05),
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,

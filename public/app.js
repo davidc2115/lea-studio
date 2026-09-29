@@ -819,10 +819,33 @@ Peau : Claire, texture veloutée et uniforme.`;
     ];
   }
   const ex = expandProfileExtra(extra);
-  // Si l'utilisateur précise une pose, on ne force PAS une pose aléatoire qui contredit
-  const pose = ex.overridesPose
-    ? ("pose/position from user detail, follow USER DETAIL exactly")
-    : pick(posePool);
+  // Poses aléatoires élargies (sexy / scénario) pour ne pas recopier la ref
+  const extraPoses = [
+    "standing three-quarter view looking at camera, one hand on hip",
+    "sitting on a sofa looking at viewer, legs crossed",
+    "leaning against a wall, looking over shoulder",
+    "kneeling on the floor looking up at viewer",
+    "standing in doorway, weight on one leg",
+    "sitting on edge of bed, looking at camera",
+    "bending slightly forward looking at viewer",
+    "from the side turning face toward camera",
+    "arms loosely crossed under chest, looking at camera",
+    "hands in hair, looking at viewer, new angle",
+  ];
+  const fullPool = (posePool || []).concat(extraPoses);
+  let pose;
+  if (ex.overridesPose) {
+    pose = "pose/position from user detail, follow USER DETAIL exactly";
+  } else {
+    try {
+      const last = localStorage.getItem("lea.lastPose." + (c.id || "x")) || "";
+      const pool = fullPool.filter((p) => p !== last);
+      pose = pool[Math.floor(Math.random() * pool.length)] || fullPool[0];
+      localStorage.setItem("lea.lastPose." + (c.id || "x"), pose);
+    } catch (_) {
+      pose = fullPool[Math.floor(Math.random() * fullPool.length)];
+    }
+  }
 
   let bodyLock = {
     ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
@@ -4607,7 +4630,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.38 : 0.40);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.42 : 0.45);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
@@ -5687,7 +5710,8 @@ Peau : Claire, texture veloutée et uniforme.`;
           payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
-          payload.denoising = Math.min(0.42, Math.max(Number(payload.denoising) || 0.38, 0.38));
+          // Denoise plus haut = pose/tenue peuvent changer, visage tenu par face_lock + ref
+          payload.denoising = Math.min(0.52, Math.max(Number(payload.denoising) || 0.48, 0.45));
           setGenStatus("Horde img2img · nouvelle pose · denoise " + payload.denoising + "…");
         }
       }
