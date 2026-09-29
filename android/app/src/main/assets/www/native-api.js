@@ -1555,6 +1555,32 @@
         `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
         `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
+        // Jeu action/vérité / défis : règles strictes de tours
+        (function () {
+          const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "") + " " + String(PERSONA.tags || "");
+          if (!/action\s*ou\s*v[eé]rit|v[eé]rit[eé]\s*ou\s*action|truth\s*or\s*dare|jeu(x)?\s*(de\s*)?(soir[eé]e|cartes|d[eé]fi)/i.test(sc)) return "";
+          return [
+            "=== RÈGLES DU JEU ACTION OU VÉRITÉ (OBLIGATOIRES) ===",
+            "C'est un VRAI jeu à tours alternés entre TOI et le joueur.",
+            "",
+            "QUAND C'EST TON TOUR DE JOUER (le joueur dit « à toi », « ton tour », « action ou vérité » pour toi) :",
+            "1) Tu choisis UNIQUEMENT : « Action » OU « Vérité » (pour TOI-MÊME).",
+            "2) Tu n'inventes PAS le contenu du défi. Tu ATTENDS que le joueur te donne l'action à faire ou la question à répondre.",
+            "3) Exemple correct : (Il me met la pression.) *Je croise les bras en souriant.* Action. Vas-y, défie-moi.",
+            "4) INTERDIT : te donner toi-même une action (« je me caresse… », « je te propose de me toucher… ») quand c'est ton tour de CHOISIR.",
+            "5) INTERDIT : reposer immédiatement une question au joueur alors qu'il vient de te passer le tour.",
+            "",
+            "QUAND C'EST LE TOUR DU JOUEUR (tu lui poses le choix) :",
+            "1) Tu demandes clairement : « À toi : action ou vérité ? »",
+            "2) Il répond Action ou Vérité.",
+            "3) SEULEMENT ALORS tu lui donnes une action à faire OU une question de vérité à répondre (adaptée au ton du jeu, peut être osée si le contexte l'est).",
+            "4) Tu attends sa réponse / son récit avant de rejouer.",
+            "",
+            "ALTERNANCE : un tour toi → un tour lui → un tour toi. Jamais deux défis d'affilée pour le joueur sans que tu aies joué ton tour entre les deux.",
+            "Si le joueur vient de répondre à ta vérité/action, ton prochain message = TON choix (Action ou Vérité) + attente du défi, PAS une nouvelle question pour lui.",
+            "=== FIN RÈGLES JEU ===",
+          ].join("\\n");
+        })(),
         `IDENTITÉ VERROUILLÉE : tu n'es PAS la meilleure amie de la fille de l'utilisateur SAUF si le titre/scénario le dit explicitement. Tu n'arrives PAS trempée par un orage SAUF si le scénario le décrit.`,
         "COHÉRENCE DIALOGUE (CRITIQUE) :",
         "1) Réponds UNIQUEMENT au dernier message de l'utilisateur — pas de saut de sujet, pas d'invention de scènes hors contexte.",
@@ -1563,8 +1589,7 @@
         "4) Progression : chaque message avance d'UN cran max (regarder → sourire → s'asseoir → accepter un verre). Jamais trois cran d'un coup.",
         "5) Si le joueur reste soft/SFW, reste soft. Si explicite, suis. Si il freine, freine immédiatement.",
         "6) INTERDIT de répéter la même structure (pensée + même geste + même phrase) deux messages de suite.",
-        "6b) ACTION OU VÉRITÉ / jeux de soirée : ALTERNANCE des tours OBLIGATOIRE. Après le tour du joueur, c'est TOI qui poses une action, une vérité, ou joues ta carte. Annonce clairement Action ou vérité ? quand c'est ton tour. Ne laisse pas toujours la main au joueur.",
-        "6c) Ne réutilise JAMAIS la même action (*...*) ni la même phrase d'ouverture que tes 3 derniers messages.",
+        "6b) Ne réutilise JAMAIS la même action (*...*) ni la même phrase d'ouverture que tes 3 derniers messages.",
         "7) Reste fidèle au RÔLE (belle-mère ≠ secrétaire ≠ amie de la fille). Vocabulaire et attitude adaptés.",
         relationLock,
         // Duo multi-voix
@@ -1688,6 +1713,18 @@
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
+      // Indice tour de jeu action/vérité selon le dernier message joueur
+      try {
+        const lastUser = String(txt || "");
+        const scGame = /action\s*ou\s*v[eé]rit|truth\s*or\s*dare|soir[eé]e.*jeu/i.test(String(PERSONA.scenario || "") + String(PERSONA.title || ""));
+        if (scGame || /action\s*ou\s*v[eé]rit|ton tour|\u00e0 toi|a toi|c.?est \u00e0 toi|cest a toi/i.test(lastUser)) {
+          if (/(ton tour|\u00e0 toi|a toi|c.?est \u00e0 toi|maintenant (c.?est )?\u00e0 toi|action ou v[eé]rit[eé].{0,20}(toi|pour toi))/i.test(lastUser)) {
+            system += "\n\n⚠ TOUR DU PERSONNAGE MAINTENANT : choisis uniquement « Action » ou « Vérité » pour TOI. N'invente PAS le défi. N'interroge PAS le joueur. Attends qu'il te donne l'action ou la question.";
+          } else if (/(action|v[eé]rit[eé])\s*[.!]?\s*$/i.test(lastUser.trim()) || /^(action|v[eé]rit[eé])$/i.test(lastUser.trim())) {
+            system += "\n\n⚠ Le joueur a choisi. Donne-lui MAINTENANT une action concrète à faire OU une question de vérité claire (selon son choix). Puis attends sa réponse.";
+          }
+        }
+      } catch (_) {}
       const prevAsst = (chat.messages || []).filter((m) => m.role === "assistant").slice(-3)
         .map((m) => String(m.content || "").replace(/\s+/g, " ").slice(0, 280));
       if (prevAsst.length) {
