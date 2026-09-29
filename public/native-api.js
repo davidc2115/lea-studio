@@ -240,8 +240,9 @@
     "Réponds en FRANÇAIS avec EXACTEMENT cette structure COMPLÈTE (3 parties obligatoires, jamais tronquée) :",
     "(Une seule pensée entre parenthèses — ouvrir et fermer)",
     "*Une seule action entre deux astérisques — ouvrir et fermer*",
-    "Une à trois phrases de dialogue parlé, SANS * et SANS parenthèses.",
-    "La réponse DOIT inclure les 3 parties et se terminer proprement. Ne coupe jamais une phrase.",
+    "OBLIGATOIRE : une à trois phrases de dialogue PARLÉ (mots dits à voix haute), SANS * et SANS parenthèses.",
+    "INTERDIT de répondre seulement avec une pensée et une action. Sans paroles = réponse INVALIDE.",
+    "La réponse DOIT inclure les 3 parties (pensée + action + paroles) et se terminer proprement. Ne coupe jamais une phrase.",
     "Exemple exact :",
     "(Il me regarde trop intensément.)",
     "*Je pose mon verre sur la table en croisant les bras.*",
@@ -427,11 +428,11 @@
             }
             text = tt;
             console.warn("[lea] MAX_TOKENS — réponse coupée, fermeture forcée");
-            // Si pas de dialogue parlé après action, ajouter une ligne courte
+            // Si pas de dialogue parlé après action, ajouter une vraie phrase
             try {
               const hasSpeech = /\n[^(*\n][^\n]{8,}/.test(tt) || (/\*[^]*\*[\s\S]*[A-Za-zÀ-ÿ]{10}/.test(tt));
               if (!hasSpeech) {
-                tt = tt.replace(/\s*$/, "") + "\n…";
+                tt = tt.replace(/\s*$/, "") + "\nJe t'écoute.";
               }
             } catch (_) {}
           }
@@ -543,7 +544,7 @@
       outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
       "Mode: " + modeLock + ". Réponds TOUJOURS en français.",
       "COHÉRENCE: réponds au dernier message, un cran de progression max, pas de téléportation de lieu.",
-      "FORMAT STRICT: (pensée courte) puis *action physique* puis paroles naturelles.",
+      "FORMAT STRICT: (pensée) *action* puis PAROLES obligatoires (1-3 phrases dites à voix haute). Sans paroles = invalide.",
       "Reste DANS le scénario et le tempérament. Orage/trempé SEULEMENT si le scénario le dit.",
       "Début SFW heat bas: polie/timide selon tempérament — PAS de câlin, PAS de tête sur l'épaule, PAS d'amour déclaré.",
       "Qualité dialogue: phrases naturelles, pas de refrains, pas de méta, pas d'anglais.",
@@ -648,14 +649,36 @@
       if (lastSpace > 30 && lastSpace > tt.length - 50) tt = tt.slice(0, lastSpace);
       tt = tt.replace(/[,:;\-—]\s*$/, "") + ".";
     }
-    // Réponse incomplète : pensée + action mais PAS de dialogue → ajouter une ligne parlée minimale
+    // Réponse incomplète : pensée + action mais PAS de dialogue → vraie phrase parlée (pas juste "…")
     try {
       const lines = tt.split(/\n/).map(function(l) { return l.trim(); }).filter(Boolean);
       const hasThought = lines.some(function(l) { return /^\(.*\)$/.test(l); });
-      const hasAction = lines.some(function(l) { return /^\*.*\*$/.test(l); });
-      const hasSpeech = lines.some(function(l) { return !/^\(.*\)$/.test(l) && !/^\*.*\*$/.test(l) && l.length > 2; });
-      if (hasThought && hasAction && !hasSpeech) {
-        tt = tt + "\n…";
+      const hasAction = lines.some(function(l) { return /^\*[^*]+\*$/.test(l); });
+      const hasSpeech = lines.some(function(l) {
+        return !/^\(.*\)$/.test(l) && !/^\*[^*]*\*$/.test(l) && l.length > 2 && l !== "…" && l !== "...";
+      });
+      if ((hasThought || hasAction) && !hasSpeech) {
+        // Si le texte mentionne déjà Action/Vérité dans l'action, verbaliser le choix
+        const blob = tt.toLowerCase();
+        let speech;
+        if (/\baction\b/.test(blob) && !/\bv[eé]rit/.test(blob)) {
+          speech = "Action.";
+        } else if (/\bv[eé]rit/.test(blob) && !/\baction\b/.test(blob)) {
+          speech = "Vérité.";
+        } else if (/action\s*ou\s*v[eé]rit|v[eé]rit[eé]\s*ou\s*action/.test(blob)) {
+          speech = Math.random() < 0.5 ? "Action. À toi de me défier." : "Vérité. Pose ta question.";
+        } else {
+          const pool = [
+            "Hmm… et alors ?",
+            "Je t'écoute.",
+            "Continue…",
+            "C'est à toi.",
+            "Tu dis ?",
+            "Vas-y.",
+          ];
+          speech = pool[Math.floor(Math.random() * pool.length)];
+        }
+        tt = tt.replace(/\n?[….]{1,3}\s*$/, "") + "\n" + speech;
       }
     } catch (_) {}
     return tt;
@@ -1737,7 +1760,7 @@
         const scGame = /action\s*ou\s*v[eé]rit|truth\s*or\s*dare|soir[eé]e.*jeu/i.test(String(PERSONA.scenario || "") + String(PERSONA.title || ""));
         if (scGame || /action\s*ou\s*v[eé]rit|ton tour|\u00e0 toi|a toi|c.?est \u00e0 toi|cest a toi/i.test(lastUser)) {
           if (/(ton tour|\u00e0 toi|a toi|c.?est \u00e0 toi|maintenant (c.?est )?\u00e0 toi|action ou v[eé]rit[eé].{0,20}(toi|pour toi))/i.test(lastUser)) {
-            system += "\n\n⚠ TOUR DU PERSONNAGE MAINTENANT : choisis uniquement « Action » ou « Vérité » pour TOI. N'invente PAS le défi. N'interroge PAS le joueur. Attends qu'il te donne l'action ou la question.";
+            system += "\n\n⚠ TOUR DU PERSONNAGE MAINTENANT :\n1) Réponds avec (pensée) *action* et PAROLES obligatoires.\n2) Dans les paroles, dis clairement « Action. » ou « Vérité. » (ton choix pour TOI).\n3) N'invente PAS le défi. N'interroge PAS le joueur. Attends qu'il te donne l'action ou la question.\nExemple paroles : Action. Vas-y, défie-moi.";
           } else if (/(action|v[eé]rit[eé])\s*[.!]?\s*$/i.test(lastUser.trim()) || /^(action|v[eé]rit[eé])$/i.test(lastUser.trim())) {
             system += "\n\n⚠ Le joueur a choisi. Donne-lui MAINTENANT une action concrète à faire OU une question de vérité claire (selon son choix). Puis attends sa réponse.";
           }
