@@ -539,6 +539,8 @@
       "Reste DANS le scénario et le tempérament. Orage/trempé SEULEMENT si le scénario le dit.",
       "Début SFW heat bas: polie/timide selon tempérament — PAS de câlin, PAS de tête sur l'épaule, PAS d'amour déclaré.",
       "Qualité dialogue: phrases naturelles, pas de refrains, pas de méta, pas d'anglais.",
+      "SFW↔NSFW fluide comme Gemini: suis le joueur, initiatives selon tempérament (directe=peut agir, timide=hésite).",
+      "NSFW explicite autorisé si le joueur ouvre (pas de refus moralisateur).",
       FORMAT_REMINDER,
       "=== FIN VERROU ===",
     ].filter(Boolean).join("\n");
@@ -1511,7 +1513,17 @@
       if (!temperBits.length) {
         temperBits.push("TEMPÉRAMENT : suis STRICTEMENT ta personnalité écrite ci-dessus dans chaque phrase et chaque action.");
       }
-      const temperBlock = temperBits.join(" ");
+      const temperBlock = temperBits.join(" ") || ("TEMPÉRAMENT: " + String(PERSONA.personality || "naturelle, cohérente avec le rôle").slice(0, 400));
+      const sharedPlayRules = [
+        "=== RÈGLES PARTAGÉES (Gemini + Groq identiques) ===",
+        "TEMPÉRAMENT = loi absolue pour (pensées), *actions* et paroles.",
+        "SFW↔NSFW fluide: suis le joueur (monte / reste / redescend) sans moraliser ni coller en NSFW.",
+        "INITIATIVES: directe/tactile peut agir seule (main, ouverture vêtement, geste osé). Timide hésite et suit. Flirt tease. Autoritaire dirige.",
+        "En NSFW explicite OK (vocabulaire cru si le joueur l'ouvre). Fiction 18+ consentante.",
+        "Créativité: micro-gestes et détails sensoriels nouveaux. Pas de refrains.",
+        "Pas d'amour forcé. One-shot possible selon tempérament.",
+        "=== FIN RÈGLES PARTAGÉES ===",
+      ].join("\n");
 
       let system = [
         FORMAT_REMINDER,
@@ -1586,6 +1598,7 @@
             + "INTERDIT: culotte mouillée, excitation, gémissements, « le film peut attendre », « je reste blottie contre lui », « joue sur son épaule », « regard vers l'écran ». Réponse 3–6 phrases. Au tout début: frisson, eau, politesse — PAS de câlin."),
         "DIRECTE / TACTILE : si tags directe ou tactile, le personnage dit et fait ce qu'elle veut SANS tourner autour du pot : phrases claires, contact physique assumé, pas de fausse pudeur inutile. Respecte toujours un non explicite. NON-HUMAIN / FANTASY : si tags fantasy ou non-humain (oreilles, queues, ailes, écailles, cornes, etc.), conserve TOUJOURS ces traits dans le rôle et les descriptions. Ne les humanise pas. SPEAKERS / PLAN À TROIS : si le personnage est un DUO (multiSpeaker) ou si une 3e personne est dans la scène, chaque réplique DOIT indiquer qui parle : [Prénom] : dialogue Tu peux alterner les voix. Actions *...* peuvent impliquer l'une ou les deux. N'invente pas de 3e sans le joueur.",
         temperBlock,
+        sharedPlayRules,
         "INTERDIT — phrases clichés NSFW à NE PLUS JAMAIS utiliser (même une fois) :",
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",

@@ -54,6 +54,31 @@ function maybeAutoCover(charId, storedSrc) {
   } catch (_) {}
 }
 
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem("lea.favorites");
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.map(String) : [];
+  } catch (_) { return []; }
+}
+function saveFavorites(ids) {
+  try { localStorage.setItem("lea.favorites", JSON.stringify(ids.slice(0, 500))); } catch (_) {}
+}
+function isFavorite(id) {
+  return loadFavorites().indexOf(String(id)) >= 0;
+}
+function toggleFavorite(id) {
+  id = String(id || "");
+  if (!id) return false;
+  let list = loadFavorites();
+  const i = list.indexOf(id);
+  if (i >= 0) list.splice(i, 1);
+  else list.unshift(id);
+  saveFavorites(list);
+  return list.indexOf(id) >= 0;
+}
+
 function character() {
   let list = state.characters.length ? state.characters : window.CAST || [FALLBACK_LEA];
   try { list = ensureLeaGallery(list); } catch (_) {}
@@ -1007,7 +1032,7 @@ Peau : Claire, texture veloutée et uniforme.`;
   const finalPose = (hasUser && (ex.overridesPose || ex.poseLine || ex.sceneLine))
     ? "follow USER pose exactly"
     : (pose + ", " + cameraAngle + ",");
-  // ——— Prompt COURT et net (Horde suit mieux 60–120 tokens) ———
+  // ——— Prompt COURT : pose/tenue EN TÊTE (sinon img2img recopie la nude ref) ———
   if (!isDuo && !ex.overridesAct) {
     const faceBits = [
       looks,
@@ -1024,15 +1049,17 @@ Peau : Claire, texture veloutée et uniforme.`;
     const loc = (hasUser && ex.overridesPlace && ex.placeLine)
       ? ex.placeLine
       : (placeDetail || "indoor apartment");
+    const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
     const short = [
-      "photorealistic photo of the same adult woman,",
-      faceBits.slice(0, 280) + ",",
-      "wearing " + wear + ",",
-      pos + ",",
+      // Composition d'abord = variation réelle
+      "(new pose:1.4), (new camera angle:1.3), " + pos + ",",
+      clothed ? ("(wearing " + wear + ":1.45), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
       "in " + loc + ",",
-      "sharp focus, detailed face, natural skin texture, realistic lighting,",
-      "different pose from any reference, new composition,",
-      hasUser ? ((ex.text || "").slice(0, 120) + ",") : "",
+      "photorealistic photo of the same adult woman,",
+      faceBits.slice(0, 260) + ",",
+      "sharp focus, detailed face, natural skin, realistic lighting,",
+      "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
+      hasUser ? ((ex.text || "").slice(0, 100) + ",") : "",
       anti,
     ].filter(Boolean).join(" ");
     return short.replace(/\s+/g, " ").trim();
@@ -3308,6 +3335,13 @@ function openEditImported(id) {
 
 
 function filterDiscoverList(q) {
+  const qn = String(q || "").trim().toLowerCase();
+  if (qn === "favoris" || qn === "favorites" || qn === "fav") {
+    const favs = loadFavorites();
+    const all = state.characters || [];
+    return all.filter((c) => favs.indexOf(String(c.id)) >= 0);
+  }
+
   // Toujours fusionner CAST + EXTRA au cas où le script extra charge après
   let list = state.characters.length ? state.characters.slice() : [];
   if (window.CAST && window.CAST.length > list.length) list = window.CAST.slice();
@@ -3521,7 +3555,7 @@ function renderDiscoverCards(list) {
 function renderDiscover() {
   const q0 = (state.discQuery || "");
   const SUGGEST_TAGS = [
-    "aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","fille d'ami",
+    "favoris","aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","fille d'ami",
     "voisine","collègue","secrétaire","tante","maman d'ami","jeu","duo","fantasy","non-humain",
     "directe","tactile","timide","nsfw","spécial",
     "blonde","brune","rousse","cheveux noirs",
@@ -3535,8 +3569,9 @@ function renderDiscover() {
   $("view-discover").innerHTML = `
     <h1>Découvrir</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;align-items:center">
-      <button type="button" class="cta" id="disc-open-import" style="margin:0;padding:8px 12px;font-size:13px">＋ Importer (Chub / fichier)</button>
-      <span style="color:var(--muted);font-size:11px;flex:1">Chub.ai · JSON/PNG</span>
+      <button type="button" class="cta" id="disc-open-import" style="margin:0;padding:8px 12px;font-size:13px">＋ Importer</button>
+      <button type="button" class="cta" id="disc-fav-only" style="margin:0;padding:8px 12px;font-size:13px;background:#3a2048">★ Favoris</button>
+      <span style="color:var(--muted);font-size:11px;flex:1">Chub · tags</span>
     </div>
     <p id="disc-import-status" style="color:var(--muted);font-size:12px;margin:0 0 6px"></p>
     <div class="disc-search-wrap">
@@ -3592,6 +3627,13 @@ function renderDiscover() {
   }
   if ($("disc-open-import")) {
     $("disc-open-import").onclick = () => renderImportHub();
+  }
+  if ($("disc-fav-only")) {
+    $("disc-fav-only").onclick = () => {
+      if ($("disc-search")) $("disc-search").value = "favoris";
+      state.discQuery = "favoris";
+      paint();
+    };
   }
   $("view-discover").onclick = (e) => {
     const tag = e.target.closest(".tag-filter");
@@ -3786,6 +3828,13 @@ function renderProfile() {
       <button type="button" class="cta" id="prof-adapt-now" style="margin-top:8px">Adapter maintenant (Gemini FR)</button>
     </p>` : ""}
     <p style="color:var(--muted)">${c.age || 18} ans · ${c.title || ""}</p>
+    <p style="margin:8px 0">
+      <button type="button" class="cta" id="prof-fav" style="background:${isFavorite(c.id) ? "#6b3050" : "#3a2048"}">${isFavorite(c.id) ? "★ Favori" : "☆ Ajouter aux favoris"}</button>
+    </p>
+    <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
+      <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Tempérament & caractère</div>
+      <p style="margin:0;line-height:1.5;white-space:pre-wrap;font-size:13px">${escapeHtml(formatTemperamentFR(c))}</p>
+    </div>
     <div style="background:#1a1022;border-radius:12px;padding:12px;margin:10px 0;border:1px solid #3a2048">
       <div style="color:#e8b4d4;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Descriptif physique</div>
       <p style="margin:0 0 8px;line-height:1.5;white-space:pre-wrap;font-size:13px">${formatPhysicalFR(c)}</p>
@@ -3834,6 +3883,13 @@ function renderProfile() {
     show("chat");
     renderChat();
   };
+  if ($("prof-fav")) {
+    $("prof-fav").onclick = () => {
+      const on = toggleFavorite(c.id);
+      setGenStatus(on ? "Ajouté aux favoris ★" : "Retiré des favoris");
+      renderProfile();
+    };
+  }
   if ($("prof-chat")) $("prof-chat").onclick = () => goChat(false);
   if ($("prof-newchat")) $("prof-newchat").onclick = () => {
     if (confirm("Recommencer une nouvelle conversation avec " + c.name + " ? L'historique local sera effacé.")) goChat(true);
@@ -4351,6 +4407,26 @@ function duoCompositionBlock(c) {
 /** Enrichit looks_en en descriptif ultra-détaillé (visage + corps) pour TOUS les personnages. */
 
 /** Descriptif physique FR détaillé affiché dans le profil (tous personnages). */
+
+function formatTemperamentFR(c) {
+  if (!c) return "";
+  const p = String(c.personality || "").trim();
+  if (p.length > 40) return p;
+  const tags = (c.tags || []).map(String);
+  const blob = (tags.join(" ") + " " + (c.title || "")).toLowerCase();
+  const bits = [];
+  if (/timide|réserv|maladroite|gênée/.test(blob)) bits.push("Timide et réservée : hésite, rougit facilement, phrases courtes, peu d'initiatives physiques au début.");
+  if (/directe|tactile|cash/.test(blob)) bits.push("Directe et tactile : dit clairement ce qu'elle veut, n'a pas peur du contact, peut prendre l'initiative (main, baiser, geste osé) sans tourner autour du pot.");
+  if (/flirt|espiègle|taquine|coquine|provoc/.test(blob)) bits.push("Flirt / espiègle : teasing, sourires en coin, provocations légères, s'amuse de la tension.");
+  if (/froide|distante/.test(blob)) bits.push("Froide / distante : peu d'émotion affichée, garde le contrôle, se livre lentement.");
+  if (/autoritaire|dominante|stricte/.test(blob)) bits.push("Autoritaire : mène la danse, ton ferme, n'est pas en demande.");
+  if (/fragile|câline|douce|sensible/.test(blob)) bits.push("Sensible / douce : besoin de réassurance, ton doux, émotion visible.");
+  if (/extravert|ouverte|rieuse|bavarde|joueuse/.test(blob)) bits.push("Ouverte et joueuse : à l'aise, parle facilement, humour, peut lancer des défis.");
+  if (!bits.length) bits.push("Naturelle et cohérente avec son rôle : réagit selon le contexte, sans forcer l'amour ni la distance.");
+  bits.push("SFW ↔ NSFW fluide selon le joueur. One-shot ou attachement progressif selon le tempérament, jamais d'amour forcé.");
+  return bits.join(" ");
+}
+
 function formatPhysicalFR(c) {
   if (!c) return "";
   const stored = String(c.appearance || "").trim();
@@ -5720,35 +5796,7 @@ async function generatePhoto() {
       payload.nsfw = true;
       payload.denoising = Math.min(0.42, Math.max(payload.denoising || 0.32, 0.34));
     }
-        // img2img unifié : cover / assets pour TOUS les personnages
-    if (c.id === "duo_twins_lea") {
-    return `Femme 1 : Léa (brunette aux cheveux lisses)
-Âge et origine : 21 ans, type européen / français.
-Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
-Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
-Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
-Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
-Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
-Morphologie : Silhouette élancée et harmonieuse.
-Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
-Taille : Fine et dessinée de façon fluide.
-Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
-Peau : Claire, satinée et uniforme sur tout le corps.
-
-Femme 2 : Louna (châtain clair aux reflets dorés)
-Âge et origine : 21 ans, type européen.
-Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
-Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
-Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
-Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
-Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
-Morphologie : Silhouette en sablier très affirmée.
-Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
-Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
-Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
-Peau : Claire, texture veloutée et uniforme.`;
-  }
-  if (c.id === "lea") {
+    if (c.id === "lea") {
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, dry fabric, matte dry skin, sports bra, black top, gym clothes, fully dry";
       payload.nsfw = true;
     }
@@ -5787,12 +5835,14 @@ Peau : Claire, texture veloutée et uniforme.`;
           payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
-          // Denoise modéré : net + pose/tenue différentes (trop haut = flou)
-          payload.denoising = Math.min(0.48, Math.max(Number(payload.denoising) || 0.44, 0.42));
+          // Assez de denoise pour changer pose/tenue ; seed unique à chaque clic
+          payload.denoising = Math.min(0.52, Math.max(Number(payload.denoising) || 0.48, 0.46));
+          payload.seed = Math.floor(Math.random() * 2_000_000_000);
           payload.negative = (payload.negative || "") +
             ", blurry, out of focus, same pose as reference, identical pose, same framing, " +
-            "copy of reference pose, static nude portrait only, identical composition";
-          setGenStatus("Horde img2img · pose/tenue · denoise " + payload.denoising + "…");
+            "copy of reference pose, static nude portrait only, identical composition, " +
+            "completely nude, fully naked, topless when clothes requested";
+          setGenStatus("Horde img2img · pose/tenue · seed " + payload.seed + " · denoise " + payload.denoising + "…");
         }
       }
     } catch (e) {
