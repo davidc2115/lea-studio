@@ -719,33 +719,7 @@ function faceIdentityLock(c) {
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
-  if (c.id === "duo_twins_lea") {
-    return `Femme 1 : Léa (brunette aux cheveux lisses)
-Âge et origine : 21 ans, type européen / français.
-Visage : Ovale parfait aux traits doux, teint clair uniforme sans imperfection, pommettes discrètes, menton arrondi délicat.
-Yeux : En amande, grands, iris marron foncé profond et chaleureux, regard expressif.
-Sourcils : Bruns foncés, fournis, naturels et bien dessinés en arc doux.
-Nez et bouche : Nez fin et droit ; lèvres naturellement pulpeuses, bouche bien dessinée, teinte rosée naturelle.
-Cheveux : Bruns foncés, très longs (descendant jusqu'aux reins), texture raide et soyeuse, séparés par une raie centrale nette.
-Morphologie : Silhouette élancée et harmonieuse.
-Poitrine : Menu et discrète, bonnet B, galbe naturel et proportionné à sa carrure fine.
-Taille : Fine et dessinée de façon fluide.
-Hanches et jambes : Hanches doucement galbées, jambes longues, fines et fuselées.
-Peau : Claire, satinée et uniforme sur tout le corps.
-
-Femme 2 : Louna (châtain clair aux reflets dorés)
-Âge et origine : 21 ans, type européen.
-Visage : Ovale sculpté, structure osseuse marquée avec des pommettes saillantes et une mâchoire anguleuse mais fine. Teint de porcelaine, très lumineux et net.
-Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés chauds, cils longs et séparés.
-Sourcils : Châtain foncé, denses, brossés vers le haut et bien architecturés avec une arche haute et affirmée.
-Nez et bouche : Nez droit, fin et délicat ; lèvres charnues au contour net, arc de Cupidon bien défini, teinte rose chair mate.
-Cheveux : Châtains clairs avec reflets miel et dorés, longueur aux épaules / clavicules, coiffés avec une raie sur le côté et un mouvement d'ondulations souples (wavy) apportant du volume sur le dessus et les côtés.
-Morphologie : Silhouette en sablier très affirmée.
-Poitrine : Volumineuse et proéminente, bonnet D, décolleté profond et bien galbé contrastant avec son buste fin.
-Épaules et taille : Épaules délicates avec clavicules visibles, taille fine très marquée.
-Hanches et jambes : Hanches arrondies créant un bel équilibre avec la poitrine, jambes toniques et élancées.
-Peau : Claire, texture veloutée et uniforme.`;
-  }
+  // duo_twins_lea: prompt géré dans generatePhoto via duoCompositionBlock
   if (c.id === "lea") {
     const ex0 = expandProfileExtra(extra || "");
     const leaPosePool = [
@@ -4234,6 +4208,14 @@ function isDuoCharacter(c) {
 
 function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
+  // Léa & Louna : descriptif EN court verrouillé
+  if (c && c.id === "duo_twins_lea") {
+    return [
+      "LEFT woman Léa: long straight dark brown hair to lower back, dark brown almond eyes, small natural B-cup breasts, slim slender frame, fair skin,",
+      "RIGHT woman Louna: honey-brown wavy shoulder-length hair golden highlights, hazel-green eyes, large D-cup breasts, hourglass tiny waist, fair skin,",
+      "STRONG contrast different hair and bust, two separate women,",
+    ].join(" ");
+  }
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
@@ -5534,17 +5516,35 @@ async function generatePhoto() {
     if (isDuoCharacter(c)) {
       const duoCore = duoCompositionBlock(c);
       const ex = expandProfileExtra(extra);
-      const outfitBit = (ex && ex.outfitLine) ? (ex.outfitLine + ",") : "office blouse and skirt or pants,";
-      const placeBit = (ex && ex.placeLine) ? (ex.placeLine + ",") : "indoor apartment living room,";
-      const poseBit = (ex && ex.poseLine) ? (ex.poseLine + ",") : "standing side by side looking at camera,";
+      const outfits = [
+        "casual tops and jeans",
+        "elegant evening dresses",
+        "lingerie matching sets",
+        "summer dresses",
+        "blouses and skirts",
+        "silk robes loosely tied",
+      ];
+      const poses = [
+        "standing side by side looking at camera, full body",
+        "sitting on a sofa together looking at viewer",
+        "one standing one sitting, both looking at camera",
+        "leaning close together, three-quarter view",
+        "walking toward camera side by side",
+      ];
+      let outfitBit = (ex && ex.outfitLine) ? ex.outfitLine : outfits[Math.floor(Math.random() * outfits.length)];
+      let poseBit = (ex && ex.poseLine) ? ex.poseLine : poses[Math.floor(Math.random() * poses.length)];
+      let placeBit = (ex && ex.placeLine) ? ex.placeLine : "indoor living room warm light";
+      // Prompt COURT EN uniquement (Horde échoue sur les pavés FR)
       prompt = [
-        duoCore,
-        outfitBit,
-        placeBit,
-        poseBit,
-        extra ? (extra + ",") : "",
-        "photorealistic DSLR photo, natural skin, sharp faces,",
-        "exactly two women only,",
+        "photorealistic photo of exactly two different adult women side by side,",
+        duoCore || "LEFT woman and RIGHT woman, different hair colors, different breast sizes,",
+        "both fully visible head to thighs, two separate bodies two faces,",
+        "wearing " + outfitBit + ",",
+        poseBit + ",",
+        "in " + placeBit + ",",
+        "sharp focus, natural skin, realistic lighting,",
+        "NOT mirror symmetry, NOT identical faces, NOT fused bodies, NOT one body two heads, NOT clones,",
+        extra ? (String(extra).slice(0, 80) + ",") : "",
       ].filter(Boolean).join(" ");
       console.log("[lea duo prompt]", prompt.slice(0, 400));
     }
@@ -5828,22 +5828,35 @@ async function generatePhoto() {
         await applyCharacterRefToPayload(payload, c);
         payload.denoising = Math.min(0.42, Math.max(Number(payload.denoising) || 0.32, 0.34));
         setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
-      } else {
+      } else if (userEx.hasAny) {
+        // Options partielles → img2img léger
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        if (userEx.hasAny) {
-          payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
-          setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
-        } else {
-          // Assez de denoise pour changer pose/tenue ; seed unique à chaque clic
-          payload.denoising = Math.min(0.52, Math.max(Number(payload.denoising) || 0.48, 0.46));
-          payload.seed = Math.floor(Math.random() * 2_000_000_000);
-          payload.negative = (payload.negative || "") +
-            ", blurry, out of focus, same pose as reference, identical pose, same framing, " +
-            "copy of reference pose, static nude portrait only, identical composition, " +
-            "completely nude, fully naked, topless when clothes requested";
-          setGenStatus("Horde img2img · pose/tenue · seed " + payload.seed + " · denoise " + payload.denoising + "…");
-        }
+        payload.denoising = Math.min(0.45, Math.max(Number(payload.denoising) || 0.38, 0.38));
+        payload.seed = Math.floor(Math.random() * 2_000_000_000);
+        setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
+      } else {
+        // ALÉATOIRE profil : txt2img UNIQUEMENT
+        // img2img sur une ref nude = toujours la même pose (denoise insuffisant pour changer)
+        delete payload.source_image;
+        delete payload.source_processing;
+        payload.seed = Math.floor(Math.random() * 2_000_000_000);
+        payload.negative = (payload.negative || "") +
+          ", blurry, out of focus, same pose every time, static nude portrait only, " +
+          "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body";
+        // Analyse Gemini du visage ★ → face_lock SANS coller la pose de la ref
+        try {
+          if (!isDuoCharacter(c)) {
+            setGenStatus("Analyse visage (Gemini) pour identité…");
+            const ref = await resolveCharacterRefB64(c);
+            if (ref) {
+              const faceLock = await ensureFaceLockFromGemini(c, ref, setGenStatus);
+              if (faceLock) payload.face_lock = faceLock;
+            }
+          }
+        } catch (e) { console.warn("[face_lock]", e); }
+        setGenStatus("Horde txt2img · pose/tenue libre · seed " + payload.seed +
+          (payload.face_lock ? " · visage Gemini" : "") + "…");
       }
     } catch (e) {
       console.warn("[img2img]", e);
