@@ -152,7 +152,7 @@ function physicalLocksFromText(c) {
   ];
   for (const [re, pos, neg] of hairMap) {
     if (re.test(blob)) {
-      out.positive.push("(" + pos + ":1.45)");
+      out.positive.push("(" + pos + ":1.55)");
       out.negative.push(neg);
       break;
     }
@@ -729,13 +729,22 @@ function faceIdentityLock(c) {
     else if (age && age <= 30) locks.push("woman about " + age + " years old");
     else if (age) locks.push("mature woman about " + age + " years old");
   } catch (_) {}
+  // Toujours coller cheveux/yeux de la fiche (évite défaut châtain + verts)
+  try {
+    const phys = physicalLocksFromText(c);
+    if (phys && phys.positive && phys.positive.length) {
+      locks.unshift(...phys.positive.slice(0, 5));
+    }
+  } catch (_) {}
+  const ageN = Math.max(18, Number(c && c.age) || 21);
   return [
-    "(identical face to reference photo:1.65)",
-    "(same facial features as source image:1.55)",
-    "same eye shape same nose same lips same jawline same age",
+    "(identical face to reference photo:1.55)",
+    "(same facial features as source image:1.45)",
+    "(looks exactly " + ageN + " years old:1.5),",
+    "same eye color same hair color as character sheet, same nose same lips same jawline",
     "consistent identity, same woman as reference,",
     locks.join(", "),
-    "NOT a different person, NOT face morph, NOT older celebrity look, NOT different hair color,",
+    "NOT a different person, NOT face morph, NOT different hair color, NOT different eye color, NOT " + ageNegatives(c) + ",",
   ].filter(Boolean).join(", ");
 }
 
@@ -1102,13 +1111,18 @@ function buildLeaImagePrompt(extra = "") {
       ? ex.placeLine
       : (placeDetail || "indoor apartment");
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
-    const ageN = Number(c.age) || 21;
-    const ageLock = "(looks exactly " + ageN + " years old:1.5), (" + ageN + " year old woman:1.45), age-appropriate face,";
+    const ageN = Math.max(18, Number(c.age) || 21);
+    const ageLock = "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5), age-appropriate face for " + ageN + ",";
+    // Cheveux + yeux OBLIGATOIRES en tête (sinon défaut châtain / yeux verts des modèles)
+    const hairEyeLock = (phys.positive && phys.positive.length)
+      ? phys.positive.slice(0, 6).join(", ") + ","
+      : "";
     const short = [
-      // Identité + âge EN TÊTE (Horde tronque la fin)
+      // Identité + âge + cheveux/yeux EN TÊTE (Horde tronque la fin)
       "(1girl:1.55), (solo:1.5), single woman only,",
       ageLock,
-      faceBits.slice(0, 280) + ",",
+      hairEyeLock,
+      faceBits.slice(0, 260) + ",",
       // Composition + pose variée
       "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
       "(completely different pose:1.55), (new camera angle:1.45), (unique body position:1.4), " + pos + ",",
@@ -4733,10 +4747,10 @@ function formatPhysicalFR(c) {
   if (stored.length > 200 && (/Femme\s*[1—–-]|Femme 1|LEFT woman|Femme\s*—/i.test(stored)) && /Yeux|Cheveux|Poitrine/i.test(stored)) {
     return prettyPhys(stored);
   }
-  if (stored.indexOf("Sujet") >= 0 && stored.indexOf("Yeux") >= 0 && stored.length > 250) {
+  if (stored.indexOf("Sujet") >= 0 || stored.indexOf("Yeux") >= 0 || stored.indexOf("Cheveux") >= 0) {
     return prettyPhys(stored);
   }
-  if (stored.indexOf("Sujet") >= 0 && stored.length > 120) {
+  if (stored.length > 80) {
     return prettyPhys(stored);
   }
   // Duo générique : reconstruire depuis looks_en si possible
@@ -4980,16 +4994,23 @@ function fixedAppearanceBlock(c) {
 }
 
 function ageNegatives(c) {
-  const age = Number(c && c.age) || 21;
-  let n = "different face, different person, wrong age, looks " + (age + 15) + " years old";
-  if (age <= 22) {
-    n += ", middle-aged, 28 years old, 30 years old, 35 years old, 40 years old, mature face, wrinkles, crow feet, heavy glamorous makeup, soccer mom, MILF face, aged face";
-  } else if (age <= 28) {
-    n += ", elderly, 45 years old, 50 years old, teenage underage look, child face";
-  } else if (age <= 40) {
-    n += ", teenage, underage, child face, very young 18 year old face only";
+  const age = Math.max(18, Number(c && c.age) || 21);
+  let n = "different face, different person, wrong age";
+  // Interdire les âges LOIN de l'âge réel (±8 ans environ)
+  const ban = [];
+  for (let a = 18; a <= 70; a += 1) {
+    if (Math.abs(a - age) >= 8) ban.push(a + " years old");
+  }
+  // Limiter la liste pour le négatif
+  n += ", " + ban.filter((_, i) => i % 2 === 0).slice(0, 18).join(", ");
+  if (age <= 24) {
+    n += ", middle-aged face, wrinkles, crow feet, MILF face, soccer mom, aged skin";
+  } else if (age <= 32) {
+    n += ", teenage face, underage look, child face, elderly wrinkles";
+  } else if (age <= 45) {
+    n += ", teenage face, underage, child face, 18 year old only, very youthful teen face";
   } else {
-    n += ", teenage, underage, child face, 20 year old face, youthful teen";
+    n += ", teenage, underage, child face, 20 year old face, college student face only";
   }
   return n;
 }
