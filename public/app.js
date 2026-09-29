@@ -4245,18 +4245,14 @@ function isDuoCharacter(c) {
 
 function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
-  // Léa & Louna : descriptif EN court verrouillé
-  if (c && c.id === "duo_twins_lea") {
-    return [
-      "LEFT woman named Léa: (long straight dark brown hair to lower back:1.5), (dark brown almond eyes:1.3), (small natural B-cup breasts almost modest:1.55), slim slender frame, fair skin, delicate face,",
-      "RIGHT woman named Louna: (honey-brown wavy shoulder-length hair with golden highlights:1.5), (hazel-green eyes:1.3), (large full D-cup breasts deep cleavage:1.55), hourglass tiny waist, fair skin,",
-      "OBVIOUS contrast: LEFT dark brown straight hair + small B-cup, RIGHT honey-brown wavy hair + large D-cup,",
-      "NOT same hair both, NOT same bust both, NOT both blonde, NOT both same brown hair length,",
-    ].join(" ");
-  }
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
+  // Si looks_en a déjà LEFT/RIGHT détaillés (avec âges), l'utiliser tel quel (tronqué)
+  if (/LEFT\s+woman/i.test(looks) && /RIGHT\s+woman/i.test(looks) && /years old/i.test(looks)) {
+    return looks.slice(0, 900) + ", two separate women different ages hair and bust,";
+  }
+
   const body = String(c.body || "").replace(/\s+/g, " ").trim();
   const eth = String(c.ethnicity || "").toLowerCase();
   const blob = (looks + " " + body + " " + appFr).toLowerCase();
