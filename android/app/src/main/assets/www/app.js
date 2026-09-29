@@ -2419,6 +2419,117 @@ function discoverCover(c) {
   return resolvedCover(c);
 }
 
+
+/** Ajoute tags de rôle manquants d'après title / id (belle-sœur, belle-mère, etc.). */
+function ensureRoleTags(list) {
+  if (!Array.isArray(list)) return list;
+  const rules = [
+    { re: /belle-?s[oœ]eur|_bs\b|belle soeur/i, tag: "belle-sœur" },
+    { re: /belle-?m[eè]re|_bm\b|belle mere/i, tag: "belle-mère" },
+    { re: /belle-?fille|_bf\b/i, tag: "belle-fille" },
+    { re: /babysitter|baby-sitter|nounou/i, tag: "babysitter" },
+    { re: /fille d.?ami/i, tag: "fille d'ami" },
+    { re: /maman d.?ami/i, tag: "maman d'ami" },
+    { re: /\btante\b/i, tag: "tante" },
+    { re: /coll[eè]gue/i, tag: "collègue" },
+    { re: /secr[eé]taire/i, tag: "secrétaire" },
+    { re: /\bamie\b|meilleure amie/i, tag: "amie" },
+    { re: /voisin/i, tag: "voisine" },
+    { re: /jumelle/i, tag: "jumelles" },
+    { re: /m[eè]re et fille|mère et fille/i, tag: "mère" },
+  ];
+  for (const c of list) {
+    if (!c) continue;
+    const blob = [c.id, c.title, c.name, ...(c.tags || [])].join(" ");
+    const tags = Array.isArray(c.tags) ? c.tags.slice() : [];
+    const low = tags.map((t) => String(t).toLowerCase());
+    for (const r of rules) {
+      if (r.re.test(blob) && !low.some((t) => t.replace(/[œ]/g, "oe") === r.tag.replace(/[œ]/g, "oe") || t === r.tag)) {
+        tags.push(r.tag);
+        low.push(r.tag.toLowerCase());
+      }
+    }
+    // id suffix
+    if (/_bs$/i.test(c.id || "") && !low.some((t) => /belle-?s/.test(t))) tags.push("belle-sœur");
+    if (/_bm$/i.test(c.id || "") && !low.some((t) => /belle-?m/.test(t))) tags.push("belle-mère");
+    if (/_bf$/i.test(c.id || "") && !low.some((t) => /belle-?f/.test(t))) tags.push("belle-fille");
+    c.tags = tags;
+  }
+  return list;
+}
+
+
+function tagDisplay(t) {
+  const raw = String(t || "").trim();
+  const k = raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/œ/g, "oe");
+  const map = {
+    "belle-soeur": { e: "💍", c: "tag-rose" },
+    "belle-mere": { e: "👠", c: "tag-purple" },
+    "belle-fille": { e: "🎀", c: "tag-pink" },
+    "babysitter": { e: "🍼", c: "tag-mint" },
+    "amie": { e: "💕", c: "tag-pink" },
+    "fille d'ami": { e: "👧", c: "tag-mint" },
+    "maman d'ami": { e: "👩", c: "tag-purple" },
+    "tante": { e: "💜", c: "tag-purple" },
+    "collegue": { e: "💼", c: "tag-blue" },
+    "secretaire": { e: "📎", c: "tag-blue" },
+    "voisine": { e: "🏠", c: "tag-mint" },
+    "duo": { e: "👯", c: "tag-gold" },
+    "jumelles": { e: "👯‍♀️", c: "tag-gold" },
+    "soeurs": { e: "👭", c: "tag-gold" },
+    "jeu": { e: "🎲", c: "tag-orange" },
+    "defis": { e: "🔥", c: "tag-orange" },
+    "nsfw": { e: "🔥", c: "tag-red" },
+    "favoris": { e: "⭐", c: "tag-gold" },
+    "timide": { e: "🙈", c: "tag-mint" },
+    "directe": { e: "💬", c: "tag-orange" },
+    "tactile": { e: "✋", c: "tag-orange" },
+    "blonde": { e: "👱‍♀️", c: "tag-gold" },
+    "brune": { e: "👩", c: "tag-brown" },
+    "rousse": { e: "👩‍🦰", c: "tag-orange" },
+    "gros seins": { e: "🍒", c: "tag-pink" },
+    "petits seins": { e: "🌸", c: "tag-mint" },
+    "plan a trois": { e: "💋", c: "tag-red" },
+    "mere": { e: "👩‍👧", c: "tag-purple" },
+    "fille": { e: "👧", c: "tag-pink" },
+    "fantasy": { e: "✨", c: "tag-purple" },
+    "non-humain": { e: "✨", c: "tag-purple" },
+    "elfe": { e: "🧝", c: "tag-mint" },
+    "kitsune": { e: "🦊", c: "tag-orange" },
+    "renard": { e: "🦊", c: "tag-orange" },
+    "succube": { e: "😈", c: "tag-red" },
+    "demon": { e: "🔥", c: "tag-red" },
+    "dragon": { e: "🐉", c: "tag-orange" },
+    "catgirl": { e: "🐱", c: "tag-pink" },
+    "sirene": { e: "🧜", c: "tag-blue" },
+    "ange": { e: "😇", c: "tag-gold" },
+    "vampire": { e: "🦇", c: "tag-purple" },
+    "fee": { e: "🧚", c: "tag-pink" },
+    "dryade": { e: "🌿", c: "tag-mint" },
+    "lamia": { e: "🐍", c: "tag-mint" },
+    "harpie": { e: "🦅", c: "tag-orange" },
+    "slime": { e: "🫧", c: "tag-blue" },
+    "androide": { e: "🤖", c: "tag-blue" },
+    "loup-garou": { e: "🐺", c: "tag-brown" },
+    "centaure": { e: "🐴", c: "tag-brown" },
+    "gorgone": { e: "🐍", c: "tag-mint" },
+    "oni": { e: "👹", c: "tag-red" },
+    "naga": { e: "🐍", c: "tag-mint" },
+    "phenix": { e: "🔥", c: "tag-orange" },
+    "fantome": { e: "👻", c: "tag-purple" },
+    "sorciere": { e: "🧙", c: "tag-purple" },
+  };
+  // fuzzy key
+  let hit = map[k];
+  if (!hit) {
+    for (const [key, val] of Object.entries(map)) {
+      if (k.includes(key) || key.includes(k)) { hit = val; break; }
+    }
+  }
+  hit = hit || { e: "✨", c: "tag-default" };
+  return { label: (hit.e ? hit.e + " " : "") + raw, cls: hit.c };
+}
+
 function shuffleList(arr) {
   const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -3435,6 +3546,7 @@ function filterDiscoverList(q) {
       if (c && c.id && !seenC.has(c.id)) { list.push(c); seenC.add(c.id); }
     }
   }  if (!list.length) list = [FALLBACK_LEA];
+  try { list = ensureRoleTags(list); } catch (_) {}
   // Sync state
   if (list.length > (state.characters || []).length) 
   try { window.CAST = list.slice(); } catch (_) {}
@@ -3464,8 +3576,8 @@ function filterDiscoverList(q) {
     // Matchers exacts (phrase complète de recherche)
     const exactMatchers = {
       "belle-fille": (c) => hasTag(c, "belle-fille") || /belle-fille/.test(titleOf(c)),
-      "belle-mere": (c) => hasTag(c, "belle-mere", "belle-mère") || /belle-mere/.test(titleOf(c)),
-      "belle-soeur": (c) => hasTag(c, "belle-soeur", "belle-sœur") || /belle-s[oœ]eur/.test(titleOf(c)),
+      "belle-mere": (c) => hasTag(c, "belle-mere", "belle-mère") || /belle-?m[eè]?re/.test(titleOf(c)) || /_bm$/i.test(String(c.id||"")) || /belle-?m[eè]?re/.test(norm(c.name||"")),
+      "belle-soeur": (c) => hasTag(c, "belle-soeur", "belle-sœur") || /belle-?s[oœ]eur/.test(titleOf(c)) || /_bs$/i.test(String(c.id||"")) || /belle-?s[oœ]eur/.test(norm(c.name||"")),
       "babysitter": (c) => hasTag(c, "babysitter") || /babysitter|baby-sitter|nounou/.test(titleOf(c)),
       "fille d'ami": (c) => hasTag(c, "fille d'ami", "fille dami") || /fille d.?ami/.test(titleOf(c)),
       "fille dami": (c) => hasTag(c, "fille d'ami") || /fille d.?ami/.test(titleOf(c)),
@@ -3583,9 +3695,20 @@ function renderDiscoverCards(list) {
   }
   return `<div class="disc-grid">${list.map((c) => {
     const cover = discoverCover(c) || "";
-    const tags = (c.tags || []).slice(0, 5);
+    const rawTags = (c.tags || []).slice();
+    const prio = ["elfe","kitsune","succube","dragon","catgirl","sirène","sirene","ange","démon","demon","vampire","fée","fee","dryade","lamia","harpie","slime","androïde","androide","loup-garou","centaure","gorgone","oni","naga","phénix","phenix","fantôme","fantome","sorcière","sorciere","renard"];
+    const tags = rawTags.slice().sort((a, b) => {
+      const ia = prio.findIndex((p) => String(a).toLowerCase().includes(p));
+      const ib = prio.findIndex((p) => String(b).toLowerCase().includes(p));
+      const sa = ia < 0 ? 99 : ia;
+      const sb = ib < 0 ? 99 : ib;
+      // deprioritize generic
+      const ga = /^(fantasy|non-humain|nsfw)$/i.test(String(a)) ? 50 : 0;
+      const gb = /^(fantasy|non-humain|nsfw)$/i.test(String(b)) ? 50 : 0;
+      return (sa + ga) - (sb + gb);
+    }).slice(0, 5);
     const blurb = String(c.scenario || c.title || "").replace(/\s+/g, " ").trim().slice(0, 100);
-    const tagsHtml = tags.map((t) => `<span class="disc-tag">${String(t)}</span>`).join("");
+    const tagsHtml = tags.map((t) => { const td = tagDisplay(t); return `<span class="disc-tag ${td.cls}">${td.label}</span>`; }).join("");
     return `
       <article class="disc-hero-card open-profile" data-id="${c.id}">
         <div class="disc-hero-media">
@@ -3662,7 +3785,7 @@ function renderDiscover() {
     }
     box.classList.remove("hidden");
     box.innerHTML = hits.slice(0, 16).map((t) =>
-      `<button type="button" class="disc-suggest-item tag-filter" data-tag="${String(t).replace(/"/g, "&quot;")}">${t}</button>`
+      (() => { const td = tagDisplay(t); return `<button type="button" class="disc-suggest-item tag-filter ${td.cls}" data-tag="${String(t).replace(/"/g, "&quot;")}">${td.label}</button>`; })()
     ).join("");
   };
   const paint = () => {
@@ -3852,8 +3975,7 @@ function renderProfile() {
     all.push(g);
   }
   const hero = c.cover || (all[0] && all[0].src) || "";
-  const tagsHtml = (c.tags || []).slice(0, 8).map((t) =>
-    `<span class="prof-tag">${String(t)}</span>`).join("");
+  const tagsHtml = (c.tags || []).slice(0, 8).map((t) => { const td = tagDisplay(t); return `<span class="tag ${td.cls}">${td.label}</span>`; }).join("");
   const blurb = (c.scenario || c.title || "").replace(/\s+/g, " ").trim().slice(0, 120);
   $("view-profile").innerHTML = `
     <div class="prof-card">
@@ -3861,7 +3983,7 @@ function renderProfile() {
         ${hero ? `<img class="profile-hero" src="${hero}" alt="${c.name}" data-full="${hero}" onerror="this.style.opacity=.3" />` : `<div class="profile-hero prof-hero-empty"></div>`}
         <div class="prof-hero-fade"></div>
         <div class="prof-hero-meta">
-          <h1 class="prof-name">${c.name}</h1>
+          <h1 class="prof-name">${(() => { const role = (c.title||""); const td = tagDisplay(/belle-s/i.test(role)?"belle-sœur":/belle-m/i.test(role)?"belle-mère":/amie/i.test(role)?"amie":/duo|jumelle/i.test(role)?"duo":"nsfw"); return td.e + " " + c.name; })()}</h1>
           <div class="prof-tags">${tagsHtml}</div>
           <p class="prof-blurb">${blurb}${(c.scenario||"").length > 120 ? "…" : ""}</p>
           <button type="button" class="cta prof-chat-btn" id="prof-chat">💬 Chat</button>
@@ -3893,7 +4015,10 @@ function renderProfile() {
       <p style="margin:0 0 8px;line-height:1.5;white-space:pre-wrap;font-size:13px">${formatPhysicalFR(c)}</p>
       <p style="margin:0;color:#b9a8c4;font-size:13px;line-height:1.4">${c.body ? ("Morphologie : " + c.body) : ""}${c.ethnicity ? (" · " + c.ethnicity) : ""}${c.age ? (" · " + c.age + " ans") : ""}</p>
     </div>
-    <p style="color:#d7c8dc;font-size:14px">${c.scenario || ""}</p>
+    <div style="background:linear-gradient(135deg,#1a1028,#241830);border-radius:12px;padding:12px;margin:10px 0;border:1px solid #4a2860">
+      <div style="color:#ff9ec8;font-size:12px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">🎬 Scénario</div>
+      <p style="margin:0;line-height:1.55;white-space:pre-wrap;font-size:14px;color:#f0e4f5">${escapeHtml(c.scenario || "Aucun scénario défini.")}</p>
+    </div>
     <p style="color:#a898b0;font-size:13px">${c.personality || ""}</p>
     <h3>Photos</h3>
     <div class="gallery">
@@ -4346,18 +4471,18 @@ function duoCompositionBlock(c) {
     const a2 = parseInt(age2, 10) || 22;
     const ageGap = Math.abs(a1 - a2) >= 10;
     const gapLine = ageGap
-      ? ("CLEAR GENERATIONAL AGE GAP: LEFT is " + a1 + " years old mature woman, RIGHT is " + a2 + " years old young adult daughter/younger, NOT the same age,")
+      ? ("CLEAR GENERATIONAL AGE GAP mother and adult daughter: LEFT is the MOTHER " + a1 + " years old mature woman, RIGHT is the DAUGHTER " + a2 + " years old young woman, huge age difference visible, NOT the same age, NOT sisters same generation,")
       : ("LEFT " + a1 + "yo and RIGHT " + a2 + "yo, clearly different faces,");
     const youngFace = a2 <= 22
-      ? "RIGHT has youthful young adult face smooth skin no wrinkles looks " + a2 + ","
+      ? "RIGHT has youthful daughter face smooth baby-smooth skin ZERO wrinkles looks " + a2 + " NOT 30 NOT 40, young adult,"
       : "RIGHT looks exactly " + a2 + ",";
     const matureFace = a1 >= 35
-      ? "LEFT has mature face subtle age lines looks " + a1 + " not 25,"
+      ? "LEFT has mature motherly face subtle crow feet and age lines looks " + a1 + " NOT 20 NOT 25, mature skin texture,"
       : "LEFT looks exactly " + a1 + ",";
     return [
       gapLine,
-      "LEFT woman " + n1 + ": (" + a1 + " years old:1.6), " + matureFace + " (" + hair1 + ":1.5), " + (eyes1 ? "(" + eyes1 + ":1.25), " : "") + "(" + cup1 + ":1.6),",
-      "RIGHT woman " + n2 + ": (" + a2 + " years old:1.6), " + youngFace + " (" + hair2 + ":1.5), " + (eyes2 ? "(" + eyes2 + ":1.25), " : "") + "(" + cup2 + ":1.6),",
+      "LEFT woman " + n1 + ": (" + a1 + " years old:1.75), (looks " + a1 + ":1.7), " + matureFace + " (" + hair1 + ":1.5), " + (eyes1 ? "(" + eyes1 + ":1.25), " : "") + "(" + cup1 + ":1.6),",
+      "RIGHT woman " + n2 + ": (" + a2 + " years old:1.75), (looks " + a2 + ":1.7), " + youngFace + " (" + hair2 + ":1.5), " + (eyes2 ? "(" + eyes2 + ":1.25), " : "") + "(" + cup2 + ":1.6),",
       "OBVIOUS contrast different ages different hair different bust sizes, two separate women,",
       "NOT same age both, NOT both " + a1 + ", NOT both mature, NOT both young same look, NOT same breast size, NOT matching cups, NOT clones,",
     ].join(" ");
@@ -7904,7 +8029,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   // 1) Afficher IMMÉDIATEMENT les profils (évite écran noir)
   try {
     if (typeof mergeCustomIntoCast === "function") mergeCustomIntoCast();
-    if (window.CAST && window.CAST.length) state.characters = ensureLeaGallery(window.CAST);
+    if (window.CAST && window.CAST.length) state.characters = ensureRoleTags(ensureLeaGallery(window.CAST));
   } catch (_) {}
   try {
     renderDiscover();

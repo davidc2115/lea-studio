@@ -456,3 +456,39 @@ body.chat-open #view-chat { margin: 0; }
   background: linear-gradient(90deg, #ff6b9d, #c44dff) !important;
   border: none;
 }
+
+
+/* ——— Tags colorés ——— */
+.tag, .disc-tag, .disc-suggest-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.tag-default, .disc-tag { background: #2a1835; color: #e8b4d4; border-color: #4a2a55; }
+.tag-rose { background: linear-gradient(135deg,#4a1838,#6b2048); color: #ffb3d9; border-color: #ff4d8d55; }
+.tag-pink { background: linear-gradient(135deg,#3a1530,#5a2040); color: #ff9ec8; border-color: #ff4d8d44; }
+.tag-purple { background: linear-gradient(135deg,#2a1848,#3a2868); color: #d4b4ff; border-color: #c48bff55; }
+.tag-blue { background: linear-gradient(135deg,#152a48,#204060); color: #a8d4ff; border-color: #4d9eff55; }
+.tag-mint { background: linear-gradient(135deg,#153530,#1a4840); color: #9ef0d0; border-color: #4dffc055; }
+.tag-gold { background: linear-gradient(135deg,#3a3010,#5a4820); color: #ffe09a; border-color: #ffc04d55; }
+.tag-orange { background: linear-gradient(135deg,#3a2010,#5a3018); color: #ffc090; border-color: #ff8c4d55; }
+.tag-red { background: linear-gradient(135deg,#3a1018,#5a1828); color: #ff9aaa; border-color: #ff4d6d55; }
+.tag-brown { background: linear-gradient(135deg,#2a1810,#3a2818); color: #e0c0a0; border-color: #a0704055; }
+.disc-suggest-item.tag-rose,
+.disc-suggest-item.tag-pink,
+.disc-suggest-item.tag-purple,
+.disc-suggest-item.tag-blue,
+.disc-suggest-item.tag-mint,
+.disc-suggest-item.tag-gold,
+.disc-suggest-item.tag-orange,
+.disc-suggest-item.tag-red { opacity: 0.95; }
+.prof-name { background: linear-gradient(90deg,#ff4d8d,#c48bff); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; }
+.disc-hero-name { text-shadow: 0 2px 12px rgba(255,77,141,0.35); }
+.tabbar .nav.active { color: #ff4d8d; }
+.prof-tags, .disc-hero-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
