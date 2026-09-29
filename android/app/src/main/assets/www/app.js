@@ -190,32 +190,97 @@ function physicalLocksFromText(c) {
   if (/peau\s*mate|tan\s*skin|olive\s*skin|golden\s*tan/i.test(blob)) out.positive.push("tan olive skin");
   if (/peau\s*fonc[ée]e|dark\s*skin|brown\s*skin/i.test(blob)) out.positive.push("dark brown skin");
 
-  // —— Non-humain / kemonomimi (OBLIGATOIRE si décrit — ne jamais générer humain simple) ——
+  // —— Non-humain : traits EXCLUSIFS par type (sirène ≠ cornes de démon) ——
+  const idTitle = [c && c.id, c && c.title, c && Array.isArray(c.tags) ? c.tags.join(" ") : ""].filter(Boolean).join(" ").toLowerCase();
   const nh = [];
-  if (/oreille[s]?\s*(de\s*)?renard|fox\s*ears|kitsune/i.test(blob)) nh.push("(fox ears on top of head:1.55)", "(fluffy fox ears:1.5)", "kemonomimi");
-  if (/oreille[s]?\s*(de\s*)?chat|cat\s*ears|nekomimi/i.test(blob)) nh.push("(cat ears on top of head:1.55)", "(cat ears:1.5)", "nekomimi");
-  if (/oreille[s]?\s*(de\s*)?loup|wolf\s*ears/i.test(blob)) nh.push("(wolf ears on top of head:1.55)");
-  if (/oreille[s]?\s*(de\s*)?lapin|bunny\s*ears|rabbit\s*ears/i.test(blob)) nh.push("(bunny rabbit ears:1.55)");
-  if (/oreille[s]?\s*d['']?elfe|elf\s*ears|pointed\s*ears|longues?\s*et\s*pointues/i.test(blob)) nh.push("(long pointed elf ears:1.6)", "(elf ears highly visible:1.5)");
-  if (/oreille[s]?\s*(d.?animaux|animales)|animal\s*ears|kemonomimi/i.test(blob)) nh.push("(animal ears on head:1.5)");
-  if (/queue[s]?\s*(de\s*)?(renard|chat|loup|renard)|fox\s*tail|cat\s*tail|wolf\s*tail|queues?\s*renard|queues?\s*duveteuses/i.test(blob)) nh.push("(fluffy animal tail visible:1.55)", "(fox tail:1.4)");
-  if (/\bcornes?\b|\bhorns?\b|petites\s*cornes/i.test(blob)) nh.push("(horns on head:1.55)", "demon horns");
-  if (/ailes?\s*(de\s*)?(chauve|d[eé]mon|bat)|bat\s*wings|demon\s*wings/i.test(blob)) nh.push("(bat demon wings:1.5)");
-  else if (/\bail(?:e|es)\b|\bwings?\b/i.test(blob) && /non-humain|fantasy|succube|ange|d[eé]mon|harpie|dragon/i.test(blob)) nh.push("(wings:1.45)");
-  if (/queue\s*pointue|embout\s*c[oe]ur|spaded\s*tail/i.test(blob)) nh.push("(spaded demon tail:1.5)");
-  if (/vampire|fangs|canines/i.test(blob)) nh.push("subtle vampire fangs");
-  if (/succube|demon\s*girl|d[eé]mone/i.test(blob)) nh.push("(succubus demon girl:1.45)", "supernatural features");
-  if (/[eé]cailles?|\bscales?\b/i.test(blob) && /non-humain|fantasy|dragon|naga|lamia/i.test(blob)) nh.push("(scales on skin:1.4)");
-  if (/peau\s*gris-bleue|grey-blue\s*skin|blue-grey\s*skin/i.test(blob)) nh.push("(grey-blue skin:1.45)");
-  if (/yeux\s*violets\s*phosphorescents|phosphorescent/i.test(blob)) nh.push("(glowing purple eyes:1.4)");
-  if (nh.length) {
-    out.features = nh;
-    // Traits non-humains EN TÊTE du positif (priorité max)
-    out.positive = nh.concat(out.positive);
-    out.negative.push(
-      "plain human only, purely human, ordinary human ears only, missing animal ears, missing elf ears, missing horns, missing tail, missing wings, human ears only, no fantasy features"
-    );
+  let nhNeg = "plain human only, purely human, no fantasy features, missing non-human traits";
+  const is = (re) => re.test(idTitle) || re.test(blob);
+
+  if (is(/kitsune|renard|fan_kitsune/)) {
+    nh.push("(fox ears on top of head:1.65)", "(fluffy fox ears:1.55)", "(multiple fluffy fox tails:1.6)", "kemonomimi");
+    nhNeg += ", demon horns, elf ears, cat ears, bat wings, mermaid scales, fish tail, snake hair, horns";
+  } else if (is(/catgirl|neko|fan_catgirl/)) {
+    nh.push("(cat ears on top of head:1.65)", "(long cat tail:1.55)", "nekomimi");
+    nhNeg += ", demon horns, fox ears, elf ears, bat wings, mermaid scales, wolf ears, horns";
+  } else if (is(/sir[eè]ne|sirene|fan_sirene|mermaid/)) {
+    nh.push("(iridescent mermaid scales on hips and arms:1.65)", "(mermaid scales:1.55)", "slightly webbed fingers", "water droplets on skin", "mermaid girl");
+    nhNeg += ", demon horns, horns, fox ears, cat ears, elf ears, bat wings, animal tail, snake hair, dragon horns";
+  } else if (is(/succube|fan_succube/)) {
+    nh.push("(curved demon horns on head:1.6)", "(bat demon wings:1.55)", "(spaded demon tail:1.55)", "succubus");
+    nhNeg += ", fox ears, cat ears, elf ears, mermaid scales, fish tail, angel halo, white angel wings, snake hair";
+  } else if (is(/fan_demon|\bd[eé]mone?\b/) && !is(/succube|dragon|oni/)) {
+    nh.push("(curved black demon horns:1.6)", "(small bat wings:1.5)", "(spaded demon tail:1.55)", "demon girl");
+    nhNeg += ", fox ears, cat ears, elf ears, angel halo, white angel wings, mermaid scales";
+  } else if (is(/dragon|fan_dragon/)) {
+    nh.push("(small dragon horns:1.55)", "(scales on shoulders and cheeks:1.5)", "dragon girl");
+    nhNeg += ", fox ears, cat ears, elf ears, mermaid fish tail, bat wings, snake hair, spaded demon tail";
+  } else if (is(/elfe|fan_elfe|\belf\b/)) {
+    nh.push("(long pointed elf ears highly visible:1.65)", "(elf ears:1.55)");
+    if (/gris-bleue|grey-blue|phosphorescent/i.test(blob)) nh.push("(grey-blue skin:1.45)", "(glowing purple eyes:1.4)");
+    nhNeg += ", demon horns, horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair";
+  } else if (is(/\bange\b|angel|seraph|fan_ange/)) {
+    nh.push("(large white feathered angel wings:1.65)", "(angel wings:1.55)", "subtle golden halo");
+    nhNeg += ", demon horns, bat wings, fox ears, cat ears, mermaid scales, spaded tail, dark demon wings";
+  } else if (is(/vampire|fan_vampire/)) {
+    nh.push("subtle vampire fangs", "supernatural pale skin", "gothic beauty");
+    nhNeg += ", demon horns, horns, fox ears, cat ears, elf ears, bat wings on back, mermaid scales, animal tail, snake hair";
+  } else if (is(/f[eé]e|fan_f|pixie|fairy/) && !is(/elfe/)) {
+    nh.push("(small translucent fairy wings:1.6)", "sparkling fairy dust");
+    nhNeg += ", demon horns, large bat wings, fox ears, cat ears, mermaid scales, animal tail, snake hair";
+  } else if (is(/dryade|fan_dryade/)) {
+    nh.push("leaf patterns on skin", "subtle bark on arms", "flowers in hair", "dryad");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair, elf ears";
+  } else if (is(/lamia|fan_lamia/)) {
+    nh.push("(serpentine scales on hips:1.55)", "hypnotic snake eyes", "lamia");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid fish tail, snake hair medusa, elf ears";
+  } else if (is(/harpie|fan_harpie/)) {
+    nh.push("(large feathered bird wings:1.6)", "feathers on shoulders", "harpy");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair, elf ears";
+  } else if (is(/slime|fan_slime|gel/)) {
+    nh.push("semi-translucent gelatinous skin", "slime girl glow");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, animal tail, solid opaque human only";
+  } else if (is(/andro|robot|fan_robot/)) {
+    nh.push("subtle android joints", "blue circuit lines under synthetic skin", "android girl");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, elf ears";
+  } else if (is(/loup|werewolf|fan_loup|wolf/)) {
+    nh.push("(wolf ears on top of head:1.6)", "(fluffy wolf tail:1.55)", "marked canines");
+    nhNeg += ", demon horns, fox ears, cat ears, elf ears, bat wings, mermaid scales, snake hair";
+  } else if (is(/centaure|fan_centaure/)) {
+    nh.push("subtle equine features", "mane-like hair", "strong legs");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, snake hair";
+  } else if (is(/gorgone|medusa|fan_gorgone/)) {
+    nh.push("(living snake hair:1.65)", "(snakes for hair:1.55)", "snake eyes", "green scales on temples", "gorgon");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, normal human hair only, mermaid fish tail, elf ears";
+  } else if (is(/\boni\b|fan_oni/)) {
+    nh.push("(two short red oni horns:1.65)", "(oni horns:1.55)", "slightly pointed teeth", "japanese oni");
+    nhNeg += ", elf ears, fox ears, cat ears, bat wings, mermaid scales, long demon horns, snake hair";
+  } else if (is(/\bnaga\b|fan_naga/)) {
+    nh.push("(scales on lower torso:1.55)", "naga serpent features");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid fish tail, snake hair medusa, elf ears";
+  } else if (is(/ph[eé]nix|phoenix|fan_phoenix|ember/)) {
+    nh.push("ember tips in hair", "feather patterns on shoulders", "warm heat aura", "phoenix");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair, elf ears";
+  } else if (is(/fant[oô]me|ghost|fan_ghost/)) {
+    nh.push("partially translucent body", "cold mist aura", "floating hair", "ghostly");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail";
+  } else if (is(/sorci|witch|fan_witch/)) {
+    nh.push("witch aesthetic", "pentagram pendant", "mystical aura");
+    nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, elf ears, snake hair";
+  } else {
+    // Fallback texte libre (imports) — toujours exclusif, pas de cornes par défaut
+    if (/oreille[s]?\s*(de\s*)?renard|fox\s*ears|kitsune/i.test(blob)) nh.push("(fox ears on top of head:1.55)", "(fluffy fox tails:1.5)");
+    else if (/oreille[s]?\s*(de\s*)?chat|cat\s*ears/i.test(blob)) nh.push("(cat ears on top of head:1.55)", "(cat tail:1.5)");
+    else if (/oreille[s]?\s*d.?elfe|elf\s*ears/i.test(blob)) nh.push("(long pointed elf ears:1.6)");
+    else if (/sir[eè]ne|mermaid|écailles\s*(de\s*)?sir/i.test(blob)) nh.push("(mermaid scales on hips and arms:1.55)");
+    else if (/succube|cornes?\s*(de\s*)?d[eé]mon/i.test(blob)) nh.push("(demon horns:1.55)", "(bat wings:1.4)", "(spaded tail:1.4)");
+    if (nh.length) nhNeg += ", wrong fantasy species mix";
   }
+  if (nh.length) {
+    out.features = nh.slice();
+    out.positive = nh.concat(out.positive);
+    out.negative.push(nhNeg);
+  }
+
 
   // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
   if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
