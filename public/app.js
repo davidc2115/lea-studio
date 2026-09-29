@@ -857,6 +857,11 @@ function buildLeaImagePrompt(extra = "") {
     "crouching slightly, elbows on knees, looking up at viewer",
     "walking toward camera mid-step, dynamic motion, looking at viewer",
     "sitting on a kitchen counter edge, legs dangling, looking at camera",
+    "lying on stomach on bed, chin on hands, looking at camera, legs up",
+    "standing arms crossed, leaning on doorframe, full body visible",
+    "sitting on floor against wall, one knee up, looking at camera",
+    "twirling, skirt or hair motion, mid-turn looking back",
+    "reaching up to shelf, body stretched, side view",
   ];
   const cameraAngles = [
     "shot from slightly below, low angle",
@@ -896,6 +901,14 @@ function buildLeaImagePrompt(extra = "") {
     "lace bodysuit",
     "towel wrapped around body after shower",
     "open cardigan over lingerie",
+    "green satin slip dress",
+    "denim shorts and tied shirt",
+    "black leather mini skirt and crop top",
+    "white blouse unbuttoned low with pencil skirt",
+    "pink pajama shorts and tank top",
+    "gold sequin party dress",
+    "yoga pants and sports bra after workout",
+    "bikini top and sarong skirt near window",
   ];
   let randomOutfitPick = null;
   if (!ex.overridesOutfit) {
@@ -1047,14 +1060,16 @@ function buildLeaImagePrompt(extra = "") {
       : (placeDetail || "indoor apartment");
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
     const short = [
-      // Composition d'abord = variation réelle
-      "(new pose:1.4), (new camera angle:1.3), " + pos + ",",
-      clothed ? ("(wearing " + wear + ":1.45), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
+      // Composition d'abord = variation réelle + corps entier
+      "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
+      "(new pose:1.45), (new camera angle:1.35), " + pos + ",",
+      clothed ? ("(wearing " + wear + ":1.5), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
       "in " + loc + ",",
       "photorealistic photo of the same adult woman,",
-      faceBits.slice(0, 260) + ",",
-      "sharp focus, detailed face, natural skin, realistic lighting,",
+      faceBits.slice(0, 220) + ",",
+      "sharp focus, natural skin, realistic lighting,",
       "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
+      "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
       hasUser ? ((ex.text || "").slice(0, 100) + ",") : "",
       anti,
     ].filter(Boolean).join(" ");
@@ -4233,9 +4248,10 @@ function duoCompositionBlock(c) {
   // Léa & Louna : descriptif EN court verrouillé
   if (c && c.id === "duo_twins_lea") {
     return [
-      "LEFT woman Léa: long straight dark brown hair to lower back, dark brown almond eyes, small natural B-cup breasts, slim slender frame, fair skin,",
-      "RIGHT woman Louna: honey-brown wavy shoulder-length hair golden highlights, hazel-green eyes, large D-cup breasts, hourglass tiny waist, fair skin,",
-      "STRONG contrast different hair and bust, two separate women,",
+      "LEFT woman named Léa: (long straight dark brown hair to lower back:1.5), (dark brown almond eyes:1.3), (small natural B-cup breasts almost modest:1.55), slim slender frame, fair skin, delicate face,",
+      "RIGHT woman named Louna: (honey-brown wavy shoulder-length hair with golden highlights:1.5), (hazel-green eyes:1.3), (large full D-cup breasts deep cleavage:1.55), hourglass tiny waist, fair skin,",
+      "OBVIOUS contrast: LEFT dark brown straight hair + small B-cup, RIGHT honey-brown wavy hair + large D-cup,",
+      "NOT same hair both, NOT same bust both, NOT both blonde, NOT both same brown hair length,",
     ].join(" ");
   }
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
@@ -5124,7 +5140,7 @@ async function generatePhotoHordeFallback(prompt, c) {
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {
-        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both red hair, both auburn hair, both blonde, both brunette, matching hair, solo woman, 1girl, single person, three women, six women, group of clones, identical twins same hair same chest, bright orange red hair on both";
+        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both auburn hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
@@ -5539,42 +5555,70 @@ async function generatePhoto() {
       const duoCore = duoCompositionBlock(c);
       const ex = expandProfileExtra(extra);
       const outfits = [
-        "casual tops and jeans",
-        "elegant evening dresses",
-        "lingerie matching sets",
-        "summer dresses",
-        "blouses and skirts",
-        "silk robes loosely tied",
+        "casual fitted tops and blue jeans",
+        "different colored evening dresses",
+        "lingerie: different bras and panties each",
+        "summer sundresses different colors",
+        "office blouse and skirt vs pants",
+        "silk robes loosely tied different colors",
+        "crop tops and mini skirts",
+        "one in black dress one in white blouse",
       ];
       const poses = [
-        "standing side by side looking at camera, full body",
-        "sitting on a sofa together looking at viewer",
-        "one standing one sitting, both looking at camera",
-        "leaning close together, three-quarter view",
-        "walking toward camera side by side",
+        "(full body standing side by side:1.45), looking at camera, weight on hip",
+        "(sitting on a sofa together:1.4), legs crossed differently, looking at viewer",
+        "(one standing one sitting on arm of sofa:1.4), both looking at camera",
+        "(leaning on a kitchen counter side by side:1.35), three-quarter view",
+        "(walking toward camera mid-step:1.35), dynamic, side by side",
+        "(standing in doorway together:1.4), one hand on frame, looking at viewer",
+        "(sitting on bed edge side by side:1.35), leaning slightly toward each other",
+        "(from behind looking over shoulders:1.35), backs partly to camera",
+      ];
+      const places = [
+        "indoor modern living room warm light",
+        "apartment hallway near door",
+        "bedroom soft lamp light",
+        "kitchen island evening light",
+        "hotel suite large window",
       ];
       let outfitBit = (ex && ex.outfitLine) ? ex.outfitLine : outfits[Math.floor(Math.random() * outfits.length)];
       let poseBit = (ex && ex.poseLine) ? ex.poseLine : poses[Math.floor(Math.random() * poses.length)];
-      let placeBit = (ex && ex.placeLine) ? ex.placeLine : "indoor living room warm light";
-      // Prompt COURT EN uniquement (Horde échoue sur les pavés FR)
+      let placeBit = (ex && ex.placeLine) ? ex.placeLine : places[Math.floor(Math.random() * places.length)];
+      // Anti-même pose que la précédente
+      try {
+        const last = localStorage.getItem("lea.lastDuoPose." + (c.id || "x")) || "";
+        if (!ex.poseLine && last) {
+          const pool = poses.filter((p) => p !== last);
+          poseBit = pool[Math.floor(Math.random() * pool.length)] || poseBit;
+        }
+        localStorage.setItem("lea.lastDuoPose." + (c.id || "x"), poseBit);
+      } catch (_) {}
       prompt = [
-        "photorealistic photo of exactly two different adult women side by side,",
-        duoCore || "LEFT woman and RIGHT woman, different hair colors, different breast sizes,",
-        "both fully visible head to thighs, two separate bodies two faces,",
-        "wearing " + outfitBit + ",",
+        "photorealistic DSLR photo of EXACTLY TWO different adult women,",
         poseBit + ",",
+        "both fully visible head to mid-thigh, wide shot NOT close-up faces,",
+        duoCore || "LEFT woman and RIGHT woman, different hair colors, different breast sizes,",
+        "LEFT and RIGHT must look OBVIOUSLY different: different hair color, different breast size,",
+        "wearing " + outfitBit + ",",
         "in " + placeBit + ",",
-        "sharp focus, natural skin, realistic lighting,",
-        "NOT mirror symmetry, NOT identical faces, NOT fused bodies, NOT one body two heads, NOT clones,",
+        "two separate bodies, two faces, natural skin, sharp focus,",
+        "NOT same hair color both, NOT both brunette identical, NOT both blonde, NOT same breast size,",
+        "NOT mirror symmetry, NOT identical twins same look, NOT fused bodies, NOT clones, NOT solo 1girl,",
+        "NOT face crop only, NOT portrait only,",
         extra ? (String(extra).slice(0, 80) + ",") : "",
       ].filter(Boolean).join(" ");
-      console.log("[lea duo prompt]", prompt.slice(0, 400));
+      console.log("[lea duo prompt]", prompt.slice(0, 450));
     }
   } catch (e) { console.warn("duo prompt", e); }
   // Renfort visage (tous personnages solo)
   try {
     if (!isDuoCharacter(c)) {
-      prompt = faceIdentityLock(c) + " " + prompt;
+      // Cadre corps entier EN TÊTE (Horde bias portrait sinon)
+      const frame = "(full body shot head to mid-thigh visible:1.5), (wide composition not face crop:1.4), ";
+      prompt = frame + faceIdentityLock(c) + " " + prompt;
+      if (!/NOT face crop|NOT portrait only/i.test(prompt)) {
+        prompt += ", NOT face crop only, NOT close-up portrait only, NOT head and shoulders only,";
+      }
     }
   } catch (_) {}
   window._leaGenBusy = true;
@@ -5789,7 +5833,7 @@ async function generatePhoto() {
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {
-        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both red hair, both auburn hair, both blonde, both brunette, matching hair, solo woman, 1girl, single person, three women, six women, group of clones, identical twins same hair same chest, bright orange red hair on both";
+        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both auburn hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
