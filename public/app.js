@@ -4488,9 +4488,23 @@ function formatTemperamentFR(c) {
 function formatPhysicalFR(c) {
   if (!c) return "";
   const stored = String(c.appearance || "").trim();
+  // Duo : afficher tel quel si déjà séparé (Femme 1 / Femme — / LEFT)
+  if (stored.length > 200 && (/Femme\s*[1—–-]|Femme 1|LEFT woman|Femme\s*—/i.test(stored)) && /Yeux|Cheveux|Poitrine/i.test(stored)) {
+    return stored;
+  }
   if (stored.indexOf("Sujet") >= 0 && stored.indexOf("Yeux") >= 0 && stored.length > 250) {
     return stored;
   }
+  // Duo générique : reconstruire depuis looks_en si possible
+  try {
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+      const looks = String(c.looks_en || "");
+      if (/LEFT woman/i.test(looks) && /RIGHT woman/i.test(looks)) {
+        // Préférer appearance stockée si assez longue
+        if (stored.length > 300) return stored;
+      }
+    }
+  } catch (_) {}
   if (c.id === "duo_twins_lea") {
     return `Femme 1 : Léa (brunette aux cheveux lisses)
 Âge et origine : 21 ans, type européen / français.
@@ -4574,6 +4588,12 @@ Mains : Doigts longs, fins et soignés.`;
     : /caramel|tan|mate|dorée/.test(blob) ? "peau mate / caramel"
     : /dark skin|ebony/.test(blob) ? "peau foncée"
     : "peau claire";
+  // Duo : ne jamais fusionner en un seul Sujet
+  try {
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && stored.length > 80) {
+      return stored;
+    }
+  } catch (_) {}
   // Structure type Léa (sections)
   let out = [
     "Sujet : " + name + ", " + age + " ans" + (eth ? (", " + eth) : "") + ". " + morph + ".",

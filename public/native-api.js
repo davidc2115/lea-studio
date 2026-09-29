@@ -237,10 +237,11 @@
   /** Rappel format unique pour TOUS les modèles (Gemini / Groq / OpenAI). */
   const FORMAT_REMINDER = [
     "═══ FORMAT RÉPONSE UNIQUE (OBLIGATOIRE) ═══",
-    "Réponds en FRANÇAIS avec EXACTEMENT cette structure, 3 lignes séparées :",
+    "Réponds en FRANÇAIS avec EXACTEMENT cette structure COMPLÈTE (3 parties obligatoires, jamais tronquée) :",
     "(Une seule pensée entre parenthèses — ouvrir et fermer)",
     "*Une seule action entre deux astérisques — ouvrir et fermer*",
     "Une à trois phrases de dialogue parlé, SANS * et SANS parenthèses.",
+    "La réponse DOIT inclure les 3 parties et se terminer proprement. Ne coupe jamais une phrase.",
     "Exemple exact :",
     "(Il me regarde trop intensément.)",
     "*Je pose mon verre sur la table en croisant les bras.*",
@@ -320,7 +321,7 @@
       const genConfig = {
         temperature: 0.95,
         topP: 0.95,
-        maxOutputTokens: 1000,
+        maxOutputTokens: 1600,
       };
       // 3.x : thinking_level minimal (thinkingBudget seul peut échouer)
       if (is3x) {
@@ -359,7 +360,7 @@
               const payload2 = {
                 systemInstruction: { parts: [{ text: system.slice(0, 9000) }] },
                 contents,
-                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 850 },
+                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 1400 },
                 safetySettings,
               };
               const res2 = await fetchTimeout(
@@ -426,6 +427,13 @@
             }
             text = tt;
             console.warn("[lea] MAX_TOKENS — réponse coupée, fermeture forcée");
+            // Si pas de dialogue parlé après action, ajouter une ligne courte
+            try {
+              const hasSpeech = /\n[^(*\n][^\n]{8,}/.test(tt) || (/\*[^]*\*[\s\S]*[A-Za-zÀ-ÿ]{10}/.test(tt));
+              if (!hasSpeech) {
+                tt = tt.replace(/\s*$/, "") + "\n…";
+              }
+            } catch (_) {}
           }
           console.log("[lea] Gemini OK", model, keyHint, finish);
           return ensureCompleteReply(sanitizeReply(text));
@@ -459,7 +467,7 @@
             model: "gpt-4o-mini",
             messages,
             temperature: 0.9,
-            max_tokens: 1200,
+            max_tokens: 1600,
           }),
         });
         const data = await res.json();
@@ -594,7 +602,7 @@
               model: model,
               messages: msgs,
               temperature: 0.92,
-              max_tokens: 1100,
+              max_tokens: 1500,
               top_p: 0.95,
               frequency_penalty: 0.75,
               presence_penalty: 0.5,
@@ -640,6 +648,16 @@
       if (lastSpace > 30 && lastSpace > tt.length - 50) tt = tt.slice(0, lastSpace);
       tt = tt.replace(/[,:;\-—]\s*$/, "") + ".";
     }
+    // Réponse incomplète : pensée + action mais PAS de dialogue → ajouter une ligne parlée minimale
+    try {
+      const lines = tt.split(/\n/).map(function(l) { return l.trim(); }).filter(Boolean);
+      const hasThought = lines.some(function(l) { return /^\(.*\)$/.test(l); });
+      const hasAction = lines.some(function(l) { return /^\*.*\*$/.test(l); });
+      const hasSpeech = lines.some(function(l) { return !/^\(.*\)$/.test(l) && !/^\*.*\*$/.test(l) && l.length > 2; });
+      if (hasThought && hasAction && !hasSpeech) {
+        tt = tt + "\n…";
+      }
+    } catch (_) {}
     return tt;
   }
 
