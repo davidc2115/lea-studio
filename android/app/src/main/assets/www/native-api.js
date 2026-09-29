@@ -1881,7 +1881,7 @@
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
-      // Gemini native image (Nano Banana) — gratuit selon quota, souvent filtre NSFW
+      // Gemini native image (Nano Banana)
       if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
         try {
           const refs = body.ref_images || body.refImages || null;
@@ -1891,30 +1891,35 @@
           });
           return { ok: true, image: dataUrl, engine: "gemini" };
         } catch (e) {
-          // fallback Horde si demandé
           if (body.fallback_horde === false) throw e;
           console.warn("[gemini-img]", e.message || e);
         }
       }
-      // ——— Horde : payloads minimaux valides (évite "Input payload validation failed") ———
-      const extraNeg = String(body.negative || "").replace(/\s+/g, " ").trim().slice(0, 500);
-      const negative = (
-        "cartoon, anime, deformed, blurry, lowres, watermark, text, child, teen, underage, " +
-        "different face, different person, " + extraNeg
-      ).replace(/\s+/g, " ").trim().slice(0, 800);
+      // ——— Horde (version stable post-personnages) ———
+      const extraNeg = String(body.negative || "");
+      const negative = [
+        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
+        "deformed, mutated, extra limbs, extra fingers, bad anatomy, blurry, lowres, jpeg artifacts,",
+        "watermark, text, logo, signature, dreamstime, stock photo, child, teen, underage, loli,",
+        "wrong body type, inconsistent proportions,",
+        "different face, different person, face morph, identity change, another woman,",
+        "wrong facial features, different eyes, different nose, different jaw,",
+        extraNeg
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1000);
-      if (!promptSafe) promptSafe = "photorealistic photo of a 21 year old woman, detailed face";
+      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1500);
+      if (!promptSafe) promptSafe = "photorealistic portrait of an adult woman";
 
-      // Ref img2img optionnelle (base64 pur, max ~900k pour éviter SourceImageSizeExceeded)
+      // source_image: base64 pur, taille limitée (évite validation failed)
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
-        if (raw.length > 800 && raw.length < 1200000) src = raw;
+        if (raw.length > 800 && raw.length < 1_200_000) src = raw;
       }
+      const useImg2Img = Boolean(src);
 
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
@@ -1923,30 +1928,22 @@
         const st = settings();
         if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
       } catch (_) {}
+      try {
+        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
+      } catch (_) {}
 
-      // Client-Agent obligatoire format name:version:contact
-      const clientAgent = "LeaStudio:2.2:https://github.com/davidc2115/lea-studio";
-
-      // Payloads : img2img EN PREMIER si ref (sinon visage aléatoire stock)
+      const clientAgent = "LeaStudio:2.3:https://github.com/davidc2115/lea-studio";
+      const photoModels = ["Dreamshaper", "AbsoluteReality", "Deliberate", "Realistic Vision"];
       const payloads = [];
-      const negFull = (negative ? (" ### " + negative) : "") +
-        " ### watermark, text, logo, signature, dreamstime, shutterstock, getty, stock photo, studio headshot, plain background, shoulder-length bob, auburn hair, red hair, different woman";
 
-      // 1) img2img prioritaires — denoise BAS + steps HAUTS = visage stable
-      if (src) {
+      if (useImg2Img) {
         let den = typeof body.denoising === "number" ? body.denoising : 0.38;
-        // Ne jamais monter trop haut (visage change au-dessus de ~0.42)
-        den = Math.min(0.44, Math.max(0.32, den));
-        const facePrompt = [
-          "(identical face to reference photo:1.65)",
-          "(same woman same face identity:1.55)",
-          "same eye color same nose same lips same jaw,",
-          "long dark brown hair to lower back NOT light brown NOT auburn NOT bob,",
-          promptSafe.slice(0, 700),
-        ].join(" ");
-        // Essai A : denoise bas, steps élevés
+        den = Math.min(0.48, Math.max(0.32, den));
+        const faceBoost = "(identical face to reference photo:1.5), same woman as source, ";
+        const imgPrompt = faceBoost + promptSafe.slice(0, 900);
         payloads.push({
-          prompt: facePrompt + negFull,
+          prompt: imgPrompt + " ### " + negative,
           params: {
             width: 512,
             height: 768,
@@ -1956,27 +1953,26 @@
             cfg_scale: 7,
             denoising_strength: den,
           },
-          nsfw: true,
+          nsfw: body.nsfw !== false,
           censor_nsfw: false,
-          models: ["Dreamshaper", "AbsoluteReality", "Realistic Vision"],
+          models: photoModels,
           r2: true,
           slow_workers: true,
           source_image: src,
           source_processing: "img2img",
         });
-        // Essai B : denoise un peu plus bas encore
         payloads.push({
-          prompt: facePrompt + negFull,
+          prompt: imgPrompt + " ### " + negative,
           params: {
             width: 512,
             height: 768,
-            steps: 28,
+            steps: 26,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 6.5,
-            denoising_strength: Math.max(0.28, den - 0.04),
+            denoising_strength: Math.min(0.48, den + 0.06),
           },
-          nsfw: true,
+          nsfw: body.nsfw !== false,
           censor_nsfw: false,
           models: ["stable_diffusion", "Dreamshaper"],
           r2: true,
@@ -1986,19 +1982,19 @@
         });
       }
 
-      // 2) txt2img secours UNIQUEMENT si pas de ref ou img2img refusé
+      // txt2img si pas de ref, ou secours après échec img2img
       payloads.push({
-        prompt: promptSafe + negFull,
-        params: { width: 512, height: 768, steps: 22, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
-        nsfw: true,
+        prompt: promptSafe + " ### " + negative,
+        params: { width: 512, height: 768, steps: 28, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
+        nsfw: body.nsfw !== false,
         censor_nsfw: false,
-        models: ["Dreamshaper", "AbsoluteReality", "Deliberate"],
+        models: photoModels,
         r2: true,
         slow_workers: true,
       });
       payloads.push({
-        prompt: promptSafe.slice(0, 600) + " ### watermark, stock photo, dreamstime",
-        params: { width: 512, height: 768, steps: 18, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
+        prompt: promptSafe.slice(0, 800) + " ### " + negative.slice(0, 400),
+        params: { width: 512, height: 768, steps: 20, n: 1, sampler_name: "k_euler_a", cfg_scale: 7 },
         nsfw: true,
         censor_nsfw: false,
         models: ["stable_diffusion"],
@@ -2006,8 +2002,7 @@
       });
 
       for (const host of hosts) {
-        for (let i = 0; i < payloads.length; i++) {
-          const bodyPayload = payloads[i];
+        for (const bodyPayload of payloads) {
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
@@ -2025,11 +2020,11 @@
                 host,
                 pending: true,
                 mode: bodyPayload.source_processing || "txt2img",
-                models: (bodyPayload.models || ["any"]).slice(0, 3),
+                models: (bodyPayload.models || []).slice(0, 3),
               };
             }
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 180) : "") || ("HTTP " + res.status);
-            console.warn("[horde] payload", i, host, last);
+            console.warn("[horde]", host, last);
           } catch (e) {
             last = String(e.message || e);
           }
