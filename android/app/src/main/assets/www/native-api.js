@@ -2018,8 +2018,8 @@
 
       if (useImg2Img) {
         let den = typeof body.denoising === "number" ? body.denoising : 0.45;
-        den = Math.min(0.55, Math.max(0.32, den));
-        const faceBoost = "(identical face to reference photo:1.55), same woman as source, same eyes same nose same lips, ";
+        den = Math.min(0.65, Math.max(0.32, den));
+        const faceBoost = "(identical face to reference photo:1.6), (same woman as source:1.5), same eyes same nose same lips same hair color, ";
         const imgPrompt = faceBoost + promptSafe.slice(0, 800);
         payloads.push({
           prompt: imgPrompt + " ### " + negative,

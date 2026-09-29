@@ -819,21 +819,36 @@ Peau : Claire, texture veloutée et uniforme.`;
     ];
   }
   const ex = expandProfileExtra(extra);
-  // Poses aléatoires élargies (sexy / scénario) pour ne pas recopier la ref
+  // Variété FORTE : pose + angle caméra (anti-copie de la ref ★)
   const extraPoses = [
-    "standing three-quarter view looking at camera, one hand on hip",
-    "sitting on a sofa looking at viewer, legs crossed",
-    "leaning against a wall, looking over shoulder",
-    "kneeling on the floor looking up at viewer",
-    "standing in doorway, weight on one leg",
-    "sitting on edge of bed, looking at camera",
-    "bending slightly forward looking at viewer",
-    "from the side turning face toward camera",
-    "arms loosely crossed under chest, looking at camera",
-    "hands in hair, looking at viewer, new angle",
+    "standing full body three-quarter view, weight on one hip, one hand on hip, looking at camera",
+    "sitting on a sofa, legs crossed, leaning forward slightly, looking at viewer",
+    "leaning against a wall, looking over the shoulder, profile of body face toward camera",
+    "kneeling on the floor on a rug, looking up at viewer, hands on thighs",
+    "standing in doorway, one hand on doorframe, body angled, looking at viewer",
+    "sitting on the edge of a bed, legs slightly apart, looking at camera",
+    "bending slightly forward from the waist, looking up at viewer, playful expression",
+    "from the side, body in profile, head turned toward camera, over-shoulder glance",
+    "lying on her side on a couch, propped on one elbow, looking at camera",
+    "hands in hair lifting it, arms up, looking at viewer, dynamic angle",
+    "sitting cross-legged on the floor, looking up, casual relaxed pose",
+    "standing with back partly to camera, looking back over shoulder, teasing look",
+    "crouching slightly, elbows on knees, looking up at viewer",
+    "walking toward camera mid-step, dynamic motion, looking at viewer",
+    "sitting on a kitchen counter edge, legs dangling, looking at camera",
+  ];
+  const cameraAngles = [
+    "shot from slightly below, low angle",
+    "eye-level medium shot",
+    "slight high angle looking down",
+    "close three-quarter body crop",
+    "full body from head to toes visible",
+    "side angle 45 degrees",
+    "dutch angle slight tilt cinematic",
   ];
   const fullPool = (posePool || []).concat(extraPoses);
   let pose;
+  let cameraAngle = cameraAngles[Math.floor(Math.random() * cameraAngles.length)];
   if (ex.overridesPose) {
     pose = "pose/position from user detail, follow USER DETAIL exactly";
   } else {
@@ -844,6 +859,32 @@ Peau : Claire, texture veloutée et uniforme.`;
       localStorage.setItem("lea.lastPose." + (c.id || "x"), pose);
     } catch (_) {
       pose = fullPool[Math.floor(Math.random() * fullPool.length)];
+    }
+  }
+  // Tenues aléatoires si l'utilisateur n'impose rien (évite de rester nue comme la ref)
+  const randomOutfits = [
+    "red lace lingerie set bra and panties",
+    "black sheer babydoll nightie",
+    "tight white crop top and blue jeans",
+    "short black mini skirt and tight blouse",
+    "silk robe loosely tied, cleavage visible",
+    "wet white t-shirt clinging to body",
+    "red cocktail dress deep neckline",
+    "oversized man shirt only, thigh length",
+    "sports bra and tight leggings",
+    "lace bodysuit",
+    "towel wrapped around body after shower",
+    "open cardigan over lingerie",
+  ];
+  let randomOutfitPick = null;
+  if (!ex.overridesOutfit) {
+    try {
+      const lastO = localStorage.getItem("lea.lastOutfit." + (c.id || "x")) || "";
+      const op = randomOutfits.filter((o) => o !== lastO);
+      randomOutfitPick = op[Math.floor(Math.random() * op.length)] || randomOutfits[0];
+      localStorage.setItem("lea.lastOutfit." + (c.id || "x"), randomOutfitPick);
+    } catch (_) {
+      randomOutfitPick = randomOutfits[Math.floor(Math.random() * randomOutfits.length)];
     }
   }
 
@@ -918,12 +959,15 @@ Peau : Claire, texture veloutée et uniforme.`;
   if (hasUser && ex.overridesOutfit) {
     outfitLine = "OUTFIT MANDATORY FROM USER (ignore scenario default clothes): " +
       (ex.outfitLine || "exactly as described in USER REQUEST") +
-      ", NOT default lingerie, NOT wrong clothes,";
+      ", NOT default lingerie, NOT wrong clothes, NOT nude unless user asked nude,";
   } else if (hasUser) {
-    // Texte libre sans mot-clé tenue → quand même priorité au texte user
-    outfitLine = "OUTFIT: follow USER REQUEST if it describes clothes, otherwise: " + outfitDetail + ",";
+    outfitLine = "OUTFIT: follow USER REQUEST if it describes clothes, otherwise: " +
+      (randomOutfitPick || outfitDetail) + ",";
   } else {
-    outfitLine = "OUTFIT REQUIRED (match exactly): " + outfitDetail + ",";
+    // Génération aléatoire profil : tenue VARIÉE à chaque fois (pas la nude de la ref)
+    const o = randomOutfitPick || outfitDetail;
+    outfitLine = "OUTFIT REQUIRED (must wear clothes, not nude copy of reference): " + o +
+      ", fully dressed as described, fabric visible, NOT completely nude, NOT same nude pose as reference,";
   }
 
   let placeLine;
@@ -962,7 +1006,7 @@ Peau : Claire, texture veloutée et uniforme.`;
     : "";
   const finalPose = (hasUser && (ex.overridesPose || ex.poseLine || ex.sceneLine))
     ? "follow USER pose exactly"
-    : (pose + ",");
+    : (pose + ", " + cameraAngle + ",");
   return [
     // DUO: composition en PREMIER pour que Horde suive les deux morphologies
     isDuo ? duoBlock : "",
@@ -982,7 +1026,9 @@ Peau : Claire, texture veloutée et uniforme.`;
     placeLine,
     hasUser ? "EVERY detail of USER REQUEST is mandatory (clothes, pose, place, act)," : ("scenario: " + situation + ","),
     finalPose,
-    "IMPORTANT: different pose and camera angle from any reference photo, new composition, not a copy of the cover,",
+    "CRITICAL: completely different pose, posture, arm position and camera angle from the reference photo,",
+    "new composition, different framing, NOT a copy of the cover, NOT the same standing nude portrait,",
+    "NOT same head tilt, NOT same arm position, NOT identical crop,",
     "Natural skin pores, realistic DSLR photography, sharp detailed face matching identity, soft cinematic lighting,",
     "High-end photorealistic quality,",
     anti,
@@ -4630,7 +4676,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.42 : 0.45);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.50 : 0.55);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
@@ -5710,9 +5756,13 @@ Peau : Claire, texture veloutée et uniforme.`;
           payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
-          // Denoise plus haut = pose/tenue peuvent changer, visage tenu par face_lock + ref
-          payload.denoising = Math.min(0.52, Math.max(Number(payload.denoising) || 0.48, 0.45));
-          setGenStatus("Horde img2img · nouvelle pose · denoise " + payload.denoising + "…");
+          // Denoise élevé : pose/tenue/angle changent ; visage via face_lock + ref
+          payload.denoising = Math.min(0.62, Math.max(Number(payload.denoising) || 0.55, 0.52));
+          payload.negative = (payload.negative || "") +
+            ", same pose as reference, identical pose, same framing, same arm position, " +
+            "copy of reference pose, static nude portrait only, arms crossed looking down, " +
+            "identical composition, duplicate of source image";
+          setGenStatus("Horde img2img · nouvelle pose/tenue · denoise " + payload.denoising + "…");
         }
       }
     } catch (e) {
