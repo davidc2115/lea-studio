@@ -1007,8 +1007,39 @@ Peau : Claire, texture veloutée et uniforme.`;
   const finalPose = (hasUser && (ex.overridesPose || ex.poseLine || ex.sceneLine))
     ? "follow USER pose exactly"
     : (pose + ", " + cameraAngle + ",");
+  // ——— Prompt COURT et net (Horde suit mieux 60–120 tokens) ———
+  if (!isDuo && !ex.overridesAct) {
+    const faceBits = [
+      looks,
+      (c.age ? (c.age + " year old") : "adult"),
+      phys.positive.slice(0, 4).join(", "),
+      body,
+    ].filter(Boolean).join(", ");
+    const wear = (hasUser && ex.overridesOutfit && ex.outfitLine)
+      ? ex.outfitLine
+      : (randomOutfitPick || outfitDetail || "stylish casual outfit");
+    const pos = (hasUser && (ex.poseLine || ex.overridesPose))
+      ? (ex.poseLine || "follow user pose")
+      : (pose + ", " + (cameraAngle || "eye-level medium shot"));
+    const loc = (hasUser && ex.overridesPlace && ex.placeLine)
+      ? ex.placeLine
+      : (placeDetail || "indoor apartment");
+    const short = [
+      "photorealistic photo of the same adult woman,",
+      faceBits.slice(0, 280) + ",",
+      "wearing " + wear + ",",
+      pos + ",",
+      "in " + loc + ",",
+      "sharp focus, detailed face, natural skin texture, realistic lighting,",
+      "different pose from any reference, new composition,",
+      hasUser ? ((ex.text || "").slice(0, 120) + ",") : "",
+      anti,
+    ].filter(Boolean).join(" ");
+    return short.replace(/\s+/g, " ").trim();
+  }
+
   return [
-    // DUO: composition en PREMIER pour que Horde suive les deux morphologies
+    // DUO / actes explicites : prompt plus complet
     isDuo ? duoBlock : "",
     sceneHead,
     poseHead,
@@ -1017,7 +1048,7 @@ Peau : Claire, texture veloutée et uniforme.`;
     actHead,
     isDuo ? "" : (fixedAppearanceBlock(c) + ","),
     duoExtra,
-    "Photorealistic photo,",
+    "Photorealistic photo, sharp focus,",
     ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner body visible in frame," : "",
     // Mono seulement si PAS duo
     isDuo ? "" : ("body: " + body + ","),
@@ -4676,7 +4707,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.50 : 0.55);
+      if (payload.denoising == null) payload.denoising = duoDenoise(c.id === "lea" ? 0.42 : 0.44);
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
@@ -5756,13 +5787,12 @@ Peau : Claire, texture veloutée et uniforme.`;
           payload.denoising = Math.min(0.40, Math.max(Number(payload.denoising) || 0.32, 0.32));
           setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
         } else {
-          // Denoise élevé : pose/tenue/angle changent ; visage via face_lock + ref
-          payload.denoising = Math.min(0.62, Math.max(Number(payload.denoising) || 0.55, 0.52));
+          // Denoise modéré : net + pose/tenue différentes (trop haut = flou)
+          payload.denoising = Math.min(0.48, Math.max(Number(payload.denoising) || 0.44, 0.42));
           payload.negative = (payload.negative || "") +
-            ", same pose as reference, identical pose, same framing, same arm position, " +
-            "copy of reference pose, static nude portrait only, arms crossed looking down, " +
-            "identical composition, duplicate of source image";
-          setGenStatus("Horde img2img · nouvelle pose/tenue · denoise " + payload.denoising + "…");
+            ", blurry, out of focus, same pose as reference, identical pose, same framing, " +
+            "copy of reference pose, static nude portrait only, identical composition";
+          setGenStatus("Horde img2img · pose/tenue · denoise " + payload.denoising + "…");
         }
       }
     } catch (e) {
