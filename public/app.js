@@ -190,23 +190,31 @@ function physicalLocksFromText(c) {
   if (/peau\s*mate|tan\s*skin|olive\s*skin|golden\s*tan/i.test(blob)) out.positive.push("tan olive skin");
   if (/peau\s*fonc[ée]e|dark\s*skin|brown\s*skin/i.test(blob)) out.positive.push("dark brown skin");
 
-  // —— Non-humain / kemonomimi (NE PAS ignorer) ——
+  // —— Non-humain / kemonomimi (OBLIGATOIRE si décrit — ne jamais générer humain simple) ——
   const nh = [];
-  if (/oreille[s]?\s*de\s*renard|fox\s*ears|kitsune/i.test(blob)) nh.push("(fox ears on head:1.4)", "fluffy fox ears");
-  if (/oreille[s]?\s*de\s*chat|cat\s*ears|nekomimi/i.test(blob)) nh.push("(cat ears on head:1.4)", "cat ears");
-  if (/oreille[s]?\s*de\s*loup|wolf\s*ears/i.test(blob)) nh.push("(wolf ears on head:1.4)");
-  if (/oreille[s]?\s*de\s*lapin|bunny\s*ears|rabbit\s*ears/i.test(blob)) nh.push("(bunny rabbit ears:1.4)");
-  if (/oreille[s]?\s*(d.?animaux|animales)|animal\s*ears|kemonomimi/i.test(blob)) nh.push("(animal ears on head:1.35)");
-  if (/\bqueue\b|tail\b|fox\s*tail|cat\s*tail/i.test(blob)) nh.push("(animal tail:1.3)");
-  if (/cornes?|horns/i.test(blob)) nh.push("(horns on head:1.3)");
-  if (/ailes?|wings/i.test(blob)) nh.push("(wings:1.25)");
-  if (/elfe|elf\s*ears|pointed\s*ears/i.test(blob)) nh.push("(pointed elf ears:1.35)");
-  if (/vampire|fangs/i.test(blob)) nh.push("subtle fangs");
-  if (/succube|demon\s*girl|d[eé]mone/i.test(blob)) nh.push("succubus demon girl features");
+  if (/oreille[s]?\s*(de\s*)?renard|fox\s*ears|kitsune/i.test(blob)) nh.push("(fox ears on top of head:1.55)", "(fluffy fox ears:1.5)", "kemonomimi");
+  if (/oreille[s]?\s*(de\s*)?chat|cat\s*ears|nekomimi/i.test(blob)) nh.push("(cat ears on top of head:1.55)", "(cat ears:1.5)", "nekomimi");
+  if (/oreille[s]?\s*(de\s*)?loup|wolf\s*ears/i.test(blob)) nh.push("(wolf ears on top of head:1.55)");
+  if (/oreille[s]?\s*(de\s*)?lapin|bunny\s*ears|rabbit\s*ears/i.test(blob)) nh.push("(bunny rabbit ears:1.55)");
+  if (/oreille[s]?\s*d['']?elfe|elf\s*ears|pointed\s*ears|longues?\s*et\s*pointues/i.test(blob)) nh.push("(long pointed elf ears:1.6)", "(elf ears highly visible:1.5)");
+  if (/oreille[s]?\s*(d.?animaux|animales)|animal\s*ears|kemonomimi/i.test(blob)) nh.push("(animal ears on head:1.5)");
+  if (/queue[s]?\s*(de\s*)?(renard|chat|loup|renard)|fox\s*tail|cat\s*tail|wolf\s*tail|queues?\s*renard|queues?\s*duveteuses/i.test(blob)) nh.push("(fluffy animal tail visible:1.55)", "(fox tail:1.4)");
+  if (/\bcornes?\b|\bhorns?\b|petites\s*cornes/i.test(blob)) nh.push("(horns on head:1.55)", "demon horns");
+  if (/ailes?\s*(de\s*)?(chauve|d[eé]mon|bat)|bat\s*wings|demon\s*wings/i.test(blob)) nh.push("(bat demon wings:1.5)");
+  else if (/\bail(?:e|es)\b|\bwings?\b/i.test(blob) && /non-humain|fantasy|succube|ange|d[eé]mon|harpie|dragon/i.test(blob)) nh.push("(wings:1.45)");
+  if (/queue\s*pointue|embout\s*c[oe]ur|spaded\s*tail/i.test(blob)) nh.push("(spaded demon tail:1.5)");
+  if (/vampire|fangs|canines/i.test(blob)) nh.push("subtle vampire fangs");
+  if (/succube|demon\s*girl|d[eé]mone/i.test(blob)) nh.push("(succubus demon girl:1.45)", "supernatural features");
+  if (/[eé]cailles?|\bscales?\b/i.test(blob) && /non-humain|fantasy|dragon|naga|lamia/i.test(blob)) nh.push("(scales on skin:1.4)");
+  if (/peau\s*gris-bleue|grey-blue\s*skin|blue-grey\s*skin/i.test(blob)) nh.push("(grey-blue skin:1.45)");
+  if (/yeux\s*violets\s*phosphorescents|phosphorescent/i.test(blob)) nh.push("(glowing purple eyes:1.4)");
   if (nh.length) {
     out.features = nh;
-    out.positive.push(...nh);
-    out.negative.push("plain human ears only, missing animal ears, no ears on head");
+    // Traits non-humains EN TÊTE du positif (priorité max)
+    out.positive = nh.concat(out.positive);
+    out.negative.push(
+      "plain human only, purely human, ordinary human ears only, missing animal ears, missing elf ears, missing horns, missing tail, missing wings, human ears only, no fantasy features"
+    );
   }
 
   // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
@@ -1112,17 +1120,27 @@ function buildLeaImagePrompt(extra = "") {
       : (placeDetail || "indoor apartment");
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
     const ageN = Math.max(18, Number(c.age) || 21);
-    const ageLock = "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5), age-appropriate face for " + ageN + ",";
-    // Cheveux + yeux OBLIGATOIRES en tête (sinon défaut châtain / yeux verts des modèles)
+    const isFantasy = /fan_|fantasy|non-humain|elfe|kitsune|succube|dragon|vampire|catgirl/i.test(
+      [c.id, c.title, (c.tags || []).join(" "), c.appearance].filter(Boolean).join(" ")
+    );
+    // Fantasy âgée → visage adulte jeune, pas vieillard
+    const ageLock = (isFantasy && ageN > 35)
+      ? "(ageless adult beauty mid-20s to early 30s:1.55), adult woman face,"
+      : "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5), age-appropriate face for " + ageN + ",";
+    // Traits non-humains d'abord (si présents), puis cheveux/yeux
+    const nhLock = (phys.features && phys.features.length)
+      ? phys.features.slice(0, 8).join(", ") + ","
+      : "";
     const hairEyeLock = (phys.positive && phys.positive.length)
-      ? phys.positive.slice(0, 6).join(", ") + ","
+      ? phys.positive.filter((p) => !nhLock || nhLock.indexOf(p) < 0).slice(0, 8).join(", ") + ","
       : "";
     const short = [
-      // Identité + âge + cheveux/yeux EN TÊTE (Horde tronque la fin)
+      // Identité + NH + âge + cheveux/yeux EN TÊTE
       "(1girl:1.55), (solo:1.5), single woman only,",
+      nhLock,
       ageLock,
       hairEyeLock,
-      faceBits.slice(0, 260) + ",",
+      faceBits.slice(0, 220) + ",",
       // Composition + pose variée
       "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
       "(completely different pose:1.55), (new camera angle:1.45), (unique body position:1.4), " + pos + ",",
@@ -1133,7 +1151,9 @@ function buildLeaImagePrompt(extra = "") {
       "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
       "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
       "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
-      ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,",
+      nhLock ? "NOT plain human only, NOT missing fantasy features, NOT ordinary human ears only," : "",
+      (isFantasy && ageN > 35) ? "NOT elderly, NOT wrinkles, NOT old woman face," :
+        (ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,"),
       hasUser ? ((ex.text || "").slice(0, 100) + ",") : "",
       anti,
     ].filter(Boolean).join(" ");
@@ -4005,7 +4025,35 @@ function renderProfile() {
         ${hero ? `<img class="profile-hero" src="${hero}" alt="${c.name}" data-full="${hero}" onerror="this.style.opacity=.3" />` : `<div class="profile-hero prof-hero-empty"></div>`}
         <div class="prof-hero-fade"></div>
         <div class="prof-hero-meta">
-          <h1 class="prof-name">${(() => { const role = (c.title||""); const td = tagDisplay(/belle-s/i.test(role)?"belle-sœur":/belle-m/i.test(role)?"belle-mère":/amie/i.test(role)?"amie":/duo|jumelle/i.test(role)?"duo":"nsfw"); return td.e + " " + c.name; })()}</h1>
+          <h1 class="prof-name">${(() => {
+            const role = String(c.title || "");
+            const key =
+              /fille\s*d['']?ami/i.test(role) ? "fille d'ami" :
+              /maman\s*d['']?ami/i.test(role) ? "maman d'ami" :
+              /belle-?s/i.test(role) ? "belle-sœur" :
+              /belle-?m/i.test(role) ? "belle-mère" :
+              /belle-?f/i.test(role) ? "belle-fille" :
+              /babysitter/i.test(role) ? "babysitter" :
+              /secr[eé]taire/i.test(role) ? "secretaire" :
+              /coll[eè]gue/i.test(role) ? "collegue" :
+              /voisin/i.test(role) ? "voisine" :
+              /tante/i.test(role) ? "tante" :
+              /duo|jumelle|sœurs|soeurs/i.test(role) ? "duo" :
+              /elfe/i.test(role) ? "elfe" :
+              /kitsune|renard/i.test(role) ? "kitsune" :
+              /succube/i.test(role) ? "succube" :
+              /dragon/i.test(role) ? "dragon" :
+              /vampire/i.test(role) ? "vampire" :
+              /catgirl|chat/i.test(role) ? "catgirl" :
+              /sir[eè]ne/i.test(role) ? "sirene" :
+              /fantasy|non-humain/i.test(role) ? "fantasy" :
+              /amie/i.test(role) ? "amie" :
+              /jeu|action|v[eé]rit[eé]/i.test(role) ? "jeu" :
+              (c.tags && c.tags[0]) || "nsfw";
+            const td = tagDisplay(key);
+            const emoji = String((td && td.label) || "✨").trim().split(/\s+/)[0] || "✨";
+            return emoji + " " + (c.name || "");
+          })()}</h1>
           <div class="prof-tags">${tagsHtml}</div>
           <p class="prof-blurb">${blurb}${(c.scenario||"").length > 120 ? "…" : ""}</p>
           <button type="button" class="cta prof-chat-btn" id="prof-chat">💬 Chat</button>
