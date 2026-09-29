@@ -4290,9 +4290,77 @@ function duoCompositionBlock(c) {
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
-  // Si looks_en a déjà LEFT/RIGHT détaillés (avec âges), l'utiliser tel quel (tronqué)
+  // looks_en avec LEFT/RIGHT + âges → reformater en prompt COURT ultra contrasté (Horde)
   if (/LEFT\s+woman/i.test(looks) && /RIGHT\s+woman/i.test(looks) && /years old/i.test(looks)) {
-    return looks.slice(0, 900) + ", two separate women different ages hair and bust,";
+    const nm = names.split(/\s*&\s*|\s+et\s+/i).map((s) => s.trim()).filter(Boolean);
+    const n1 = nm[0] || "Woman A";
+    const n2 = nm[1] || "Woman B";
+    function grab(side, fieldRe, fallback) {
+      const sideRe = side === "L"
+        ? /LEFT\s+woman[^:]*:\s*([\s\S]+?)(?=RIGHT\s+woman|$)/i
+        : /RIGHT\s+woman[^:]*:\s*([\s\S]+?)(?=OBVIOUS|NOT same|two separate|$)/i;
+      const m = looks.match(sideRe);
+      const chunk = m ? m[1] : "";
+      const fm = chunk.match(fieldRe);
+      return fm ? fm[1].trim() : fallback;
+    }
+    const age1 = grab("L", /\((\d+)\s*years?\s*old/i, "") || grab("L", /looks exactly (\d+)/i, "30");
+    const age2 = grab("R", /\((\d+)\s*years?\s*old/i, "") || grab("R", /looks exactly (\d+)/i, "22");
+    const hair1 = grab("L", /\(([^)]*hair[^)]*)\s*:\s*[\d.]+\)/i, "dark hair") || "dark hair";
+    const hair2 = grab("R", /\(([^)]*hair[^)]*)\s*:\s*[\d.]+\)/i, "different hair") || "different hair";
+    const eyes1 = grab("L", /\(([^)]*eyes[^)]*)\s*:\s*[\d.]+\)/i, "");
+    const eyes2 = grab("R", /\(([^)]*eyes[^)]*)\s*:\s*[\d.]+\)/i, "");
+    // cups from body or looks
+    const body = String(c.body || looks).toLowerCase();
+    function cupSide(side) {
+      // body format: "duo: X (42yo) + Y (19yo)"
+      const parts = String(c.body || "").split("+");
+      const chunk = (side === "L" ? parts[0] : parts[1] || parts[0] || "").toLowerCase();
+      if (/j-cup|bonnet\s*j/.test(chunk)) return "massive J-cup breasts";
+      if (/i-cup|bonnet\s*i/.test(chunk)) return "enormous I-cup breasts";
+      if (/h-cup|bonnet\s*h/.test(chunk)) return "huge H-cup breasts";
+      if (/e-cup|bonnet\s*e|very large heavy e/.test(chunk)) return "very large heavy E-cup breasts";
+      if (/d-cup|bonnet\s*d|large full d/.test(chunk)) return "large full D-cup breasts";
+      if (/c-cup|bonnet\s*c|medium c/.test(chunk)) return "medium C-cup breasts";
+      if (/b-cup|bonnet\s*b|small (natural )?b/.test(chunk)) return "small B-cup breasts modest chest";
+      if (/a-cup|flat|nearly flat|very small/.test(chunk)) return "very small flat A-cup breasts almost flat chest";
+      // from looks chunk
+      const sideRe = side === "L"
+        ? /LEFT\s+woman[^:]*:\s*([\s\S]+?)(?=RIGHT\s+woman|$)/i
+        : /RIGHT\s+woman[^:]*:\s*([\s\S]+?)(?=OBVIOUS|NOT same|$)/i;
+      const m = looks.match(sideRe);
+      const ch = (m ? m[1] : "").toLowerCase();
+      if (/j-cup/.test(ch)) return "massive J-cup breasts";
+      if (/i-cup/.test(ch)) return "enormous I-cup breasts";
+      if (/h-cup/.test(ch)) return "huge H-cup breasts";
+      if (/e-cup|very large heavy/.test(ch)) return "very large heavy E-cup breasts";
+      if (/d-cup|large full/.test(ch)) return "large full D-cup breasts";
+      if (/c-cup|medium/.test(ch)) return "medium C-cup breasts";
+      if (/b-cup|small natural|modest/.test(ch)) return "small B-cup breasts modest chest";
+      if (/a-cup|flat|almost flat|very small/.test(ch)) return "very small flat A-cup breasts almost flat chest";
+      return side === "L" ? "full breasts" : "different breast size";
+    }
+    const cup1 = cupSide("L");
+    const cup2 = cupSide("R");
+    const a1 = parseInt(age1, 10) || 30;
+    const a2 = parseInt(age2, 10) || 22;
+    const ageGap = Math.abs(a1 - a2) >= 10;
+    const gapLine = ageGap
+      ? ("CLEAR GENERATIONAL AGE GAP: LEFT is " + a1 + " years old mature woman, RIGHT is " + a2 + " years old young adult daughter/younger, NOT the same age,")
+      : ("LEFT " + a1 + "yo and RIGHT " + a2 + "yo, clearly different faces,");
+    const youngFace = a2 <= 22
+      ? "RIGHT has youthful young adult face smooth skin no wrinkles looks " + a2 + ","
+      : "RIGHT looks exactly " + a2 + ",";
+    const matureFace = a1 >= 35
+      ? "LEFT has mature face subtle age lines looks " + a1 + " not 25,"
+      : "LEFT looks exactly " + a1 + ",";
+    return [
+      gapLine,
+      "LEFT woman " + n1 + ": (" + a1 + " years old:1.6), " + matureFace + " (" + hair1 + ":1.5), " + (eyes1 ? "(" + eyes1 + ":1.25), " : "") + "(" + cup1 + ":1.6),",
+      "RIGHT woman " + n2 + ": (" + a2 + " years old:1.6), " + youngFace + " (" + hair2 + ":1.5), " + (eyes2 ? "(" + eyes2 + ":1.25), " : "") + "(" + cup2 + ":1.6),",
+      "OBVIOUS contrast different ages different hair different bust sizes, two separate women,",
+      "NOT same age both, NOT both " + a1 + ", NOT both mature, NOT both young same look, NOT same breast size, NOT matching cups, NOT clones,",
+    ].join(" ");
   }
 
   const body = String(c.body || "").replace(/\s+/g, " ").trim();
@@ -4706,17 +4774,15 @@ function fixedAppearanceBlock(c) {
   const phys = duo ? { positive: [], negative: [], features: [] } : physicalLocksFromText(c);
   const duoBlock = duoCompositionBlock(c);
   if (duo) {
+    // NE PAS forcer age unique "year old both" — chaque femme a son âge dans duoBlock
     return [
       duoBlock,
       "=== FIXED DUO APPEARANCE ===",
-      "Pair: " + name + " — TWO distinct adult women,",
-      looks + ",",
-      morphWeights(c) + ",",
+      "Pair: " + name + " — TWO distinct adult women with SEPARATE ages,",
+      "Each woman keeps her OWN age, hair color, eye color, and breast size as in LEFT/RIGHT above,",
       body ? ("morphology: " + body + ",") : "",
       eth ? ("ethnicity: " + eth + ",") : "",
-      "(" + age + " year old both:1.4),",
-      "Each woman keeps her OWN hair color, eye color, and breast size as described above,",
-      "NOT identical faces with same hair, NOT same bust on both,",
+      "NOT same age both, NOT identical faces with same hair, NOT same bust on both,",
       "=== END FIXED DUO — only pose, outfit, environment may change ===",
     ].filter(Boolean).join(" ");
   }
@@ -5198,7 +5264,7 @@ async function generatePhotoHordeFallback(prompt, c) {
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {
-        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both auburn hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
+        duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
@@ -5661,16 +5727,17 @@ async function generatePhoto() {
         }
         localStorage.setItem("lea.lastDuoPose." + (c.id || "x"), poseBit);
       } catch (_) {}
+      // Contraste d'abord (âge / cheveux / poitrine) — Horde dilue sinon
       prompt = [
-        "photorealistic DSLR photo of EXACTLY TWO different adult women,",
+        "photorealistic DSLR photo of EXACTLY TWO different adult women side by side,",
+        duoCore || "LEFT woman and RIGHT woman, different ages, different hair, different breast sizes,",
         poseBit + ",",
         "both fully visible head to mid-thigh, wide shot NOT close-up faces,",
-        duoCore || "LEFT woman and RIGHT woman, different hair colors, different breast sizes,",
-        "LEFT and RIGHT must look OBVIOUSLY different: different hair color, different breast size,",
         "wearing " + outfitBit + ",",
         "in " + placeBit + ",",
         "two separate bodies, two faces, natural skin, sharp focus,",
-        "NOT same hair color both, NOT both brunette identical, NOT both blonde, NOT same breast size,",
+        "NOT same age both women, NOT both middle-aged, NOT both 40, NOT both young identical,",
+        "NOT same hair color both, NOT both brunette identical, NOT both blonde, NOT same breast size, NOT matching cup sizes,",
         "NOT mirror symmetry, NOT identical twins same look, NOT fused bodies, NOT clones, NOT solo 1girl,",
         "NOT face crop only, NOT portrait only,",
         extra ? (String(extra).slice(0, 80) + ",") : "",
@@ -5907,7 +5974,7 @@ async function generatePhoto() {
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {
-        duoNeg = ", same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both auburn hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
+        duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
