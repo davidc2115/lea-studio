@@ -2206,31 +2206,55 @@
     }
 
 
-    // ——— Rate limit Horde (évite "2 per 1 second" + timeout IP) ———
+    // ——— Rate limit Horde (persistant + anti spam IP) ———
     let _hordeLastSubmit = 0;
     let _hordeLastStatus = 0;
     let _hordeIpBlockedUntil = 0;
-    const HORDE_MIN_SUBMIT_MS = 12000; // min 12s entre 2 soumissions
-    const HORDE_MIN_STATUS_MS = 4500;  // min 4.5s entre checks
+    try {
+      const saved = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+      if (saved > Date.now()) _hordeIpBlockedUntil = saved;
+    } catch (_) {}
+    const HORDE_MIN_SUBMIT_MS = 18000; // 18s entre 2 soumissions (anon)
+    const HORDE_MIN_STATUS_MS = 6000;  // 6s entre checks
 
     function parseHordeWaitMs(msg) {
       const s = String(msg || "");
       let m = s.match(/timeout for (\d+)\s*more seconds/i);
-      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      if (m) return (parseInt(m[1], 10) + 5) * 1000;
       m = s.match(/(\d+)\s*more seconds/i);
-      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      if (m) return (parseInt(m[1], 10) + 5) * 1000;
       m = s.match(/try again in (\d+)/i);
-      if (m) return (parseInt(m[1], 10) + 1) * 1000;
-      if (/2 per 1 second|rate limit|too many requests|429/i.test(s)) return 15000;
-      if (/abuse prevention|put into timeout/i.test(s)) return 120000;
+      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      m = s.match(/attends? (\d+)\s*s/i);
+      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      if (/2 per 1 second|rate limit|too many requests|429/i.test(s)) return 20000;
+      if (/abuse prevention|put into timeout/i.test(s)) return 900000; // 15 min défaut
       return 0;
+    }
+
+    function formatWaitFr(sec) {
+      sec = Math.max(0, Math.ceil(sec));
+      if (sec >= 60) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return m + " min" + (s ? " " + s + " s" : "");
+      }
+      return sec + " s";
     }
 
     async function hordeWaitGate(kind) {
       const now = Date.now();
+      try {
+        const saved = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+        if (saved > _hordeIpBlockedUntil) _hordeIpBlockedUntil = saved;
+      } catch (_) {}
       if (_hordeIpBlockedUntil > now) {
         const sec = Math.ceil((_hordeIpBlockedUntil - now) / 1000);
-        throw new Error("Horde : IP en pause anti-abus encore " + sec + " s. Attends ou utilise une clé aihorde.net dans Réglages.");
+        throw new Error(
+          "Horde : IP bloquée encore " + formatWaitFr(sec) +
+          ". N'envoie PLUS de génération pendant ce délai (ça prolonge le ban). " +
+          "Astuce : crée un compte gratuit sur aihorde.net et colle ta clé dans Clés → moins de blocages."
+        );
       }
       const last = kind === "status" ? _hordeLastStatus : _hordeLastSubmit;
       const min = kind === "status" ? HORDE_MIN_STATUS_MS : HORDE_MIN_SUBMIT_MS;
@@ -2246,6 +2270,9 @@
       const ms = parseHordeWaitMs(msg);
       if (ms > 0) {
         _hordeIpBlockedUntil = Math.max(_hordeIpBlockedUntil, Date.now() + ms);
+        try {
+          localStorage.setItem("lea.hordeBlockedUntil", String(_hordeIpBlockedUntil));
+        } catch (_) {}
       }
     }
 
@@ -2449,8 +2476,9 @@
             if (/timeout for|abuse prevention|2 per 1 second|rate limit|too many|429/i.test(String(last))) {
               const sec = Math.ceil(parseHordeWaitMs(last) / 1000) || 60;
               throw new Error(
-                "Horde limite de débit : attends " + sec + " s puis réessaie. " +
-                "(Astuce : clé gratuite sur aihorde.net → moins de blocages.) Détail : " + String(last).slice(0, 120)
+                "Horde : IP bloquée encore " + formatWaitFr(sec) +
+                ". Attends sans cliquer (sinon le ban continue). Clé gratuite : aihorde.net → champ Horde dans Clés. " +
+                String(last).slice(0, 80)
               );
             }
           } catch (e) {

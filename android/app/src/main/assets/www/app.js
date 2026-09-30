@@ -4639,6 +4639,11 @@ function renderProfile() {
   } catch (_) {}
   $("genimg").onclick = () => {
     try {
+      const left = hordeBlockRemaining();
+      if (left > 2000) {
+        setGenStatus("Horde bloqué encore " + formatHordeWait(left) + " — patientes. Ne reclique pas.");
+        return;
+      }
       const r = generatePhoto();
       if (r && typeof r.catch === "function") {
         r.catch((e) => {
@@ -4709,8 +4714,39 @@ function renderProfile() {
   };
 }
 
+function hordeBlockRemaining() {
+  try {
+    const until = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+    return Math.max(0, until - Date.now());
+  } catch (_) { return 0; }
+}
+function formatHordeWait(ms) {
+  const sec = Math.ceil(ms / 1000);
+  if (sec >= 60) return Math.floor(sec / 60) + " min " + (sec % 60) + " s";
+  return sec + " s";
+}
 function setGenStatus(t) {
-  if ($("imgerr")) $("imgerr").textContent = t;
+  const msg = String(t || "");
+  // Mémoriser un ban Horde pour bloquer les clics suivants
+  try {
+    let m = msg.match(/timeout for (\d+)\s*more seconds/i)
+      || msg.match(/(\d+)\s*more seconds/i)
+      || msg.match(/encore (\d+)\s*s/i)
+      || msg.match(/attends? (\d+)\s*s/i);
+    if (m) {
+      const sec = parseInt(m[1], 10);
+      if (sec > 5) {
+        const until = Date.now() + (sec + 5) * 1000;
+        const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+        if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
+      }
+    } else if (/abuse prevention|put into timeout/i.test(msg)) {
+      const until = Date.now() + 900000;
+      const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+      if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
+    }
+  } catch (_) {}
+  if ($("imgerr")) $("imgerr").textContent = msg;
 }
 
 function bodyNegatives(c) {
@@ -6352,6 +6388,16 @@ function toastScene(msg) {
 
 
 async function generatePhoto() {
+  // Ne pas spammer Horde si IP déjà bloquée
+  try {
+    const left = hordeBlockRemaining();
+    if (left > 2000) {
+      setGenStatus("Horde bloqué encore " + formatHordeWait(left) + " — attends sans recliquer. Clé aihorde.net = moins de bans.");
+      window._leaGenBusy = false;
+      return;
+    }
+  } catch (_) {}
+
   if (window._leaGenBusy) {
     setGenStatus("Déjà une génération en cours…");
     return;
@@ -8366,6 +8412,10 @@ function renderSettings() {
     <label>Ta biographie (immersion : âge, apparence, maison, etc.)</label>
     <textarea class="field" id="pbio" rows="4" placeholder="ex: Homme, 38 ans, brun, cheveux courts, homme d'affaires, grande maison avec piscine…"></textarea>
     <p style="color:var(--muted);font-size:12px;margin:4px 0 0">Les personnages t'appellent par ce prénom et tiennent compte de cette bio.</p>
+    <label>Clé AI Horde (optionnel, gratuit — aihorde.net)</label>
+    <input id="hordekey" placeholder="Colle ta clé API Horde ici" autocomplete="off" />
+    <p style="color:var(--muted);font-size:12px;margin:4px 0 8px">Compte gratuit = moins de timeouts IP. Sans clé = anonyme (limites strictes).</p>
+
     <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button>
     <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;
@@ -8383,6 +8433,7 @@ function renderSettings() {
     if ($("gemimgmodel")) $("gemimgmodel").value = s.settings.geminiImageModel || "auto";
     $("pname").value = s.settings.personaName || "";
     $("pbio").value = s.settings.personaBio || "";
+    if ($("hordekey")) $("hordekey").value = s.settings.hordeKey || "";
     $("gemini").value = s.settings.geminiKeys || "";
     if ($("grok")) $("grok").value = s.settings.grokKeys || "";
     if ($("groq")) $("groq").value = s.settings.groqKeys || "";
@@ -8406,6 +8457,7 @@ function renderSettings() {
       const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
       cur.personaName = $("pname").value;
       cur.personaBio = $("pbio").value;
+      if ($("hordekey")) cur.hordeKey = $("hordekey").value.trim();
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     } catch (_) {}
     const data = await api("/api/settings", {
@@ -8414,6 +8466,7 @@ function renderSettings() {
         provider: $("chatprovider") ? $("chatprovider").value : "gemini",
         personaName: $("pname").value,
         personaBio: $("pbio").value,
+        hordeKey: ($("hordekey") && $("hordekey").value || "").trim(),
         geminiKeys: $("gemini").value,
         grokKeys: $("grok") ? $("grok").value : "",
         groqKeys: $("groq") ? $("groq").value : "",
