@@ -8361,10 +8361,11 @@ function renderSettings() {
       <option value="imagen-3.0-generate-002">Imagen 3</option>
     </select>
     <p style="color:var(--muted);font-size:13px">OpenAI n'est plus utilisé pour les images.</p>
-    <label>Ton nom / persona</label>
-    <input id="pname" />
-    <label>Bio persona</label>
-    <textarea class="field" id="pbio" rows="3"></textarea>
+    <label>Ton prénom (utilisé dans les dialogues)</label>
+    <input id="pname" placeholder="ex: David" />
+    <label>Ta biographie (immersion : âge, apparence, maison, etc.)</label>
+    <textarea class="field" id="pbio" rows="4" placeholder="ex: Homme, 38 ans, brun, cheveux courts, homme d'affaires, grande maison avec piscine…"></textarea>
+    <p style="color:var(--muted);font-size:12px;margin:4px 0 0">Les personnages t'appellent par ce prénom et tiennent compte de cette bio.</p>
     <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button>
     <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;

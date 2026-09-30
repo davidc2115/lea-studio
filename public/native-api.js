@@ -1290,13 +1290,22 @@
     const relevant = searchVault(chat, q || (chat.messages || []).slice(-5).map((m) => m.content || "").join(" "), null, 14);
     // Rôle + scénario rappelés À CHAQUE message (évite inversion après N tours)
     const p = persona || {};
+    let uName = "toi";
+    let uBio = "";
+    try {
+      const stU = settings();
+      uName = String(stU.personaName || "toi").trim() || "toi";
+      uBio = String(stU.personaBio || "").trim().slice(0, 400);
+    } catch (_) {}
     const roleFacts = [
       "=== RÔLE & SCÉNARIO (JAMAIS OUBLIER — même après 50 messages) ===",
       "Personnage: " + (p.name || "?") + " | Titre: " + (p.title || "?") + " | Âge: " + (p.age || "?"),
+      "JOUEUR: " + uName + (uBio ? (" | Bio: " + uBio) : ""),
       "SCÉNARIO FIXE: " + String(p.scenario || "").replace(/\s+/g, " ").trim().slice(0, 700),
       "RÈGLE D'OR: le scénario dit QUI a le problème et POURQUOI elle est là. Si ELLE s'est disputée avec son mari/conjoint → c'est SA dispute, pas celle de l'utilisateur. INTERDIT d'inverser (ex: « tu t'es disputé avec ton frère » alors que c'est ELLE qui a quitté son mari = ton frère).",
-      "L'utilisateur = hôte / maître de maison dans la plupart des scènes. Le personnage = visiteuse ou celle qui a le motif du scénario.",
+      "L'utilisateur (" + uName + ") = hôte / maître de maison dans la plupart des scènes. Le personnage = visiteuse ou celle qui a le motif du scénario.",
       "RAPPEL PERMANENT: ne demande JAMAIS à l'utilisateur d'expliquer SA dispute / SON problème si le scénario dit que c'est TOI (le personnage) qui as le motif. Parle de TON vécu.",
+      "POV: JE=personnage, TU=" + uName + ". Ne vole jamais les gestes du joueur (s'il te touche, tu réagis, tu ne rejoues pas son action en « je »).",
       "Si le scénario contient [RÔLE VERROUILLÉ], obéis-y à chaque message sans exception.",
     ].join("\n");
     const lines = [
@@ -1472,7 +1481,7 @@
       const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre chose|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant|on arr[eê]te|assez|pause)/i.test(txt);
       const holdHint = /(restons comme|reste comme|comme [cç]a|le film|souffle|reprendre (notre |nos )?esprit|juste rester|dans tes bras|c[aâ]lin|on reste|ne (me )?l[aâ]che pas|on se pose|profiter|chaque seconde|le temps du film|film peut attendre|film peux attendre|rien de mieux|blotti|enlac[ée]s?|contre toi|à tes c[oô]t[ée]s|rien d'autre|continuons comme)/i.test(txt)
         && !/(baisse|enl[eè]ve|suce|p[eé]n[eè]tre|doigte|plus fort|plus vite|baise|chatte|bite)/i.test(txt);
-      const lastNsfw = /(sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|lingerie|caresse-moi|touche-moi|hardcore|bite|queue|chatte|mouill[ée]|nude|orgasme|suce|fellation|\bpipe\b|branle|handjob|doigte|d[eé]shabille|enl[eè]ve (ton|ta|le|la)|p[eé]n[eè]tr|missionnaire|levrette|cowgirl|sperme|jouis|enfonce|doigts? dans)/i.test(txt);
+      const lastNsfw = /(sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|fesses?|cuisse|lingerie|caresse|touche-moi|touche |hardcore|bite|queue|chatte|mouill[ée]|nude|orgasme|suce|fellation|\bpipe\b|branle|handjob|doigte|d[eé]shabille|enl[eè]ve (ton|ta|le|la)|p[eé]n[eè]tr|missionnaire|levrette|cowgirl|sperme|jouis|enfonce|doigts? dans|[eé]rection|durciss|bien mont[ée]|je te (prends|baise|doigte)|ma main (sur|entre))/i.test(txt);
       const recentNsfw = /(sexe|baiser|baise|chatte|bite|queue|orgasme|suce|fellation|branle|doigte|p[eé]n[eè]tr|nude|\bnue\b|sperme|levrette|missionnaire)/i.test(recent);
       if (!chat.relationship) chat.relationship = { closeness: 1, trust: 1, heat: 0 };
       let mode;
@@ -1645,6 +1654,8 @@
         "=== RÈGLES PARTAGÉES (Gemini + Groq identiques) ===",
         "TEMPÉRAMENT = loi absolue pour (pensées), *actions* et paroles.",
         "SFW↔NSFW fluide: suis le joueur (monte / reste / redescend) sans moraliser ni coller en NSFW.",
+        "POV STRICT: JE = personnage femme. TU = joueur. Si le joueur te touche, tu RÉAGIS (frisson, gémissement, *je presse mon corps contre sa main*). INTERDIT de refaire son geste en « je » (*je caresse sa cuisse* alors que c'est lui).",
+        "INTERDIT « mon érection / ma bite » : le sexe masculin est celui du joueur (sa bite, son désir contre toi).",
         "INITIATIVES: directe/tactile peut agir seule (main, ouverture vêtement, geste osé). Timide hésite et suit. Flirt tease. Autoritaire dirige.",
         "En NSFW explicite OK (vocabulaire cru si le joueur l'ouvre). Fiction 18+ consentante.",
         "Créativité: micro-gestes et détails sensoriels nouveaux. Pas de refrains.",
@@ -1652,12 +1663,42 @@
         "=== FIN RÈGLES PARTAGÉES ===",
       ].join("\n");
 
+      // Identité joueur (bio + nom) pour immersion
+      let userName = "toi";
+      let userBio = "";
+      try {
+        const stU = settings();
+        userName = String(stU.personaName || "toi").trim() || "toi";
+        userBio = String(stU.personaBio || "").trim();
+      } catch (_) {}
+
       let system = [
         FORMAT_REMINDER,
         "LANGUE OBLIGATOIRE : réponds TOUJOURS en français (paroles, actions, pensées). INTERDIT d'écrire en anglais sauf noms propres.",
         `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
         `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
+        [
+          "=== IDENTITÉ DU JOUEUR (UTILISE-LA) ===",
+          "Le joueur s'appelle : " + userName + ".",
+          userBio
+            ? ("Biographie du joueur (faits à utiliser pour immersion : apparence, âge, statut, maison, etc.) : " + userBio.slice(0, 500))
+            : "Biographie joueur non renseignée — tutoiement neutre.",
+          "Dans tes paroles, tu peux l'appeler par son prénom (« " + userName + " ») de temps en temps, pas à chaque phrase.",
+          "Si la bio mentionne une particularité physique (ex. bien monté, cheveux courts, homme d'affaires), tu peux y faire allusion naturellement en NSFW ou en observation, sans réciter la bio.",
+          "=== FIN IDENTITÉ JOUEUR ===",
+        ].join("\n"),
+        [
+          "=== POINT DE VUE — ANTI-INVERSION (CRITIQUE) ===",
+          "Tu es " + (PERSONA.name || "le personnage") + ". L'utilisateur est " + userName + ".",
+          "JE / MON / MA / MES = TOI (le personnage). TU / TON / TA / TES = le joueur (" + userName + ").",
+          "Si le joueur écrit « je caresse ta cuisse / tes seins », c'est LUI qui te touche. Tu RÉAGIS : *Je frissonne quand sa main glisse sur ma cuisse*, PAS *Je glisse ma main sur sa cuisse*.",
+          "INTERDIT de reprendre l'action du joueur à la 1ère personne comme si c'était toi qui la faisais.",
+          "INTERDIT de parler de « mon érection » / « ma bite » : tu es une femme. La bite / l'érection appartient au joueur (son sexe, sa queue, son désir contre toi).",
+          "Correct : *Je sens son sexe dur contre mes fesses* · Incorrect : *Je sens mon érection* ou *je glisse ma main sur sa cuisse* quand c'est lui qui t'a touchée.",
+          "Dans *actions*, décris UNIQUEMENT ce que TU fais ou ce que tu ressens sur TON corps. Pour les gestes de l'autre : « sa main », « il », « " + userName + " ».",
+          "=== FIN POINT DE VUE ===",
+        ].join("\n"),
         (function () {
           const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "");
           const sheComes = /d[eé]barque|passe chez|frappe|sonne|visite|dispute|rupture|heures supp|oubli[eé]|fuite|babysitter|après le boulot|afterwork|d[eé]placement|chez toi|chez vous/i.test(sc);
