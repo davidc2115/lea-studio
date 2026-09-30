@@ -325,15 +325,9 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    out.positive.push(
-      "(plus-size chubby body:1.6)",
-      "(soft belly:1.55)",
-      "(full thick thighs:1.45)",
-      "(wide soft hips:1.4)",
-      "plump soft figure",
-      "BBW"
-    );
-    out.negative.push("slim body, skinny, model thin, flat stomach athletic, thin waist only, hourglass skinny, underweight");
+    // Prompt simple (comme avant) — poids forts / BBW cassaient le rendu
+    out.positive.push("(curvy plus-size soft body:1.35)", "full hips", "thick thighs", "soft natural midsection");
+    out.negative.push("skinny, model thin, underweight, flat athletic stomach only");
   } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
     out.positive.push("curvy feminine figure, soft curves");
   }
@@ -4453,9 +4447,9 @@ function bodyNegatives(c) {
     neg += ", extremely wide hips, exaggerated pear shape";
   }
   if (chubby) {
-    neg += ", skinny, model thin, flat stomach athletic, underweight, slim hourglass only, thin waist model, fashion model body, petite slim frame, slim legs only";
+    neg += ", skinny, model thin, underweight, fashion model thin body";
   } else if (thin) {
-    neg += ", plus-size, obese, heavy belly, chubby, BBW, soft belly";
+    neg += ", plus-size, obese, heavy belly, chubby, BBW";
   }
   } // fin mono-poitrine (skip si duo)
 
@@ -4892,10 +4886,10 @@ function formatPhysicalFR(c) {
     if (/ronde|plus-size|chubby|pulpeuse|bbw|soft belly/.test(blob)) {
       stored = stored.replace(
         /Corps et silhouette\s*:[^\n]*/i,
-        "Corps et silhouette : silhouette ronde / plus-size, ventre doux, cuisses et hanches généreuses, formes pulpeuses (pas mince)."
+        "Corps et silhouette : silhouette ronde / pulpeuse, formes douces, hanches et cuisses généreuses, ventre souple naturel."
       );
-      if (!/silhouette ronde|plus-size|chubby|pulpeuse/i.test(stored)) {
-        stored = stored.replace(/(Poitrine\s*:)/i, "Corps et silhouette : silhouette ronde / plus-size, ventre doux, formes pulpeuses.\n$1");
+      if (!/silhouette ronde|pulpeuse|plus-size|chubby/i.test(stored)) {
+        stored = stored.replace(/(Poitrine\s*:)/i, "Corps et silhouette : silhouette ronde / pulpeuse, formes douces, hanches généreuses.\n$1");
       }
     }
   } catch (_) {}
