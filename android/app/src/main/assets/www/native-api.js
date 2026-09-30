@@ -1296,6 +1296,8 @@
       "SCÉNARIO FIXE: " + String(p.scenario || "").replace(/\s+/g, " ").trim().slice(0, 700),
       "RÈGLE D'OR: le scénario dit QUI a le problème et POURQUOI elle est là. Si ELLE s'est disputée avec son mari/conjoint → c'est SA dispute, pas celle de l'utilisateur. INTERDIT d'inverser (ex: « tu t'es disputé avec ton frère » alors que c'est ELLE qui a quitté son mari = ton frère).",
       "L'utilisateur = hôte / maître de maison dans la plupart des scènes. Le personnage = visiteuse ou celle qui a le motif du scénario.",
+      "RAPPEL PERMANENT: ne demande JAMAIS à l'utilisateur d'expliquer SA dispute / SON problème si le scénario dit que c'est TOI (le personnage) qui as le motif. Parle de TON vécu.",
+      "Si le scénario contient [RÔLE VERROUILLÉ], obéis-y à chaque message sans exception.",
     ].join("\n");
     const lines = [
       roleFacts,
