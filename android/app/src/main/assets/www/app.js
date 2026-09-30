@@ -316,7 +316,19 @@ function physicalLocksFromText(c) {
   }
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
-  if (/ronde|chubby|plus.?size|pulpeuse/i.test(blob)) out.positive.push("curvy plus-size soft body");
+  if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
+    out.positive.push(
+      "(plus-size chubby body:1.6)",
+      "(soft belly:1.55)",
+      "(full thick thighs:1.45)",
+      "(wide soft hips:1.4)",
+      "plump soft figure",
+      "BBW"
+    );
+    out.negative.push("slim body, skinny, model thin, flat stomach athletic, thin waist only, hourglass skinny, underweight");
+  } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
+    out.positive.push("curvy feminine figure, soft curves");
+  }
   if (/athl[eé]tique|athletic|toned/i.test(blob)) out.positive.push("athletic toned body");
 
   return out;
@@ -4410,9 +4422,10 @@ function bodyNegatives(c) {
     || /^(bruna|camila|keisha|fatou)$/.test(id);
   // Fine / athlétique
   const thin = /mince|slim|thin|athlétique|athletic|fine\b|élancée/i.test(blob);
-  // Ronde / plus-size
-  const chubby = /chubby|plus-size|ronde|pulpeuse|soft belly|gros ventre/i.test(blob)
-    || /^(amelie|olga|viola)$/.test(id);
+  // Ronde / plus-size (tags + body + ids connus)
+  const chubby = /chubby|plus-size|ronde|pulpeuse|soft belly|gros ventre|bbw|plump/i.test(blob)
+    || /^(amelie|olga|viola|myriam|sp_plus1|sp_plus2|amelie_bs)$/.test(id)
+    || (Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))));
 
   if (smallChest) {
     neg += ", large breasts, huge breasts, heavy breasts, massive breasts, busty, voluptuous, deep cleavage, 95D, 100E, F-cup, DD-cup, curvy hourglass bust, enhanced breasts, implants";
@@ -4423,13 +4436,13 @@ function bodyNegatives(c) {
   if (bigButt) {
     neg += ", flat butt, skinny hips, boyish hips, no curves, thin flat backside";
   }
-  if (!bigButt && thin && !hugeChest) {
+  if (!bigButt && thin && !hugeChest && !chubby) {
     neg += ", extremely wide hips, exaggerated pear shape";
   }
   if (chubby) {
-    neg += ", skinny, model thin, flat stomach athletic, underweight";
+    neg += ", skinny, model thin, flat stomach athletic, underweight, slim hourglass only, thin waist model, fashion model body, petite slim frame, slim legs only";
   } else if (thin) {
-    neg += ", plus-size, obese, heavy belly";
+    neg += ", plus-size, obese, heavy belly, chubby, BBW, soft belly";
   }
   } // fin mono-poitrine (skip si duo)
 
@@ -4953,7 +4966,8 @@ Mains : Doigts longs, fins et soignés.`;
   if (/hourglass|sablier/.test(blob)) morph = "silhouette sablier, taille fine, hanches marquées";
   else if (/athletic/.test(blob)) morph = "corps athlétique tonique";
   else if (/slim|slender|mince/.test(blob)) morph = "silhouette mince et élancée";
-  else if (/curvy|voluptuous|plus-size|ronde/.test(blob)) morph = "formes voluptueuses / généreuses";
+  else if (/plus-size|ronde|chubby|pulpeuse|bbw|soft belly/.test(blob)) morph = "silhouette ronde / plus-size, formes pulpeuses";
+  else if (/curvy|voluptuous|voluptueuse/.test(blob)) morph = "formes voluptueuses / généreuses";
   const skin = /porcelain|porcelaine/.test(blob) ? "teint porcelaine"
     : /olive/.test(blob) ? "peau olive"
     : /caramel|tan|mate|dorée/.test(blob) ? "peau mate / caramel"
@@ -5035,7 +5049,8 @@ function enrichLooksDetail(c) {
   if (/hourglass|sablier/.test(blob)) morph = "marked hourglass figure, narrow waist, rounded hips";
   else if (/athletic|athlétique/.test(blob)) morph = "athletic toned figure";
   else if (/slim|mince|slender/.test(blob)) morph = "slim slender figure";
-  else if (/curvy|voluptuous|plus-size|chubby|ronde/.test(blob)) morph = "voluptuous curvy figure";
+  else if (/plus-size|ronde|chubby|pulpeuse|bbw|soft belly/.test(blob)) morph = "plus-size chubby plump figure, soft belly";
+  else if (/curvy|voluptuous/.test(blob)) morph = "voluptuous curvy figure";
   else if (/petite/.test(blob)) morph = "petite short stature";
   // Peau
   let skin = "fair skin";
