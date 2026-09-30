@@ -1240,64 +1240,86 @@ function buildLeaImagePrompt(extra = "") {
     : (pose + ", " + cameraAngle + ",");
   // ——— Prompt COURT : pose/tenue EN TÊTE (sinon img2img recopie la nude ref) ———
   if (!isDuo && !ex.overridesAct) {
-    const faceBits = [
-      looks,
-      (c.age ? (c.age + " year old") : "adult"),
-      phys.positive.slice(0, 4).join(", "),
-      body,
-    ].filter(Boolean).join(", ");
     const wear = (hasUser && ex.overridesOutfit && ex.outfitLine)
       ? ex.outfitLine
       : (randomOutfitPick || outfitDetail || "stylish casual outfit");
     const pos = (hasUser && (ex.poseLine || ex.overridesPose))
       ? (ex.poseLine || "follow user pose")
       : (pose + ", " + (cameraAngle || "eye-level medium shot"));
-    const loc = (hasUser && ex.overridesPlace && ex.placeLine)
+    // Lieu neutre si fantasy (évite mer/plage qui pousse vers sirène)
+    let loc = (hasUser && ex.overridesPlace && ex.placeLine)
       ? ex.placeLine
       : (placeDetail || "indoor apartment");
     const clothed = !/\bnude\b|naked|topless|fully nude/i.test(wear);
     const ageN = Math.max(18, Number(c.age) || 21);
-    const isFantasy = /fan_|fantasy|non-humain|elfe|kitsune|succube|dragon|vampire|catgirl/i.test(
-      [c.id, c.title, (c.tags || []).join(" "), c.appearance].filter(Boolean).join(" ")
-    );
-    // Fantasy âgée → visage adulte jeune, pas vieillard
+    const fantBlob = [c.id, c.title, (c.tags || []).join(" "), c.appearance, looks].filter(Boolean).join(" ");
+    const isFantasy = /fan_|fantasy|non-humain|elfe|kitsune|succube|dragon|vampire|catgirl|ange|angel|sir[eè]ne|d[eé]mon/i.test(fantBlob);
+    if (isFantasy && !hasUser && /ocean|sea|beach|water|pool|plage|mer/i.test(loc)) {
+      loc = "soft indoor light, neutral background";
+    }
     const ageLock = (isFantasy && ageN > 35)
-      ? "(ageless adult beauty mid-20s to early 30s:1.55), adult woman face,"
-      : "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5), age-appropriate face for " + ageN + ",";
-    // Traits non-humains d'abord (si présents), puis cheveux/yeux
-    const nhLock = (phys.features && phys.features.length)
-      ? phys.features.slice(0, 8).join(", ") + ","
-      : "";
-    const hairEyeLock = (phys.positive && phys.positive.length)
-      ? phys.positive.filter((p) => !nhLock || nhLock.indexOf(p) < 0).slice(0, 8).join(", ") + ","
-      : "";
-    const short = [
-      // Identité + NH + âge + cheveux/yeux EN TÊTE
+      ? "(ageless adult beauty mid-20s:1.55), young adult woman face,"
+      : "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5),";
+    // looks_en COMPLET en tête (corps + fantasy + cheveux + yeux) — ne pas tronquer à 220
+    const idCore = [
       "(1girl:1.55), (solo:1.5), single woman only,",
-      nhLock,
       ageLock,
-      hairEyeLock,
-      faceBits.slice(0, 220) + ",",
-      // Composition + pose variée
-      "(full body shot from head to mid-thigh:1.5), (wide shot not portrait crop:1.4),",
-      "(completely different pose:1.55), (new camera angle:1.45), (unique body position:1.4), " + pos + ",",
-      clothed ? ("(wearing " + wear + ":1.5), clothes on, fabric visible, NOT nude, NOT topless,") : ("wearing " + wear + ","),
+      looks, // contains body type + fantasy + hair/eyes/breasts
+      (phys.positive || []).slice(0, 12).join(", "),
+      (phys.features || []).slice(0, 8).join(", "),
+    ].filter(Boolean).join(", ");
+    // Boost corps explicite
+    let bodyBoost = "";
+    if (/plus-size|chubby|ronde/i.test(looks + " " + (c.body || "") + " " + ((c.tags || []).join(" ")))) {
+      bodyBoost = "(plus-size chubby body:1.6), (soft belly visible:1.5), (wide full hips:1.5), (thick thighs:1.5), full soft arms, NOT skinny, NOT slim model, NOT hourglass thin waist only,";
+    } else if (/hourglass|voluptuous|voluptueuse|sablier/i.test(looks + " " + (c.body || ""))) {
+      bodyBoost = "(voluptuous hourglass:1.55), (narrow waist:1.4), (wide hips:1.4), NOT chubby belly, NOT overweight,";
+    }
+    // Boost fantasy exclusif
+    let fantBoost = "";
+    if (/angel|ange|ailes d.ange/i.test(fantBlob)) {
+      fantBoost = "(white feathered angel wings fully visible:1.7), (angel wings spread behind back:1.55), celestial, NOT mermaid, NOT fish scales, NOT ocean, NOT underwater, NOT tail,";
+    } else if (/dragon/i.test(fantBlob)) {
+      fantBoost = "(small dragon horns on forehead:1.65), (iridescent shoulder scales:1.5), dragon girl, NOT mermaid, NOT fox ears, NOT angel wings,";
+    } else if (/sir[eè]ne|mermaid/i.test(fantBlob)) {
+      fantBoost = "(mermaid tail:1.65), iridescent scales, NOT legs only, NOT angel wings, NOT dragon horns,";
+    } else if (/kitsune|fox ears|renard/i.test(fantBlob)) {
+      fantBoost = "(fox ears on head:1.65), fluffy fox tail, NOT elf ears, NOT dragon horns, NOT mermaid,";
+    } else if (/elfe|\belf\b|elf ears/i.test(fantBlob)) {
+      fantBoost = "(long pointy elf ears:1.65), NOT human round ears, NOT horns, NOT mermaid,";
+    } else if (/succube|succubus/i.test(fantBlob)) {
+      fantBoost = "(small succubus horns:1.6), bat wings, spaded tail, NOT angel, NOT mermaid,";
+    } else if (/catgirl|cat ears/i.test(fantBlob)) {
+      fantBoost = "(cat ears on head:1.65), cat tail, NOT fox ears, NOT elf ears,";
+    } else if (/d[eé]mon|demon/i.test(fantBlob)) {
+      fantBoost = "(demon horns:1.6), demon tail, NOT angel wings, NOT mermaid,";
+    }
+    const scenePart = [
+      "(full body or three-quarter shot:1.45),",
+      "(completely different pose:1.5), " + pos + ",",
+      clothed ? ("(wearing " + wear + ":1.45), fabric visible,") : ("wearing " + wear + ","),
       "in " + loc + ",",
-      "photorealistic photo of the same adult woman,",
-      "sharp focus, natural skin, realistic lighting,",
-      "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
-      "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
-      "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
-      "NOT collage, NOT grid, NOT 2x2, NOT multipanel, NOT split screen,",
-      "photorealistic photograph, real human skin, sharp photo,",
-      "NOT anime, NOT manga, NOT cartoon, NOT illustration,",
-      nhLock ? "NOT plain human only, NOT missing fantasy features, NOT ordinary human ears only," : "",
-      (isFantasy && ageN > 35) ? "NOT elderly, NOT wrinkles, NOT old woman face," :
-        (ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,"),
-      hasUser ? ((ex.text || "").slice(0, 100) + ",") : "",
+    ].join(" ");
+    const qualityPart = [
+      "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
+      "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT painting, NOT 3d render, NOT cgi,",
+      "NOT text, NOT watermark, NOT logo, NOT signature, NOT letters, NOT words on image,",
+      "NOT 2girls, NOT twins, NOT mirror symmetry, NOT collage, NOT grid,",
+      "NOT same pose as reference,",
       anti,
+      hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",
     ].filter(Boolean).join(" ");
-    return short.replace(/\s+/g, " ").trim();
+    // Identité d'abord, scène coupée si besoin (max ~1350)
+    const maxLen = 1350;
+    let short = [idCore, bodyBoost, fantBoost, scenePart, qualityPart].filter(Boolean).join(" ");
+    short = short.replace(/\s+/g, " ").trim();
+    if (short.length > maxLen) {
+      const head = [idCore, bodyBoost, fantBoost].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+      const tailBudget = Math.max(200, maxLen - head.length - 10);
+      const tail = (scenePart + " " + qualityPart).replace(/\s+/g, " ").trim().slice(0, tailBudget);
+      short = (head + ", " + tail).slice(0, maxLen);
+    }
+    return short;
   }
 
   return [

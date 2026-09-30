@@ -2183,30 +2183,53 @@
       const extraNeg = String(body.negative || "");
       const isDuoPrompt = /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1/i.test(prompt);
       const negative = [
-        // anti-miroir / grille en premier (court, ne casse pas le rendu)
+        "anime, manga, cartoon, illustration, drawing, sketch, painting, comic, webtoon, 2d art, 3d render, cgi, plastic doll,",
+        "text, watermark, logo, signature, letters, words, title, caption, ui, subtitle,",
         "mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
-        "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
-        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
-        "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
-        "child, teen, underage, different face, different person, face morph,",
-        "same pose as reference, identical composition, copy of source pose,",
+        "blurry, out of focus, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy,",
+        "child, teen, underage, different person,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 850);
 
-      let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
+      // ——— Ne pas tronquer l'identité : poids (:1.x) et corps/fantasy en tête ———
+      function prioritizeIdentity(raw) {
+        let s = String(raw || "").replace(/\s+/g, " ").trim();
+        if (!s) return "photorealistic photo of an adult woman, sharp focus";
+        const weights = s.match(/\([^\)]{3,90}:1\.\d+\)/g) || [];
+        const bodyKeys = [];
+        const keyList = [
+          "plus-size chubby", "soft belly", "wide full hips", "thick thighs",
+          "voluptuous hourglass", "narrow waist",
+          "angel wings", "dragon horns", "fox ears", "elf ears", "mermaid tail",
+          "succubus horns", "cat ears", "demon horns", "shoulder scales",
+          "jet-black hair", "blonde hair", "chestnut", "brown hair", "red auburn", "silver white",
+          "green eyes", "blue eyes", "brown eyes", "hazel", "D-cup", "E-cup", "A-cup", "H-cup", "I-cup", "J-cup"
+        ];
+        const low = s.toLowerCase();
+        for (const k of keyList) {
+          if (low.indexOf(k.toLowerCase()) >= 0) bodyKeys.push(k);
+        }
+        const head = (weights.slice(0, 24).join(", ") + (bodyKeys.length ? ", " + bodyKeys.join(", ") : "")).replace(/\s+/g, " ").trim();
+        // Si le prompt original commence déjà bien, garder l'ordre mais plafonner sans couper le head
+        const maxP = 1450;
+        if (head.length > 80) {
+          const rest = s;
+          if (head.length >= maxP - 100) return head.slice(0, maxP);
+          return (head + ", " + rest).replace(/\s+/g, " ").trim().slice(0, maxP);
+        }
+        return s.slice(0, maxP);
+      }
+      let promptSafe = prioritizeIdentity(prompt);
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
           .replace(/\s+/g, " ")
           .trim()
-          .slice(0, 280);
-        promptSafe = ("(identical face to reference:1.55), " + fl + ", " + promptSafe).slice(0, 1200);
+          .slice(0, 220);
+        promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
       }
-      if (!promptSafe) promptSafe = "photorealistic photo of an adult woman, sharp focus, detailed face";
-
-      // Prefer sharp quality keywords at end
-      if (!/sharp focus|photorealistic/i.test(promptSafe)) {
-        promptSafe = (promptSafe + ", sharp focus, photorealistic, detailed skin, natural lighting").slice(0, 1100);
+      if (!/photorealistic|photograph/i.test(promptSafe)) {
+        promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1450);
       }
 
       let src = null;
@@ -2256,7 +2279,7 @@
       const soloNeg = isDuoPrompt
         ? ", 3girls, four women, crowd, identical clone twins"
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
+      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime style, drawn, sketch, text overlay";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // txt2img EN PREMIER (variété poses)
@@ -2275,7 +2298,7 @@
 
       if (useImg2Img) {
         const faceBoost = "(identical face:1.55), (same woman as reference photo:1.45), same hair color, same eye color, (completely new pose:1.55), (different camera angle:1.45), ";
-        const imgPrompt = (faceBoost + promptSafe).slice(0, 950);
+        const imgPrompt = prioritizeIdentity(faceBoost + promptSafe);
         payloads.push({
           prompt: imgPrompt + " ### " + negFull + ", same pose as reference, identical composition, copy of source pose, static portrait",
           params: {
@@ -2295,7 +2318,7 @@
 
       // Secours txt2img (sans le modèle basique 16 steps qui sort en 3s)
       payloads.push({
-        prompt: promptSafe.slice(0, 900) + " ### " + negative.slice(0, 500),
+        prompt: prioritizeIdentity(promptSafe).slice(0, 1200) + " ### " + negative.slice(0, 600),
         params: { width: 512, height: 640, steps: 30, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
         nsfw: body.nsfw !== false,
         censor_nsfw: false,
