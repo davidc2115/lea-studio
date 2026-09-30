@@ -123,22 +123,23 @@
       hour: entry.hour,
     });
     // limite ~800 entrées vault (quasi illimité usage normal)
-    if (chat.vault.entries.length > 800) {
+    // Mémoire quasi illimitée (plafond technique ~20k entrées)
+    if (chat.vault.entries.length > 20000) {
       const pinned = chat.vault.entries.filter((e) => e.pinned);
-      const rest = chat.vault.entries.filter((e) => !e.pinned).slice(-4800);
-      chat.vault.entries = pinned.concat(rest).slice(-5000);
+      const rest = chat.vault.entries.filter((e) => !e.pinned).slice(-15000);
+      chat.vault.entries = pinned.concat(rest).slice(-18000);
     }
-    if (chat.memories.length > 800) {
+    if (chat.memories.length > 5000) {
       const pinned = chat.memories.filter((m) => m.pinned);
-      const rest = chat.memories.filter((m) => !m.pinned).slice(-4800);
-      chat.memories = pinned.concat(rest).slice(-5000);
+      const rest = chat.memories.filter((m) => !m.pinned).slice(-4000);
+      chat.memories = pinned.concat(rest).slice(-4500);
     }
   }
   /** Recherche vectorielle locale par tag optionnel + requête + récence. */
   function searchVault(chat, query, tag, limit) {
     ensureVault(chat);
     const qv = textToVec(query || "");
-    const lim = limit || 12;
+    const lim = limit || 20;
     const now = Date.now();
     let list = chat.vault.entries;
     if (tag) list = list.filter((e) => e.tag === tag);
@@ -165,14 +166,18 @@
       return e ? e.text + " (" + e.date + " " + e.hour + ")" : (sc[tag === "tenue" ? "outfit" : tag === "lieu" ? "place" : tag] || "inconnu");
     };
     return [
-      "=== ÉTAT ACTUEL (source de vérité — ne contredis pas) ===",
-      "DERNIÈRE TENUE / CORPS: " + (sc.body || "") + " | " + (sc.outfit || "") + " | vault: " + L("tenue"),
+      "=== ÉTAT ACTUEL (source de vérité — ne contredis JAMAIS) ===",
+      "TENUE / CORPS: " + (sc.body || "") + " | " + (sc.outfit || "") + " | vault: " + L("tenue"),
       sc.clothes ? ("PIÈCES: haut=" + sc.clothes.top + " bas=" + sc.clothes.bottom + " soutien=" + sc.clothes.bra + " culotte=" + sc.clothes.panties) : "",
-      "DERNIER LIEU: " + (sc.place || "") + " | vault: " + L("lieu"),
-      "DERNIÈRE POSE/POSITION: " + (sc.pose || sc.activity || "") + " | vault: " + L("pose"),
-      "DERNIÈRE ACTIVITÉ: " + (sc.activity || ""),
+      "LIEU / ENVIRONNEMENT: " + (sc.place || "") + " | vault: " + L("lieu") + " | " + L("environnement"),
+      "POSE / POSITION: " + (sc.pose || sc.activity || "") + " | vault: " + L("pose"),
+      "ACTIVITÉ: " + (sc.activity || ""),
       "HUMEUR: " + (sc.mood || ""),
-      "DERNIER MOMENT INTIME: " + L("intime"),
+      "HEURE / MOMENT: " + (sc.time || L("heure")),
+      "INTIME (dernier): " + L("intime"),
+      "REFUS du personnage: " + L("refus"),
+      "ACCEPTATIONS: " + L("acceptation"),
+      "LIMITES posées: " + L("limite"),
     ].join("\n");
   }
 
@@ -286,7 +291,7 @@
     system = FORMAT_REMINDER + "\n\n" + system;
     const nonSys = messages.filter((m) => m.role !== "system");
     // Historique court = réponses plus rapides
-    let contents = nonSys.slice(-32).map((m) => ({
+    let contents = nonSys.slice(-40).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: String(m.content || "").slice(0, 900) }],
     }));
@@ -557,7 +562,7 @@
     let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
-    const nonSys = messages.filter((m) => m.role !== "system").slice(-28).map((m) => ({
+    const nonSys = messages.filter((m) => m.role !== "system").slice(-36).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content || "").slice(0, 1200),
     }));
@@ -947,7 +952,7 @@
 
   /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
   function cleanHistory(messages) {
-    return (messages || []).slice(-48).map((m) => ({
+    return (messages || []).slice(-60).map((m) => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
     })).filter((m) => m.content && m.content.length > 1);
@@ -1203,6 +1208,30 @@
       const note = String(userTxt || replyTxt || "").replace(/\s+/g, " ").trim().slice(0, 220);
       if (note) {
         sc.intimate = (sc.intimate || []).concat([note]).slice(-50);
+    // REFUS / ACCEPTATION / LIMITES
+    if (/(je (ne )?(veux|peux) pas|pas envie|refuse|non[,.]? (pas|je)|arr[eê]te|trop vite|pas [cç]a|pas par l[aà]|pas l'anal|pas le cul|doucement)/i.test(blob) && /(assistant|\*)/.test(String(replyTxt||""))) {
+      const ref = String(replyTxt || "").replace(/\s+/g, " ").trim().slice(0, 160);
+      if (ref) { pushVault(chat, "refus", ref, false); sc.lastRefus = ref; }
+    }
+    if (/(oui[,.]? (prends|fais|continue|vas-y)|j'accepte|ok[,.]? (prends|fais)|je veux (bien|que)|vas-y|continues?)/i.test(blob)) {
+      const acc = String(replyTxt || userTxt || "").replace(/\s+/g, " ").trim().slice(0, 160);
+      if (acc) pushVault(chat, "acceptation", acc, false);
+    }
+    if (/(pas d'anal|pas le cul|seulement oral|pas de (fellation|pipe)|condom|capote|doucement|pas trop fort)/i.test(blob)) {
+      pushVault(chat, "limite", String(blob).replace(/\s+/g, " ").trim().slice(0, 120), true);
+    }
+    // HEURE / MOMENT de la journée
+    if (/(ce matin|matin[ée]|au r[eé]veil)/i.test(blob)) { sc.time = "matin"; pushVault(chat, "heure", "matin", false); }
+    else if (/(cet apr[eè]s-midi|apr[eè]s-midi)/i.test(blob)) { sc.time = "après-midi"; pushVault(chat, "heure", "après-midi", false); }
+    else if (/(ce soir|soir[ée]e|nuit|minuit|il est tard)/i.test(blob)) { sc.time = "soir/nuit"; pushVault(chat, "heure", "soir/nuit", false); }
+    // ENVIRONNEMENT détail
+    if (/(canap[eé]|sofa)/i.test(blob)) pushVault(chat, "environnement", "canapé", false);
+    if (/(lit|bed)/i.test(blob)) pushVault(chat, "environnement", "lit", false);
+    if (/(douche|bain)/i.test(blob)) pushVault(chat, "environnement", "douche/bain", false);
+    if (/(cuisine|table)/i.test(blob)) pushVault(chat, "environnement", "cuisine", false);
+    if (/(balcon|terrasse)/i.test(blob)) pushVault(chat, "environnement", "balcon", false);
+    if (/(voiture|auto)/i.test(blob)) pushVault(chat, "environnement", "voiture", false);
+
         pushVault(chat, "intime", note, false);
       }
     }
@@ -1258,13 +1287,13 @@
       if (!list.length) return "- (rien)";
       return list.map((e) => "- [" + e.date + " " + e.hour + "] " + e.text).join("\n");
     };
-    const relevant = searchVault(chat, q || (chat.messages || []).slice(-3).map((m) => m.content || "").join(" "), null, 8);
+    const relevant = searchVault(chat, q || (chat.messages || []).slice(-5).map((m) => m.content || "").join(" "), null, 14);
     // Rôle + scénario rappelés À CHAQUE message (évite inversion après N tours)
     const p = persona || {};
     const roleFacts = [
       "=== RÔLE & SCÉNARIO (JAMAIS OUBLIER — même après 50 messages) ===",
       "Personnage: " + (p.name || "?") + " | Titre: " + (p.title || "?") + " | Âge: " + (p.age || "?"),
-      "SCÉNARIO FIXE: " + String(p.scenario || "").replace(/\s+/g, " ").trim().slice(0, 500),
+      "SCÉNARIO FIXE: " + String(p.scenario || "").replace(/\s+/g, " ").trim().slice(0, 700),
       "RÈGLE D'OR: le scénario dit QUI a le problème et POURQUOI elle est là. Si ELLE s'est disputée avec son mari/conjoint → c'est SA dispute, pas celle de l'utilisateur. INTERDIT d'inverser (ex: « tu t'es disputé avec ton frère » alors que c'est ELLE qui a quitté son mari = ton frère).",
       "L'utilisateur = hôte / maître de maison dans la plupart des scènes. Le personnage = visiteuse ou celle qui a le motif du scénario.",
     ].join("\n");
@@ -1278,17 +1307,26 @@
       "",
       "Relation: prox " + (rel.closeness || 1) + "/10 conf " + (rel.trust || 1) + "/10 heat " + (rel.heat || 0) + "/10 lien " + (rel.bond || "indéfini") + ".",
       "",
-      "=== JOURNAL CHRONOLOGIQUE (25 derniers) ===",
-      ((chat.vault.entries || []).slice(-25).map(function(e) {
-        return "- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 160);
+      "=== JOURNAL CHRONOLOGIQUE (40 derniers faits) ===",
+      ((chat.vault.entries || []).slice(-40).map(function(e) {
+        return "- [" + e.tag + " · " + e.date + " " + e.hour + "] " + String(e.text || "").slice(0, 180);
       }).join("\n") || "- (debut)"),
       "",
-      "HISTORIQUE TENUES (récent):",
-      by("tenue", 12),
-      "HISTORIQUE LIEUX (récent):",
-      by("lieu", 10),
+      "HISTORIQUE TENUES:",
+      by("tenue", 16),
+      "HISTORIQUE LIEUX / ENVIRONNEMENT:",
+      by("lieu", 12),
+      by("environnement", 6),
+      "HISTORIQUE POSES / POSITIONS:",
+      by("pose", 10),
       "HISTORIQUE INTIME:",
-      by("intime", 10),
+      by("intime", 14),
+      "REFUS / LIMITES / ACCEPTATIONS:",
+      by("refus", 8),
+      by("limite", 6),
+      by("acceptation", 8),
+      "HEURES / MOMENTS:",
+      by("heure", 6),
     ];
     if (relevant.length) {
       lines.push("RAPPELS UTILES (recherche):");

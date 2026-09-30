@@ -325,10 +325,11 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre|joues charnues|visage rond/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    out.positive.push("(curvy plus-size soft body:1.4)", "(full soft cheeks:1.25)", "full hips", "thick thighs", "soft natural midsection");
-    out.negative.push("skinny, model thin, underweight, hollow cheeks");
-  } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
-    out.positive.push("curvy feminine figure, soft curves");
+    out.positive.push("(plus-size chubby body:1.55)", "(soft belly:1.4)", "(wide full hips:1.45)", "(thick thighs:1.45)", "(full soft cheeks:1.3)");
+    out.negative.push("skinny, model thin, underweight, hollow cheeks, slim hourglass only, narrow waist only");
+  } else if (/curvy|voluptueuse|voluptuous|sablier|hourglass/i.test(blob)) {
+    out.positive.push("(voluptuous hourglass:1.5)", "(narrow waist:1.35)", "(wide hips:1.35)", "full round butt");
+    out.negative.push("chubby belly, plus-size overweight, skinny flat chest");
   }
   // Traits non-humains depuis la fiche
   if (/Traits non-humains\s*:\s*([^\n]+)/i.test(blob) || /Traits non-humains\s*:\s*([^\n]+)/i.test(String(c && c.appearance || ""))) {
@@ -357,8 +358,9 @@ function physicalLocksFromText(c) {
       out.positive.push("(demon horns:1.5)", "thin demon tail");
       out.negative.push("elf ears, fox ears, angel wings");
     }
-    if (/cornes de dragon|dragon horns/i.test(nh+blob)) {
-      out.positive.push("(small dragon horns:1.45)", "shoulder scales");
+    if (/cornes de dragon|dragon horns|dragon girl/i.test(nh+blob)) {
+      out.positive.push("(dragon girl:1.55)", "(small dragon horns on forehead:1.6)", "(iridescent scales on shoulders:1.45)");
+      out.negative.push("mermaid tail, fish scales full body, fox ears, cat ears, elf ears, succubus bat wings");
     }
     if (/ailes d.ange|angel wings/i.test(nh+blob)) {
       out.positive.push("(white angel wings:1.45)");
