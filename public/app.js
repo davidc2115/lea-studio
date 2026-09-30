@@ -979,7 +979,13 @@ function faceIdentityLock(c) {
   } else if (/gorgone|medusa|snake hair/i.test(blob)) {
     parts.push("(living snakes for hair:1.65)", "NOT mermaid, NOT normal hair only");
   } else if (/slime/i.test(blob)) {
-    parts.push("(translucent slime girl:1.55)", "NOT mermaid, NOT solid human only");
+    parts.push(
+      "(translucent slime girl body:1.7)",
+      "(glossy jelly translucent skin:1.55)",
+      "semi-transparent colorful slime, amorphous soft edges,",
+      "NO horns, NO mermaid tail, NO animal ears, NO wings,",
+      "full body visible"
+    );
   } else if (/android|robot/i.test(blob)) {
     parts.push("(android robot girl:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
   } else if (/ghost|fant[oô]me/i.test(blob)) {
@@ -987,11 +993,25 @@ function faceIdentityLock(c) {
   } else if (/witch|sorci[eè]re/i.test(blob)) {
     parts.push("mystical witch aura, pointed hat optional,", "NOT mermaid, NOT underwater");
   } else if (/fairy|f[eé]e|fairy wings/i.test(blob)) {
-    parts.push("(translucent fairy wings:1.65)", "NOT demon horns, NOT mermaid");
+    parts.push(
+      "(translucent iridescent fairy wings:1.7)",
+      "delicate fairy, full body,",
+      "NOT demon horns, NOT mermaid, NOT large bat wings, NOT fox ears"
+    );
   } else if (/dryade/i.test(blob)) {
-    parts.push("bark accents, leaves in hair, nature spirit,", "NOT mermaid, NOT underwater");
+    parts.push(
+      "(dryad nature spirit:1.55)",
+      "bark-like skin accents, green leaves and vines in hair,",
+      "deep forest, human legs, full body,",
+      "NOT mermaid, NOT horns, NOT animal ears"
+    );
   } else if (/harpie/i.test(blob)) {
-    parts.push("(large feathered bird wings:1.65)", "NOT mermaid, NOT underwater");
+    parts.push(
+      "(large feathered bird wings spread:1.7)",
+      "avian wings, subtle talon fingers, feather accents,",
+      "full body with wings visible,",
+      "NOT mermaid, NOT demon horns, NOT fox ears, NOT snake hair"
+    );
   }
 
   // physicalLocks extra
@@ -1439,6 +1459,14 @@ function buildLeaImagePrompt(extra = "") {
       fantBoost = "(two short thick oni horns:1.7), japanese oni, human legs standing on land, NOT mermaid, NOT underwater, NOT fish tail,";
     } else if (/gorgone|medusa/i.test(fantBlob)) {
       fantBoost = "(living snakes instead of hair:1.75), medusa gorgon, human legs, NOT mermaid, NOT horns, NOT underwater,";
+    } else if (/slime/i.test(fantBlob)) {
+      fantBoost = "(translucent slime girl body:1.7), glossy jelly skin, NO horns, NO mermaid, NO wings,";
+    } else if (/harpie/i.test(fantBlob)) {
+      fantBoost = "(large feathered bird wings:1.7), avian, full body wings, NOT mermaid, NOT horns,";
+    } else if (/dryade/i.test(fantBlob)) {
+      fantBoost = "(dryad:1.5), leaves in hair, bark accents, forest, NOT mermaid, NOT horns,";
+    } else if (/f[eé]e|fairy/i.test(fantBlob)) {
+      fantBoost = "(translucent fairy wings:1.7), delicate fairy, NOT horns, NOT mermaid,";
     } else if (/d[eé]mon|demon/i.test(fantBlob)) {
       fantBoost = "(demon horns:1.6), demon tail, NOT angel wings, NOT mermaid,";
     }
@@ -2478,16 +2506,21 @@ function openFull(src, opts) {
         }
         localStorage.setItem(chatBgKey(id), showSrc);
         try { applyChatLook(); } catch (_) {}
-        // Si on est dans le chat, rafraîchir le fond tout de suite
         try {
           const el = document.querySelector(".chat-bg");
-          if (el) el.style.backgroundImage = "url('" + showSrc + "')";
-          // Marquer sélection dans le sheet si ouvert
+          if (el) {
+            el.style.backgroundImage = "url('" + showSrc + "')";
+            // force repaint
+            el.style.opacity = "0.99";
+            requestAnimationFrame(() => { el.style.opacity = ""; });
+          }
           document.querySelectorAll(".bg-pick img").forEach((im) => {
-            im.classList.toggle("on", im.getAttribute("data-bg") === showSrc || im.src === showSrc);
+            const d = im.getAttribute("data-bg") || "";
+            im.classList.toggle("on", d === showSrc || im.src === showSrc || (d && showSrc && d.endsWith(showSrc.slice(-30))));
           });
         } catch (_) {}
         btn.textContent = "Fond du chat ✓";
+        setTimeout(() => { try { applyChatBg(); } catch (_) {} }, 50);
       };
       btn.textContent = "Utiliser comme fond";
     }
@@ -2721,6 +2754,36 @@ async function addToGallery(src, charId) {
   saveExtra(list, cid);
   // Première génération = cover auto (Découvrir / chat) si pas déjà choisie
   maybeAutoCover(cid, stored);
+  // Rafraîchir fond de chat en direct si on est sur ce personnage
+  try {
+    if (state.view === "chat" && state.current === cid) {
+      // Mettre à jour les miniatures du sheet sans tout re-render si possible
+      const pick = document.querySelector(".bg-pick");
+      if (pick) {
+        const resolved = resolvePhotoSrc(stored) || stored;
+        // prépendre une mini si absente
+        const exists = [...pick.querySelectorAll("img")].some((im) => {
+          const d = im.getAttribute("data-bg") || "";
+          return d === stored || d === resolved || im.src === resolved;
+        });
+        if (!exists && resolved) {
+          const im = document.createElement("img");
+          im.src = resolved;
+          im.setAttribute("data-bg", stored);
+          im.alt = "Nouvelle";
+          im.onclick = (e) => {
+            e.preventDefault();
+            localStorage.setItem(chatBgKey(cid), stored);
+            document.querySelectorAll(".bg-pick img").forEach((x) => x.classList.remove("on"));
+            im.classList.add("on");
+            applyChatBg();
+          };
+          pick.insertBefore(im, pick.firstChild);
+        }
+      }
+      applyChatLook();
+    }
+  } catch (_) {}
   return stored;
 }
 
@@ -4495,8 +4558,32 @@ function renderProfile() {
         }
         hidePhoto(c.id, removed);
         if (customCover(c.id) === removed) setCustomCover(c.id, "");
+        // Invalider fond de chat s'il pointait sur cette image
+        try {
+          const bgKey = chatBgKey(c.id);
+          const curBg = localStorage.getItem(bgKey) || "";
+          const remSrc = resolvePhotoSrc(removed) || removed;
+          if (curBg && (curBg === removed || curBg === remSrc ||
+              (remSrc && String(curBg).indexOf(String(remSrc).slice(-40)) >= 0) ||
+              (removed && String(curBg).indexOf(String(removed).replace(/^gallery:/,"")) >= 0))) {
+            localStorage.removeItem(bgKey);
+          }
+        } catch (_) {}
         saveExtra(list);
+        try { applyChatLook(); } catch (_) {}
         renderProfile();
+        // Si sheet chat ouvert, resync les miniatures fond
+        try {
+          if (state.view === "chat") {
+            const sheet = $("sheet");
+            if (sheet && !sheet.classList.contains("hidden")) {
+              // re-render chat pour rafraîchir bg-pick
+              renderChat();
+            } else {
+              applyChatBg();
+            }
+          }
+        } catch (_) {}
         return;
       }
       // Image assets APK / cover : masquage local (ne peut pas effacer le fichier APK)
@@ -4506,6 +4593,14 @@ function renderProfile() {
         if (c.cover && (raw === c.cover || String(raw).endsWith(String(c.cover).split("/").pop()))) {
           try { setCustomCover(c.id, ""); } catch (_) {}
         }
+        try {
+          const bgKey = chatBgKey(c.id);
+          const curBg = localStorage.getItem(bgKey) || "";
+          if (curBg && (curBg === raw || String(curBg).indexOf(String(raw).split("/").pop()) >= 0)) {
+            localStorage.removeItem(bgKey);
+          }
+          applyChatLook();
+        } catch (_) {}
         setGenStatus("Image masquée (y compris si elle vient de l'APK)");
         renderProfile();
       }
@@ -6960,6 +7055,10 @@ function characterBgOptions(c) {
   const seen = new Set();
   const push = (src, title) => {
     if (!src || typeof src !== "string") return;
+    // Ignorer images masquées / supprimées
+    try {
+      if (typeof isHiddenPhoto === "function" && isHiddenPhoto(id, src)) return;
+    } catch (_) {}
     // Résoudre gallery: → data URL affichable
     let url = src;
     if (src.startsWith("gallery:")) {
@@ -7001,18 +7100,52 @@ function chatBg(id) {
   const c = (state.characters || []).find((x) => x.id === cid) || character();
   const opts = characterBgOptions(c);
   const allowed = new Set();
-  opts.forEach((o) => { if (o.src) allowed.add(o.src); if (o.raw) allowed.add(o.raw); });
+  opts.forEach((o) => {
+    if (o.src) allowed.add(o.src);
+    if (o.raw) allowed.add(o.raw);
+  });
+  // Aussi accepter les extras actuels (générées)
+  try {
+    extraPhotos(cid).forEach((s) => {
+      allowed.add(s);
+      try { const r = resolvePhotoSrc(s); if (r) allowed.add(r); } catch (_) {}
+    });
+  } catch (_) {}
   let saved = localStorage.getItem(chatBgKey(cid));
   if (!saved && cid === "lea") {
     const legacy = localStorage.getItem("lea.chatBg");
     if (legacy) saved = legacy;
   }
   // Résoudre gallery: sauvegardé
+  let resolved = saved;
   if (saved && String(saved).startsWith("gallery:")) {
-    try { const r = resolvePhotoSrc(saved); if (r) saved = r; } catch (_) {}
+    try {
+      const r = resolvePhotoSrc(saved);
+      if (r) resolved = r;
+      else {
+        // Image galerie introuvable (supprimée) → invalider
+        localStorage.removeItem(chatBgKey(cid));
+        saved = null;
+        resolved = null;
+      }
+    } catch (_) {}
   }
-  if (saved && (allowed.has(saved) || String(saved).startsWith("data:image") || String(saved).startsWith("images/"))) {
-    return saved;
+  // Rejeter si masquée
+  try {
+    if (resolved && typeof isHiddenPhoto === "function" && isHiddenPhoto(cid, resolved)) {
+      localStorage.removeItem(chatBgKey(cid));
+      saved = null;
+      resolved = null;
+    }
+  } catch (_) {}
+  if (resolved && (allowed.has(resolved) || allowed.has(saved) ||
+      String(resolved).startsWith("data:image") || String(resolved).startsWith("images/") ||
+      String(resolved).startsWith("blob:") || String(resolved).startsWith("file:"))) {
+    return resolved;
+  }
+  // Fond périmé → nettoyer
+  if (saved) {
+    try { localStorage.removeItem(chatBgKey(cid)); } catch (_) {}
   }
   // Défaut : cover résolue puis 1ère option galerie
   try {
