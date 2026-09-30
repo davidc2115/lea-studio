@@ -836,62 +836,102 @@ function getUserPartnerImagePrompt() {
 
 /** Verrou visage fort pour img2img (Horde). */
 function faceIdentityLock(c) {
-  const n = (c && c.name) ? String(c.name).split(/\s|&/)[0] : "her";
-  const id = c && c.id;
-  // Léa : traits exacts de la galerie (longs cheveux, yeux verts/marron, visage ovale)
+  if (!c) return "adult woman, photorealistic";
+  const id = c.id || "";
+  const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
+  const body = String(c.body || "");
+  const app = String(c.appearance || "");
+  const tags = Array.isArray(c.tags) ? c.tags.join(" ") : "";
+  const blob = [looks, body, app, tags, c.title, id].join(" ").toLowerCase();
+  const age = Math.max(18, Number(c.age) || 25);
+  const isFantasy = /fan_|fantasy|dragon|ange|angel|sir[eè]ne|mermaid|kitsune|elfe|\belf\b|succube|d[eé]mon|catgirl|vampire/i.test(blob);
+  const visAge = (isFantasy && age > 35) ? 25 : age;
+
+  // Léa : galerie exacte
   if (id === "lea") {
     return [
-      "(identical face to reference photo:1.7)",
-      "same young French woman as source,",
-      "oval porcelain face, delicate bone structure, soft defined jaw,",
-      "(large almond hazel-green eyes:1.45), golden green iris,",
-      "dark chestnut thick arched brows, fine straight nose,",
-      "full soft natural rose lips, calm faint smile,",
-      "(long straight dark brown hair to lower back:1.5), subtle honey highlights,",
-      "(large prominent 95D breasts:1.5), deep cleavage, narrow waist hourglass,",
-      "delicate narrow shoulders, fair flawless skin,",
-      "NOT short hair, NOT bob, NOT small breasts, NOT flat chest, NOT different woman,",
+      "(identical face to reference photo:1.6)",
+      "21 year old French woman, oval porcelain face,",
+      "(large almond hazel-green eyes:1.45),",
+      "(long straight dark brown hair to lower back:1.5),",
+      "(large prominent 95D breasts:1.5), hourglass narrow waist,",
+      "fair flawless skin, photorealistic",
     ].join(" ");
   }
-  // Tous personnages non-Léa : verrou physique fiche (cheveux, yeux, poitrine, âge)
-  const locks = [];
+
+  const parts = [];
+  // Âge visuel
+  parts.push("(" + visAge + " year old woman:1.5)", "(looks exactly " + visAge + ":1.45)");
+
+  // looks_en COMPLET en priorité (cheveux yeux poitrine corps fantasy)
+  if (looks.length > 30) {
+    parts.push(looks);
+  }
+
+  // Corps — boost explicite selon classe
+  if (/ronde|chubby|plus-size|plus size|soft belly|plantureuse/i.test(blob)) {
+    parts.push(
+      "(plus-size chubby body:1.65)",
+      "(soft round belly visible:1.55)",
+      "(wide full hips:1.55)",
+      "(thick soft thighs:1.55)",
+      "full soft arms, double chin subtle optional,",
+      "NOT skinny, NOT slim model, NOT thin waist only, NOT hourglass slim, NOT face-only portrait"
+    );
+  } else if (/voluptueuse|hourglass|sablier|voluptuous/i.test(blob)) {
+    parts.push("(voluptuous hourglass:1.55)", "(narrow waist:1.4)", "(wide hips:1.4)", "NOT chubby overweight belly");
+  } else if (/mince|slim|petits? seins|a-cup/i.test(blob)) {
+    parts.push("(slim slender body:1.4)");
+  }
+
+  // Poitrine si pas déjà dans looks
+  if (!/cup breasts|95d|bonnet/i.test(looks)) {
+    if (/bonnet\s*e|e-cup|tr[eè]s gros seins/i.test(blob)) parts.push("(very large E-cup breasts:1.5)");
+    else if (/bonnet\s*d|d-cup|95d|gros seins/i.test(blob)) parts.push("(large D-cup breasts:1.45)");
+    else if (/bonnet\s*h|h-cup/i.test(blob)) parts.push("(huge H-cup breasts:1.5)");
+  }
+
+  // Fantasy EXCLUSIVE — traits + anti-contamination
+  if (/dragon/i.test(blob)) {
+    parts.push(
+      "(dragon girl:1.65)",
+      "(small curved dragon horns on forehead:1.7)",
+      "(small iridescent dragon scale patches only on shoulders:1.45)",
+      "human legs, standing on land, dry skin,",
+      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT siren"
+    );
+  } else if (/ange|angel|ailes d.ange/i.test(blob)) {
+    parts.push(
+      "(white feathered angel wings fully visible behind back:1.7)",
+      "human legs, standing,",
+      "NOT mermaid, NOT tail, NOT underwater, NOT scales, NOT demon horns"
+    );
+  } else if (/sir[eè]ne|mermaid/i.test(blob)) {
+    parts.push("(mermaid tail:1.65)", "underwater or seaside,", "NOT dragon horns, NOT angel wings, NOT human legs only");
+  } else if (/kitsune|fox ears|renard/i.test(blob)) {
+    parts.push("(fox ears on head:1.65)", "fluffy fox tail,", "NOT dragon horns, NOT mermaid, NOT elf ears");
+  } else if (/elfe|\belf\b|elf ears/i.test(blob)) {
+    parts.push("(long pointy elf ears:1.65)", "NOT horns, NOT mermaid, NOT fox ears");
+  } else if (/succube|succubus/i.test(blob)) {
+    parts.push("(small succubus horns:1.6)", "bat wings,", "NOT angel, NOT mermaid, NOT dragon");
+  } else if (/catgirl|cat ears/i.test(blob)) {
+    parts.push("(cat ears on head:1.65)", "cat tail,", "NOT fox ears, NOT dragon");
+  } else if (/d[eé]mon|demon/i.test(blob)) {
+    parts.push("(demon horns:1.6)", "demon tail,", "NOT angel wings, NOT mermaid");
+  } else if (/vampire/i.test(blob)) {
+    parts.push("pale vampire skin, subtle fangs,", "NOT animal ears, NOT mermaid");
+  }
+
+  // physicalLocks extra
   try {
-    const pl = typeof physicalLocksFromText === "function" ? physicalLocksFromText(c) : null;
-    if (pl && pl.positive && pl.positive.length) locks.push(...pl.positive);
-    const blob = [c && c.appearance, c && c.looks_en, c && c.body, c && c.title].filter(Boolean).join(" ").toLowerCase();
-    if (/bonnet\s*h|h-cup|huge heavy h/.test(blob)) locks.push("(huge heavy H-cup breasts:1.55)", "deep cleavage", "hourglass waist");
-    else if (/bonnet\s*i|i-cup/.test(blob)) locks.push("(enormous I-cup breasts:1.55)");
-    else if (/bonnet\s*j|j-cup/.test(blob)) locks.push("(massive J-cup breasts:1.55)");
-    else if (/bonnet\s*g|g-cup/.test(blob)) locks.push("(extremely large G-cup breasts:1.5)");
-    else if (/bonnet\s*f|f-cup/.test(blob)) locks.push("(huge heavy F-cup breasts:1.5)");
-    else if (/bonnet\s*e|e-cup|95e/.test(blob)) locks.push("(very large heavy E-cup breasts:1.5)");
-    else if (/bonnet\s*d|d-cup|95d/.test(blob)) locks.push("(large full D-cup breasts:1.45)");
-    else if (/bonnet\s*c|c-cup/.test(blob)) locks.push("(medium C-cup breasts:1.35)");
-    else if (/bonnet\s*b|b-cup/.test(blob)) locks.push("(small B-cup breasts:1.4)");
-    else if (/bonnet\s*a|a-cup|flat chest/.test(blob)) locks.push("(very small flat A-cup breasts:1.45)");
-    const age = Number(c && c.age) || 0;
-    if (age && age <= 22) locks.push("young adult woman " + age + " years old", "youthful face");
-    else if (age && age <= 30) locks.push("woman about " + age + " years old");
-    else if (age) locks.push("mature woman about " + age + " years old");
+    const pl = physicalLocksFromText(c);
+    if (pl && pl.positive) parts.push(...pl.positive.slice(0, 6));
   } catch (_) {}
-  // Toujours coller cheveux/yeux de la fiche (évite défaut châtain + verts)
-  try {
-    const phys = physicalLocksFromText(c);
-    if (phys && phys.positive && phys.positive.length) {
-      locks.unshift(...phys.positive.slice(0, 5));
-    }
-  } catch (_) {}
-  const ageN = Math.max(18, Number(c && c.age) || 21);
-  return [
-    "(identical face to reference photo:1.55)",
-    "(same facial features as source image:1.45)",
-    "(looks exactly " + ageN + " years old:1.5),",
-    "same eye color same hair color as character sheet, same nose same lips same jawline",
-    "consistent identity, same woman as reference,",
-    locks.join(", "),
-    "NOT a different person, NOT face morph, NOT different hair color, NOT different eye color, NOT " + ageNegatives(c) + ",",
-  ].filter(Boolean).join(", ");
+
+  parts.push("photorealistic photograph, real human skin");
+  return parts.filter(Boolean).join(", ");
 }
+
 
 function buildLeaImagePrompt(extra = "") {
   const c = character();
@@ -6173,23 +6213,21 @@ async function generatePhoto() {
   // Renfort visage (tous personnages solo)
   try {
     if (!isDuoCharacter(c)) {
-      // Cadre corps entier EN TÊTE (Horde bias portrait sinon)
+      // Cadre corps entier OBLIGATOIRE (Horde adore les portraits sinon)
       const frames = [
-        "(full body shot from head to toes:1.5), (wide composition not face crop:1.45), ",
-        "(full body head to mid-thigh:1.5), (wide shot not portrait:1.4), ",
-        "(full body three-quarter length:1.45), (environment visible:1.3), ",
-        "(full body rear three-quarter view:1.45), (looking back at camera:1.35), ",
+        "(full body head to knees:1.6), (wide shot showing body:1.5), ",
+        "(three-quarter body shot hips visible:1.55), (environment in frame:1.35), ",
+        "(full body standing or sitting:1.55), (torso and hips clearly visible:1.5), ",
+        "(medium-wide shot from thighs up:1.5), (breasts and waist and hips visible:1.45), ",
       ];
       const frame = frames[Math.floor(Math.random() * frames.length)];
-      // FORCE une seule personne (sauf duo géré plus haut)
-      const soloLock = "(1girl:1.55), (solo:1.5), (single woman:1.45), only one person in frame, ";
-      prompt = soloLock + frame + faceIdentityLock(c) + " " + prompt;
-      if (!/NOT face crop|NOT portrait only/i.test(prompt)) {
-        prompt += ", NOT face crop only, NOT close-up portrait only, NOT head and shoulders only,";
-      }
-      if (!/NOT 2girls|NOT twins|NOT clones/i.test(prompt)) {
-        prompt += ", NOT 2girls, NOT 3girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women, NOT duplicate, NOT same person twice,";
-      }
+      const soloLock = "(1girl:1.55), (solo:1.5), only one woman, ";
+      const idLock = faceIdentityLock(c);
+      // Identité + corps EN TÊTE, prompt scène après
+      prompt = soloLock + frame + idLock + ", " + prompt;
+      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT passport photo, NOT face-only,";
+      prompt += ", NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry,";
+      prompt += ", (photorealistic:1.45), NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT text, NOT watermark,";
     }
   } catch (_) {}
   window._leaGenBusy = true;

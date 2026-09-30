@@ -2281,7 +2281,7 @@
       const soloNeg = isDuoPrompt
         ? ", 3girls, four women, crowd, identical clone twins"
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime style, drawn, sketch, text overlay";
+      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime style, drawn, sketch, text overlay, face crop only, headshot only, passport photo, close-up face only";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // txt2img EN PREMIER (variété poses)
@@ -2289,7 +2289,7 @@
       if (!forceImg2) {
         payloads.push({
           prompt: promptSafe + " ### " + negFull,
-          params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
+          params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 8.5 },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
           models: photoModels,
