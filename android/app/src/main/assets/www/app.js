@@ -324,12 +324,68 @@ function physicalLocksFromText(c) {
   }
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
-  if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    // Comme hier + un cran pour vraiment ronde (sans BBW / piles de NOT)
-    out.positive.push("(curvy plus-size soft body:1.4)", "full hips", "thick thighs", "soft natural midsection");
-    out.negative.push("skinny, model thin, underweight");
+  if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre|joues charnues|visage rond/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
+    out.positive.push("(curvy plus-size soft body:1.4)", "(full soft cheeks:1.25)", "full hips", "thick thighs", "soft natural midsection");
+    out.negative.push("skinny, model thin, underweight, hollow cheeks");
   } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
     out.positive.push("curvy feminine figure, soft curves");
+  }
+  // Traits non-humains depuis la fiche
+  if (/Traits non-humains\s*:\s*([^\n]+)/i.test(blob) || /Traits non-humains\s*:\s*([^\n]+)/i.test(String(c && c.appearance || ""))) {
+    const nh = (String(c && c.appearance || blob).match(/Traits non-humains\s*:\s*([^\n]+)/i) || [])[1] || "";
+    if (/oreille.*elfe|elf ears|pointues d.elfe/i.test(nh+blob)) {
+      out.positive.push("(pointy elf ears:1.55)", "elven features");
+      out.negative.push("human round ears only, demon horns, fox ears, mermaid tail");
+    }
+    if (/oreille.*renard|fox ears|kitsune/i.test(nh+blob)) {
+      out.positive.push("(fox ears on head:1.55)", "fluffy fox tail");
+      out.negative.push("elf ears, demon horns, mermaid tail");
+    }
+    if (/oreille.*chat|cat ears/i.test(nh+blob)) {
+      out.positive.push("(cat ears on head:1.55)", "cat tail");
+      out.negative.push("elf ears, demon horns");
+    }
+    if (/succube|succubus horns/i.test(nh+blob)) {
+      out.positive.push("(small succubus horns:1.5)", "bat wings", "thin pointed tail");
+      out.negative.push("elf ears, fox ears, mermaid");
+    }
+    if (/sir[eè]ne|mermaid/i.test(nh+blob)) {
+      out.positive.push("(mermaid tail:1.5)", "iridescent scales");
+      out.negative.push("human legs only, demon horns, elf ears");
+    }
+    if (/cornes de d[eé]mon|demon horns/i.test(nh+blob)) {
+      out.positive.push("(demon horns:1.5)", "thin demon tail");
+      out.negative.push("elf ears, fox ears, angel wings");
+    }
+    if (/cornes de dragon|dragon horns/i.test(nh+blob)) {
+      out.positive.push("(small dragon horns:1.45)", "shoulder scales");
+    }
+    if (/ailes d.ange|angel wings/i.test(nh+blob)) {
+      out.positive.push("(white angel wings:1.45)");
+      out.negative.push("demon horns");
+    }
+    if (/ailes de f[eé]e|fairy wings/i.test(nh+blob)) {
+      out.positive.push("(translucent fairy wings:1.45)");
+    }
+    if (/vampire|canines/i.test(nh+blob)) {
+      out.positive.push("pale vampire skin", "subtle fangs");
+    }
+    if (/naga|lamia|serpent/i.test(nh+blob)) {
+      out.positive.push("(serpent lower body:1.4)", "scales");
+      out.negative.push("full human legs only");
+    }
+    if (/loup|wolf ears/i.test(nh+blob)) {
+      out.positive.push("(wolf ears:1.5)", "wolf tail");
+    }
+    if (/oni/i.test(nh+blob)) {
+      out.positive.push("(oni horns:1.45)");
+    }
+    if (/slime/i.test(nh+blob)) {
+      out.positive.push("(slime girl:1.4)", "translucent body");
+    }
+    if (/android|andro[iï]de|robot/i.test(nh+blob)) {
+      out.positive.push("(android robot girl:1.35)", "subtle mechanical joints");
+    }
   }
   if (/athl[eé]tique|athletic|toned/i.test(blob)) out.positive.push("athletic toned body");
 
