@@ -286,7 +286,7 @@
     system = FORMAT_REMINDER + "\n\n" + system;
     const nonSys = messages.filter((m) => m.role !== "system");
     // Historique court = réponses plus rapides
-    let contents = nonSys.slice(-24).map((m) => ({
+    let contents = nonSys.slice(-32).map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
       parts: [{ text: String(m.content || "").slice(0, 900) }],
     }));
@@ -557,7 +557,7 @@
     let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
-    const nonSys = messages.filter((m) => m.role !== "system").slice(-22).map((m) => ({
+    const nonSys = messages.filter((m) => m.role !== "system").slice(-28).map((m) => ({
       role: m.role === "assistant" ? "assistant" : "user",
       content: String(m.content || "").slice(0, 1200),
     }));
@@ -947,7 +947,7 @@
 
   /** Historique sans fuites méta (évite que le modèle imite d'anciennes erreurs). */
   function cleanHistory(messages) {
-    return (messages || []).slice(-36).map((m) => ({
+    return (messages || []).slice(-48).map((m) => ({
       role: m.role === "user" ? "user" : "assistant",
       content: m.role === "assistant" ? sanitizeReply(m.content || "") : String(m.content || "").slice(0, 2000),
     })).filter((m) => m.content && m.content.length > 1);
@@ -1248,7 +1248,7 @@
     } catch (_) {}
   }
 
-  function memoryBlock(chat, userTxt) {
+  function memoryBlock(chat, userTxt, persona) {
     ensureVault(chat);
     const sc = chat.scene || {};
     const rel = chat.relationship || {};
@@ -1259,7 +1259,18 @@
       return list.map((e) => "- [" + e.date + " " + e.hour + "] " + e.text).join("\n");
     };
     const relevant = searchVault(chat, q || (chat.messages || []).slice(-3).map((m) => m.content || "").join(" "), null, 8);
+    // Rôle + scénario rappelés À CHAQUE message (évite inversion après N tours)
+    const p = persona || {};
+    const roleFacts = [
+      "=== RÔLE & SCÉNARIO (JAMAIS OUBLIER — même après 50 messages) ===",
+      "Personnage: " + (p.name || "?") + " | Titre: " + (p.title || "?") + " | Âge: " + (p.age || "?"),
+      "SCÉNARIO FIXE: " + String(p.scenario || "").replace(/\s+/g, " ").trim().slice(0, 500),
+      "RÈGLE D'OR: le scénario dit QUI a le problème et POURQUOI elle est là. Si ELLE s'est disputée avec son mari/conjoint → c'est SA dispute, pas celle de l'utilisateur. INTERDIT d'inverser (ex: « tu t'es disputé avec ton frère » alors que c'est ELLE qui a quitté son mari = ton frère).",
+      "L'utilisateur = hôte / maître de maison dans la plupart des scènes. Le personnage = visiteuse ou celle qui a le motif du scénario.",
+    ].join("\n");
     const lines = [
+      roleFacts,
+      "",
       currentStateBlock(chat),
       "",
       "⚠ VERROU : lieu=" + (sc.place || "?") + " | tenue=" + (sc.outfit || sc.body || "?") + " | pose=" + (sc.pose || sc.activity || "?"),
@@ -1452,6 +1463,15 @@
         chat.relationship.bond = "romance";
       }
       chat.messages.push({ role: "user", content: txt, ts: Date.now() });
+      // Épingler rôle+scénario dès le 1er message (mémoire longue)
+      try {
+        ensureVault(chat);
+        const rolePin = "RÔLE FIXE: " + (PERSONA.name || "") + " | " + (PERSONA.title || "") + " | " + String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 400);
+        const hasRole = (chat.vault.entries || []).some((e) => e.tag === "role" && e.pinned);
+        if (!hasRole) {
+          pushVault(chat, "role", rolePin, true);
+        }
+      } catch (_) {}
       save(chatKey, chat);
       const bond = chat.relationship.bond || "indéfini";
       const title = String(PERSONA.title || "") + " " + String(PERSONA.scenario || "");
@@ -1602,15 +1622,23 @@
           const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "");
           const sheComes = /d[eé]barque|passe chez|frappe|sonne|visite|dispute|rupture|heures supp|oubli[eé]|fuite|babysitter|après le boulot|afterwork|d[eé]placement|chez toi|chez vous/i.test(sc);
           const sheHasProblem = /dispute|rupture|dispute avec|s'est disput|s'est disputée|conjoint|partenaire|mari|heures supp|dossier|fuite|oubli/i.test(sc);
+          const isBs = /belle-?s[oœ]eur|sœur de ton|femme de ton frère|sœur de ton conjoint/i.test(sc);
+          const bits = [];
           if (sheComes || sheHasProblem) {
-            return [
-              "ANCRAGE SCÈNE (OBLIGATOIRE) :",
-              "• C'est TOI qui es chez l'utilisateur (ou dans son espace) pour le motif du scénario.",
-              "• C'est TOI qui as le motif (dispute / travail / visite / oubli…). L'utilisateur t'accueille.",
-              "• Premiers messages : parle de TON motif, pas du sien. N'inverse pas les rôles.",
-            ].join(" ");
+            bits.push(
+              "ANCRAGE SCÈNE (OBLIGATOIRE — valable TOUTE la conversation, pas seulement le début) :",
+              "• C'est TOI qui es chez l'utilisateur pour le motif du scénario.",
+              "• C'est TOI qui as le motif (ta dispute, ton travail, ta visite…). L'utilisateur t'accueille.",
+              "• N'inverse JAMAIS : ne dis pas que LUI s'est disputé avec son frère / sa femme si le scénario dit que C'EST TOI qui as quitté ton conjoint.",
+              "• Exemple INTERDIT si tu es belle-sœur après dispute avec ton mari : « Tu t'es disputé avec ton frère ? » / « Raconte-moi ta dispute avec mon mari » inversé. CORRECT : tu parles de TA dispute avec TON mari (= son frère)."
+            );
           }
-          return "ANCRAGE SCÈNE : reste strictement dans le titre et le scénario de ta fiche.";
+          if (isBs) {
+            bits.push(
+              "BELLE-SŒUR : ton mari / partenaire = le frère de l'utilisateur (ou le lien du scénario). Sa femme = ta sœur si sœur du conjoint. Ne confonds jamais qui s'est disputé avec qui."
+            );
+          }
+          return bits.length ? bits.join(" ") : "ANCRAGE SCÈNE : reste strictement dans le titre et le scénario de ta fiche — du premier au dernier message.";
         })(),
         "=== PRÉMISSE DE RÔLE (NON NÉGOCIABLE) ===",
         "1) Tu es UNIQUEMENT le personnage de la fiche (nom, âge, titre, scénario). L'utilisateur est l'autre personne de la scène — le maître de maison / l'hôte dans la plupart des cas.",
@@ -1770,7 +1798,7 @@
         "- N'invente PAS un changement. Si top+jean, tu restes top+jean après une serviette reçue.",
         "- Pour Léa (orage) : tenue de base = top court blanc/crème TREMPÉ + jean moulant mouillé. PAS de veste, PAS de soutien-gorge seul, PAS lingerie seule sauf si enlevé explicitement.",
         "- Si la conversation redevient calme, reste SFW.",
-        memoryBlock(chat, typeof txt !== "undefined" ? txt : ""),
+        memoryBlock(chat, typeof txt !== "undefined" ? txt : "", PERSONA),
         "LANGUE : français uniquement (paroles, *actions*, (pensées)). Aucune phrase en anglais. Réponds uniquement en tant que le personnage.",
         "LONGUEUR : 3 à 8 phrases. Privilégie la qualité et la variété, pas le remplissage.",
         "RAPPEL FORMAT : (pensée) puis *action* puis paroles — voir bloc FORMAT en tête. Une pensée, une action, 1-3 phrases.",
@@ -2115,37 +2143,19 @@
       }
       // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
-      // Duo si le prompt demande 2 femmes (LEFT/RIGHT) — ne pas bloquer 2girls
-      const isDuoPrompt = /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women together/i.test(prompt);
-      // Critiques EN PREMIER (sinon troncature coupe anti-miroir / grille)
+      const isDuoPrompt = /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1/i.test(prompt);
       const negative = [
-        // Toujours anti-miroir / grille (même pour duos : pas de planche 2x2)
-        "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, vertical symmetry, kaleidoscope,",
-        "half mirror, mirror split, collage, grid, 2x2, 4x4, 4 panel, multipanel, split screen, four faces, tiled image,",
-        // Solo uniquement : interdire multi-personnes
-        isDuoPrompt
-          ? "3girls, four women, five women, crowd, clone twins identical,"
-          : "2girls, 3girls, multiple women, twins, clone, same woman twice, extra person,",
-        "cartoon, anime, manga, illustration, 2d, drawing, painting, cgi, plastic skin,",
-        "blurry, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy, watermark, text,",
-        "child, teen, underage, different face, different person,",
-        "wooden bra, bark texture, melting clothes, pregnant belly, body horror,",
+        // anti-miroir / grille en premier (court, ne casse pas le rendu)
+        "mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
+        "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
+        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
+        "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
+        "child, teen, underage, different face, different person, face morph,",
+        "same pose as reference, identical composition, copy of source pose,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
 
       let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
-      // Toujours forcer photo réaliste (évite anime kitsune / grilles)
-      if (!/photorealistic photograph/i.test(promptSafe)) {
-        promptSafe = ("photorealistic photograph, natural skin pores, DSLR photo, " + promptSafe).slice(0, 1200);
-      }
-      // Solo : une seule femme ; duo : deux femmes distinctes, pas de miroir
-      if (isDuoPrompt) {
-        if (!/two distinct women/i.test(promptSafe)) {
-          promptSafe = (promptSafe + ", two distinct women, different faces, natural photo").slice(0, 1200);
-        }
-      } else if (!/single complete person/i.test(promptSafe)) {
-        promptSafe = (promptSafe + ", single complete person only, one woman, natural photo composition").slice(0, 1200);
-      }
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
@@ -2194,9 +2204,9 @@
       const photoModels = [
         "ICBINP - I Can't Believe It's Not Photography",
         "AbsoluteReality",
+        "Dreamshaper",
         "Realistic Vision",
         "Deliberate",
-        "Dreamshaper",
       ];
       const payloads = [];
 
@@ -2205,11 +2215,11 @@
       den = Math.min(0.82, Math.max(0.62, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
-      // soloNeg court : les critiques sont déjà en tête de negative
-      const soloNeg = ", contact sheet, moodboard, Rorschach, flipped duplicate, anime, manga";
+      const soloNeg = isDuoPrompt
+        ? ", 3girls, four women, crowd, identical clone twins"
+        : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
       const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
-      // 1000 chars, critiques déjà en premier → ne jamais les tronquer
-      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1000);
+      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // txt2img EN PREMIER (variété poses)
       const forceImg2 = useImg2Img && body.force_img2img === true;

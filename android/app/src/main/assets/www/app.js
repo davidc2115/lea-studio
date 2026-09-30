@@ -325,15 +325,9 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    // Assez fort pour être vraiment ronde, sans pile BBW qui casse le rendu
-    out.positive.push(
-      "(plus-size body:1.45)",
-      "(chubby soft figure:1.35)",
-      "full hips",
-      "thick thighs",
-      "soft natural belly"
-    );
-    out.negative.push("skinny, model thin, underweight, flat athletic stomach, slim hourglass only");
+    // Comme hier + un cran pour vraiment ronde (sans BBW / piles de NOT)
+    out.positive.push("(curvy plus-size soft body:1.4)", "full hips", "thick thighs", "soft natural midsection");
+    out.negative.push("skinny, model thin, underweight");
   } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
     out.positive.push("curvy feminine figure, soft curves");
   }
@@ -1236,11 +1230,9 @@ function buildLeaImagePrompt(extra = "") {
       "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
       "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
       "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
-      "NOT mirrored image, NOT left-right mirror, NOT reflection symmetry, NOT bilateral symmetry, NOT kaleidoscope,",
-      "NOT wooden bra, NOT bark texture clothing, NOT pregnant belly, NOT body horror, NOT plastic skin, NOT melting clothes,",
-      "photorealistic photograph, real human skin, sharp photo, single complete person only, one woman,",
-      "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT 2d, NOT drawing, NOT webtoon, NOT comic,",
-      "NOT collage, NOT grid, NOT 2x2, NOT 4x4, NOT 4 panel, NOT multipanel, NOT split screen, NOT four faces, NOT contact sheet,",
+      "NOT collage, NOT grid, NOT 2x2, NOT multipanel, NOT split screen,",
+      "photorealistic photograph, real human skin, sharp photo,",
+      "NOT anime, NOT manga, NOT cartoon, NOT illustration,",
       nhLock ? "NOT plain human only, NOT missing fantasy features, NOT ordinary human ears only," : "",
       (isFantasy && ageN > 35) ? "NOT elderly, NOT wrinkles, NOT old woman face," :
         (ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,"),
@@ -6221,7 +6213,7 @@ async function generatePhoto() {
           return;
         }
       } catch (_) {}
-      const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, wooden bra, bark texture, pregnant, body horror, plastic skin, melting clothes, deformed, child, underage, blurry, watermark";
+      const neg = bodyNegatives(c) + ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
       const ldPayload = JSON.stringify({
         prompt: String(prompt).slice(0, 1800),
         negative: String(neg).slice(0, 500),
@@ -6280,7 +6272,7 @@ async function generatePhoto() {
               if (!st.warm && window.LeaAndroid.sdCppPreload) {
                 try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
               }
-              const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, wooden bra, bark texture, pregnant, body horror, plastic skin, melting clothes, deformed, child, underage, blurry, watermark";
+              const neg = bodyNegatives(c) + ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
               let sdRef = null;
               try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
               const sdPayload = {
@@ -6410,10 +6402,8 @@ async function generatePhoto() {
           ", blurry, out of focus, same pose every time, static nude portrait only, " +
           "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
           "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
-          "anime, manga, cartoon, illustration, 2d, drawing, webtoon, comic style, " +
-          "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, " +
-          "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, Rorschach, " +
-          "wooden bra, bark texture clothing, pregnant belly, body horror, plastic skin, melting clothes, diseased skin";
+          "anime, manga, cartoon, illustration, " +
+          "collage, grid, 2x2, multipanel, split screen, mirror symmetry";
         // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
         payload.force_img2img = false;
         delete payload.source_image;
