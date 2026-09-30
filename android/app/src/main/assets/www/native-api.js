@@ -2164,6 +2164,51 @@
       return { ok: true, facePrompt: desc };
     }
 
+
+    // ——— Rate limit Horde (évite "2 per 1 second" + timeout IP) ———
+    let _hordeLastSubmit = 0;
+    let _hordeLastStatus = 0;
+    let _hordeIpBlockedUntil = 0;
+    const HORDE_MIN_SUBMIT_MS = 12000; // min 12s entre 2 soumissions
+    const HORDE_MIN_STATUS_MS = 4500;  // min 4.5s entre checks
+
+    function parseHordeWaitMs(msg) {
+      const s = String(msg || "");
+      let m = s.match(/timeout for (\d+)\s*more seconds/i);
+      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      m = s.match(/(\d+)\s*more seconds/i);
+      if (m) return (parseInt(m[1], 10) + 2) * 1000;
+      m = s.match(/try again in (\d+)/i);
+      if (m) return (parseInt(m[1], 10) + 1) * 1000;
+      if (/2 per 1 second|rate limit|too many requests|429/i.test(s)) return 15000;
+      if (/abuse prevention|put into timeout/i.test(s)) return 120000;
+      return 0;
+    }
+
+    async function hordeWaitGate(kind) {
+      const now = Date.now();
+      if (_hordeIpBlockedUntil > now) {
+        const sec = Math.ceil((_hordeIpBlockedUntil - now) / 1000);
+        throw new Error("Horde : IP en pause anti-abus encore " + sec + " s. Attends ou utilise une clé aihorde.net dans Réglages.");
+      }
+      const last = kind === "status" ? _hordeLastStatus : _hordeLastSubmit;
+      const min = kind === "status" ? HORDE_MIN_STATUS_MS : HORDE_MIN_SUBMIT_MS;
+      const wait = last + min - now;
+      if (wait > 0) {
+        await new Promise((r) => setTimeout(r, wait));
+      }
+      if (kind === "status") _hordeLastStatus = Date.now();
+      else _hordeLastSubmit = Date.now();
+    }
+
+    function markHordeRateLimit(msg) {
+      const ms = parseHordeWaitMs(msg);
+      if (ms > 0) {
+        _hordeIpBlockedUntil = Math.max(_hordeIpBlockedUntil, Date.now() + ms);
+      }
+    }
+
+
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
@@ -2329,8 +2374,13 @@
         slow_workers: true,
       });
 
-      for (const host of hosts) {
-        for (const bodyPayload of payloads) {
+      // Un seul host principal (aihorde = stablehorde, éviter double spam)
+      const hostsTry = ["https://aihorde.net/api/v2"];
+      await hordeWaitGate("submit");
+      for (const host of hostsTry) {
+        for (let pi = 0; pi < payloads.length; pi++) {
+          const bodyPayload = payloads[pi];
+          if (pi > 0) await new Promise((r) => setTimeout(r, 3000));
           try {
             const res = await fetch(host + "/generate/async", {
               method: "POST",
@@ -2353,8 +2403,19 @@
             }
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
             console.warn("[horde]", host, last);
+            markHordeRateLimit(last);
+            // Rate limit / IP timeout : ne pas spammer l'autre host
+            if (/timeout for|abuse prevention|2 per 1 second|rate limit|too many|429/i.test(String(last))) {
+              const sec = Math.ceil(parseHordeWaitMs(last) / 1000) || 60;
+              throw new Error(
+                "Horde limite de débit : attends " + sec + " s puis réessaie. " +
+                "(Astuce : clé gratuite sur aihorde.net → moins de blocages.) Détail : " + String(last).slice(0, 120)
+              );
+            }
           } catch (e) {
             last = String(e.message || e);
+            if (/Horde limite|IP en pause/i.test(last)) throw e;
+            markHordeRateLimit(last);
           }
         }
       }
@@ -2363,20 +2424,42 @@
           "Horde quota (kudos). Réessaie plus tard ou ajoute une clé gratuite aihorde.net. " + String(last).slice(0, 100)
         );
       }
+      if (/timeout for|abuse prevention|2 per 1 second|rate limit/i.test(String(last))) {
+        const sec = Math.ceil(parseHordeWaitMs(last) / 1000) || 60;
+        throw new Error("Horde limite de débit : attends " + sec + " s. " + String(last).slice(0, 100));
+      }
       throw new Error(last || "Horde indisponible");
     }
 
     if (path === "/api/image-status") {
       const jobId = body.jobId || "";
-      const host = body.host || "https://stablehorde.net/api/v2";
+      let host = body.host || "https://aihorde.net/api/v2";
       if (!jobId) throw new Error("jobId manquant");
-      const chk = await fetch(host + "/generate/check/" + jobId, { headers: { "Client-Agent": "lea-studio:1.0:anon" } });
-      const c = await chk.json();
+      // Normaliser host stablehorde → aihorde (même backend)
+      if (/stablehorde\.net/i.test(host)) host = "https://aihorde.net/api/v2";
+      try {
+        await hordeWaitGate("status");
+      } catch (e) {
+        return { done: false, wait: Math.ceil((_hordeIpBlockedUntil - Date.now()) / 1000), queue: null, processing: false, error: String(e.message || e) };
+      }
+      let c = {};
+      try {
+        const chk = await fetch(host + "/generate/check/" + jobId, { headers: { "Client-Agent": "LeaStudio:2.5:https://github.com/davidc2115/lea-studio" } });
+        c = await chk.json().catch(() => ({}));
+        if (c.message || c.error) {
+          markHordeRateLimit(c.message || c.error);
+        }
+      } catch (e) {
+        markHordeRateLimit(e.message);
+        return { done: false, wait: 10, queue: null, processing: false };
+      }
       if (c.faulted) return { done: true, error: "Worker Horde en échec" };
       if (!c.done) {
         return { done: false, wait: c.wait_time, queue: c.queue_position, processing: c.processing };
       }
-      const st = await fetch(host + "/generate/status/" + jobId, { headers: { "Client-Agent": "lea-studio:1.0:anon" } });
+      // Petite pause avant status (2e requête)
+      await new Promise((r) => setTimeout(r, 800));
+      const st = await fetch(host + "/generate/status/" + jobId, { headers: { "Client-Agent": "LeaStudio:2.5:https://github.com/davidc2115/lea-studio" } });
       const data = await st.json();
       const g = data.generations && data.generations[0];
       if (!g) return { done: true, error: "Pas d'image renvoyée" };

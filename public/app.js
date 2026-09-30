@@ -4643,7 +4643,7 @@ function renderProfile() {
       if (r && typeof r.catch === "function") {
         r.catch((e) => {
           window._leaGenBusy = false;
-          setGenStatus("Erreur génération : " + (e && e.message ? e.message : e));
+          setGenStatus((e && e.message ? e.message : String(e)));
           console.error("[lea gen]", e);
         });
       }
@@ -6194,7 +6194,7 @@ async function generateScenePhoto() {
     setSceneProgress("⏳ File Horde · job " + String(start.jobId).slice(0, 8) + "…", 18);
 
     for (let i = 0; i < 200; i++) {
-      await new Promise((r) => setTimeout(r, 3500));
+      await new Promise((r) => setTimeout(r, 5000));
       let st = {};
       try {
         st = await api("/api/image-status", {
@@ -6854,20 +6854,33 @@ async function persistImageUrl(url) {
 
 async function pollHordeJob(jobId, host, charId) {
   const cid = charId || state.current || "lea";
-  for (let i = 0; i < 240; i++) {
-    await new Promise((r) => setTimeout(r, 2500));
+  for (let i = 0; i < 180; i++) {
+    await new Promise((r) => setTimeout(r, 5000));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
+      if (st && st.error && /limite|pause|timeout for|abuse|rate limit|2 per/i.test(String(st.error))) {
+        setGenStatus(st.error);
+        // Attendre puis continuer (ne pas abandonner le job)
+        const m = String(st.error).match(/(\d+)\s*s/);
+        const waitSec = m ? Math.min(180, parseInt(m[1], 10)) : 30;
+        setGenStatus(st.error + " — reprise auto…");
+        await new Promise((r) => setTimeout(r, waitSec * 1000));
+        continue;
+      }
       if (!st.done) {
         const q = st.queue != null ? " · file " + st.queue : "";
         const w = st.wait != null ? " · ~" + st.wait + "s" : "";
         const p = st.processing ? " · calcul" : "";
-        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/240)");
+        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/180)");
         continue;
       }
       window._leaGenBusy = false;
       if (st.error) {
         setGenStatus(st.error);
+        return;
+      }
+      if (!st.url) {
+        setGenStatus("Horde : job terminé sans image");
         return;
       }
       const stored = await addToGallery(st.url, cid);
@@ -6876,11 +6889,15 @@ async function pollHordeJob(jobId, host, charId) {
       if (stored && state.current === cid) if (state.view === "profile") { renderProfile(); } else if (state.view !== "chat") { openFull(resolvePhotoSrc(stored) || stored); }
       return;
     } catch (e) {
-      setGenStatus("Horde… " + (e.message || e));
+      const msg = String(e.message || e);
+      setGenStatus("Horde… " + msg);
+      if (/limite|pause|timeout for|abuse|2 per/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 20000));
+      }
     }
   }
   window._leaGenBusy = false;
-  setGenStatus("Horde timeout (~12 min). Réessaie, file parfois très longue.");
+  setGenStatus("Horde timeout (~15 min). Réessaie plus tard (file parfois longue).");
 }
 
 function formatBubble(text) {
