@@ -325,9 +325,15 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    // Prompt simple (comme avant) — poids forts / BBW cassaient le rendu
-    out.positive.push("(curvy plus-size soft body:1.35)", "full hips", "thick thighs", "soft natural midsection");
-    out.negative.push("skinny, model thin, underweight, flat athletic stomach only");
+    // Assez fort pour être vraiment ronde, sans pile BBW qui casse le rendu
+    out.positive.push(
+      "(plus-size body:1.45)",
+      "(chubby soft figure:1.35)",
+      "full hips",
+      "thick thighs",
+      "soft natural belly"
+    );
+    out.negative.push("skinny, model thin, underweight, flat athletic stomach, slim hourglass only");
   } else if (/curvy|voluptueuse|voluptuous/i.test(blob)) {
     out.positive.push("curvy feminine figure, soft curves");
   }
@@ -1232,9 +1238,9 @@ function buildLeaImagePrompt(extra = "") {
       "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
       "NOT mirrored image, NOT left-right mirror, NOT reflection symmetry, NOT bilateral symmetry, NOT kaleidoscope,",
       "NOT wooden bra, NOT bark texture clothing, NOT pregnant belly, NOT body horror, NOT plastic skin, NOT melting clothes,",
-      "photorealistic photograph, real human skin, sharp photo, asymmetric natural pose, single complete person,",
+      "photorealistic photograph, real human skin, sharp photo, single complete person only, one woman,",
       "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT 2d, NOT drawing, NOT webtoon, NOT comic,",
-      "NOT collage, NOT grid, NOT 2x2, NOT 4 panel, NOT multipanel, NOT split screen, NOT four faces, NOT contact sheet,",
+      "NOT collage, NOT grid, NOT 2x2, NOT 4x4, NOT 4 panel, NOT multipanel, NOT split screen, NOT four faces, NOT contact sheet,",
       nhLock ? "NOT plain human only, NOT missing fantasy features, NOT ordinary human ears only," : "",
       (isFantasy && ageN > 35) ? "NOT elderly, NOT wrinkles, NOT old woman face," :
         (ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,"),

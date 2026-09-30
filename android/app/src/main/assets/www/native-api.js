@@ -2115,29 +2115,36 @@
       }
       // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
+      // Duo si le prompt demande 2 femmes (LEFT/RIGHT) — ne pas bloquer 2girls
+      const isDuoPrompt = /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women together/i.test(prompt);
+      // Critiques EN PREMIER (sinon troncature coupe anti-miroir / grille)
       const negative = [
-        "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
-        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll, 2d, drawing, webtoon, comic,",
-        "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, tiled image,",
-        "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, vertical symmetry,",
-        "kaleidoscope, half mirror, mirror split, symmetrical face split, mirrored hair, Rorschach, flipped duplicate,",
-        "wooden bra, bark texture clothing, tree bark on body, leather fused to skin, melting clothes, deformed lingerie,",
-        "pregnant belly, pregnancy, bloated diseased skin, excessive stretch marks as primary feature, body horror,",
-        "oily plastic skin, wax figure, mannequin, oversharpened pores, alien skin texture,",
-        "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
-        "child, teen, underage, different face, different person, face morph,",
-        "same pose as reference, identical composition, copy of source pose,",
+        // Toujours anti-miroir / grille (même pour duos : pas de planche 2x2)
+        "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, vertical symmetry, kaleidoscope,",
+        "half mirror, mirror split, collage, grid, 2x2, 4x4, 4 panel, multipanel, split screen, four faces, tiled image,",
+        // Solo uniquement : interdire multi-personnes
+        isDuoPrompt
+          ? "3girls, four women, five women, crowd, clone twins identical,"
+          : "2girls, 3girls, multiple women, twins, clone, same woman twice, extra person,",
+        "cartoon, anime, manga, illustration, 2d, drawing, painting, cgi, plastic skin,",
+        "blurry, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy, watermark, text,",
+        "child, teen, underage, different face, different person,",
+        "wooden bra, bark texture, melting clothes, pregnant belly, body horror,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 
       let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
       // Toujours forcer photo réaliste (évite anime kitsune / grilles)
       if (!/photorealistic photograph/i.test(promptSafe)) {
-        promptSafe = ("photorealistic photograph of a real woman, natural skin pores, DSLR photo, " + promptSafe).slice(0, 1200);
+        promptSafe = ("photorealistic photograph, natural skin pores, DSLR photo, " + promptSafe).slice(0, 1200);
       }
-      // Anti-miroir explicite (évite demi-visage reflété)
-      if (!/asymmetric natural pose/i.test(promptSafe)) {
-        promptSafe = (promptSafe + ", asymmetric natural pose, single complete person, natural uneven lighting").slice(0, 1200);
+      // Solo : une seule femme ; duo : deux femmes distinctes, pas de miroir
+      if (isDuoPrompt) {
+        if (!/two distinct women/i.test(promptSafe)) {
+          promptSafe = (promptSafe + ", two distinct women, different faces, natural photo").slice(0, 1200);
+        }
+      } else if (!/single complete person/i.test(promptSafe)) {
+        promptSafe = (promptSafe + ", single complete person only, one woman, natural photo composition").slice(0, 1200);
       }
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
@@ -2198,9 +2205,11 @@
       den = Math.min(0.82, Math.max(0.62, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
-      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art, wooden clothing, bark texture, pregnant, body horror, plastic skin, melting clothes";
+      // soloNeg court : les critiques sont déjà en tête de negative
+      const soloNeg = ", contact sheet, moodboard, Rorschach, flipped duplicate, anime, manga";
       const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
-      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
+      // 1000 chars, critiques déjà en premier → ne jamais les tronquer
+      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1000);
 
       // txt2img EN PREMIER (variété poses)
       const forceImg2 = useImg2Img && body.force_img2img === true;
