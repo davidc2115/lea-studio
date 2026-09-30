@@ -2214,8 +2214,8 @@
       const saved = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
       if (saved > Date.now()) _hordeIpBlockedUntil = saved;
     } catch (_) {}
-    const HORDE_MIN_SUBMIT_MS = 18000; // 18s entre 2 soumissions (anon)
-    const HORDE_MIN_STATUS_MS = 6000;  // 6s entre checks
+    const HORDE_MIN_SUBMIT_MS = 45000; // 45s entre soumissions (anon) // 18s entre 2 soumissions (anon)
+    const HORDE_MIN_STATUS_MS = 8000; // 8s min entre checks  // 6s entre checks
 
     function parseHordeWaitMs(msg) {
       const s = String(msg || "");
@@ -2228,7 +2228,7 @@
       m = s.match(/attends? (\d+)\s*s/i);
       if (m) return (parseInt(m[1], 10) + 2) * 1000;
       if (/2 per 1 second|rate limit|too many requests|429/i.test(s)) return 20000;
-      if (/abuse prevention|put into timeout/i.test(s)) return 900000; // 15 min défaut
+      if (/abuse prevention|put into timeout/i.test(s)) return 60000; // 1 min si pas de chiffre (évite gonfler le ban)
       return 0;
     }
 
@@ -2274,6 +2274,13 @@
           localStorage.setItem("lea.hordeBlockedUntil", String(_hordeIpBlockedUntil));
         } catch (_) {}
       }
+    }
+    /** Après un job réussi : cooldown soumission pour ne pas reban l'IP */
+    function markHordeJobDone() {
+      _hordeLastSubmit = Date.now();
+      try {
+        localStorage.setItem("lea.hordeLastSubmit", String(Date.now()));
+      } catch (_) {}
     }
 
 
@@ -2377,13 +2384,10 @@
       // Steps élevés = moins d'images "flash" (2-5s) floues / hors-identité
       const steps = hasHordeAccount ? 36 : 30;
       // Noms reconnus sur AI Horde (évite turbo/lightning qui sortent en 3s)
-      const photoModels = [
-        "ICBINP - I Can't Believe It's Not Photography",
-        "AbsoluteReality",
-        "Dreamshaper",
-        "Realistic Vision",
-        "Deliberate",
-      ];
+      // 1-2 modèles max = moins de charge workers / moins de rejets
+      const photoModels = hasHordeAccount
+        ? ["ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
+        : ["AbsoluteReality", "Dreamshaper"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2397,27 +2401,15 @@
       const qualityNeg = ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
-      // txt2img EN PREMIER (variété poses)
+      // UNE SEULE soumission (évite ban IP : plus de chaîne txt2img+img2img+secours)
       const forceImg2 = useImg2Img && body.force_img2img === true;
-      if (!forceImg2) {
-        payloads.push({
-          prompt: promptSafe + " ### " + negFull,
-          params: { width: W, height: H, steps: steps, n: 1, sampler_name: "k_euler_a", cfg_scale: 8.5 },
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: photoModels,
-          r2: true,
-          slow_workers: true,
-        });
-      }
-
-      if (useImg2Img) {
-        const faceBoost = "(identical face:1.55), (same woman as reference photo:1.45), same hair color, same eye color, (completely new pose:1.55), (different camera angle:1.45), ";
+      if (forceImg2 && useImg2Img) {
+        const faceBoost = "(identical face:1.5), same hair color, same eye color, (new pose:1.5), ";
         const imgPrompt = prioritizeIdentity(faceBoost + promptSafe);
         payloads.push({
-          prompt: imgPrompt + " ### " + negFull + ", same pose as reference, identical composition, copy of source pose, static portrait",
+          prompt: (imgPrompt + " ### " + negFull).slice(0, 1800),
           params: {
-            width: W, height: H, steps: steps, n: 1,
+            width: W, height: Math.min(H, 640), steps: Math.min(steps, 28), n: 1,
             sampler_name: "k_euler_a", cfg_scale: 7.5,
             denoising_strength: den,
           },
@@ -2429,18 +2421,25 @@
           source_image: src,
           source_processing: "img2img",
         });
+      } else {
+        // txt2img par défaut (poses variées, 1 seul job)
+        payloads.push({
+          prompt: (promptSafe + " ### " + negFull).slice(0, 1800),
+          params: {
+            width: 512,
+            height: hasHordeAccount ? 768 : 576,
+            steps: hasHordeAccount ? 32 : 25,
+            n: 1,
+            sampler_name: "k_euler_a",
+            cfg_scale: 7.5,
+          },
+          nsfw: body.nsfw !== false,
+          censor_nsfw: false,
+          models: photoModels,
+          r2: true,
+          slow_workers: true,
+        });
       }
-
-      // Secours txt2img (sans le modèle basique 16 steps qui sort en 3s)
-      payloads.push({
-        prompt: prioritizeIdentity(promptSafe).slice(0, 1200) + " ### " + negative.slice(0, 600),
-        params: { width: 512, height: 640, steps: 30, n: 1, sampler_name: "k_euler_a", cfg_scale: 7.5 },
-        nsfw: body.nsfw !== false,
-        censor_nsfw: false,
-        models: photoModels,
-        r2: true,
-        slow_workers: true,
-      });
 
       // Un seul host principal (aihorde = stablehorde, éviter double spam)
       const hostsTry = ["https://aihorde.net/api/v2"];
@@ -2461,6 +2460,15 @@
             });
             const data = await res.json().catch(() => ({}));
             if (data.id) {
+              // Job accepté = IP OK pour l'instant ; ne pas garder un faux ban local
+              try {
+                const left = _hordeIpBlockedUntil - Date.now();
+                if (left > 0 && left < 120000) {
+                  _hordeIpBlockedUntil = 0;
+                  localStorage.removeItem("lea.hordeBlockedUntil");
+                }
+              } catch (_) {}
+              markHordeJobDone();
               return {
                 jobId: data.id,
                 host,

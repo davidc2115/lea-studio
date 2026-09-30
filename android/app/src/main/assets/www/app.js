@@ -4740,8 +4740,9 @@ function setGenStatus(t) {
         const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
         if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
       }
-    } else if (/abuse prevention|put into timeout/i.test(msg)) {
-      const until = Date.now() + 900000;
+    } else if (/abuse prevention|put into timeout/i.test(msg) && !/\d+\s*more seconds/i.test(msg)) {
+      // Sans durée serveur : +2 min seulement (ne pas gonfler à 15-36 min)
+      const until = Date.now() + 120000;
       const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
       if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
     }
@@ -6396,6 +6397,14 @@ async function generatePhoto() {
       window._leaGenBusy = false;
       return;
     }
+    const lastSub = Number(localStorage.getItem("lea.hordeLastSubmit") || 0);
+    const since = Date.now() - lastSub;
+    if (lastSub && since < 45000) {
+      const wait = Math.ceil((45000 - since) / 1000);
+      setGenStatus("Anti-ban : attends encore " + wait + " s avant une nouvelle génération Horde.");
+      window._leaGenBusy = false;
+      return;
+    }
   } catch (_) {}
 
   if (window._leaGenBusy) {
@@ -6900,16 +6909,18 @@ async function persistImageUrl(url) {
 
 async function pollHordeJob(jobId, host, charId) {
   const cid = charId || state.current || "lea";
-  for (let i = 0; i < 180; i++) {
-    await new Promise((r) => setTimeout(r, 5000));
+  for (let i = 0; i < 120; i++) {
+    // Poll adaptatif : plus espacé = moins de ban IP
+    // Base 8s, puis 10s, max 15s ; si wait_time API élevé, dormir ce temps
+    let sleepMs = i < 5 ? 8000 : (i < 20 ? 10000 : 15000);
+    await new Promise((r) => setTimeout(r, sleepMs));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
-      if (st && st.error && /limite|pause|timeout for|abuse|rate limit|2 per/i.test(String(st.error))) {
+      if (st && st.error && /limite|pause|timeout for|abuse|rate limit|2 per|bloquée/i.test(String(st.error))) {
         setGenStatus(st.error);
-        // Attendre puis continuer (ne pas abandonner le job)
         const m = String(st.error).match(/(\d+)\s*s/);
-        const waitSec = m ? Math.min(180, parseInt(m[1], 10)) : 30;
-        setGenStatus(st.error + " — reprise auto…");
+        const waitSec = m ? Math.min(120, Math.max(20, parseInt(m[1], 10))) : 45;
+        setGenStatus(st.error + " — pause " + waitSec + "s puis reprise…");
         await new Promise((r) => setTimeout(r, waitSec * 1000));
         continue;
       }
@@ -6917,7 +6928,12 @@ async function pollHordeJob(jobId, host, charId) {
         const q = st.queue != null ? " · file " + st.queue : "";
         const w = st.wait != null ? " · ~" + st.wait + "s" : "";
         const p = st.processing ? " · calcul" : "";
-        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/180)");
+        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/120)");
+        // Si Horde dit wait 30s+, ne pas re-poller trop tôt
+        if (st.wait && Number(st.wait) >= 20) {
+          const extra = Math.min(45, Number(st.wait)) * 1000;
+          await new Promise((r) => setTimeout(r, extra));
+        }
         continue;
       }
       window._leaGenBusy = false;
@@ -6930,20 +6946,30 @@ async function pollHordeJob(jobId, host, charId) {
         return;
       }
       const stored = await addToGallery(st.url, cid);
-      setGenStatus("Image ajoutée à la galerie");
+      // Cooldown 60s après succès pour ne pas re-ban l'IP anonyme
+      try {
+        const coolUntil = Date.now() + 60000;
+        const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
+        // Ne pas écraser un vrai ban plus long
+        if (coolUntil > prev && prev < Date.now()) {
+          localStorage.setItem("lea.hordeLastSubmit", String(Date.now()));
+        }
+        localStorage.setItem("lea.hordeLastSubmit", String(Date.now()));
+      } catch (_) {}
+      setGenStatus("Image OK · attends ~1 min avant la prochaine (anti-ban Horde)");
       if (state.view === "profile" && state.current === cid) renderProfile();
       if (stored && state.current === cid) if (state.view === "profile") { renderProfile(); } else if (state.view !== "chat") { openFull(resolvePhotoSrc(stored) || stored); }
       return;
     } catch (e) {
       const msg = String(e.message || e);
       setGenStatus("Horde… " + msg);
-      if (/limite|pause|timeout for|abuse|2 per/i.test(msg)) {
-        await new Promise((r) => setTimeout(r, 20000));
+      if (/limite|pause|timeout for|abuse|2 per|bloquée/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 45000));
       }
     }
   }
   window._leaGenBusy = false;
-  setGenStatus("Horde timeout (~15 min). Réessaie plus tard (file parfois longue).");
+  setGenStatus("Horde timeout. Réessaie plus tard (ou clé aihorde.net dans Clés).");
 }
 
 function formatBubble(text) {
