@@ -2095,16 +2095,22 @@
         "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
         "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll, 2d, drawing, webtoon, comic,",
         "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, tiled image,",
+        "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, vertical symmetry,",
+        "kaleidoscope, half mirror, mirror split, symmetrical face split, mirrored hair, Rorschach, flipped duplicate,",
         "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
         "child, teen, underage, different face, different person, face morph,",
         "same pose as reference, identical composition, copy of source pose,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1000);
 
       let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
       // Toujours forcer photo réaliste (évite anime kitsune / grilles)
       if (!/photorealistic photograph/i.test(promptSafe)) {
         promptSafe = ("photorealistic photograph of a real woman, natural skin pores, DSLR photo, " + promptSafe).slice(0, 1200);
+      }
+      // Anti-miroir explicite (évite demi-visage reflété)
+      if (!/asymmetric natural pose/i.test(promptSafe)) {
+        promptSafe = (promptSafe + ", asymmetric natural pose, single complete person, natural uneven lighting").slice(0, 1200);
       }
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
@@ -2154,9 +2160,9 @@
       const photoModels = [
         "ICBINP - I Can't Believe It's Not Photography",
         "AbsoluteReality",
-        "Dreamshaper",
         "Realistic Vision",
         "Deliberate",
+        "Dreamshaper",
       ];
       const payloads = [];
 
@@ -2165,7 +2171,7 @@
       den = Math.min(0.82, Math.max(0.62, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
-      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art";
+      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art";
       const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
