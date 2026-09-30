@@ -180,7 +180,15 @@ function physicalLocksFromText(c) {
   ];
   for (const [re, pos] of eyeMap) {
     if (re.test(blob)) {
-      out.positive.push("(" + pos + ":1.3)");
+      out.positive.push("(" + pos + ":1.55)");
+      // Empêcher les yeux par défaut (bleus sur blondes, verts génériques)
+      if (/brown|marron|hazel|noisette/i.test(pos)) {
+        out.negative.push("blue eyes, green eyes, grey eyes, ice blue eyes, bright blue eyes");
+      } else if (/blue|bleu/i.test(pos)) {
+        out.negative.push("brown eyes, green eyes, hazel eyes");
+      } else if (/green|vert/i.test(pos) && !/hazel|noisette/i.test(pos)) {
+        out.negative.push("blue eyes, brown eyes, grey eyes");
+      }
       break;
     }
   }
@@ -1228,6 +1236,9 @@ function buildLeaImagePrompt(extra = "") {
       "NOT same pose as reference, NOT same framing, NOT copy of source composition,",
       "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
       "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
+      "photorealistic photograph, real human skin, sharp photo,",
+      "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT 2d, NOT drawing, NOT webtoon, NOT comic,",
+      "NOT collage, NOT grid, NOT 2x2, NOT 4 panel, NOT multipanel, NOT split screen, NOT four faces, NOT contact sheet,",
       nhLock ? "NOT plain human only, NOT missing fantasy features, NOT ordinary human ears only," : "",
       (isFantasy && ageN > 35) ? "NOT elderly, NOT wrinkles, NOT old woman face," :
         (ageN <= 25 ? "NOT middle-aged, NOT 35 years old, NOT 40 years old, NOT mature MILF face," : "NOT teenage face, NOT underage,"),
@@ -4873,6 +4884,19 @@ function formatPhysicalFR(c) {
   if (stored.length > 200 && (/Femme\s*[1—–-]|Femme 1|LEFT woman|Femme\s*—/i.test(stored)) && /Yeux|Cheveux|Poitrine/i.test(stored)) {
     return prettyPhys(stored);
   }
+  // Forcer corps ronde / plus-size si tags ou body le disent (évite "curvy" affiché à tort)
+  try {
+    const blob = [c.body, c.tags && c.tags.join(" "), c.looks_en, stored].filter(Boolean).join(" ").toLowerCase();
+    if (/ronde|plus-size|chubby|pulpeuse|bbw|soft belly/.test(blob)) {
+      stored = stored.replace(
+        /Corps et silhouette\s*:[^\n]*/i,
+        "Corps et silhouette : silhouette ronde / plus-size, ventre doux, cuisses et hanches généreuses, formes pulpeuses (pas mince)."
+      );
+      if (!/silhouette ronde|plus-size|chubby|pulpeuse/i.test(stored)) {
+        stored = stored.replace(/(Poitrine\s*:)/i, "Corps et silhouette : silhouette ronde / plus-size, ventre doux, formes pulpeuses.\n$1");
+      }
+    }
+  } catch (_) {}
   if (stored.indexOf("Sujet") >= 0 || stored.indexOf("Yeux") >= 0 || stored.indexOf("Cheveux") >= 0) {
     return prettyPhys(stored);
   }
@@ -6383,7 +6407,9 @@ async function generatePhoto() {
         payload.negative = (payload.negative || "") +
           ", blurry, out of focus, same pose every time, static nude portrait only, " +
           "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
-          "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person";
+          "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
+          "anime, manga, cartoon, illustration, 2d, drawing, webtoon, comic style, " +
+          "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard";
         // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
         payload.force_img2img = false;
         delete payload.source_image;

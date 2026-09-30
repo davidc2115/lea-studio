@@ -1548,7 +1548,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (green eyes:1.45), (long pointed elf ears highly visible:1.65), (elf ears:1.55), subtle magical skin glow, (medium C-cup breasts:1.4), hourglass figure, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (green eyes:1.45), (long pointed elf ears highly visible:1.65), (elf ears:1.55), subtle magical skin glow, (medium C-cup breasts:1.4), hourglass figure, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Aelindra. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1580,7 +1580,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (purple eyes:1.45), (long pointed elf ears highly visible:1.65), (elf ears:1.55), subtle magical skin glow, (large full D-cup breasts:1.4), athletic toned body, dark brown skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (purple eyes:1.45), (long pointed elf ears highly visible:1.65), (elf ears:1.55), subtle magical skin glow, (large full D-cup breasts:1.4), athletic toned body, dark brown skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Nyxaria. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1613,7 +1613,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (amber golden eyes:1.45), (fox ears on top of head:1.65), (fluffy fox ears:1.55), (multiple fluffy fox tails:1.6), (fox tail visible:1.5), kemonomimi, (medium C-cup breasts:1.4), curvy voluptuous body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, asiatique, adult woman",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (amber golden eyes:1.45), (fox ears on top of head:1.65), (fluffy fox ears:1.55), (multiple fluffy fox tails:1.6), (fox tail visible:1.5), kemonomimi, (medium C-cup breasts:1.4), curvy voluptuous body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, asiatique, adult woman, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Yoru. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1646,7 +1646,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (natural red ginger hair:1.5), (amber golden eyes:1.45), (fox ears on top of head:1.65), (fluffy fox ears:1.55), (multiple fluffy fox tails:1.6), (fox tail visible:1.5), kemonomimi, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (natural red ginger hair:1.5), (amber golden eyes:1.45), (fox ears on top of head:1.65), (fluffy fox ears:1.55), (multiple fluffy fox tails:1.6), (fox tail visible:1.5), kemonomimi, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Aka. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1679,7 +1679,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), (curved demon horns on head:1.6), (bat demon wings:1.55), (spaded demon tail:1.55), succubus demon girl, (very large E-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), (curved demon horns on head:1.6), (bat demon wings:1.55), (spaded demon tail:1.55), succubus demon girl, (very large E-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Lilithra. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1711,7 +1711,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (purple hair:1.5), (purple eyes:1.45), (curved demon horns on head:1.6), (bat demon wings:1.55), (spaded demon tail:1.55), succubus demon girl, (large full D-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (purple hair:1.5), (purple eyes:1.45), (curved demon horns on head:1.6), (bat demon wings:1.55), (spaded demon tail:1.55), succubus demon girl, (large full D-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Morrigan Shade. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1743,7 +1743,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), (small dragon horns:1.55), (scales on shoulders and cheeks:1.5), dragon girl features, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), (small dragon horns:1.55), (scales on shoulders and cheeks:1.5), dragon girl features, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Pyra Vex. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1775,7 +1775,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (blue eyes:1.45), (small dragon horns:1.55), (scales on shoulders and cheeks:1.5), dragon girl features, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (blue eyes:1.45), (small dragon horns:1.55), (scales on shoulders and cheeks:1.5), dragon girl features, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Saphira Noctis. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1807,7 +1807,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22:1.45), (black hair:1.5), (green eyes:1.45), (cat ears on top of head:1.65), (cat ears:1.55), (long cat tail:1.55), nekomimi, kemonomimi, (small B-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (22 year old woman:1.5), (looks exactly 22:1.45), (black hair:1.5), (green eyes:1.45), (cat ears on top of head:1.65), (cat ears:1.55), (long cat tail:1.55), nekomimi, kemonomimi, (small B-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Neko-Chan Miri. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1839,7 +1839,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24:1.45), (blonde hair:1.5), (amber golden eyes:1.45), (cat ears on top of head:1.65), (cat ears:1.55), (long cat tail:1.55), nekomimi, kemonomimi, (large full D-cup breasts:1.4), athletic toned body, caramel mixed-race skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (24 year old woman:1.5), (looks exactly 24:1.45), (blonde hair:1.5), (amber golden eyes:1.45), (cat ears on top of head:1.65), (cat ears:1.55), (long cat tail:1.55), nekomimi, kemonomimi, (large full D-cup breasts:1.4), athletic toned body, caramel mixed-race skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Sable. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1871,7 +1871,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (blue teal hair:1.5), (green eyes:1.45), (iridescent mermaid scales on hips and arms:1.6), (mermaid scales:1.55), slightly webbed fingers, water droplets on skin, mermaid girl, NOT fish lower body if standing on legs, scales shimmer, (large full D-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (blue teal hair:1.5), (green eyes:1.45), (iridescent mermaid scales on hips and arms:1.6), (mermaid scales:1.55), slightly webbed fingers, water droplets on skin, mermaid girl, NOT fish lower body if standing on legs, scales shimmer, (large full D-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Coralia. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1903,7 +1903,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35:1.45), (black hair:1.5), (blue eyes:1.45), (iridescent mermaid scales on hips and arms:1.6), (mermaid scales:1.55), slightly webbed fingers, water droplets on skin, mermaid girl, NOT fish lower body if standing on legs, scales shimmer, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (35 year old woman:1.5), (looks exactly 35:1.45), (black hair:1.5), (blue eyes:1.45), (iridescent mermaid scales on hips and arms:1.6), (mermaid scales:1.55), slightly webbed fingers, water droplets on skin, mermaid girl, NOT fish lower body if standing on legs, scales shimmer, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Marina Deep. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1935,7 +1935,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (blonde hair:1.5), (blue eyes:1.45), (large white feathered angel wings:1.65), (angel wings:1.55), subtle golden halo, (large full D-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (blonde hair:1.5), (blue eyes:1.45), (large white feathered angel wings:1.65), (angel wings:1.55), subtle golden halo, (large full D-cup breasts:1.4), hourglass figure, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Seraphiel. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1967,7 +1967,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), (curved black demon horns:1.6), (small bat wings:1.5), (spaded demon tail:1.55), demon girl, (very large E-cup breasts:1.4), slim slender body, fair skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), (curved black demon horns:1.6), (small bat wings:1.5), (spaded demon tail:1.55), demon girl, (very large E-cup breasts:1.4), slim slender body, fair skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Azura Flame. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1999,7 +1999,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), subtle vampire fangs, supernatural pale skin, gothic beauty, (no horns:1.3), (large full D-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (brown eyes:1.45), subtle vampire fangs, supernatural pale skin, gothic beauty, (no horns:1.3), (large full D-cup breasts:1.4), slim slender body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Countess Vera. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2031,7 +2031,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (grey eyes:1.45), subtle vampire fangs, supernatural pale skin, gothic beauty, (no horns:1.3), (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (silver white hair:1.5), (grey eyes:1.45), subtle vampire fangs, supernatural pale skin, gothic beauty, (no horns:1.3), (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Luna Crowe. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2063,7 +2063,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19:1.45), (pink hair:1.5), (brown eyes:1.45), (small translucent fairy wings:1.6), (fairy wings:1.55), sparkling fairy dust, tiny glowing freckles, (small B-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (19 year old woman:1.5), (looks exactly 19:1.45), (pink hair:1.5), (brown eyes:1.45), (small translucent fairy wings:1.6), (fairy wings:1.55), sparkling fairy dust, tiny glowing freckles, (small B-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Pix. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2095,7 +2095,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (green hair:1.5), (green eyes:1.45), leaf patterns on skin, subtle bark texture on arms, flowers in hair, nature spirit dryad, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (green hair:1.5), (green eyes:1.45), leaf patterns on skin, subtle bark texture on arms, flowers in hair, nature spirit dryad, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Sylva. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2127,7 +2127,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (green hair:1.5), (amber golden eyes:1.45), (serpentine scales on hips:1.55), subtle forked tongue, hypnotic snake eyes, lamia features, (large full D-cup breasts:1.4), hourglass figure, olive Mediterranean skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (green hair:1.5), (amber golden eyes:1.45), (serpentine scales on hips:1.55), subtle forked tongue, hypnotic snake eyes, lamia features, (large full D-cup breasts:1.4), hourglass figure, olive Mediterranean skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Nerissa. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2159,7 +2159,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30:1.45), (dark brown hair:1.5), (amber golden eyes:1.45), (large feathered bird wings:1.6), talon-like nails, feathers on shoulders, harpy girl, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (30 year old woman:1.5), (looks exactly 30:1.45), (dark brown hair:1.5), (amber golden eyes:1.45), (large feathered bird wings:1.6), talon-like nails, feathers on shoulders, harpy girl, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Kaelith. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2191,7 +2191,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18:1.45), (pink hair:1.5), (brown eyes:1.45), semi-translucent gelatinous skin, soft pink-violet slime body glow, slime girl, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (18 year old woman:1.5), (looks exactly 18:1.45), (pink hair:1.5), (brown eyes:1.45), semi-translucent gelatinous skin, soft pink-violet slime body glow, slime girl, (large full D-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Gelée. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2223,7 +2223,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22:1.45), (silver white hair:1.5), (grey eyes:1.45), subtle android joints, blue circuit lines under synthetic skin, android girl, cyborg details, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (22 year old woman:1.5), (looks exactly 22:1.45), (silver white hair:1.5), (grey eyes:1.45), subtle android joints, blue circuit lines under synthetic skin, android girl, cyborg details, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Unit-7 Aria. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2255,7 +2255,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26:1.45), (dark brown hair:1.5), (amber golden eyes:1.45), (wolf ears on top of head:1.6), (fluffy wolf tail:1.55), marked canines, werewolf girl kemonomimi, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (26 year old woman:1.5), (looks exactly 26:1.45), (dark brown hair:1.5), (amber golden eyes:1.45), (wolf ears on top of head:1.6), (fluffy wolf tail:1.55), marked canines, werewolf girl kemonomimi, (medium C-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Raven Wolf. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2287,7 +2287,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28:1.45), (dark brown hair:1.5), (brown eyes:1.45), subtle equine features, mane-like hair volume, strong legs, centaur-inspired humanoid upper body, (large full D-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (28 year old woman:1.5), (looks exactly 28:1.45), (dark brown hair:1.5), (brown eyes:1.45), subtle equine features, mane-like hair volume, strong legs, centaur-inspired humanoid upper body, (large full D-cup breasts:1.4), athletic toned body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Thera. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2319,7 +2319,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), (living snake hair:1.65), (snakes for hair:1.55), snake eyes, green scales on temples, gorgon medusa, (large full D-cup breasts:1.4), slim slender body, olive Mediterranean skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), (living snake hair:1.65), (snakes for hair:1.55), snake eyes, green scales on temples, gorgon medusa, (large full D-cup breasts:1.4), slim slender body, olive Mediterranean skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Meda. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2351,7 +2351,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32:1.45), (black hair:1.5), (amber golden eyes:1.45), (two short red oni horns:1.65), (oni horns:1.55), slightly pointed teeth, japanese oni girl, (large full D-cup breasts:1.4), curvy voluptuous body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, asiatique, adult woman",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (32 year old woman:1.5), (looks exactly 32:1.45), (black hair:1.5), (amber golden eyes:1.45), (two short red oni horns:1.65), (oni horns:1.55), slightly pointed teeth, japanese oni girl, (large full D-cup breasts:1.4), curvy voluptuous body, fair East Asian porcelain skin, porcelain skin, East Asian porcelain skin, asiatique, adult woman, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Aka-Oni Yumi. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2383,7 +2383,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (amber golden eyes:1.45), (scales on lower torso:1.55), cobra hood when angry, naga serpent features, snake scales, (large full D-cup breasts:1.4), curvy voluptuous body, olive Mediterranean skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (black hair:1.5), (amber golden eyes:1.45), (scales on lower torso:1.55), cobra hood when angry, naga serpent features, snake scales, (large full D-cup breasts:1.4), curvy voluptuous body, olive Mediterranean skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Zafira. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2415,7 +2415,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), ember tips in hair, feather patterns on shoulders, warm heat aura, phoenix girl, (large full D-cup breasts:1.4), sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (ageless adult beauty mid-20s to early 30s:1.55), (dark brown hair:1.5), (amber golden eyes:1.45), ember tips in hair, feather patterns on shoulders, warm heat aura, phoenix girl, (large full D-cup breasts:1.4), sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Ember. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2447,7 +2447,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22:1.45), (dark brown hair:1.5), (brown eyes:1.45), partially translucent body, cold mist aura, floating hair, ghostly pale, spirit girl, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (22 year old woman:1.5), (looks exactly 22:1.45), (dark brown hair:1.5), (brown eyes:1.45), partially translucent body, cold mist aura, floating hair, ghostly pale, spirit girl, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Mira Shade. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2479,7 +2479,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29:1.45), (black hair:1.5), (purple eyes:1.45), witch aesthetic, pentagram pendant, mystical aura, herb-stained fingertips, human witch, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic",
+    "looks_en": "photorealistic photograph of a real woman, natural skin, (29 year old woman:1.5), (looks exactly 29:1.45), (black hair:1.5), (purple eyes:1.45), witch aesthetic, pentagram pendant, mystical aura, herb-stained fingertips, human witch, (medium C-cup breasts:1.4), slim slender body, sun-kissed Latina skin, adult woman, photorealistic, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT collage, NOT grid",
     "system_extra": "Tu es UNIQUEMENT Hecate Moss. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   }
 ];

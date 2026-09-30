@@ -2093,14 +2093,19 @@
       const extraNeg = String(body.negative || "");
       const negative = [
         "blurry, out of focus, soft focus, lowres, jpeg artifacts, noisy, grainy,",
-        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll,",
+        "cartoon, anime, manga, illustration, painting, 3d render, cgi, plastic skin, doll, 2d, drawing, webtoon, comic,",
+        "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, tiled image,",
         "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
         "child, teen, underage, different face, different person, face morph,",
         "same pose as reference, identical composition, copy of source pose,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
 
       let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
+      // Toujours forcer photo réaliste (évite anime kitsune / grilles)
+      if (!/photorealistic photograph/i.test(promptSafe)) {
+        promptSafe = ("photorealistic photograph of a real woman, natural skin pores, DSLR photo, " + promptSafe).slice(0, 1200);
+      }
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
