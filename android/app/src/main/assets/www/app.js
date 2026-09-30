@@ -6219,7 +6219,7 @@ async function generatePhoto() {
           return;
         }
       } catch (_) {}
-      const neg = bodyNegatives(c) + ", cartoon, anime, deformed, child, underage, blurry, watermark";
+      const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, deformed, child, underage, blurry, watermark";
       const ldPayload = JSON.stringify({
         prompt: String(prompt).slice(0, 1800),
         negative: String(neg).slice(0, 500),
@@ -6278,7 +6278,7 @@ async function generatePhoto() {
               if (!st.warm && window.LeaAndroid.sdCppPreload) {
                 try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
               }
-              const neg = bodyNegatives(c) + ", cartoon, anime, deformed, child, underage, blurry, watermark";
+              const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, deformed, child, underage, blurry, watermark";
               let sdRef = null;
               try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
               const sdPayload = {

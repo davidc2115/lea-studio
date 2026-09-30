@@ -2165,7 +2165,7 @@
       den = Math.min(0.82, Math.max(0.62, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
-      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
+      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art";
       const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
