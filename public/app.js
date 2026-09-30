@@ -325,7 +325,7 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre|joues charnues|visage rond/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    out.positive.push("(plus-size chubby body:1.55)", "(soft belly:1.4)", "(wide full hips:1.45)", "(thick thighs:1.45)", "(full soft cheeks:1.3)");
+    out.positive.push("(round soft chubby face:1.55)", "(full soft cheeks:1.5)", "(plus-size chubby body:1.55)", "(soft belly:1.4)", "(wide full hips:1.45)", "(thick thighs:1.45)");
     out.negative.push("skinny, model thin, underweight, hollow cheeks, slim hourglass only, narrow waist only");
   } else if (/curvy|voluptueuse|voluptuous|sablier|hourglass/i.test(blob)) {
     out.positive.push("(voluptuous hourglass:1.5)", "(narrow waist:1.35)", "(wide hips:1.35)", "full round butt");
@@ -871,11 +871,15 @@ function faceIdentityLock(c) {
   // Corps — boost explicite selon classe
   if (/ronde|chubby|plus-size|plus size|soft belly|plantureuse/i.test(blob)) {
     parts.push(
+      "(round soft chubby face:1.6)",
+      "(full soft cheeks:1.55)",
+      "(soft double chin subtle:1.3)",
       "(plus-size chubby body:1.65)",
       "(soft round belly visible:1.55)",
       "(wide full hips:1.55)",
       "(thick soft thighs:1.55)",
-      "full soft arms, double chin subtle optional,",
+      "full soft arms,",
+      "NOT angular face, NOT hollow cheeks, NOT skinny face,",
       "NOT skinny, NOT slim model, NOT thin waist only, NOT hourglass slim, NOT face-only portrait"
     );
   } else if (/voluptueuse|hourglass|sablier|voluptuous/i.test(blob)) {
