@@ -873,15 +873,11 @@ function faceIdentityLock(c) {
   // Corps — boost explicite selon classe
   if (/ronde|chubby|plus-size|plus size|soft belly|plantureuse|natural plus-size/i.test(blob)) {
     parts.push(
-      "(natural plus-size woman:1.5)",
-      "(soft round face with full cheeks:1.4)",
-      "(soft belly:1.35)",
-      "(wide hips:1.4)",
-      "(thick thighs:1.35)",
-      "soft arms, realistic proportions,",
-      "(photorealistic DSLR photo:1.55), (real skin pores:1.4),",
-      "NOT anime, NOT cartoon, NOT illustration, NOT 3d render, NOT plastic doll, NOT exaggerated cartoon body,",
-      "NOT skinny, NOT model thin, NOT face-only portrait"
+      "plus-size chubby body, soft belly, wide hips, thick thighs,",
+      "soft round face with full cheeks,",
+      "photorealistic photo of a real woman, natural skin,",
+      "NOT anime, NOT cartoon, NOT deformed, NOT fused body parts, NOT plastic skin,",
+      "NOT skinny, NOT face-only portrait"
     );
   } else if (/voluptueuse|hourglass|sablier|voluptuous/i.test(blob)) {
     parts.push("(voluptuous hourglass:1.55)", "(narrow waist:1.4)", "(wide hips:1.4)", "NOT chubby overweight belly");
@@ -1060,9 +1056,24 @@ function buildLeaImagePrompt(extra = "") {
   // —— PROFIL = scène du SCÉNARIO (tenue + lieu + situation) ——
   const outfits = (c.outfits && c.outfits.length) ? c.outfits : ["casual indoor clothes"];
   const places = (c.places && c.places.length) ? c.places : ["apartment interior at night"];
-  // Tenue + lieu FIXES = 1er du scénario (comme les covers Grok). Seule la pose change.
-  const outfit = outfits[0];
-  const place = places[0];
+  // Variété : rotation tenue + lieu du scénario (pas toujours le même)
+  let outfit = outfits[0];
+  let place = places[0];
+  try {
+    const keyO = "lea.lastOutfit." + (c.id || "x");
+    const keyP = "lea.lastPlace." + (c.id || "x");
+    const lastO = localStorage.getItem(keyO) || "";
+    const lastP = localStorage.getItem(keyP) || "";
+    const oPool = outfits.filter((o) => o !== lastO);
+    const pPool = places.filter((p) => p !== lastP);
+    outfit = (oPool.length ? oPool : outfits)[Math.floor(Math.random() * (oPool.length || outfits.length))];
+    place = (pPool.length ? pPool : places)[Math.floor(Math.random() * (pPool.length || places.length))];
+    localStorage.setItem(keyO, outfit);
+    localStorage.setItem(keyP, place);
+  } catch (_) {
+    outfit = outfits[Math.floor(Math.random() * outfits.length)];
+    place = places[Math.floor(Math.random() * places.length)];
+  }
   const scenario = String(c.scenario || c.title || "").replace(/\s+/g, " ").trim();
   const age = c.age || 21;
 
@@ -1095,10 +1106,18 @@ function buildLeaImagePrompt(extra = "") {
     ];
   } else {
     posePool = [
-      "standing three-quarter view looking at camera",
-      "standing, weight on one hip, looking at camera",
-      "sitting in the scene, looking at camera",
-      "slight over-the-shoulder look, still in the same outfit and location",
+      "standing full body three-quarter view looking at camera, head to mid-thigh visible",
+      "standing full body, weight on one hip, looking at camera, entire figure visible",
+      "sitting on sofa full body, legs visible, looking at camera",
+      "leaning against wall full body, one knee bent, looking over shoulder",
+      "standing from behind looking back at camera over shoulder, full body",
+      "kneeling on bed full body, hands on thighs, looking at camera",
+      "sitting on edge of bed full body, legs dangling, playful look",
+      "standing arched back, looking down then up at camera, full body hips to head",
+      "lying on side on sofa full body, propped on elbow, looking at camera",
+      "bending forward slightly looking back, full body rear three-quarter view",
+      "sitting cross-legged on floor full body, leaning forward, looking up",
+      "standing with arms above head stretching, full body",
     ];
   }
   const ex = expandProfileExtra(extra);
@@ -1378,7 +1397,7 @@ function buildLeaImagePrompt(extra = "") {
     // Boost corps explicite
     let bodyBoost = "";
     if (/plus-size|chubby|ronde/i.test(looks + " " + (c.body || "") + " " + ((c.tags || []).join(" ")))) {
-      bodyBoost = "(plus-size chubby body:1.6), (soft belly visible:1.5), (wide full hips:1.5), (thick thighs:1.5), full soft arms, NOT skinny, NOT slim model, NOT hourglass thin waist only,";
+      bodyBoost = "plus-size chubby body, soft belly, wide hips, thick thighs, soft arms, NOT skinny, NOT slim model, NOT deformed, NOT fused body parts,";
     } else if (/hourglass|voluptuous|voluptueuse|sablier/i.test(looks + " " + (c.body || ""))) {
       bodyBoost = "(voluptuous hourglass:1.55), (narrow waist:1.4), (wide hips:1.4), NOT chubby belly, NOT overweight,";
     }
@@ -1387,7 +1406,7 @@ function buildLeaImagePrompt(extra = "") {
     if (/angel|ange|ailes d.ange/i.test(fantBlob)) {
       fantBoost = "(white feathered angel wings fully visible:1.7), (angel wings spread behind back:1.55), celestial, NOT mermaid, NOT fish scales, NOT ocean, NOT underwater, NOT tail,";
     } else if (/dragon/i.test(fantBlob)) {
-      fantBoost = "(small dragon horns on forehead:1.65), (iridescent shoulder scales:1.5), dragon girl, NOT mermaid, NOT fox ears, NOT angel wings,";
+      fantBoost = "(small dragon horns on forehead:1.65), tiny scale patches on shoulders only, dragon girl, human legs, standing on land, NOT mermaid, NOT underwater, NOT fish tail, NOT fox ears,";
     } else if (/sir[eè]ne|mermaid/i.test(fantBlob)) {
       fantBoost = "(mermaid tail:1.65), iridescent scales, NOT legs only, NOT angel wings, NOT dragon horns,";
     } else if (/kitsune|fox ears|renard/i.test(fantBlob)) {
@@ -1398,6 +1417,8 @@ function buildLeaImagePrompt(extra = "") {
       fantBoost = "(small succubus horns:1.6), bat wings, spaded tail, NOT angel, NOT mermaid,";
     } else if (/catgirl|cat ears/i.test(fantBlob)) {
       fantBoost = "(cat ears on head:1.65), cat tail, NOT fox ears, NOT elf ears,";
+    } else if (/\boni\b|fan_oni/i.test(fantBlob)) {
+      fantBoost = "(two short thick oni horns:1.7), japanese oni, human legs standing on land, NOT mermaid, NOT underwater, NOT fish tail,";
     } else if (/d[eé]mon|demon/i.test(fantBlob)) {
       fantBoost = "(demon horns:1.6), demon tail, NOT angel wings, NOT mermaid,";
     }
@@ -5309,9 +5330,19 @@ function fixedAppearanceBlock(c) {
       "=== END FIXED DUO — only pose, outfit, environment may change ===",
     ].filter(Boolean).join(" ");
   }
+  // Yeux + cheveux EN TÊTE (Horde dilue la fin du prompt)
+  let eyeHair = "";
+  try {
+    const L = String(c.looks_en || "");
+    const em = L.match(/\(([^()]*eyes:1\.[0-9]+)\)/i);
+    const hm = L.match(/\(([^()]*hair:1\.[0-9]+)\)/i);
+    if (em) eyeHair += "(" + em[1] + "), ";
+    if (hm) eyeHair += "(" + hm[1] + "), ";
+  } catch (_) {}
   return [
     "=== FIXED CHARACTER APPEARANCE (MUST NOT CHANGE) ===",
     "Person: " + name + ",",
+    eyeHair,
     identityLock(c) + ",",
     enrichLooksDetail(c) + ",",
     phys.positive.join(", ") + ",",
@@ -5319,9 +5350,11 @@ function fixedAppearanceBlock(c) {
     body ? ("morphology: " + body + ",") : "",
     eth ? ("ethnicity: " + eth + ",") : "",
     "(" + age + " year old:1.45), (looks exactly " + age + ":1.4),",
-    "IDENTICAL face, EXACT hair color, hair style, eye color, skin tone, breast size, body type,",
+    "IDENTICAL face, EXACT hair color, hair style, EXACT eye color locked, skin tone, breast size, body type,",
     phys.features.length ? ("MUST show: " + phys.features.join(", ") + ",") : "",
+    "(full body wide shot:1.45), hips visible, NOT bust crop only,",
     "same person as cover photo and profile, consistent identity lock,",
+    "photorealistic DSLR photo, real skin, NOT anime, NOT cartoon, NOT deformed,",
     "=== END FIXED APPEARANCE — only pose, outfit, posture, environment may change below ===",
   ].filter(Boolean).join(" ");
 }
@@ -6290,9 +6323,18 @@ async function generatePhoto() {
       const frame = frames[Math.floor(Math.random() * frames.length)];
       const soloLock = "(1girl:1.55), (solo:1.5), only one woman, ";
       const idLock = faceIdentityLock(c);
+      // Yeux + cheveux extraits en priorité absolue
+      let eyeFirst = "";
+      try {
+        const L = String(c.looks_en || "");
+        const em = L.match(/\(([^()]*eyes:1\.[0-9]+)\)/i);
+        const hm = L.match(/\(([^()]*hair:1\.[0-9]+)\)/i);
+        if (em) eyeFirst += "(" + em[1] + "), ";
+        if (hm) eyeFirst += "(" + hm[1] + "), ";
+      } catch (_) {}
       // Identité + corps EN TÊTE, prompt scène après
-      prompt = soloLock + frame + idLock + ", " + prompt;
-      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT passport photo, NOT face-only,";
+      prompt = soloLock + eyeFirst + frame + idLock + ", " + prompt;
+      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT bust only, NOT cropped at chest, NOT passport photo, NOT face-only, (full body or three-quarter body in frame:1.5), hips and thighs visible,";
       prompt += ", NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry,";
       prompt += ", (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, NOT text, NOT watermark,";
     }

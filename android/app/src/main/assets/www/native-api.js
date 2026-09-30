@@ -2231,7 +2231,7 @@
         promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
       }
       if (!/photorealistic|photograph/i.test(promptSafe)) {
-        promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1450);
+        promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
       }
 
       let src = null;
@@ -2281,7 +2281,7 @@
       const soloNeg = isDuoPrompt
         ? ", 3girls, four women, crowd, identical clone twins"
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, passport photo, close-up face only, exaggerated cartoon proportions";
+      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // txt2img EN PREMIER (variété poses)
