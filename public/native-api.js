@@ -2281,7 +2281,7 @@
       const soloNeg = isDuoPrompt
         ? ", 3girls, four women, crowd, identical clone twins"
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime style, drawn, sketch, text overlay, face crop only, headshot only, passport photo, close-up face only";
+      const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, passport photo, close-up face only, exaggerated cartoon proportions";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // txt2img EN PREMIER (variété poses)

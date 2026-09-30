@@ -220,8 +220,8 @@ function physicalLocksFromText(c) {
     nh.push("(curved black demon horns:1.6)", "(small bat wings:1.5)", "(spaded demon tail:1.55)", "demon girl");
     nhNeg += ", fox ears, cat ears, elf ears, angel halo, white angel wings, mermaid scales";
   } else if (is(/dragon|fan_dragon/)) {
-    nh.push("(small dragon horns:1.55)", "(scales on shoulders and cheeks:1.5)", "dragon girl");
-    nhNeg += ", fox ears, cat ears, elf ears, mermaid fish tail, bat wings, snake hair, spaded demon tail";
+    nh.push("(small curved dragon horns on forehead:1.7)", "(tiny dragon scale patches only on shoulders:1.4)", "dragon girl", "human legs", "standing on land");
+    nhNeg += ", fox ears, cat ears, elf ears, mermaid, mermaid tail, fish tail, underwater, ocean, swimming, full body scales, bat wings, snake hair";
   } else if (is(/elfe|fan_elfe|\belf\b/)) {
     nh.push("(long pointed elf ears highly visible:1.65)", "(elf ears:1.55)");
     if (/gris-bleue|grey-blue|phosphorescent/i.test(blob)) nh.push("(grey-blue skin:1.45)", "(glowing purple eyes:1.4)");
@@ -260,7 +260,8 @@ function physicalLocksFromText(c) {
     nh.push("(living snake hair:1.65)", "(snakes for hair:1.55)", "snake eyes", "green scales on temples", "gorgon");
     nhNeg += ", demon horns, fox ears, cat ears, bat wings, normal human hair only, mermaid fish tail, elf ears";
   } else if (is(/\boni\b|fan_oni/)) {
-    nh.push("(two short red oni horns:1.65)", "(oni horns:1.55)", "slightly pointed teeth", "japanese oni");
+    nh.push("(two short thick oni horns on forehead:1.75)", "(japanese oni horns:1.65)", "slight red skin tint optional", "human legs", "standing on land");
+    nhNeg += ", mermaid, mermaid tail, fish tail, underwater, ocean, swimming, fox ears, elf ears, angel wings, full body scales";
     nhNeg += ", elf ears, fox ears, cat ears, bat wings, mermaid scales, long demon horns, snake hair";
   } else if (is(/\bnaga\b|fan_naga/)) {
     nh.push("(scales on lower torso:1.55)", "naga serpent features");
@@ -325,7 +326,7 @@ function physicalLocksFromText(c) {
 
   if (/mince|slim|thin|petite\s*silhouette/i.test(blob)) out.positive.push("slim slender body");
   if (/ronde|chubby|plus.?size|pulpeuse|bbw|soft belly|gros ventre|joues charnues|visage rond/i.test(blob) || (c && Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))))) {
-    out.positive.push("(round soft chubby face:1.55)", "(full soft cheeks:1.5)", "(plus-size chubby body:1.55)", "(soft belly:1.4)", "(wide full hips:1.45)", "(thick thighs:1.45)");
+    out.positive.push("(natural plus-size woman:1.45)", "(soft round face full cheeks:1.35)", "(soft belly:1.3)", "(wide hips:1.35)", "(thick thighs:1.3)", "photorealistic, NOT cartoon, NOT anime");
     out.negative.push("skinny, model thin, underweight, hollow cheeks, slim hourglass only, narrow waist only");
   } else if (/curvy|voluptueuse|voluptuous|sablier|hourglass/i.test(blob)) {
     out.positive.push("(voluptuous hourglass:1.5)", "(narrow waist:1.35)", "(wide hips:1.35)", "full round butt");
@@ -380,7 +381,8 @@ function physicalLocksFromText(c) {
       out.positive.push("(wolf ears:1.5)", "wolf tail");
     }
     if (/oni/i.test(nh+blob)) {
-      out.positive.push("(oni horns:1.45)");
+      out.positive.push("(two short thick oni horns:1.7)", "japanese oni", "human legs standing on land");
+      out.negative.push("mermaid, mermaid tail, fish tail, underwater, ocean, fox ears, elf ears");
     }
     if (/slime/i.test(nh+blob)) {
       out.positive.push("(slime girl:1.4)", "translucent body");
@@ -869,18 +871,17 @@ function faceIdentityLock(c) {
   }
 
   // Corps — boost explicite selon classe
-  if (/ronde|chubby|plus-size|plus size|soft belly|plantureuse/i.test(blob)) {
+  if (/ronde|chubby|plus-size|plus size|soft belly|plantureuse|natural plus-size/i.test(blob)) {
     parts.push(
-      "(round soft chubby face:1.6)",
-      "(full soft cheeks:1.55)",
-      "(soft double chin subtle:1.3)",
-      "(plus-size chubby body:1.65)",
-      "(soft round belly visible:1.55)",
-      "(wide full hips:1.55)",
-      "(thick soft thighs:1.55)",
-      "full soft arms,",
-      "NOT angular face, NOT hollow cheeks, NOT skinny face,",
-      "NOT skinny, NOT slim model, NOT thin waist only, NOT hourglass slim, NOT face-only portrait"
+      "(natural plus-size woman:1.5)",
+      "(soft round face with full cheeks:1.4)",
+      "(soft belly:1.35)",
+      "(wide hips:1.4)",
+      "(thick thighs:1.35)",
+      "soft arms, realistic proportions,",
+      "(photorealistic DSLR photo:1.55), (real skin pores:1.4),",
+      "NOT anime, NOT cartoon, NOT illustration, NOT 3d render, NOT plastic doll, NOT exaggerated cartoon body,",
+      "NOT skinny, NOT model thin, NOT face-only portrait"
     );
   } else if (/voluptueuse|hourglass|sablier|voluptuous/i.test(blob)) {
     parts.push("(voluptuous hourglass:1.55)", "(narrow waist:1.4)", "(wide hips:1.4)", "NOT chubby overweight belly");
@@ -895,35 +896,97 @@ function faceIdentityLock(c) {
     else if (/bonnet\s*h|h-cup/i.test(blob)) parts.push("(huge H-cup breasts:1.5)");
   }
 
-  // Fantasy EXCLUSIVE — traits + anti-contamination
-  if (/dragon/i.test(blob)) {
+  // Fantasy EXCLUSIVE — un seul type, anti-contamination stricte
+  if (/\boni\b|fan_oni/i.test(blob)) {
     parts.push(
-      "(dragon girl:1.65)",
+      "(two short thick oni horns on forehead:1.75)",
+      "(japanese oni horns:1.65)",
+      "slight red skin tint optional, sharp teeth,",
+      "human legs, standing on solid ground, dry skin,",
+      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT fox ears, NOT elf ears, NOT angel wings"
+    );
+  } else if (/dragon/i.test(blob)) {
+    parts.push(
       "(small curved dragon horns on forehead:1.7)",
-      "(small iridescent dragon scale patches only on shoulders:1.45)",
-      "human legs, standing on land, dry skin,",
-      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT siren"
+      "(tiny dragon scale patches only on shoulders:1.4)",
+      "human legs, standing on solid ground, dry skin,",
+      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT fox ears"
     );
   } else if (/ange|angel|ailes d.ange/i.test(blob)) {
     parts.push(
-      "(white feathered angel wings fully visible behind back:1.7)",
+      "(large white feathered angel wings fully visible behind back:1.75)",
       "human legs, standing,",
-      "NOT mermaid, NOT tail, NOT underwater, NOT scales, NOT demon horns"
+      "NOT mermaid, NOT tail, NOT underwater, NOT scales, NOT demon horns, NOT bat wings"
     );
   } else if (/sir[eè]ne|mermaid/i.test(blob)) {
-    parts.push("(mermaid tail:1.65)", "underwater or seaside,", "NOT dragon horns, NOT angel wings, NOT human legs only");
-  } else if (/kitsune|fox ears|renard/i.test(blob)) {
-    parts.push("(fox ears on head:1.65)", "fluffy fox tail,", "NOT dragon horns, NOT mermaid, NOT elf ears");
+    parts.push(
+      "(mermaid tail instead of legs:1.7)",
+      "(iridescent mermaid scales:1.55)",
+      "underwater or seaside,",
+      "NOT dragon horns, NOT oni horns, NOT angel wings, NOT human legs standing on land only"
+    );
+  } else if (/kitsune|renard|fox ears/i.test(blob)) {
+    parts.push(
+      "(fox ears on top of head:1.7)",
+      "(fluffy multiple fox tails:1.6)",
+      "human legs, standing,",
+      "NOT dragon horns, NOT mermaid, NOT cat ears, NOT elf ears, NOT underwater"
+    );
   } else if (/elfe|\belf\b|elf ears/i.test(blob)) {
-    parts.push("(long pointy elf ears:1.65)", "NOT horns, NOT mermaid, NOT fox ears");
+    parts.push(
+      "(long pointed elf ears highly visible:1.7)",
+      "human legs, standing,",
+      "NOT horns, NOT mermaid, NOT fox ears, NOT cat ears"
+    );
   } else if (/succube|succubus/i.test(blob)) {
-    parts.push("(small succubus horns:1.6)", "bat wings,", "NOT angel, NOT mermaid, NOT dragon");
-  } else if (/catgirl|cat ears/i.test(blob)) {
-    parts.push("(cat ears on head:1.65)", "cat tail,", "NOT fox ears, NOT dragon");
-  } else if (/d[eé]mon|demon/i.test(blob)) {
-    parts.push("(demon horns:1.6)", "demon tail,", "NOT angel wings, NOT mermaid");
+    parts.push(
+      "(curved small succubus horns:1.65)",
+      "(small bat demon wings:1.5)",
+      "(spaded thin demon tail:1.5)",
+      "human legs, standing,",
+      "NOT angel, NOT mermaid, NOT fox ears, NOT underwater"
+    );
+  } else if (/catgirl|cat ears|neko/i.test(blob)) {
+    parts.push(
+      "(cat ears on top of head:1.7)",
+      "(long cat tail:1.6)",
+      "human legs, standing,",
+      "NOT fox ears, NOT dragon, NOT mermaid"
+    );
+  } else if (/d[eé]mon|demon/i.test(blob) && !/succube|dragon|oni/i.test(blob)) {
+    parts.push(
+      "(curved black demon horns:1.7)",
+      "(small bat wings:1.5)",
+      "(spaded demon tail:1.55)",
+      "human legs, standing,",
+      "NOT angel wings, NOT mermaid, NOT underwater"
+    );
   } else if (/vampire/i.test(blob)) {
-    parts.push("pale vampire skin, subtle fangs,", "NOT animal ears, NOT mermaid");
+    parts.push("very pale vampire skin, subtle fangs,", "human legs, standing,", "NOT animal ears, NOT mermaid, NOT horns");
+  } else if (/naga|lamia|serpent lower/i.test(blob)) {
+    parts.push("(serpent lower body from waist:1.65)", "NOT mermaid fish tail style, NOT full human legs only");
+  } else if (/\bwolf\b|loup-garou|wolf ears/i.test(blob)) {
+    parts.push("(wolf ears on head:1.65)", "(wolf tail:1.5)", "NOT fox ears, NOT mermaid");
+  } else if (/phoenix|ph[eé]nix/i.test(blob)) {
+    parts.push("(phoenix fire wings:1.65)", "ember feathers,", "NOT mermaid, NOT underwater");
+  } else if (/centaur|centaure/i.test(blob)) {
+    parts.push("(centaur horse lower body:1.7)", "NOT mermaid, NOT human legs only");
+  } else if (/gorgone|medusa|snake hair/i.test(blob)) {
+    parts.push("(living snakes for hair:1.65)", "NOT mermaid, NOT normal hair only");
+  } else if (/slime/i.test(blob)) {
+    parts.push("(translucent slime girl:1.55)", "NOT mermaid, NOT solid human only");
+  } else if (/android|robot/i.test(blob)) {
+    parts.push("(android robot girl:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
+  } else if (/ghost|fant[oô]me/i.test(blob)) {
+    parts.push("semi-transparent ethereal ghost body,", "NOT mermaid, NOT fully opaque solid only");
+  } else if (/witch|sorci[eè]re/i.test(blob)) {
+    parts.push("mystical witch aura, pointed hat optional,", "NOT mermaid, NOT underwater");
+  } else if (/fairy|f[eé]e|fairy wings/i.test(blob)) {
+    parts.push("(translucent fairy wings:1.65)", "NOT demon horns, NOT mermaid");
+  } else if (/dryade/i.test(blob)) {
+    parts.push("bark accents, leaves in hair, nature spirit,", "NOT mermaid, NOT underwater");
+  } else if (/harpie/i.test(blob)) {
+    parts.push("(large feathered bird wings:1.65)", "NOT mermaid, NOT underwater");
   }
 
   // physicalLocks extra
@@ -6231,7 +6294,7 @@ async function generatePhoto() {
       prompt = soloLock + frame + idLock + ", " + prompt;
       prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT passport photo, NOT face-only,";
       prompt += ", NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry,";
-      prompt += ", (photorealistic:1.45), NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT text, NOT watermark,";
+      prompt += ", (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, NOT text, NOT watermark,";
     }
   } catch (_) {}
   window._leaGenBusy = true;

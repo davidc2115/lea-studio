@@ -386,7 +386,7 @@ window.LEA_CAST_COLLEGUES = [
       "sofa",
       "apartment at night"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (red auburn hair:1.5), (blue eyes:1.45), golden caramel skin, (very large E-cup breasts:1.45), (plus-size chubby body:1.55), (soft belly:1.4), (wide full hips:1.45), (thick thighs:1.45), soft arms, full figure, NOT skinny, NOT slim waist only, NOT model thin, NOT hourglass slim, européenne, photorealistic adult woman, sharp focus, NOT A-cup, NOT B-cup, NOT flat, full body or torso hips visible, (round soft chubby face:1.55), (full soft cheeks:1.5), (soft double chin subtle:1.25), NOT angular face, NOT hollow cheeks, NOT skinny face",
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (red auburn hair:1.5), (blue eyes:1.45), golden caramel skin, (very large E-cup breasts:1.45), soft arms, full figure, NOT skinny, NOT slim waist only, NOT model thin, NOT hourglass slim, européenne, photorealistic adult woman, sharp focus, NOT A-cup, NOT B-cup, NOT flat, full body or torso hips visible, (natural plus-size woman:1.5), (soft round face with full cheeks:1.4), (soft belly:1.35), (wide hips:1.4), (thick thighs:1.35), soft arms, (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural soft lighting, NOT anime, NOT cartoon, NOT illustration, NOT 3d render, NOT plastic skin, NOT exaggerated cartoon proportions, NOT skinny, NOT model thin",
     "system_extra": "Tu es UNIQUEMENT Amélie Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
