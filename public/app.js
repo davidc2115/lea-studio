@@ -211,8 +211,8 @@ function physicalLocksFromText(c) {
     nh.push("(cat ears on top of head:1.65)", "(long cat tail:1.55)", "nekomimi");
     nhNeg += ", demon horns, fox ears, elf ears, bat wings, mermaid scales, wolf ears, horns";
   } else if (is(/sir[eè]ne|sirene|fan_sirene|mermaid/)) {
-    nh.push("(iridescent mermaid scales on hips and arms:1.65)", "(mermaid scales:1.55)", "slightly webbed fingers", "water droplets on skin", "mermaid girl");
-    nhNeg += ", demon horns, horns, fox ears, cat ears, elf ears, bat wings, animal tail, snake hair, dragon horns";
+    nh.push("(mermaid tail instead of legs:1.75)", "(iridescent mermaid scales on tail:1.55)", "wet hair", "mermaid girl", "full mermaid body");
+    nhNeg += ", demon horns, horns, any horns, dragon horns, oni horns, fox ears, cat ears, elf ears, bat wings, animal tail, snake hair, human legs with feet, standing on land";
   } else if (is(/succube|fan_succube/)) {
     nh.push("(curved demon horns on head:1.6)", "(bat demon wings:1.55)", "(spaded demon tail:1.55)", "succubus");
     nhNeg += ", fox ears, cat ears, elf ears, mermaid scales, fish tail, angel halo, white angel wings, snake hair";
@@ -916,10 +916,19 @@ function faceIdentityLock(c) {
     );
   } else if (/sir[eè]ne|mermaid/i.test(blob)) {
     parts.push(
-      "(mermaid tail instead of legs:1.7)",
-      "(iridescent mermaid scales:1.55)",
-      "underwater or seaside,",
-      "NOT dragon horns, NOT oni horns, NOT angel wings, NOT human legs standing on land only"
+      "(mermaid tail instead of legs:1.75)",
+      "(iridescent fish scales on tail only:1.55)",
+      "wet hair, underwater or rocky shore,",
+      "full mermaid body head to tail tip visible,",
+      "NO horns, NO demon horns, NO dragon horns, NO oni horns, NO any horns,",
+      "NOT horns, NOT horned, NOT demon, NOT dragon girl, NOT oni, NOT angel wings, NOT snake hair, NOT standing on land with feet"
+    );
+  } else if (/gorgone|medusa|snake hair/i.test(blob)) {
+    parts.push(
+      "(living snakes instead of hair:1.75)",
+      "(medusa snake hair:1.7), gorgon,",
+      "human legs standing, full body,",
+      "NOT mermaid tail, NOT fish tail, NOT horns, NOT underwater"
     );
   } else if (/kitsune|renard|fox ears/i.test(blob)) {
     parts.push(
@@ -1106,20 +1115,25 @@ function buildLeaImagePrompt(extra = "") {
     ];
   } else {
     posePool = [
-      "standing full body three-quarter view looking at camera, head to mid-thigh visible",
-      "standing full body, weight on one hip, looking at camera, entire figure visible",
-      "sitting on sofa full body, legs visible, looking at camera",
-      "leaning against wall full body, one knee bent, looking over shoulder",
-      "standing from behind looking back at camera over shoulder, full body",
-      "kneeling on bed full body, hands on thighs, looking at camera",
-      "sitting on edge of bed full body, legs dangling, playful look",
-      "standing arched back, looking down then up at camera, full body hips to head",
-      "lying on side on sofa full body, propped on elbow, looking at camera",
-      "bending forward slightly looking back, full body rear three-quarter view",
-      "sitting cross-legged on floor full body, leaning forward, looking up",
-      "standing with arms above head stretching, full body",
-    ];
-  }
+      "standing full body three-quarter, weight on one hip, teasing look at camera, head to knees visible",
+      "standing full body arched back, chest forward, hands behind head, seductive smile",
+      "standing full body from behind looking back over shoulder, arched, teasing",
+      "leaning against wall full body, one knee bent, biting lip, looking at camera",
+      "sitting on sofa full body legs crossed then uncrossing, short outfit riding up",
+      "sitting on edge of bed full body, legs slightly open, leaning forward, cleavage",
+      "kneeling on bed full body, sitting back on heels, hands on thighs, looking up",
+      "on all fours on bed full body, arched back, looking back over shoulder provocatively",
+      "lying on side full body on bed, one leg bent up, propped on elbow, flirty eyes",
+      "lying on back full body, knees up, looking at camera through lashes",
+      "bending forward full body hands on knees, looking up, deep cleavage angle",
+      "standing legs apart confident full body, hands sliding down sides, inviting look",
+      "sitting straddling chair backwards full body, arms on backrest, sultry",
+      "standing in doorway full body, one hand on frame, hip cocked, come-hither look",
+      "kneeling and leaning back full body, hands behind on bed, chest up",
+      "standing tiptoe stretch full body arms up, outfit lifting slightly",
+      "sitting on floor knees together full body leaning forward, looking up innocently-sexy",
+      "lying on stomach full body on bed, chin on hands, feet up, playful smile",
+    ];  }
   const ex = expandProfileExtra(extra);
   // Variété FORTE : pose + angle caméra (anti-copie de la ref ★)
   const extraPoses = [
@@ -1380,8 +1394,12 @@ function buildLeaImagePrompt(extra = "") {
     const ageN = Math.max(18, Number(c.age) || 21);
     const fantBlob = [c.id, c.title, (c.tags || []).join(" "), c.appearance, looks].filter(Boolean).join(" ");
     const isFantasy = /fan_|fantasy|non-humain|elfe|kitsune|succube|dragon|vampire|catgirl|ange|angel|sir[eè]ne|d[eé]mon/i.test(fantBlob);
-    if (isFantasy && !hasUser && /ocean|sea|beach|water|pool|plage|mer/i.test(loc)) {
+    // Évite mer/plage pour fantasy SAUF sirènes (elles DOIVENT être dans l'eau)
+    if (isFantasy && !hasUser && !/sir[eè]ne|mermaid|fan_sirene/i.test(fantBlob) && /ocean|sea|beach|water|pool|plage|mer/i.test(loc)) {
       loc = "soft indoor light, neutral background";
+    }
+    if (/sir[eè]ne|mermaid|fan_sirene/i.test(fantBlob) && !hasUser) {
+      loc = "underwater ocean or rocky seashore with clear water, mermaid habitat";
     }
     const ageLock = (isFantasy && ageN > 35)
       ? "(ageless adult beauty mid-20s:1.55), young adult woman face,"
@@ -1408,7 +1426,7 @@ function buildLeaImagePrompt(extra = "") {
     } else if (/dragon/i.test(fantBlob)) {
       fantBoost = "(small dragon horns on forehead:1.65), tiny scale patches on shoulders only, dragon girl, human legs, standing on land, NOT mermaid, NOT underwater, NOT fish tail, NOT fox ears,";
     } else if (/sir[eè]ne|mermaid/i.test(fantBlob)) {
-      fantBoost = "(mermaid tail:1.65), iridescent scales, NOT legs only, NOT angel wings, NOT dragon horns,";
+      fantBoost = "(mermaid tail instead of legs:1.75), iridescent fish scales on tail, full mermaid body, NO horns of any kind, NOT demon horns, NOT dragon horns, NOT oni horns, NOT angel wings, NOT snake hair, NOT human legs with feet,";
     } else if (/kitsune|fox ears|renard/i.test(fantBlob)) {
       fantBoost = "(fox ears on head:1.65), fluffy fox tail, NOT elf ears, NOT dragon horns, NOT mermaid,";
     } else if (/elfe|\belf\b|elf ears/i.test(fantBlob)) {
@@ -1419,14 +1437,17 @@ function buildLeaImagePrompt(extra = "") {
       fantBoost = "(cat ears on head:1.65), cat tail, NOT fox ears, NOT elf ears,";
     } else if (/\boni\b|fan_oni/i.test(fantBlob)) {
       fantBoost = "(two short thick oni horns:1.7), japanese oni, human legs standing on land, NOT mermaid, NOT underwater, NOT fish tail,";
+    } else if (/gorgone|medusa/i.test(fantBlob)) {
+      fantBoost = "(living snakes instead of hair:1.75), medusa gorgon, human legs, NOT mermaid, NOT horns, NOT underwater,";
     } else if (/d[eé]mon|demon/i.test(fantBlob)) {
       fantBoost = "(demon horns:1.6), demon tail, NOT angel wings, NOT mermaid,";
     }
     const scenePart = [
-      "(full body or three-quarter shot:1.45),",
+      "(full body head to mid-thigh:1.55), (hips and legs visible:1.45), wide shot,",
       "(completely different pose:1.5), " + pos + ",",
-      clothed ? ("(wearing " + wear + ":1.45), fabric visible,") : ("wearing " + wear + ","),
+      clothed ? ("(wearing " + wear + ":1.45), fabric visible, sexy outfit,") : ("wearing " + wear + ","),
       "in " + loc + ",",
+      "NOT face crop, NOT bust only, NOT headshot,",
     ].join(" ");
     const qualityPart = [
       "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
@@ -5989,6 +6010,20 @@ async function generateScenePhoto() {
     if (!prompt || prompt.length < 20) {
       prompt = "photorealistic photo of adult woman, " + (c.appearance || c.name || "") + ", detailed face";
     }
+    // Corps entier + anti-miroir + identité yeux/cheveux en tête
+    try {
+      const L = String(c.looks_en || "");
+      let eyeHair = "";
+      const em = L.match(/\(([^()]*eyes:1\.[0-9]+)\)/i);
+      const hm = L.match(/\(([^()]*hair:1\.[0-9]+)\)/i);
+      if (em) eyeHair += "(" + em[1] + "), ";
+      if (hm) eyeHair += "(" + hm[1] + "), ";
+      const id = typeof faceIdentityLock === "function" ? faceIdentityLock(c) : "";
+      prompt = "(1girl:1.5), (solo:1.45), " + eyeHair +
+        "(full body wide shot head to mid-thigh:1.55), hips and legs visible, " +
+        id + ", " + prompt +
+        ", NOT face crop, NOT bust crop only, NOT headshot, NOT mirror symmetry, NOT deformed, NOT fused body parts, photorealistic";
+    } catch (_) {}
     console.log("[lea scene prompt]", prompt.slice(0, 300));
 
     const sc = (state.chat && state.chat.scene) || {};
@@ -6018,8 +6053,9 @@ async function generateScenePhoto() {
     } catch (_) {}
     const payload = {
       prompt,
-      negative: bodyNegatives(c) +
-        ", child, teen, underage, cartoon, anime, deformed, blurry, watermark, text, wrong body type, empty white background, different face, different person, wrong hair color, middle-aged, " +
+      negative: "mirror symmetry, symmetrical face mirrored, left right mirror, collage, grid, 2girls, twins, clone, " +
+        bodyNegatives(c) +
+        ", child, teen, underage, cartoon, anime, deformed, fused body parts, hair fused with clothes, melted body, extra limbs, bad anatomy, blurry, watermark, text, wrong body type, empty white background, different face, different person, wrong hair color, wrong eye color, middle-aged, face crop only, bust crop only, headshot, close-up portrait only, " +
         (String(prompt).match(/SOAKING WET|crop top|top court|wearing|jean|dress|towel|NOT nude|clinging/i)
           ? "completely nude, fully naked, bare breasts, exposed nipples, topless, no clothes, nude standing, glamorous different face"
           : ""),
@@ -6034,8 +6070,9 @@ async function generateScenePhoto() {
         if (ref) {
           payload.source_image = ref;
           payload.source_processing = "img2img";
-          const bigChange = /missionnaire|doggy|nude|levrette|orgasme/i.test(prompt);
-          payload.denoising = bigChange ? 0.68 : 0.58;
+          // Denoise haut pour ne pas coller le buste de la ref
+          const bigChange = /missionnaire|doggy|nude|levrette|orgasme|full body|pose/i.test(prompt);
+          payload.denoising = bigChange ? 0.72 : 0.65;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
         } else {

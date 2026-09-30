@@ -1704,7 +1704,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.4), (slim slender body:1.4), (small curved dragon horns on forehead:1.7), (tiny dragon scale patches only on shoulders:1.45), optional slit pupils, rocky cliff or castle balcony, standing on solid ground, dry skin, human legs fully visible, NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT fox ears, NOT bat wings, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(25 year old woman:1.5), (brown eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), (slim slender body:1.4), (small curved dragon horns on forehead:1.7), tiny scale patches only on shoulders, human legs, standing on solid ground, dry skin, full body head to feet, NO mermaid, NO mermaid tail, NO fish tail, NO underwater, NO ocean, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Pyra Vex. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1736,7 +1736,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (silver white hair:1.5), (blue eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), feminine balanced figure, (small curved dragon horns on forehead:1.7), (tiny dragon scale patches only on shoulders:1.45), optional slit pupils, rocky cliff or castle balcony, standing on solid ground, dry skin, human legs fully visible, NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT fox ears, NOT bat wings, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(25 year old woman:1.5), (blue eyes:1.55), (silver white hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), feminine figure, (small curved dragon horns on forehead:1.7), tiny scale patches only on shoulders, human legs, standing on solid ground, dry skin, full body head to feet, NO mermaid, NO mermaid tail, NO fish tail, NO underwater, NO ocean, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Saphira Noctis. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1832,7 +1832,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.4), feminine balanced figure, (mermaid tail instead of legs:1.7), (iridescent mermaid scales:1.55), wet hair, underwater or seaside, underwater or rocky shore with water, NOT demon horns, NOT dragon horns, NOT fox ears, NOT elf ears, NOT bat wings, NOT human legs standing on land, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(28 year old woman:1.5), (blue eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), feminine figure, (mermaid tail instead of legs:1.75), (iridescent fish scales on tail:1.55), wet long hair, underwater or rocky shore, full mermaid body visible head to tail tip, NO horns, NO demon horns, NO dragon horns, NO oni horns, NO angel wings, NO fox ears, NO snake hair, NOT horns of any kind, NOT standing on land with human legs, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Coralia. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1864,7 +1864,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (blonde hair:1.5), (brown eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (mermaid tail instead of legs:1.7), (iridescent mermaid scales:1.55), wet hair, underwater or seaside, underwater or rocky shore with water, NOT demon horns, NOT dragon horns, NOT fox ears, NOT elf ears, NOT bat wings, NOT human legs standing on land, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(35 year old woman:1.5), (brown eyes:1.55), (blonde hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (mermaid tail instead of legs:1.75), (iridescent fish scales on tail:1.55), wet long hair, underwater or rocky shore, full mermaid body visible head to tail tip, NO horns, NO demon horns, NO dragon horns, NO oni horns, NO angel wings, NO fox ears, NO snake hair, NOT horns of any kind, NOT standing on land with human legs, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Marina Deep. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1896,7 +1896,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.4), feminine balanced figure, (large white feathered angel wings fully visible:1.75), soft halo optional, bright sky or church steps, standing on land, human legs, NOT demon horns, NOT bat wings, NOT mermaid, NOT fish tail, NOT underwater, NOT scales, NOT fox ears, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(28 year old woman:1.5), (brown eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), feminine figure, (large white feathered angel wings:1.75), human legs standing, full body, NO horns, NO mermaid, NO bat wings, NO underwater, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Seraphiel. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1928,7 +1928,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (curved black demon horns:1.7), (small bat wings:1.5), (spaded demon tail:1.55), dark interior or hellish glow, standing, human legs, NOT white angel wings, NOT mermaid, NOT fox ears, NOT elf ears, NOT underwater, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(27 year old woman:1.5), (brown eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (curved black demon horns:1.7), small bat wings, spaded tail, human legs, full body, NO angel wings, NO mermaid, NO underwater, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Azura Flame. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2088,7 +2088,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), feminine balanced figure, (serpent lower body from waist:1.65), scales on lower half, ancient temple ruins, NOT mermaid fish tail, NOT human legs only, NOT fox ears, NOT angel wings, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(26 year old woman:1.5), (brown eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), feminine figure, (serpent lower body from waist:1.7), scales on lower half, human torso, NO mermaid fish tail, NO horns, NO snake hair, full body visible, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Nerissa. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2280,7 +2280,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (living snakes for hair:1.65), gorgon medusa, stone temple, standing, human legs, NOT mermaid, NOT normal human hair only, NOT fox ears, NOT underwater, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(28 year old woman:1.5), (blue eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (living snakes instead of hair:1.75), (medusa snake hair:1.7), gorgon, human legs standing, stone temple, full body visible, NO mermaid tail, NO fish tail, NO demon horns, NO dragon horns, NO oni horns, NOT underwater, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Meda. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2312,7 +2312,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.4), feminine balanced figure, (two short thick oni horns on forehead:1.75), (japanese oni horns:1.65), slight red skin tint optional, sharp teeth, japanese shrine or mountain path, standing on solid ground, dry skin, human legs fully visible, NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT fox ears, NOT elf ears, NOT angel wings, NOT full body scales, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(32 year old woman:1.5), (brown eyes:1.55), (jet-black hair:1.5), fair East Asian skin, (large D-cup breasts:1.4), feminine figure, (two short thick oni horns on forehead:1.75), japanese oni, human legs, standing on land, full body, NO mermaid, NO mermaid tail, NO underwater, NO fish tail, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Aka-Oni Yumi. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2344,7 +2344,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), feminine balanced figure, (naga serpent lower body:1.65), scales from waist down, desert temple or jungle ruins, NOT mermaid fish tail style, NOT human legs only, NOT fox ears, (photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, sharp focus, adult woman",
+    "looks_en": "(27 year old woman:1.5), (brown eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), feminine figure, (naga serpent lower body from waist:1.7), scales from waist down, human torso, NO mermaid fish tail style, NO horns, NO snake hair medusa, full body visible, photorealistic photo, real skin, sharp focus, NOT anime, NOT cartoon, NOT deformed",
     "system_extra": "Tu es UNIQUEMENT Zafira. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
