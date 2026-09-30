@@ -1471,8 +1471,8 @@
       const isFantasy = /fantasy|non-humain/i.test(tagsBlob);
       const isJeu = /\bjeu\b|joueuse|d[eé]fis/i.test(tagsBlob) && !isAmieFille;
       const titleSc = tagsBlob;
-      const isFemmeDuFrere = isBelleSoeur && /femme de ton frère|femme de mon frère|épouse de ton frère/i.test(titleSc);
-      const isSoeurEpouse = isBelleSoeur && /sœur de ton épouse|sœur de ta femme/i.test(titleSc);
+      const isFemmeDuFrere = isBelleSoeur && /femme de ton frère|femme de mon frère|épouse de ton frère|femme du frère|belle-sœur.*frère/i.test(titleSc);
+      const isSoeurEpouse = isBelleSoeur && /sœur de ton épouse|sœur de ta femme|sœur de ton conjoint|soeur de ton conjoint|sœur de ton mari|sœur de ta conjointe|soeur de ton épouse/i.test(titleSc);
       let relationLock = "";
       if (isBelleMere) {
         relationLock = [
@@ -1487,12 +1487,15 @@
         ].join(" ");
       } else if (isSoeurEpouse) {
         relationLock = [
-          `Tu es ${PERSONA.name}, BELLE-SŒUR : SŒUR DE L'ÉPOUSE de l'utilisateur.`,
-          "« Ma sœur » = sa femme. Correct.",
+          `Tu es ${PERSONA.name}, BELLE-SŒUR : SŒUR DU CONJOINT / DE L'ÉPOUSE de l'utilisateur.`,
+          "Tu es chez LUI. Si le scénario dit que tu t'es disputée avec ton partenaire : c'est TOI qui as besoin de parler — pas l'utilisateur.",
+          "« Ma sœur » peut désigner sa femme (ta sœur). Ne confonds pas les rôles.",
         ].join(" ");
       } else if (isBelleSoeur) {
         relationLock = [
-          `Tu es ${PERSONA.name}, BELLE-SŒUR. Lis titre + scénario pour le lien exact.`,
+          `Tu es ${PERSONA.name}, BELLE-SŒUR de l'utilisateur.`,
+          "Lis le SCÉNARIO pour le lien exact (sœur du conjoint OU femme du frère).",
+          "Tu n'es PAS l'utilisatrice : c'est LUI le maître de maison. Tu es la visiteuse / la belle-sœur.",
         ].join(" ");
       } else if (isBelleFille) {
         relationLock = [
@@ -1595,6 +1598,12 @@
         `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
         `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
+        "=== PRÉMISSE DE RÔLE (NON NÉGOCIABLE) ===",
+        "1) Tu es UNIQUEMENT le personnage de la fiche (nom, âge, titre, scénario). L'utilisateur est l'autre personne de la scène.",
+        "2) Le SCÉNARIO définit POURQUOI tu es là et QUI porte le problème. Si le scénario dit que TU viens (dispute, rupture, oubli, heures supp, visite…) : c'est TOI la visiteuse / celle qui a un sujet. N'inverse JAMAIS : ne traite pas l'utilisateur comme s'il était venu se confier chez toi, ne lui demande pas « qu'est-ce qui te tracasse » comme si c'était LUI le motif de la scène — sauf s'il amène lui-même un sujet.",
+        "3) Au début, ancre la conversation dans TA situation (ta dispute, ton travail, ta visite). Tu peux écouter l'utilisateur ensuite, mais tu ne voles pas son rôle.",
+        "4) INTERDIT de changer de rôle (pas de secrétaire qui devient belle-mère, pas d'amie qui devient collègue, etc.).",
+        "5) INTERDIT d'inventer un autre lien familial ou pro que celui du TITRE + SCÉNARIO.",
         // Jeu action/vérité / défis : règles strictes de tours
         (function () {
           const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "") + " " + String(PERSONA.tags || "");
