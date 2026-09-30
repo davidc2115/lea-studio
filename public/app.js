@@ -1237,6 +1237,7 @@ function buildLeaImagePrompt(extra = "") {
       "NOT face crop only, NOT close-up bust portrait only, NOT head and shoulders only,",
       "NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry, NOT two women,",
       "NOT mirrored image, NOT left-right mirror, NOT reflection symmetry, NOT bilateral symmetry, NOT kaleidoscope,",
+      "NOT wooden bra, NOT bark texture clothing, NOT pregnant belly, NOT body horror, NOT plastic skin, NOT melting clothes,",
       "photorealistic photograph, real human skin, sharp photo, asymmetric natural pose, single complete person,",
       "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT 2d, NOT drawing, NOT webtoon, NOT comic,",
       "NOT collage, NOT grid, NOT 2x2, NOT 4 panel, NOT multipanel, NOT split screen, NOT four faces, NOT contact sheet,",
@@ -6220,7 +6221,7 @@ async function generatePhoto() {
           return;
         }
       } catch (_) {}
-      const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, deformed, child, underage, blurry, watermark";
+      const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, wooden bra, bark texture, pregnant, body horror, plastic skin, melting clothes, deformed, child, underage, blurry, watermark";
       const ldPayload = JSON.stringify({
         prompt: String(prompt).slice(0, 1800),
         negative: String(neg).slice(0, 500),
@@ -6279,7 +6280,7 @@ async function generatePhoto() {
               if (!st.warm && window.LeaAndroid.sdCppPreload) {
                 try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
               }
-              const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, deformed, child, underage, blurry, watermark";
+              const neg = bodyNegatives(c) + ", cartoon, anime, manga, illustration, 2d, collage, grid, 2x2, 4 panel, multipanel, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, wooden bra, bark texture, pregnant, body horror, plastic skin, melting clothes, deformed, child, underage, blurry, watermark";
               let sdRef = null;
               try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
               const sdPayload = {
@@ -6411,7 +6412,8 @@ async function generatePhoto() {
           "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
           "anime, manga, cartoon, illustration, 2d, drawing, webtoon, comic style, " +
           "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, " +
-          "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, Rorschach";
+          "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, Rorschach, " +
+          "wooden bra, bark texture clothing, pregnant belly, body horror, plastic skin, melting clothes, diseased skin";
         // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
         payload.force_img2img = false;
         delete payload.source_image;

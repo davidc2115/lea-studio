@@ -1598,12 +1598,27 @@
         `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
         `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
+        (function () {
+          const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "");
+          const sheComes = /d[eé]barque|passe chez|frappe|sonne|visite|dispute|rupture|heures supp|oubli[eé]|fuite|babysitter|après le boulot|afterwork|d[eé]placement|chez toi|chez vous/i.test(sc);
+          const sheHasProblem = /dispute|rupture|dispute avec|s'est disput|s'est disputée|conjoint|partenaire|mari|heures supp|dossier|fuite|oubli/i.test(sc);
+          if (sheComes || sheHasProblem) {
+            return [
+              "ANCRAGE SCÈNE (OBLIGATOIRE) :",
+              "• C'est TOI qui es chez l'utilisateur (ou dans son espace) pour le motif du scénario.",
+              "• C'est TOI qui as le motif (dispute / travail / visite / oubli…). L'utilisateur t'accueille.",
+              "• Premiers messages : parle de TON motif, pas du sien. N'inverse pas les rôles.",
+            ].join(" ");
+          }
+          return "ANCRAGE SCÈNE : reste strictement dans le titre et le scénario de ta fiche.";
+        })(),
         "=== PRÉMISSE DE RÔLE (NON NÉGOCIABLE) ===",
-        "1) Tu es UNIQUEMENT le personnage de la fiche (nom, âge, titre, scénario). L'utilisateur est l'autre personne de la scène.",
-        "2) Le SCÉNARIO définit POURQUOI tu es là et QUI porte le problème. Si le scénario dit que TU viens (dispute, rupture, oubli, heures supp, visite…) : c'est TOI la visiteuse / celle qui a un sujet. N'inverse JAMAIS : ne traite pas l'utilisateur comme s'il était venu se confier chez toi, ne lui demande pas « qu'est-ce qui te tracasse » comme si c'était LUI le motif de la scène — sauf s'il amène lui-même un sujet.",
-        "3) Au début, ancre la conversation dans TA situation (ta dispute, ton travail, ta visite). Tu peux écouter l'utilisateur ensuite, mais tu ne voles pas son rôle.",
-        "4) INTERDIT de changer de rôle (pas de secrétaire qui devient belle-mère, pas d'amie qui devient collègue, etc.).",
+        "1) Tu es UNIQUEMENT le personnage de la fiche (nom, âge, titre, scénario). L'utilisateur est l'autre personne de la scène — le maître de maison / l'hôte dans la plupart des cas.",
+        "2) QUI PORTE LE PROBLÈME : lis le SCÉNARIO. Si TU arrives (dispute avec conjoint, rupture, oubli de clés, heures supp, fuite d'eau, visite surprise, babysitting terminé…) → c'est TOI la visiteuse / celle qui a un motif. L'utilisateur t'accueille. INTERDIT d'inverser : ne lui demande PAS « qu'est-ce qui te tracasse », « raconte-moi ce qui ne va pas », « tu as l'air stressé » comme si C'ÉTAIT LUI le motif de la scène — SAUF s'il amène lui-même un sujet personnel.",
+        "3) AU DÉBUT : ancre-toi dans TA situation (ta dispute, ton travail, ta visite, ton job). Exemple belle-sœur après dispute : tu parles de TA dispute / ton conjoint, pas de ses problèmes à lui. Tu peux l'écouter ensuite s'il se confie — tu ne voles pas son rôle.",
+        "4) INTERDIT de changer de rôle (pas de secrétaire→belle-mère, pas d'amie→collègue, etc.).",
         "5) INTERDIT d'inventer un autre lien familial ou pro que celui du TITRE + SCÉNARIO.",
+        "6) Phrases INTERDITES en ouverture si le scénario dit que TU viens : « qu'est-ce qui te tracasse », « raconte-moi ta journée », « tu as l'air fatigué, parle-moi », « c'est moi qui devrais t'écouter » (sauf si le joueur a déjà confié un souci).",
         // Jeu action/vérité / défis : règles strictes de tours
         (function () {
           const sc = String(PERSONA.scenario || "") + " " + String(PERSONA.title || "") + " " + String(PERSONA.tags || "");
@@ -2106,11 +2121,14 @@
         "collage, grid, 2x2, 4 panel, multipanel, split screen, four faces, contact sheet, moodboard, tiled image,",
         "mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, vertical symmetry,",
         "kaleidoscope, half mirror, mirror split, symmetrical face split, mirrored hair, Rorschach, flipped duplicate,",
+        "wooden bra, bark texture clothing, tree bark on body, leather fused to skin, melting clothes, deformed lingerie,",
+        "pregnant belly, pregnancy, bloated diseased skin, excessive stretch marks as primary feature, body horror,",
+        "oily plastic skin, wax figure, mannequin, oversharpened pores, alien skin texture,",
         "deformed, mutated, extra limbs, extra fingers, bad anatomy, watermark, text, logo,",
         "child, teen, underage, different face, different person, face morph,",
         "same pose as reference, identical composition, copy of source pose,",
         extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1000);
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
 
       let promptSafe = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 1200);
       // Toujours forcer photo réaliste (évite anime kitsune / grilles)
@@ -2180,7 +2198,7 @@
       den = Math.min(0.82, Math.max(0.62, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
-      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art";
+      const soloNeg = ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, mirrored image, left-right mirror, reflection symmetry, bilateral symmetry, kaleidoscope, half mirror, same woman twice, split screen, collage, extra person, grid, 2x2, 4x4, 4 panel, multipanel, tiled, contact sheet, anime, manga, cartoon, illustration, 2d art, wooden clothing, bark texture, pregnant, body horror, plastic skin, melting clothes";
       const qualityNeg = ", turbo, lightning, lcm, blurry face, wrong age, different woman";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
