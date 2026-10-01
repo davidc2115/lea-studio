@@ -2410,14 +2410,16 @@
       // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
       const isDuoPrompt = body.is_duo === true || /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women side by side/i.test(prompt);
+      const speciesFirst = extraNeg.slice(0, 420);
       const negative = [
+        speciesFirst,
         "anime, manga, cartoon, illustration, drawing, sketch, painting, comic, webtoon, 2d art, 3d render, cgi, plastic doll,",
         "text, watermark, logo, signature, letters, words, title, caption, ui, subtitle,",
         "mirror symmetry, mirrored body, left-right mirror, symmetrical breasts, double torso, duplicated body, fused body, conjoined, two spines, four breasts, mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
         "blurry, out of focus, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy, mutated, disfigured,",
         "child, teen, underage, different person,",
-        extraNeg
-      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 850);
+        extraNeg.slice(420)
+      ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
 
       // ——— Ne pas tronquer l'identité : poids (:1.x) et corps/fantasy en tête ———
       function prioritizeIdentity(raw) {
@@ -2432,6 +2434,9 @@
         return s.slice(0, 1500);
       }
       let promptSafe = prioritizeIdentity(prompt);
+      // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
+      promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
+      promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
@@ -2503,7 +2508,7 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const base = {
-          prompt: (promptSafe + " ### " + negFull).slice(0, 1600),
+          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
           params: {
             width: w,
             height: h,

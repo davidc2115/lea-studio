@@ -933,129 +933,11 @@ function faceIdentityLock(c) {
     else if (/bonnet\s*h|h-cup/i.test(blob)) parts.push("(huge H-cup breasts:1.5)");
   }
 
-  // Fantasy EXCLUSIVE — un seul type, anti-contamination stricte
-  if (/\boni\b|fan_oni/i.test(blob)) {
-    parts.push(
-      "(two short thick oni horns on forehead:1.75)",
-      "(japanese oni horns:1.65)",
-      "slight red skin tint optional, sharp teeth,",
-      "human legs, standing on solid ground, dry skin,",
-      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT fox ears, NOT elf ears, NOT angel wings"
-    );
-  } else if (/dragon/i.test(blob)) {
-    parts.push(
-      "(small curved dragon horns on forehead:1.7)",
-      "(tiny dragon scale patches only on shoulders:1.4)",
-      "human legs, standing on solid ground, dry skin,",
-      "NOT mermaid, NOT mermaid tail, NOT fish tail, NOT underwater, NOT ocean, NOT swimming, NOT full body scales, NOT fox ears"
-    );
-  } else if (/ange|angel|ailes d.ange/i.test(blob)) {
-    parts.push(
-      "(large white feathered angel wings fully visible behind back:1.75)",
-      "human legs, standing,",
-      "NOT mermaid, NOT tail, NOT underwater, NOT scales, NOT demon horns, NOT bat wings"
-    );
-  } else if (/sir[eè]ne|mermaid/i.test(blob)) {
-    parts.push(
-      "(mermaid tail instead of legs:1.75)",
-      "(iridescent fish scales on tail only:1.55)",
-      "wet hair, underwater or rocky shore,",
-      "full mermaid body head to tail tip visible,",
-      "NO horns, NO demon horns, NO dragon horns, NO oni horns, NO any horns,",
-      "NOT horns, NOT horned, NOT demon, NOT dragon girl, NOT oni, NOT angel wings, NOT snake hair, NOT standing on land with feet"
-    );
-  } else if (/gorgone|medusa|snake hair/i.test(blob)) {
-    parts.push(
-      "(living snakes instead of hair:1.75)",
-      "(medusa snake hair:1.7), gorgon,",
-      "human legs standing, full body,",
-      "NOT mermaid tail, NOT fish tail, NOT horns, NOT underwater"
-    );
-  } else if (/kitsune|renard|fox ears/i.test(blob)) {
-    parts.push(
-      "(fox ears on top of head:1.7)",
-      "(fluffy multiple fox tails:1.6)",
-      "human legs, standing,",
-      "NOT dragon horns, NOT mermaid, NOT cat ears, NOT elf ears, NOT underwater"
-    );
-  } else if (/elfe|\belf\b|elf ears/i.test(blob)) {
-    parts.push(
-      "(long pointed elf ears highly visible:1.7)",
-      "human legs, standing,",
-      "NOT horns, NOT mermaid, NOT fox ears, NOT cat ears"
-    );
-  } else if (/succube|succubus/i.test(blob)) {
-    parts.push(
-      "(curved small succubus horns:1.65)",
-      "(small bat demon wings:1.5)",
-      "(spaded thin demon tail:1.5)",
-      "human legs, standing,",
-      "NOT angel, NOT mermaid, NOT fox ears, NOT underwater"
-    );
-  } else if (/catgirl|cat ears|neko/i.test(blob)) {
-    parts.push(
-      "(cat ears on top of head:1.7)",
-      "(long cat tail:1.6)",
-      "human legs, standing,",
-      "NOT fox ears, NOT dragon, NOT mermaid"
-    );
-  } else if (/d[eé]mon|demon/i.test(blob) && !/succube|dragon|oni/i.test(blob)) {
-    parts.push(
-      "(curved black demon horns:1.7)",
-      "(small bat wings:1.5)",
-      "(spaded demon tail:1.55)",
-      "human legs, standing,",
-      "NOT angel wings, NOT mermaid, NOT underwater"
-    );
-  } else if (/vampire/i.test(blob)) {
-    parts.push("very pale vampire skin, subtle fangs,", "human legs, standing,", "NOT animal ears, NOT mermaid, NOT horns");
-  } else if (/naga|lamia|serpent lower/i.test(blob)) {
-    parts.push("(serpent lower body from waist:1.65)", "NOT mermaid fish tail style, NOT full human legs only");
-  } else if (/\bwolf\b|loup-garou|wolf ears/i.test(blob)) {
-    parts.push("(wolf ears on head:1.65)", "(wolf tail:1.5)", "NOT fox ears, NOT mermaid");
-  } else if (/phoenix|ph[eé]nix/i.test(blob)) {
-    parts.push("(phoenix fire wings:1.65)", "ember feathers,", "NOT mermaid, NOT underwater");
-  } else if (/centaur|centaure/i.test(blob)) {
-    parts.push("(centaur horse lower body:1.7)", "NOT mermaid, NOT human legs only");
-  } else if (/gorgone|medusa|snake hair/i.test(blob)) {
-    parts.push("(living snakes for hair:1.65)", "NOT mermaid, NOT normal hair only");
-  } else if (/slime|gel[eé]e|mochi/i.test(blob)) {
-    parts.push(
-      "photorealistic adult woman, clear human face eyes nose mouth,",
-      "(glossy translucent jelly-like skin texture:1.6),",
-      "fully humanoid woman body with arms legs feet,",
-      "indoor bathroom, standing on tiled floor,",
-      "NOT abstract blob, NOT formless mass, NOT faceless,",
-      "NO horns, NO mermaid tail, NO fish scales, NO wings,",
-      "NOT underwater ocean, NOT coral, full body visible"
-    );
-  } else if (/android|robot/i.test(blob)) {
-    parts.push("(android robot woman:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
-  } else if (/ghost|fant[oô]me/i.test(blob)) {
-    parts.push("semi-transparent ethereal ghost body,", "NOT mermaid, NOT fully opaque solid only");
-  } else if (/witch|sorci[eè]re/i.test(blob)) {
-    parts.push("mystical witch aura, pointed hat optional,", "NOT mermaid, NOT underwater");
-  } else if (/fairy|f[eé]e|fairy wings/i.test(blob)) {
-    parts.push(
-      "(translucent iridescent fairy wings:1.7)",
-      "delicate fairy, full body,",
-      "NOT demon horns, NOT mermaid, NOT large bat wings, NOT fox ears"
-    );
-  } else if (/dryade/i.test(blob)) {
-    parts.push(
-      "(dryad nature spirit:1.55)",
-      "bark-like skin accents, green leaves and vines in hair,",
-      "deep forest, human legs, full body,",
-      "NOT mermaid, NOT horns, NOT animal ears"
-    );
-  } else if (/harpie/i.test(blob)) {
-    parts.push(
-      "(large feathered bird wings spread:1.7)",
-      "avian wings, subtle talon fingers, feather accents,",
-      "full body with wings visible,",
-      "NOT mermaid, NOT demon horns, NOT fox ears, NOT snake hair"
-    );
-  }
+  // Fantasy : uniquement speciesLock (jamais de "NOT mermaid" dans le positif)
+  try {
+    const sl = typeof speciesLock === "function" ? speciesLock(c) : "";
+    if (sl) parts.push(sl);
+  } catch (_) {}
 
   // physicalLocks extra
   try {
@@ -5762,6 +5644,10 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       setS("Horde txt2img duo (2 personnes, sans img2img mono)…");
       return payload;
     }
+    if (typeof fantasyKind === "function" && fantasyKind(c)) {
+      setS("Horde txt2img fantasy (pas d'img2img — évite cornes/sirène copiées)…");
+      return payload;
+    }
     let ref = await resolveCharacterRefB64(c);
     if (ref) {
       // Réduire la ref si trop lourde (Horde workers plus stables)
@@ -6645,7 +6531,7 @@ function speciesLock(c) {
   const map = {
     slime: "(slime girl:1.95), translucent see-through jelly body, glossy gelatinous skin, clear human face, two human legs, human feet, standing in a bathtub, indoor bathroom",
     sirene: "(mermaid:1.9), mermaid tail instead of legs, iridescent scales on the tail only, rocky shore",
-    catgirl: "(catgirl:1.9), cat ears on top of head, fluffy cat tail, two human legs, human feet, standing on the floor, indoor apartment",
+    catgirl: "(catgirl:1.95), cat ears on top of head, fluffy cat tail, two human legs, two human feet, kneeling or standing on a wooden floor, indoor apartment, dry skin",
     kitsune: "(kitsune:1.85), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet, shrine interior",
     succube: "(succubus:1.85), small curved horns, small bat wings, spaded tail, two human legs, human feet, dim indoor room",
     dragon: "(dragon woman:1.85), small dragon horns, scale patches on shoulders only, two human legs, standing on land, cave balcony",
@@ -6657,7 +6543,7 @@ function speciesLock(c) {
     elfe: "(elf woman:1.85), long pointed elf ears, two human legs, human feet, forest hall",
     ange: "(angel woman:1.85), large white feathered wings, two human legs, human feet, cloudy terrace",
     demon: "(demon woman:1.85), black demon horns, small bat wings, spaded tail, two human legs, dark hall",
-    vampire: "(vampire woman:1.8), very pale skin, subtle fangs, two human legs, gothic interior",
+    vampire: "(vampire woman:1.95), very pale skin, subtle fangs, two human legs, two human feet, standing on a wooden floor, gothic apartment interior, candlelight, dry skin",
     fee: "(fairy woman:1.8), small translucent insect wings, two human legs, flower glade",
     oni: "(oni woman:1.85), short thick oni horns, two human legs, japanese hall",
     centaure: "(centaur woman:1.9), human torso on horse body, meadow",
