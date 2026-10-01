@@ -1063,7 +1063,7 @@ function buildLeaImagePrompt(extra = "") {
       "ultra photorealistic DSLR photo of Léa,",
       "(solo:1.45), single adult woman only, NOT 2girls, NOT twins, NOT clones, NOT mirror,",
       faceIdentityLock(c) + ",",
-      "(18-21 year old young French woman:1.4), (looks exactly 21:1.35),",
+      "(21 year old adult French woman:1.4), young adult woman,",
       "oval porcelain face, delicate bone structure, soft jaw, subtle cheekbones,",
       "(large almond hazel-green eyes:1.4), golden-green iris, long dark lashes,",
       "dark chestnut thick arched brows, fine straight nose, full soft matte rose lips,",
@@ -5548,7 +5548,7 @@ function ageNegatives(c) {
 
 function identityLock(c) {
   if (!c) return "";
-  const age = Number(c.age) || 21;
+  const age = Math.max(21, Number(c.age) || 22);
   const name = c.name || "the woman";
   const looks = describeLooks(c);
   const mw = morphWeights(c);
@@ -5571,7 +5571,7 @@ function identityLock(c) {
   const ageD = Math.max(21, Number(age) || 25);
   const ageLock = [
     "(" + ageD + " year old adult woman:1.4)",
-    "(looks exactly " + age + " years old:1.35)",
+    "( " + Math.max(21, Number(age)||25) + " year old adult woman:1.35)",
     "youthful face appropriate for age " + age,
     age <= 25
       ? "young soft skin, no wrinkles, not middle-aged, not 30, not 35, not mature woman"

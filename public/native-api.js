@@ -2419,11 +2419,11 @@
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
-      // 512x768 si compte, sinon 512x512 gratuit
+      // Anonyme: MAX 512x512 (sinon Horde kudos: "over 576x576")
+      // Compte: 512x768 OK
       const W = 512;
-      const H = hasHordeAccount ? 768 : 640;
-      // Steps élevés = moins d'images "flash" (2-5s) floues / hors-identité
-      const steps = hasHordeAccount ? 36 : 30;
+      const H = hasHordeAccount ? 768 : 512;
+      const steps = hasHordeAccount ? 32 : 22;
       // Noms reconnus sur AI Horde (évite turbo/lightning qui sortent en 3s)
       // 1-2 modèles max = moins de charge workers / moins de rejets
       const photoModels = hasHordeAccount
@@ -2450,7 +2450,7 @@
         payloads.push({
           prompt: (imgPrompt + " ### " + negFull).slice(0, 1800),
           params: {
-            width: W, height: Math.min(H, 640), steps: Math.min(steps, 28), n: 1,
+            width: W, height: H, steps: Math.min(steps, hasHordeAccount ? 28 : 20), n: 1,
             sampler_name: "k_euler_a", cfg_scale: 7.5,
             denoising_strength: den,
           },
@@ -2467,12 +2467,12 @@
         payloads.push({
           prompt: (promptSafe + " ### " + negFull).slice(0, 1800),
           params: {
-            width: 512,
-            height: hasHordeAccount ? 768 : 576,
-            steps: hasHordeAccount ? 32 : 25,
+            width: W,
+            height: H,
+            steps: steps,
             n: 1,
             sampler_name: "k_euler_a",
-            cfg_scale: 7.5,
+            cfg_scale: 7,
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
@@ -2537,9 +2537,10 @@
           }
         }
       }
-      if (/kudos|heavy demand|work budget/i.test(String(last))) {
+      if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
         throw new Error(
-          "Horde quota (kudos). Réessaie plus tard ou ajoute une clé gratuite aihorde.net. " + String(last).slice(0, 100)
+          "Horde : besoin de kudos (résolution/file). Sans clé → image 512x512 max. " +
+          "Crée une clé gratuite sur aihorde.net et colle-la dans Clés. " + String(last).slice(0, 80)
         );
       }
       if (/timeout for|abuse prevention|2 per 1 second|rate limit/i.test(String(last))) {
