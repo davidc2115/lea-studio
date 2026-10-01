@@ -2490,7 +2490,7 @@
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
-      const negFull = (mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1100);
+      const negFull = (mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1800);
 
       // UNE SEULE soumission — anonyme: coût kudos minimal
       function makePayload(opts) {

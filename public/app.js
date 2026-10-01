@@ -123,6 +123,35 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 /** Physique complet : looks_en (CAST) prioritaire, sinon appearance. */
 
 /** Extrait cheveux / yeux / traits non-humains depuis appearance + looks_en (FR ou EN). */
+
+function cupLock(c) {
+  const body = String((c && c.body) || "");
+  const tags = ((c && c.tags) || []).join(" ");
+  const src = (body + " " + tags).toLowerCase();
+  const table = [
+    [/bonnet\s*j|\bj-cup\b/, "(massive J-cup breasts:1.7), extremely heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
+    [/bonnet\s*i|\bi-cup\b/, "(enormous I-cup breasts:1.65), very heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "(huge H-cup breasts:1.6), heavy chest", "A-cup, B-cup, C-cup, small breasts, flat chest"],
+    [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
+    [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
+    [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
+    [/bonnet\s*d|\bd-cup\b|95d/, "(D-cup breasts:1.5), full but not enormous", "A-cup, B-cup, flat chest, H-cup, I-cup, J-cup"],
+    [/bonnet\s*c|\bc-cup\b/, "(medium C-cup breasts:1.55), modest cleavage", "huge breasts, D-cup, E-cup, F-cup, H-cup, I-cup"],
+    [/bonnet\s*b|\bb-cup\b/, "(small B-cup breasts:1.65), modest chest, small natural breasts", "large breasts, huge breasts, deep cleavage, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty"],
+    [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
+  ];
+  for (const [re, pos, neg] of table) {
+    if (re.test(src)) return { pos, neg };
+  }
+  return { pos: "", neg: "" };
+}
+function identityFromCard(c) {
+  const name = String((c && c.name) || "woman");
+  const age = Math.max(18, Number(c && c.age) || 25);
+  const hair = (String((c && c.appearance) || "").match(/Cheveux\s*:\s*([^\n.]+)/i) || [])[1] || "";
+  const eyes = (String((c && c.appearance) || "").match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || "";
+  return name + ", " + age + " year old woman, " + hair + ", " + eyes;
+}
 function physicalLocksFromText(c) {
   const blob = [
     c && c.looks_en,
@@ -311,8 +340,8 @@ function physicalLocksFromText(c) {
     out.positive.push("(small flat A-cup breasts:1.3)");
     out.negative.push("large breasts, huge breasts, D-cup, E-cup, H-cup");
   } else if (/bonnet\s*b|b-cup/i.test(blob)) {
-    out.positive.push("(small-medium B-cup breasts:1.3)");
-    out.negative.push("huge breasts, E-cup, H-cup, flat chest");
+    out.positive.push("(small B-cup breasts:1.65)", "modest natural chest");
+    out.negative.push("large breasts, huge breasts, deep cleavage, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty");
   } else if (/bonnet\s*c|c-cup/i.test(blob)) {
     out.positive.push("(medium C-cup breasts:1.25)");
   } else if (/bonnet\s*d|d-cup|95d/i.test(blob)) {
@@ -1460,7 +1489,9 @@ function buildLeaImagePrompt(extra = "") {
       .replace(/\b1[89] year old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(solo:1.45), single adult woman only,",
+      "(solo:1.55), single adult woman only, one woman, NOT 2girls, NOT twins, NOT side by side duplicate,",
+      (cupLock(c).pos || ""),
+      identityFromCard(c) + ",",
       ageLock,
       looksClean, // contains body type + fantasy + hair/eyes/breasts
       (phys.positive || []).slice(0, 12).join(", "),
@@ -5753,7 +5784,10 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       } catch (_) {}
       payload.source_image = ref;
       payload.source_processing = "img2img";
-      if (payload.denoising == null) payload.denoising = duoDenoise(0.62);
+      if (payload.denoising == null) payload.denoising = duoDenoise(0.42);
+      const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
+      payload.prompt = [cup.pos, "same woman as the reference photo, same face, same skin tone, same breast size, do not enlarge or shrink the chest", payload.prompt || ""].filter(Boolean).join(", ");
+      if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
@@ -7012,6 +7046,11 @@ async function generatePhoto() {
       payload.prompt = stripForeignSpecies(payload.prompt || "", c);
       payload.negative = speciesNegative(c) + ", " + (payload.negative || "");
     }
+    try {
+      const cup = cupLock(c);
+      if (cup.pos) payload.prompt = cup.pos + ", " + (payload.prompt || "");
+      if (cup.neg) payload.negative = cup.neg + ", two women, 2girls, twins, duplicate, " + (payload.negative || "");
+    } catch (_) {}
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, auburn hair, red hair, shoulder-length bob, short hair, white bra only, lingerie set, nude, seamless studio, plain background, stock photo, dreamstime, watermark, middle-aged, 30 years old, different face, different woman";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
     // Toute option utilisateur → denoise plus fort + négatifs adaptés
