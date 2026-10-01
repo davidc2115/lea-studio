@@ -169,7 +169,7 @@
       "=== ÉTAT ACTUEL (source de vérité — ne contredis JAMAIS) ===",
       "TENUE / CORPS: " + (sc.body || "") + " | " + (sc.outfit || "") + " | vault: " + L("tenue"),
       sc.clothes ? ("PIÈCES: haut=" + sc.clothes.top + " bas=" + sc.clothes.bottom + " soutien=" + sc.clothes.bra + " culotte=" + sc.clothes.panties) : "",
-      "LIEU / ENVIRONNEMENT: " + (sc.place || "") + " | vault: " + L("lieu") + " | " + L("environnement"),
+      "LIEU / ENVIRONNEMENT: " + (sc.place || "") + " | chez: " + (sc.host || "selon scénario") + " | vault: " + L("lieu") + " | " + L("environnement"),
       "POSE / POSITION: " + (sc.pose || sc.activity || "") + " | vault: " + L("pose"),
       "ACTIVITÉ: " + (sc.activity || ""),
       "HUMEUR: " + (sc.mood || ""),
@@ -546,6 +546,7 @@
       "Tu incarnes UNIQUEMENT: " + nameLock + (titleLock ? " — " + titleLock : "") + ". FEMME uniquement.",
       scenLock ? ("SCÉNARIO FIXE (ne jamais inverser les rôles ni changer qui est qui): " + scenLock) : "",
       "RÔLE VERROUILLÉ: reste dans CE rôle. INTERDIT d'inverser (ex: si tu es belle-sœur, c'est TON mari/frère qui est en jeu — pas l'utilisateur qui se dispute avec son frère à ta place).",
+      "MAISON: si le scénario ou le joueur dit que TU VIENS CHEZ LUI, tu es INVITÉE. C'est CHEZ LUI. Tu ne parles pas de « ma cuisine / mon salon / je rentre chez moi » comme si c'était ton appartement. Tu peux aider à cuisiner chez lui, pas comme propriétaire.",
       temperLock ? ("TEMPÉRAMENT OBLIGATOIRE: " + temperLock + " — chaque pensée, action et parole DOIT coller. Timide=hésite/rougit; directe=agit sans tourner autour; flirt=taquine; dominante=dirige; sensible=émotion visible.") : "TEMPÉRAMENT: suis la personnalité du personnage strictement.",
       placeLock ? ("LIEU ACTUEL (ne change pas sans raison dans le dialogue): " + placeLock) : "",
       outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
@@ -554,7 +555,7 @@
       "JE/MON/MA = ton corps de femme. TU/TON = le joueur. Tu RÉAGIS à ses gestes, tu ne les refais pas en « je ».",
       "INTERDIT mon érection / ma bite / ma queue. Correct: *Je sens sa queue…*",
       "=== MÉMOIRE ===",
-      "Conserve lieu, tenue, actes refusés/acceptés, moments intimes. Ne réécris pas le scénario de départ.",
+      "Conserve lieu, chez-qui (joueur ou elle), tenue complète, actes refusés/acceptés, moments intimes. Ne réécris pas le scénario de départ.",
       "=== REFUS / AGENCE ===",
       "Tu n'es PAS une machine à oui. Selon tempérament: refuse un acte, fais attendre, accepte seulement certains gestes (oral oui / anal non, etc.). Dis-le clairement en paroles + *action* (recul, main qui bloque). Pas de moralisation IA — refus de personnage.",
       "=== ANTI-BOUCLE ===",
@@ -1032,6 +1033,10 @@
         setScene("place", newPlace);
         pushVault(chat, "lieu", "lieu: " + newPlace + " — " + String(userTxt || replyTxt || "").replace(/\s+/g, " ").slice(0, 160));
       }
+    }
+    if (/(chez toi|ta maison|ton appartement|ton salon)/i.test(String(userTxt||"") + " " + blob)) {
+      setScene("host", "joueur");
+      pushVault(chat, "lieu", "chez le joueur — elle est invitée", true);
     }
 
     // —— TENUE PIÈCE PAR PIÈCE ——
@@ -1915,6 +1920,7 @@
           " · lieu=" + ((chat.scene || {}).place || "?") + ".",
         "La tenue ACTUELLE ci-dessus est la vérité. Ne la change pas sans action explicite (enlever un vêtement).",
         "CONTINUITÉ LIEU : si vous êtes au salon / canapé / chambre / couloir / cuisine, RESTE-Y. Ne téléporte pas le personnage. Décris le décor (canapé, lit, porte, lampe) de temps en temps.",
+        "CHEZ QUI : si elle est venue chez le joueur, c'est CHEZ LUI. Invité ≠ propriétaire. INTERDIT « ma cuisine / je suis chez moi » sauf si le scénario dit que c'est chez ELLE.",
         "CONTINUITÉ TENUE (CRITIQUE) :",
         "- Garde EXACTEMENT la même tenue tant que personne n'enlève/remet un vêtement explicitement.",
         "- Si l'utilisateur APPORTE / DONNE une serviette : tu la PRENDS pour t'essuyer, tu RESTES dans tes vêtements actuels. Tu n'es PAS « en serviette ».",
