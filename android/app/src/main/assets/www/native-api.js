@@ -2562,9 +2562,8 @@
           String(last).slice(0, 70)
         );
       }
-      if (/timeout for|abuse prevention|2 per 1 second|rate limit/i.test(String(last))) {
-        const sec = Math.ceil(parseHordeWaitMs(last) / 1000) || 60;
-        throw new Error("Horde limite de débit : attends " + sec + " s. " + String(last).slice(0, 100));
+      if (/timeout for|abuse prevention|2 per 1 second|rate limit|429/i.test(String(last))) {
+        throw new Error("Horde occupé: " + String(last).slice(0, 120) + " — réessaie dans un instant.");
       }
       throw new Error(last || "Horde indisponible");
     }
@@ -2578,7 +2577,7 @@
       try {
         await hordeWaitGate("status");
       } catch (e) {
-        return { done: false, wait: Math.ceil((_hordeIpBlockedUntil - Date.now()) / 1000), queue: null, processing: false, error: String(e.message || e) };
+        return { done: false, wait: 3, queue: null, processing: false, error: null };
       }
       let c = {};
       try {

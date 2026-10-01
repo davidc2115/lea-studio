@@ -214,10 +214,10 @@ function physicalLocksFromText(c) {
     nh.push("(mermaid tail instead of legs:1.75)", "(iridescent mermaid scales on tail:1.55)", "wet hair", "mermaid girl", "full mermaid body");
     nhNeg += ", demon horns, horns, any horns, dragon horns, oni horns, fox ears, cat ears, elf ears, bat wings, animal tail, snake hair, human legs with feet, standing on land";
   } else if (is(/succube|fan_succube/)) {
-    nh.push("(curved demon horns on head:1.6)", "(bat demon wings:1.55)", "(spaded demon tail:1.55)", "succubus");
+    nh.push("(curved demon horns on head:1.6)", "(bat demon wings:1.55)", "(spaded demon tail:1.55)", "succubus woman");
     nhNeg += ", fox ears, cat ears, elf ears, mermaid scales, fish tail, angel halo, white angel wings, snake hair";
   } else if (is(/fan_demon|\bd[eé]mone?\b/) && !is(/succube|dragon|oni/)) {
-    nh.push("(curved black demon horns:1.6)", "(small bat wings:1.5)", "(spaded demon tail:1.55)", "demon girl");
+    nh.push("(curved black demon horns:1.6)", "(small bat wings:1.5)", "(spaded demon tail:1.55)", "demon woman");
     nhNeg += ", fox ears, cat ears, elf ears, angel halo, white angel wings, mermaid scales";
   } else if (is(/dragon|fan_dragon/)) {
     nh.push("(small curved dragon horns on forehead:1.7)", "(tiny dragon scale patches only on shoulders:1.4)", "dragon girl", "human legs", "standing on land");
@@ -992,18 +992,16 @@ function faceIdentityLock(c) {
     parts.push("(living snakes for hair:1.65)", "NOT mermaid, NOT normal hair only");
   } else if (/slime|gel[eé]e|mochi/i.test(blob)) {
     parts.push(
-      "(translucent gelatinous slime girl:1.85)",
-      "(glossy jelly translucent skin:1.7)",
-      "(semi-transparent colorful slime body:1.65)",
-      "amorphous soft jelly edges, humanoid slime standing on human legs,",
-      "indoor bathroom or laboratory, dry air, NOT underwater,",
-      "NO horns of any kind, NO mermaid tail, NO fish scales, NO fish tail,",
-      "NO fins, NO wings, NO animal ears, NO snake hair,",
-      "NOT mermaid, NOT underwater, NOT ocean, NOT swimming, NOT coral reef,",
-      "full body head to feet visible"
+      "photorealistic adult woman, clear human face eyes nose mouth,",
+      "(glossy translucent jelly-like skin texture:1.6),",
+      "fully humanoid woman body with arms legs feet,",
+      "indoor bathroom, standing on tiled floor,",
+      "NOT abstract blob, NOT formless mass, NOT faceless,",
+      "NO horns, NO mermaid tail, NO fish scales, NO wings,",
+      "NOT underwater ocean, NOT coral, full body visible"
     );
   } else if (/android|robot/i.test(blob)) {
-    parts.push("(android robot girl:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
+    parts.push("(android robot woman:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
   } else if (/ghost|fant[oô]me/i.test(blob)) {
     parts.push("semi-transparent ethereal ghost body,", "NOT mermaid, NOT fully opaque solid only");
   } else if (/witch|sorci[eè]re/i.test(blob)) {
@@ -1496,7 +1494,7 @@ function buildLeaImagePrompt(extra = "") {
     } else if (/gorgone|medusa/i.test(fantBlob)) {
       fantBoost = "(living snakes instead of hair:1.75), medusa gorgon, human legs, NOT mermaid, NOT horns, NOT underwater,";
     } else if (/slime|gel[eé]e|mochi/i.test(fantBlob)) {
-      fantBoost = "(translucent gelatinous slime girl:1.85), (glossy jelly skin:1.7), human legs, indoor bathroom or lab, NOT underwater, NOT ocean, NOT mermaid, NOT fish tail, NOT horns, NOT fins, NOT wings, NOT coral,";
+      fantBoost = "photorealistic adult woman clear human face, glossy translucent jelly-like skin, fully humanoid body arms legs, indoor bathroom, NOT abstract blob, NOT faceless, NOT mermaid, NOT horns, NOT underwater ocean,";
     } else if (/harpie/i.test(fantBlob)) {
       fantBoost = "(large feathered bird wings:1.75), bird-woman, feathered wings spread, humanoid torso, talon-like hands, standing or mid-air above cliffs, NOT mermaid, NOT fish, NOT horns, NOT underwater,";
     } else if (/dryade/i.test(fantBlob)) {
@@ -4675,11 +4673,7 @@ function renderProfile() {
   } catch (_) {}
   $("genimg").onclick = () => {
     try {
-      const left = hordeBlockRemaining();
-      if (left > 2000) {
-        setGenStatus("Horde bloqué encore " + formatHordeWait(left) + " — patientes. Ne reclique pas.");
-        return;
-      }
+      try { localStorage.removeItem("lea.hordeBlockedUntil"); } catch (_) {}
       const r = generatePhoto();
       if (r && typeof r.catch === "function") {
         r.catch((e) => {
@@ -4750,12 +4744,7 @@ function renderProfile() {
   };
 }
 
-function hordeBlockRemaining() {
-  try {
-    const until = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
-    return Math.max(0, until - Date.now());
-  } catch (_) { return 0; }
-}
+function hordeBlockRemaining() { return 0; }
 function formatHordeWait(ms) {
   const sec = Math.ceil(ms / 1000);
   if (sec >= 60) return Math.floor(sec / 60) + " min " + (sec % 60) + " s";
@@ -4763,26 +4752,8 @@ function formatHordeWait(ms) {
 }
 function setGenStatus(t) {
   const msg = String(t || "");
-  // Mémoriser un ban Horde pour bloquer les clics suivants
-  try {
-    let m = msg.match(/timeout for (\d+)\s*more seconds/i)
-      || msg.match(/(\d+)\s*more seconds/i)
-      || msg.match(/encore (\d+)\s*s/i)
-      || msg.match(/attends? (\d+)\s*s/i);
-    if (m) {
-      const sec = parseInt(m[1], 10);
-      if (sec > 5) {
-        const until = Date.now() + (sec + 5) * 1000;
-        const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
-        if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
-      }
-    } else if (/abuse prevention|put into timeout/i.test(msg) && !/\d+\s*more seconds/i.test(msg)) {
-      // Sans durée serveur : +2 min seulement (ne pas gonfler à 15-36 min)
-      const until = Date.now() + 120000;
-      const prev = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
-      if (until > prev) localStorage.setItem("lea.hordeBlockedUntil", String(until));
-    }
-  } catch (_) {}
+  // antiban local retiré complètement
+  try { localStorage.removeItem("lea.hordeBlockedUntil"); } catch (_) {}
   if ($("imgerr")) $("imgerr").textContent = msg;
 }
 
@@ -6426,22 +6397,10 @@ function toastScene(msg) {
 
 
 async function generatePhoto() {
-  // Ne pas spammer Horde si IP déjà bloquée
+  // antiban local complètement désactivé
   try {
-    const left = hordeBlockRemaining();
-    if (left > 2000) {
-      setGenStatus("Horde bloqué encore " + formatHordeWait(left) + " — attends sans recliquer. Clé aihorde.net = moins de bans.");
-      window._leaGenBusy = false;
-      return;
-    }
-    const lastSub = Number(localStorage.getItem("lea.hordeLastSubmit") || 0);
-    const since = Date.now() - lastSub;
-    if (lastSub && since < 45000) {
-      const wait = Math.ceil((45000 - since) / 1000);
-      setGenStatus("Anti-ban : attends encore " + wait + " s avant une nouvelle génération Horde.");
-      window._leaGenBusy = false;
-      return;
-    }
+    localStorage.removeItem("lea.hordeBlockedUntil");
+    localStorage.removeItem("lea.hordeLastSubmit");
   } catch (_) {}
 
   if (window._leaGenBusy) {
@@ -6993,15 +6952,15 @@ async function pollHordeJob(jobId, host, charId) {
         }
         localStorage.setItem("lea.hordeLastSubmit", String(Date.now()));
       } catch (_) {}
-      setGenStatus("Image OK · attends ~1 min avant la prochaine (anti-ban Horde)");
+      setGenStatus("Image OK");
       if (state.view === "profile" && state.current === cid) renderProfile();
       if (stored && state.current === cid) if (state.view === "profile") { renderProfile(); } else if (state.view !== "chat") { openFull(resolvePhotoSrc(stored) || stored); }
       return;
     } catch (e) {
       const msg = String(e.message || e);
       setGenStatus("Horde… " + msg);
-      if (/limite|pause|timeout for|abuse|2 per|bloquée/i.test(msg)) {
-        await new Promise((r) => setTimeout(r, 45000));
+      if (/limite|pause|timeout for|abuse|2 per|429/i.test(msg)) {
+        await new Promise((r) => setTimeout(r, 5000));
       }
     }
   }
