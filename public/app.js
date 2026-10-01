@@ -202,7 +202,7 @@ function physicalLocksFromText(c) {
   const idTitle = [c && c.id, c && c.title, c && Array.isArray(c.tags) ? c.tags.join(" ") : ""].filter(Boolean).join(" ").toLowerCase();
   const nh = [];
   let nhNeg = "plain human only, purely human, no fantasy features, missing non-human traits";
-  const is = (re) => re.test(idTitle) || re.test(blob);
+  const is = (re) => re.test(idTitle); // id+title+tags only — never blob (avoids NOT mermaid matching mermaid)
 
   if (is(/kitsune|renard|fan_kitsune/)) {
     nh.push("(fox ears on top of head:1.65)", "(fluffy fox ears:1.55)", "(multiple fluffy fox tails:1.6)", "kemonomimi");
@@ -244,7 +244,7 @@ function physicalLocksFromText(c) {
   } else if (is(/harpie|fan_harpie/)) {
     nh.push("(large feathered bird wings:1.6)", "feathers on shoulders", "harpy");
     nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair, elf ears";
-  } else if (is(/slime|fan_slime|gel|mochi/)) {
+  } else if (is(/slime|fan_slime/)) {
     nh.push("semi-translucent gelatinous slime skin", "glossy jelly body", "human legs");
     nhNeg += ", mermaid, mermaid tail, fish scales, fish tail, fins, underwater, ocean, coral reef, demon horns, fox ears, cat ears, bat wings, animal ears, snake hair, angel wings";
   } else if (is(/andro|robot|fan_robot/)) {
@@ -6518,7 +6518,7 @@ function toastScene(msg) {
 
 
 function speciesLock(c) {
-  const id = String((c && c.id) || "") + " " + String((c && c.title) || "");
+  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
   const map = [
     [/slime/i, "(slime girl:1.8), glossy translucent gelatinous humanoid skin, human face, human legs, standing in bathroom, NOT mermaid, NOT fish tail, NOT scales, NOT ocean"],
     [/sir[eè]ne|sirene/i, "(mermaid:1.8), mermaid tail instead of legs, iridescent scales on tail only, NOT slime, NOT horns, NOT legs"],
