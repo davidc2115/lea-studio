@@ -4018,6 +4018,12 @@ function filterDiscoverList(q) {
     for (const c of window.LEA_CAST_COLLEGUES) {
       if (c && c.id && !seenC.has(c.id)) { list.push(c); seenC.add(c.id); }
     }
+  }
+  if (window.LEA_CAST_TAQUIN && window.LEA_CAST_TAQUIN.length) {
+    const seenT = new Set(list.map((c) => c.id));
+    for (const c of window.LEA_CAST_TAQUIN) {
+      if (c && c.id && !seenT.has(c.id)) { list.push(c); seenT.add(c.id); }
+    }
   }  if (!list.length) list = [FALLBACK_LEA];
   try { list = ensureRoleTags(list); } catch (_) {}
   // Sync state
@@ -4076,6 +4082,8 @@ function filterDiscoverList(q) {
       "tante": (c) => hasTag(c, "tante") || /tante/.test(titleOf(c)),
       "directe": (c) => hasTag(c, "directe"),
       "tactile": (c) => hasTag(c, "tactile"),
+      "taquine": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
+      "taquin": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
       "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||""),
       "slime": (c) => hasTag(c, "slime") || /fan_slime|slime|gel[eé]e/.test((c.id||"")+" "+(c.title||"")+" "+(c.name||"")),
       "dragon": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
