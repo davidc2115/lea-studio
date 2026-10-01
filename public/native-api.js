@@ -2419,16 +2419,14 @@
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
-      // Anonyme: MAX 512x512 (sinon Horde kudos: "over 576x576")
-      // Compte: 512x768 OK
+      // Anonyme 0 kudos: STRICT 512x512 + steps bas + modèle abondant
+      // (Horde refuse sinon: "over 576x576" / heavy demand)
       const W = 512;
       const H = hasHordeAccount ? 768 : 512;
-      const steps = hasHordeAccount ? 32 : 22;
-      // Noms reconnus sur AI Horde (évite turbo/lightning qui sortent en 3s)
-      // 1-2 modèles max = moins de charge workers / moins de rejets
+      const steps = hasHordeAccount ? 30 : 15;
       const photoModels = hasHordeAccount
         ? ["ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
-        : ["AbsoluteReality", "Dreamshaper"];
+        : ["Dreamshaper", "stable_diffusion"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2442,54 +2440,67 @@
       const qualityNeg = ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
-      // UNE SEULE soumission (évite ban IP : plus de chaîne txt2img+img2img+secours)
-      const forceImg2 = useImg2Img && body.force_img2img === true;
-      if (forceImg2 && useImg2Img) {
-        const faceBoost = "(identical face:1.5), same hair color, same eye color, (new pose:1.5), ";
-        const imgPrompt = prioritizeIdentity(faceBoost + promptSafe);
-        payloads.push({
-          prompt: (imgPrompt + " ### " + negFull).slice(0, 1800),
+      // UNE SEULE soumission — anonyme: coût kudos minimal
+      function makePayload(opts) {
+        opts = opts || {};
+        const w = opts.w || W;
+        const h = opts.h || H;
+        const st = opts.steps || steps;
+        const models = opts.models || photoModels;
+        const base = {
+          prompt: (promptSafe + " ### " + negFull).slice(0, 1600),
           params: {
-            width: W, height: H, steps: Math.min(steps, hasHordeAccount ? 28 : 20), n: 1,
-            sampler_name: "k_euler_a", cfg_scale: 7.5,
-            denoising_strength: den,
-          },
-          nsfw: body.nsfw !== false,
-          censor_nsfw: false,
-          models: photoModels,
-          r2: true,
-          slow_workers: true,
-          source_image: src,
-          source_processing: "img2img",
-        });
-      } else {
-        // txt2img par défaut (poses variées, 1 seul job)
-        payloads.push({
-          prompt: (promptSafe + " ### " + negFull).slice(0, 1800),
-          params: {
-            width: W,
-            height: H,
-            steps: steps,
+            width: w,
+            height: h,
+            steps: st,
             n: 1,
             sampler_name: "k_euler_a",
             cfg_scale: 7,
+            clip_skip: 1,
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
-          models: photoModels,
+          models: models,
           r2: true,
           slow_workers: true,
-        });
+          shared: true,
+        };
+        if (opts.img2img && src) {
+          base.source_image = src;
+          base.source_processing = "img2img";
+          base.params.denoising_strength = den;
+          base.params.steps = Math.min(st, hasHordeAccount ? 28 : 12);
+        }
+        return base;
       }
 
-      // Un seul host principal (aihorde = stablehorde, éviter double spam)
+      const forceImg2 = useImg2Img && body.force_img2img === true;
+      if (forceImg2 && useImg2Img) {
+        payloads.push(makePayload({ img2img: true }));
+      } else {
+        payloads.push(makePayload({}));
+      }
+      // Fallback ultra-cheap si anonyme (0 kudos / heavy demand)
+      if (!hasHordeAccount) {
+        payloads.push(makePayload({
+          w: 512, h: 512, steps: 12,
+          models: ["stable_diffusion"],
+        }));
+      }
+
       const hostsTry = ["https://aihorde.net/api/v2"];
       await hordeWaitGate("submit");
       for (const host of hostsTry) {
         for (let pi = 0; pi < payloads.length; pi++) {
           const bodyPayload = payloads[pi];
-          if (pi > 0) await new Promise((r) => setTimeout(r, 3000));
+          if (pi > 0) await new Promise((r) => setTimeout(r, 2500));
           try {
+            // Garantir jamais >512 anonyme
+            if (!hasHordeAccount && bodyPayload.params) {
+              bodyPayload.params.width = 512;
+              bodyPayload.params.height = 512;
+              if (bodyPayload.params.steps > 18) bodyPayload.params.steps = 15;
+            }
             const res = await fetch(host + "/generate/async", {
               method: "POST",
               headers: {
@@ -2519,7 +2530,11 @@
               };
             }
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
-            console.warn("[horde]", host, last);
+            console.warn("[horde]", host, last, "params", bodyPayload.params && (bodyPayload.params.width + "x" + bodyPayload.params.height + " s" + bodyPayload.params.steps));
+            // Kudos ≠ ban IP : essayer le payload suivant (512x512 minimal)
+            if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
+              continue;
+            }
             markHordeRateLimit(last);
             // Rate limit / IP timeout : ne pas spammer l'autre host
             if (/timeout for|abuse prevention|2 per 1 second|rate limit|too many|429/i.test(String(last))) {
@@ -2539,8 +2554,8 @@
       }
       if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
         throw new Error(
-          "Horde : besoin de kudos (résolution/file). Sans clé → image 512x512 max. " +
-          "Crée une clé gratuite sur aihorde.net et colle-la dans Clés. " + String(last).slice(0, 80)
+          "Horde file saturée (0 kudos). Réessaie dans 1–2 min, ou crée une clé gratuite sur aihorde.net (Clés → AI Horde) pour passer devant. " +
+          String(last).slice(0, 70)
         );
       }
       if (/timeout for|abuse prevention|2 per 1 second|rate limit/i.test(String(last))) {
