@@ -2942,7 +2942,7 @@ function ensureRoleTags(list) {
       [/fan_vampire|vampire/, "vampire"], [/fan_fée|fee/, "fée"], [/fan_dryade|dryade/, "dryade"],
       [/fan_lamia|lamia/, "lamia"], [/fan_harpie|harpie/, "harpie"], [/fan_robot|robot/, "robot"],
       [/fan_loup|loup/, "louve"], [/fan_centaure|centaure/, "centaure"], [/fan_gorgone|gorgone/, "gorgone"],
-      [/fan_oni|oni/, "oni"], [/fan_naga|naga/, "naga"], [/fan_phoenix|phoenix/, "phénix"],
+      [/\bfan_oni\b|\boni\b/, "oni"], [/fan_naga|naga/, "naga"], [/fan_phoenix|phoenix/, "phénix"],
       [/fan_ghost|ghost/, "fantôme"], [/fan_witch|witch/, "sorcière"],
     ];
     for (const [re, tag] of species) {
@@ -4120,7 +4120,7 @@ function filterDiscoverList(q) {
       "tactile": (c) => hasTag(c, "tactile"),
       "taquine": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
       "taquin": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
-      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /^taquin_fantasy/.test(c.id||""),
+      "fantasy": (c) => (/^fan_/.test(c.id||"") || /^taquin_fantasy/.test(c.id||"") || (hasTag(c, "fantasy") && !/monique/i.test(c.id||""))),
       "fantastique": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /^taquin_fantasy/.test(c.id||""),
       "slime": (c) => hasTag(c, "slime") || /fan_slime|slime|gel[eé]e/.test((c.id||"")+" "+(c.title||"")+" "+(c.name||"")),
       "dragon": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
