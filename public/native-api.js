@@ -2386,9 +2386,10 @@
         // NE PAS dupliquer le prompt (head+full = double seins / miroir)
         let s = String(raw || "").replace(/\s+/g, " ").trim();
         if (!s) return "photorealistic photo of an adult woman, sharp focus";
-        // Anti-miroir en tête
-        if (!/asymmetric|natural pose|single torso/i.test(s)) {
-          s = "single natural body, one torso, one pair of breasts, asymmetric natural pose, " + s;
+        // Anti-miroir en tête (solo seulement — ne pas casser les duos)
+        const duo = /\b2girls\b|LEFT woman|RIGHT woman|two women side by side/i.test(s);
+        if (!duo && !/one torso|not mirrored/i.test(s)) {
+          s = "(one woman:1.5), (single torso:1.6), (exactly two natural breasts:1.45), asymmetric casual pose, not mirrored, not kaleidoscope, " + s;
         }
         return s.slice(0, 1500);
       }
@@ -2451,7 +2452,10 @@
       const qualityNeg = isDuoPrompt
         ? ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, face crop only, headshot only, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
+      const mirrorHead = isDuoPrompt
+        ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
+        : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
+      const negFull = (mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1100);
 
       // UNE SEULE soumission — anonyme: coût kudos minimal
       function makePayload(opts) {
