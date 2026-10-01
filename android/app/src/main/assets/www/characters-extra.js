@@ -1,4 +1,3 @@
-/** Scénarios immersifs style Chub — rôles verrouillés */
 window.EXTRA_CAST = [
   {
     "id": "bf_emma",
@@ -7,10 +6,12 @@ window.EXTRA_CAST = [
     "title": "Belle-fille",
     "tags": [
       "timide",
-      "française",
-      "nsfw",
       "belle-fille",
-      "mince"
+      "blonde",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_emma.jpg",
     "gallery": [
@@ -40,11 +41,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "rebelle",
-      "espagnole",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "athlétique"
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_luna.jpg",
     "gallery": [
@@ -74,11 +78,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "réservée",
-      "asiatique",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_maya.jpg",
     "gallery": [
@@ -108,11 +114,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-fille",
     "tags": [
-      "espiègle",
-      "maghrébine",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_ines.jpg",
     "gallery": [
@@ -143,10 +151,13 @@ window.EXTRA_CAST = [
     "title": "Belle-fille",
     "tags": [
       "directe",
-      "polonaise",
-      "nsfw",
       "belle-fille",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_sara.jpg",
     "gallery": [
@@ -178,11 +189,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "fière",
-      "africaine",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_aicha.jpg",
     "gallery": [
@@ -216,10 +229,12 @@ window.EXTRA_CAST = [
     "title": "Belle-fille",
     "tags": [
       "timide",
-      "française",
-      "nsfw",
       "belle-fille",
-      "mince"
+      "rousse",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_chloe.jpg",
     "gallery": [
@@ -250,11 +265,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "polie",
-      "japonaise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_yuki.jpg",
     "gallery": [
@@ -284,11 +301,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "maladroite",
-      "française",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_lea_bf.jpg",
     "gallery": [
@@ -318,11 +338,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-fille",
     "tags": [
-      "chaude",
-      "italienne",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_nina.jpg",
     "gallery": [
@@ -352,11 +374,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "sarcastique",
-      "française",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_zoe_bf.jpg",
     "gallery": [
@@ -386,11 +410,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "provocante",
-      "libanaise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_amira.jpg",
     "gallery": [
@@ -421,11 +447,14 @@ window.EXTRA_CAST = [
     "age": 23,
     "title": "Belle-fille",
     "tags": [
-      "froide",
-      "suédoise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_helen.jpg",
     "gallery": [
@@ -457,11 +486,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "tactile",
-      "brésilienne",
-      "nsfw",
+      "directe",
       "belle-fille",
-      "fesses rondes"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_camila.jpg",
     "gallery": [
@@ -491,11 +522,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "réservée",
-      "française",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "mince"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_jade_bf.jpg",
     "gallery": [
@@ -525,11 +558,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "ouverte",
-      "espagnole",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_sofia_bf.jpg",
     "gallery": [
@@ -559,11 +595,14 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-fille",
     "tags": [
-      "douce",
-      "indienne",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_priya.jpg",
     "gallery": [
@@ -595,11 +634,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "naïve",
-      "française",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "douce"
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_marie.jpg",
     "gallery": [
@@ -629,11 +670,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "confiante",
-      "afro-américaine",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_keisha.jpg",
     "gallery": [
@@ -663,11 +706,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "distante",
-      "russe",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "élancée"
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_olga_bf.jpg",
     "gallery": [
@@ -698,10 +743,12 @@ window.EXTRA_CAST = [
     "title": "Belle-fille",
     "tags": [
       "timide",
-      "coréenne",
-      "nsfw",
       "belle-fille",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_hana.jpg",
     "gallery": [
@@ -734,11 +781,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-fille",
     "tags": [
-      "passionnée",
-      "argentine",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_lucia.jpg",
     "gallery": [
@@ -768,11 +817,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "rêveuse",
-      "française",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "mince"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_thea.jpg",
     "gallery": [
@@ -802,11 +853,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "ambitieuse",
-      "tunisienne",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "athlétique"
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_rania.jpg",
     "gallery": [
@@ -836,11 +890,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "moqueuse",
-      "écossaise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "fine"
+      "oni",
+      "rousse",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_isla.jpg",
     "gallery": [
@@ -872,11 +928,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "protectrice",
-      "sénégalaise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "forte"
+      "oni",
+      "brune",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_fatou_bf.jpg",
     "gallery": [
@@ -906,11 +964,14 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-fille",
     "tags": [
-      "carrée",
-      "allemande",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_anna.jpg",
     "gallery": [
@@ -940,11 +1001,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "flirteuse",
-      "algérienne",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_yasmine.jpg",
     "gallery": [
@@ -974,11 +1037,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-fille",
     "tags": [
-      "douce",
-      "franco-vietnamienne",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_rose.jpg",
     "gallery": [
@@ -1008,11 +1073,13 @@ window.EXTRA_CAST = [
     "age": 23,
     "title": "Belle-fille",
     "tags": [
-      "chaleureuse",
-      "portugaise",
-      "nsfw",
+      "timide",
       "belle-fille",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bf_valentina.jpg",
     "gallery": [
@@ -1044,11 +1111,14 @@ window.EXTRA_CAST = [
     "age": 24,
     "title": "Belle-mère",
     "tags": [
-      "maladroite",
-      "française",
-      "nsfw",
+      "timide",
       "belle-mère",
-      "sablier"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_lea.jpg",
     "gallery": [
@@ -1079,10 +1149,12 @@ window.EXTRA_CAST = [
     "title": "Belle-mère",
     "tags": [
       "timide",
-      "française",
-      "nsfw",
       "belle-mère",
-      "mince"
+      "blonde",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_sara.jpg",
     "gallery": [
@@ -1114,11 +1186,12 @@ window.EXTRA_CAST = [
     "age": 26,
     "title": "Belle-mère",
     "tags": [
-      "polie",
-      "japonaise",
-      "nsfw",
       "belle-mère",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_maya.jpg",
     "gallery": [
@@ -1148,11 +1221,13 @@ window.EXTRA_CAST = [
     "age": 25,
     "title": "Belle-mère",
     "tags": [
-      "chaude",
-      "espagnole",
-      "nsfw",
       "belle-mère",
-      "voluptueuse"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_ines.jpg",
     "gallery": [
@@ -1182,11 +1257,12 @@ window.EXTRA_CAST = [
     "age": 23,
     "title": "Belle-mère",
     "tags": [
-      "fière",
-      "malienne",
-      "nsfw",
       "belle-mère",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_aisha.jpg",
     "gallery": [
@@ -1216,11 +1292,13 @@ window.EXTRA_CAST = [
     "age": 27,
     "title": "Belle-mère",
     "tags": [
-      "froide",
-      "suédoise",
-      "nsfw",
       "belle-mère",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_nora.jpg",
     "gallery": [
@@ -1250,11 +1328,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Belle-mère",
     "tags": [
-      "espiègle",
-      "française",
-      "nsfw",
+      "flirt",
       "belle-mère",
-      "mince"
+      "rousse",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_camille.jpg",
     "gallery": [
@@ -1284,11 +1364,13 @@ window.EXTRA_CAST = [
     "age": 28,
     "title": "Belle-mère",
     "tags": [
-      "douce",
-      "indienne",
-      "nsfw",
       "belle-mère",
-      "sablier"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_priya.jpg",
     "gallery": [
@@ -1320,11 +1402,13 @@ window.EXTRA_CAST = [
     "age": 24,
     "title": "Belle-mère",
     "tags": [
-      "tactile",
-      "brésilienne",
-      "nsfw",
+      "directe",
       "belle-mère",
-      "fesses rondes"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_julia.jpg",
     "gallery": [
@@ -1354,11 +1438,13 @@ window.EXTRA_CAST = [
     "age": 25,
     "title": "Belle-mère",
     "tags": [
-      "réservée",
-      "coréenne",
-      "nsfw",
+      "timide",
       "belle-mère",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_hana.jpg",
     "gallery": [
@@ -1390,11 +1476,12 @@ window.EXTRA_CAST = [
     "age": 26,
     "title": "Belle-mère",
     "tags": [
-      "théâtrale",
-      "italienne",
-      "nsfw",
       "belle-mère",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_sofia.jpg",
     "gallery": [
@@ -1426,11 +1513,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-mère",
     "tags": [
-      "naïve",
-      "française",
-      "nsfw",
       "belle-mère",
-      "douce ronde"
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_amelie.jpg",
     "gallery": [
@@ -1460,11 +1548,13 @@ window.EXTRA_CAST = [
     "age": 27,
     "title": "Belle-mère",
     "tags": [
-      "provocante",
-      "libanaise",
-      "nsfw",
+      "flirt",
       "belle-mère",
-      "sablier"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_lina.jpg",
     "gallery": [
@@ -1495,10 +1585,13 @@ window.EXTRA_CAST = [
     "title": "Belle-mère",
     "tags": [
       "directe",
-      "tchèque",
-      "nsfw",
       "belle-mère",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_eva.jpg",
     "gallery": [
@@ -1528,11 +1621,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Belle-mère",
     "tags": [
-      "troublée",
-      "française",
-      "nsfw",
       "belle-mère",
-      "sablier"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bm_y_rose.jpg",
     "gallery": [
@@ -1562,11 +1657,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "responsable",
-      "française",
-      "nsfw",
       "babysitter",
-      "mince"
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_emma.jpg",
     "gallery": [
@@ -1596,11 +1693,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "calme",
-      "coréenne",
-      "nsfw",
       "babysitter",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_luna.jpg",
     "gallery": [
@@ -1631,10 +1729,12 @@ window.EXTRA_CAST = [
     "title": "Babysitter",
     "tags": [
       "timide",
-      "brésilienne",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_maya.jpg",
     "gallery": [
@@ -1664,11 +1764,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Babysitter",
     "tags": [
-      "à l'aise",
-      "française",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_ines.jpg",
     "gallery": [
@@ -1698,11 +1800,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "intello",
-      "allemande",
-      "nsfw",
       "babysitter",
-      "mince"
+      "blonde",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_sara.jpg",
     "gallery": [
@@ -1732,11 +1835,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "chaleureuse",
-      "guinéenne",
-      "nsfw",
       "babysitter",
-      "voluptueuse"
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_aicha.jpg",
     "gallery": [
@@ -1766,11 +1871,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "espiègle",
-      "française",
-      "nsfw",
+      "flirt",
       "babysitter",
-      "mince"
+      "rousse",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_chloe.jpg",
     "gallery": [
@@ -1800,11 +1907,12 @@ window.EXTRA_CAST = [
     "age": 23,
     "title": "Babysitter",
     "tags": [
-      "stricte",
-      "japonaise",
-      "nsfw",
       "babysitter",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_yuki.jpg",
     "gallery": [
@@ -1834,11 +1942,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "fatiguée",
-      "italienne",
-      "nsfw",
       "babysitter",
-      "voluptueuse"
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_nina.jpg",
     "gallery": [
@@ -1868,11 +1977,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "sarcastique",
-      "française",
-      "nsfw",
       "babysitter",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_zoe.jpg",
     "gallery": [
@@ -1902,11 +2012,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Babysitter",
     "tags": [
-      "posée",
-      "égyptienne",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_amira.jpg",
     "gallery": [
@@ -1936,11 +2048,13 @@ window.EXTRA_CAST = [
     "age": 24,
     "title": "Babysitter",
     "tags": [
-      "britannique",
-      "anglaise",
-      "nsfw",
       "babysitter",
-      "athlétique"
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_helen.jpg",
     "gallery": [
@@ -1970,11 +2084,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "énergique",
-      "colombienne",
-      "nsfw",
       "babysitter",
-      "fesses rondes"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_camila.jpg",
     "gallery": [
@@ -2004,11 +2119,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "réservée",
-      "française",
-      "nsfw",
+      "timide",
       "babysitter",
-      "mince"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_jade.jpg",
     "gallery": [
@@ -2038,11 +2155,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "ouverte",
-      "portugaise",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_sofia.jpg",
     "gallery": [
@@ -2072,11 +2190,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "attentionnée",
-      "indienne",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_priya.jpg",
     "gallery": [
@@ -2106,11 +2226,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "naïve",
-      "française",
-      "nsfw",
       "babysitter",
-      "douce"
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_marie.jpg",
     "gallery": [
@@ -2140,11 +2261,13 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Babysitter",
     "tags": [
-      "confiante",
-      "afro-américaine",
-      "nsfw",
       "babysitter",
-      "voluptueuse"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_keisha.jpg",
     "gallery": [
@@ -2174,11 +2297,12 @@ window.EXTRA_CAST = [
     "age": 23,
     "title": "Babysitter",
     "tags": [
-      "froide",
-      "russe",
-      "nsfw",
       "babysitter",
-      "élancée"
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_olga.jpg",
     "gallery": [
@@ -2209,10 +2333,12 @@ window.EXTRA_CAST = [
     "title": "Babysitter",
     "tags": [
       "timide",
-      "coréenne",
-      "nsfw",
       "babysitter",
-      "mince"
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_hana.jpg",
     "gallery": [
@@ -2242,11 +2368,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "joyeuse",
-      "mexicaine",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_lucia.jpg",
     "gallery": [
@@ -2276,11 +2405,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "rêveuse",
-      "française",
-      "nsfw",
       "babysitter",
-      "mince"
+      "rousse",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_thea.jpg",
     "gallery": [
@@ -2310,11 +2440,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "ambitieuse",
-      "algérienne",
-      "nsfw",
       "babysitter",
-      "athlétique"
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_rania.jpg",
     "gallery": [
@@ -2344,11 +2476,12 @@ window.EXTRA_CAST = [
     "age": 21,
     "title": "Babysitter",
     "tags": [
-      "moqueuse",
-      "écossaise",
-      "nsfw",
       "babysitter",
-      "fine"
+      "oni",
+      "rousse",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_isla.jpg",
     "gallery": [
@@ -2378,11 +2511,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "forte",
-      "sénégalaise",
-      "nsfw",
       "babysitter",
-      "forte"
+      "oni",
+      "brune",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_fatou.jpg",
     "gallery": [
@@ -2412,11 +2546,14 @@ window.EXTRA_CAST = [
     "age": 24,
     "title": "Babysitter",
     "tags": [
-      "carrée",
-      "allemande",
-      "nsfw",
       "babysitter",
-      "athlétique"
+      "ange",
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_anna.jpg",
     "gallery": [
@@ -2446,11 +2583,13 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "coquine",
-      "tunisienne",
-      "nsfw",
+      "flirt",
       "babysitter",
-      "sablier"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_yasmine.jpg",
     "gallery": [
@@ -2480,11 +2619,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "douce",
-      "franco-vietnamienne",
-      "nsfw",
       "babysitter",
-      "fine"
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_rose.jpg",
     "gallery": [
@@ -2514,11 +2654,12 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "affectueuse",
-      "portugaise",
-      "nsfw",
       "babysitter",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_valentina.jpg",
     "gallery": [
@@ -2548,11 +2689,14 @@ window.EXTRA_CAST = [
     "age": 22,
     "title": "Babysitter",
     "tags": [
-      "maladroite",
-      "française",
-      "nsfw",
+      "timide",
+      "belle-sœur",
       "babysitter",
-      "sablier"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "images/cast/bs_lea_bs.jpg",
     "gallery": [

@@ -6,12 +6,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -30,12 +30,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -54,12 +54,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -78,12 +78,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
-      "blonde",
+      "rousse",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -102,12 +102,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -126,12 +126,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -150,12 +150,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -174,12 +174,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -198,12 +198,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -222,12 +222,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Amie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "amie",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -246,12 +246,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -270,12 +270,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -294,12 +294,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -318,12 +318,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -342,12 +342,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -366,12 +366,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -390,12 +390,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -414,12 +414,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -438,12 +438,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -462,12 +462,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-mère taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-mère",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -486,12 +486,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -510,12 +509,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
-      "brune",
+      "rousse",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -534,12 +532,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -558,12 +555,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -582,12 +578,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -606,12 +601,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -630,12 +624,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -654,12 +647,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -678,12 +670,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -702,12 +693,11 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-sœur taquine",
     "tags": [
       "taquine",
-      "taquin",
-      "belle-sœur",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -726,12 +716,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
-      "blonde",
+      "rousse",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -750,12 +740,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -774,12 +764,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -798,12 +788,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -822,12 +812,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -846,12 +836,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -870,12 +860,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -894,12 +884,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -918,12 +908,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -942,12 +932,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Belle-fille taquine",
     "tags": [
       "taquine",
-      "taquin",
       "belle-fille",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -966,12 +956,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -990,12 +981,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1014,12 +1006,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1038,12 +1031,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1062,12 +1056,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1086,12 +1081,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1110,12 +1106,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
-      "brune",
+      "ange",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1134,12 +1131,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1158,12 +1156,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
+      "ange",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1182,12 +1181,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Babysitter taquine",
     "tags": [
       "taquine",
-      "taquin",
       "babysitter",
-      "nsfw",
-      "châtain",
+      "ange",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1206,12 +1206,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1230,12 +1230,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1254,12 +1254,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1278,12 +1278,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1302,12 +1302,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1326,12 +1326,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1350,12 +1350,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1374,12 +1374,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1398,12 +1398,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1422,12 +1422,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Voisine taquine",
     "tags": [
       "taquine",
-      "taquin",
       "voisine",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1446,12 +1446,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1470,12 +1470,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1494,12 +1494,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1518,12 +1518,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1542,12 +1542,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1566,12 +1566,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1590,12 +1590,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1614,12 +1614,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1638,12 +1638,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1662,12 +1662,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Tante taquine",
     "tags": [
       "taquine",
-      "taquin",
       "tante",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1686,12 +1686,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1710,12 +1710,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1734,12 +1734,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1758,12 +1758,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1782,12 +1782,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1806,12 +1806,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1830,12 +1830,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1854,12 +1854,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1878,12 +1878,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1902,12 +1902,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Collègue taquine",
     "tags": [
       "taquine",
-      "taquin",
       "collègue",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1926,12 +1926,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1950,12 +1950,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1974,12 +1974,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1998,12 +1998,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2022,12 +2022,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2046,12 +2046,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2070,12 +2070,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2094,12 +2094,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2118,12 +2118,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2142,12 +2142,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Secrétaire taquine",
     "tags": [
       "taquine",
-      "taquin",
       "secrétaire",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2166,12 +2166,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2190,12 +2190,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2214,12 +2214,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2238,12 +2238,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2262,12 +2262,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2286,12 +2286,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2310,12 +2310,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2334,12 +2334,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2358,12 +2358,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2382,12 +2382,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Maman d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "maman d'ami",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2406,12 +2406,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "blonde",
       "mince",
-      "b-cup"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2430,12 +2430,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "brune",
       "ronde",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2454,12 +2454,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "e-cup"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2478,12 +2478,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "blonde",
       "mince",
-      "c-cup"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2502,12 +2502,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "brune",
       "athlétique",
-      "d-cup"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2526,12 +2526,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "rousse",
       "ronde",
-      "f-cup"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2550,12 +2550,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
-      "brune",
+      "cheveux noirs",
       "voluptueuse",
-      "h-cup"
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2574,12 +2574,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "blonde",
       "voluptueuse",
-      "i-cup"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2598,12 +2598,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
       "rousse",
       "voluptueuse",
-      "j-cup"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2622,12 +2622,12 @@ window.LEA_CAST_TAQUIN = [
     "title": "Fille d'ami taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fille d'ami",
-      "nsfw",
-      "châtain",
+      "brune",
       "mince",
-      "a-cup"
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2646,15 +2646,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Slime taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "slime",
       "blonde",
       "mince",
-      "b-cup",
-      "slime",
-      "fantasy",
-      "non-humain"
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2673,15 +2671,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Dragon taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "dragon",
       "brune",
       "ronde",
-      "d-cup",
-      "dragon",
-      "fantasy",
-      "non-humain"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2700,15 +2696,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Succube taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "succube",
       "rousse",
       "voluptueuse",
-      "e-cup",
-      "succube",
-      "fantasy",
-      "non-humain"
+      "bonnet E",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2727,15 +2721,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Elfe taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "elfe",
       "blonde",
       "mince",
-      "c-cup",
-      "elfe",
-      "fantasy",
-      "non-humain"
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2754,15 +2746,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Kitsune taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "kitsune",
       "brune",
       "athlétique",
-      "d-cup",
-      "kitsune",
-      "fantasy",
-      "non-humain"
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2781,15 +2771,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Harpie taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "harpie",
       "rousse",
       "ronde",
-      "f-cup",
-      "harpie",
-      "fantasy",
-      "non-humain"
+      "bonnet F",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2808,15 +2796,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Dryade taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
-      "brune",
-      "voluptueuse",
-      "h-cup",
       "dryade",
-      "fantasy",
-      "non-humain"
+      "cheveux noirs",
+      "voluptueuse",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2835,15 +2821,14 @@ window.LEA_CAST_TAQUIN = [
     "title": "Sirène taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "slime",
+      "sirène",
       "blonde",
       "voluptueuse",
-      "i-cup",
-      "sirène",
-      "fantasy",
-      "non-humain"
+      "bonnet I",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2862,15 +2847,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Lamia taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
+      "lamia",
       "rousse",
       "voluptueuse",
-      "j-cup",
-      "lamia",
-      "fantasy",
-      "non-humain"
+      "bonnet J",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2889,15 +2872,13 @@ window.LEA_CAST_TAQUIN = [
     "title": "Gorgone taquine",
     "tags": [
       "taquine",
-      "taquin",
       "fantasy",
-      "nsfw",
-      "châtain",
-      "mince",
-      "a-cup",
       "gorgone",
-      "fantasy",
-      "non-humain"
+      "brune",
+      "mince",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],

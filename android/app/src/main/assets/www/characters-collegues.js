@@ -1,4 +1,3 @@
-/** Scénarios immersifs style Chub — rôles verrouillés */
 window.LEA_CAST_COLLEGUES = [
   {
     "id": "col_var_v01",
@@ -7,8 +6,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "travail",
-      "ouverte",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -38,10 +39,12 @@ window.LEA_CAST_COLLEGUES = [
     "age": 24,
     "title": "Collègue",
     "tags": [
-      "collègue",
       "timide",
+      "collègue",
+      "rousse",
+      "ronde",
+      "bonnet B",
       "petits seins",
-      "jeune",
       "nsfw"
     ],
     "cover": "",
@@ -71,9 +74,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet D",
     "tags": [
       "collègue",
-      "confiante",
-      "gros seins",
+      "ange",
+      "cheveux noirs",
+      "ronde",
       "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -103,9 +108,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "réservée",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
       "petits seins",
-      "asiatique",
       "nsfw"
     ],
     "cover": "",
@@ -134,10 +141,13 @@ window.LEA_CAST_COLLEGUES = [
     "age": 29,
     "title": "Collègue",
     "tags": [
-      "collègue",
       "taquine",
+      "collègue",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
       "seins moyens",
-      "maghrébine",
       "nsfw"
     ],
     "cover": "",
@@ -167,8 +177,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "impulsive",
-      "jeune",
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -199,10 +211,12 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet E",
     "tags": [
       "collègue",
-      "posée",
-      "mature",
-      "gros seins",
+      "ange",
+      "oni",
+      "rousse",
+      "voluptueuse",
       "bonnet E",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -232,8 +246,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "sarcastique",
-      "mince",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet B",
       "petits seins",
       "nsfw"
     ],
@@ -264,10 +280,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet D",
     "tags": [
       "collègue",
-      "sensuelle",
-      "sablier",
-      "gros seins",
+      "cheveux noirs",
+      "ronde",
       "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -297,10 +313,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "studieuse",
-      "petite",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
       "petits seins",
-      "asiatique",
       "nsfw"
     ],
     "cover": "",
@@ -330,8 +347,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "froide",
+      "ange",
+      "oni",
+      "blonde",
       "athlétique",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -362,11 +382,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet E",
     "tags": [
       "collègue",
-      "maternelle",
-      "mature",
+      "ange",
+      "rousse",
       "ronde",
-      "gros seins",
       "bonnet E",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -396,9 +416,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "curieuse",
-      "jeune",
-      "mince",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -429,8 +450,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "ambitieuse",
+      "ange",
+      "oni",
+      "cheveux noirs",
       "athlétique",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -461,10 +485,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet D",
     "tags": [
       "collègue",
-      "rêveuse",
-      "sablier",
-      "gros seins",
+      "ange",
+      "brune",
+      "ronde",
       "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -494,8 +519,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "mystérieuse",
-      "maghrébine",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -525,9 +552,12 @@ window.LEA_CAST_COLLEGUES = [
     "age": 25,
     "title": "Collègue",
     "tags": [
+      "directe",
       "collègue",
-      "sportive",
-      "athlétique",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet B",
       "petits seins",
       "nsfw"
     ],
@@ -558,8 +588,9 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "intellectuelle",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -589,10 +620,13 @@ window.LEA_CAST_COLLEGUES = [
     "age": 26,
     "title": "Collègue · bonnet D",
     "tags": [
+      "tactile",
       "collègue",
-      "extravertie",
-      "gros seins",
+      "ange",
+      "oni",
+      "brune",
       "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -622,10 +656,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "perfectionniste",
-      "petite",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
       "petits seins",
-      "asiatique",
       "nsfw"
     ],
     "cover": "",
@@ -655,8 +690,9 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "autoritaire",
-      "mature",
+      "blonde",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -687,10 +723,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet E",
     "tags": [
       "collègue",
-      "chaleureuse",
-      "voluptueuse",
-      "gros seins",
+      "ange",
+      "cheveux noirs",
+      "ronde",
       "bonnet E",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -720,8 +757,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "froide",
-      "mince",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -752,10 +791,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet D",
     "tags": [
       "collègue",
-      "passionnée",
-      "sablier",
-      "gros seins",
+      "ange",
+      "rousse",
+      "ronde",
       "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -784,11 +824,13 @@ window.LEA_CAST_COLLEGUES = [
     "age": 27,
     "title": "Collègue",
     "tags": [
-      "collègue",
       "taquine",
-      "mince",
+      "collègue",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
       "petits seins",
-      "asiatique",
       "nsfw"
     ],
     "cover": "",
@@ -818,8 +860,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "mature",
-      "expérimentée",
+      "ange",
+      "oni",
+      "blonde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -850,8 +894,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "discrète",
-      "maghrébine",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -882,8 +928,10 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue",
     "tags": [
       "collègue",
-      "ouverte",
-      "jeune",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],
@@ -914,9 +962,11 @@ window.LEA_CAST_COLLEGUES = [
     "title": "Collègue · bonnet E",
     "tags": [
       "collègue",
-      "dominante",
-      "gros seins",
+      "ange",
+      "oni",
+      "rousse",
       "bonnet E",
+      "gros seins",
       "nsfw"
     ],
     "cover": "",
@@ -945,10 +995,12 @@ window.LEA_CAST_COLLEGUES = [
     "age": 25,
     "title": "Collègue",
     "tags": [
-      "collègue",
       "timide",
-      "jeune",
-      "mince",
+      "collègue",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet C",
       "seins moyens",
       "nsfw"
     ],

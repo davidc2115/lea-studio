@@ -1,4 +1,3 @@
-/** Scénarios immersifs style Chub — rôles verrouillés */
 window.LEA_CAST_CUPS = [
   {
     "id": "cup_collegue_01",
@@ -7,13 +6,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet H",
     "tags": [
       "collègue",
-      "travail",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -42,13 +39,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet I",
     "tags": [
       "collègue",
-      "travail",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -77,13 +72,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet J",
     "tags": [
       "collègue",
-      "travail",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -112,13 +105,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet H",
     "tags": [
       "collègue",
-      "travail",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -147,13 +138,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet I",
     "tags": [
       "collègue",
-      "travail",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -182,13 +171,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet J",
     "tags": [
       "collègue",
-      "travail",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -217,13 +204,11 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet H",
     "tags": [
       "collègue",
-      "travail",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -252,13 +237,12 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet I",
     "tags": [
       "collègue",
-      "travail",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -287,13 +271,12 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet J",
     "tags": [
       "collègue",
-      "travail",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -322,13 +305,12 @@ window.LEA_CAST_CUPS = [
     "title": "Collègue · bonnet H",
     "tags": [
       "collègue",
-      "travail",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -356,14 +338,14 @@ window.LEA_CAST_CUPS = [
     "age": 24,
     "title": "Secrétaire · bonnet H",
     "tags": [
+      "timide",
       "secrétaire",
-      "bureau",
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -391,14 +373,13 @@ window.LEA_CAST_CUPS = [
     "age": 25,
     "title": "Secrétaire · bonnet I",
     "tags": [
+      "directe",
       "secrétaire",
-      "bureau",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -426,14 +407,14 @@ window.LEA_CAST_CUPS = [
     "age": 26,
     "title": "Secrétaire · bonnet J",
     "tags": [
+      "flirt",
       "secrétaire",
-      "bureau",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -461,14 +442,14 @@ window.LEA_CAST_CUPS = [
     "age": 27,
     "title": "Secrétaire · bonnet H",
     "tags": [
+      "taquine",
       "secrétaire",
-      "bureau",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -497,13 +478,11 @@ window.LEA_CAST_CUPS = [
     "title": "Secrétaire · bonnet I",
     "tags": [
       "secrétaire",
-      "bureau",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -532,13 +511,11 @@ window.LEA_CAST_CUPS = [
     "title": "Secrétaire · bonnet J",
     "tags": [
       "secrétaire",
-      "bureau",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -567,13 +544,11 @@ window.LEA_CAST_CUPS = [
     "title": "Secrétaire · bonnet H",
     "tags": [
       "secrétaire",
-      "bureau",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -601,14 +576,15 @@ window.LEA_CAST_CUPS = [
     "age": 31,
     "title": "Secrétaire · bonnet I",
     "tags": [
+      "timide",
       "secrétaire",
-      "bureau",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -636,14 +612,13 @@ window.LEA_CAST_CUPS = [
     "age": 32,
     "title": "Secrétaire · bonnet J",
     "tags": [
+      "directe",
       "secrétaire",
-      "bureau",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -671,14 +646,13 @@ window.LEA_CAST_CUPS = [
     "age": 33,
     "title": "Secrétaire · bonnet H",
     "tags": [
+      "flirt",
       "secrétaire",
-      "bureau",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -707,14 +681,12 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet H",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -743,14 +715,11 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet I",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -779,14 +748,11 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet J",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "rousse",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -815,14 +781,11 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet H",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -851,14 +814,12 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet I",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -887,14 +848,12 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet J",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -923,14 +882,11 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet H",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -959,14 +915,12 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet I",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -995,14 +949,12 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet J",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1031,14 +983,11 @@ window.LEA_CAST_CUPS = [
     "title": "Tante · bonnet H",
     "tags": [
       "tante",
-      "famille",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1067,13 +1016,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet H",
     "tags": [
       "maman d'ami",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1102,13 +1049,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet I",
     "tags": [
       "maman d'ami",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1137,13 +1082,12 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet J",
     "tags": [
       "maman d'ami",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1172,13 +1116,13 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet H",
     "tags": [
       "maman d'ami",
-      "mature",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1207,13 +1151,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet I",
     "tags": [
       "maman d'ami",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1242,13 +1184,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet J",
     "tags": [
       "maman d'ami",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1277,13 +1217,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet H",
     "tags": [
       "maman d'ami",
-      "mature",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1312,13 +1250,12 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet I",
     "tags": [
       "maman d'ami",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1347,13 +1284,12 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet J",
     "tags": [
       "maman d'ami",
-      "mature",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1382,13 +1318,11 @@ window.LEA_CAST_CUPS = [
     "title": "Maman d'ami · bonnet H",
     "tags": [
       "maman d'ami",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1417,12 +1351,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet H",
     "tags": [
       "voisine",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1451,12 +1384,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet I",
     "tags": [
       "voisine",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1485,12 +1417,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet J",
     "tags": [
       "voisine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1519,12 +1450,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet H",
     "tags": [
       "voisine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1553,12 +1483,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet I",
     "tags": [
       "voisine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1587,12 +1516,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet J",
     "tags": [
       "voisine",
+      "rousse",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1621,12 +1549,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet H",
     "tags": [
       "voisine",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1655,12 +1582,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet I",
     "tags": [
       "voisine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1689,12 +1615,11 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet J",
     "tags": [
       "voisine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1723,12 +1648,12 @@ window.LEA_CAST_CUPS = [
     "title": "Voisine · bonnet H",
     "tags": [
       "voisine",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1757,13 +1682,11 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1792,13 +1715,12 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet I",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1827,13 +1749,13 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet J",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "jeu",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1862,13 +1784,12 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1897,13 +1818,12 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet I",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1932,13 +1852,11 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet J",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1967,13 +1885,11 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2002,13 +1918,12 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet I",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "jeu",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2037,13 +1952,11 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet J",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2072,13 +1985,12 @@ window.LEA_CAST_CUPS = [
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
-      "jeune",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2106,14 +2018,14 @@ window.LEA_CAST_CUPS = [
     "age": 22,
     "title": "Soirée jeu · bonnet H",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2141,14 +2053,13 @@ window.LEA_CAST_CUPS = [
     "age": 21,
     "title": "Soirée jeu · bonnet I",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2176,14 +2087,13 @@ window.LEA_CAST_CUPS = [
     "age": 22,
     "title": "Soirée jeu · bonnet J",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2211,14 +2121,13 @@ window.LEA_CAST_CUPS = [
     "age": 23,
     "title": "Soirée jeu · bonnet H",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2246,14 +2155,14 @@ window.LEA_CAST_CUPS = [
     "age": 24,
     "title": "Soirée jeu · bonnet I",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2281,14 +2190,13 @@ window.LEA_CAST_CUPS = [
     "age": 25,
     "title": "Soirée jeu · bonnet J",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2316,14 +2224,14 @@ window.LEA_CAST_CUPS = [
     "age": 26,
     "title": "Soirée jeu · bonnet H",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2351,14 +2259,14 @@ window.LEA_CAST_CUPS = [
     "age": 27,
     "title": "Soirée jeu · bonnet I",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2386,14 +2294,13 @@ window.LEA_CAST_CUPS = [
     "age": 28,
     "title": "Soirée jeu · bonnet J",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "rousse",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2421,14 +2328,14 @@ window.LEA_CAST_CUPS = [
     "age": 22,
     "title": "Soirée jeu · bonnet H",
     "tags": [
+      "flirt",
       "jeu",
-      "défis",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2457,13 +2364,11 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet H",
     "tags": [
       "belle-mère",
-      "mature",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2492,13 +2397,12 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet I",
     "tags": [
       "belle-mère",
-      "mature",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2527,13 +2431,12 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet J",
     "tags": [
       "belle-mère",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2562,13 +2465,12 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet H",
     "tags": [
       "belle-mère",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2597,13 +2499,11 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet I",
     "tags": [
       "belle-mère",
-      "mature",
+      "rousse",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2632,13 +2532,12 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet J",
     "tags": [
       "belle-mère",
-      "mature",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2667,13 +2566,11 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet H",
     "tags": [
       "belle-mère",
-      "mature",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2702,13 +2599,11 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet I",
     "tags": [
       "belle-mère",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2737,13 +2632,11 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet J",
     "tags": [
       "belle-mère",
-      "mature",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2772,13 +2665,12 @@ window.LEA_CAST_CUPS = [
     "title": "Belle-mère · bonnet H",
     "tags": [
       "belle-mère",
-      "mature",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "mature"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2807,13 +2699,12 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",
-      "jeune",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2842,13 +2733,11 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet I",
     "tags": [
       "babysitter",
-      "jeune",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2877,13 +2766,11 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet J",
     "tags": [
       "babysitter",
-      "jeune",
+      "rousse",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2912,13 +2799,11 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",
-      "jeune",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2947,13 +2832,12 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet I",
     "tags": [
       "babysitter",
-      "jeune",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2982,13 +2866,12 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet J",
     "tags": [
       "babysitter",
-      "jeune",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3017,13 +2900,12 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",
-      "jeune",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3052,13 +2934,11 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet I",
     "tags": [
       "babysitter",
-      "jeune",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3087,13 +2967,11 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet J",
     "tags": [
       "babysitter",
-      "jeune",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3122,13 +3000,12 @@ window.LEA_CAST_CUPS = [
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",
-      "jeune",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3157,13 +3034,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet H",
     "tags": [
       "amie",
-      "copine",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3192,13 +3067,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet I",
     "tags": [
       "amie",
-      "copine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3227,13 +3100,12 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet J",
     "tags": [
       "amie",
-      "copine",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3262,13 +3134,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet H",
     "tags": [
       "amie",
-      "copine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3297,13 +3167,12 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet I",
     "tags": [
       "amie",
-      "copine",
+      "jeu",
+      "cheveux noirs",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3332,13 +3201,12 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet J",
     "tags": [
       "amie",
-      "copine",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3367,13 +3235,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet H",
     "tags": [
       "amie",
-      "copine",
+      "brune",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3402,13 +3268,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet I",
     "tags": [
       "amie",
-      "copine",
+      "rousse",
+      "ronde",
+      "bonnet I",
       "gros seins",
-      "bonnet I",
-      "spécial",
-      "nsfw",
-      "bonnet I",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3437,13 +3301,11 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet J",
     "tags": [
       "amie",
-      "copine",
+      "cheveux noirs",
+      "ronde",
+      "bonnet J",
       "gros seins",
-      "bonnet J",
-      "spécial",
-      "nsfw",
-      "bonnet J",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3472,13 +3334,13 @@ window.LEA_CAST_CUPS = [
     "title": "Amie · bonnet H",
     "tags": [
       "amie",
-      "copine",
+      "jeu",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
       "gros seins",
-      "bonnet H",
-      "spécial",
-      "nsfw",
-      "bonnet H",
-      "jeune"
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],

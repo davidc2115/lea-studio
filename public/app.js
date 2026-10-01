@@ -2922,9 +2922,14 @@ function ensureRoleTags(list) {
     if (/blonde hair|blond hair/i.test(looks)) add("blonde");
     if (/auburn|red hair|roux/i.test(looks)) add("rousse");
     if (/black hair|dark brown hair|chestnut|brun/i.test(looks) && !/blonde/i.test(looks)) add("brune");
-    if (/A-cup|flat chest|bonnet a/i.test(looks)) add("petits seins");
-    if (/[D-J]-cup|bonnet [d-j]|huge|large D/i.test(looks)) add("gros seins");
-    if (/chubby|plus-size|ronde/i.test(looks + " " + (c.tags||[]).join(" "))) add("ronde");
+    const hasBigCup = /bonnet\s*[d-j]|[d-j]-cup|gros seins/i.test(tags.join(" ")+" "+looks);
+    const hasSmallCup = /bonnet\s*[ab]|[ab]-cup|petits seins/i.test(tags.join(" ")+" "+looks);
+    if (!hasBigCup && /A-cup|flat chest|bonnet a\b/i.test(looks)) add("petits seins");
+    if (!hasSmallCup && /[D-J]-cup|bonnet [d-j]|huge|large D/i.test(looks)) add("gros seins");
+    if (/chubby|plus-size|\bronde\b/i.test(looks + " " + (c.tags||[]).join(" ")) && !/voluptueuse|hourglass/i.test(tags.join(" "))) add("ronde");
+    if (/voluptuous|voluptueuse|hourglass|sablier/i.test(looks)) add("voluptueuse");
+    if (/slim|mince|slender/i.test(looks) && !/chubby|ronde|voluptueuse/i.test(tags.join(" "))) add("mince");
+    if (/athletic|athl[eé]tique/i.test(looks)) add("athlétique");
     if (/slime|elf|dragon|mermaid|kitsune|succub|oni|harpy|dryad|naga|angel/i.test(looks + " " + (c.id||""))) add("fantasy");
     c.tags = tags;
   }
@@ -4117,8 +4122,9 @@ function filterDiscoverList(q) {
       "rousse": (c) => /roux|rousse|red hair|ginger|auburn/.test(blobOf(c)),
       "cheveux noirs": (c) => /cheveux noirs|black hair/.test(blobOf(c)),
       "mince": (c) => hasTag(c, "mince") || /mince|slim slender|slim frame/.test(blobOf(c)),
-      "ronde": (c) => hasTag(c, "ronde", "plus-size") || /ronde|plus-size|voluptueuse|full voluptuous/.test(blobOf(c)),
-      "sablier": (c) => hasTag(c, "sablier") || /sablier|hourglass/.test(blobOf(c)),
+      "ronde": (c) => hasTag(c, "ronde", "plus-size", "chubby") || /\bronde\b|plus-size|chubby/.test(blobOf(c)),
+      "voluptueuse": (c) => hasTag(c, "voluptueuse", "sablier") || /voluptueuse|voluptuous|hourglass|sablier/.test(blobOf(c)),
+      "sablier": (c) => hasTag(c, "sablier", "voluptueuse") || /sablier|hourglass/.test(blobOf(c)),
       "athletique": (c) => hasTag(c, "athletique", "athlétique") || /athletique|athletic/.test(blobOf(c)),
       "petite": (c) => hasTag(c, "petite") || /silhouette petite|petite slim|1m50/.test(blobOf(c)),
       "tres grande": (c) => hasTag(c, "tres grande", "très grande") || /tres grande|very tall|1m85/.test(blobOf(c)),
@@ -4145,6 +4151,17 @@ function filterDiscoverList(q) {
     exactMatchers["sirène"] = exactMatchers["sirene"];
     exactMatchers["démon"] = exactMatchers["demon"];
     exactMatchers["fée"] = exactMatchers["fee"];
+    exactMatchers["athlétique"] = exactMatchers["athletique"];
+    exactMatchers["bonnet A"] = exactMatchers["bonnet a"];
+    exactMatchers["bonnet B"] = exactMatchers["bonnet b"];
+    exactMatchers["bonnet C"] = exactMatchers["bonnet c"];
+    exactMatchers["bonnet D"] = exactMatchers["bonnet d"];
+    exactMatchers["bonnet E"] = exactMatchers["bonnet e"];
+    exactMatchers["bonnet F"] = exactMatchers["bonnet f"];
+    exactMatchers["bonnet G"] = exactMatchers["bonnet g"];
+    exactMatchers["bonnet H"] = exactMatchers["bonnet h"];
+    exactMatchers["bonnet I"] = exactMatchers["bonnet i"];
+    exactMatchers["bonnet J"] = exactMatchers["bonnet j"];
 
     const sn = norm(s);
     const exactHit = exactMatchers[sn] || exactMatchers[s];
@@ -4242,7 +4259,7 @@ function renderDiscover() {
     "slime","dragonne","sirène","harpie","dryade","lamia","gorgone","succube","elfe",
     "directe","tactile","timide","nsfw","spécial",
     "blonde","brune","rousse","cheveux noirs",
-    "gros seins","petits seins","seins moyens","95D","bonnet H","bonnet I","bonnet J",
+    "gros seins","petits seins","seins moyens","bonnet A","bonnet B","bonnet C","bonnet D","bonnet E","bonnet F","bonnet G","bonnet H","bonnet I","bonnet J",
     "grosses fesses","mince","ronde","sablier","athlétique","voluptueuse","petite","très grande",
     "française","maghrébine","asiatique","africaine","latine","métisse",
     "mariée","célibataire","veuve","divorcée",

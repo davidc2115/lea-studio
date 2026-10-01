@@ -1,11 +1,19 @@
-/** duo covers wired */
 window.LEA_CAST_NEW = [
   {
     "id": "duo_twins_lea",
     "name": "Léa & Louna",
     "age": 21,
     "title": "Jumelles",
-    "tags": ["sensible", "jumelles", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet d"],
+    "tags": [
+      "duo",
+      "jeu",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_twins_lea.jpg",
     "gallery": [
       "images/cast/duo_twins_lea.jpg"
@@ -37,7 +45,15 @@ window.LEA_CAST_NEW = [
     "name": "Mei & Yuki",
     "age": 22,
     "title": "Jumelles asiatiques",
-    "tags": ["flirt", "jumelles", "duo", "nsfw", "plan à trois", "bonnet a", "bonnet e"],
+    "tags": [
+      "flirt",
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_twins_asia.jpg",
     "gallery": [
       "images/cast/duo_twins_asia.jpg"
@@ -69,7 +85,16 @@ window.LEA_CAST_NEW = [
     "name": "Clara & Zoé",
     "age": 24,
     "title": "Grande et petite sœur",
-    "tags": ["flirt", "sœurs", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet b"],
+    "tags": [
+      "flirt",
+      "amie",
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_sisters_fr.jpg",
     "gallery": [
       "images/cast/duo_sisters_fr.jpg"
@@ -101,7 +126,14 @@ window.LEA_CAST_NEW = [
     "name": "Ana & Lia",
     "age": 23,
     "title": "Sœurs brésiliennes",
-    "tags": ["extravertie", "sœurs", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet c"],
+    "tags": [
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_sisters_br.jpg",
     "gallery": [
       "images/cast/duo_sisters_br.jpg"
@@ -133,7 +165,17 @@ window.LEA_CAST_NEW = [
     "name": "Nina & Sam",
     "age": 23,
     "title": "Amies de sport",
-    "tags": ["réservée", "amies", "duo", "nsfw", "plan à trois", "bonnet b", "bonnet c"],
+    "tags": [
+      "amie",
+      "duo",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_friends_sport.jpg",
     "gallery": [
       "images/cast/duo_friends_sport.jpg"
@@ -165,7 +207,15 @@ window.LEA_CAST_NEW = [
     "name": "Inès & Emma",
     "age": 27,
     "title": "Collègues amies",
-    "tags": ["chaleureuse", "amies", "duo", "nsfw", "plan à trois", "bonnet a", "bonnet e", "collègue"],
+    "tags": [
+      "collègue",
+      "duo",
+      "oni",
+      "rousse",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_friends_work.jpg",
     "gallery": [
       "images/cast/duo_friends_work.jpg"
@@ -197,7 +247,16 @@ window.LEA_CAST_NEW = [
     "name": "Chloé & Jade",
     "age": 25,
     "title": "Couple lesbien",
-    "tags": ["joueuse", "couple", "duo", "wlw", "nsfw", "plan à trois", "bonnet c", "bonnet d"],
+    "tags": [
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "blonde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_couple_wlw.jpg",
     "gallery": [
       "images/cast/duo_couple_wlw.jpg"
@@ -229,7 +288,16 @@ window.LEA_CAST_NEW = [
     "name": "Sarah & Nora",
     "age": 28,
     "title": "Couple lesbien",
-    "tags": ["directe", "couple", "duo", "wlw", "nsfw", "plan à trois", "bonnet d", "bonnet b"],
+    "tags": [
+      "directe",
+      "amie",
+      "duo",
+      "oni",
+      "rousse",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_couple_wlw2.jpg",
     "gallery": [
       "images/cast/duo_couple_wlw2.jpg"
@@ -261,7 +329,15 @@ window.LEA_CAST_NEW = [
     "name": "Hélène & Manon",
     "age": 42,
     "title": "Mère et fille 18+",
-    "tags": ["timide", "mère", "fille", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet b", "mère-fille"],
+    "tags": [
+      "timide",
+      "duo",
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_md1.jpg",
     "gallery": [
       "images/cast/duo_md1.jpg"
@@ -293,7 +369,16 @@ window.LEA_CAST_NEW = [
     "name": "Sofia & Luna",
     "age": 45,
     "title": "Mère et fille 18+",
-    "tags": ["timide", "mère", "fille", "duo", "nsfw", "plan à trois", "bonnet e", "bonnet a", "mère-fille"],
+    "tags": [
+      "timide",
+      "duo",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_md2.jpg",
     "gallery": [
       "images/cast/duo_md2.jpg"
@@ -325,7 +410,16 @@ window.LEA_CAST_NEW = [
     "name": "Aya & Rina",
     "age": 24,
     "title": "Voisines",
-    "tags": ["flirt", "amies", "duo", "nsfw", "plan à trois", "bonnet b", "bonnet d", "voisine"],
+    "tags": [
+      "flirt",
+      "voisine",
+      "duo",
+      "oni",
+      "brune",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_voisines.jpg",
     "gallery": [
       "images/cast/duo_voisines.jpg"
@@ -357,7 +451,17 @@ window.LEA_CAST_NEW = [
     "name": "Léna & Camille",
     "age": 22,
     "title": "Colocs étudiantes",
-    "tags": ["directe", "amies", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet a"],
+    "tags": [
+      "directe",
+      "amie",
+      "duo",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_etudiantes.jpg",
     "gallery": [
       "images/cast/duo_etudiantes.jpg"
@@ -389,7 +493,18 @@ window.LEA_CAST_NEW = [
     "name": "Maya & Priya",
     "age": 23,
     "title": "Danseuses",
-    "tags": ["joueuse", "amies", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet d"],
+    "tags": [
+      "amie",
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_danseuses.jpg",
     "gallery": [
       "images/cast/duo_danseuses.jpg"
@@ -421,7 +536,15 @@ window.LEA_CAST_NEW = [
     "name": "Claire & Nadia",
     "age": 29,
     "title": "Infirmières",
-    "tags": ["dominante", "collègues", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet e"],
+    "tags": [
+      "collègue",
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_infirmieres.jpg",
     "gallery": [
       "images/cast/duo_infirmieres.jpg"
@@ -453,7 +576,16 @@ window.LEA_CAST_NEW = [
     "name": "Isabelle & Thaïs",
     "age": 36,
     "title": "Mentore et jeune adulte",
-    "tags": ["joueuse", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet b"],
+    "tags": [
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "rousse",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_mentor.jpg",
     "gallery": [
       "images/cast/duo_mentor.jpg"
@@ -485,7 +617,16 @@ window.LEA_CAST_NEW = [
     "name": "Iris & Ivy",
     "age": 21,
     "title": "Jumelles rousses",
-    "tags": ["extravertie", "jumelles", "duo", "nsfw", "plan à trois", "bonnet b", "bonnet d"],
+    "tags": [
+      "taquine",
+      "duo",
+      "jeu",
+      "oni",
+      "rousse",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_twins_red.jpg",
     "gallery": [
       "images/cast/duo_twins_red.jpg"
@@ -517,7 +658,16 @@ window.LEA_CAST_NEW = [
     "name": "Kira & Nia",
     "age": 22,
     "title": "Jumelles métisses",
-    "tags": ["provocante", "jumelles", "duo", "nsfw", "plan à trois", "bonnet a", "bonnet e"],
+    "tags": [
+      "duo",
+      "fée",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_twins_dark.jpg",
     "gallery": [
       "images/cast/duo_twins_dark.jpg"
@@ -549,7 +699,17 @@ window.LEA_CAST_NEW = [
     "name": "Giulia & Rosa",
     "age": 24,
     "title": "Sœurs italiennes",
-    "tags": ["joueuse", "sœurs", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet c"],
+    "tags": [
+      "amie",
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_sisters_it.jpg",
     "gallery": [
       "images/cast/duo_sisters_it.jpg"
@@ -581,7 +741,14 @@ window.LEA_CAST_NEW = [
     "name": "Anya & Katia",
     "age": 23,
     "title": "Sœurs slaves",
-    "tags": ["chaleureuse", "sœurs", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet e"],
+    "tags": [
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_sisters_ru.jpg",
     "gallery": [
       "images/cast/duo_sisters_ru.jpg"
@@ -613,7 +780,16 @@ window.LEA_CAST_NEW = [
     "name": "Eve & Lilith",
     "age": 21,
     "title": "Amies gothiques",
-    "tags": ["timide", "amies", "duo", "nsfw", "plan à trois", "bonnet b", "bonnet d"],
+    "tags": [
+      "timide",
+      "amie",
+      "duo",
+      "oni",
+      "cheveux noirs",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_goth.jpg",
     "gallery": [
       "images/cast/duo_goth.jpg"
@@ -645,7 +821,15 @@ window.LEA_CAST_NEW = [
     "name": "Tara & Inès",
     "age": 26,
     "title": "Amies yoga",
-    "tags": ["dominante", "amies", "duo", "nsfw", "plan à trois", "bonnet a", "bonnet c"],
+    "tags": [
+      "amie",
+      "duo",
+      "oni",
+      "cheveux noirs",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_yoga.jpg",
     "gallery": [
       "images/cast/duo_yoga.jpg"
@@ -677,7 +861,16 @@ window.LEA_CAST_NEW = [
     "name": "Lina & Hana",
     "age": 24,
     "title": "Couple asiatique",
-    "tags": ["directe", "couple", "duo", "wlw", "nsfw", "plan à trois", "bonnet b", "bonnet c"],
+    "tags": [
+      "directe",
+      "duo",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_wlw3.jpg",
     "gallery": [
       "images/cast/duo_wlw3.jpg"
@@ -709,7 +902,17 @@ window.LEA_CAST_NEW = [
     "name": "Mila & Zoé",
     "age": 22,
     "title": "Couple coloc",
-    "tags": ["joueuse", "couple", "duo", "wlw", "nsfw", "plan à trois", "bonnet c", "bonnet d"],
+    "tags": [
+      "amie",
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "blonde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_wlw4.jpg",
     "gallery": [
       "images/cast/duo_wlw4.jpg"
@@ -741,7 +944,15 @@ window.LEA_CAST_NEW = [
     "name": "Carmen & Sofia",
     "age": 44,
     "title": "Mère et fille latina 18+",
-    "tags": ["flirt", "mère", "fille", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet c", "mère-fille"],
+    "tags": [
+      "flirt",
+      "duo",
+      "oni",
+      "cheveux noirs",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_md_lat.jpg",
     "gallery": [
       "images/cast/duo_md_lat.jpg"
@@ -773,7 +984,16 @@ window.LEA_CAST_NEW = [
     "name": "Aisha & Nala",
     "age": 40,
     "title": "Mère et fille 18+",
-    "tags": ["joueuse", "mère", "fille", "duo", "nsfw", "plan à trois", "bonnet e", "bonnet c", "mère-fille"],
+    "tags": [
+      "duo",
+      "jeu",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_md_blk.jpg",
     "gallery": [
       "images/cast/duo_md_blk.jpg"
@@ -805,7 +1025,16 @@ window.LEA_CAST_NEW = [
     "name": "Léa & Manon",
     "age": 25,
     "title": "Voisines",
-    "tags": ["flirt", "amies", "duo", "nsfw", "plan à trois", "bonnet a", "bonnet e", "voisine"],
+    "tags": [
+      "flirt",
+      "voisine",
+      "duo",
+      "oni",
+      "brune",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_vois2.jpg",
     "gallery": [
       "images/cast/duo_vois2.jpg"
@@ -837,7 +1066,19 @@ window.LEA_CAST_NEW = [
     "name": "Julie & Alice",
     "age": 28,
     "title": "Secrétaires",
-    "tags": ["provocante", "duo", "bureau", "nsfw", "plan à trois", "bonnet c", "bonnet d", "collègue", "secrétaire"],
+    "tags": [
+      "timide",
+      "secrétaire",
+      "collègue",
+      "duo",
+      "fée",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_sec.jpg",
     "gallery": [
       "images/cast/duo_sec.jpg"
@@ -869,7 +1110,16 @@ window.LEA_CAST_NEW = [
     "name": "Marie & Elsa",
     "age": 32,
     "title": "Avocates",
-    "tags": ["timide", "duo", "travail", "nsfw", "plan à trois", "bonnet b", "bonnet e"],
+    "tags": [
+      "timide",
+      "collègue",
+      "duo",
+      "oni",
+      "blonde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_law.jpg",
     "gallery": [
       "images/cast/duo_law.jpg"
@@ -901,7 +1151,15 @@ window.LEA_CAST_NEW = [
     "name": "Skye & Nova",
     "age": 27,
     "title": "Hôtesses",
-    "tags": ["sensible", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet c"],
+    "tags": [
+      "duo",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_air.jpg",
     "gallery": [
       "images/cast/duo_air.jpg"
@@ -933,7 +1191,16 @@ window.LEA_CAST_NEW = [
     "name": "Pam & Romy",
     "age": 30,
     "title": "Cheffes",
-    "tags": ["timide", "duo", "nsfw", "plan à trois", "bonnet d", "bonnet b"],
+    "tags": [
+      "timide",
+      "duo",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/duo_chef.jpg",
     "gallery": [
       "images/cast/duo_chef.jpg"
@@ -966,11 +1233,13 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "réservée",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -995,11 +1264,12 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "dominante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1024,11 +1294,13 @@ window.LEA_CAST_NEW = [
     "age": 21,
     "title": "Soirée jeu",
     "tags": [
-      "chaleureuse",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1053,11 +1325,14 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "réservée",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1082,11 +1357,12 @@ window.LEA_CAST_NEW = [
     "age": 23,
     "title": "Soirée jeu",
     "tags": [
-      "chaleureuse",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1111,11 +1387,13 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Soirée jeu",
     "tags": [
-      "joueuse",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1142,9 +1420,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "blonde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1171,9 +1451,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1198,11 +1480,12 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Soirée jeu",
     "tags": [
-      "sensible",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "cheveux noirs",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1229,9 +1512,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1258,9 +1544,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1285,11 +1573,13 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "provocante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1314,11 +1604,13 @@ window.LEA_CAST_NEW = [
     "age": 21,
     "title": "Soirée jeu",
     "tags": [
-      "provocante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "fée",
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1343,11 +1635,13 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "extravertie",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1374,9 +1668,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1401,11 +1697,12 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Soirée jeu",
     "tags": [
-      "sensible",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1430,11 +1727,14 @@ window.LEA_CAST_NEW = [
     "age": 25,
     "title": "Soirée jeu",
     "tags": [
-      "provocante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "fée",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1459,11 +1759,13 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Soirée jeu",
     "tags": [
-      "dominante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1488,11 +1790,13 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Soirée jeu",
     "tags": [
-      "extravertie",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1517,11 +1821,13 @@ window.LEA_CAST_NEW = [
     "age": 28,
     "title": "Soirée jeu",
     "tags": [
-      "réservée",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1548,9 +1854,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1575,11 +1883,13 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "provocante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "fée",
+      "blonde",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1606,9 +1916,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "brune",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1633,11 +1945,14 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Soirée jeu",
     "tags": [
-      "provocante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "fée",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1662,11 +1977,12 @@ window.LEA_CAST_NEW = [
     "age": 23,
     "title": "Soirée jeu",
     "tags": [
-      "dominante",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1691,11 +2007,12 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Soirée jeu",
     "tags": [
-      "chaleureuse",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "rousse",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1720,11 +2037,14 @@ window.LEA_CAST_NEW = [
     "age": 25,
     "title": "Soirée jeu",
     "tags": [
-      "joueuse",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1749,11 +2069,13 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Soirée jeu",
     "tags": [
-      "extravertie",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1778,11 +2100,13 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Soirée jeu",
     "tags": [
-      "réservée",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1809,9 +2133,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "jeu",
-      "nsfw",
-      "défis",
-      "jeune"
+      "oni",
+      "rousse",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1838,9 +2164,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1867,9 +2195,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1894,11 +2224,15 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Tante",
     "tags": [
-      "provocante",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "fée",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1923,11 +2257,14 @@ window.LEA_CAST_NEW = [
     "age": 39,
     "title": "Tante",
     "tags": [
-      "provocante",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "fée",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1952,11 +2289,14 @@ window.LEA_CAST_NEW = [
     "age": 40,
     "title": "Tante",
     "tags": [
-      "extravertie",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -1981,11 +2321,13 @@ window.LEA_CAST_NEW = [
     "age": 41,
     "title": "Tante",
     "tags": [
-      "sensible",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2012,9 +2354,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2041,9 +2385,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2068,11 +2414,13 @@ window.LEA_CAST_NEW = [
     "age": 44,
     "title": "Tante",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2097,11 +2445,14 @@ window.LEA_CAST_NEW = [
     "age": 45,
     "title": "Tante",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2126,11 +2477,14 @@ window.LEA_CAST_NEW = [
     "age": 46,
     "title": "Tante",
     "tags": [
-      "extravertie",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2155,11 +2509,14 @@ window.LEA_CAST_NEW = [
     "age": 47,
     "title": "Tante",
     "tags": [
-      "réservée",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2184,11 +2541,14 @@ window.LEA_CAST_NEW = [
     "age": 48,
     "title": "Tante",
     "tags": [
-      "sensible",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2213,11 +2573,15 @@ window.LEA_CAST_NEW = [
     "age": 49,
     "title": "Tante",
     "tags": [
-      "réservée",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "ange",
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2242,11 +2606,14 @@ window.LEA_CAST_NEW = [
     "age": 50,
     "title": "Tante",
     "tags": [
-      "réservée",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2271,11 +2638,13 @@ window.LEA_CAST_NEW = [
     "age": 51,
     "title": "Tante",
     "tags": [
-      "extravertie",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2300,11 +2669,13 @@ window.LEA_CAST_NEW = [
     "age": 52,
     "title": "Tante",
     "tags": [
-      "sensible",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2329,11 +2700,14 @@ window.LEA_CAST_NEW = [
     "age": 36,
     "title": "Tante",
     "tags": [
-      "extravertie",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2358,11 +2732,13 @@ window.LEA_CAST_NEW = [
     "age": 37,
     "title": "Tante",
     "tags": [
-      "dominante",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2389,9 +2765,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2418,9 +2796,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2445,11 +2826,13 @@ window.LEA_CAST_NEW = [
     "age": 40,
     "title": "Tante",
     "tags": [
-      "sensible",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2474,11 +2857,15 @@ window.LEA_CAST_NEW = [
     "age": 41,
     "title": "Tante",
     "tags": [
-      "joueuse",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "jeu",
+      "ange",
+      "oni",
+      "rousse",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2503,11 +2890,13 @@ window.LEA_CAST_NEW = [
     "age": 42,
     "title": "Tante",
     "tags": [
-      "sensible",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2532,11 +2921,14 @@ window.LEA_CAST_NEW = [
     "age": 43,
     "title": "Tante",
     "tags": [
-      "extravertie",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2561,11 +2953,14 @@ window.LEA_CAST_NEW = [
     "age": 44,
     "title": "Tante",
     "tags": [
-      "provocante",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "fée",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2590,11 +2985,13 @@ window.LEA_CAST_NEW = [
     "age": 45,
     "title": "Tante",
     "tags": [
-      "dominante",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2619,11 +3016,13 @@ window.LEA_CAST_NEW = [
     "age": 46,
     "title": "Tante",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2650,9 +3049,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2679,9 +3080,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "tante",
-      "famille",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2708,9 +3111,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2735,11 +3140,12 @@ window.LEA_CAST_NEW = [
     "age": 25,
     "title": "Collègue",
     "tags": [
-      "sensible",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2764,11 +3170,13 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Collègue",
     "tags": [
-      "chaleureuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2795,9 +3203,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2822,11 +3232,12 @@ window.LEA_CAST_NEW = [
     "age": 28,
     "title": "Collègue",
     "tags": [
-      "dominante",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "rousse",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2853,9 +3264,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2880,11 +3293,13 @@ window.LEA_CAST_NEW = [
     "age": 30,
     "title": "Collègue",
     "tags": [
-      "provocante",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "fée",
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2909,11 +3324,13 @@ window.LEA_CAST_NEW = [
     "age": 31,
     "title": "Collègue",
     "tags": [
-      "provocante",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2938,11 +3355,12 @@ window.LEA_CAST_NEW = [
     "age": 32,
     "title": "Collègue",
     "tags": [
-      "extravertie",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "oni",
+      "brune",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2969,9 +3387,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -2996,11 +3417,14 @@ window.LEA_CAST_NEW = [
     "age": 34,
     "title": "Collègue",
     "tags": [
-      "joueuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3025,11 +3449,13 @@ window.LEA_CAST_NEW = [
     "age": 35,
     "title": "Collègue",
     "tags": [
-      "extravertie",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3054,11 +3480,13 @@ window.LEA_CAST_NEW = [
     "age": 36,
     "title": "Collègue",
     "tags": [
-      "chaleureuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3083,11 +3511,13 @@ window.LEA_CAST_NEW = [
     "age": 37,
     "title": "Collègue",
     "tags": [
-      "provocante",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3112,11 +3542,14 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Collègue",
     "tags": [
-      "joueuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3143,9 +3576,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3172,9 +3607,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3199,11 +3637,13 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Collègue",
     "tags": [
-      "réservée",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3228,11 +3668,13 @@ window.LEA_CAST_NEW = [
     "age": 25,
     "title": "Collègue",
     "tags": [
-      "réservée",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3257,11 +3699,12 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Collègue",
     "tags": [
-      "chaleureuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3286,11 +3729,14 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Collègue",
     "tags": [
-      "joueuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3315,11 +3761,14 @@ window.LEA_CAST_NEW = [
     "age": 28,
     "title": "Collègue",
     "tags": [
-      "joueuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3344,11 +3793,12 @@ window.LEA_CAST_NEW = [
     "age": 29,
     "title": "Collègue",
     "tags": [
-      "chaleureuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3373,11 +3823,13 @@ window.LEA_CAST_NEW = [
     "age": 30,
     "title": "Collègue",
     "tags": [
-      "dominante",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3402,11 +3854,13 @@ window.LEA_CAST_NEW = [
     "age": 31,
     "title": "Collègue",
     "tags": [
-      "provocante",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "fée",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3431,11 +3885,13 @@ window.LEA_CAST_NEW = [
     "age": 32,
     "title": "Collègue",
     "tags": [
-      "extravertie",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3462,9 +3918,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3489,11 +3947,12 @@ window.LEA_CAST_NEW = [
     "age": 34,
     "title": "Collègue",
     "tags": [
-      "chaleureuse",
       "collègue",
-      "travail",
-      "nsfw",
-      "jeune"
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3520,9 +3979,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3547,11 +4008,13 @@ window.LEA_CAST_NEW = [
     "age": 36,
     "title": "Collègue",
     "tags": [
-      "réservée",
       "collègue",
-      "travail",
-      "nsfw",
-      "mature"
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3578,9 +4041,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3607,9 +4072,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3634,11 +4101,15 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Secrétaire",
     "tags": [
-      "extravertie",
+      "taquine",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3665,9 +4136,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3692,11 +4165,14 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Secrétaire",
     "tags": [
-      "joueuse",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3721,11 +4197,14 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Secrétaire",
     "tags": [
-      "joueuse",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "oni",
+      "brune",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3752,9 +4231,13 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3779,11 +4262,14 @@ window.LEA_CAST_NEW = [
     "age": 29,
     "title": "Secrétaire",
     "tags": [
-      "réservée",
+      "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3808,11 +4294,13 @@ window.LEA_CAST_NEW = [
     "age": 30,
     "title": "Secrétaire",
     "tags": [
-      "dominante",
+      "flirt",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "oni",
+      "brune",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3837,11 +4325,16 @@ window.LEA_CAST_NEW = [
     "age": 31,
     "title": "Secrétaire",
     "tags": [
-      "joueuse",
+      "taquine",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3866,11 +4359,13 @@ window.LEA_CAST_NEW = [
     "age": 32,
     "title": "Secrétaire",
     "tags": [
-      "sensible",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3895,11 +4390,13 @@ window.LEA_CAST_NEW = [
     "age": 33,
     "title": "Secrétaire",
     "tags": [
-      "réservée",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3924,11 +4421,13 @@ window.LEA_CAST_NEW = [
     "age": 34,
     "title": "Secrétaire",
     "tags": [
-      "réservée",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3953,11 +4452,14 @@ window.LEA_CAST_NEW = [
     "age": 35,
     "title": "Secrétaire",
     "tags": [
-      "provocante",
+      "timide",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "mature"
+      "fée",
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -3982,11 +4484,14 @@ window.LEA_CAST_NEW = [
     "age": 36,
     "title": "Secrétaire",
     "tags": [
-      "timide",
+      "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "mature"
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4011,11 +4516,13 @@ window.LEA_CAST_NEW = [
     "age": 37,
     "title": "Secrétaire",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4040,11 +4547,14 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Secrétaire",
     "tags": [
-      "chaleureuse",
+      "taquine",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4069,11 +4579,14 @@ window.LEA_CAST_NEW = [
     "age": 22,
     "title": "Secrétaire",
     "tags": [
-      "joueuse",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4098,11 +4611,13 @@ window.LEA_CAST_NEW = [
     "age": 23,
     "title": "Secrétaire",
     "tags": [
-      "réservée",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4127,11 +4642,12 @@ window.LEA_CAST_NEW = [
     "age": 24,
     "title": "Secrétaire",
     "tags": [
-      "dominante",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "oni",
+      "rousse",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4156,11 +4672,13 @@ window.LEA_CAST_NEW = [
     "age": 25,
     "title": "Secrétaire",
     "tags": [
-      "flirt",
+      "timide",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "blonde",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4185,11 +4703,14 @@ window.LEA_CAST_NEW = [
     "age": 26,
     "title": "Secrétaire",
     "tags": [
-      "provocante",
+      "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4214,11 +4735,14 @@ window.LEA_CAST_NEW = [
     "age": 27,
     "title": "Secrétaire",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "oni",
+      "brune",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4243,11 +4767,15 @@ window.LEA_CAST_NEW = [
     "age": 28,
     "title": "Secrétaire",
     "tags": [
-      "joueuse",
+      "taquine",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4272,11 +4800,12 @@ window.LEA_CAST_NEW = [
     "age": 29,
     "title": "Secrétaire",
     "tags": [
-      "dominante",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4303,9 +4832,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4330,11 +4861,13 @@ window.LEA_CAST_NEW = [
     "age": 31,
     "title": "Secrétaire",
     "tags": [
-      "extravertie",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4359,11 +4892,14 @@ window.LEA_CAST_NEW = [
     "age": 32,
     "title": "Secrétaire",
     "tags": [
-      "extravertie",
+      "timide",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4388,11 +4924,13 @@ window.LEA_CAST_NEW = [
     "age": 33,
     "title": "Secrétaire",
     "tags": [
-      "sensible",
+      "directe",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4419,9 +4957,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "secrétaire",
-      "bureau",
-      "nsfw",
-      "jeune"
+      "oni",
+      "rousse",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4446,11 +4986,13 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Maman d'ami",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4475,11 +5017,13 @@ window.LEA_CAST_NEW = [
     "age": 39,
     "title": "Maman d'ami",
     "tags": [
-      "sensible",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4504,11 +5048,14 @@ window.LEA_CAST_NEW = [
     "age": 40,
     "title": "Maman d'ami",
     "tags": [
-      "réservée",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4533,11 +5080,14 @@ window.LEA_CAST_NEW = [
     "age": 41,
     "title": "Maman d'ami",
     "tags": [
-      "dominante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4562,11 +5112,14 @@ window.LEA_CAST_NEW = [
     "age": 42,
     "title": "Maman d'ami",
     "tags": [
-      "provocante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "fée",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4591,11 +5144,15 @@ window.LEA_CAST_NEW = [
     "age": 43,
     "title": "Maman d'ami",
     "tags": [
-      "réservée",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4620,11 +5177,13 @@ window.LEA_CAST_NEW = [
     "age": 44,
     "title": "Maman d'ami",
     "tags": [
-      "dominante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "blonde",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4651,9 +5210,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "timide",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4680,9 +5241,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4707,11 +5271,14 @@ window.LEA_CAST_NEW = [
     "age": 47,
     "title": "Maman d'ami",
     "tags": [
-      "sensible",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "oni",
+      "rousse",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4736,11 +5303,14 @@ window.LEA_CAST_NEW = [
     "age": 48,
     "title": "Maman d'ami",
     "tags": [
-      "réservée",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4767,9 +5337,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4794,11 +5366,13 @@ window.LEA_CAST_NEW = [
     "age": 50,
     "title": "Maman d'ami",
     "tags": [
-      "dominante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "oni",
+      "brune",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4823,11 +5397,14 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Maman d'ami",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4852,11 +5429,13 @@ window.LEA_CAST_NEW = [
     "age": 39,
     "title": "Maman d'ami",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4881,11 +5460,14 @@ window.LEA_CAST_NEW = [
     "age": 40,
     "title": "Maman d'ami",
     "tags": [
-      "réservée",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4912,9 +5494,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4939,11 +5524,15 @@ window.LEA_CAST_NEW = [
     "age": 42,
     "title": "Maman d'ami",
     "tags": [
-      "joueuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4970,9 +5559,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -4997,11 +5589,15 @@ window.LEA_CAST_NEW = [
     "age": 44,
     "title": "Maman d'ami",
     "tags": [
-      "joueuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "jeu",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5026,11 +5622,15 @@ window.LEA_CAST_NEW = [
     "age": 45,
     "title": "Maman d'ami",
     "tags": [
-      "joueuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "jeu",
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5055,11 +5655,13 @@ window.LEA_CAST_NEW = [
     "age": 46,
     "title": "Maman d'ami",
     "tags": [
-      "chaleureuse",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5084,11 +5686,13 @@ window.LEA_CAST_NEW = [
     "age": 47,
     "title": "Maman d'ami",
     "tags": [
-      "sensible",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5113,11 +5717,15 @@ window.LEA_CAST_NEW = [
     "age": 48,
     "title": "Maman d'ami",
     "tags": [
-      "extravertie",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "athlétique",
+      "bonnet C",
+      "seins moyens",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5142,11 +5750,14 @@ window.LEA_CAST_NEW = [
     "age": 49,
     "title": "Maman d'ami",
     "tags": [
-      "réservée",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5171,11 +5782,14 @@ window.LEA_CAST_NEW = [
     "age": 50,
     "title": "Maman d'ami",
     "tags": [
-      "provocante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5200,11 +5814,13 @@ window.LEA_CAST_NEW = [
     "age": 38,
     "title": "Maman d'ami",
     "tags": [
-      "dominante",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet B",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5231,9 +5847,11 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5260,9 +5878,12 @@ window.LEA_CAST_NEW = [
     "tags": [
       "directe",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],
@@ -5287,11 +5908,13 @@ window.LEA_CAST_NEW = [
     "age": 41,
     "title": "Maman d'ami",
     "tags": [
-      "sensible",
+      "flirt",
       "maman d'ami",
-      "mature",
-      "nsfw",
-      "mature"
+      "rousse",
+      "ronde",
+      "bonnet A",
+      "petits seins",
+      "nsfw"
     ],
     "cover": "",
     "gallery": [],

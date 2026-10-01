@@ -1,4 +1,3 @@
-/** Scénarios immersifs style Chub — rôles verrouillés */
 window.CAST = [
   {
     "id": "lea",
@@ -6,7 +5,15 @@ window.CAST = [
     "age": 21,
     "title": "Meilleure amie de ta fille · orage",
     "tags": [
-      "chaleureuse","timide", "amie de ta fille", "orage", "nsfw", "amie"],
+      "timide",
+      "amie",
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/lea-orage-dentelle.jpg",
     "gallery": [
       "images/lea-orage-dentelle.jpg",
@@ -55,7 +62,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "dominante","directe", "maghrébine", "nsfw", "amie"],
+      "directe",
+      "amie",
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/ines.jpg",
     "gallery": [
       "images/cast/ines.jpg",
@@ -86,7 +100,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "timide","sportive", "métisse", "nsfw", "amie"],
+      "timide",
+      "amie",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/aya.jpg",
     "gallery": [
       "images/cast/aya.jpg",
@@ -118,7 +139,16 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "joueuse","voluptueuse", "provocante", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sofia.jpg",
     "gallery": [
       "images/cast/sofia.jpg",
@@ -150,8 +180,10 @@ window.CAST = [
     "title": "Intello de la bande",
     "tags": [
       "timide",
-      "réservée",
-      "lunettes",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
       "nsfw"
     ],
     "cover": "images/cast/jade.jpg",
@@ -183,7 +215,15 @@ window.CAST = [
     "name": "Myriam El Fassi",
     "age": 22,
     "title": "Amie",
-    "tags": ["sensible", "calme", "pulpeuse", "nsfw", "amie", "ronde", "chubby", "plus-size"],
+    "tags": [
+      "amie",
+      "jeu",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/myriam.jpg",
     "gallery": [
       "images/cast/myriam.jpg"
@@ -212,7 +252,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "extravertie","espiègle", "fine", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/chloe.jpg",
     "gallery": [
       "images/cast/chloe.jpg",
@@ -243,7 +290,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "dominante","froide", "grande", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/nina.jpg",
     "gallery": [
       "images/cast/nina.jpg"
@@ -272,7 +326,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "dominante","extravertie", "afro", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/keisha.jpg",
     "gallery": [
       "images/cast/keisha.jpg"
@@ -301,7 +362,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "flirt","timide", "asiatique", "nsfw", "amie"],
+      "timide",
+      "amie",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/lina.jpg",
     "gallery": [
       "images/cast/lina.jpg"
@@ -330,7 +398,15 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "provocante","douce", "formes", "nsfw", "amie"],
+      "amie",
+      "jeu",
+      "fée",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/priya.jpg",
     "gallery": [
       "images/cast/priya.jpg"
@@ -359,7 +435,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "chaleureuse","chaude", "courbes", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/camila.jpg",
     "gallery": [
       "images/cast/camila.jpg",
@@ -389,7 +472,15 @@ window.CAST = [
     "name": "Amélie Dubois",
     "age": 21,
     "title": "Amie",
-    "tags": ["timide", "ronde", "câline", "nsfw", "amie", "chubby", "plus-size"],
+    "tags": [
+      "timide",
+      "amie",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/amelie.jpg",
     "gallery": [
       "images/cast/amelie.jpg",
@@ -421,7 +512,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "directe","goth", "tranchante", "nsfw", "amie"],
+      "directe",
+      "amie",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/zoe.jpg",
     "gallery": [
       "images/cast/zoe.jpg"
@@ -450,7 +548,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "directe","protectrice", "forte", "nsfw", "amie"],
+      "directe",
+      "amie",
+      "oni",
+      "brune",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/fatou.jpg",
     "gallery": [
       "images/cast/fatou.jpg"
@@ -479,7 +584,15 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "flirt","discrète", "petite", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "jeu",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/hana.jpg",
     "gallery": [
       "images/cast/hana.jpg",
@@ -510,7 +623,15 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "extravertie","flirt", "brune", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/lucia.jpg",
     "gallery": [
       "images/cast/lucia.jpg"
@@ -539,7 +660,15 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "chaleureuse","naturelle", "athlétique", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/marine.jpg",
     "gallery": [
       "images/cast/marine.jpg"
@@ -568,7 +697,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "réservée","secrète", "charme", "nsfw", "amie"],
+      "amie",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/rania.jpg",
     "gallery": [
       "images/cast/rania.jpg"
@@ -597,7 +733,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "chaleureuse","rêveuse", "fine", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "rousse",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/thea.jpg",
     "gallery": [
       "images/cast/thea.jpg"
@@ -626,7 +769,15 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "timide","candide", "blonde", "nsfw", "amie"],
+      "timide",
+      "amie",
+      "jeu",
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/viola.jpg",
     "gallery": [
       "images/cast/viola.jpg"
@@ -655,7 +806,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "directe","familière", "petite", "nsfw", "amie"],
+      "directe",
+      "amie",
+      "oni",
+      "rousse",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/noemie.jpg",
     "gallery": [
       "images/cast/noemie.jpg"
@@ -684,7 +842,15 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "provocante", "sculptée", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "fée",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/daria.jpg",
     "gallery": [
       "images/cast/daria.jpg",
@@ -715,7 +881,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "chaleureuse","geek", "plate", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elles échangent un regard complices*\n(Je ne veux déranger personne.)\nDeux pour le prix d'une visite. Tu assumes ? Je reste calme.",
@@ -742,7 +915,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "sensible","souple", "charme", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "(C'est agréable, ici.)\n*elle s'essuie le front, encore en tenue de sport*\nDouche chez toi ou je rentre comme ça ?",
@@ -769,7 +949,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "chaleureuse","explosive", "fessier", "nsfw", "amie"],
+      "amie",
+      "jeu",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle s'assoit en tailleur, prête*\n(Je ne veux déranger personne.)\nJ'ai prévu le jeu. T'as intérêt à pas te défiler. Merci d'avance.",
@@ -796,7 +983,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "dominante","douce", "poitrine", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/elise.jpg",
     "gallery": [
       "images/cast/elise.jpg",
@@ -827,7 +1021,15 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "provocante","ambiguë", "fine", "nsfw", "amie"],
+      "flirt",
+      "amie",
+      "fée",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sasha.jpg",
     "gallery": [
       "images/cast/sasha.jpg"
@@ -856,7 +1058,14 @@ window.CAST = [
     "age": 21,
     "title": "Amie",
     "tags": [
-      "dominante","glamour", "décolleté", "nsfw", "amie"],
+      "amie",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elles échangent un regard complices*\n(Qu'il écoute un peu.)\nDeux pour le prix d'une visite. Tu assumes ? Voilà.",
@@ -882,7 +1091,15 @@ window.CAST = [
     "name": "Olga Petrov",
     "age": 22,
     "title": "Amie",
-    "tags": ["flirt", "affirmée", "pulpeuse", "nsfw", "amie", "ronde", "chubby", "plus-size"],
+    "tags": [
+      "flirt",
+      "amie",
+      "blonde",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle s'essuie le front, encore en tenue de sport*\n(Ce soir pourrait être long.)\nJe finissais ma course… t'habites pile sur le trajet.",
@@ -909,7 +1126,14 @@ window.CAST = [
     "age": 22,
     "title": "Amie",
     "tags": [
-      "dominante","moqueuse", "métisse", "nsfw", "amie"],
+      "amie",
+      "jeu",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/maya.jpg",
     "gallery": [
       "images/cast/maya.jpg"
@@ -938,7 +1162,14 @@ window.CAST = [
     "age": 48,
     "title": "Belle-mère",
     "tags": [
-      "chaleureuse","autoritaire", "française", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/helen.jpg",
     "gallery": [
       "images/cast/helen.jpg",
@@ -968,7 +1199,15 @@ window.CAST = [
     "name": "Monique Lefèvre",
     "age": 52,
     "title": "Belle-mère",
-    "tags": ["sensible", "cassante", "française", "nsfw", "belle-mère", "ronde", "plus-size", "chubby"],
+    "tags": [
+      "belle-mère",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/monique.jpg",
     "gallery": [
       "images/cast/monique.jpg"
@@ -997,7 +1236,15 @@ window.CAST = [
     "age": 45,
     "title": "Belle-mère",
     "tags": [
-      "réservée","chaleureuse", "italienne", "nsfw", "belle-mère"],
+      "belle-mère",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sofia_bm.jpg",
     "gallery": [
       "images/cast/sofia_bm.jpg"
@@ -1026,7 +1273,14 @@ window.CAST = [
     "age": 41,
     "title": "Belle-mère",
     "tags": [
-      "réservée","sèche", "athlétique", "nsfw", "belle-mère"],
+      "belle-mère",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/nathalie.jpg",
     "gallery": [
       "images/cast/nathalie.jpg"
@@ -1055,7 +1309,15 @@ window.CAST = [
     "age": 46,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","réservée", "maghrébine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/karima.jpg",
     "gallery": [
       "images/cast/karima.jpg"
@@ -1084,7 +1346,14 @@ window.CAST = [
     "age": 55,
     "title": "Belle-mère · veuve récente",
     "tags": [
-      "provocante","fragile", "allemande", "nsfw", "belle-mère"],
+      "belle-mère",
+      "fée",
+      "blonde",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/brigitte.jpg",
     "gallery": [
       "images/cast/brigitte.jpg",
@@ -1116,7 +1385,14 @@ window.CAST = [
     "age": 39,
     "title": "Belle-mère",
     "tags": [
-      "timide","provocante", "brésilienne", "nsfw", "belle-mère"],
+      "timide",
+      "belle-mère",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/valeria.jpg",
     "gallery": [
       "images/cast/valeria.jpg"
@@ -1144,7 +1420,16 @@ window.CAST = [
     "name": "Eileen Walsh",
     "age": 50,
     "title": "Belle-mère",
-    "tags": ["joueuse", "moqueuse", "irlandaise", "nsfw", "belle-mère", "ronde", "plus-size", "chubby"],
+    "tags": [
+      "belle-mère",
+      "jeu",
+      "ange",
+      "rousse",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/eileen.jpg",
     "gallery": [
       "images/cast/eileen.jpg"
@@ -1173,7 +1458,14 @@ window.CAST = [
     "age": 43,
     "title": "Belle-mère",
     "tags": [
-      "extravertie","stricte", "libanaise", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/amira.jpg",
     "gallery": [
       "images/cast/amira.jpg",
@@ -1205,7 +1497,13 @@ window.CAST = [
     "age": 47,
     "title": "Belle-mère",
     "tags": [
-      "sensible","discrète", "japonaise", "nsfw", "belle-mère"],
+      "belle-mère",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/yuki_bm.jpg",
     "gallery": [
       "images/cast/yuki_bm.jpg"
@@ -1234,7 +1532,14 @@ window.CAST = [
     "age": 38,
     "title": "Belle-mère",
     "tags": [
-      "provocante","maladroite", "française", "nsfw", "belle-mère"],
+      "belle-mère",
+      "fée",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/claire_bm.jpg",
     "gallery": [
       "images/cast/claire_bm.jpg",
@@ -1266,7 +1571,16 @@ window.CAST = [
     "age": 51,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","passionnée", "espagnole", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/rosa.jpg",
     "gallery": [
       "images/cast/rosa.jpg"
@@ -1295,7 +1609,14 @@ window.CAST = [
     "age": 49,
     "title": "Belle-mère",
     "tags": [
-      "timide","froide", "suédoise", "nsfw", "belle-mère"],
+      "timide",
+      "belle-mère",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/ingrid.jpg",
     "gallery": [
       "images/cast/ingrid.jpg",
@@ -1326,7 +1647,15 @@ window.CAST = [
     "age": 44,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","protectrice", "marocaine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/fatima.jpg",
     "gallery": [
       "images/cast/fatima.jpg",
@@ -1357,7 +1686,15 @@ window.CAST = [
     "age": 42,
     "title": "Belle-mère",
     "tags": [
-      "chaleureuse","fière", "africaine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "ange",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/patricia.jpg",
     "gallery": [
       "images/cast/patricia.jpg"
@@ -1386,7 +1723,15 @@ window.CAST = [
     "age": 58,
     "title": "Belle-mère",
     "tags": [
-      "timide","doucereuse", "française", "nsfw", "belle-mère"],
+      "timide",
+      "belle-mère",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/marie_bm.jpg",
     "gallery": [
       "images/cast/marie_bm.jpg"
@@ -1414,7 +1759,16 @@ window.CAST = [
     "name": "Olga Volkov",
     "age": 46,
     "title": "Belle-mère",
-    "tags": ["joueuse", "dominante", "russe", "nsfw", "belle-mère", "ronde", "plus-size", "chubby"],
+    "tags": [
+      "belle-mère",
+      "jeu",
+      "ange",
+      "blonde",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/olga_bm.jpg",
     "gallery": [
       "images/cast/olga_bm.jpg"
@@ -1443,7 +1797,13 @@ window.CAST = [
     "age": 40,
     "title": "Belle-mère",
     "tags": [
-      "chaleureuse","ouverte", "américaine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/diane.jpg",
     "gallery": [
       "images/cast/diane.jpg",
@@ -1474,7 +1834,14 @@ window.CAST = [
     "age": 53,
     "title": "Belle-mère",
     "tags": [
-      "directe","morale", "française", "nsfw", "belle-mère"],
+      "directe",
+      "belle-mère",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sylvie.jpg",
     "gallery": [
       "images/cast/sylvie.jpg"
@@ -1503,7 +1870,14 @@ window.CAST = [
     "age": 45,
     "title": "Belle-mère",
     "tags": [
-      "dominante","traditionnelle", "indienne", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/priya_bm.jpg",
     "gallery": [
       "images/cast/priya_bm.jpg"
@@ -1531,7 +1905,15 @@ window.CAST = [
     "name": "Chantal Roux",
     "age": 49,
     "title": "Belle-mère",
-    "tags": ["timide", "bavarde", "française", "nsfw", "belle-mère", "ronde", "plus-size", "chubby"],
+    "tags": [
+      "timide",
+      "belle-mère",
+      "rousse",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/chantal.jpg",
     "gallery": [
       "images/cast/chantal.jpg",
@@ -1562,7 +1944,15 @@ window.CAST = [
     "age": 37,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","gênée", "polonaise", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/lena_bm.jpg",
     "gallery": [
       "images/cast/lena_bm.jpg"
@@ -1591,7 +1981,14 @@ window.CAST = [
     "age": 44,
     "title": "Belle-mère",
     "tags": [
-      "flirt","charismatique", "sénégalaise", "nsfw", "belle-mère"],
+      "flirt",
+      "belle-mère",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/aisha_bm.jpg",
     "gallery": [
       "images/cast/aisha_bm.jpg",
@@ -1623,7 +2020,13 @@ window.CAST = [
     "age": 51,
     "title": "Belle-mère",
     "tags": [
-      "sensible","rigoureuse", "allemande", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/hannah.jpg",
     "gallery": [
       "images/cast/hannah.jpg",
@@ -1654,7 +2057,15 @@ window.CAST = [
     "age": 47,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","explosive", "mexicaine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/carmen.jpg",
     "gallery": [
       "images/cast/carmen.jpg"
@@ -1683,7 +2094,13 @@ window.CAST = [
     "age": 36,
     "title": "Belle-mère",
     "tags": [
-      "extravertie","ambiguë", "française", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/elise_bm.jpg",
     "gallery": [
       "images/cast/elise_bm.jpg",
@@ -1714,7 +2131,16 @@ window.CAST = [
     "age": 42,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","secrète", "marocaine", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/noura.jpg",
     "gallery": [
       "images/cast/noura.jpg"
@@ -1743,7 +2169,15 @@ window.CAST = [
     "age": 54,
     "title": "Belle-mère",
     "tags": [
-      "joueuse","cérébrale", "française", "nsfw", "belle-mère"],
+      "belle-mère",
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/beatrice.jpg",
     "gallery": [
       "images/cast/beatrice.jpg",
@@ -1775,7 +2209,14 @@ window.CAST = [
     "age": 48,
     "title": "Belle-mère",
     "tags": [
-      "directe","fashion", "italienne", "nsfw", "belle-mère"],
+      "directe",
+      "belle-mère",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/giulia.jpg",
     "gallery": [
       "images/cast/giulia.jpg",
@@ -1806,7 +2247,14 @@ window.CAST = [
     "age": 50,
     "title": "Belle-mère",
     "tags": [
-      "extravertie","solide", "polonaise", "nsfw", "belle-mère"],
+      "belle-mère",
+      "oni",
+      "blonde",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/marta.jpg",
     "gallery": [
       "images/cast/marta.jpg"
@@ -1835,7 +2283,14 @@ window.CAST = [
     "age": 24,
     "title": "Belle-sœur",
     "tags": [
-      "directe","complice", "française", "nsfw", "belle-sœur"],
+      "directe",
+      "belle-sœur",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/emma_bs.jpg",
     "gallery": [
       "images/cast/emma_bs.jpg",
@@ -1866,7 +2321,15 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","timide", "française", "nsfw", "belle-sœur"],
+      "timide",
+      "belle-sœur",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/lea_bs.jpg",
     "gallery": [
       "images/cast/lea_bs.jpg"
@@ -1895,7 +2358,15 @@ window.CAST = [
     "age": 27,
     "title": "Belle-sœur",
     "tags": [
-      "flirt","directe", "française", "nsfw", "belle-sœur"],
+      "directe",
+      "belle-sœur",
+      "oni",
+      "brune",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/chloe_bs.jpg",
     "gallery": [
       "images/cast/chloe_bs.jpg",
@@ -1926,7 +2397,13 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","rebelle", "maghrébine", "nsfw", "belle-sœur"],
+      "ange",
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sara.jpg",
     "gallery": [
       "images/cast/sara.jpg"
@@ -1955,7 +2432,15 @@ window.CAST = [
     "age": 25,
     "title": "Belle-sœur",
     "tags": [
-      "joueuse","chaleureuse", "italienne", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "jeu",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/julia_bs.jpg",
     "gallery": [
       "images/cast/julia_bs.jpg",
@@ -1986,7 +2471,14 @@ window.CAST = [
     "age": 21,
     "title": "Belle-sœur",
     "tags": [
-      "réservée","studieuse", "chinoise", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/maya_bs.jpg",
     "gallery": [
       "images/cast/maya_bs.jpg"
@@ -2015,7 +2507,13 @@ window.CAST = [
     "age": 23,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","party", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/ines_bs.jpg",
     "gallery": [
       "images/cast/ines_bs.jpg",
@@ -2046,7 +2544,14 @@ window.CAST = [
     "age": 26,
     "title": "Belle-sœur",
     "tags": [
-      "directe","fière", "ivoirienne", "nsfw", "belle-sœur"],
+      "directe",
+      "belle-sœur",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/aisha_bs.jpg",
     "gallery": [
       "images/cast/aisha_bs.jpg",
@@ -2078,7 +2583,14 @@ window.CAST = [
     "age": 28,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","maternelle", "espagnole", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/sofia_bs.jpg",
     "gallery": [
       "images/cast/sofia_bs.jpg"
@@ -2107,7 +2619,12 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","kawaii", "coréenne", "nsfw", "belle-sœur"],
+      "cheveux noirs",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "(Qu'il écoute un peu.)\n*elle croise les bras, encore énervée*\nIl a encore déconné. T'as deux minutes pour m'écouter sans prendre son parti ?",
@@ -2134,7 +2651,13 @@ window.CAST = [
     "age": 30,
     "title": "Belle-sœur",
     "tags": [
-      "chaleureuse","protectrice", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/camille_bs.jpg",
     "gallery": [
       "images/cast/camille_bs.jpg",
@@ -2165,7 +2688,14 @@ window.CAST = [
     "age": 24,
     "title": "Belle-sœur",
     "tags": [
-      "réservée","explosive", "brésilienne", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/bruna_bs.jpg",
     "gallery": [
       "images/cast/bruna_bs.jpg",
@@ -2196,7 +2726,12 @@ window.CAST = [
     "age": 25,
     "title": "Belle-sœur",
     "tags": [
-      "extravertie","froide", "suédoise", "nsfw", "belle-sœur"],
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle pose une main sur le mur pour s'équilibrer*\n(Ok, j'y vais.)\nEncore un verre ici ? Chez moi c'est loin.",
@@ -2223,7 +2758,14 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "timide","secrète", "tunisienne", "nsfw", "belle-sœur"],
+      "timide",
+      "belle-sœur",
+      "oni",
+      "cheveux noirs",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/rania_bs.jpg",
     "gallery": [
       "images/cast/rania_bs.jpg"
@@ -2252,7 +2794,14 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "sensible","insolente", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "ange",
+      "cheveux noirs",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/zoe_bs.jpg",
     "gallery": [
       "images/cast/zoe_bs.jpg"
@@ -2281,7 +2830,15 @@ window.CAST = [
     "age": 26,
     "title": "Belle-sœur",
     "tags": [
-      "directe","brillante", "indienne", "nsfw", "belle-sœur"],
+      "directe",
+      "belle-sœur",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/priya_bs.jpg",
     "gallery": [
       "images/cast/priya_bs.jpg"
@@ -2310,7 +2867,13 @@ window.CAST = [
     "age": 23,
     "title": "Belle-sœur",
     "tags": [
-      "directe","artiste", "portugaise", "nsfw", "belle-sœur"],
+      "directe",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/luna.jpg",
     "gallery": [
       "images/cast/luna.jpg"
@@ -2339,7 +2902,14 @@ window.CAST = [
     "age": 27,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","extravertie", "afro-américaine", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "oni",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle pose son sac, mâchoire serrée*\n(On va faire les choses proprement.)\nJ'ai encore tout entendu. Ton frère… enfin mon mari. Je pouvais pas rester là-bas — c'est Keisha.",
@@ -2366,7 +2936,13 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "chaleureuse","polie", "japonaise", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/hana_bs.jpg",
     "gallery": [
       "images/cast/hana_bs.jpg",
@@ -2397,7 +2973,14 @@ window.CAST = [
     "age": 25,
     "title": "Belle-sœur",
     "tags": [
-      "sensible","sportive", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "oni",
+      "blonde",
+      "athlétique",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/marine_bs.jpg",
     "gallery": [
       "images/cast/marine_bs.jpg"
@@ -2426,7 +3009,14 @@ window.CAST = [
     "age": 24,
     "title": "Belle-sœur",
     "tags": [
-      "flirt","mannequin", "russe", "nsfw", "belle-sœur"],
+      "flirt",
+      "belle-sœur",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/daria_bs.jpg",
     "gallery": [
       "images/cast/daria_bs.jpg",
@@ -2457,7 +3047,13 @@ window.CAST = [
     "age": 29,
     "title": "Belle-sœur",
     "tags": [
-      "dominante","fatigue", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "brune",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/elise_bs.jpg",
     "gallery": [
       "images/cast/elise_bs.jpg",
@@ -2488,7 +3084,12 @@ window.CAST = [
     "age": 21,
     "title": "Belle-sœur",
     "tags": [
-      "extravertie","curieuse", "indienne", "nsfw", "belle-sœur"],
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "(Bon. Allez.)\n*elle croise les bras, encore énervée*\nIl a encore déconné. T'as deux minutes pour m'écouter sans prendre son parti ?",
@@ -2515,7 +3116,13 @@ window.CAST = [
     "age": 27,
     "title": "Belle-sœur",
     "tags": [
-      "timide","snob", "anglaise", "nsfw", "belle-sœur"],
+      "timide",
+      "blonde",
+      "ronde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/victoria.jpg",
     "gallery": [
       "images/cast/victoria.jpg",
@@ -2545,7 +3152,14 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "provocante","miroir", "française", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "fée",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/lina_bs.jpg",
     "gallery": [
       "images/cast/lina_bs.jpg"
@@ -2574,7 +3188,14 @@ window.CAST = [
     "age": 25,
     "title": "Belle-sœur",
     "tags": [
-      "extravertie","solide", "sénégalaise", "nsfw", "belle-sœur"],
+      "belle-sœur",
+      "ange",
+      "oni",
+      "brune",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/fatou_bs.jpg",
     "gallery": [
       "images/cast/fatou_bs.jpg",
@@ -2604,7 +3225,12 @@ window.CAST = [
     "age": 26,
     "title": "Belle-sœur",
     "tags": [
-      "chaleureuse","calme", "néerlandaise", "nsfw", "belle-sœur"],
+      "oni",
+      "blonde",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle pose une main sur le mur pour s'équilibrer*\n(Je ne veux déranger personne.)\nJe suis un peu pompette. T'as de l'eau ?",
@@ -2631,7 +3257,15 @@ window.CAST = [
     "age": 22,
     "title": "Belle-sœur",
     "tags": [
-      "timide","voisine", "française", "nsfw", "belle-sœur"],
+      "timide",
+      "belle-sœur",
+      "voisine",
+      "oni",
+      "brune",
+      "bonnet H",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/noemie_bs.jpg",
     "gallery": [
       "images/cast/noemie_bs.jpg"
@@ -2660,7 +3294,15 @@ window.CAST = [
     "age": 23,
     "title": "Belle-sœur",
     "tags": [
-      "directe","androgyne", "russe", "nsfw", "belle-sœur"],
+      "directe",
+      "belle-sœur",
+      "ange",
+      "brune",
+      "ronde",
+      "bonnet D",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "",
     "gallery": [],
     "greeting": "*une ombre d'ailes se dessine un instant derrière elle*\n(Je sais ce que je fais ici.)\nUn ange sur ton seuil. Tu as une prière, ou un verre d'eau ? S'il te plaît.",
@@ -2686,7 +3328,15 @@ window.CAST = [
     "name": "Amélie Rousseau",
     "age": 28,
     "title": "Belle-sœur",
-    "tags": ["extravertie", "ronde", "française", "nsfw", "belle-sœur", "chubby", "plus-size"],
+    "tags": [
+      "belle-sœur",
+      "oni",
+      "rousse",
+      "ronde",
+      "bonnet E",
+      "gros seins",
+      "nsfw"
+    ],
     "cover": "images/cast/amelie_bs.jpg",
     "gallery": [
       "images/cast/amelie_bs.jpg",
