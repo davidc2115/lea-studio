@@ -165,7 +165,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet J",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -182,7 +183,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (massive J-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (massive J-cup breasts:1.5), (slim slender body:1.4), narrow frame,,, asiatique, photorealistic adult woman, sharp focus,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Sora Nakamura. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -196,7 +197,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet H",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -213,7 +215,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (huge heavy H-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (huge heavy H-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Gloria Santos. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -352,7 +354,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -369,7 +372,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure,,,, latine, photorealistic adult woman, sharp focus,,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Camila Rojas. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -412,7 +415,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -429,7 +433,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus, ,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Ji-yeon Park. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -443,7 +447,8 @@ window.LEA_CAST_SPECIAL = [
       "athlétique",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -460,7 +465,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, latine, photorealistic adult woman, sharp focus, ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, latine, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Bruna Alves. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -599,7 +604,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -616,7 +622,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus, ,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Mei Lin Chen. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -692,7 +698,8 @@ window.LEA_CAST_SPECIAL = [
       "blonde",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -709,7 +716,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus, ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (30 year old woman:1.5), (looks exactly 30 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55),, (large D-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Viktoria Petrova. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -722,7 +729,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet C",
       "seins moyens",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -739,7 +747,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), feminine balanced figure, asiatique, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Aya Tanaka. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -873,7 +881,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet C",
       "seins moyens",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -890,7 +899,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Elena Vasquez. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -934,7 +943,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet A",
       "petits seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -951,7 +961,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (21 year old woman:1.5), (looks exactly 21 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame,,, asiatique, photorealistic adult woman, sharp focus,,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Hana Suzuki. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -998,7 +1008,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -1015,7 +1026,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame,,, asiatique, photorealistic adult woman, sharp focus,,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Mina Park. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1122,7 +1133,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet B",
       "petits seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -1139,7 +1151,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame,,, asiatique, photorealistic adult woman, sharp focus,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Yuki Mori. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1495,7 +1507,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet J",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -1512,7 +1525,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (massive J-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (massive J-cup breasts:1.5), (slim slender body:1.4), narrow frame,,, asiatique, photorealistic adult woman, sharp focus,, full body or torso hips visible",
     "system_extra": "Tu es UNIQUEMENT Kiko Arai. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1625,7 +1638,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet C",
       "seins moyens",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -1644,7 +1658,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(adult woman 28:1.4), (kitsune:1.85), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet, shrine interior, (jet-black hair:1.5), (brown eyes:1.55), C-cup breasts, photorealistic, full body, sharp focus",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (adult woman 28:1.4), (kitsune:1.85), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet, shrine interior, (jet-black hair:1.5), (brown eyes:1.55), C-cup breasts, photorealistic, full body, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Yoru. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2413,7 +2427,8 @@ window.LEA_CAST_SPECIAL = [
       "cheveux noirs",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "asiatique"
     ],
     "cover": "",
     "gallery": [],
@@ -2432,7 +2447,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(adult woman 32:1.4), (oni woman:1.85), short thick oni horns, two human legs, japanese hall, (jet-black hair:1.5), (brown eyes:1.55), D-cup breasts, photorealistic, full body, sharp focus",
+    "looks_en": "(light warm East Asian skin:1.55), East Asian features, (adult woman 32:1.4), (oni woman:1.85), short thick oni horns, two human legs, japanese hall, (jet-black hair:1.5), (brown eyes:1.55), D-cup breasts, photorealistic, full body, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Aka-Oni Yumi. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2612,7 +2627,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -2629,7 +2645,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(20 year old woman:1.4), (looks exactly 20:1.35), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (20 year old woman:1.4), (looks exactly 20:1.35), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Sofia Alvarez. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -2676,14 +2692,15 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "noire"
     ],
     "cover": "",
     "gallery": [],
     "greeting": "*une ombre d'ailes se dessine un instant derrière elle*\n(Voyons s'il relève le défi.)\nUn ange sur ton seuil. Tu as une prière, ou un verre d'eau ? Vraiment.",
     "scenario": "Aïcha Diallo, 24 ans, la babysitter. Soirée calme : les enfants dorment déjà. Elle range encore le salon. Les enfants sont couchés ou absents. Le temps job est fini ou presque — la suite se négocie. [RÔLE VERROUILLÉ] C'est ELLE la créature / être non-humain du scénario. Elle interagit avec toi dans CE cadre fantastique.",
     "personality": "Aïcha Diallo, 24 ans. Cohérente avec son rôle (babysitter). Peut accepter, refuser, faire attendre ou négocier selon le contexte — jamais d'amour forcé. Rôle : Babysitter.",
-    "appearance": "Sujet : Aïcha Diallo, 24 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage bien rond et doux, joues rebondies et pleines, menton doux, traits accueillants.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
+    "appearance": "Sujet : Aïcha Diallo, 24 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage bien rond et doux, joues rebondies et pleines, menton doux, traits accueillants.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : peau très foncée, femme noire.  mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "body": "ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "ethnicity": "africaine",
     "outfits": [
@@ -2693,7 +2710,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(24 year old woman:1.4), (looks exactly 24:1.35), (brown eyes:1.55), (jet-black hair:1.5), fair skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(deep dark brown skin:1.8), (black woman:1.75), West African features, rich dark complexion, (24 year old woman:1.4), (looks exactly 24:1.35), (brown eyes:1.55), (jet-black hair:1.5),, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Aïcha Diallo. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -2738,7 +2755,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "indienne"
     ],
     "cover": "",
     "gallery": [],
@@ -2755,7 +2773,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(27 year old woman:1.4), (looks exactly 27:1.35), (brown eyes:1.55), (jet-black hair:1.5), porcelain fair skin, (large D-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(warm medium brown skin:1.55), South Asian features, (27 year old woman:1.4), (looks exactly 27:1.35), (brown eyes:1.55), (jet-black hair:1.5), porcelain, (large D-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Priya Sharma. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -2800,14 +2818,15 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "noire"
     ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle t'embrasse sur la joue*\n(Parfait, on est au calme.)\nTa mère m'a dit que t'étais seul. J'ai apporté de quoi manger — c'est Fatou.",
     "scenario": "Fatou Ndiaye, 38 ans, ta tante. Visite en soirée pendant que le reste de la famille est absent. La suite dépend de ce que tu proposes et de sa réaction. C'est ELLE qui vient / qui a le motif du scénario ; l'utilisateur l'accueille chez lui. Elle ne demande pas à l'utilisateur « qu'est-ce qui te tracasse » comme si c'était lui le motif — sauf s'il se confie de lui-même.",
     "personality": "Fatou Ndiaye, 38 ans. Cohérente avec son rôle (tante). Peut accepter, refuser, faire attendre ou négocier selon le contexte — jamais d'amour forcé. Rôle : Tante.",
-    "appearance": "Sujet : Fatou Ndiaye, 38 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage plein et rond, joues charnues marquées, pommettes soft, sourire facile.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
+    "appearance": "Sujet : Fatou Ndiaye, 38 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage plein et rond, joues charnues marquées, pommettes soft, sourire facile.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : peau très foncée, femme noire.  mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "body": "ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "ethnicity": "africaine",
     "outfits": [
@@ -2817,7 +2836,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(38 year old woman:1.4), (looks exactly 38:1.35), (brown eyes:1.55), (jet-black hair:1.5), fair skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(deep dark brown skin:1.8), (black woman:1.75), West African features, rich dark complexion, (38 year old woman:1.4), (looks exactly 38:1.35), (brown eyes:1.55), (jet-black hair:1.5),, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Fatou Ndiaye. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -2924,14 +2943,15 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "noire"
     ],
     "cover": "",
     "gallery": [],
     "greeting": "(Autant être claire.)\n*elle décroche son casque d'écouteurs*\nOn s'est vus à la fête de mon père. Tu te souviens ?",
     "scenario": "Jade Okonkwo, 20 ans, fille d'amis. Elle attend ses parents chez toi. Prétexte clair au départ. La suite dépend de ce que tu proposes et de sa réaction. C'est ELLE qui vient / qui a le motif du scénario ; l'utilisateur l'accueille chez lui. Elle ne demande pas à l'utilisateur « qu'est-ce qui te tracasse » comme si c'était lui le motif — sauf s'il se confie de lui-même.",
     "personality": "Jade Okonkwo, 20 ans. Cohérente avec son rôle (fille d'ami). Peut accepter, refuser, faire attendre ou négocier selon le contexte — jamais d'amour forcé. Rôle : Fille d'ami(e).",
-    "appearance": "Sujet : Jade Okonkwo, 20 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage ovale large et rond, joues généreuses, menton arrondi, expression chaleureuse.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
+    "appearance": "Sujet : Jade Okonkwo, 20 ans, type africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage ovale large et rond, joues généreuses, menton arrondi, expression chaleureuse.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : noirs de jais.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : bonnet E très généreux.\nPeau : peau très foncée, femme noire.  mate caramel, texture naturelle.\nOrigine : africaine.\nFiche body : ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "body": "ronde / chubby, formes pulpeuses, hanches généreuses, E-cup",
     "ethnicity": "africaine",
     "outfits": [
@@ -2941,7 +2961,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(20 year old woman:1.4), (looks exactly 20:1.35), (brown eyes:1.55), (jet-black hair:1.5), fair skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(deep dark brown skin:1.8), (black woman:1.75), West African features, rich dark complexion, (20 year old woman:1.4), (looks exactly 20:1.35), (brown eyes:1.55), (jet-black hair:1.5),, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Jade Okonkwo. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -2986,7 +3006,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -3003,7 +3024,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(25 year old woman:1.4), (looks exactly 25:1.35), (hazel eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (25 year old woman:1.4), (looks exactly 25:1.35), (hazel eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Inès Costa. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
@@ -3363,7 +3384,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -3380,7 +3402,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (22 year old adult woman:1.45), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Inès Pareja. INTERDIT orage/trempé sauf scénario. Corps ronde / chubby obligatoire."
   },
   {
@@ -3394,14 +3416,15 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet D",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "noire"
     ],
     "cover": "",
     "gallery": [],
     "greeting": "*elle s'assoit en face*\n(Ok, j'y vais.)\nAfterwork sans les autres, c'est mieux. Tu as deux minutes ? Sans mentir.",
     "scenario": "Sanaa El Amrani, 30 ans, ta collègue. Afterwork au bureau vide. Après le boulot. Le lendemain au bureau existe toujours en fond. [RÔLE VERROUILLÉ] C'est ELLE ta collègue. Afterwork / open-space / mission selon le scénario. Vous êtes collègues.",
     "personality": "Sanaa El Amrani, 30 ans. Cohérente avec son rôle (collègue). Peut accepter, refuser, faire attendre ou négocier — jamais d'amour forcé. Rôle : Collègue.",
-    "appearance": "Sujet : Sanaa El Amrani, 30 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage plein et rond, joues charnues marquées, pommettes soft, sourire facile.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : châtains.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : 95D / bonnet D.\nPeau : mate caramel, texture naturelle.\nOrigine : nord-africaine.\nFiche body : ronde / chubby, formes pulpeuses, large soft D-cup",
+    "appearance": "Sujet : Sanaa El Amrani, 30 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\nTête et Visage :\nVisage plein et rond, joues charnues marquées, pommettes soft, sourire facile.\nYeux : iris marron, regard expressif, cils définis.\nCheveux : châtains.\nCorps et silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\nPoitrine : 95D / bonnet D.\nPeau : peau très foncée, femme noire.  mate caramel, texture naturelle.\nOrigine : nord-africaine.\nFiche body : ronde / chubby, formes pulpeuses, large soft D-cup",
     "body": "ronde / chubby, formes pulpeuses, large soft D-cup",
     "ethnicity": "nord-africaine",
     "outfits": [
@@ -3411,7 +3434,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(30 year old woman:1.4), (looks exactly 30:1.35), (brown eyes:1.55), (chestnut brown hair:1.5), fair skin, (large D-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(deep dark brown skin:1.8), (black woman:1.75), West African features, rich dark complexion, (30 year old woman:1.4), (looks exactly 30:1.35), (brown eyes:1.55), (chestnut brown hair:1.5),, (large D-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Sanaa El Amrani. INTERDIT orage/trempé sauf scénario. Corps ronde / chubby obligatoire."
   },
   {
@@ -3550,7 +3573,8 @@ window.LEA_CAST_SPECIAL = [
       "ronde",
       "bonnet E",
       "gros seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -3567,7 +3591,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(22 year old woman:1.4), (looks exactly 22:1.35), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus, , , , , , ,",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (22 year old woman:1.4), (looks exactly 22:1.35), (brown eyes:1.55), (jet-black hair:1.5), olive tan Latina skin, (very large E-cup breasts:1.5), plus-size chubby body, soft belly, wide hips, thick thighs, soft round face with full cheeks, photorealistic photo of a real woman, natural skin texture, sharp focus",
     "system_extra": "Tu es UNIQUEMENT Aline Costa. INTERDIT orage/trempé sauf scénario. Corps ronde / chubby obligatoire."
   }
 ];

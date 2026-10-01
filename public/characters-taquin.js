@@ -2652,7 +2652,8 @@ window.LEA_CAST_TAQUIN = [
       "mince",
       "bonnet B",
       "petits seins",
-      "nsfw"
+      "nsfw",
+      "latina"
     ],
     "cover": "",
     "gallery": [],
@@ -2661,7 +2662,7 @@ window.LEA_CAST_TAQUIN = [
     "personality": "Taquine : allusions, second degré, peut refuser si on force.",
     "appearance": "Sujet : Chloé Dubois, 29 ans.\\nCheveux : blonde.\\nYeux : blue eyes.\\nMorphologie : small B-cup breasts, slim slender\nPoitrine : bonnet B.\nTraits : Peau gélatineuse translucide vert-rose, corps humanoïde (jambes et pieds humains), visage humain net. , \nTraits non-humains : corps de gelée translucide, sans cornes, jambes humaines, salle de bain.",
     "body": "small B-cup breasts, slim slender",
-    "looks_en": "(adult woman 29:1.4), (slime girl:1.95), (translucent see-through jelly body:1.85), glossy gelatinous skin, clear human face,, two human legs, human feet, standing in a bathtub, indoor bathroom tiles, photorealistic, full body",
+    "looks_en": "(warm golden-tan skin:1.55), Latina features, (adult woman 29:1.4), (slime girl:1.95), (translucent see-through jelly body:1.85), glossy gelatinous skin, clear human face,, two human legs, human feet, standing in a bathtub, indoor bathroom tiles, photorealistic, full body",
     "system_extra": "Tempérament taquin. Reste dans le rôle. Pas d'inversion."
   },
   {

@@ -222,10 +222,26 @@ function physicalLocksFromText(c) {
     }
   }
 
-  // Peau
-  if (/peau\s*claire|fair\s*skin|pale\s*skin|peau\s*p[aâ]le/i.test(blob)) out.positive.push("fair pale skin");
-  if (/peau\s*mate|tan\s*skin|olive\s*skin|golden\s*tan/i.test(blob)) out.positive.push("tan olive skin");
-  if (/peau\s*fonc[ée]e|dark\s*skin|brown\s*skin/i.test(blob)) out.positive.push("dark brown skin");
+  // Peau — ethnie prioritaire
+  const ethField = String((c && c.ethnicity) || "").toLowerCase();
+  if (/africain|noire|black/.test(ethField)) {
+    out.positive.unshift("(deep dark brown skin:1.8)", "(black woman:1.75)", "West African features");
+    out.negative.push("fair skin, pale skin, white woman, european woman, blonde caucasian, light skin");
+  } else if (/m[eé]tisse|mixed/.test(ethField)) {
+    out.positive.unshift("(warm medium brown skin:1.7)", "(mixed-race woman:1.65)");
+    out.negative.push("pale porcelain skin, white woman only");
+  } else if (/asiat/.test(ethField)) {
+    out.positive.unshift("(East Asian features:1.6)", "light warm East Asian skin");
+    out.negative.push("european face only, caucasian only");
+  } else if (/maghr|arabe/.test(ethField)) {
+    out.positive.unshift("(olive tan skin:1.55)", "North African features");
+  } else if (/latin|br[eé]sil/.test(ethField)) {
+    out.positive.unshift("(warm golden-tan skin:1.55)", "Latina features");
+  } else if (/indien|south asian/.test(ethField)) {
+    out.positive.unshift("(warm medium brown skin:1.55)", "South Asian features");
+  } else if (/peau\s*claire|fair\s*skin|pale\s*skin|peau\s*p[aâ]le/i.test(blob)) out.positive.push("fair pale skin");
+  if (/peau\s*mate|tan\s*skin|olive\s*skin|golden\s*tan/i.test(blob) && !/africain|noire/.test(ethField)) out.positive.push("tan olive skin");
+  if (/peau\s*fonc/i.test(blob)) out.positive.push("dark brown skin");
 
   // —— Non-humain : traits EXCLUSIFS par type (sirène ≠ cornes de démon) ——
   const idTitle = [c && c.id, c && c.title, c && Array.isArray(c.tags) ? c.tags.join(" ") : ""].filter(Boolean).join(" ").toLowerCase();
@@ -2876,6 +2892,12 @@ function tagDisplay(t) {
     "directe": { e: "💬", c: "tag-orange" },
     "tactile": { e: "✋", c: "tag-orange" },
     "blonde": { e: "👱‍♀️", c: "tag-gold" },
+    "noire": { e: "🌍", c: "tag-brown" },
+    "metisse": { e: "🤎", c: "tag-brown" },
+    "asiatique": { e: "🌸", c: "tag-pink" },
+    "maghrebine": { e: "🌙", c: "tag-gold" },
+    "latina": { e: "💃", c: "tag-orange" },
+    "indienne": { e: "🪷", c: "tag-orange" },
     "brune": { e: "👩", c: "tag-brown" },
     "rousse": { e: "👩‍🦰", c: "tag-orange" },
     "gros seins": { e: "🍒", c: "tag-pink" },
@@ -4032,6 +4054,12 @@ function filterDiscoverList(q) {
       "veuve": (c) => hasTag(c, "veuve"),
       "divorcee": (c) => hasTag(c, "divorcee", "divorcée"),
       "blonde": (c) => /blond|platinum|cendr/.test(blobOf(c)),
+      "noire": (c) => hasTag(c, "noire") || /africain|black woman|peau tr[eè]s fonc/.test(blobOf(c)),
+      "metisse": (c) => hasTag(c, "metisse", "métisse") || /m[eé]tisse|mixed-race/.test(blobOf(c)),
+      "asiatique": (c) => hasTag(c, "asiatique") || /asiatique|east asian|japonais|cor[eé]en/.test(blobOf(c)),
+      "maghrebine": (c) => hasTag(c, "maghrebine", "maghrébine") || /maghr[eé]b|arabe/.test(blobOf(c)),
+      "latina": (c) => hasTag(c, "latina") || /latina|latine|br[eé]sil/.test(blobOf(c)),
+      "indienne": (c) => hasTag(c, "indienne") || /indienne|south asian/.test(blobOf(c)),
       "brune": (c) => /brun|chatain|brown hair|chestnut/.test(blobOf(c)),
       "rousse": (c) => /roux|rousse|red hair|ginger|auburn/.test(blobOf(c)),
       "cheveux noirs": (c) => /cheveux noirs|black hair/.test(blobOf(c)),
@@ -4067,6 +4095,8 @@ function filterDiscoverList(q) {
     exactMatchers["fée"] = exactMatchers["fee"];
     exactMatchers["athlétique"] = exactMatchers["athletique"];
     exactMatchers["bonnet A"] = exactMatchers["bonnet a"];
+    exactMatchers["métisse"] = exactMatchers["metisse"];
+    exactMatchers["maghrébine"] = exactMatchers["maghrebine"];
     exactMatchers["bonnet B"] = exactMatchers["bonnet b"];
     exactMatchers["bonnet C"] = exactMatchers["bonnet c"];
     exactMatchers["bonnet D"] = exactMatchers["bonnet d"];
@@ -5451,12 +5481,19 @@ function enrichLooksDetail(c) {
   else if (/plus-size|ronde|chubby|pulpeuse|bbw|soft belly/.test(blob)) morph = "plus-size chubby plump figure, soft belly";
   else if (/curvy|voluptuous/.test(blob)) morph = "voluptuous curvy figure";
   else if (/petite/.test(blob)) morph = "petite short stature";
-  // Peau
+  // Peau — ethnie d'abord (sinon tout le monde sort européenne)
   let skin = "fair skin";
-  if (/porcelain|porcelaine/.test(blob)) skin = "porcelain fair clear skin";
+  const ethLow = String(eth || "").toLowerCase();
+  if (/africain|noire|black/.test(ethLow)) skin = "deep dark brown skin, black woman, West African features";
+  else if (/m[eé]tisse|mixed/.test(ethLow)) skin = "warm medium brown skin, mixed-race woman";
+  else if (/asiat/.test(ethLow)) skin = "light warm East Asian skin, East Asian features";
+  else if (/maghr|arabe|maroc|alg[eé]r|tunis/.test(ethLow)) skin = "olive tan skin, North African features";
+  else if (/latin|br[eé]sil|hispan/.test(ethLow)) skin = "warm golden-tan skin, Latina features";
+  else if (/indien|south asian/.test(ethLow)) skin = "warm medium brown skin, South Asian features";
+  else if (/porcelain|porcelaine/.test(blob)) skin = "porcelain fair clear skin";
   else if (/olive/.test(blob)) skin = "olive mediterranean skin";
   else if (/caramel|tan|dorée|mate/.test(blob)) skin = "golden caramel tan skin";
-  else if (/dark skin|ebony|black skin/.test(blob)) skin = "dark smooth skin";
+  else if (/dark skin|ebony|black skin/.test(blob)) skin = "deep dark brown skin";
   else if (/pale|pâle/.test(blob)) skin = "pale fair skin";
   const freckles = /freckle|rousseur/.test(blob) ? "visible freckles on face," : "";
   const glasses = /glasses|lunettes/.test(blob) ? "wearing glasses," : "";
