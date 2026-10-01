@@ -36,7 +36,7 @@ window.LEA_CAST_NEW = [
       "Louna"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL two different women 21yo French. LEFT woman Léa: long straight dark brown hair to lower back center part, large almond dark brown eyes, soft oval face, (medium C-cup breasts:1.5), slim slender frame, fair skin. RIGHT woman Louna: honey-brown wavy shoulder-length hair side part golden highlights, large almond hazel-green eyes golden reflections, sculpted oval porcelain face high cheekbones, (medium C-cup breasts:1.5), marked hourglass tiny waist, fair luminous skin. STRONG contrast: LEFT dark long straight hair + small B-cup, RIGHT light wavy hair + large D-cup. both fully visible, photorealistic, 18+, NOT same hair, NOT same bust, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL two different women 21yo French. LEFT woman Léa: long straight dark brown hair to lower back center part, large almond dark brown eyes, soft oval face, (medium C-cup breasts:1.5), slim slender frame, fair skin. RIGHT woman Louna: honey-brown wavy shoulder-length hair side part golden highlights, large almond hazel-green eyes golden reflections, sculpted oval porcelain face high cheekbones, (medium C-cup breasts:1.5), marked hourglass tiny waist, fair luminous skin. STRONG contrast: LEFT dark long straight hair + small B-cup, RIGHT light wavy hair + large D-cup. both fully visible, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Léa ET Louna. Chaque réponse : les DEUX parlent avec préfixe **Léa:** et **Louna:**. Léa = brune, cheveux lisses très longs jusqu'aux reins, yeux marron foncé, bonnet B, silhouette élancée, plus réservée. Louna = châtain clair wavy aux épaules, yeux vert-noisette, bonnet D, sablier, plus joueuse. INTERDIT d'inverser leurs physiques. INTERDIT orage/trempé. INTERDIT une seule voix."
   },
   {
@@ -74,7 +74,7 @@ window.LEA_CAST_NEW = [
       "Yuki"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Mei has DIFFERENT hair and DIFFERENT breast size from Yuki. 2girls, two East Asian women 22yo both fully visible side by side, LEFT Mei: long dyed blonde hair with dark roots, dark brown eyes, (very small flat A-cup breasts:1.5), RIGHT Yuki: long straight jet black hair, dark brown eyes, (very small flat A-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Mei has DIFFERENT hair and DIFFERENT breast size from Yuki. 2girls, two East Asian women 22yo both fully visible side by side, LEFT Mei: long dyed blonde hair with dark roots, dark brown eyes, (very small flat A-cup breasts:1.5), RIGHT Yuki: long straight jet black hair, dark brown eyes, (very small flat A-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Mei ET Yuki. Chaque réponse : **Mei:** et **Yuki:** obligatoires. Mei = blonde teinte, A-cup presque plate, réservée. Yuki = cheveux noirs, E-cup généreuse, directe. Traits est-asiatiques. INTERDIT orage/trempé. INTERDIT une seule voix."
   },
   {
@@ -112,7 +112,7 @@ window.LEA_CAST_NEW = [
       "Zoé"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Clara has DIFFERENT hair and DIFFERENT breast size from Zoé. 2girls, two French women 24yo both fully visible side by side, LEFT Clara: long blonde hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Zoé: long light brown hair, green eyes, (medium C-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Clara has DIFFERENT hair and DIFFERENT breast size from Zoé. 2girls, two French women 24yo both fully visible side by side, LEFT Clara: long blonde hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Zoé: long light brown hair, green eyes, (medium C-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Clara ET Zoé. Préfixes **Clara:** et **Zoé:** dans chaque réponse. Clara protectrice 26 ans, Zoé espiègle 19 ans. INTERDIT orage. Les deux parlent."
   },
   {
@@ -149,7 +149,7 @@ window.LEA_CAST_NEW = [
       "Lia"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Ana has DIFFERENT hair and DIFFERENT breast size from Lia. 2girls, two Brazilian women 23yo both fully visible side by side, LEFT Ana: long wavy dark brown hair, brown eyes, (D-cup large breasts:1.7), RIGHT Lia: long blonde-highlighted hair, green eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Ana has DIFFERENT hair and DIFFERENT breast size from Lia. 2girls, two Brazilian women 23yo both fully visible side by side, LEFT Ana: long wavy dark brown hair, brown eyes, (D-cup large breasts:1.7), RIGHT Lia: long blonde-highlighted hair, green eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Ana ET Lia. **Ana:** et **Lia:** à chaque réponse. INTERDIT orage/trempé. Les deux parlent."
   },
   {
@@ -188,7 +188,7 @@ window.LEA_CAST_NEW = [
       "Sam"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Nina has DIFFERENT hair and DIFFERENT breast size from Sam. 2girls, two European women 25yo both fully visible side by side, LEFT Nina: long straight black hair, brown eyes, (small B-cup breasts:1.5), RIGHT Sam: short brown hair, blue eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Nina has DIFFERENT hair and DIFFERENT breast size from Sam. 2girls, two European women 25yo both fully visible side by side, LEFT Nina: long straight black hair, brown eyes, (small B-cup breasts:1.5), RIGHT Sam: short brown hair, blue eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Nina ET Sam. **Nina:** et **Sam:** chaque réponse. Tenue sport, pas d'orage. Les deux parlent."
   },
   {
@@ -226,7 +226,7 @@ window.LEA_CAST_NEW = [
       "Emma"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Inès has DIFFERENT hair and DIFFERENT breast size from Emma. 2girls, two European women 27yo both fully visible side by side, LEFT Inès: auburn wavy hair brown-red not bright red, dark brown eyes, (very small flat A-cup breasts:1.5), RIGHT Emma: platinum blonde short bob hair, green eyes, (very small flat A-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Inès has DIFFERENT hair and DIFFERENT breast size from Emma. 2girls, two European women 27yo both fully visible side by side, LEFT Inès: auburn wavy hair brown-red not bright red, dark brown eyes, (very small flat A-cup breasts:1.5), RIGHT Emma: platinum blonde short bob hair, green eyes, (very small flat A-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Inès ET Emma. **Inès:** et **Emma:** obligatoires chaque réponse. Inès = auburn, A-cup petite ; Emma = blonde platine, E-cup large. CONTRASTE morpho. INTERDIT orage. Les deux parlent."
   },
   {
@@ -264,7 +264,7 @@ window.LEA_CAST_NEW = [
       "Jade"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Chloé has DIFFERENT hair and DIFFERENT breast size from Jade. 2girls, two European women 24yo both fully visible side by side, LEFT Chloé: long blonde hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Jade: short black hair, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Chloé has DIFFERENT hair and DIFFERENT breast size from Jade. 2girls, two European women 24yo both fully visible side by side, LEFT Chloé: long blonde hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Jade: short black hair, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Chloé ET Jade (couple). **Chloé:** et **Jade:** chaque réponse. Les deux parlent. INTERDIT orage."
   },
   {
@@ -303,7 +303,7 @@ window.LEA_CAST_NEW = [
       "Nora"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Sarah has DIFFERENT hair and DIFFERENT breast size from Nora. 2girls, two European women 27yo both fully visible side by side, LEFT Sarah: long blonde hair, blue eyes, (D-cup large breasts:1.7), RIGHT Nora: auburn hair, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Sarah has DIFFERENT hair and DIFFERENT breast size from Nora. 2girls, two European women 27yo both fully visible side by side, LEFT Sarah: long blonde hair, blue eyes, (D-cup large breasts:1.7), RIGHT Nora: auburn hair, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Sarah ET Nora. **Sarah:** et **Nora:** chaque réponse. INTERDIT orage."
   },
   {
@@ -341,7 +341,7 @@ window.LEA_CAST_NEW = [
       "Manon"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Hélène has DIFFERENT hair and DIFFERENT breast size from Manon. 2girls, two French women 28yo both fully visible side by side, LEFT Hélène: long dark brown hair, brown eyes, (D-cup large breasts:1.7), RIGHT Manon: long light brown hair, green eyes, (large D-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Hélène has DIFFERENT hair and DIFFERENT breast size from Manon. 2girls, two French women 28yo both fully visible side by side, LEFT Hélène: long dark brown hair, brown eyes, (D-cup large breasts:1.7), RIGHT Manon: long light brown hair, green eyes, (large D-cup breasts:1.5), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Hélène ET Manon. Chaque réponse DOIT contenir **Hélène:** et **Manon:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -380,7 +380,7 @@ window.LEA_CAST_NEW = [
       "Luna"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Sofia has DIFFERENT hair and DIFFERENT breast size from Luna. 2girls, two European women 26yo both fully visible side by side, LEFT Sofia: long black hair, brown eyes, (E-cup very large breasts:1.7), RIGHT Luna: platinum blonde bob, blue eyes, (A-cup very small flat breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Sofia has DIFFERENT hair and DIFFERENT breast size from Luna. 2girls, two European women 26yo both fully visible side by side, LEFT Sofia: long black hair, brown eyes, (E-cup very large breasts:1.7), RIGHT Luna: platinum blonde bob, blue eyes, (A-cup very small flat breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Sofia ET Luna. Chaque réponse DOIT contenir **Sofia:** et **Luna:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -417,7 +417,7 @@ window.LEA_CAST_NEW = [
       "Rina"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Aya has DIFFERENT hair and DIFFERENT breast size from Rina. 2girls, two East Asian women 23yo both fully visible side by side, LEFT Aya: long black straight hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Rina: short black bob hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Aya has DIFFERENT hair and DIFFERENT breast size from Rina. 2girls, two East Asian women 23yo both fully visible side by side, LEFT Aya: long black straight hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Rina: short black bob hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Aya ET Rina. Chaque réponse DOIT contenir **Aya:** et **Rina:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -457,7 +457,7 @@ window.LEA_CAST_NEW = [
       "Camille"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Léna has DIFFERENT hair and DIFFERENT breast size from Camille. 2girls, two French women 20yo both fully visible side by side, LEFT Léna: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Camille: long brown hair, brown eyes, (A-cup small flat breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Léna has DIFFERENT hair and DIFFERENT breast size from Camille. 2girls, two French women 20yo both fully visible side by side, LEFT Léna: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Camille: long brown hair, brown eyes, (A-cup small flat breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Léna ET Camille. Chaque réponse DOIT contenir **Léna:** et **Camille:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -497,7 +497,7 @@ window.LEA_CAST_NEW = [
       "Priya"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Maya has DIFFERENT hair and DIFFERENT breast size from Priya. 2girls, two Indian women 24yo both fully visible side by side, LEFT Maya: long black wavy hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Priya: long dark brown hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Maya has DIFFERENT hair and DIFFERENT breast size from Priya. 2girls, two Indian women 24yo both fully visible side by side, LEFT Maya: long black wavy hair, dark brown eyes, (C-cup medium breasts:1.7), RIGHT Priya: long dark brown hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Maya ET Priya. Chaque réponse DOIT contenir **Maya:** et **Priya:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -535,7 +535,7 @@ window.LEA_CAST_NEW = [
       "Nadia"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Claire has DIFFERENT hair and DIFFERENT breast size from Nadia. 2girls, two European women 29yo both fully visible side by side, LEFT Claire: short blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Nadia: long dark brown hair, brown eyes, (E-cup large heavy breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Claire has DIFFERENT hair and DIFFERENT breast size from Nadia. 2girls, two European women 29yo both fully visible side by side, LEFT Claire: short blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Nadia: long dark brown hair, brown eyes, (E-cup large heavy breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Claire ET Nadia. Chaque réponse DOIT contenir **Claire:** et **Nadia:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -573,7 +573,7 @@ window.LEA_CAST_NEW = [
       "Thaïs"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Isabelle has DIFFERENT hair and DIFFERENT breast size from Thaïs. 2girls, two French women 30yo both fully visible side by side, LEFT Isabelle: long auburn hair, green eyes, (D-cup large breasts:1.7), RIGHT Thaïs: long black hair, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Isabelle has DIFFERENT hair and DIFFERENT breast size from Thaïs. 2girls, two French women 30yo both fully visible side by side, LEFT Isabelle: long auburn hair, green eyes, (D-cup large breasts:1.7), RIGHT Thaïs: long black hair, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Isabelle ET Thaïs. Chaque réponse DOIT contenir **Isabelle:** et **Thaïs:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -613,7 +613,7 @@ window.LEA_CAST_NEW = [
       "Ivy"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Iris has DIFFERENT hair and DIFFERENT breast size from Ivy. 2girls, two European women 22yo both fully visible side by side, LEFT Iris: long natural red hair, green eyes, (B-cup small breasts:1.7), RIGHT Ivy: long natural red hair slightly darker, hazel eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Iris has DIFFERENT hair and DIFFERENT breast size from Ivy. 2girls, two European women 22yo both fully visible side by side, LEFT Iris: long natural red hair, green eyes, (B-cup small breasts:1.7), RIGHT Ivy: long natural red hair slightly darker, hazel eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Iris ET Ivy. Chaque réponse DOIT contenir **Iris:** et **Ivy:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -652,7 +652,7 @@ window.LEA_CAST_NEW = [
       "Nia"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Kira has DIFFERENT hair and DIFFERENT breast size from Nia. 2girls, two mixed women 23yo both fully visible side by side, LEFT Kira: long jet black hair, brown eyes, (A-cup flat breasts:1.7), RIGHT Nia: short black curly hair, dark brown eyes, (E-cup very large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Kira has DIFFERENT hair and DIFFERENT breast size from Nia. 2girls, two mixed women 23yo both fully visible side by side, LEFT Kira: long jet black hair, brown eyes, (A-cup flat breasts:1.7), RIGHT Nia: short black curly hair, dark brown eyes, (E-cup very large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Kira ET Nia. Chaque réponse DOIT contenir **Kira:** et **Nia:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -691,7 +691,7 @@ window.LEA_CAST_NEW = [
       "Rosa"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Giulia has DIFFERENT hair and DIFFERENT breast size from Rosa. 2girls, two Italian women 25yo both fully visible side by side, LEFT Giulia: long dark brown wavy hair, brown eyes, (D-cup large breasts:1.7), RIGHT Rosa: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Giulia has DIFFERENT hair and DIFFERENT breast size from Rosa. 2girls, two Italian women 25yo both fully visible side by side, LEFT Giulia: long dark brown wavy hair, brown eyes, (D-cup large breasts:1.7), RIGHT Rosa: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Giulia ET Rosa. Chaque réponse DOIT contenir **Giulia:** et **Rosa:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -728,7 +728,7 @@ window.LEA_CAST_NEW = [
       "Katia"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Anya has DIFFERENT hair and DIFFERENT breast size from Katia. 2girls, two Russian women 24yo both fully visible side by side, LEFT Anya: long platinum blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Katia: long dark brown hair, green eyes, (E-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Anya has DIFFERENT hair and DIFFERENT breast size from Katia. 2girls, two Russian women 24yo both fully visible side by side, LEFT Anya: long platinum blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Katia: long dark brown hair, green eyes, (E-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Anya ET Katia. Chaque réponse DOIT contenir **Anya:** et **Katia:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -767,7 +767,7 @@ window.LEA_CAST_NEW = [
       "Lilith"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Eve has DIFFERENT hair and DIFFERENT breast size from Lilith. 2girls, two European women 23yo both fully visible side by side, LEFT Eve: long jet black hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Lilith: short black hair with purple tips, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Eve has DIFFERENT hair and DIFFERENT breast size from Lilith. 2girls, two European women 23yo both fully visible side by side, LEFT Eve: long jet black hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Lilith: short black hair with purple tips, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Eve ET Lilith. Chaque réponse DOIT contenir **Eve:** et **Lilith:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -805,7 +805,7 @@ window.LEA_CAST_NEW = [
       "Inès"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Tara has DIFFERENT hair and DIFFERENT breast size from Inès. 2girls, two European women 26yo both fully visible side by side, LEFT Tara: long light brown hair in ponytail, brown eyes, (A-cup small flat breasts:1.7), RIGHT Inès: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Tara has DIFFERENT hair and DIFFERENT breast size from Inès. 2girls, two European women 26yo both fully visible side by side, LEFT Tara: long light brown hair in ponytail, brown eyes, (A-cup small flat breasts:1.7), RIGHT Inès: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Tara ET Inès. Chaque réponse DOIT contenir **Tara:** et **Inès:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -843,7 +843,7 @@ window.LEA_CAST_NEW = [
       "Hana"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Lina has DIFFERENT hair and DIFFERENT breast size from Hana. 2girls, two East Asian women 22yo both fully visible side by side, LEFT Lina: long black straight hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Hana: short black bob hair, brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Lina has DIFFERENT hair and DIFFERENT breast size from Hana. 2girls, two East Asian women 22yo both fully visible side by side, LEFT Lina: long black straight hair, dark brown eyes, (B-cup small breasts:1.7), RIGHT Hana: short black bob hair, brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Lina ET Hana. Chaque réponse DOIT contenir **Lina:** et **Hana:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -882,7 +882,7 @@ window.LEA_CAST_NEW = [
       "Zoé"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Mila has DIFFERENT hair and DIFFERENT breast size from Zoé. 2girls, two European women 25yo both fully visible side by side, LEFT Mila: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Zoé: short brown hair, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Mila has DIFFERENT hair and DIFFERENT breast size from Zoé. 2girls, two European women 25yo both fully visible side by side, LEFT Mila: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Zoé: short brown hair, green eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Mila ET Zoé. Chaque réponse DOIT contenir **Mila:** et **Zoé:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -919,7 +919,7 @@ window.LEA_CAST_NEW = [
       "Sofia"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Carmen has DIFFERENT hair and DIFFERENT breast size from Sofia. 2girls, two Latina women 28yo both fully visible side by side, LEFT Carmen: long dark wavy hair, brown eyes, (D-cup large breasts:1.7), RIGHT Sofia: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Carmen has DIFFERENT hair and DIFFERENT breast size from Sofia. 2girls, two Latina women 28yo both fully visible side by side, LEFT Carmen: long dark wavy hair, brown eyes, (D-cup large breasts:1.7), RIGHT Sofia: long black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Carmen ET Sofia. Chaque réponse DOIT contenir **Carmen:** et **Sofia:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -957,7 +957,7 @@ window.LEA_CAST_NEW = [
       "Nala"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Aisha has DIFFERENT hair and DIFFERENT breast size from Nala. 2girls, two Black women 27yo both fully visible side by side, LEFT Aisha: long black curly hair, brown eyes, (E-cup very large breasts:1.7), RIGHT Nala: short black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Aisha has DIFFERENT hair and DIFFERENT breast size from Nala. 2girls, two Black women 27yo both fully visible side by side, LEFT Aisha: long black curly hair, brown eyes, (E-cup very large breasts:1.7), RIGHT Nala: short black hair, dark brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Aisha ET Nala. Chaque réponse DOIT contenir **Aisha:** et **Nala:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -995,7 +995,7 @@ window.LEA_CAST_NEW = [
       "Manon"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Léa has DIFFERENT hair and DIFFERENT breast size from Manon. 2girls, two French women 21yo both fully visible side by side, LEFT Léa: long light brown straight hair, green eyes, (A-cup very small flat breasts:1.7), RIGHT Manon: long dark brown hair, brown eyes, (E-cup very large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Léa has DIFFERENT hair and DIFFERENT breast size from Manon. 2girls, two French women 21yo both fully visible side by side, LEFT Léa: long light brown straight hair, green eyes, (A-cup very small flat breasts:1.7), RIGHT Manon: long dark brown hair, brown eyes, (E-cup very large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Léa ET Manon. Chaque réponse DOIT contenir **Léa:** et **Manon:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -1035,7 +1035,7 @@ window.LEA_CAST_NEW = [
       "Alice"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Julie has DIFFERENT hair and DIFFERENT breast size from Alice. 2girls, two French women 26yo both fully visible side by side, LEFT Julie: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Alice: long black hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Julie has DIFFERENT hair and DIFFERENT breast size from Alice. 2girls, two French women 26yo both fully visible side by side, LEFT Julie: long blonde hair, blue eyes, (C-cup medium breasts:1.7), RIGHT Alice: long black hair, brown eyes, (D-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Julie ET Alice. Chaque réponse DOIT contenir **Julie:** et **Alice:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -1074,7 +1074,7 @@ window.LEA_CAST_NEW = [
       "Elsa"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Marie has DIFFERENT hair and DIFFERENT breast size from Elsa. 2girls, two European women 30yo both fully visible side by side, LEFT Marie: long brown hair, brown eyes, (B-cup small breasts:1.7), RIGHT Elsa: platinum blonde bob, blue eyes, (E-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color",
+    "looks_en": "CRITICAL: two different women. Marie has DIFFERENT hair and DIFFERENT breast size from Elsa. 2girls, two European women 30yo both fully visible side by side, LEFT Marie: long brown hair, brown eyes, (B-cup small breasts:1.7), RIGHT Elsa: platinum blonde bob, blue eyes, (E-cup large breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, ,",
     "system_extra": "Tu incarnes Marie ET Elsa. Chaque réponse DOIT contenir **Marie:** et **Elsa:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -1112,7 +1112,7 @@ window.LEA_CAST_NEW = [
       "Nova"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Skye has DIFFERENT hair and DIFFERENT breast size from Nova. 2girls, two European women 25yo both fully visible side by side, LEFT Skye: long blonde hair, blue eyes, (D-cup large breasts:1.7), RIGHT Nova: short black hair, brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Skye has DIFFERENT hair and DIFFERENT breast size from Nova. 2girls, two European women 25yo both fully visible side by side, LEFT Skye: long blonde hair, blue eyes, (D-cup large breasts:1.7), RIGHT Nova: short black hair, brown eyes, (C-cup medium breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Skye ET Nova. Chaque réponse DOIT contenir **Skye:** et **Nova:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -1151,7 +1151,7 @@ window.LEA_CAST_NEW = [
       "Romy"
     ],
     "multiSpeaker": true,
-    "looks_en": "CRITICAL: two different women. Pam has DIFFERENT hair and DIFFERENT breast size from Romy. 2girls, two European women 28yo both fully visible side by side, LEFT Pam: short brown hair, green eyes, (D-cup large breasts:1.7), RIGHT Romy: long black hair in bun, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, NOT same breast size, NOT same hair color, (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "CRITICAL: two different women. Pam has DIFFERENT hair and DIFFERENT breast size from Romy. 2girls, two European women 28yo both fully visible side by side, LEFT Pam: short brown hair, green eyes, (D-cup large breasts:1.7), RIGHT Romy: long black hair in bun, brown eyes, (B-cup small breasts:1.7), STRONG contrast different hair colors different breast sizes, photorealistic, 18+, , , (curvy plus-size soft body:1.4), full hips, thick thighs, full body or torso hips visible,",
     "system_extra": "Tu incarnes Pam ET Romy. Chaque réponse DOIT contenir **Pam:** et **Romy:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -1182,7 +1182,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_02",
@@ -1211,7 +1211,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_03",
@@ -1241,7 +1241,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "game_04",
@@ -1271,7 +1271,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_05",
@@ -1301,7 +1301,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_06",
@@ -1331,7 +1331,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_07",
@@ -1360,7 +1360,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_08",
@@ -1391,7 +1391,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_09",
@@ -1420,7 +1420,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "game_10",
@@ -1450,7 +1450,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "game_11",
@@ -1481,7 +1481,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_12",
@@ -1511,7 +1511,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_13",
@@ -1540,7 +1540,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_14",
@@ -1570,7 +1570,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_15",
@@ -1600,7 +1600,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_16",
@@ -1629,7 +1629,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_17",
@@ -1659,7 +1659,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "game_18",
@@ -1689,7 +1689,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_19",
@@ -1719,7 +1719,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_20",
@@ -1749,7 +1749,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_21",
@@ -1779,7 +1779,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_22",
@@ -1809,7 +1809,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_23",
@@ -1839,7 +1839,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "game_24",
@@ -1869,7 +1869,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_25",
@@ -1899,7 +1899,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_26",
@@ -1929,7 +1929,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "game_27",
@@ -1959,7 +1959,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "game_28",
@@ -1989,7 +1989,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_29",
@@ -2019,7 +2019,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "game_30",
@@ -2049,7 +2049,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "tante_01",
@@ -2080,7 +2080,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_02",
@@ -2110,7 +2110,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "tante_03",
@@ -2141,7 +2141,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "tante_04",
@@ -2172,7 +2172,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_05",
@@ -2203,7 +2203,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "tante_06",
@@ -2234,7 +2234,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_07",
@@ -2265,7 +2265,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_08",
@@ -2296,7 +2296,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "tante_09",
@@ -2327,7 +2327,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_10",
@@ -2358,7 +2358,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "tante_11",
@@ -2389,7 +2389,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_12",
@@ -2420,7 +2420,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_13",
@@ -2451,7 +2451,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_14",
@@ -2482,7 +2482,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "tante_15",
@@ -2513,7 +2513,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_16",
@@ -2543,7 +2543,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(51 year old woman:1.5), (looks exactly 51 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(51 year old woman:1.5), (looks exactly 51 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "tante_17",
@@ -2574,7 +2574,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(52 year old woman:1.5), (looks exactly 52 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(52 year old woman:1.5), (looks exactly 52 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_18",
@@ -2605,7 +2605,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_19",
@@ -2636,7 +2636,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "tante_20",
@@ -2667,7 +2667,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_21",
@@ -2698,7 +2698,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "tante_22",
@@ -2729,7 +2729,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_23",
@@ -2760,7 +2760,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "tante_24",
@@ -2791,7 +2791,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "tante_25",
@@ -2822,7 +2822,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "tante_26",
@@ -2853,7 +2853,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_27",
@@ -2884,7 +2884,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_28",
@@ -2915,7 +2915,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_29",
@@ -2946,7 +2946,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "tante_30",
@@ -2977,7 +2977,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_01",
@@ -3007,7 +3007,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (blonde hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_02",
@@ -3037,7 +3037,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_03",
@@ -3067,7 +3067,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "collegue_04",
@@ -3097,7 +3097,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_05",
@@ -3127,7 +3127,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_06",
@@ -3158,7 +3158,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_07",
@@ -3188,7 +3188,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_08",
@@ -3218,7 +3218,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_09",
@@ -3247,7 +3247,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "collegue_10",
@@ -3278,7 +3278,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "collegue_11",
@@ -3309,7 +3309,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_12",
@@ -3339,7 +3339,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_13",
@@ -3369,7 +3369,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_14",
@@ -3399,7 +3399,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_15",
@@ -3430,7 +3430,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_16",
@@ -3460,7 +3460,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "collegue_17",
@@ -3490,7 +3490,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "collegue_18",
@@ -3520,7 +3520,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_19",
@@ -3550,7 +3550,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_20",
@@ -3580,7 +3580,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_21",
@@ -3611,7 +3611,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_22",
@@ -3642,7 +3642,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_23",
@@ -3672,7 +3672,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_24",
@@ -3702,7 +3702,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "collegue_25",
@@ -3732,7 +3732,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_26",
@@ -3762,7 +3762,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_27",
@@ -3792,7 +3792,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_28",
@@ -3822,7 +3822,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "collegue_29",
@@ -3853,7 +3853,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "collegue_30",
@@ -3883,7 +3883,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "secretaire_01",
@@ -3914,7 +3914,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_02",
@@ -3945,7 +3945,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_03",
@@ -3976,7 +3976,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_04",
@@ -4007,7 +4007,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_05",
@@ -4038,7 +4038,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "secretaire_06",
@@ -4068,7 +4068,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_07",
@@ -4099,7 +4099,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_08",
@@ -4130,7 +4130,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_09",
@@ -4160,7 +4160,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_10",
@@ -4192,7 +4192,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "secretaire_11",
@@ -4222,7 +4222,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_12",
@@ -4252,7 +4252,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "secretaire_13",
@@ -4281,7 +4281,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "secretaire_14",
@@ -4312,7 +4312,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_15",
@@ -4343,7 +4343,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_16",
@@ -4373,7 +4373,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_17",
@@ -4404,7 +4404,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_18",
@@ -4435,7 +4435,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "secretaire_19",
@@ -4465,7 +4465,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_20",
@@ -4494,7 +4494,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "secretaire_21",
@@ -4525,7 +4525,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_22",
@@ -4556,7 +4556,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_23",
@@ -4586,7 +4586,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_24",
@@ -4618,7 +4618,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_25",
@@ -4648,7 +4648,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_26",
@@ -4679,7 +4679,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_27",
@@ -4708,7 +4708,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "secretaire_28",
@@ -4739,7 +4739,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "secretaire_29",
@@ -4770,7 +4770,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "secretaire_30",
@@ -4800,7 +4800,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "maman_ami_01",
@@ -4831,7 +4831,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_02",
@@ -4861,7 +4861,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "maman_ami_03",
@@ -4892,7 +4892,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_04",
@@ -4923,7 +4923,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_05",
@@ -4954,7 +4954,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_06",
@@ -4985,7 +4985,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "maman_ami_07",
@@ -5016,7 +5016,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (platinum blonde hair:1.5), (green eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_08",
@@ -5047,7 +5047,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_09",
@@ -5078,7 +5078,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_10",
@@ -5109,7 +5109,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "maman_ami_11",
@@ -5140,7 +5140,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_12",
@@ -5171,7 +5171,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_13",
@@ -5201,7 +5201,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup"
+    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, ,"
   },
   {
     "id": "maman_ami_14",
@@ -5232,7 +5232,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_15",
@@ -5263,7 +5263,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_16",
@@ -5294,7 +5294,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_17",
@@ -5325,7 +5325,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "maman_ami_18",
@@ -5357,7 +5357,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_19",
@@ -5388,7 +5388,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_20",
@@ -5420,7 +5420,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_21",
@@ -5452,7 +5452,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_22",
@@ -5483,7 +5483,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_23",
@@ -5514,7 +5514,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(47 year old woman:1.5), (looks exactly 47 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_24",
@@ -5545,7 +5545,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts"
+    "looks_en": "(48 year old woman:1.5), (looks exactly 48 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,"
   },
   {
     "id": "maman_ami_25",
@@ -5576,7 +5576,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(49 year old woman:1.5), (looks exactly 49 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_26",
@@ -5607,7 +5607,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(50 year old woman:1.5), (looks exactly 50 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_27",
@@ -5638,7 +5638,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_28",
@@ -5669,7 +5669,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_29",
@@ -5700,7 +5700,7 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   },
   {
     "id": "maman_ami_30",
@@ -5731,6 +5731,6 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , , full body or torso hips visible,"
   }
 ];

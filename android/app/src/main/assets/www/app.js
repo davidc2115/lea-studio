@@ -1562,7 +1562,7 @@ function buildLeaImagePrompt(extra = "") {
     isDuo
       ? "NOT same breast size on both women, NOT identical bust, NOT matching cup sizes, NOT same hair color unless described, NOT solo portrait,"
       : "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
-    (!isDuo && phys.negative.length) ? ("NOT " + phys.negative.join(", ") + ",") : "",
+    "",
     hasUser
       ? "NOT ignore USER REQUEST, NOT wrong location, NOT swimming pool when bed requested, NOT lying on back when all fours requested, NOT copy cover pose,"
       : "no wrong outfit, no missing wet/ripped/oversized details from the scenario outfit,",
@@ -6517,31 +6517,52 @@ function toastScene(msg) {
 
 
 
+
+function stripForeignSpecies(prompt, c) {
+  let s = String(prompt || "");
+  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
+  const siren = /sir[eè]ne|sirene|mermaid/i.test(id);
+  s = s.replace(/\bNOT\s+[a-z][a-z' -]{0,40}/gi, " ");
+  if (!siren) {
+    s = s.replace(/\bmermaid\b|\bfish tail\b|\bunderwater\b|\bocean\b|\bcoral reef\b|\bseashell top\b/gi, " ");
+  }
+  return s.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
+}
+function speciesNegative(c) {
+  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
+  if (/sir[eè]ne|sirene/i.test(id)) return "horns, demon horns, cat ears, fox ears, slime, human legs, human feet";
+  if (/catgirl|neko/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, water background, split image, collage, half tail, fox ears, demon horns";
+  if (/slime/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, horns, underwater, ocean, split image, collage";
+  if (/fantasy|fan_|elfe|kitsune|succube|dragon|harpie|dryade|lamia|gorgone|oni|vampire/i.test(id)) return "mermaid, mermaid tail, fish tail, underwater, ocean, split image, collage, fused body, two bodies";
+  return "split image, collage, fused body";
+}
+
 function speciesLock(c) {
   const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
+  // Positif seulement. Jamais le mot d'une autre espèce (SD dessine le mot même après NOT).
   const map = [
-    [/slime/i, "(slime girl:1.8), glossy translucent gelatinous humanoid skin, human face, human legs, standing in bathroom, NOT mermaid, NOT fish tail, NOT scales, NOT ocean"],
-    [/sir[eè]ne|sirene/i, "(mermaid:1.8), mermaid tail instead of legs, iridescent scales on tail only, NOT slime, NOT horns, NOT legs"],
-    [/elfe|\belf\b/i, "(elf woman:1.7), pointed elf ears, human legs, NOT mermaid, NOT slime, NOT horns"],
-    [/kitsune/i, "(kitsune:1.75), fox ears, multiple fox tails, NOT mermaid, NOT slime, NOT cat ears"],
-    [/succube/i, "(succubus:1.75), small curved horns, small bat wings, spaded tail, human legs, NOT mermaid, NOT slime"],
-    [/dragon/i, "(dragon woman:1.75), small dragon horns, scale patches on shoulders only, human legs on land, NOT mermaid, NOT fish tail, NOT slime"],
-    [/catgirl|neko/i, "(catgirl:1.7), cat ears, cat tail, human legs, NOT fox, NOT mermaid, NOT slime"],
-    [/\bange\b/i, "(angel woman:1.75), large white feathered wings, human legs, NOT bat wings, NOT mermaid, NOT slime"],
-    [/demon|d[eé]mon/i, "(demon woman:1.75), black demon horns, small bat wings, spaded tail, human legs, NOT mermaid, NOT slime, NOT angel"],
-    [/vampire/i, "(vampire woman:1.7), pale skin, subtle fangs, human legs, NOT mermaid, NOT slime, NOT horns"],
-    [/f[eé]e|\bfee\b/i, "(fairy woman:1.7), small translucent insect wings, human legs, NOT mermaid, NOT slime"],
-    [/dryade/i, "(dryad:1.75), bark texture on arms, leaves in hair, human legs, forest, NOT mermaid, NOT slime"],
-    [/lamia/i, "(lamia:1.8), snake lower body instead of legs, human torso, NOT mermaid, NOT slime, NOT fish"],
-    [/harpie/i, "(harpy:1.8), feathered bird wings, bird talons, NOT mermaid, NOT slime, NOT bat wings"],
-    [/gorgone/i, "(gorgon:1.8), living snakes for hair, human legs, NOT mermaid, NOT slime"],
-    [/oni/i, "(oni woman:1.75), one or two oni horns, human legs, NOT mermaid, NOT slime"],
-    [/naga/i, "(naga:1.8), snake tail lower body, human torso, NOT mermaid, NOT fish tail"],
-    [/centaure/i, "(centaur woman:1.8), human torso on horse body, NOT mermaid, NOT slime"],
-    [/loup|wolf/i, "(wolf woman:1.7), wolf ears, wolf tail, human legs, NOT mermaid, NOT slime"],
-    [/robot/i, "(android woman:1.7), visible panel seams, humanoid robot, NOT mermaid, NOT slime"],
-    [/phoenix/i, "(phoenix woman:1.7), fire-tipped feathers, wings, human legs, NOT mermaid, NOT slime"],
-    [/ghost|fant[oô]me/i, "(ghost woman:1.7), slightly translucent, human legs, NOT mermaid, NOT slime"],
+    [/slime/i, "(slime girl:1.85), glossy translucent gelatinous humanoid skin, human face, two human legs, human feet, standing indoors on bathroom tiles"],
+    [/sir[eè]ne|sirene/i, "(mermaid:1.85), mermaid tail instead of legs, iridescent scales on the tail, rocky shore"],
+    [/elfe|\belf\b/i, "(elf woman:1.75), long pointed elf ears, two human legs, human feet, standing on the ground"],
+    [/kitsune/i, "(kitsune:1.8), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet"],
+    [/succube/i, "(succubus:1.8), small curved horns, small bat wings, spaded tail, two human legs, human feet"],
+    [/dragon/i, "(dragon woman:1.8), small dragon horns, scale patches on shoulders only, two human legs, standing on land"],
+    [/catgirl|neko/i, "(catgirl:1.9), (cat ears on top of head:1.8), (fluffy cat tail:1.7), two human legs, human feet, standing on the floor, indoor apartment"],
+    [/\bange\b/i, "(angel woman:1.75), large white feathered wings, human legs, NOT bat wings"],
+    [/demon|d[eé]mon/i, "(demon woman:1.75), black demon horns, small bat wings, spaded tail, human legs, NOT angel"],
+    [/vampire/i, "(vampire woman:1.7), pale skin, subtle fangs, human legs, NOT horns"],
+    [/f[eé]e|\bfee\b/i, "(fairy woman:1.7), small translucent insect wings, human legs"],
+    [/dryade/i, "(dryad:1.75), bark texture on arms, leaves in hair, human legs, forest"],
+    [/lamia/i, "(lamia:1.8), snake lower body instead of legs, human torso, NOT fish"],
+    [/harpie/i, "(harpy:1.8), feathered bird wings, bird talons, NOT bat wings"],
+    [/gorgone/i, "(gorgon:1.8), living snakes for hair, human legs"],
+    [/oni/i, "(oni woman:1.75), one or two oni horns, human legs"],
+    [/naga/i, "(naga:1.8), snake tail lower body, human torso"],
+    [/centaure/i, "(centaur woman:1.8), human torso on horse body"],
+    [/loup|wolf/i, "(wolf woman:1.7), wolf ears, wolf tail, human legs"],
+    [/robot/i, "(android woman:1.7), visible panel seams, humanoid robot"],
+    [/phoenix/i, "(phoenix woman:1.7), fire-tipped feathers, wings, human legs"],
+    [/ghost|fant[oô]me/i, "(ghost woman:1.7), slightly translucent, human legs"],
   ];
   for (const [re, line] of map) if (re.test(id)) return line;
   return "";
@@ -6919,6 +6940,10 @@ async function generatePhoto() {
     if (c.id === "mei") payload.negative = (payload.negative || "") + ", large breasts, busty, blonde, european only features";
     if (c.id === "sofia") payload.negative = (payload.negative || "") + ", flat chest, small breasts, A-cup, skinny boyish";
     if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, large breasts, D-cup, no freckles, brown hair";
+    if (c && typeof speciesNegative === "function") {
+      payload.prompt = stripForeignSpecies(payload.prompt || "", c);
+      payload.negative = speciesNegative(c) + ", " + (payload.negative || "");
+    }
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, auburn hair, red hair, shoulder-length bob, short hair, white bra only, lingerie set, nude, seamless studio, plain background, stock photo, dreamstime, watermark, middle-aged, 30 years old, different face, different woman";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
     // Toute option utilisateur → denoise plus fort + négatifs adaptés

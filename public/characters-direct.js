@@ -30,7 +30,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Léa Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -62,7 +62,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Inès Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -96,7 +96,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Clara Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -129,7 +129,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Jade Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -162,7 +162,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Lina Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -195,7 +195,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Maya Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -229,7 +229,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Nora Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -262,7 +262,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sara Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -294,7 +294,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Emma Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -327,7 +327,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Chloé Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -361,7 +361,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Aya Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -394,7 +394,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Zoé Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -427,7 +427,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, maghrébine, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Luna Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -460,7 +460,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Iris Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -494,7 +494,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Nina Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -527,7 +527,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Eva Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -560,7 +560,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Mila Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -593,7 +593,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Anna Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -626,7 +626,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Lisa Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -659,7 +659,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, maghrébine, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Rose Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -693,7 +693,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Hana Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -726,7 +726,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Yuna Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -759,7 +759,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sofia Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -793,7 +793,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Camille Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -826,7 +826,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Manon Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -859,7 +859,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Léna Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -893,7 +893,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(20 year old woman:1.5), (looks exactly 20 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Alice Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -925,7 +925,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Julie Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -958,7 +958,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Pauline Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -990,7 +990,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Elise Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1022,7 +1022,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sara Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1055,7 +1055,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Emma Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1087,7 +1087,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Chloé Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1119,7 +1119,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, africaine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, africaine, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Aya Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1151,7 +1151,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Zoé Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1184,7 +1184,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Luna Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1217,7 +1217,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Iris Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1250,7 +1250,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Nina Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1281,7 +1281,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, métisse, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Eva Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1313,7 +1313,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Mila Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1345,7 +1345,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Anna Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1377,7 +1377,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(35 year old woman:1.5), (looks exactly 35 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Lisa Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1409,7 +1409,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Rose Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1440,7 +1440,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (platinum blonde hair:1.5), (blue eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), feminine balanced figure, slave, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Hana Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1472,7 +1472,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Yuna Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1504,7 +1504,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sofia Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1536,7 +1536,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Camille Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1568,7 +1568,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, africaine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, africaine, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Manon Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1601,7 +1601,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Léna Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1633,7 +1633,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Alice Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1665,7 +1665,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Julie Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1696,7 +1696,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Pauline Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1729,7 +1729,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, métisse, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Elise Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1762,7 +1762,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Léa Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1795,7 +1795,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , africaine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Inès Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1827,7 +1827,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Clara Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1859,7 +1859,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, maghrébine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , maghrébine, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Jade Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1891,7 +1891,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , slave, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Lina Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1923,7 +1923,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Maya Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1956,7 +1956,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , métisse, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Nora Dubois. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1988,7 +1988,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Vanessa Cruz. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2021,7 +2021,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sarah Klein. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2054,7 +2054,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (brown eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (blonde hair:1.5), (brown eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Amira Benali. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2086,7 +2086,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Jordan Lee. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2118,7 +2118,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Morgane Dupont. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2151,7 +2151,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Tasha Rivers. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2183,7 +2183,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Elena Rossi. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2216,7 +2216,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Kimberly Shaw. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2249,7 +2249,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(32 year old woman:1.5), (looks exactly 32 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Priya Sharma. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2281,7 +2281,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(34 year old woman:1.5), (looks exactly 34 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Céline Marchand. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2315,7 +2315,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (red auburn hair:1.5), (green eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Julie Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2348,7 +2348,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(29 year old woman:1.5), (looks exactly 29 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Nadia El Amrani. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2381,7 +2381,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Brittany Cole. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2414,7 +2414,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Hana Yoshida. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2445,7 +2445,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(30 year old woman:1.5), (looks exactly 30 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Laura Vega. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2477,7 +2477,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(33 year old woman:1.5), (looks exactly 33 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Ingrid Berg. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2509,7 +2509,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(28 year old woman:1.5), (looks exactly 28 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Aisha Mensah. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2542,7 +2542,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sophie Lang. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2575,7 +2575,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(31 year old woman:1.5), (looks exactly 31 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Mei Chen. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2608,7 +2608,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(27 year old woman:1.5), (looks exactly 27 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Clara Fontaine. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2641,7 +2641,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Hélène Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2674,7 +2674,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Patricia Doyle. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2707,7 +2707,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Samira Kadri. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2740,7 +2740,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Diane Walsh. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2772,7 +2772,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Rosa Alvarez. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2805,7 +2805,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Christine Lefevre. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2838,7 +2838,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, asiatique, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Yvonne Park. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2871,7 +2871,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Gloria Bennett. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2904,7 +2904,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Monique Rivière. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2936,7 +2936,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(36 year old woman:1.5), (looks exactly 36 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Fatima Zahra. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2968,7 +2968,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(44 year old woman:1.5), (looks exactly 44 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Catherine Blanc. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3001,7 +3001,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (hazel eyes:1.55), (jet-black hair:1.5), (medium C-cup breasts:1.5)",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, , , , , , , , , , , , , , , , , full body head to feet, photorealistic, (hazel eyes:1.55), (jet-black hair:1.5), (medium C-cup breasts:1.5)",
     "system_extra": "Tu es UNIQUEMENT Angela Torres. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3033,7 +3033,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(42 year old woman:1.5), (looks exactly 42 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Susan Clark. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3065,7 +3065,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(39 year old woman:1.5), (looks exactly 39 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Nadine Okonkwo. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3098,7 +3098,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(45 year old woman:1.5), (looks exactly 45 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Isabelle Renard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3131,7 +3131,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(38 year old woman:1.5), (looks exactly 38 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Mei Ling Wu. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3163,7 +3163,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(41 year old woman:1.5), (looks exactly 41 not older:1.45), (blonde hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), feminine balanced figure, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Brenda Hayes. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3196,7 +3196,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(43 year old woman:1.5), (looks exactly 43 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (large D-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , européenne, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Karine Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3229,7 +3229,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(37 year old woman:1.5), (looks exactly 37 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), olive tan Latina skin, (very small flat A-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , latine, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Sofia Mendes. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3262,7 +3262,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(46 year old woman:1.5), (looks exactly 46 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (small B-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Hélène Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3294,7 +3294,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Kira Bloom. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3326,7 +3326,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Tess Morgan. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3358,7 +3358,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (medium C-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Lola Ruiz. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3391,7 +3391,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, asiatique, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (medium C-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, , , , asiatique, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Amy Park. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3423,7 +3423,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(21 year old woman:1.5), (looks exactly 21 not older:1.45), (chestnut brown hair:1.5), (blue eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Noémie Fay. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3455,7 +3455,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(26 year old woman:1.5), (looks exactly 26 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, européenne, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Destiny Cole. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3488,7 +3488,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(23 year old woman:1.5), (looks exactly 23 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (athletic toned body:1.4), firm stomach, toned legs, slave, photorealistic adult woman, sharp focus,",
     "system_extra": "Tu es UNIQUEMENT Iris Novak. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3519,7 +3519,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(24 year old woman:1.5), (looks exactly 24 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (large D-cup breasts:1.5), feminine balanced figure, latine, photorealistic adult woman, sharp focus, ,",
     "system_extra": "Tu es UNIQUEMENT Mila Costa. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3551,7 +3551,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old woman:1.5), (looks exactly 22 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (medium C-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , européenne, photorealistic adult woman, sharp focus, , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Chloe Nash. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -3584,7 +3584,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(25 year old woman:1.5), (looks exactly 25 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (large D-cup breasts:1.5), (slim slender body:1.4), narrow frame, , , asiatique, photorealistic adult woman, sharp focus, , , full body or torso hips visible,",
     "system_extra": "Tu es UNIQUEMENT Yuki Sato. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   }
 ];
