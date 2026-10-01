@@ -2930,7 +2930,7 @@ function ensureRoleTags(list) {
     if (/voluptuous|voluptueuse|hourglass|sablier/i.test(looks)) add("voluptueuse");
     if (/slim|mince|slender/i.test(looks) && !/chubby|ronde|voluptueuse/i.test(tags.join(" "))) add("mince");
     if (/athletic|athl[eé]tique/i.test(looks)) add("athlétique");
-    if (/slime|elf|dragon|mermaid|kitsune|succub|oni|harpy|dryad|naga|angel/i.test(looks + " " + (c.id||""))) add("fantasy");
+    if (/^fan_|\bslime\b|\belfe\b|\bdragon\b|\bkitsune\b|\bsuccube\b|\bharpie\b|\bdryade\b|\blamia\b|\bgorgone\b|\bcatgirl\b|\bsirene\b/i.test(String(c.id||"")+" "+String(c.title||""))) add("fantasy");
     c.tags = tags;
   }
   return list;
@@ -4089,7 +4089,8 @@ function filterDiscoverList(q) {
       "tactile": (c) => hasTag(c, "tactile"),
       "taquine": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
       "taquin": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
-      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /elfe|kitsune|succube|dragon|sir[eè]ne|slime|harpie|dryade|lamia|gorgone|vampire|catgirl|ange|d[eé]mon|mermaid/.test((titleOf(c)+" "+(c.id||"")+" "+(c.tags||[]).join(" ")).toLowerCase()),
+      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /^taquin_fantasy/.test(c.id||""),
+      "fantastique": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /^taquin_fantasy/.test(c.id||""),
       "slime": (c) => hasTag(c, "slime") || /fan_slime|slime|gel[eé]e/.test((c.id||"")+" "+(c.title||"")+" "+(c.name||"")),
       "dragon": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
       "dragonne": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
@@ -6526,6 +6527,9 @@ function stripForeignSpecies(prompt, c) {
   if (!siren) {
     s = s.replace(/\bmermaid\b|\bfish tail\b|\bunderwater\b|\bocean\b|\bcoral reef\b|\bseashell top\b/gi, " ");
   }
+  if (!/succube|dragon|demon|oni|d[eé]mon/i.test(id)) {
+    s = s.replace(/\bhorns?\b|\bcornes?\b|\bPAS de cornes\b/gi, " ");
+  }
   return s.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
 }
 function speciesNegative(c) {
@@ -6533,7 +6537,7 @@ function speciesNegative(c) {
   const base = "split image, collage, fused body, two bodies, half body, side by side duplicate";
   if (/sir[eè]ne|sirene/i.test(id)) return "horns, demon horns, cat ears, fox ears, slime, human legs, human feet, " + base;
   if (/catgirl|neko/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, fox ears, demon horns, " + base;
-  if (/slime/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, horns, underwater, ocean, " + base;
+  if (/slime/i.test(id)) return "horns, demon horns, dragon horns, oni horns, antlers, mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, opaque skin, latex catsuit, " + base;
   if (/harpie/i.test(id)) return "mermaid, fish tail, cat ears, demon horns, human feet only, " + base;
   if (/lamia|naga/i.test(id)) return "mermaid, fish tail, cat ears, fox ears, human legs only, " + base;
   if (/gorgone/i.test(id)) return "mermaid, fish tail, normal hair only, cat ears, " + base;
@@ -6546,7 +6550,7 @@ function speciesLock(c) {
   const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
   // Positif seulement. Jamais le mot d'une autre espèce (SD dessine le mot même après NOT).
   const map = [
-    [/slime/i, "(slime girl:1.85), glossy translucent gelatinous humanoid skin, human face, two human legs, human feet, standing indoors on bathroom tiles"],
+    [/slime/i, "(slime girl:1.95), (translucent jelly body:1.8), see-through gelatinous skin, glossy slime texture, no horns, bald of horns, human face, two human legs, human feet, standing in a bathtub, indoor bathroom tiles"],
     [/sir[eè]ne|sirene/i, "(mermaid:1.85), mermaid tail instead of legs, iridescent scales on the tail, rocky shore"],
     [/elfe|\belf\b/i, "(elf woman:1.75), long pointed elf ears, two human legs, human feet, standing on the ground"],
     [/kitsune/i, "(kitsune:1.8), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet"],
