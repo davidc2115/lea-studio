@@ -1386,7 +1386,7 @@ function buildLeaImagePrompt(extra = "") {
 
   const isDuo = isDuoCharacter(c);
   const duoExtra = isDuo
-    ? "(2girls:1.6), (two adult women:1.6), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
+    ? "(2girls:1.9), (two adult women:1.85), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
     : "";
   // Pour duo: composition LEFT/RIGHT prioritaire — JAMAIS un seul body/cup
   const duoBlock = isDuo ? duoCompositionBlock(c) : "";
@@ -4925,10 +4925,16 @@ function isDuoCharacter(c) {
   const tags = (c.tags || []).map((t) => String(t).toLowerCase());
   const id = String(c.id || "").toLowerCase();
   const name = String(c.name || "");
-  if (tags.some((t) => /duo|jumelles?|s[oœ]eurs?|plan\s*[àa]\s*trois|amies|couple/.test(t))) return true;
-  if (/^duo_|_twins|_sisters|_friends|_couple|_md|_wlw/.test(id)) return true;
-  if (/\s*&\s*|\set\s/.test(name) && /duo|jumelle|sœur|soeur|amies|couple|mère|mere/i.test([name, ...(c.tags || [])].join(" "))) return true;
+  // id duo_* = source de vérité
+  if (/^duo_/.test(id)) return true;
+  if (/_twins|_sisters|_friends|_couple|_md|_wlw/.test(id) && /duo|twin|sister|friend|couple/i.test(id)) return true;
+  // tag exact "duo" ou jumelles (pas le tag vague "amies" seul)
+  if (tags.some((t) => t === "duo" || /^jumelles?$/.test(t) || /plan\s*[àa]\s*trois/.test(t))) return true;
+  // nom "A & B"
   if (/\s*&\s*/.test(name)) return true;
+  if (/\s+et\s+/i.test(name) && tags.some((t) => t === "duo" || /jumelle/.test(t))) return true;
+  // looks_en LEFT + RIGHT
+  if (/LEFT\s+woman/i.test(c.looks_en || "") && /RIGHT\s+woman/i.test(c.looks_en || "")) return true;
   return false;
 }
 
@@ -5150,7 +5156,9 @@ function duoCompositionBlock(c) {
 
   // Prompt COURT et TRÈS pondéré (Horde ignore les pavés longs)
   return [
-    "(2girls:1.8), (two women side by side:1.7), both fully visible,",
+    "(2girls:1.9), (two distinct women:1.85), (two women side by side:1.8),",
+    "(both women fully visible head to thighs:1.7), (two faces two bodies:1.75),",
+    "NOT solo, NOT 1girl, NOT single woman, NOT one person only,",
     ethLine,
     // LEFT
     "(LEFT woman " + n1 + ":1.6),",
@@ -6808,12 +6816,20 @@ async function generatePhoto() {
         delete payload.source_processing;
         delete payload.denoising;
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
-        payload.negative = (payload.negative || "") +
-          ", blurry, out of focus, same pose every time, static nude portrait only, " +
-          "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
-          "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
-          "anime, manga, cartoon, illustration, " +
-          "collage, grid, 2x2, multipanel, split screen, mirror symmetry";
+        if (isDuoCharacter(c)) {
+          payload.negative = (payload.negative || "") +
+            ", blurry, out of focus, solo, 1girl, single woman only, one woman only, " +
+            "3girls, four women, five women, crowd, identical clones same face, " +
+            "fused faces, conjoined, two heads one body, same hair both, same breast size both, " +
+            "anime, manga, cartoon, illustration, collage, grid, 2x2, multipanel, mirror symmetry";
+        } else {
+          payload.negative = (payload.negative || "") +
+            ", blurry, out of focus, same pose every time, static nude portrait only, " +
+            "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
+            "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
+            "anime, manga, cartoon, illustration, " +
+            "collage, grid, 2x2, multipanel, split screen, mirror symmetry";
+        }
         // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
         payload.force_img2img = false;
         delete payload.source_image;
@@ -6831,14 +6847,34 @@ async function generatePhoto() {
           }
         } catch (e) { console.warn("[face_lock]", e); }
         try {
-          const idLock = faceIdentityLock(c);
-          if (idLock) payload.prompt = idLock + ", " + (payload.prompt || prompt || "");
-          const pl = physicalLocksFromText(c);
-          if (pl && pl.negative && pl.negative.length) {
-            payload.negative = (payload.negative || "") + ", " + pl.negative.join(", ");
+          if (!isDuoCharacter(c)) {
+            const idLock = faceIdentityLock(c);
+            if (idLock) payload.prompt = idLock + ", " + (payload.prompt || prompt || "");
+            const pl = physicalLocksFromText(c);
+            if (pl && pl.negative && pl.negative.length) {
+              payload.negative = (payload.negative || "") + ", " + pl.negative.join(", ");
+            }
+          } else {
+            // Duo: ne PAS coller faceIdentityLock (solo) — duoCompositionBlock suffit
+            const pl = physicalLocksFromText(c);
+            if (pl && pl.negative && pl.negative.length) {
+              payload.negative = (payload.negative || "") + ", " + pl.negative.join(", ");
+            }
+            // Garantir 2girls en tête du prompt
+            let pr = String(payload.prompt || prompt || "");
+            if (!/\b2girls\b/i.test(pr)) {
+              pr = "(2girls:1.85), (two women side by side:1.75), both fully visible, " + pr;
+            }
+            // Retirer fuites solo
+            pr = pr.replace(/\(solo:[^)]+\)/gi, "")
+              .replace(/\bsingle adult woman only\b/gi, "")
+              .replace(/\b1girl\b/gi, "")
+              .replace(/\s+/g, " ").trim();
+            payload.prompt = pr;
+            payload.is_duo = true;
           }
         } catch (_) {}
-        setGenStatus("Horde txt2img · pose/tenue libre · seed " + payload.seed +
+        setGenStatus((isDuoCharacter(c) ? "Horde DUO txt2img · 2 femmes · seed " : "Horde txt2img · pose/tenue libre · seed ") + payload.seed +
           (payload.face_lock ? " · visage Gemini" : "") + "…");
       }
     } catch (e) {

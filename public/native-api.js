@@ -2352,7 +2352,7 @@
       }
       // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
-      const isDuoPrompt = /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1/i.test(prompt);
+      const isDuoPrompt = body.is_duo === true || /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women side by side/i.test(prompt);
       const negative = [
         "anime, manga, cartoon, illustration, drawing, sketch, painting, comic, webtoon, 2d art, 3d render, cgi, plastic doll,",
         "text, watermark, logo, signature, letters, words, title, caption, ui, subtitle,",
@@ -2445,7 +2445,10 @@
       const soloNeg = isDuoPrompt
         ? ", 3girls, four women, crowd, identical clone twins"
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      const qualityNeg = ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
+      // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
+      const qualityNeg = isDuoPrompt
+        ? ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, face crop only, headshot only, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
+        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const negFull = (negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 900);
 
       // UNE SEULE soumission — anonyme: coût kudos minimal
