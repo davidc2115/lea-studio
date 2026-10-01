@@ -2286,8 +2286,9 @@
     async function hordeWaitGate(kind) {
       // antiban retiré : simple espace 800ms entre submits uniquement
       if (kind === "submit") {
-        const gap = 800 - (Date.now() - _hordeLastSubmitAt);
+        const gap = 800 - (Date.now() - (_hordeLastSubmit || 0));
         if (gap > 0) await new Promise((r) => setTimeout(r, gap));
+        _hordeLastSubmit = Date.now();
       }
     }
 
