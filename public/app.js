@@ -4076,7 +4076,26 @@ function filterDiscoverList(q) {
       "tante": (c) => hasTag(c, "tante") || /tante/.test(titleOf(c)),
       "directe": (c) => hasTag(c, "directe"),
       "tactile": (c) => hasTag(c, "tactile"),
-      "fantasy": (c) => hasTag(c, "fantasy", "non-humain"),
+      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||""),
+      "slime": (c) => hasTag(c, "slime") || /fan_slime|slime|gel[eé]e/.test((c.id||"")+" "+(c.title||"")+" "+(c.name||"")),
+      "dragon": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
+      "dragonne": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
+      "succube": (c) => hasTag(c, "succube") || /fan_succube|succube/.test((c.id||"")+" "+(c.title||"")),
+      "sirene": (c) => hasTag(c, "sirène", "sirene") || /fan_sirene|sir[eè]ne/.test((c.id||"")+" "+(c.title||"")),
+      "elfe": (c) => hasTag(c, "elfe") || /fan_elfe|elfe/.test((c.id||"")+" "+(c.title||"")),
+      "kitsune": (c) => hasTag(c, "kitsune") || /fan_kitsune|kitsune/.test((c.id||"")+" "+(c.title||"")),
+      "harpie": (c) => hasTag(c, "harpie") || /fan_harpie|harpie/.test((c.id||"")+" "+(c.title||"")),
+      "dryade": (c) => hasTag(c, "dryade") || /fan_dryade|dryade/.test((c.id||"")+" "+(c.title||"")),
+      "lamia": (c) => hasTag(c, "lamia") || /fan_lamia|lamia/.test((c.id||"")+" "+(c.title||"")),
+      "gorgone": (c) => hasTag(c, "gorgone") || /fan_gorgone|gorgone/.test((c.id||"")+" "+(c.title||"")),
+      "oni": (c) => hasTag(c, "oni") || /fan_oni/.test(c.id||""),
+      "naga": (c) => hasTag(c, "naga") || /fan_naga|naga/.test((c.id||"")+" "+(c.title||"")),
+      "ange": (c) => hasTag(c, "ange") || /fan_ange/.test(c.id||""),
+      "demon": (c) => hasTag(c, "démon", "demon") || /fan_demon|d[eé]mon/.test((c.id||"")+" "+(c.title||"")),
+      "vampire": (c) => hasTag(c, "vampire") || /fan_vampire|vampire/.test((c.id||"")+" "+(c.title||"")),
+      "catgirl": (c) => hasTag(c, "catgirl") || /fan_catgirl|catgirl/.test((c.id||"")+" "+(c.title||"")),
+      "fee": (c) => hasTag(c, "fée", "fee") || /fan_fée|f[eé]e/.test((c.id||"")+" "+(c.title||"")),
+
       "non-humain": (c) => hasTag(c, "non-humain", "fantasy"),
       "duo": (c) => hasTag(c, "duo", "plan a trois", "plan à trois"),
       "jeu": (c) => hasTag(c, "jeu", "defis", "défis"),
@@ -4114,6 +4133,10 @@ function filterDiscoverList(q) {
     exactMatchers["très grande"] = exactMatchers["tres grande"];
     exactMatchers["aléatoire"] = exactMatchers["aleatoire"];
     exactMatchers["importé"] = exactMatchers["importe"];
+    exactMatchers["dragonne"] = exactMatchers["dragon"];
+    exactMatchers["sirène"] = exactMatchers["sirene"];
+    exactMatchers["démon"] = exactMatchers["demon"];
+    exactMatchers["fée"] = exactMatchers["fee"];
 
     const sn = norm(s);
     if (exactMatchers[sn]) {
@@ -8919,7 +8942,7 @@ document.querySelectorAll(".nav").forEach((b) => {
   try {
     const chars = await api("/api/characters");
     if (Array.isArray(chars) && chars[0]) {
-      state.characters = ensureLeaGallery(chars);
+      state.characters = ensureRoleTags(ensureLeaGallery(chars));
       try { renderDiscover(); } catch (_) {}
     }
   } catch { /* CAST déjà chargé */ }
