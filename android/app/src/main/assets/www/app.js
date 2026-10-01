@@ -2903,6 +2903,15 @@ function ensureRoleTags(list) {
     if (/_bs$/i.test(c.id || "") && !low.some((t) => /belle-?s/.test(t))) tags.push("belle-sœur");
     if (/_bm$/i.test(c.id || "") && !low.some((t) => /belle-?m/.test(t))) tags.push("belle-mère");
     if (/_bf$/i.test(c.id || "") && !low.some((t) => /belle-?f/.test(t))) tags.push("belle-fille");
+    const looks = String(c.looks_en || "") + " " + String(c.body || "") + " " + String(c.appearance || "");
+    const add = (tag) => { if (!low.includes(tag.toLowerCase())) { tags.push(tag); low.push(tag.toLowerCase()); } };
+    if (/blonde hair|blond hair/i.test(looks)) add("blonde");
+    if (/auburn|red hair|roux/i.test(looks)) add("rousse");
+    if (/black hair|dark brown hair|chestnut|brun/i.test(looks) && !/blonde/i.test(looks)) add("brune");
+    if (/A-cup|flat chest|bonnet a/i.test(looks)) add("petits seins");
+    if (/[D-J]-cup|bonnet [d-j]|huge|large D/i.test(looks)) add("gros seins");
+    if (/chubby|plus-size|ronde/i.test(looks + " " + (c.tags||[]).join(" "))) add("ronde");
+    if (/slime|elf|dragon|mermaid|kitsune|succub|oni|harpy|dryad|naga|angel/i.test(looks + " " + (c.id||""))) add("fantasy");
     c.tags = tags;
   }
   return list;
@@ -6001,6 +6010,12 @@ async function generatePhotoHordeFallback(prompt, c) {
         duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
+    try {
+      if (!isDuoCharacter(c) && !(extra && extra.length > 2)) {
+        const phys = String(c.looks_en || c.appearance || "").slice(0, 420);
+        prompt = phys + ", " + roleScenePack(c) + ", " + prompt;
+      }
+    } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (c.id === "duo_twins_lea") {
     return `Femme 1 : Léa (brunette aux cheveux lisses)
@@ -6172,6 +6187,19 @@ async function generateScenePhoto() {
         id + ", " + prompt +
         ", NOT face crop, NOT bust crop only, NOT headshot, NOT mirror symmetry, NOT deformed, NOT fused body parts, photorealistic";
     } catch (_) {}
+    try {
+      const recent = ((state.chat && state.chat.messages) || []).slice(-8).map((m) => (m.role || "") + ": " + String(m.content || "").slice(0, 280)).join("\n");
+      const rewritten = await api("/api/scene-prompt", { method: "POST", body: JSON.stringify({
+        name: c.name, looks: String(c.looks_en || c.appearance || "").slice(0, 700),
+        scenario: String(c.scenario || "").slice(0, 300),
+        scene: (state.chat && state.chat.scene) || {},
+        dialogue: recent, draft: prompt.slice(0, 600),
+      })});
+      if (rewritten && rewritten.prompt && rewritten.prompt.length > 40) {
+        prompt = rewritten.prompt;
+        setSceneProgress("✨ Prompt scène (Gemini)…", 9);
+      }
+    } catch (e) { console.warn("scene-prompt", e); }
     console.log("[lea scene prompt]", prompt.slice(0, 300));
 
     const sc = (state.chat && state.chat.scene) || {};
@@ -6403,6 +6431,28 @@ function toastScene(msg) {
   setSceneProgress(msg, null);
 }
 
+
+
+function roleScenePack(c) {
+  const blob = [c && c.id, c && c.title, c && c.scenario, ...((c && c.tags) || [])].join(" ").toLowerCase();
+  const packs = [
+    { re: /secr[eé]taire|bureau|coll[eè]gue/, outfit: "tight office blouse slightly unbuttoned, pencil skirt, sheer stockings, heels", place: "late night office, desk and city window" },
+    { re: /babysitter|nounou/, outfit: "soft knit top and short denim skirt, cozy but revealing", place: "living room after the kids are asleep, warm lamp" },
+    { re: /belle-?m[eè]re|belle-?s[oœ]eur|voisine|tante/, outfit: "fitted dress or silk blouse and skirt, elegant and slightly provocative", place: "warm apartment living room, evening" },
+    { re: /fantasy|slime|elf|sir[eè]ne|dragon|kitsune|succube/, outfit: "fantasy costume matching her species, revealing but species traits visible", place: "setting matching her scenario, not a random ocean unless mermaid" },
+    { re: /sport|athl/, outfit: "tight sports bra and shorts, glistening skin", place: "gym or locker room" },
+  ];
+  let pack = { outfit: "sexy fitted dress with cleavage, heels", place: "indoor apartment evening light" };
+  for (const p of packs) if (p.re.test(blob)) { pack = p; break; }
+  const poses = [
+    "leaning on a desk looking at camera, playful provocative smile",
+    "sitting on the edge of a desk or sofa, legs crossed, cleavage visible",
+    "standing three-quarter, one hand on hip, looking over shoulder",
+    "kneeling on a sofa looking up with a mischievous glance",
+    "bending slightly forward, looking back at camera",
+  ];
+  return pack.outfit + ", " + poses[Math.floor(Math.random() * poses.length)] + ", in " + pack.place;
+}
 
 async function generatePhoto() {
   // antiban local complètement désactivé

@@ -2352,6 +2352,35 @@
     }
 
 
+    if (path === "/api/scene-prompt" && method === "POST") {
+      const keys = allGeminiKeys();
+      const looks = String(body.looks || "").slice(0, 700);
+      const dial = String(body.dialogue || "").slice(0, 1600);
+      const sc = body.scene || {};
+      const draft = [
+        "photorealistic photo of adult woman",
+        body.name || "",
+        looks,
+        "outfit: " + (sc.outfit || sc.body || "as in dialogue"),
+        "place: " + (sc.place || "as in dialogue"),
+        "pose: " + (sc.pose || sc.activity || "as in dialogue"),
+        "dialogue: " + dial,
+      ].join(", ").slice(0, 1400);
+      if (!keys.length) return { prompt: draft, source: "local" };
+      const sys = "Tu écris UN prompt anglais pour Stable Diffusion. Une seule femme adulte 21+. Garde EXACTEMENT cheveux, yeux, bonnet, morphologie, traits non-humains du descriptif. Décris tenue, pose, lieu EXACTS du dialogue (pas le scénario de départ si le dialogue a changé la tenue). Pas de miroir, pas de collage. Réponds seulement le prompt, 80-140 mots.";
+      try {
+        const out = await callGemini([
+          { role: "system", content: sys },
+          { role: "user", content: "DESCRIPTIF:\\n" + looks + "\\nDIALOGUE:\\n" + dial + "\\nLIEU:" + (sc.place||"") + " TENUE:" + (sc.outfit||"") },
+        ], keys);
+        const prompt = String(out || "").replace(/\\s+/g, " ").trim().slice(0, 1400);
+        if (prompt.length > 40) return { prompt, source: "gemini" };
+      } catch (e) {
+        console.warn("[scene-prompt]", e.message || e);
+      }
+      return { prompt: draft, source: "local" };
+    }
+
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
