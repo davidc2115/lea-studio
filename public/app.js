@@ -2903,6 +2903,20 @@ function ensureRoleTags(list) {
     if (/_bs$/i.test(c.id || "") && !low.some((t) => /belle-?s/.test(t))) tags.push("belle-sœur");
     if (/_bm$/i.test(c.id || "") && !low.some((t) => /belle-?m/.test(t))) tags.push("belle-mère");
     if (/_bf$/i.test(c.id || "") && !low.some((t) => /belle-?f/.test(t))) tags.push("belle-fille");
+    const id = String(c.id || "");
+    const species = [
+      [/fan_slime|slime/, "slime"], [/fan_sirene|sirene/, "sirène"], [/fan_elfe|elfe/, "elfe"],
+      [/fan_kitsune|kitsune/, "kitsune"], [/fan_succube|succube/, "succube"], [/fan_dragon|dragon/, "dragon"],
+      [/fan_catgirl|catgirl/, "catgirl"], [/fan_ange|ange/, "ange"], [/fan_demon|demon/, "démon"],
+      [/fan_vampire|vampire/, "vampire"], [/fan_fée|fee/, "fée"], [/fan_dryade|dryade/, "dryade"],
+      [/fan_lamia|lamia/, "lamia"], [/fan_harpie|harpie/, "harpie"], [/fan_robot|robot/, "robot"],
+      [/fan_loup|loup/, "louve"], [/fan_centaure|centaure/, "centaure"], [/fan_gorgone|gorgone/, "gorgone"],
+      [/fan_oni|oni/, "oni"], [/fan_naga|naga/, "naga"], [/fan_phoenix|phoenix/, "phénix"],
+      [/fan_ghost|ghost/, "fantôme"], [/fan_witch|witch/, "sorcière"],
+    ];
+    for (const [re, tag] of species) {
+      if (re.test(id + " " + (c.title || "")) && !low.includes(tag)) { tags.push(tag); low.push(tag); tags.push("fantasy"); }
+    }
     const looks = String(c.looks_en || "") + " " + String(c.body || "") + " " + String(c.appearance || "");
     const add = (tag) => { if (!low.includes(tag.toLowerCase())) { tags.push(tag); low.push(tag.toLowerCase()); } };
     if (/blonde hair|blond hair/i.test(looks)) add("blonde");
@@ -5163,22 +5177,39 @@ function duoCompositionBlock(c) {
     ethLine = "(two European women:1.3), fair skin,";
   }
 
+  function ageOf(text) {
+    const m = String(text || "").match(/(\d{2})\s*(?:year|ans|yo)/i);
+    return m ? parseInt(m[1], 10) : 0;
+  }
+  let a1 = ageOf(p1) || ageOf((looks.split(/RIGHT\s/i)[0] || ""));
+  let a2 = ageOf(p2) || ageOf((looks.split(/RIGHT\s/i)[1] || ""));
+  if (!a1) a1 = ageOf(appFr.split(/2\)/)[0] || "");
+  if (!a2) a2 = ageOf((appFr.split(/2\)/)[1] || ""));
+  let ageLine = "";
+  if (a1 && a2 && Math.abs(a1 - a2) >= 8) {
+    const older = a1 > a2 ? "LEFT" : "RIGHT";
+    const younger = a1 > a2 ? "RIGHT" : "LEFT";
+    ageLine = "(" + older + " woman is visibly older " + Math.max(a1, a2) + " years old mature face:1.8), (" + younger + " woman is visibly younger " + Math.min(a1, a2) + " years old youthful face:1.8), obvious age gap, NOT same age,";
+  } else if (a1 && a2) {
+    ageLine = "(LEFT " + a1 + " years old:1.5), (RIGHT " + a2 + " years old:1.5),";
+  }
   // Prompt COURT et TRÈS pondéré (Horde ignore les pavés longs)
   return [
     "(2girls:1.9), (two distinct women:1.85), (two women side by side:1.8),",
     "(both women fully visible head to thighs:1.7), (two faces two bodies:1.75),",
     "NOT solo, NOT 1girl, NOT single woman, NOT one person only,",
     ethLine,
+    ageLine,
     // LEFT
     "(LEFT woman " + n1 + ":1.6),",
     h1 ? ("(LEFT has " + h1 + ":1.85),") : "",
-    "(" + d1 + ":1.8),",
-    "(LEFT breast size " + c1.toUpperCase() + "-cup only:1.75),",
+    "(LEFT " + d1 + ":1.85),",
+    "(LEFT breast size " + c1.toUpperCase() + "-cup only:1.8),",
     // RIGHT
     "(RIGHT woman " + n2 + ":1.6),",
     h2 ? ("(RIGHT has " + h2 + ":1.85),") : "",
-    "(" + d2 + ":1.8),",
-    "(RIGHT breast size " + c2.toUpperCase() + "-cup only:1.75),",
+    "(RIGHT " + d2 + ":1.85),",
+    "(RIGHT breast size " + c2.toUpperCase() + "-cup only:1.8),",
     // Contrastes
     "(different hair colors:1.8),",
     "(different breast sizes:1.85),",
@@ -6013,7 +6044,8 @@ async function generatePhotoHordeFallback(prompt, c) {
     try {
       if (!isDuoCharacter(c) && !(extra && extra.length > 2)) {
         const phys = String(c.looks_en || c.appearance || "").slice(0, 420);
-        prompt = phys + ", " + roleScenePack(c) + ", " + prompt;
+        const sp = speciesLock(c);
+        prompt = (sp ? sp + ", " : "") + phys + ", " + roleScenePack(c) + ", " + prompt;
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
@@ -6182,7 +6214,8 @@ async function generateScenePhoto() {
       if (em) eyeHair += "(" + em[1] + "), ";
       if (hm) eyeHair += "(" + hm[1] + "), ";
       const id = typeof faceIdentityLock === "function" ? faceIdentityLock(c) : "";
-      prompt = "(solo:1.4), single adult woman, " + eyeHair +
+      const spLock = (typeof speciesLock === "function") ? speciesLock(c) : "";
+      prompt = (spLock ? spLock + ", " : "") + "(solo:1.4), single adult woman, " + eyeHair +
         "(full body wide shot head to mid-thigh:1.55), hips and legs visible, " +
         id + ", " + prompt +
         ", NOT face crop, NOT bust crop only, NOT headshot, NOT mirror symmetry, NOT deformed, NOT fused body parts, photorealistic";
@@ -6433,13 +6466,45 @@ function toastScene(msg) {
 
 
 
+function speciesLock(c) {
+  const id = String((c && c.id) || "") + " " + String((c && c.title) || "");
+  const map = [
+    [/slime/i, "(slime girl:1.8), glossy translucent gelatinous humanoid skin, human face, human legs, standing in bathroom, NOT mermaid, NOT fish tail, NOT scales, NOT ocean"],
+    [/sir[eè]ne|sirene/i, "(mermaid:1.8), mermaid tail instead of legs, iridescent scales on tail only, NOT slime, NOT horns, NOT legs"],
+    [/elfe|\belf\b/i, "(elf woman:1.7), pointed elf ears, human legs, NOT mermaid, NOT slime, NOT horns"],
+    [/kitsune/i, "(kitsune:1.75), fox ears, multiple fox tails, NOT mermaid, NOT slime, NOT cat ears"],
+    [/succube/i, "(succubus:1.75), small curved horns, small bat wings, spaded tail, human legs, NOT mermaid, NOT slime"],
+    [/dragon/i, "(dragon woman:1.75), small dragon horns, scale patches on shoulders only, human legs on land, NOT mermaid, NOT fish tail, NOT slime"],
+    [/catgirl|neko/i, "(catgirl:1.7), cat ears, cat tail, human legs, NOT fox, NOT mermaid, NOT slime"],
+    [/\bange\b/i, "(angel woman:1.75), large white feathered wings, human legs, NOT bat wings, NOT mermaid, NOT slime"],
+    [/demon|d[eé]mon/i, "(demon woman:1.75), black demon horns, small bat wings, spaded tail, human legs, NOT mermaid, NOT slime, NOT angel"],
+    [/vampire/i, "(vampire woman:1.7), pale skin, subtle fangs, human legs, NOT mermaid, NOT slime, NOT horns"],
+    [/f[eé]e|\bfee\b/i, "(fairy woman:1.7), small translucent insect wings, human legs, NOT mermaid, NOT slime"],
+    [/dryade/i, "(dryad:1.75), bark texture on arms, leaves in hair, human legs, forest, NOT mermaid, NOT slime"],
+    [/lamia/i, "(lamia:1.8), snake lower body instead of legs, human torso, NOT mermaid, NOT slime, NOT fish"],
+    [/harpie/i, "(harpy:1.8), feathered bird wings, bird talons, NOT mermaid, NOT slime, NOT bat wings"],
+    [/gorgone/i, "(gorgon:1.8), living snakes for hair, human legs, NOT mermaid, NOT slime"],
+    [/oni/i, "(oni woman:1.75), one or two oni horns, human legs, NOT mermaid, NOT slime"],
+    [/naga/i, "(naga:1.8), snake tail lower body, human torso, NOT mermaid, NOT fish tail"],
+    [/centaure/i, "(centaur woman:1.8), human torso on horse body, NOT mermaid, NOT slime"],
+    [/loup|wolf/i, "(wolf woman:1.7), wolf ears, wolf tail, human legs, NOT mermaid, NOT slime"],
+    [/robot/i, "(android woman:1.7), visible panel seams, humanoid robot, NOT mermaid, NOT slime"],
+    [/phoenix/i, "(phoenix woman:1.7), fire-tipped feathers, wings, human legs, NOT mermaid, NOT slime"],
+    [/ghost|fant[oô]me/i, "(ghost woman:1.7), slightly translucent, human legs, NOT mermaid, NOT slime"],
+  ];
+  for (const [re, line] of map) if (re.test(id)) return line;
+  return "";
+}
+
 function roleScenePack(c) {
   const blob = [c && c.id, c && c.title, c && c.scenario, ...((c && c.tags) || [])].join(" ").toLowerCase();
   const packs = [
     { re: /secr[eé]taire|bureau|coll[eè]gue/, outfit: "tight office blouse slightly unbuttoned, pencil skirt, sheer stockings, heels", place: "late night office, desk and city window" },
     { re: /babysitter|nounou/, outfit: "soft knit top and short denim skirt, cozy but revealing", place: "living room after the kids are asleep, warm lamp" },
     { re: /belle-?m[eè]re|belle-?s[oœ]eur|voisine|tante/, outfit: "fitted dress or silk blouse and skirt, elegant and slightly provocative", place: "warm apartment living room, evening" },
-    { re: /fantasy|slime|elf|sir[eè]ne|dragon|kitsune|succube/, outfit: "fantasy costume matching her species, revealing but species traits visible", place: "setting matching her scenario, not a random ocean unless mermaid" },
+    { re: /slime/, outfit: "nothing covering the translucent jelly skin, humanoid slime girl", place: "bathroom by bathtub, indoor, NOT ocean NOT underwater" },
+    { re: /sir[eè]ne|sirene/, outfit: "mermaid, seashell top", place: "rocky shore, mermaid tail visible" },
+    { re: /fantasy|elf|dragon|kitsune|succube|dryade|harpie|lamia/, outfit: "outfit that leaves species traits visible", place: "setting of her species, NOT ocean unless mermaid" },
     { re: /sport|athl/, outfit: "tight sports bra and shorts, glistening skin", place: "gym or locker room" },
   ];
   let pack = { outfit: "sexy fitted dress with cleavage, heels", place: "indoor apartment evening light" };
