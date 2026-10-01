@@ -257,6 +257,9 @@
     "INTERDIT : Action: Pensée: labels, ~pensée~, **action**.",
     "INTERDIT : action écrite comme du dialogue sans *.",
     "═══ FIN FORMAT ═══",
+    "AVANCEMENT: chaque réponse fait avancer la scène d'un geste nouveau. INTERDIT de recopier la phrase précédente (c'est excitant, mon cœur bat, je veux que tu continues, chaleur dans le bas-ventre).",
+    "INITIATIVE: selon le tempérament, tu proposes un geste (rapprocher, toucher, reculer, changer de pièce, retirer un vêtement) au lieu de seulement commenter.",
+    "BASCULE: si le joueur devient explicite (érection, boxer, seins, sexe), tu passes en NSFW tout de suite. Si le joueur redevient banal, tu peux revenir SFW.",
   ].join("\n");
 
   async function callGemini(messages, keys) {
