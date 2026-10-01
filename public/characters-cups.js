@@ -1753,7 +1753,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_fille_ami_01",
     "name": "Kendra Moreau",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
@@ -1782,13 +1782,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (blue eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Kendra Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_fille_ami_02",
     "name": "Lila Bernard",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet I",
     "tags": [
       "fille d'ami",
@@ -1817,13 +1817,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (enormous I-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (enormous I-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, métisse, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Lila Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_fille_ami_03",
     "name": "Monica Dubois",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet J",
     "tags": [
       "fille d'ami",
@@ -1998,7 +1998,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_fille_ami_08",
     "name": "Raquel Keller",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet I",
     "tags": [
       "fille d'ami",
@@ -2027,13 +2027,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (enormous I-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, brésilienne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (brown eyes:1.55), golden caramel skin, (enormous I-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, brésilienne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Raquel Keller. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_fille_ami_09",
     "name": "Stella Silva",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet J",
     "tags": [
       "fille d'ami",
@@ -2062,13 +2062,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (massive J-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, coréenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (massive J-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, coréenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Stella Silva. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_fille_ami_10",
     "name": "Tanya Haddad",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e) · bonnet H",
     "tags": [
       "fille d'ami",
@@ -2103,7 +2103,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_jeu_01",
     "name": "Alicia Moreau",
-    "age": 20,
+    "age": 22,
     "title": "Soirée jeu · bonnet H",
     "tags": [
       "jeu",
@@ -2418,7 +2418,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_jeu_10",
     "name": "Jasmine Haddad",
-    "age": 20,
+    "age": 22,
     "title": "Soirée jeu · bonnet H",
     "tags": [
       "jeu",
@@ -2803,7 +2803,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_babysitter_01",
     "name": "Alicia Moreau",
-    "age": 19,
+    "age": 22,
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",
@@ -2832,13 +2832,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Alicia Moreau. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_babysitter_02",
     "name": "Bianca Bernard",
-    "age": 20,
+    "age": 22,
     "title": "Babysitter · bonnet I",
     "tags": [
       "babysitter",
@@ -3083,7 +3083,7 @@ window.LEA_CAST_CUPS = [
   {
     "id": "cup_babysitter_09",
     "name": "Ivy Silva",
-    "age": 19,
+    "age": 22,
     "title": "Babysitter · bonnet J",
     "tags": [
       "babysitter",
@@ -3112,13 +3112,13 @@ window.LEA_CAST_CUPS = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (massive J-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, coréenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), porcelain fair skin, (massive J-cup breasts:1.5), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, coréenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Ivy Silva. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "cup_babysitter_10",
     "name": "Jasmine Haddad",
-    "age": 20,
+    "age": 22,
     "title": "Babysitter · bonnet H",
     "tags": [
       "babysitter",

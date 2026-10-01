@@ -845,9 +845,12 @@ function faceIdentityLock(c) {
   const app = String(c.appearance || "");
   const tags = Array.isArray(c.tags) ? c.tags.join(" ") : "";
   const blob = [looks, body, app, tags, c.title, id].join(" ").toLowerCase();
+  // Horde TOS: jamais insister sur 18 ans (filtre anti-mineur). Minimum visuel 21+.
   const age = Math.max(18, Number(c.age) || 25);
-  const isFantasy = /fan_|fantasy|dragon|ange|angel|sir[eè]ne|mermaid|kitsune|elfe|\belf\b|succube|d[eé]mon|catgirl|vampire/i.test(blob);
-  const visAge = (isFantasy && age > 35) ? 25 : age;
+  const isFantasy = /fan_|fantasy|dragon|ange|angel|sir[eè]ne|mermaid|kitsune|elfe|\belf\b|succube|d[eé]mon|catgirl|vampire|slime|gel[eé]e|harpie|dryade|gorgone|naga|lamia|oni|phoenix|ghost|witch|centaure|loup|robot|f[eé]e/i.test(blob);
+  let visAge = (isFantasy && age > 35) ? 25 : age;
+  if (visAge < 21) visAge = 22; // clamp anti-TOS
+  if (visAge > 55 && isFantasy) visAge = 28;
 
   // Léa : galerie exacte
   if (id === "lea") {
@@ -862,8 +865,8 @@ function faceIdentityLock(c) {
   }
 
   const parts = [];
-  // Âge visuel
-  parts.push("(" + visAge + " year old woman:1.5)", "(looks exactly " + visAge + ":1.45)");
+  // Âge visuel adulte (pas "exactly 18")
+  parts.push("(" + visAge + " year old adult woman:1.45)", "young adult woman,");
 
   // looks_en COMPLET en priorité (cheveux yeux poitrine corps fantasy)
   if (looks.length > 30) {
@@ -1058,7 +1061,7 @@ function buildLeaImagePrompt(extra = "") {
     const defaultWetOutfit = !(ex0 && ex0.overridesOutfit);
     return [
       "ultra photorealistic DSLR photo of Léa,",
-      "(1girl:1.55), (solo:1.5), single woman only, NOT 2girls, NOT twins, NOT clones, NOT mirror,",
+      "(solo:1.45), single adult woman only, NOT 2girls, NOT twins, NOT clones, NOT mirror,",
       faceIdentityLock(c) + ",",
       "(18-21 year old young French woman:1.4), (looks exactly 21:1.35),",
       "oval porcelain face, delicate bone structure, soft jaw, subtle cheekbones,",
@@ -1421,14 +1424,23 @@ function buildLeaImagePrompt(extra = "") {
     if (/sir[eè]ne|mermaid|fan_sirene/i.test(fantBlob) && !hasUser) {
       loc = "underwater ocean or rocky seashore with clear water, mermaid habitat";
     }
+    // Clamp âge prompt (Horde ban si "18" + corps sexualisé)
+    let ageSafe = ageN;
+    if (!ageSafe || ageSafe < 21) ageSafe = 22;
+    if (isFantasy && ageSafe > 35) ageSafe = 25;
     const ageLock = (isFantasy && ageN > 35)
-      ? "(ageless adult beauty mid-20s:1.55), young adult woman face,"
-      : "(looks exactly " + ageN + " years old:1.55), (" + ageN + " year old woman:1.5),";
-    // looks_en COMPLET en tête (corps + fantasy + cheveux + yeux) — ne pas tronquer à 220
+      ? "(ageless adult beauty mid-20s:1.5), young adult woman face,"
+      : "(" + ageSafe + " year old adult woman:1.45), young adult woman,";
+    // looks_en COMPLET — éviter 1girl (parfois flaggé) + strip 18 ans du looks
+    const looksClean = String(looks || "")
+      .replace(/\(?looks exactly 1[89][^)]*\)?/gi, "")
+      .replace(/\(?1[89] year old[^)]*\)?/gi, "")
+      .replace(/\b1[89] year old woman\b/gi, "22 year old adult woman")
+      .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(1girl:1.55), (solo:1.5), single woman only,",
+      "(solo:1.45), single adult woman only,",
       ageLock,
-      looks, // contains body type + fantasy + hair/eyes/breasts
+      looksClean, // contains body type + fantasy + hair/eyes/breasts
       (phys.positive || []).slice(0, 12).join(", "),
       (phys.features || []).slice(0, 8).join(", "),
     ].filter(Boolean).join(", ");
@@ -3336,7 +3348,7 @@ async function adaptImportedCharacter(char) {
       "   - peau, morphologie, poitrine (bonnet si connu)",
       "   - traits NON-HUMAINS s'ils existent: oreilles de renard/chat/loup, queue, cornes, ailes, oreilles d'elfe, etc. — NE JAMAIS les supprimer ni les inventer",
       "6) looks_en (ANGLAIS, pour Stable Diffusion) = une seule phrase détaillée, ex:",
-      "   '18 year old european woman, long dark brown hair tied up, green eyes, fair skin, B-cup breasts, slim body, fox ears on head, fluffy fox tail'",
+      "   '22 year old european adult woman, long dark brown hair tied up, green eyes, fair skin, B-cup breasts, slim body, fox ears on head, fluffy fox tail'",
       "   Doit coller à appearance. Inclure TOUS les traits non-humains. Couleur de cheveux obligatoire.",
       "7) personality = traits + façon de parler, condensé FR.",
       "8) greeting = 1er message format Léa Studio:",
@@ -5556,8 +5568,9 @@ function identityLock(c) {
     keisha: "dark skin, large breasts, very round butt",
   };
   const specific = locks[c.id] || "";
+  const ageD = Math.max(21, Number(age) || 25);
   const ageLock = [
-    "(" + age + " year old woman:1.4)",
+    "(" + ageD + " year old adult woman:1.4)",
     "(looks exactly " + age + " years old:1.35)",
     "youthful face appropriate for age " + age,
     age <= 25
@@ -6151,7 +6164,7 @@ async function generateScenePhoto() {
       if (em) eyeHair += "(" + em[1] + "), ";
       if (hm) eyeHair += "(" + hm[1] + "), ";
       const id = typeof faceIdentityLock === "function" ? faceIdentityLock(c) : "";
-      prompt = "(1girl:1.5), (solo:1.45), " + eyeHair +
+      prompt = "(solo:1.4), single adult woman, " + eyeHair +
         "(full body wide shot head to mid-thigh:1.55), hips and legs visible, " +
         id + ", " + prompt +
         ", NOT face crop, NOT bust crop only, NOT headshot, NOT mirror symmetry, NOT deformed, NOT fused body parts, photorealistic";
@@ -6508,7 +6521,7 @@ async function generatePhoto() {
         "(medium-wide shot from thighs up:1.5), (breasts and waist and hips visible:1.45), ",
       ];
       const frame = frames[Math.floor(Math.random() * frames.length)];
-      const soloLock = "(1girl:1.55), (solo:1.5), only one woman, ";
+      const soloLock = "(solo:1.45), single adult woman only, ";
       const idLock = faceIdentityLock(c);
       // Yeux + cheveux extraits en priorité absolue
       let eyeFirst = "";

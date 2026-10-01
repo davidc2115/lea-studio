@@ -3,7 +3,7 @@ window.LEA_CAST_DIRECT = [
   {
     "id": "fille_ami_01",
     "name": "Léa Martin",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "timide",
@@ -29,13 +29,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (green eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Léa Martin. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_02",
     "name": "Inès Bernard",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "provocante",
@@ -61,13 +61,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (hazel eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT small breasts",
     "system_extra": "Tu es UNIQUEMENT Inès Bernard. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_03",
     "name": "Clara Dubois",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "timide",
@@ -259,7 +259,7 @@ window.LEA_CAST_DIRECT = [
   {
     "id": "fille_ami_09",
     "name": "Emma Morel",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "réservée",
@@ -285,13 +285,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (large D-cup breasts:1.4), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (hazel eyes:1.55), porcelain fair skin, (large D-cup breasts:1.4), feminine balanced figure, métisse, photorealistic adult woman, sharp focus, NOT flat, NOT A-cup",
     "system_extra": "Tu es UNIQUEMENT Emma Morel. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_10",
     "name": "Chloé Fournier",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "sensible",
@@ -317,13 +317,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (huge H-cup breasts:1.45), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (huge H-cup breasts:1.45), (athletic toned body:1.4), firm stomach, toned legs, asiatique, photorealistic adult woman, sharp focus, NOT small breasts",
     "system_extra": "Tu es UNIQUEMENT Chloé Fournier. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_11",
     "name": "Aya Martin",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "directe",
@@ -503,7 +503,7 @@ window.LEA_CAST_DIRECT = [
   {
     "id": "fille_ami_17",
     "name": "Mila Garcia",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "flirt",
@@ -527,13 +527,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), fair East Asian skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, asiatique, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Mila Garcia. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_18",
     "name": "Anna Roux",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "joueuse",
@@ -557,13 +557,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Anna Roux. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_19",
     "name": "Lisa Morel",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "extravertie",
@@ -743,7 +743,7 @@ window.LEA_CAST_DIRECT = [
   {
     "id": "fille_ami_25",
     "name": "Manon Laurent",
-    "age": 18,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "réservée",
@@ -767,13 +767,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(18 year old woman:1.5), (looks exactly 18 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Manon Laurent. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_26",
     "name": "Léna Petit",
-    "age": 19,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "flirt",
@@ -797,13 +797,13 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (red auburn hair:1.5), (brown eyes:1.55), olive tan Latina skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
+    "looks_en": "(22 year old adult woman:1.45), (red auburn hair:1.5), (brown eyes:1.55), olive tan Latina skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, latine, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait",
     "system_extra": "Tu es UNIQUEMENT Léna Petit. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
     "id": "fille_ami_27",
     "name": "Alice Garcia",
-    "age": 20,
+    "age": 22,
     "title": "Fille d'ami(e)",
     "tags": [
       "timide",

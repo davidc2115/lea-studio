@@ -355,7 +355,7 @@ window.LEA_CAST_NEW = [
   {
     "id": "duo_etudiantes",
     "name": "Léna & Camille",
-    "age": 20,
+    "age": 22,
     "title": "Colocs étudiantes",
     "tags": ["directe", "amies", "duo", "nsfw", "plan à trois", "bonnet c", "bonnet a"],
     "cover": "images/cast/duo_etudiantes.jpg",
@@ -963,7 +963,7 @@ window.LEA_CAST_NEW = [
   {
     "id": "game_01",
     "name": "Alice Martin",
-    "age": 19,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "réservée",
@@ -987,12 +987,12 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (chestnut brown hair:1.5), (hazel eyes:1.55), porcelain fair skin, (B-cup breasts:1.3), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, européenne, photorealistic adult woman, sharp focus, NOT huge breasts, full body or torso hips visible, NOT face-only portrait"
   },
   {
     "id": "game_02",
     "name": "Barbara Bernard",
-    "age": 20,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "dominante",
@@ -1253,7 +1253,7 @@ window.LEA_CAST_NEW = [
   {
     "id": "game_11",
     "name": "Karine Martin",
-    "age": 19,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "directe",
@@ -1277,12 +1277,12 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (jet-black hair:1.5), (brown eyes:1.55), golden caramel skin, (huge H-cup breasts:1.45), (voluptuous hourglass:1.5), (narrow waist:1.35), (full round butt:1.3), curvy sexy figure, NOT chubby belly, NOT plus-size overweight, NOT skinny flat, africaine, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
   },
   {
     "id": "game_12",
     "name": "Laura Bernard",
-    "age": 20,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "provocante",
@@ -1543,7 +1543,7 @@ window.LEA_CAST_NEW = [
   {
     "id": "game_21",
     "name": "Vera Martin",
-    "age": 19,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "flirt",
@@ -1567,12 +1567,12 @@ window.LEA_CAST_NEW = [
       "living room",
       "sofa"
     ],
-    "looks_en": "(19 year old woman:1.5), (looks exactly 19 not older:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
+    "looks_en": "(22 year old adult woman:1.45), (blonde hair:1.5), (green eyes:1.55), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), narrow frame, NOT thick thighs, NOT plus-size, slave, photorealistic adult woman, sharp focus, NOT small breasts, full body or torso hips visible, NOT face-only portrait"
   },
   {
     "id": "game_22",
     "name": "Wendy Bernard",
-    "age": 20,
+    "age": 22,
     "title": "Soirée jeu",
     "tags": [
       "provocante",
