@@ -2252,8 +2252,8 @@
     let _hordeLastStatus = 0;
     let _hordeIpBlockedUntil = 0;
     try {
-      const saved = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
-      if (saved > Date.now()) _hordeIpBlockedUntil = saved;
+      localStorage.removeItem("lea.hordeBlockedUntil");
+      _hordeIpBlockedUntil = 0;
     } catch (_) {}
     const HORDE_MIN_SUBMIT_MS = 45000; // 45s entre soumissions (anon) // 18s entre 2 soumissions (anon)
     const HORDE_MIN_STATUS_MS = 8000; // 8s min entre checks  // 6s entre checks
@@ -2284,37 +2284,16 @@
     }
 
     async function hordeWaitGate(kind) {
-      const now = Date.now();
-      try {
-        const saved = Number(localStorage.getItem("lea.hordeBlockedUntil") || 0);
-        if (saved > _hordeIpBlockedUntil) _hordeIpBlockedUntil = saved;
-      } catch (_) {}
-      if (_hordeIpBlockedUntil > now) {
-        const sec = Math.ceil((_hordeIpBlockedUntil - now) / 1000);
-        throw new Error(
-          "Horde : IP bloquée encore " + formatWaitFr(sec) +
-          ". N'envoie PLUS de génération pendant ce délai (ça prolonge le ban). " +
-          "Astuce : crée un compte gratuit sur aihorde.net et colle ta clé dans Clés → moins de blocages."
-        );
+      // antiban retiré : simple espace 800ms entre submits uniquement
+      if (kind === "submit") {
+        const gap = 800 - (Date.now() - _hordeLastSubmitAt);
+        if (gap > 0) await new Promise((r) => setTimeout(r, gap));
       }
-      const last = kind === "status" ? _hordeLastStatus : _hordeLastSubmit;
-      const min = kind === "status" ? HORDE_MIN_STATUS_MS : HORDE_MIN_SUBMIT_MS;
-      const wait = last + min - now;
-      if (wait > 0) {
-        await new Promise((r) => setTimeout(r, wait));
-      }
-      if (kind === "status") _hordeLastStatus = Date.now();
-      else _hordeLastSubmit = Date.now();
     }
 
     function markHordeRateLimit(msg) {
-      const ms = parseHordeWaitMs(msg);
-      if (ms > 0) {
-        _hordeIpBlockedUntil = Math.max(_hordeIpBlockedUntil, Date.now() + ms);
-        try {
-          localStorage.setItem("lea.hordeBlockedUntil", String(_hordeIpBlockedUntil));
-        } catch (_) {}
-      }
+      // antiban retiré — ne plus bloquer l'IP localement
+      return;
     }
     /** Après un job réussi : cooldown soumission pour ne pas reban l'IP */
     function markHordeJobDone() {
@@ -2538,12 +2517,8 @@
             markHordeRateLimit(last);
             // Rate limit / IP timeout : ne pas spammer l'autre host
             if (/timeout for|abuse prevention|2 per 1 second|rate limit|too many|429/i.test(String(last))) {
-              const sec = Math.ceil(parseHordeWaitMs(last) / 1000) || 60;
-              throw new Error(
-                "Horde : IP bloquée encore " + formatWaitFr(sec) +
-                ". Attends sans cliquer (sinon le ban continue). Clé gratuite : aihorde.net → champ Horde dans Clés. " +
-                String(last).slice(0, 80)
-              );
+              // pas de ban local — simplement passer au payload suivant / réessayer
+              continue;
             }
           } catch (e) {
             last = String(e.message || e);

@@ -244,9 +244,9 @@ function physicalLocksFromText(c) {
   } else if (is(/harpie|fan_harpie/)) {
     nh.push("(large feathered bird wings:1.6)", "feathers on shoulders", "harpy");
     nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, snake hair, elf ears";
-  } else if (is(/slime|fan_slime|gel/)) {
-    nh.push("semi-translucent gelatinous skin", "slime girl glow");
-    nhNeg += ", demon horns, fox ears, cat ears, bat wings, animal tail, solid opaque human only";
+  } else if (is(/slime|fan_slime|gel|mochi/)) {
+    nh.push("semi-translucent gelatinous slime skin", "glossy jelly body", "human legs");
+    nhNeg += ", mermaid, mermaid tail, fish scales, fish tail, fins, underwater, ocean, coral reef, demon horns, fox ears, cat ears, bat wings, animal ears, snake hair, angel wings";
   } else if (is(/andro|robot|fan_robot/)) {
     nh.push("subtle android joints", "blue circuit lines under synthetic skin", "android girl");
     nhNeg += ", demon horns, fox ears, cat ears, bat wings, mermaid scales, animal tail, elf ears";
@@ -384,8 +384,17 @@ function physicalLocksFromText(c) {
       out.positive.push("(two short thick oni horns:1.7)", "japanese oni", "human legs standing on land");
       out.negative.push("mermaid, mermaid tail, fish tail, underwater, ocean, fox ears, elf ears");
     }
-    if (/slime/i.test(nh+blob)) {
-      out.positive.push("(slime girl:1.4)", "translucent body");
+    if (/slime|gel[eé]e|mochi/i.test(nh+blob)) {
+      out.positive.push(
+        "(translucent gelatinous slime girl:1.7)",
+        "glossy jelly skin",
+        "human legs on solid floor",
+        "indoor bathroom or lab"
+      );
+      out.negative.push(
+        "mermaid", "mermaid tail", "fish scales", "fish tail", "fins",
+        "underwater", "ocean", "coral", "horns", "wings", "animal ears"
+      );
     }
     if (/android|andro[iï]de|robot/i.test(nh+blob)) {
       out.positive.push("(android robot girl:1.35)", "subtle mechanical joints");
@@ -981,13 +990,17 @@ function faceIdentityLock(c) {
     parts.push("(centaur horse lower body:1.7)", "NOT mermaid, NOT human legs only");
   } else if (/gorgone|medusa|snake hair/i.test(blob)) {
     parts.push("(living snakes for hair:1.65)", "NOT mermaid, NOT normal hair only");
-  } else if (/slime/i.test(blob)) {
+  } else if (/slime|gel[eé]e|mochi/i.test(blob)) {
     parts.push(
-      "(translucent slime girl body:1.7)",
-      "(glossy jelly translucent skin:1.55)",
-      "semi-transparent colorful slime, amorphous soft edges,",
-      "NO horns, NO mermaid tail, NO animal ears, NO wings,",
-      "full body visible"
+      "(translucent gelatinous slime girl:1.85)",
+      "(glossy jelly translucent skin:1.7)",
+      "(semi-transparent colorful slime body:1.65)",
+      "amorphous soft jelly edges, humanoid slime standing on human legs,",
+      "indoor bathroom or laboratory, dry air, NOT underwater,",
+      "NO horns of any kind, NO mermaid tail, NO fish scales, NO fish tail,",
+      "NO fins, NO wings, NO animal ears, NO snake hair,",
+      "NOT mermaid, NOT underwater, NOT ocean, NOT swimming, NOT coral reef,",
+      "full body head to feet visible"
     );
   } else if (/android|robot/i.test(blob)) {
     parts.push("(android robot girl:1.5)", "mechanical joints,", "NOT mermaid, NOT animal ears");
@@ -1418,11 +1431,22 @@ function buildLeaImagePrompt(extra = "") {
     const fantBlob = [c.id, c.title, (c.tags || []).join(" "), c.appearance, looks].filter(Boolean).join(" ");
     const isFantasy = /fan_|fantasy|non-humain|elfe|kitsune|succube|dragon|vampire|catgirl|ange|angel|sir[eè]ne|d[eé]mon/i.test(fantBlob);
     // Évite mer/plage pour fantasy SAUF sirènes (elles DOIVENT être dans l'eau)
-    if (isFantasy && !hasUser && !/sir[eè]ne|mermaid|fan_sirene/i.test(fantBlob) && /ocean|sea|beach|water|pool|plage|mer/i.test(loc)) {
-      loc = "soft indoor light, neutral background";
+    if (/slime|gel[eé]e|mochi|fan_slime/i.test(fantBlob) && !hasUser) {
+      loc = "indoor bathroom with bathtub or chemistry laboratory, tiled floor, indoor lighting, dry room";
+    } else if (isFantasy && !hasUser && !/sir[eè]ne|mermaid|fan_sirene|naga|lamia/i.test(fantBlob) && /ocean|sea|beach|water|pool|plage|mer|underwater/i.test(loc)) {
+      loc = "soft indoor light, neutral dry background, standing on solid floor";
     }
     if (/sir[eè]ne|mermaid|fan_sirene/i.test(fantBlob) && !hasUser) {
       loc = "underwater ocean or rocky seashore with clear water, mermaid habitat";
+    }
+    if (/naga|lamia/i.test(fantBlob) && !hasUser) {
+      loc = "ancient temple ruins on land, dry stone floor";
+    }
+    if (/dryade/i.test(fantBlob) && !hasUser) {
+      loc = "deep forest among trees, mossy ground";
+    }
+    if (/dragon|oni|succube|demon|ange|angel|kitsune|catgirl|elfe|elf|harpie|gorgone|phoenix|ghost|witch|centaure|loup|robot|f[eé]e|fairy/i.test(fantBlob) && !hasUser && /ocean|underwater|mermaid/i.test(loc)) {
+      loc = "indoor room with solid floor, soft lighting";
     }
     // Clamp âge prompt (Horde ban si "18" + corps sexualisé)
     let ageSafe = ageN;
@@ -1471,14 +1495,14 @@ function buildLeaImagePrompt(extra = "") {
       fantBoost = "(two short thick oni horns:1.7), japanese oni, human legs standing on land, NOT mermaid, NOT underwater, NOT fish tail,";
     } else if (/gorgone|medusa/i.test(fantBlob)) {
       fantBoost = "(living snakes instead of hair:1.75), medusa gorgon, human legs, NOT mermaid, NOT horns, NOT underwater,";
-    } else if (/slime/i.test(fantBlob)) {
-      fantBoost = "(translucent slime girl body:1.7), glossy jelly skin, NO horns, NO mermaid, NO wings,";
+    } else if (/slime|gel[eé]e|mochi/i.test(fantBlob)) {
+      fantBoost = "(translucent gelatinous slime girl:1.85), (glossy jelly skin:1.7), human legs, indoor bathroom or lab, NOT underwater, NOT ocean, NOT mermaid, NOT fish tail, NOT horns, NOT fins, NOT wings, NOT coral,";
     } else if (/harpie/i.test(fantBlob)) {
-      fantBoost = "(large feathered bird wings:1.7), avian, full body wings, NOT mermaid, NOT horns,";
+      fantBoost = "(large feathered bird wings:1.75), bird-woman, feathered wings spread, humanoid torso, talon-like hands, standing or mid-air above cliffs, NOT mermaid, NOT fish, NOT horns, NOT underwater,";
     } else if (/dryade/i.test(fantBlob)) {
-      fantBoost = "(dryad:1.5), leaves in hair, bark accents, forest, NOT mermaid, NOT horns,";
+      fantBoost = "(dryad nature spirit:1.65), bark-like skin accents, green leaves and vines woven in hair, deep forest trees, human legs on mossy ground, NOT mermaid, NOT horns, NOT underwater, NOT scales,";
     } else if (/f[eé]e|fairy/i.test(fantBlob)) {
-      fantBoost = "(translucent fairy wings:1.7), delicate fairy, NOT horns, NOT mermaid,";
+      fantBoost = "(translucent iridescent fairy wings:1.75), small delicate fairy woman, garden or forest clearing, human legs, NOT horns, NOT mermaid, NOT underwater, NOT bat wings,";
     } else if (/d[eé]mon|demon/i.test(fantBlob)) {
       fantBoost = "(demon horns:1.6), demon tail, NOT angel wings, NOT mermaid,";
     }

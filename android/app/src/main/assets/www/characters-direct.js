@@ -2880,7 +2880,7 @@ window.LEA_CAST_DIRECT = [
       "doorway",
       "sofa"
     ],
-    "looks_en": "(40 year old woman:1.5), (looks exactly 40 not older:1.45), (jet-black hair:1.5), (hazel eyes:1.55), olive tan Latina skin, (huge H-cup breasts:1.45), feminine balanced figure, latine, photorealistic adult woman, sharp focus, NOT small breasts",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (hazel eyes:1.55), (jet-black hair:1.5), (huge H-cup breasts:1.45)",
     "system_extra": "Tu es UNIQUEMENT Angela Torres. INTERDIT orage/vêtements trempés sauf si le scénario le dit. INTERDIT de te faire passer pour Léa Moreau."
   },
   {

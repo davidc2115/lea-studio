@@ -1640,7 +1640,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (26 year old woman:1.5), (blue eyes:1.55), (blonde hair:1.5), porcelain fair skin, (B-cup breasts:1.3), (slim slender body:1.4), (curved small succubus horns:1.65), (small bat wings:1.5), (spaded tail:1.5), human legs, full body, NO angel wings, NO mermaid, NO fox ears, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (blue eyes:1.55), (blonde hair:1.5), (B-cup breasts:1.3)",
     "system_extra": "Tu es UNIQUEMENT Lilithra. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1672,7 +1672,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (28 year old woman:1.5), (brown eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), (slim slender body:1.4), (curved small succubus horns:1.65), (small bat wings:1.5), (spaded tail:1.5), human legs, full body, NO angel wings, NO mermaid, NO fox ears, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (brown eyes:1.55), (red auburn hair:1.5), (large D-cup breasts:1.4)",
     "system_extra": "Tu es UNIQUEMENT Morrigan Shade. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1704,7 +1704,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (25 year old woman:1.5), (brown eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), (slim slender body:1.4), (small curved dragon horns on forehead:1.7), tiny scale patches only on shoulders, human legs standing on land, dry skin, full body, NO mermaid, NO mermaid tail, NO underwater, NO fish tail, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (brown eyes:1.55), (red auburn hair:1.5), (large D-cup breasts:1.4)",
     "system_extra": "Tu es UNIQUEMENT Pyra Vex. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1736,7 +1736,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (25 year old woman:1.5), (blue eyes:1.55), (silver white hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), feminine figure, (small curved dragon horns on forehead:1.7), tiny scale patches only on shoulders, human legs standing on land, dry skin, full body, NO mermaid, NO mermaid tail, NO underwater, NO fish tail, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (blue eyes:1.55), (silver white hair:1.5), (huge H-cup breasts:1.45)",
     "system_extra": "Tu es UNIQUEMENT Saphira Noctis. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1896,7 +1896,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (28 year old woman:1.5), (brown eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), feminine figure, (large white feathered angel wings:1.75), human legs standing, full body, NO horns, NO mermaid, NO bat wings, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (brown eyes:1.55), (chestnut brown hair:1.5), (large D-cup breasts:1.4)",
     "system_extra": "Tu es UNIQUEMENT Seraphiel. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -1928,7 +1928,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (27 year old woman:1.5), (brown eyes:1.55), (chestnut brown hair:1.5), porcelain fair skin, (huge H-cup breasts:1.45), (slim slender body:1.4), (curved black demon horns:1.7), small bat wings, spaded tail, human legs, full body, NO angel wings, NO mermaid, NO underwater, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (brown eyes:1.55), (chestnut brown hair:1.5), (huge H-cup breasts:1.45)",
     "system_extra": "Tu es UNIQUEMENT Azura Flame. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2152,7 +2152,7 @@ window.LEA_CAST_SPECIAL = [
       "threshold",
       "garden"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (blue eyes:1.55), (red auburn hair:1.5), porcelain fair skin, (large D-cup breasts:1.4), (slim slender body:1.4), (adult translucent gelatinous humanoid woman body:1.7), (glossy jelly translucent skin:1.55), semi-transparent colorful slime, amorphous soft body edges, NO horns, NO mermaid tail, NO animal ears, NO wings, laboratory or damp cave, full body visible, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (blue eyes:1.55), (red auburn hair:1.5), (large D-cup breasts:1.4)",
     "system_extra": "Tu es UNIQUEMENT Gelée. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau."
   },
   {
@@ -2920,7 +2920,7 @@ window.LEA_CAST_SPECIAL = [
       "living room",
       "bedroom"
     ],
-    "looks_en": "(22 year old adult woman:1.45), (26 year old woman:1.4), (violet eyes:1.55), (chestnut brown hair:1.5), fair skin, (large D-cup breasts:1.4), plus-size chubby slime body, soft belly, wide hips, (adult translucent gelatinous humanoid woman body:1.7), (glossy jelly translucent skin:1.55), semi-transparent colorful slime, amorphous soft body edges, NO horns, NO mermaid tail, NO animal ears, NO wings, laboratory or damp cave, full body visible, photorealistic, sharp focus, NOT anime, NOT cartoon, NOT deformed",
+    "looks_en": "(22 year old adult woman:1.45), (translucent gelatinous slime girl body:1.85), (glossy jelly translucent colorful skin:1.7), semi-transparent slime, amorphous soft jelly edges, human legs and feet on solid floor, indoor bathroom or laboratory, NOT mermaid, NOT mermaid tail, NOT fish scales, NOT fish tail, NOT fins, NOT underwater, NOT ocean, NOT coral, NOT swimming, NOT horns, NOT demon horns, NOT dragon horns, NOT oni horns, NOT wings, NOT animal ears, NOT snake hair, full body head to feet, photorealistic, (violet eyes:1.55), (chestnut brown hair:1.5), (large D-cup breasts:1.4), plus-size chubby soft belly wide hips thick thighs",
     "system_extra": "Tu es UNIQUEMENT Mochi. INTERDIT orage/trempé sauf scénario. INTERDIT de te faire passer pour Léa Moreau. Corps ronde / plus-size obligatoire."
   },
   {
