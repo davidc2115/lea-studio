@@ -6530,11 +6530,16 @@ function stripForeignSpecies(prompt, c) {
 }
 function speciesNegative(c) {
   const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
-  if (/sir[eè]ne|sirene/i.test(id)) return "horns, demon horns, cat ears, fox ears, slime, human legs, human feet";
-  if (/catgirl|neko/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, water background, split image, collage, half tail, fox ears, demon horns";
-  if (/slime/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, horns, underwater, ocean, split image, collage";
-  if (/fantasy|fan_|elfe|kitsune|succube|dragon|harpie|dryade|lamia|gorgone|oni|vampire/i.test(id)) return "mermaid, mermaid tail, fish tail, underwater, ocean, split image, collage, fused body, two bodies";
-  return "split image, collage, fused body";
+  const base = "split image, collage, fused body, two bodies, half body, side by side duplicate";
+  if (/sir[eè]ne|sirene/i.test(id)) return "horns, demon horns, cat ears, fox ears, slime, human legs, human feet, " + base;
+  if (/catgirl|neko/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, fox ears, demon horns, " + base;
+  if (/slime/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, horns, underwater, ocean, " + base;
+  if (/harpie/i.test(id)) return "mermaid, fish tail, cat ears, demon horns, human feet only, " + base;
+  if (/lamia|naga/i.test(id)) return "mermaid, fish tail, cat ears, fox ears, human legs only, " + base;
+  if (/gorgone/i.test(id)) return "mermaid, fish tail, normal hair only, cat ears, " + base;
+  if (/centaure/i.test(id)) return "mermaid, fish tail, human legs only, " + base;
+  if (/fantasy|fan_|elfe|kitsune|succube|dragon|dryade|oni|vampire|ange|demon/i.test(id)) return "mermaid, mermaid tail, fish tail, underwater, ocean, " + base;
+  return base;
 }
 
 function speciesLock(c) {
