@@ -4084,7 +4084,7 @@ function filterDiscoverList(q) {
       "tactile": (c) => hasTag(c, "tactile"),
       "taquine": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
       "taquin": (c) => hasTag(c, "taquine", "taquin") || /taquin_/.test(c.id||""),
-      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||""),
+      "fantasy": (c) => hasTag(c, "fantasy", "non-humain") || /^fan_/.test(c.id||"") || /elfe|kitsune|succube|dragon|sir[eè]ne|slime|harpie|dryade|lamia|gorgone|vampire|catgirl|ange|d[eé]mon|mermaid/.test((titleOf(c)+" "+(c.id||"")+" "+(c.tags||[]).join(" ")).toLowerCase()),
       "slime": (c) => hasTag(c, "slime") || /fan_slime|slime|gel[eé]e/.test((c.id||"")+" "+(c.title||"")+" "+(c.name||"")),
       "dragon": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
       "dragonne": (c) => hasTag(c, "dragon") || /fan_dragon|dragon/.test((c.id||"")+" "+(c.title||"")),
@@ -4147,10 +4147,12 @@ function filterDiscoverList(q) {
     exactMatchers["fée"] = exactMatchers["fee"];
 
     const sn = norm(s);
-    if (exactMatchers[sn]) {
-      out = list.filter(exactMatchers[sn]);
-    } else if (exactMatchers[s]) {
-      out = list.filter(exactMatchers[s]);
+    const exactHit = exactMatchers[sn] || exactMatchers[s];
+    if (exactHit) {
+      out = list.filter(exactHit);
+      if (!out.length) {
+        out = list.filter((c) => blobOf(c).includes(sn) || titleOf(c).includes(sn) || norm(c.name).includes(sn) || norm(c.id).includes(sn));
+      }
     } else {
       // Tokens : ne pas casser "bonnet h" — d'abord essayer phrases connues dans la query
       let matchedPhrase = false;
@@ -4236,7 +4238,8 @@ function renderDiscover() {
   const q0 = (state.discQuery || "");
   const SUGGEST_TAGS = [
     "favoris","aléatoire","importé","belle-fille","belle-mère","belle-sœur","babysitter","amie","fille d'ami",
-    "voisine","collègue","secrétaire","tante","maman d'ami","jeu","duo","fantasy","non-humain",
+    "voisine","collègue","secrétaire","tante","maman d'ami","jeu","duo","fantasy","non-humain","taquine",
+    "slime","dragonne","sirène","harpie","dryade","lamia","gorgone","succube","elfe",
     "directe","tactile","timide","nsfw","spécial",
     "blonde","brune","rousse","cheveux noirs",
     "gros seins","petits seins","seins moyens","95D","bonnet H","bonnet I","bonnet J",
