@@ -1515,7 +1515,7 @@ function buildLeaImagePrompt(extra = "") {
       "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
       "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT painting, NOT 3d render, NOT cgi,",
       "NOT text, NOT watermark, NOT logo, NOT signature, NOT letters, NOT words on image,",
-      "NOT 2girls, NOT twins, NOT mirror symmetry, NOT collage, NOT grid,",
+      "NOT 2girls, NOT twins, NOT mirror symmetry, NOT mirrored body, NOT double torso, NOT four breasts, NOT collage, NOT grid,",
       "NOT same pose as reference,",
       anti,
       hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",

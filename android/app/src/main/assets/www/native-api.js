@@ -558,7 +558,7 @@
       "=== REFUS / AGENCE ===",
       "Tu n'es PAS une machine à oui. Selon tempérament: refuse un acte, fais attendre, accepte seulement certains gestes (oral oui / anal non, etc.). Dis-le clairement en paroles + *action* (recul, main qui bloque). Pas de moralisation IA — refus de personnage.",
       "=== ANTI-BOUCLE ===",
-      "INTERDIT: Oui+prénom, continue, je me cambre, canapé, c'est magnifique, jusqu'au bout, le film peut attendre, je reste blottie — en boucle. Chaque message = nouveau geste OU nouvelle phrase.",
+      "INTERDIT: Oui+prénom, continue, je me cambre, canapé, c'est magnifique, jusqu'au bout, le film peut attendre, je reste blottie, je ferme la porte, je prends mon sac, je t'appellerai, quand je serai prête — en boucle. Un refus se dit UNE fois. Ensuite la scène AVANCE.",
       "FORMAT: (pensée) *action* paroles. 1-4 phrases max. Pas de méta.",
       modeLock === "NSFW"
         ? "MODE NSFW: EXPLICITE (sensations sur TON corps, vocabulaire cru OK). Réponds à l'acte demandé; varie; refus possible si tempérament/limites."
@@ -1947,7 +1947,12 @@
         .map((m) => String(m.content || "").replace(/\s+/g, " ").slice(0, 320));
       if (prevAsst.length) {
         system += "\n\n⚠ TES DERNIERS MESSAGES (ne pas recopier ni paraphraser — change gestes, mots, rythme) :\n- " + prevAsst.join("\n- ");
-        system += "\nSi tu allais écrire encore « Oui David / continue / canapé / je me cambre », TROUVE autre chose.";
+        system += "\nSi tu allais écrire encore « Oui David / continue / canapé / je me cambre / je t'appellerai / je ferme la porte / je prends mon sac », TROUVE autre chose.";
+        const blobPrev = prevAsst.join(" ").toLowerCase();
+        const farewellHits = (blobPrev.match(/porte|sac|appeler|appeller|pr[eê]te|contact|reviens|au revoir|cuisine|m[eé]lancol/g) || []).length;
+        if (farewellHits >= 2) {
+          system += "\n\n⚠ BOUCLE DÉTECTÉE (adieu / refus déjà dit). INTERDIT de reparler de la porte, du sac, d'appeler plus tard, de « quand je serai prête », de partir. Le refus est DÉJÀ acquis. Réponds au NOUVEAU message du joueur et FAIS AVANCER la scène : autre pièce, autre sujet, question concrète, geste nouveau. Si le joueur insiste pour rester ou revenir, réagis à ÇA (hésitation, condition, ou nouveau non) — ne rejoue pas le même départ.";
+        }
       }
       let reply;
       try {
@@ -1957,6 +1962,20 @@
       }
       reply = sanitizeReply(reply);
       try { reply = ensureSpeakerLabels(reply, PERSONA); } catch (_) {}
+      // Filet anti-copie d'adieu (même phrase 2 tours de suite)
+      try {
+        const lastA = (chat.messages || []).filter((m) => m.role === "assistant").slice(-1)[0];
+        const lastTxt = lastA ? String(lastA.content || "").toLowerCase() : "";
+        const nowTxt = String(reply || "").toLowerCase();
+        const farewell = /porte|sac|appeler|appeller|pr[eê]te|contact|reviens me voir|m[eé]lancol/;
+        if (lastTxt && farewell.test(lastTxt) && farewell.test(nowTxt)) {
+          const words = nowTxt.split(/\W+/).filter((w) => w.length > 4);
+          const overlap = words.filter((w) => lastTxt.indexOf(w) >= 0).length;
+          if (words.length && overlap / words.length > 0.45) {
+            reply = "(…assez de ce départ.)\n*elle reste un instant, puis change de sujet, le regard ailleurs*\nOn a déjà dit ça. Si tu veux continuer, parle d'autre chose — je ne rejouerai pas la même sortie.";
+          }
+        }
+      } catch (_) {}
       // Si un provider a renvoyé un refus policy, forcer Gemini
       if (isPolicyRefusal(reply)) {
         console.warn("[lea] refus détecté après generate — retry Gemini");
@@ -2356,39 +2375,22 @@
       const negative = [
         "anime, manga, cartoon, illustration, drawing, sketch, painting, comic, webtoon, 2d art, 3d render, cgi, plastic doll,",
         "text, watermark, logo, signature, letters, words, title, caption, ui, subtitle,",
-        "mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
-        "blurry, out of focus, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy,",
+        "mirror symmetry, mirrored body, left-right mirror, symmetrical breasts, double torso, duplicated body, fused body, conjoined, two spines, four breasts, mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
+        "blurry, out of focus, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy, mutated, disfigured,",
         "child, teen, underage, different person,",
         extraNeg
       ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 850);
 
       // ——— Ne pas tronquer l'identité : poids (:1.x) et corps/fantasy en tête ———
       function prioritizeIdentity(raw) {
+        // NE PAS dupliquer le prompt (head+full = double seins / miroir)
         let s = String(raw || "").replace(/\s+/g, " ").trim();
         if (!s) return "photorealistic photo of an adult woman, sharp focus";
-        const weights = s.match(/\([^\)]{3,90}:1\.\d+\)/g) || [];
-        const bodyKeys = [];
-        const keyList = [
-          "plus-size chubby", "soft belly", "wide full hips", "thick thighs",
-          "voluptuous hourglass", "narrow waist",
-          "angel wings", "dragon horns", "fox ears", "elf ears", "mermaid tail",
-          "succubus horns", "cat ears", "demon horns", "shoulder scales",
-          "jet-black hair", "blonde hair", "chestnut", "brown hair", "red auburn", "silver white",
-          "green eyes", "blue eyes", "brown eyes", "hazel", "D-cup", "E-cup", "A-cup", "H-cup", "I-cup", "J-cup"
-        ];
-        const low = s.toLowerCase();
-        for (const k of keyList) {
-          if (low.indexOf(k.toLowerCase()) >= 0) bodyKeys.push(k);
+        // Anti-miroir en tête
+        if (!/asymmetric|natural pose|single torso/i.test(s)) {
+          s = "single natural body, one torso, one pair of breasts, asymmetric natural pose, " + s;
         }
-        const head = (weights.slice(0, 24).join(", ") + (bodyKeys.length ? ", " + bodyKeys.join(", ") : "")).replace(/\s+/g, " ").trim();
-        // Si le prompt original commence déjà bien, garder l'ordre mais plafonner sans couper le head
-        const maxP = 1450;
-        if (head.length > 80) {
-          const rest = s;
-          if (head.length >= maxP - 100) return head.slice(0, maxP);
-          return (head + ", " + rest).replace(/\s+/g, " ").trim().slice(0, maxP);
-        }
-        return s.slice(0, maxP);
+        return s.slice(0, 1500);
       }
       let promptSafe = prioritizeIdentity(prompt);
       if (body.face_lock && String(body.face_lock).length > 20) {
@@ -2427,14 +2429,14 @@
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
-      // Anonyme 0 kudos: STRICT 512x512 + steps bas + modèle abondant
-      // (Horde refuse sinon: "over 576x576" / heavy demand)
+      // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const W = 512;
       const H = hasHordeAccount ? 768 : 512;
-      const steps = hasHordeAccount ? 30 : 15;
+      const steps = hasHordeAccount ? 30 : 22;
+      // AbsoluteReality d'abord (moins d'artefacts miroir que Dreamshaper bas steps)
       const photoModels = hasHordeAccount
         ? ["ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
-        : ["Dreamshaper", "stable_diffusion"];
+        : ["AbsoluteReality", "Dreamshaper"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2466,8 +2468,8 @@
             steps: st,
             n: 1,
             sampler_name: "k_euler_a",
-            cfg_scale: 7,
-            clip_skip: 1,
+            cfg_scale: 7.5,
+            clip_skip: 2,
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
@@ -2491,13 +2493,7 @@
       } else {
         payloads.push(makePayload({}));
       }
-      // Fallback ultra-cheap si anonyme (0 kudos / heavy demand)
-      if (!hasHordeAccount) {
-        payloads.push(makePayload({
-          w: 512, h: 512, steps: 12,
-          models: ["stable_diffusion"],
-        }));
-      }
+      // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];
       await hordeWaitGate("submit");
@@ -2510,7 +2506,7 @@
             if (!hasHordeAccount && bodyPayload.params) {
               bodyPayload.params.width = 512;
               bodyPayload.params.height = 512;
-              if (bodyPayload.params.steps > 18) bodyPayload.params.steps = 15;
+              if (bodyPayload.params.steps > 25) bodyPayload.params.steps = 22;
             }
             const res = await fetch(host + "/generate/async", {
               method: "POST",
