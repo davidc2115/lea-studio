@@ -332,8 +332,8 @@ function physicalLocksFromText(c) {
     out.positive.push("(voluptuous hourglass:1.5)", "(narrow waist:1.35)", "(wide hips:1.35)", "full round butt");
     out.negative.push("chubby belly, plus-size overweight, skinny flat chest");
   }
-  // Traits non-humains depuis la fiche
-  if (/Traits non-humains\s*:\s*([^\n]+)/i.test(blob) || /Traits non-humains\s*:\s*([^\n]+)/i.test(String(c && c.appearance || ""))) {
+  // Traits fiche : uniquement si l'id/titre est vraiment cette espèce (évite oni dans harmonieuse)
+  if (false && (/Traits non-humains\s*:\s*([^\n]+)/i.test(blob) || /Traits non-humains\s*:\s*([^\n]+)/i.test(String(c && c.appearance || "")))) {
     const nh = (String(c && c.appearance || blob).match(/Traits non-humains\s*:\s*([^\n]+)/i) || [])[1] || "";
     if (/oreille.*elfe|elf ears|pointues d.elfe/i.test(nh+blob)) {
       out.positive.push("(pointy elf ears:1.55)", "elven features");
@@ -6519,63 +6519,122 @@ function toastScene(msg) {
 
 
 
+function fantasyKind(c) {
+  const id = (String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ")).toLowerCase();
+  const order = ["slime","sirene","catgirl","kitsune","succube","dragon","harpie","lamia","naga","gorgone","dryade","elfe","ange","demon","vampire","fee","oni","centaure","louve","android","phenix","fantome"];
+  const tests = {
+    slime: /slime|gel[eé]e/,
+    sirene: /sir[eè]ne|sirene/,
+    catgirl: /catgirl|neko/,
+    kitsune: /kitsune/,
+    succube: /succube/,
+    dragon: /dragon/,
+    harpie: /harpie|harpy/,
+    lamia: /lamia/,
+    naga: /\bnaga\b/,
+    gorgone: /gorgone|gorgon/,
+    dryade: /dryade|dryad/,
+    elfe: /elfe|\belf\b/,
+    ange: /\bange\b|angel/,
+    demon: /d[eé]mon|demon/,
+    vampire: /vampire/,
+    fee: /f[eé]e|\bfee\b/,
+    oni: /\boni\b/,
+    centaure: /centaure|centaur/,
+    louve: /louve|wolf/,
+    android: /android|andro/,
+    phenix: /ph[eé]nix|phoenix/,
+    fantome: /fant[oô]me|ghost/,
+  };
+  for (const k of order) if (tests[k].test(id)) return k;
+  return "";
+}
 function stripForeignSpecies(prompt, c) {
   let s = String(prompt || "");
-  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
-  const siren = /sir[eè]ne|sirene|mermaid/i.test(id);
-  s = s.replace(/\bNOT\s+[a-z][a-z' -]{0,40}/gi, " ");
-  if (!siren) {
-    s = s.replace(/\bmermaid\b|\bfish tail\b|\bunderwater\b|\bocean\b|\bcoral reef\b|\bseashell top\b/gi, " ");
-  }
-  if (!/succube|dragon|demon|oni|d[eé]mon/i.test(id)) {
-    s = s.replace(/\bhorns?\b|\bcornes?\b|\bPAS de cornes\b/gi, " ");
+  const k = fantasyKind(c);
+  s = s.replace(/\bNOT\b[^,]{0,48}/gi, " ");
+  s = s.replace(/\bno horns\b|\bbald of horns\b|\bPAS de cornes\b/gi, " ");
+  const ban = {
+    mermaid: k !== "sirene",
+    "fish tail": k !== "sirene",
+    "fish scales": k !== "sirene" && k !== "dragon",
+    underwater: k !== "sirene",
+    ocean: k !== "sirene",
+    horns: !["succube","dragon","demon","oni"].includes(k),
+    "demon horns": !["succube","demon"].includes(k),
+    "dragon horns": k !== "dragon",
+    "fox ears": k !== "kitsune",
+    "fox tail": k !== "kitsune",
+    "cat ears": k !== "catgirl",
+    "cat tail": k !== "catgirl",
+    "elf ears": k !== "elfe",
+    "bat wings": !["succube","demon"].includes(k),
+    slime: k !== "slime",
+    gelatinous: k !== "slime",
+  };
+  for (const [word, drop] of Object.entries(ban)) {
+    if (drop) s = s.replace(new RegExp("\\b" + word.replace(" ", "\\s+") + "\\b", "gi"), " ");
   }
   return s.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
 }
 function speciesNegative(c) {
-  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
-  const base = "split image, collage, fused body, two bodies, half body, side by side duplicate";
-  if (/sir[eè]ne|sirene/i.test(id)) return "horns, demon horns, cat ears, fox ears, slime, human legs, human feet, " + base;
-  if (/catgirl|neko/i.test(id)) return "mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, fox ears, demon horns, " + base;
-  if (/slime/i.test(id)) return "horns, demon horns, dragon horns, oni horns, antlers, mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, opaque skin, latex catsuit, " + base;
-  if (/harpie/i.test(id)) return "mermaid, fish tail, cat ears, demon horns, human feet only, " + base;
-  if (/lamia|naga/i.test(id)) return "mermaid, fish tail, cat ears, fox ears, human legs only, " + base;
-  if (/gorgone/i.test(id)) return "mermaid, fish tail, normal hair only, cat ears, " + base;
-  if (/centaure/i.test(id)) return "mermaid, fish tail, human legs only, " + base;
-  if (/fantasy|fan_|elfe|kitsune|succube|dragon|dryade|oni|vampire|ange|demon/i.test(id)) return "mermaid, mermaid tail, fish tail, underwater, ocean, " + base;
-  return base;
+  const k = fantasyKind(c);
+  const base = "split image, collage, fused body, two bodies, half body, side by side duplicate, extra limbs";
+  const all = {
+    slime: "horns, demon horns, dragon horns, antlers, mermaid, mermaid tail, fish tail, fish scales, underwater, ocean, opaque skin, latex, wings, animal ears",
+    sirene: "horns, demon horns, dragon horns, oni horns, antlers, cat ears, fox ears, elf ears, bat wings, slime, human legs, human feet, standing on land",
+    catgirl: "horns, mermaid, mermaid tail, fish tail, underwater, ocean, fox ears, elf ears, bat wings, slime",
+    kitsune: "horns, mermaid, mermaid tail, fish tail, underwater, cat ears, elf ears, bat wings, slime",
+    succube: "mermaid, mermaid tail, fish tail, underwater, ocean, fox ears, cat ears, elf ears, slime, angel wings",
+    dragon: "mermaid, mermaid tail, fish tail, underwater, ocean, swimming, fox ears, cat ears, elf ears, bat wings, slime, full body scales",
+    harpie: "horns, demon horns, mermaid, mermaid tail, fish tail, underwater, ocean, cat ears, fox ears, slime, human feet only",
+    lamia: "horns, mermaid, fish tail, underwater, cat ears, fox ears, human legs only, slime",
+    naga: "horns, mermaid, fish tail, underwater, cat ears, human legs only, slime",
+    gorgone: "horns, mermaid, fish tail, cat ears, slime",
+    dryade: "horns, mermaid, fish tail, underwater, cat ears, bat wings, slime",
+    elfe: "horns, mermaid, fish tail, underwater, cat ears, fox ears, bat wings, slime",
+    ange: "horns, demon horns, mermaid, fish tail, underwater, bat wings, slime",
+    demon: "mermaid, fish tail, underwater, fox ears, cat ears, elf ears, angel wings, slime",
+    vampire: "horns, mermaid, fish tail, underwater, animal ears, bat wings, slime",
+    fee: "horns, mermaid, fish tail, underwater, slime",
+    oni: "mermaid, mermaid tail, fish tail, underwater, ocean, fox ears, elf ears, slime",
+    centaure: "horns, mermaid, fish tail, human legs only, slime",
+    louve: "horns, mermaid, fish tail, slime",
+    android: "horns, mermaid, fish tail, animal ears, slime",
+    phenix: "horns, mermaid, fish tail, underwater, slime",
+    fantome: "horns, mermaid, fish tail, slime",
+  };
+  return (all[k] || "horns, mermaid, mermaid tail, fish tail, underwater") + ", " + base;
+}
+function speciesLock(c) {
+  const k = fantasyKind(c);
+  const map = {
+    slime: "(slime girl:1.95), translucent see-through jelly body, glossy gelatinous skin, clear human face, two human legs, human feet, standing in a bathtub, indoor bathroom",
+    sirene: "(mermaid:1.9), mermaid tail instead of legs, iridescent scales on the tail only, rocky shore",
+    catgirl: "(catgirl:1.9), cat ears on top of head, fluffy cat tail, two human legs, human feet, standing on the floor, indoor apartment",
+    kitsune: "(kitsune:1.85), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet, shrine interior",
+    succube: "(succubus:1.85), small curved horns, small bat wings, spaded tail, two human legs, human feet, dim indoor room",
+    dragon: "(dragon woman:1.85), small dragon horns, scale patches on shoulders only, two human legs, standing on land, cave balcony",
+    harpie: "(harpy:1.9), large feathered bird wings, bird talons, cliff",
+    lamia: "(lamia:1.9), snake lower body from the waist, human torso, temple floor",
+    naga: "(naga:1.9), snake tail lower body, human torso, ruins",
+    gorgone: "(gorgon:1.9), living snakes for hair, two human legs, stone hall",
+    dryade: "(dryad:1.85), bark on forearms, leaves in hair, two human legs, forest",
+    elfe: "(elf woman:1.85), long pointed elf ears, two human legs, human feet, forest hall",
+    ange: "(angel woman:1.85), large white feathered wings, two human legs, human feet, cloudy terrace",
+    demon: "(demon woman:1.85), black demon horns, small bat wings, spaded tail, two human legs, dark hall",
+    vampire: "(vampire woman:1.8), very pale skin, subtle fangs, two human legs, gothic interior",
+    fee: "(fairy woman:1.8), small translucent insect wings, two human legs, flower glade",
+    oni: "(oni woman:1.85), short thick oni horns, two human legs, japanese hall",
+    centaure: "(centaur woman:1.9), human torso on horse body, meadow",
+    louve: "(wolf woman:1.85), wolf ears, wolf tail, two human legs, forest night",
+    android: "(android woman:1.8), visible panel seams, synthetic skin, laboratory",
+    phenix: "(phoenix woman:1.85), ember feathers, fire wings, two human legs, dusk cliff",
+    fantome: "(ghost woman:1.8), slightly translucent body, two human legs, old house",
+  };
+  return map[k] || "";
 }
 
-function speciesLock(c) {
-  const id = String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ");
-  // Positif seulement. Jamais le mot d'une autre espèce (SD dessine le mot même après NOT).
-  const map = [
-    [/slime/i, "(slime girl:1.95), (translucent jelly body:1.8), see-through gelatinous skin, glossy slime texture, no horns, bald of horns, human face, two human legs, human feet, standing in a bathtub, indoor bathroom tiles"],
-    [/sir[eè]ne|sirene/i, "(mermaid:1.85), mermaid tail instead of legs, iridescent scales on the tail, rocky shore"],
-    [/elfe|\belf\b/i, "(elf woman:1.75), long pointed elf ears, two human legs, human feet, standing on the ground"],
-    [/kitsune/i, "(kitsune:1.8), fox ears on top of head, multiple fluffy fox tails, two human legs, human feet"],
-    [/succube/i, "(succubus:1.8), small curved horns, small bat wings, spaded tail, two human legs, human feet"],
-    [/dragon/i, "(dragon woman:1.8), small dragon horns, scale patches on shoulders only, two human legs, standing on land"],
-    [/catgirl|neko/i, "(catgirl:1.9), (cat ears on top of head:1.8), (fluffy cat tail:1.7), two human legs, human feet, standing on the floor, indoor apartment"],
-    [/\bange\b/i, "(angel woman:1.75), large white feathered wings, human legs, NOT bat wings"],
-    [/demon|d[eé]mon/i, "(demon woman:1.75), black demon horns, small bat wings, spaded tail, human legs, NOT angel"],
-    [/vampire/i, "(vampire woman:1.7), pale skin, subtle fangs, human legs, NOT horns"],
-    [/f[eé]e|\bfee\b/i, "(fairy woman:1.7), small translucent insect wings, human legs"],
-    [/dryade/i, "(dryad:1.75), bark texture on arms, leaves in hair, human legs, forest"],
-    [/lamia/i, "(lamia:1.8), snake lower body instead of legs, human torso, NOT fish"],
-    [/harpie/i, "(harpy:1.8), feathered bird wings, bird talons, NOT bat wings"],
-    [/gorgone/i, "(gorgon:1.8), living snakes for hair, human legs"],
-    [/oni/i, "(oni woman:1.75), one or two oni horns, human legs"],
-    [/naga/i, "(naga:1.8), snake tail lower body, human torso"],
-    [/centaure/i, "(centaur woman:1.8), human torso on horse body"],
-    [/loup|wolf/i, "(wolf woman:1.7), wolf ears, wolf tail, human legs"],
-    [/robot/i, "(android woman:1.7), visible panel seams, humanoid robot"],
-    [/phoenix/i, "(phoenix woman:1.7), fire-tipped feathers, wings, human legs"],
-    [/ghost|fant[oô]me/i, "(ghost woman:1.7), slightly translucent, human legs"],
-  ];
-  for (const [re, line] of map) if (re.test(id)) return line;
-  return "";
-}
 
 function roleScenePack(c) {
   const blob = [c && c.id, c && c.title, c && c.scenario, ...((c && c.tags) || [])].join(" ").toLowerCase();
@@ -6583,9 +6642,9 @@ function roleScenePack(c) {
     { re: /secr[eé]taire|bureau|coll[eè]gue/, outfit: "tight office blouse slightly unbuttoned, pencil skirt, sheer stockings, heels", place: "late night office, desk and city window" },
     { re: /babysitter|nounou/, outfit: "soft knit top and short denim skirt, cozy but revealing", place: "living room after the kids are asleep, warm lamp" },
     { re: /belle-?m[eè]re|belle-?s[oœ]eur|voisine|tante/, outfit: "fitted dress or silk blouse and skirt, elegant and slightly provocative", place: "warm apartment living room, evening" },
-    { re: /slime/, outfit: "nothing covering the translucent jelly skin, humanoid slime girl", place: "bathroom by bathtub, indoor, NOT ocean NOT underwater" },
+    { re: /slime/, outfit: "nothing covering the translucent jelly skin, humanoid slime girl", place: "bathroom by bathtub, indoor tiles" },
     { re: /sir[eè]ne|sirene/, outfit: "mermaid, seashell top", place: "rocky shore, mermaid tail visible" },
-    { re: /fantasy|elf|dragon|kitsune|succube|dryade|harpie|lamia/, outfit: "outfit that leaves species traits visible", place: "setting of her species, NOT ocean unless mermaid" },
+    { re: /fantasy|elf|dragon|kitsune|succube|dryade|harpie|lamia/, outfit: "outfit that leaves species traits visible", place: "indoor room matching her species, standing on the floor" },
     { re: /sport|athl/, outfit: "tight sports bra and shorts, glistening skin", place: "gym or locker room" },
   ];
   let pack = { outfit: "sexy fitted dress with cleavage, heels", place: "indoor apartment evening light" };
