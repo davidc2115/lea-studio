@@ -5002,75 +5002,17 @@ function duoCompositionBlock(c) {
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
   // looks_en avec LEFT/RIGHT + âges → reformater en prompt COURT ultra contrasté (Horde)
   if (/LEFT\s+/i.test(looks) && /RIGHT\s+/i.test(looks) && /year old/i.test(looks)) {
-    const nm = names.split(/\s*&\s*|\s+et\s+/i).map((s) => s.trim()).filter(Boolean);
-    const n1 = nm[0] || "Woman A";
-    const n2 = nm[1] || "Woman B";
-    function grab(side, fieldRe, fallback) {
-      const sideRe = side === "L"
-        ? /LEFT\s+woman[^:]*:\s*([\s\S]+?)(?=RIGHT\s+woman|$)/i
-        : /RIGHT\s+woman[^:]*:\s*([\s\S]+?)(?=OBVIOUS|NOT same|two separate|$)/i;
-      const m = looks.match(sideRe);
-      const chunk = m ? m[1] : "";
-      const fm = chunk.match(fieldRe);
-      return fm ? fm[1].trim() : fallback;
-    }
-    const age1 = grab("L", /\((\d+)\s*years?\s*old/i, "") || grab("L", /looks exactly (\d+)/i, "30");
-    const age2 = grab("R", /\((\d+)\s*years?\s*old/i, "") || grab("R", /looks exactly (\d+)/i, "22");
-    const hair1 = grab("L", /\(([^)]*hair[^)]*)\s*:\s*[\d.]+\)/i, "dark hair") || "dark hair";
-    const hair2 = grab("R", /\(([^)]*hair[^)]*)\s*:\s*[\d.]+\)/i, "different hair") || "different hair";
-    const eyes1 = grab("L", /\(([^)]*eyes[^)]*)\s*:\s*[\d.]+\)/i, "");
-    const eyes2 = grab("R", /\(([^)]*eyes[^)]*)\s*:\s*[\d.]+\)/i, "");
-    // cups from body or looks
-    const body = String(c.body || looks).toLowerCase();
-    function cupSide(side) {
-      // body format: "duo: X (42yo) + Y (19yo)"
-      const parts = String(c.body || "").split("+");
-      const chunk = (side === "L" ? parts[0] : parts[1] || parts[0] || "").toLowerCase();
-      if (/j-cup|bonnet\s*j/.test(chunk)) return "massive J-cup breasts";
-      if (/i-cup|bonnet\s*i/.test(chunk)) return "enormous I-cup breasts";
-      if (/h-cup|bonnet\s*h/.test(chunk)) return "huge H-cup breasts";
-      if (/e-cup|bonnet\s*e|very large heavy e/.test(chunk)) return "very large heavy E-cup breasts";
-      if (/d-cup|bonnet\s*d|large full d/.test(chunk)) return "large full D-cup breasts";
-      if (/c-cup|bonnet\s*c|medium c/.test(chunk)) return "medium C-cup breasts";
-      if (/b-cup|bonnet\s*b|small (natural )?b/.test(chunk)) return "small B-cup breasts modest chest";
-      if (/a-cup|flat|nearly flat|very small/.test(chunk)) return "very small flat A-cup breasts almost flat chest";
-      // from looks chunk
-      const sideRe = side === "L"
-        ? /LEFT\s+woman[^:]*:\s*([\s\S]+?)(?=RIGHT\s+woman|$)/i
-        : /RIGHT\s+woman[^:]*:\s*([\s\S]+?)(?=OBVIOUS|NOT same|$)/i;
-      const m = looks.match(sideRe);
-      const ch = (m ? m[1] : "").toLowerCase();
-      if (/j-cup/.test(ch)) return "massive J-cup breasts";
-      if (/i-cup/.test(ch)) return "enormous I-cup breasts";
-      if (/h-cup/.test(ch)) return "huge H-cup breasts";
-      if (/e-cup|very large heavy/.test(ch)) return "very large heavy E-cup breasts";
-      if (/d-cup|large full/.test(ch)) return "large full D-cup breasts";
-      if (/c-cup|medium/.test(ch)) return "medium C-cup breasts";
-      if (/b-cup|small natural|modest/.test(ch)) return "small B-cup breasts modest chest";
-      if (/a-cup|flat|almost flat|very small/.test(ch)) return "very small flat A-cup breasts almost flat chest";
-      return side === "L" ? "full breasts" : "different breast size";
-    }
-    const cup1 = cupSide("L");
-    const cup2 = cupSide("R");
-    const a1 = parseInt(age1, 10) || 30;
-    const a2 = parseInt(age2, 10) || 22;
-    const ageGap = Math.abs(a1 - a2) >= 10;
-    const gapLine = ageGap
-      ? ("CLEAR GENERATIONAL AGE GAP mother and adult daughter: LEFT is the MOTHER " + a1 + " years old mature woman, RIGHT is the DAUGHTER " + a2 + " years old young woman, huge age difference visible, NOT the same age, NOT sisters same generation,")
-      : ("LEFT " + a1 + "yo and RIGHT " + a2 + "yo, clearly different faces,");
-    const youngFace = a2 <= 22
-      ? "RIGHT has youthful daughter face smooth baby-smooth skin ZERO wrinkles looks " + a2 + " NOT 30 NOT 40, young adult,"
-      : "RIGHT looks exactly " + a2 + ",";
-    const matureFace = a1 >= 35
-      ? "LEFT has mature motherly face subtle crow feet and age lines looks " + a1 + " NOT 20 NOT 25, mature skin texture,"
-      : "LEFT looks exactly " + a1 + ",";
-    return [
-      gapLine,
-      "LEFT woman " + n1 + ": (" + a1 + " years old:1.75), (looks " + a1 + ":1.7), " + matureFace + " (" + hair1 + ":1.5), " + (eyes1 ? "(" + eyes1 + ":1.25), " : "") + "(" + cup1 + ":1.6),",
-      "RIGHT woman " + n2 + ": (" + a2 + " years old:1.75), (looks " + a2 + ":1.7), " + youngFace + " (" + hair2 + ":1.5), " + (eyes2 ? "(" + eyes2 + ":1.25), " : "") + "(" + cup2 + ":1.6),",
-      "OBVIOUS contrast different ages different hair different bust sizes, two separate women,",
-      "NOT same age both, NOT both " + a1 + ", NOT both mature, NOT both young same look, NOT same breast size, NOT matching cups, NOT clones,",
-    ].join(" ");
+    const ages = [];
+    const reA = /(\d{2})\s*year old/gi;
+    let mm;
+    while ((mm = reA.exec(looks)) && ages.length < 2) ages.push(parseInt(mm[1], 10));
+    const a1 = ages[0] || 46;
+    const a2 = ages[1] || 19;
+    const gap = Math.abs(a1 - a2) >= 8;
+    const face = gap
+      ? "(LEFT is a " + a1 + " year old mother:1.95), (mature face:1.9), (crow's feet:1.8), (fine wrinkles around eyes and mouth:1.75), (NOT a 20 year old face on the left:1.8), (RIGHT is a " + a2 + " year old daughter:1.95), (youthful smooth face:1.9), (no wrinkles on the right:1.8), obvious age gap, NOT same age, NOT twins, NOT both young,"
+      : "(LEFT " + a1 + " years old:1.6), (RIGHT " + a2 + " years old:1.6), different faces,";
+    return face + " " + looks + ", NOT close-up twins portrait, both faces and chests visible,";
   }
 
   const body = String(c.body || "").replace(/\s+/g, " ").trim();
