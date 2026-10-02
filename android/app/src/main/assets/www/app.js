@@ -2898,6 +2898,13 @@ function tagDisplay(t) {
     "directe": { e: "💬", c: "tag-orange" },
     "tactile": { e: "✋", c: "tag-orange" },
     "blonde": { e: "👱‍♀️", c: "tag-gold" },
+    "ronde": { e: "🩷", c: "tag-pink" },
+    "tres ronde": { e: "🩷", c: "tag-pink" },
+    "pulpeuse": { e: "🍑", c: "tag-orange" },
+    "bombee": { e: "💃", c: "tag-pink" },
+    "parfaite": { e: "✨", c: "tag-gold" },
+    "athletique": { e: "🏃", c: "tag-mint" },
+    "mince": { e: "🌿", c: "tag-mint" },
     "noire": { e: "🌍", c: "tag-brown" },
     "metisse": { e: "🤎", c: "tag-brown" },
     "asiatique": { e: "🌸", c: "tag-pink" },
@@ -4072,6 +4079,10 @@ function filterDiscoverList(q) {
       "cheveux noirs": (c) => /cheveux noirs|black hair/.test(blobOf(c)),
       "mince": (c) => hasTag(c, "mince") || /mince|slim slender|slim frame/.test(blobOf(c)),
       "ronde": (c) => hasTag(c, "ronde", "plus-size", "chubby") || /\bronde\b|plus-size|chubby/.test(blobOf(c)),
+      "tres ronde": (c) => hasTag(c, "tres ronde", "très ronde") || /tr[eè]s ronde|bbw|very plus-size/.test(blobOf(c)),
+      "pulpeuse": (c) => hasTag(c, "pulpeuse", "voluptueuse") || /pulpeuse|voluptueuse|hourglass/.test(blobOf(c)),
+      "bombee": (c) => hasTag(c, "bombee", "bombée") || /bomb[eé]e|bombshell/.test(blobOf(c)),
+      "parfaite": (c) => hasTag(c, "parfaite") || /\bparfaite\b|balanced feminine/.test(blobOf(c)),
       "voluptueuse": (c) => hasTag(c, "voluptueuse", "sablier") || /voluptueuse|voluptuous|hourglass|sablier/.test(blobOf(c)),
       "sablier": (c) => hasTag(c, "sablier", "voluptueuse") || /sablier|hourglass/.test(blobOf(c)),
       "athletique": (c) => hasTag(c, "athletique", "athlétique") || /athletique|athletic/.test(blobOf(c)),
@@ -4103,6 +4114,9 @@ function filterDiscoverList(q) {
     exactMatchers["athlétique"] = exactMatchers["athletique"];
     exactMatchers["bonnet A"] = exactMatchers["bonnet a"];
     exactMatchers["mère et fille"] = exactMatchers["mere et fille"];
+    exactMatchers["très ronde"] = exactMatchers["tres ronde"];
+    exactMatchers["bombée"] = exactMatchers["bombee"];
+    exactMatchers["athlétique"] = exactMatchers["athletique"] || exactMatchers["bombee"];
     exactMatchers["métisse"] = exactMatchers["metisse"];
     exactMatchers["maghrébine"] = exactMatchers["maghrebine"];
     exactMatchers["bonnet B"] = exactMatchers["bonnet b"];
