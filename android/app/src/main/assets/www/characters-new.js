@@ -342,7 +342,7 @@ window.LEA_CAST_NEW = [
       "Manon"
     ],
     "multiSpeaker": true,
-    "looks_en": "(2girls:1.9), two women side by side both fully visible, LEFT woman Helene: (46 year old mother:1.8), mature face, long dark brown hair, brown eyes, (E-cup large breasts:1.75), curvy hips, RIGHT woman Manon: (19 year old adult daughter:1.8), youthful face, long light brown hair, green eyes, (small B-cup breasts:1.75), slim body, obvious age gap, different breast sizes, photorealistic",
+    "looks_en": "(2girls:1.95), (age gap mother and daughter:1.9), LEFT Helene 46 year old mother mature face crow's feet long dark brown hair brown eyes (E-cup breasts:1.7), RIGHT Manon 19 year old daughter youthful smooth face long light brown hair green eyes (small B-cup breasts:1.8), NOT same age, NOT matching bust, photorealistic",
     "system_extra": "Tu incarnes Hélène ET Manon. Chaque réponse DOIT contenir **Hélène:** et **Manon:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -380,7 +380,7 @@ window.LEA_CAST_NEW = [
       "Luna"
     ],
     "multiSpeaker": true,
-    "looks_en": "athletic toned body, defined waist, fit legs, (2girls:1.9), two women side by side both fully visible, LEFT woman Sofia: (48 year old mother:1.8), mature face, long blonde hair, blue eyes, (E-cup very large breasts:1.75), athletic toned body, defined waist, fit legs soft body, RIGHT woman Luna: (20 year old adult daughter:1.8), youthful face, platinum blonde bob, blue eyes, (very small A-cup breasts:1.75), slim petite body, obvious age gap, different breast sizes, photorealistic",
+    "looks_en": "(2girls:1.95), (age gap mother and daughter:1.9), LEFT Sofia 48 year old mother mature face fine lines long blonde hair blue eyes (E-cup breasts:1.7), RIGHT Luna 20 year old daughter youthful smooth face platinum blonde bob blue eyes (very small A-cup breasts:1.8), NOT same age, NOT matching bust, photorealistic",
     "system_extra": "Tu incarnes Sofia ET Luna. Chaque réponse DOIT contenir **Sofia:** et **Luna:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -921,7 +921,7 @@ window.LEA_CAST_NEW = [
       "Sofia"
     ],
     "multiSpeaker": true,
-    "looks_en": "(warm golden-tan skin:1.55), Latina features, (2girls:1.9), two Latina women side by side both fully visible, LEFT woman Carmen: (45 year old mother:1.8), mature face, long dark wavy hair, brown eyes, (D-cup breasts:1.7), curvy, RIGHT woman Sofia: (21 year old adult daughter:1.8), youthful face, long black hair, dark brown eyes, (C-cup medium breasts:1.7), slimmer, obvious age gap, photorealistic",
+    "looks_en": "(2girls:1.95), (Latina:1.5), (age gap mother and daughter:1.9), LEFT Carmen 45 year old mother mature face long dark wavy hair brown eyes (D-cup breasts:1.7), RIGHT Sofia 21 year old daughter youthful smooth face long black hair dark eyes (medium C-cup breasts:1.6), NOT same age, photorealistic",
     "system_extra": "Tu incarnes Carmen ET Sofia. Chaque réponse DOIT contenir **Carmen:** et **Sofia:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
@@ -959,7 +959,7 @@ window.LEA_CAST_NEW = [
       "Nala"
     ],
     "multiSpeaker": true,
-    "looks_en": "(deep dark brown skin:1.8), (black women:1.7), (2girls:1.9), two Black women side by side both fully visible, LEFT woman Aisha: (47 year old mother:1.8), mature face, long black hair, brown eyes, (E-cup large breasts:1.75), curvy, RIGHT woman Nala: (20 year old adult daughter:1.8), youthful face, black hair in a puff, brown eyes, (small B-cup breasts:1.75), slim, obvious age gap, different breast sizes, photorealistic",
+    "looks_en": "(2girls:1.95), (deep dark brown skin:1.8), (age gap mother and daughter:1.9), LEFT Aisha 47 year old mother mature face long black hair (E-cup breasts:1.7), RIGHT Nala 20 year old daughter youthful smooth face black hair puff (small B-cup breasts:1.8), NOT same age, photorealistic",
     "system_extra": "Tu incarnes Aisha ET Nala. Chaque réponse DOIT contenir **Aisha:** et **Nala:**. Les DEUX parlent. INTERDIT orage/trempé/meilleure amie de la fille. INTERDIT une seule voix."
   },
   {
