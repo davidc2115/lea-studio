@@ -5001,7 +5001,7 @@ function duoCompositionBlock(c) {
   const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
   // looks_en avec LEFT/RIGHT + âges → reformater en prompt COURT ultra contrasté (Horde)
-  if (/LEFT\s+woman/i.test(looks) && /RIGHT\s+woman/i.test(looks) && /years old/i.test(looks)) {
+  if (/LEFT\s+/i.test(looks) && /RIGHT\s+/i.test(looks) && /year old/i.test(looks)) {
     const nm = names.split(/\s*&\s*|\s+et\s+/i).map((s) => s.trim()).filter(Boolean);
     const n1 = nm[0] || "Woman A";
     const n2 = nm[1] || "Woman B";
