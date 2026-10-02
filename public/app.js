@@ -902,9 +902,8 @@ function faceIdentityLock(c) {
   // Horde TOS: jamais insister sur 18 ans (filtre anti-mineur). Minimum visuel 21+.
   const age = Math.max(18, Number(c.age) || 25);
   const isFantasy = /fan_|fantasy|dragon|ange|angel|sir[eè]ne|mermaid|kitsune|elfe|\belf\b|succube|d[eé]mon|catgirl|vampire|slime|gel[eé]e|harpie|dryade|gorgone|naga|lamia|oni|phoenix|ghost|witch|centaure|loup|robot|f[eé]e/i.test(blob);
-  let visAge = (isFantasy && age > 35) ? 25 : age;
-  if (visAge < 21) visAge = 22; // clamp anti-TOS
-  if (visAge > 55 && isFantasy) visAge = 28;
+  let visAge = age;
+  if (visAge < 21) visAge = 22; // clamp anti-TOS, pas de rajeunissement fantasy
 
   // Léa : galerie exacte
   if (id === "lea") {
@@ -920,7 +919,12 @@ function faceIdentityLock(c) {
 
   const parts = [];
   // Âge visuel adulte (pas "exactly 18")
-  parts.push("(" + visAge + " year old adult woman:1.45)", "young adult woman,");
+  const ageLook = visAge >= 45
+    ? "mature woman, looks exactly " + visAge + ", subtle age lines, NOT 20, NOT 25, NOT young adult"
+    : visAge >= 35
+    ? "adult woman, looks exactly " + visAge + ", NOT 22, NOT college student"
+    : "young adult woman, looks exactly " + visAge + ", no wrinkles";
+  parts.push("(" + visAge + " year old adult woman:1.7)", ageLook + ",");
 
   // looks_en COMPLET en priorité (cheveux yeux poitrine corps fantasy)
   if (looks.length > 30) {
@@ -1376,10 +1380,12 @@ function buildLeaImagePrompt(extra = "") {
     // Clamp âge prompt (Horde ban si "18" + corps sexualisé)
     let ageSafe = ageN;
     if (!ageSafe || ageSafe < 21) ageSafe = 22;
-    if (isFantasy && ageSafe > 35) ageSafe = 25;
-    const ageLock = (isFantasy && ageN > 35)
-      ? "(ageless adult beauty mid-20s:1.5), young adult woman face,"
-      : "(" + ageSafe + " year old adult woman:1.45), young adult woman,";
+    const ageLook = ageSafe >= 45
+      ? "mature woman face, looks exactly " + ageSafe + ", subtle age lines, NOT 20, NOT 25, NOT young adult"
+      : ageSafe >= 35
+      ? "adult woman, looks exactly " + ageSafe + ", NOT 22, NOT college student face"
+      : "young adult woman, looks exactly " + ageSafe + ", no wrinkles";
+    const ageLock = "(" + ageSafe + " year old adult woman:1.7), " + ageLook + ",";
     // looks_en COMPLET — éviter 1girl (parfois flaggé) + strip 18 ans du looks
     const looksClean = String(looks || "")
       .replace(/\(?looks exactly 1[89][^)]*\)?/gi, "")
@@ -5624,7 +5630,7 @@ function identityLock(c) {
       ? "young soft skin, no wrinkles, not middle-aged, not 30, not 35, not mature woman"
       : age <= 35
       ? "looks " + age + " not older, not elderly"
-      : "mature adult looks " + age + " not teenage",
+      : "mature adult looks exactly " + age + ", subtle age lines, not 22, not young adult, not teenage",
   ].join(", ");
   return [
     "identity of " + name + ",",
@@ -6275,7 +6281,9 @@ async function generateScenePhoto() {
       prompt,
       negative: "mirror symmetry, symmetrical face mirrored, left right mirror, collage, grid, 2girls, twins, clone, " +
         bodyNegatives(c) +
-        ", child, teen, underage, cartoon, anime, deformed, fused body parts, hair fused with clothes, melted body, extra limbs, bad anatomy, blurry, watermark, text, wrong body type, empty white background, different face, different person, wrong hair color, wrong eye color, middle-aged, face crop only, bust crop only, headshot, close-up portrait only, " +
+        ", child, teen, underage, cartoon, anime, deformed, fused body parts, hair fused with clothes, melted body, extra limbs, bad anatomy, blurry, watermark, text, wrong body type, empty white background, different face, different person, wrong hair color, wrong eye color, " +
+        ((Number(c.age) || 25) >= 36 ? "20 year old face, college student only, " : "middle-aged, 50 year old, elderly, ") +
+        "face crop only, bust crop only, headshot, close-up portrait only, " +
         (String(prompt).match(/SOAKING WET|crop top|top court|wearing|jean|dress|towel|NOT nude|clinging/i)
           ? "completely nude, fully naked, bare breasts, exposed nipples, topless, no clothes, nude standing, glamorous different face"
           : ""),
