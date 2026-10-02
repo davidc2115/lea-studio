@@ -7,7 +7,7 @@ window.LEA_CAST_CUPS = [
     "tags": [
       "collègue",
       "brune",
-      "ronde",
+      "mince",
       "bonnet H",
       "gros seins",
       "nsfw"
