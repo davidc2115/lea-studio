@@ -1317,7 +1317,7 @@ function buildLeaImagePrompt(extra = "") {
 
   const isDuo = isDuoCharacter(c);
   const duoExtra = isDuo
-    ? "(2girls:1.9), (two adult women:1.85), both fully visible head to mid-thigh, side by side, two faces two bodies, NOT solo, NOT 1girl, NOT single person,"
+    ? "(2girls:1.9), (two adult women together in the same room:1.9), (shared background:1.85), both fully visible, interacting, NOT split screen, NOT diptych, NOT two panels, NOT solo,"
     : "";
   // Pour duo: composition LEFT/RIGHT prioritaire — JAMAIS un seul body/cup
   const duoBlock = isDuo ? duoCompositionBlock(c) : "";
@@ -5179,7 +5179,7 @@ function duoCompositionBlock(c) {
   const bustHead = "(LEFT " + c1.toUpperCase() + "-cup ONLY:1.95), (RIGHT " + c2.toUpperCase() + "-cup ONLY:1.95), (different breast sizes:1.95), NOT same breast size, NOT matching bust,";
   return [
     bustHead,
-    "(2girls:1.9), (two distinct women:1.85), (two women side by side:1.8),",
+    "(2girls:1.9), (two distinct women together in one scene:1.9), (same room same background:1.85), (no dividing line:1.8),",
     "(both women fully visible head to thighs:1.7), (two faces two bodies:1.75),",
     "NOT solo, NOT 1girl, NOT single woman, NOT one person only,",
     ethLine,
@@ -6041,7 +6041,7 @@ async function generatePhotoHordeFallback(prompt, c) {
     let duoNeg = "";
     try {
       if (isDuoCharacter(c)) {
-        duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
+        duoNeg = ", split screen, diptych, two panels, vertical divider, separate photos, collage, side by side portraits, white line between women, same age both women, both same age, same breast size both women, identical bust, matching cup sizes, same hair color both, solo woman, 1girl, single person, three women, fused faces";
       }
     } catch (_) {}
     try {
@@ -7099,7 +7099,7 @@ async function generatePhoto() {
             // Garantir 2girls en tête du prompt
             let pr = String(payload.prompt || prompt || "");
             if (!/\b2girls\b/i.test(pr)) {
-              pr = "(2girls:1.85), (two women side by side:1.75), both fully visible, " + pr;
+              pr = "(2girls:1.9), (both women in the same scene:1.85), (one shared background:1.8), no vertical split, " + pr;
             }
             // Retirer fuites solo
             pr = pr.replace(/\(solo:[^)]+\)/gi, "")

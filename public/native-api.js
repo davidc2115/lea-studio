@@ -2492,7 +2492,7 @@
         : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
       // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
       const qualityNeg = isDuoPrompt
-        ? ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, face crop only, headshot only, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
+        ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
