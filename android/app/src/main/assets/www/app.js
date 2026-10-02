@@ -4978,6 +4978,23 @@ function isDuoCharacter(c) {
   return false;
 }
 
+
+function duoAgeHead(c) {
+  if (!c) return "";
+  const blob = [c.body, c.looks_en, c.appearance, c.name].filter(Boolean).join(" ");
+  const ages = [];
+  const re = /(\d{2})\s*(?:ans|year)/gi;
+  let m;
+  while ((m = re.exec(blob)) && ages.length < 4) ages.push(parseInt(m[1], 10));
+  const uniq = [];
+  ages.forEach((a) => { if (a >= 18 && a <= 70 && uniq.indexOf(a) < 0) uniq.push(a); });
+  if (uniq.length < 2) return "";
+  const older = Math.max(uniq[0], uniq[1]);
+  const younger = Math.min(uniq[0], uniq[1]);
+  if (older - younger < 8) return "(LEFT " + uniq[0] + " years old:1.4), (RIGHT " + uniq[1] + " years old:1.4),";
+  return "(2girls:1.95), (CLEAR AGE GAP:1.9), (LEFT woman is the older one " + older + " years old:1.9), (mature mother face crow's feet fine lines:1.75), (RIGHT woman is the younger one " + younger + " years old:1.9), (youthful daughter face smooth skin no wrinkles:1.8), obvious age difference, NOT same age, NOT both " + younger + ", NOT both " + older + ",";
+}
+
 function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
@@ -7004,8 +7021,12 @@ async function generatePhoto() {
           "(2girls:1.9), LEFT woman different breast size from RIGHT woman, NOT same breast size, NOT matching bust,";
         let pr = String(payload.prompt || "");
         pr = pr.replace(/\((?:massive|enormous|huge|very large|large|full|medium|small)[^)]*cup breasts:[^)]*\)/gi, "");
-        payload.prompt = duoHead + " " + pr;
-        payload.negative = "same breast size, matching bust, identical breasts, both huge breasts, both small breasts, both D-cup, solo, 1girl, single woman, " + (payload.negative || "");
+        pr = pr.replace(/\(\d{2} year old adult woman:[^)]*\)/gi, "");
+        pr = pr.replace(/looks exactly \d{2} not older/gi, "");
+        pr = pr.replace(/young adult woman/gi, "");
+        const ageHead = (typeof duoAgeHead === "function" ? duoAgeHead(c) : "");
+        payload.prompt = (ageHead + " " + duoHead + " " + pr).replace(/\s+/g, " ").trim();
+        payload.negative = "same age, both same age, both 20 years old, both 25 years old, both 30 years old, both youthful identical faces, both mature identical faces, same breast size, matching bust, identical breasts, both huge breasts, both small breasts, solo, 1girl, single woman, " + (payload.negative || "");
         payload.force_img2img = false;
         delete payload.source_image;
       } else {
