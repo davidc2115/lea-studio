@@ -1478,7 +1478,7 @@ function buildLeaImagePrompt(extra = "") {
     actHead,
     isDuo ? "" : (fixedAppearanceBlock(c) + ","),
     duoExtra,
-    "Photorealistic photo, sharp focus,",
+    "(raw photo:1.35), (DSLR:1.3), (sharp focus:1.3), (detailed skin texture:1.25), (natural pores:1.2),",
     ex.overridesAct ? "MUST depict the exact sexual act from USER REQUEST, male partner body visible in frame," : "",
     // Mono seulement si PAS duo
     isDuo ? "" : ("body: " + body + ","),

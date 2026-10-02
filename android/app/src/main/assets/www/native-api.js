@@ -2475,12 +2475,11 @@
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const W = 512;
-      const H = hasHordeAccount ? 768 : 512;
-      const steps = hasHordeAccount ? 30 : 22;
-      // AbsoluteReality d'abord (moins d'artefacts miroir que Dreamshaper bas steps)
+      const H = hasHordeAccount ? 768 : 640;
+      const steps = hasHordeAccount ? 32 : 25;
       const photoModels = hasHordeAccount
-        ? ["ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
-        : ["AbsoluteReality", "Dreamshaper"];
+        ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
+        : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2494,7 +2493,7 @@
       // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
       const qualityNeg = isDuoPrompt
         ? ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, face crop only, headshot only, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
-        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
+        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
@@ -2514,8 +2513,8 @@
             height: h,
             steps: st,
             n: 1,
-            sampler_name: "k_euler_a",
-            cfg_scale: 7.5,
+            sampler_name: "k_dpmpp_2m",
+            cfg_scale: 6.5,
             clip_skip: 2,
           },
           nsfw: body.nsfw !== false,
