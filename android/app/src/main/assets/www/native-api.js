@@ -2409,7 +2409,13 @@
       }
       // ——— Horde : qualité + identité (prompt court, steps corrects) ———
       const extraNeg = String(body.negative || "");
-      const isDuoPrompt = body.is_duo === true || /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women side by side/i.test(prompt);
+      const isDuoPrompt = body.is_duo === true || /^duo_/i.test(String(body.charId || "")) || /LEFT\s*woman|RIGHT\s*woman|\b2girls\b|two distinct women|Femme\s*1|two women side by side|two adult women together/i.test(prompt);
+      if (isDuoPrompt) {
+        prompt = "(2girls:1.95), (exactly two adult women:1.9), (both women fully visible in the same room:1.85), (two faces two bodies:1.8), NOT solo, NOT 1girl, NOT single person, " + prompt;
+        delete body.source_image;
+        delete body.source_processing;
+        body.denoising = undefined;
+      }
       const speciesFirst = extraNeg.slice(0, 420);
       const negative = [
         speciesFirst,

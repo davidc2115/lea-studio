@@ -6982,7 +6982,9 @@ async function generatePhoto() {
         payload.prompt = (ageHead + " " + duoHead + " " + pr).replace(/\s+/g, " ").trim();
         payload.negative = "same age, both same age, both 20 years old, both 25 years old, both 30 years old, both youthful identical faces, both mature identical faces, same breast size, matching bust, identical breasts, both huge breasts, both small breasts, solo, 1girl, single woman, " + (payload.negative || "");
         payload.force_img2img = false;
+        payload.is_duo = true;
         delete payload.source_image;
+        delete payload.source_processing;
       } else {
         const cup = cupLock(c);
         if (cup.pos) payload.prompt = cup.pos + ", " + (payload.prompt || "");
