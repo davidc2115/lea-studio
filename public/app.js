@@ -5170,8 +5170,13 @@ function duoCompositionBlock(c) {
       : /RIGHT[\s\S]{0,90}black|RIGHT[\s\S]{0,90}noir/i.test(looks) ? "long jet black hair" : "blonde hair";
   }
 
-  let c1 = cupOf(p1) || cupOf((looks.match(/LEFT[\s\S]{0,120}/i) || [""])[0]);
-  let c2 = cupOf(p2) || cupOf((looks.match(/RIGHT[\s\S]{0,120}/i) || [""])[0]);
+  function bonnetLetter(text) {
+    const m = String(text || "").match(/bonnet\s*([a-j])|([a-j])-cup/i);
+    return m ? (m[1] || m[2] || "").toLowerCase() : "";
+  }
+  const bodyParts = String(body || "").split("+");
+  let c1 = bonnetLetter(bodyParts[0]) || cupOf(p1) || cupOf((looks.match(/LEFT[\s\S]{0,160}/i) || [""])[0]);
+  let c2 = bonnetLetter(bodyParts[1] || "") || cupOf(p2) || cupOf((looks.match(/RIGHT[\s\S]{0,160}/i) || [""])[0]);
   if (!c1 || !c2) {
     const all = [];
     const reC = /(A-cup|B-cup|C-cup|D-cup|E-cup|F-cup|G-cup|H-cup|I-cup|J-cup|flat chest|very small flat)/gi;
@@ -5197,7 +5202,7 @@ function duoCompositionBlock(c) {
     ethLine = "(both East Asian women:1.5), fair porcelain skin, East Asian facial features, NOT Caucasian faces,";
   } else if (/black|ebony|africaine|african|dark skin/.test(ethBlob) && !/black hair/.test(ethBlob.replace(/black hair/g, ""))) {
     ethLine = "(both Black women:1.5), dark skin, African features,";
-  } else if (/latina|latine|brésil|brazilian|hispanic/.test(ethBlob)) {
+  } else if (/\blatina\b|\blatine\b|brésil|brazilian|hispanic/.test(ethBlob)) {
     ethLine = "(both Latina women:1.5), sun-kissed skin,";
   } else if (/indian|indien|south asian/.test(ethBlob)) {
     ethLine = "(both Indian women:1.5), brown skin,";
@@ -5228,7 +5233,10 @@ function duoCompositionBlock(c) {
     ageLine = "(LEFT " + a1 + " years old:1.5), (RIGHT " + a2 + " years old:1.5),";
   }
   // Prompt COURT et TRÈS pondéré (Horde ignore les pavés longs)
+  if (c1 === c2) c2 = (c1 === "a" || c1 === "b") ? "e" : "a";
+  const bustHead = "(LEFT " + c1.toUpperCase() + "-cup ONLY:1.95), (RIGHT " + c2.toUpperCase() + "-cup ONLY:1.95), (different breast sizes:1.95), NOT same breast size, NOT matching bust,";
   return [
+    bustHead,
     "(2girls:1.9), (two distinct women:1.85), (two women side by side:1.8),",
     "(both women fully visible head to thighs:1.7), (two faces two bodies:1.75),",
     "NOT solo, NOT 1girl, NOT single woman, NOT one person only,",
