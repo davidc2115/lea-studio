@@ -5730,8 +5730,13 @@ async function applyCharacterRefToPayload(payload, c, statusFn) {
       payload.source_image = ref;
       payload.source_processing = "img2img";
       if (payload.denoising == null) payload.denoising = duoDenoise(0.42);
-      const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
-      payload.prompt = [cup.pos, "same woman as the reference photo, same face, same skin tone, same breast size, do not enlarge or shrink the chest", payload.prompt || ""].filter(Boolean).join(", ");
+      const cup = (typeof isDuoCharacter === "function" && isDuoCharacter(c))
+        ? { pos: "", neg: "" }
+        : ((typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" });
+      const sameLine = (typeof isDuoCharacter === "function" && isDuoCharacter(c))
+        ? "two different women, LEFT and RIGHT different breast sizes, NOT matching bust"
+        : "same woman as the reference photo, same face, same skin tone, same breast size, do not enlarge or shrink the chest";
+      payload.prompt = [cup.pos, sameLine, payload.prompt || ""].filter(Boolean).join(", ");
       if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
@@ -6994,9 +6999,20 @@ async function generatePhoto() {
       payload.negative = speciesNegative(c) + ", " + (payload.negative || "");
     }
     try {
-      const cup = cupLock(c);
-      if (cup.pos) payload.prompt = cup.pos + ", " + (payload.prompt || "");
-      if (cup.neg) payload.negative = cup.neg + ", two women, 2girls, twins, duplicate, " + (payload.negative || "");
+      if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+        const duoHead = (typeof duoCompositionBlock === "function" ? duoCompositionBlock(c) : "") ||
+          "(2girls:1.9), LEFT woman different breast size from RIGHT woman, NOT same breast size, NOT matching bust,";
+        let pr = String(payload.prompt || "");
+        pr = pr.replace(/\((?:massive|enormous|huge|very large|large|full|medium|small)[^)]*cup breasts:[^)]*\)/gi, "");
+        payload.prompt = duoHead + " " + pr;
+        payload.negative = "same breast size, matching bust, identical breasts, both huge breasts, both small breasts, both D-cup, solo, 1girl, single woman, " + (payload.negative || "");
+        payload.force_img2img = false;
+        delete payload.source_image;
+      } else {
+        const cup = cupLock(c);
+        if (cup.pos) payload.prompt = cup.pos + ", " + (payload.prompt || "");
+        if (cup.neg) payload.negative = cup.neg + ", two women, 2girls, twins, duplicate, " + (payload.negative || "");
+      }
     } catch (_) {}
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", dry clothes, dry hair, black hair, blonde, auburn hair, red hair, shoulder-length bob, short hair, white bra only, lingerie set, nude, seamless studio, plain background, stock photo, dreamstime, watermark, middle-aged, 30 years old, different face, different woman";
     if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
