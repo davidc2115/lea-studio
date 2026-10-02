@@ -4046,7 +4046,8 @@ function filterDiscoverList(q) {
       "fee": (c) => hasTag(c, "fée", "fee") || /fan_fée|f[eé]e/.test((c.id||"")+" "+(c.title||"")),
 
       "non-humain": (c) => hasTag(c, "non-humain", "fantasy"),
-      "duo": (c) => hasTag(c, "duo", "plan a trois", "plan à trois"),
+      "duo": (c) => hasTag(c, "duo", "plan a trois", "plan à trois", "jumelles") || /^duo_/.test(String(c.id||"")) || /\s&\s/.test(String(c.name||"")),
+      "mere et fille": (c) => hasTag(c, "mere et fille", "mère et fille") || /m[eè]re et fille/i.test(titleOf(c)) || /^duo_md/.test(String(c.id||"")),
       "jeu": (c) => hasTag(c, "jeu", "defis", "défis"),
       "special": (c) => hasTag(c, "special", "spécial"),
       "mariee": (c) => hasTag(c, "mariee", "mariée"),
@@ -4095,6 +4096,7 @@ function filterDiscoverList(q) {
     exactMatchers["fée"] = exactMatchers["fee"];
     exactMatchers["athlétique"] = exactMatchers["athletique"];
     exactMatchers["bonnet A"] = exactMatchers["bonnet a"];
+    exactMatchers["mère et fille"] = exactMatchers["mere et fille"];
     exactMatchers["métisse"] = exactMatchers["metisse"];
     exactMatchers["maghrébine"] = exactMatchers["maghrebine"];
     exactMatchers["bonnet B"] = exactMatchers["bonnet b"];
@@ -4780,7 +4782,7 @@ function bodyNegatives(c) {
   const blob = [
     c && c.body, c && c.appearance, c && c.looks_en, c && c.ethnicity
   ].filter(Boolean).join(" ").toLowerCase();
-  const base = "child, teen, underage, middle-aged, elderly, 35 years old, 40 years old, wrong ethnicity, deformed, extra limbs, different face, different person, face morph, identity change, another woman, celebrity lookalike, wrong face shape, different eyes, different nose";
+  const base = "child, teen, underage, wrong ethnicity, deformed, extra limbs, different face, different person, face morph, identity change, another woman, celebrity lookalike, wrong face shape, different eyes, different nose";
   let neg = base;
   try {
     if (isDuoCharacter(c)) {
