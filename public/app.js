@@ -6052,6 +6052,10 @@ async function generatePhotoHordeFallback(prompt, c) {
       }
     } catch (_) {}
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
+    if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
+      payload.prompt = "(solo:1.7), (single adult woman:1.65), (exactly one head:1.8), (one face only:1.75), (one body:1.7), photorealistic photo, " + (payload.prompt || "");
+      payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
+    }
     if (c.id === "duo_twins_lea") {
     return `Femme 1 : Léa (brunette aux cheveux lisses)
 Âge et origine : 21 ans, type européen / français.
