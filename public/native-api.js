@@ -1963,6 +1963,13 @@
           system += "\n\n⚠ BOUCLE DÉTECTÉE (adieu / refus déjà dit). INTERDIT de reparler de la porte, du sac, d'appeler plus tard, de « quand je serai prête », de partir. Le refus est DÉJÀ acquis. Réponds au NOUVEAU message du joueur et FAIS AVANCER la scène : autre pièce, autre sujet, question concrète, geste nouveau. Si le joueur insiste pour rester ou revenir, réagis à ÇA (hésitation, condition, ou nouveau non) — ne rejoue pas le même départ.";
         }
       }
+      try {
+        const sit = String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 420);
+        const greet = String(PERSONA.greeting || "").replace(/\\n/g, " ").replace(/\s+/g, " ").trim().slice(0, 220);
+        system += "\n\nSITUATION OBLIGATOIRE (ne la contredis pas) : " + sit +
+          (greet ? " Premier message déjà dit : " + greet : "") +
+          " Tu es encore dans ce lieu et ce motif tant que le joueur n'a pas changé de scène. Réponds en restant ce rôle, pas une autre femme.";
+      } catch (_) {}
       let reply;
       try {
         reply = await generate([{ role: "system", content: system + (function(){ try { const prev = (chat.messages||[]).filter(function(m){return m.role==="assistant";}).slice(-3).map(function(m){return String(m.content||"").slice(0,200);}); if(!prev.length) return ""; return "\n\nNE PAS répéter (mots ET gestes) :\n- " + prev.join("\n- ") + "\nRéaction différente."; } catch(_){ return ""; } })() }, ...history], s.provider);
