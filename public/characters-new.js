@@ -13,7 +13,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_twins_lea.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_twins_lea.jpg"
     ],
@@ -52,7 +52,7 @@ window.LEA_CAST_NEW = [
       "asiatique",
       "bonnet A"
     ],
-    "cover": "images/cast/duo_twins_asia.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_twins_asia.jpg"
     ],
@@ -91,7 +91,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_sisters_fr.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_sisters_fr.jpg"
     ],
@@ -130,7 +130,7 @@ window.LEA_CAST_NEW = [
       "latina",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_sisters_br.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_sisters_br.jpg"
     ],
@@ -170,7 +170,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_friends_sport.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_friends_sport.jpg"
     ],
@@ -209,7 +209,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet A"
     ],
-    "cover": "images/cast/duo_friends_work.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_friends_work.jpg"
     ],
@@ -248,7 +248,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_couple_wlw.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_couple_wlw.jpg"
     ],
@@ -288,7 +288,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_couple_wlw2.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_couple_wlw2.jpg"
     ],
@@ -326,7 +326,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet E"
     ],
-    "cover": "images/cast/duo_md1.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_md1.jpg"
     ],
@@ -365,7 +365,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet E"
     ],
-    "cover": "images/cast/duo_md2.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_md2.jpg"
     ],
@@ -403,7 +403,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_voisines.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_voisines.jpg"
     ],
@@ -444,7 +444,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_etudiantes.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_etudiantes.jpg"
     ],
@@ -485,7 +485,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_danseuses.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_danseuses.jpg"
     ],
@@ -524,7 +524,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_infirmieres.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_infirmieres.jpg"
     ],
@@ -563,7 +563,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_mentor.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_mentor.jpg"
     ],
@@ -603,7 +603,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_twins_red.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_twins_red.jpg"
     ],
@@ -642,7 +642,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet A"
     ],
-    "cover": "images/cast/duo_twins_dark.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_twins_dark.jpg"
     ],
@@ -682,7 +682,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_sisters_it.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_sisters_it.jpg"
     ],
@@ -720,7 +720,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_sisters_ru.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_sisters_ru.jpg"
     ],
@@ -760,7 +760,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_goth.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_goth.jpg"
     ],
@@ -799,7 +799,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet A"
     ],
-    "cover": "images/cast/duo_yoga.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_yoga.jpg"
     ],
@@ -839,7 +839,7 @@ window.LEA_CAST_NEW = [
       "asiatique",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_wlw3.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_wlw3.jpg"
     ],
@@ -879,7 +879,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_wlw4.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_wlw4.jpg"
     ],
@@ -918,7 +918,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_md_lat.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_md_lat.jpg"
     ],
@@ -957,7 +957,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet E"
     ],
-    "cover": "images/cast/duo_md_blk.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_md_blk.jpg"
     ],
@@ -996,7 +996,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet A"
     ],
-    "cover": "images/cast/duo_vois2.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_vois2.jpg"
     ],
@@ -1037,7 +1037,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet C"
     ],
-    "cover": "images/cast/duo_sec.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_sec.jpg"
     ],
@@ -1077,7 +1077,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet B"
     ],
-    "cover": "images/cast/duo_law.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_law.jpg"
     ],
@@ -1116,7 +1116,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_air.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_air.jpg"
     ],
@@ -1156,7 +1156,7 @@ window.LEA_CAST_NEW = [
       "nsfw",
       "bonnet D"
     ],
-    "cover": "images/cast/duo_chef.jpg",
+    "cover": "",
     "gallery": [
       "images/cast/duo_chef.jpg"
     ],

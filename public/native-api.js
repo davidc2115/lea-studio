@@ -2443,7 +2443,11 @@
       }
       let promptSafe = prioritizeIdentity(prompt);
       // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
-      promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
+      if (!isDuoPrompt) {
+        promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
+      } else {
+        promptSafe = "(2girls:1.95), (exactly two adult women in one photo:1.9), (both fully visible:1.85), (same room no split:1.8), NOT solo, NOT 1girl, NOT single woman, NOT headshot, NOT split screen, " + promptSafe;
+      }
       promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
       if (body.face_lock && String(body.face_lock).length > 20) {
         let fl = String(body.face_lock)
