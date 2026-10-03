@@ -6130,7 +6130,11 @@ async function generatePhotoHordeFallback(prompt, c) {
         prompt = (sp ? sp + ", " : "") + phys + ", " + roleScenePack(c) + ", " + prompt;
       }
     } catch (_) {}
+    if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+      prompt = window._leaDuoOverride;
+    }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
       payload.prompt = "(solo:1.7), (single adult woman:1.65), (exactly one head:1.8), (one face only:1.75), (one body:1.7), photorealistic photo, " + (payload.prompt || "");
       payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
@@ -6696,6 +6700,14 @@ function roleScenePack(c) {
 }
 
 async function generatePhoto() {
+  try {
+    const _c0 = character();
+    if (_c0 && typeof isDuoCharacter === "function" && isDuoCharacter(_c0)) {
+      const duo = (typeof duoCompositionBlock === "function" ? duoCompositionBlock(_c0) : "");
+      window._leaDuoOverride = "(2girls:1.95), exactly two adult women together in one living room, same background, no dividing line, both full bodies visible, " + duo + ", provocative pose, NOT solo, NOT headshot, NOT split screen";
+    } else window._leaDuoOverride = "";
+  } catch (_) { window._leaDuoOverride = ""; }
+
   // antiban local complètement désactivé
   try {
     localStorage.removeItem("lea.hordeBlockedUntil");
@@ -7036,7 +7048,11 @@ async function generatePhoto() {
         duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
+    if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+      prompt = window._leaDuoOverride;
+    }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";

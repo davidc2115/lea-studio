@@ -2421,7 +2421,9 @@
         speciesFirst,
         "anime, manga, cartoon, illustration, drawing, sketch, painting, comic, webtoon, 2d art, 3d render, cgi, plastic doll,",
         "text, watermark, logo, signature, letters, words, title, caption, ui, subtitle,",
-        "mirror symmetry, mirrored body, left-right mirror, symmetrical breasts, double torso, duplicated body, fused body, conjoined, two spines, four breasts, mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,",
+        (isDuoPrompt
+          ? "split screen, diptych, vertical divider, two panels, separate photos, collage, grid, solo, 1girl, single woman, one person only, headshot only, passport photo,"
+          : "mirror symmetry, mirrored body, left-right mirror, symmetrical breasts, double torso, duplicated body, fused body, conjoined, two spines, four breasts, mirrored image, collage, grid, 2x2, 4x4, multipanel, split screen,"),
         "blurry, out of focus, lowres, jpeg artifacts, deformed, extra limbs, bad anatomy, mutated, disfigured,",
         "child, teen, underage, different person,",
         extraNeg.slice(420)
@@ -2480,8 +2482,8 @@
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
-      const W = 512;
-      const H = hasHordeAccount ? 768 : 640;
+      const W = isDuoPrompt ? 768 : 512;
+      const H = isDuoPrompt ? 512 : (hasHordeAccount ? 768 : 640);
       const steps = hasHordeAccount ? 32 : 25;
       const photoModels = hasHordeAccount
         ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
