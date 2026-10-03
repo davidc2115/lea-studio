@@ -2498,8 +2498,8 @@
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const W = isDuoPrompt ? 768 : 512;
-      const H = isDuoPrompt ? 512 : (hasHordeAccount ? 768 : 640);
-      const steps = hasHordeAccount ? 30 : 28;
+      const H = isDuoPrompt ? 512 : 768;
+      const steps = hasHordeAccount ? 32 : 26;
       const photoModels = hasHordeAccount
         ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
         : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
@@ -2536,9 +2536,10 @@
             height: h,
             steps: st,
             n: 1,
-            sampler_name: "k_dpmpp_2m",
-            cfg_scale: 7,
-            clip_skip: 2,
+            sampler_name: "k_euler_a",
+            cfg_scale: 5.5,
+            clip_skip: 1,
+            hires_fix: true,
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
@@ -2573,10 +2574,11 @@
           try {
             // Garantir jamais >512 anonyme
             if (!hasHordeAccount && bodyPayload.params) {
-              bodyPayload.params.width = 512;
-              bodyPayload.params.height = 512;
-              if (bodyPayload.params.steps > 25) bodyPayload.params.steps = 22;
+              bodyPayload.params.width = Math.min(bodyPayload.params.width, 512);
+              bodyPayload.params.height = Math.min(bodyPayload.params.height, 768);
+              if (bodyPayload.params.steps > 28) bodyPayload.params.steps = 26;
             }
+            bodyPayload.post_processing = ["RealESRGAN_x4plus"];
             const res = await fetch(host + "/generate/async", {
               method: "POST",
               headers: {
