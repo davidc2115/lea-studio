@@ -6241,6 +6241,7 @@ Peau : Claire, texture veloutée et uniforme.`;
     try {
       await applyCharacterRefToPayload(payload, c);
     } catch (_) {}
+    try { finalizeProfilePrompt(payload, c); } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde job lancé (après échec SD.cpp)…");
@@ -6766,6 +6767,43 @@ function roleScenePack(c) {
     "bending slightly forward, looking back at camera",
   ];
   return pack.outfit + ", " + poses[Math.floor(Math.random() * poses.length)] + ", in " + pack.place;
+}
+
+
+function finalizeProfilePrompt(payload, c) {
+  if (!payload || !c) return payload;
+  const age = Math.max(18, Number(c.age) || 25);
+  const pick = (typeof roleSexyPick === "function") ? roleSexyPick(c) : { outfit: "clothes matching her role", place: "the scenario place", pose: "provocative full body pose, face visible" };
+  const scen = String(c.scenario || "");
+  let extra = "";
+  if (/plat|colis|clef|clé|frappe/i.test(scen)) extra = ", holding a dish or parcel, standing at the apartment door";
+  if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
+    payload.prompt = buildDuoShot(c);
+    payload.is_duo = true;
+    delete payload.source_image;
+    payload.negative = "solo, 1girl, headshot, split screen, diptych, headless, cropped head, " + (payload.negative || "");
+    return payload;
+  }
+  if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+    payload.prompt = speciesLock(c) + ", (" + age + " year old adult:1.5), face visible, " + pick.pose + ", " + payload.prompt;
+    payload.negative = "headless, cropped head, torso only, blurry, doll, " + (payload.negative || "");
+    return payload;
+  }
+  payload.prompt = [
+    "(" + age + " year old woman:1.7)",
+    "(face fully visible:1.8)",
+    "(head in frame:1.75)",
+    "(full body head to mid-thigh:1.6)",
+    "(wearing " + pick.outfit + ":1.7)",
+    pick.pose,
+    "in " + pick.place + extra,
+    "provocative but clothed, sharp well lit photo",
+    payload.prompt || "",
+  ].join(", ");
+  payload.negative = "headless, no head, cropped head, torso only, bust crop, bra only, green bra, armor, lingerie only, nude, naked, topless, child, teen, " + (payload.negative || "");
+  delete payload.source_image;
+  delete payload.source_processing;
+  return payload;
 }
 
 async function generatePhoto() {
@@ -7299,6 +7337,7 @@ async function generatePhoto() {
       console.warn("[img2img]", e);
       setGenStatus("Horde txt2img…");
     }
+    try { finalizeProfilePrompt(payload, c); } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
