@@ -5058,6 +5058,41 @@ function duoDenoise(base) {
   return base;
 }
 
+
+function buildDuoShot(c) {
+  const text = [c.looks_en, c.body, c.appearance, c.name, c.scenario].filter(Boolean).join(" ");
+  const ages = [];
+  let m; const re = /(\d{2})\s*(?:ans|year)/gi;
+  while ((m = re.exec(text)) && ages.length < 4) ages.push(parseInt(m[1], 10));
+  const uniq = [];
+  ages.forEach((a) => { if (a >= 18 && a <= 65 && uniq.indexOf(a) < 0) uniq.push(a); });
+  const older = uniq.length > 1 ? Math.max(uniq[0], uniq[1]) : (uniq[0] || 30);
+  const younger = uniq.length > 1 ? Math.min(uniq[0], uniq[1]) : older;
+  const cups = [];
+  const cr = /bonnet\s*([A-J])|([A-J])-cup/gi;
+  while ((m = cr.exec(text)) && cups.length < 3) cups.push((m[1] || m[2] || "").toUpperCase());
+  const hair = [];
+  if (/blond/i.test(text)) hair.push("blonde");
+  if (/brune|brown hair|dark hair/i.test(text)) hair.push("brunette");
+  if (/rousse|auburn|red hair/i.test(text)) hair.push("redhead");
+  if (/noir|black hair/i.test(text)) hair.push("black hair");
+  const wear = (typeof roleSexyPick === "function") ? roleSexyPick(c).outfit : "dresses";
+  return [
+    "(2girls:1.95)",
+    "(one photograph of two women together in the same living room:1.9)",
+    "(LEFT woman " + older + " years old:1.85)",
+    "(RIGHT woman " + younger + " years old:1.85)",
+    cups[0] ? "(LEFT " + cups[0] + "-cup breasts:1.7)" : "",
+    cups[1] ? "(RIGHT " + cups[1] + "-cup breasts:1.7)" : "(RIGHT different breast size:1.6)",
+    hair[0] ? "LEFT " + hair[0] : "",
+    hair[1] ? "RIGHT " + hair[1] : "RIGHT different hair color",
+    "both full bodies visible, wearing " + wear,
+    "provocative pose, leaning toward each other, looking at camera",
+    "same background, no dividing line, sharp well lit photo",
+    "NOT solo, NOT 1girl, NOT split screen, NOT diptych, NOT headshot, NOT both the same age",
+  ].filter(Boolean).join(", ");
+}
+
 function isDuoCharacter(c) {
   if (!c) return false;
   const tags = (c.tags || []).map((t) => String(t).toLowerCase());
@@ -6149,11 +6184,19 @@ async function generatePhotoHordeFallback(prompt, c) {
         prompt = (sp ? sp + ", " : "") + phys + ", " + roleScenePack(c) + ", " + prompt;
       }
     } catch (_) {}
-    if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
+      prompt = buildDuoShot(c);
+    } else if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
       prompt = window._leaDuoOverride;
     }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
+    try {
+      if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+        payload.prompt = speciesLock(c) + ", provocative pose, well lit sharp photo, " + (payload.prompt || "");
+        payload.negative = (payload.negative || "") + ", blurry, dark, doll, plastic, human only, wrong species";
+      }
+    } catch (_) {}
     try {
       if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
         const wear = roleSexyPick(c).outfit;
@@ -7075,11 +7118,19 @@ async function generatePhoto() {
         duoNeg = ", same age both women, both same age, both 40 years old, both 42, both middle-aged, both mature same look, both young identical, same breast size both women, identical bust, matching cup sizes, same body type both, same hair color both, both same brown hair, both long identical hair, both red hair, both blonde, both brunette matching, matching hair length, solo woman, 1girl, single person, three women, group of clones, identical twins same hair same chest, face crop only, portrait only close-up, mirror symmetry, fused faces";
       }
     } catch (_) {}
-    if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
+    if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
+      prompt = buildDuoShot(c);
+    } else if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
       prompt = window._leaDuoOverride;
     }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
+    try {
+      if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+        payload.prompt = speciesLock(c) + ", provocative pose, well lit sharp photo, " + (payload.prompt || "");
+        payload.negative = (payload.negative || "") + ", blurry, dark, doll, plastic, human only, wrong species";
+      }
+    } catch (_) {}
     try {
       if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
         const wear = roleSexyPick(c).outfit;
