@@ -6374,8 +6374,12 @@ async function generateScenePhoto() {
       const id = typeof faceIdentityLock === "function" ? faceIdentityLock(c) : "";
       const spLock = (typeof speciesLock === "function") ? speciesLock(c) : "";
       const phys = (typeof physicalLocksFromText === "function") ? physicalLocksFromText(c) : "";
-      prompt = (spLock ? spLock + ", " : "") + (phys ? phys + ", " : "") + "(solo:1.4), single adult woman, " + eyeHair +
-        "(full body:1.5), " + id + ", " + prompt +
+      const duoScene = (typeof isDuoCharacter === "function" && isDuoCharacter(c));
+      const who = duoScene
+        ? "(2girls:1.9), two adult women together in the same room, both fully visible, different faces, "
+        : "(solo:1.4), single adult woman, ";
+      prompt = (spLock ? spLock + ", " : "") + (phys ? phys + ", " : "") + who + eyeHair +
+        "(full body:1.5), " + (duoScene ? "" : id + ", ") + prompt +
         ", outfit from the dialogue made sexier and more provocative, lower neckline, shorter hem, if the messages say nude then nude, keep her face hair eyes and body, well lit sharp photo, NOT blurry, NOT doll, NOT dark underexposed";
     } catch (_) {}
     try {
@@ -6420,7 +6424,9 @@ async function generateScenePhoto() {
     } catch (_) {}
     const payload = {
       prompt,
-      negative: "mirror symmetry, symmetrical face mirrored, left right mirror, collage, grid, 2girls, twins, clone, " +
+      negative: (typeof isDuoCharacter === "function" && isDuoCharacter(c)
+        ? "solo, 1girl, single woman only, one woman only, split screen, diptych, "
+        : "mirror symmetry, symmetrical face mirrored, left right mirror, collage, grid, 2girls, twins, clone, ") +
         bodyNegatives(c) +
         ", child, teen, underage, cartoon, anime, deformed, fused body parts, hair fused with clothes, melted body, extra limbs, bad anatomy, blurry, watermark, text, wrong body type, empty white background, different face, different person, wrong hair color, wrong eye color, " +
         ((Number(c.age) || 25) >= 36 ? "20 year old face, college student only, " : "middle-aged, 50 year old, elderly, ") +
@@ -6451,6 +6457,11 @@ async function generateScenePhoto() {
           setSceneProgress("📡 Horde txt2img (pas de photo de ref)…", 12);
         }
       } else {
+        payload.is_duo = true;
+        payload.force_img2img = false;
+        delete payload.source_image;
+        prompt = "(2girls:1.95), both women in the same scene, " + prompt;
+        payload.prompt = prompt;
         setSceneProgress("📡 Horde txt2img duo…", 12);
       }
     } catch (e) {
