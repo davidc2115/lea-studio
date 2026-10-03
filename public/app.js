@@ -6731,7 +6731,7 @@ async function generatePhoto() {
     if (_c0 && typeof isDuoCharacter === "function" && isDuoCharacter(_c0)) {
       const duo = (typeof duoCompositionBlock === "function" ? duoCompositionBlock(_c0) : "");
       const wear = (typeof roleSexyPick === "function") ? roleSexyPick(_c0).outfit : "clothes matching their role";
-      window._leaDuoOverride = "(2girls:1.95), exactly two adult women together in one room, same background, no dividing line, both fully dressed, wearing " + wear + ", provocative pose, NOT nude, NOT lingerie, NOT solo, NOT headshot, NOT split screen, " + duo;
+      window._leaDuoOverride = "(2girls:1.95), (one photograph:1.9), (older woman and younger woman in the same living room:1.85), (obvious age gap:1.85), (different breast sizes:1.8), both full bodies dressed, wearing " + wear + ", NOT split screen, NOT diptych, NOT two portraits, NOT both the same age, NOT headshot, " + duo;
     } else window._leaDuoOverride = "";
   } catch (_) { window._leaDuoOverride = ""; }
 
