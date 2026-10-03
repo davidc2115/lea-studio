@@ -495,6 +495,84 @@ function describePlaceDetail(placeStr) {
 
 /** Détails tenue scénario (couleur, troué, etc.) depuis outfits[]. */
 /** Détaille la tenue du scénario pour Horde (mouillé, troué, oversized, etc.). */
+
+function roleSexyPick(c) {
+  const blob = [c && c.title, c && c.scenario, c && c.role, ((c && c.tags) || []).join(" ")].filter(Boolean).join(" ").toLowerCase();
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const poses = [
+    "leaning forward toward camera, low neckline, playful look",
+    "sitting on the edge of a desk or sofa, skirt riding up, looking at camera",
+    "standing in a doorway, one hand on hip, provocative smile",
+    "kneeling on the carpet looking up, sexy pose, full body visible",
+    "bending slightly to pick something up, looking back over her shoulder",
+    "sitting with legs crossed then one knee raised, teasing pose",
+    "leaning on a counter, chest forward, eye contact",
+  ];
+  let outfits, place;
+  if (/secr[eé]taire|bureau|office/.test(blob)) {
+    outfits = [
+      "tight white office blouse unbuttoned low, pencil skirt, sheer stockings, stilettos",
+      "silk blouse half open, tight black pencil skirt, garter belt glimpsed, heels",
+      "fitted secretary dress, top buttons open, stockings, high heels",
+    ];
+    place = "office at her desk, evening after hours, warm lamp";
+  } else if (/infirmi[eè]re|nurse|h[oô]pital/.test(blob)) {
+    outfits = [
+      "short tight nurse dress, top slightly open, white stockings, heels",
+      "fitted nurse uniform, zipper low, short hem, heels",
+    ];
+    place = "clinic break room or quiet hospital corridor, evening";
+  } else if (/belle-?m[eè]re|stepmother/.test(blob)) {
+    outfits = [
+      "elegant silk blouse unbuttoned low and fitted skirt, heels, home evening",
+      "satin robe loosely tied over a slip dress, living room",
+      "cocktail dress with deep neckline, just arrived from dinner",
+    ];
+    place = "warm living room of the user's house, evening";
+  } else if (/belle-?fille|stepdaughter/.test(blob)) {
+    outfits = [
+      "tight crop top and very short skirt, home",
+      "oversized shirt barely buttoned and short shorts",
+    ];
+    place = "living room or kitchen at home, evening";
+  } else if (/babysit/.test(blob)) {
+    outfits = [
+      "tight tee and very short shorts, casual babysitter outfit",
+      "cute short dress, cardigan slipping off one shoulder",
+    ];
+    place = "living room after the kids are asleep";
+  } else if (/voisine|neighbor/.test(blob)) {
+    outfits = [
+      "short robe loosely closed, just came from next door",
+      "tight summer dress, low neckline, neighbor visit",
+    ];
+    place = "doorway or living room, she just arrived";
+  } else if (/coll[eè]gue|coworker/.test(blob)) {
+    outfits = [
+      "office blouse unbuttoned low, tight skirt, heels",
+      "fitted work dress, neckline low, after-work office",
+    ];
+    place = "office after hours or bar corner after work";
+  } else if (/tante|aunt/.test(blob)) {
+    outfits = [
+      "elegant dress with deep neckline, family evening",
+      "silk blouse and fitted trousers, top buttons open",
+    ];
+    place = "living room during a family evening";
+  } else if (/fantasy|elfe|succube|dragon|vampire|catgirl|sir[eè]ne|ange/.test(blob)) {
+    outfits = [
+      "sexy version of her fantasy outfit, revealing but still her species costume",
+    ];
+    place = "setting that matches her fantasy role";
+  } else {
+    outfits = [
+      "outfit matching her scenario, made sexy: tight clothes, low neckline, short hem",
+    ];
+    place = "the place described in her scenario";
+  }
+  return { outfit: pick(outfits), pose: pick(poses), place: place };
+}
+
 function describeOutfitDetail(outfitStr, scenarioStr) {
   const raw = String(outfitStr || "").trim();
   const o = (raw + " " + String(scenarioStr || "")).toLowerCase();
@@ -1300,10 +1378,10 @@ function buildLeaImagePrompt(extra = "") {
     outfitLine = "OUTFIT: follow USER REQUEST if it describes clothes, otherwise: " +
       (randomOutfitPick || outfitDetail) + ",";
   } else {
-    // Génération aléatoire profil : tenue VARIÉE à chaque fois (pas la nude de la ref)
-    const o = randomOutfitPick || outfitDetail;
-    outfitLine = "OUTFIT REQUIRED (must wear clothes, not nude copy of reference): " + o +
-      ", fully dressed as described, fabric visible, NOT completely nude, NOT same nude pose as reference,";
+    const rolePick = roleSexyPick(c);
+    randomOutfitPick = rolePick.outfit;
+    outfitLine = "OUTFIT REQUIRED role-matching sexy clothes: " + rolePick.outfit +
+      ", provocative but still her role outfit, NOT random bikini, NOT unrelated costume, NOT completely nude,";
   }
 
   let placeLine;
@@ -1345,12 +1423,13 @@ function buildLeaImagePrompt(extra = "") {
     : (pose + ", " + cameraAngle + ",");
   // ——— Prompt COURT : pose/tenue EN TÊTE (sinon img2img recopie la nude ref) ———
   if (!isDuo && !ex.overridesAct) {
+    const rolePick2 = (!hasUser && typeof roleSexyPick === "function") ? roleSexyPick(c) : null;
     const wear = (hasUser && ex.overridesOutfit && ex.outfitLine)
       ? ex.outfitLine
-      : (randomOutfitPick || outfitDetail || "stylish casual outfit");
+      : (rolePick2 ? rolePick2.outfit : (randomOutfitPick || outfitDetail || "stylish casual outfit"));
     const pos = (hasUser && (ex.poseLine || ex.overridesPose))
       ? (ex.poseLine || "follow user pose")
-      : (pose + ", " + (cameraAngle || "eye-level medium shot"));
+      : (rolePick2 ? rolePick2.pose + ", provocative sexy pose, full body" : (pose + ", " + (cameraAngle || "eye-level medium shot")));
     // Lieu neutre si fantasy (évite mer/plage qui pousse vers sirène)
     let loc = (hasUser && ex.overridesPlace && ex.placeLine)
       ? ex.placeLine
