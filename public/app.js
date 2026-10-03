@@ -6444,8 +6444,8 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = bigChange ? 0.5 : 0.42;
-          prompt = "(same face as reference:1.7), (same breast size as reference:1.55), (same hair as reference:1.5), " + prompt;
+          payload.denoising = bigChange ? 0.68 : 0.62;
+          prompt = "(same face as reference:1.45), (same breast size as reference:1.35), change clothes and pose, outfit and room from the dialogue, not a copy of the reference photo, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
@@ -7294,7 +7294,7 @@ async function generatePhoto() {
           await applyCharacterRefToPayload(payload, c);
           if (payload.source_image) {
             payload.force_img2img = true;
-            payload.denoising = 0.48;
+            payload.denoising = 0.58;
             payload.negative = (payload.negative || "") + ", oil painting, digital painting, illustration, plastic skin, airbrushed, doll, stretched face, elongated face";
           }
         } else {
