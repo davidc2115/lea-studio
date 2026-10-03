@@ -1966,9 +1966,9 @@
       try {
         const sit = String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 420);
         const greet = String(PERSONA.greeting || "").replace(/\\n/g, " ").replace(/\s+/g, " ").trim().slice(0, 220);
-        system += "\n\nSITUATION OBLIGATOIRE, le scénario gagne sur tout ancien message : " + sit +
+        system += "\n\nCONTINUER LA SCÈNE (style Janitor / SpicyChat, pas de redémarrage) : " + sit +
           (greet ? " Premier message déjà dit : " + greet : "") +
-          " Tu es encore dans ce lieu et ce motif tant que le joueur n'a pas changé de scène. Réponds en restant ce rôle, pas une autre femme.";
+          " Le premier message a DÉJÀ lancé la scène. Tu es déjà dans ce lieu. INTERDIT de redemander d'ouvrir la porte, de redemander où sont les objets déjà là (oreillers, dossier, plat), ou de recommencer l'arrivée. Enchaîne le geste suivant. Réponds en restant ce rôle.";
       } catch (_) {}
       let reply;
       try {
