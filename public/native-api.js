@@ -1560,7 +1560,7 @@
       // Épingler rôle+scénario dès le 1er message (mémoire longue)
       try {
         ensureVault(chat);
-        const rolePin = "RÔLE FIXE: " + (PERSONA.name || "") + " | " + (PERSONA.title || "") + " | " + String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 400);
+        const rolePin = "RÔLE FIXE: " + (PERSONA.name || "") + " | " + (PERSONA.title || "") + " | " + String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 500) + " | Ouvre et reste dans cette situation, ce lieu et ce rôle. N invente pas une autre scène."
         const hasRole = (chat.vault.entries || []).some((e) => e.tag === "role" && e.pinned);
         if (!hasRole) {
           pushVault(chat, "role", rolePin, true);

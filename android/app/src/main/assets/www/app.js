@@ -7498,7 +7498,7 @@ function paintMessages() {
   if (!box) return;
   const c = character();
   const msgs = state.chat?.messages || [];
-  const shown = msgs.length ? msgs : (c.greeting ? [{ role: "assistant", content: c.greeting }] : []);
+  const shown = msgs.length ? msgs : (c.greeting ? [{ role: "assistant", content: String(c.greeting).replace(/\\n/g, "\n") }] : []);
   if (!shown.length) {
     box.innerHTML = "";
   } else {
