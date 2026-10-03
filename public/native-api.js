@@ -2509,8 +2509,8 @@
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const W = 512;
-      const H = 512;
-      const steps = hasHordeAccount ? 32 : 26;
+      const H = isDuoPrompt ? 512 : 512;
+      const steps = hasHordeAccount ? 28 : 22;
       const photoModels = hasHordeAccount
         ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
         : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
@@ -2518,7 +2518,7 @@
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
       let den = typeof body.denoising === "number" ? body.denoising : 0.68;
-      den = Math.min(0.82, Math.max(0.62, den));
+      den = Math.min(0.75, Math.max(0.55, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
@@ -2541,15 +2541,15 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const base = {
-          prompt: (('sharp photograph, natural skin, detailed face, ' + promptSafe).slice(0, 880) + " ### " + negFull).slice(0, 2000),
+          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
           params: {
             width: w,
             height: h,
             steps: st,
             n: 1,
-            sampler_name: "k_euler_a",
-            cfg_scale: 5.5,
-            clip_skip: 1,
+            sampler_name: "k_dpmpp_2m",
+            cfg_scale: 6.5,
+            clip_skip: 2,
           },
           nsfw: body.nsfw !== false,
           censor_nsfw: false,
