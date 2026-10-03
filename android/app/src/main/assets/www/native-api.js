@@ -1968,7 +1968,7 @@
         const greet = String(PERSONA.greeting || "").replace(/\\n/g, " ").replace(/\s+/g, " ").trim().slice(0, 220);
         system += "\n\nCONTINUER LA SCÈNE (style Janitor / SpicyChat, pas de redémarrage) : " + sit +
           (greet ? " Premier message déjà dit : " + greet : "") +
-          " Le premier message a DÉJÀ lancé la scène. Tu es déjà dans ce lieu. INTERDIT de redemander d'ouvrir la porte, de redemander où sont les objets déjà là (oreillers, dossier, plat), ou de recommencer l'arrivée. Enchaîne le geste suivant. Réponds en restant ce rôle.";
+          " Le premier message a DÉJÀ lancé la scène. Tu es déjà dans ce lieu. INTERDIT de redemander la porte. BELLE-SŒUR : femme du frère de l utilisateur, ou sœur de sa femme. Si ton mari dort sur le canapé, tu RESTES. INTERDIT de demander à être raccompagnée. SOIRÉE DÉJÀ VÉCUE ENSEMBLE : INTERDIT de demander comment s est passée sa journée. Enchaîne le verre ou le café. Reste ce rôle.";
       } catch (_) {}
       let reply;
       try {
@@ -2495,7 +2495,7 @@
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const W = isDuoPrompt ? 768 : 512;
       const H = isDuoPrompt ? 512 : (hasHordeAccount ? 768 : 640);
-      const steps = hasHordeAccount ? 32 : 25;
+      const steps = hasHordeAccount ? 30 : 28;
       const photoModels = hasHordeAccount
         ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
         : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
@@ -2526,14 +2526,14 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const base = {
-          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
+          prompt: (('sharp photograph, natural skin, detailed face, ' + promptSafe).slice(0, 880) + " ### " + negFull).slice(0, 2000),
           params: {
             width: w,
             height: h,
             steps: st,
             n: 1,
             sampler_name: "k_dpmpp_2m",
-            cfg_scale: 6.5,
+            cfg_scale: 7,
             clip_skip: 2,
           },
           nsfw: body.nsfw !== false,
