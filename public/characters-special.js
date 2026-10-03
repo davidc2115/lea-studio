@@ -1562,7 +1562,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_elfe1",
     "name": "Aelindra",
-    "age": 120,
+    "age": 28,
     "title": "Elfe",
     "tags": [
       "directe",
@@ -1597,7 +1597,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_elfe2",
     "name": "Nyxaria",
-    "age": 200,
+    "age": 28,
     "title": "Elfe noire",
     "tags": [
       "fantasy",
@@ -1630,7 +1630,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_kitsune1",
     "name": "Yoru",
-    "age": 85,
+    "age": 28,
     "title": "Kitsune",
     "tags": [
       "fantasy",
@@ -1664,7 +1664,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_kitsune2",
     "name": "Aka",
-    "age": 60,
+    "age": 28,
     "title": "Kitsune",
     "tags": [
       "fantasy",
@@ -1699,7 +1699,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_succube1",
     "name": "Lilithra",
-    "age": 300,
+    "age": 28,
     "title": "Succube",
     "tags": [
       "fantasy",
@@ -1733,7 +1733,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_succube2",
     "name": "Morrigan Shade",
-    "age": 150,
+    "age": 28,
     "title": "Succube",
     "tags": [
       "fantasy",
@@ -1767,7 +1767,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_dragon1",
     "name": "Pyra Vex",
-    "age": 90,
+    "age": 28,
     "title": "Dragonne",
     "tags": [
       "fantasy",
@@ -1802,7 +1802,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_dragon2",
     "name": "Saphira Noctis",
-    "age": 110,
+    "age": 28,
     "title": "Dragonne",
     "tags": [
       "fantasy",
@@ -1972,7 +1972,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_ange1",
     "name": "Seraphiel",
-    "age": 1000,
+    "age": 28,
     "title": "Ange",
     "tags": [
       "fantasy",
@@ -2006,7 +2006,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_demon1",
     "name": "Azura Flame",
-    "age": 250,
+    "age": 28,
     "title": "Démone",
     "tags": [
       "timide",
@@ -2041,7 +2041,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_vampire1",
     "name": "Countess Vera",
-    "age": 200,
+    "age": 28,
     "title": "Vampire",
     "tags": [
       "fantasy",
@@ -2075,7 +2075,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_vampire2",
     "name": "Luna Crowe",
-    "age": 45,
+    "age": 28,
     "title": "Vampire",
     "tags": [
       "directe",
@@ -2144,7 +2144,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_dryade1",
     "name": "Sylva",
-    "age": 80,
+    "age": 28,
     "title": "Dryade",
     "tags": [
       "fantasy",
@@ -2178,7 +2178,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_lamia1",
     "name": "Nerissa",
-    "age": 70,
+    "age": 28,
     "title": "Lamia",
     "tags": [
       "fantasy",
@@ -2453,7 +2453,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_naga1",
     "name": "Zafira",
-    "age": 55,
+    "age": 28,
     "title": "Naga",
     "tags": [
       "directe",
@@ -2487,7 +2487,7 @@ window.LEA_CAST_SPECIAL = [
   {
     "id": "fan_phoenix1",
     "name": "Ember",
-    "age": 500,
+    "age": 28,
     "title": "Phénix",
     "tags": [
       "fantasy",

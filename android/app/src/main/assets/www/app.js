@@ -6331,10 +6331,10 @@ async function generateScenePhoto() {
       if (hm) eyeHair += "(" + hm[1] + "), ";
       const id = typeof faceIdentityLock === "function" ? faceIdentityLock(c) : "";
       const spLock = (typeof speciesLock === "function") ? speciesLock(c) : "";
-      prompt = (spLock ? spLock + ", " : "") + "(solo:1.4), single adult woman, " + eyeHair +
-        "(full body wide shot head to mid-thigh:1.55), hips and legs visible, " +
-        id + ", " + prompt +
-        ", NOT face crop, NOT bust crop only, NOT headshot, NOT mirror symmetry, NOT deformed, NOT fused body parts, photorealistic";
+      const phys = (typeof physicalLocksFromText === "function") ? physicalLocksFromText(c) : "";
+      prompt = (spLock ? spLock + ", " : "") + (phys ? phys + ", " : "") + "(solo:1.4), single adult woman, " + eyeHair +
+        "(full body:1.5), " + id + ", " + prompt +
+        ", outfit from the dialogue made sexier and more provocative, lower neckline, shorter hem, if the messages say nude then nude, keep her face hair eyes and body, well lit sharp photo, NOT blurry, NOT doll, NOT dark underexposed";
     } catch (_) {}
     try {
       const recent = ((state.chat && state.chat.messages) || []).slice(-8).map((m) => (m.role || "") + ": " + String(m.content || "").slice(0, 280)).join("\n");
@@ -6682,7 +6682,7 @@ function speciesLock(c) {
     succube: "(succubus:1.85), small curved horns, small bat wings, spaded tail, two human legs, human feet, dim indoor room",
     dragon: "(dragon woman:1.85), small dragon horns, scale patches on shoulders only, two human legs, standing on land, cave balcony",
     harpie: "(harpy:1.9), large feathered bird wings, bird talons, cliff",
-    lamia: "(lamia:1.9), snake lower body from the waist, human torso, temple floor",
+    lamia: "(lamia:1.95), (long snake tail instead of legs:1.9), scales, human torso, coiled in a cellar by a radiator, well lit, sharp photo, NOT doll, NOT blurry",
     naga: "(naga:1.9), snake tail lower body, human torso, ruins",
     gorgone: "(gorgon:1.9), living snakes for hair, two human legs, stone hall",
     dryade: "(dryad:1.85), bark on forearms, leaves in hair, two human legs, forest",
