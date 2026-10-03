@@ -1966,7 +1966,7 @@
       try {
         const sit = String(PERSONA.scenario || "").replace(/\s+/g, " ").trim().slice(0, 420);
         const greet = String(PERSONA.greeting || "").replace(/\\n/g, " ").replace(/\s+/g, " ").trim().slice(0, 220);
-        system += "\n\nSITUATION OBLIGATOIRE (ne la contredis pas) : " + sit +
+        system += "\n\nSITUATION OBLIGATOIRE, le scénario gagne sur tout ancien message : " + sit +
           (greet ? " Premier message déjà dit : " + greet : "") +
           " Tu es encore dans ce lieu et ce motif tant que le joueur n'a pas changé de scène. Réponds en restant ce rôle, pas une autre femme.";
       } catch (_) {}
