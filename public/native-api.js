@@ -1526,7 +1526,7 @@
       const coolHint = /(sfw|stop|stoppe|arr[eê]te|calme|changeons de sujet|parlons d'autre chose|on se calme|trop loin|reviens|soft|plus de sexe|pas maintenant|on arr[eê]te|assez|pause)/i.test(txt);
       const holdHint = /(restons comme|reste comme|comme [cç]a|le film|souffle|reprendre (notre |nos )?esprit|juste rester|dans tes bras|c[aâ]lin|on reste|ne (me )?l[aâ]che pas|on se pose|profiter|chaque seconde|le temps du film|film peut attendre|film peux attendre|rien de mieux|blotti|enlac[ée]s?|contre toi|à tes c[oô]t[ée]s|rien d'autre|continuons comme)/i.test(txt)
         && !/(baisse|enl[eè]ve|suce|p[eé]n[eè]tre|doigte|plus fort|plus vite|baise|chatte|bite)/i.test(txt);
-      const lastNsfw = /(sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|fesses?|cuisse|lingerie|caresse|touche-moi|touche |hardcore|bite|queue|chatte|mouill[ée]|nude|orgasme|suce|fellation|\bpipe\b|branle|handjob|doigte|d[eé]shabille|enl[eè]ve (ton|ta|le|la)|p[eé]n[eè]tr|missionnaire|levrette|cowgirl|sperme|jouis|enfonce|doigts? dans|[eé]rection|durciss|bien mont[ée]|je te (prends|baise|doigte)|ma main (sur|entre))/i.test(txt);
+      const lastNsfw = /(soul[eè]ve|en toi|glisse|sexe|sexuel|nsfw|\bnu\b|\bnue\b|nues|baiser|baise|\bcul\b|seins?|fesses?|cuisse|lingerie|caresse|touche-moi|touche |hardcore|bite|queue|chatte|mouill[ée]|nude|orgasme|suce|fellation|\bpipe\b|branle|handjob|doigte|d[eé]shabille|enl[eè]ve (ton|ta|le|la)|p[eé]n[eè]tr|missionnaire|levrette|cowgirl|sperme|jouis|enfonce|doigts? dans|[eé]rection|durciss|bien mont[ée]|je te (prends|baise|doigte)|ma main (sur|entre))/i.test(txt);
       const recentNsfw = /(sexe|baiser|baise|chatte|bite|queue|orgasme|suce|fellation|branle|doigte|p[eé]n[eè]tr|nude|\bnue\b|sperme|levrette|missionnaire)/i.test(recent);
       if (!chat.relationship) chat.relationship = { closeness: 1, trust: 1, heat: 0 };
       let mode;
@@ -2044,7 +2044,7 @@
             return m0;
           });
         }
-        if (nsfwLeak.test(String(reply || "")) || nsfwLeak.test(cleaned)) {
+        if (!lastNsfw && !recentNsfw && (nsfwLeak.test(String(reply || "")) || nsfwLeak.test(cleaned))) {
           try {
             const strictSys = system + "\n\nURGENT SFW: réponse précédente incorrecte (sexuelle ou refrain usé: blottie/épaule/film). "
               + (early
@@ -2056,15 +2056,15 @@
             for (const re of bannedPhrase) cleaned = cleaned.replace(re, "");
           } catch (_) {}
         }
-        // Remplacer actions encore sexuelles par un geste neutre adapté (PAS le refrain blottie/épaule)
-        cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
-          if (/(mouill|culotte|cuisse contre|excitation|orgasme|seins|chatte|bite|g[eé]miss|blotti|épaule|regard vers l'écran)/i.test(inner)) {
-            return early
-              ? "*J'essuie une goutte d'eau sur ma joue, mal à l'aise, sans oser m'approcher plus.*"
-              : "*Je croise les bras, un peu gênée, et je regarde ailleurs un instant.*";
-          }
-          return m0;
-        });
+        // Ne jamais remplacer une scène déjà intime par la goutte d'eau
+        if (!lastNsfw && !recentNsfw) {
+          cleaned = cleaned.replace(/\*([^*]{0,220}?)\*/g, (m0, inner) => {
+            if (/(blotti|épaule|regard vers l'écran)/i.test(inner)) {
+              return "*Je marque une pause, le regard ailleurs.*";
+            }
+            return m0;
+          });
+        }
         // Purge résidus du refrain même hors *
         cleaned = cleaned.replace(/Je reste blottie contre lui[^\n]{0,100}/gi, "");
         cleaned = cleaned.replace(/la joue sur son épaule[^\n]{0,60}/gi, "");
