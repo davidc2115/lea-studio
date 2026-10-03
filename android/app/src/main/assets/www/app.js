@@ -5903,11 +5903,8 @@ async function resolveCharacterRefB64(c) {
   const id = c.id || "";
   const candidates = [];
 
-  // 1) Cover custom (étoile / choisie par user)
-  try {
-    const custom = customCover(id);
-    if (custom) candidates.push(custom);
-  } catch (_) {}
+  // 1) Cover d'origine (pas la dernière peinture générée)
+  if (c.cover) candidates.push(c.cover);
 
   // 2) Cover résolue (resolvedCover)
   try {
@@ -7294,8 +7291,8 @@ async function generatePhoto() {
           await applyCharacterRefToPayload(payload, c);
           if (payload.source_image) {
             payload.force_img2img = true;
-            payload.denoising = 0.58;
-            payload.negative = (payload.negative || "") + ", oil painting, digital painting, illustration, plastic skin, airbrushed, doll, stretched face, elongated face";
+            payload.denoising = 0.4;
+            payload.negative = (payload.negative || "") + ", oil painting, digital painting, illustration, plastic skin, airbrushed, doll, stretched face, elongated face, orange lighting, cgi";
           }
         } else {
           payload.force_img2img = false;
