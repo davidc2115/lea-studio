@@ -559,6 +559,25 @@ function roleSexyPick(c) {
       "silk blouse and fitted trousers, top buttons open",
     ];
     place = "living room during a family evening";
+  } else if (/maman d|maman d.ami|mere d.ami|friend.?s mom/.test(blob) || /\bmaman\b/.test(blob)) {
+    outfits = [
+      "smart casual blouse and fitted jeans, low neckline, visiting her son's friend",
+      "elegant knit dress, knee length, neckline low, evening visit",
+      "silk shirt dress buttoned but open at the chest, heels, living room",
+    ];
+    place = "user's living room, she came to visit, evening";
+  } else if (/belle-?s[oœ]eur|sister-in-law/.test(blob)) {
+    outfits = [
+      "party dress with deep neckline, family evening",
+      "tight top and short skirt, living room after dinner",
+    ];
+    place = "living room after a family dinner";
+  } else if (/\bamie\b|friend/.test(blob)) {
+    outfits = [
+      "tight top and short skirt, girls night",
+      "summer dress low neckline, apartment evening",
+    ];
+    place = "apartment living room, evening";
   } else if (/fantasy|elfe|succube|dragon|vampire|catgirl|sir[eè]ne|ange/.test(blob)) {
     outfits = [
       "sexy version of her fantasy outfit, revealing but still her species costume",
@@ -6139,7 +6158,7 @@ async function generatePhotoHordeFallback(prompt, c) {
       if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
         const wear = roleSexyPick(c).outfit;
         payload.prompt = "(fully dressed:1.7), (wearing " + wear + ":1.65), role outfit, clothes on, NOT nude, NOT lingerie only, " + (payload.prompt || "");
-        payload.negative = "nude, naked, topless, lingerie only, bra and panties only, underwear only, bare breasts, " + (payload.negative || "");
+        payload.negative = "nude, naked, topless, lingerie, bra only, panties only, underwear, bare breasts, bikini, id photo, passport photo, headshot only, split screen, diptych, " + (payload.negative || "");
       }
     } catch (_) {}
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
@@ -7065,7 +7084,7 @@ async function generatePhoto() {
       if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
         const wear = roleSexyPick(c).outfit;
         payload.prompt = "(fully dressed:1.7), (wearing " + wear + ":1.65), role outfit, clothes on, NOT nude, NOT lingerie only, " + (payload.prompt || "");
-        payload.negative = "nude, naked, topless, lingerie only, bra and panties only, underwear only, bare breasts, " + (payload.negative || "");
+        payload.negative = "nude, naked, topless, lingerie, bra only, panties only, underwear, bare breasts, bikini, id photo, passport photo, headshot only, split screen, diptych, " + (payload.negative || "");
       }
     } catch (_) {}
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
