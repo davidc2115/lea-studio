@@ -2392,7 +2392,7 @@
 
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
-      const prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
+      let prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
       // Gemini native image (Nano Banana)
       if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
         try {
