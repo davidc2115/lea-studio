@@ -6239,6 +6239,15 @@ Peau : Claire, texture veloutée et uniforme.`;
       await applyCharacterRefToPayload(payload, c);
     } catch (_) {}
     try { finalizeProfilePrompt(payload, c); } catch (_) {}
+    try {
+      if (!isDuoCharacter(c) && !(typeof fantasyKind === "function" && fantasyKind(c))) {
+        await applyCharacterRefToPayload(payload, c);
+        if (payload.source_image) {
+          payload.force_img2img = true;
+          payload.denoising = 0.55;
+        }
+      }
+    } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde job lancé (après échec SD.cpp)…");
@@ -6441,7 +6450,7 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = bigChange ? 0.7 : 0.62;
+          payload.denoising = 0.66;
           prompt = "(same face as reference:1.45), (same breast size as reference:1.35), change clothes and pose, outfit and room from the dialogue, not a copy of the reference photo, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
@@ -6800,9 +6809,7 @@ function finalizeProfilePrompt(payload, c) {
     "provocative but clothed, sharp well lit photo",
     payload.prompt || "",
   ].join(", ");
-  payload.negative = "headless, no head, cropped head, torso only, bust crop, bra only, green bra, armor, lingerie only, nude, naked, topless, child, teen, " + (payload.negative || "");
-  delete payload.source_image;
-  delete payload.source_processing;
+  payload.negative = "headless, no head, cropped head, torso only, bust crop, painting, plastic skin, doll, orange light, child, teen, " + (payload.negative || "");
   return payload;
 }
 
