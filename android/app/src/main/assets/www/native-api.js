@@ -2464,6 +2464,10 @@
           .slice(0, 220);
         promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
       }
+      if (!isDuoPrompt) {
+        promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
+        promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+      }
       if (!/photorealistic|photograph/i.test(promptSafe)) {
         promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
       }
@@ -2512,7 +2516,7 @@
       // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
       const qualityNeg = isDuoPrompt
         ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
-        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
+        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
