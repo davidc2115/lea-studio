@@ -6135,6 +6135,13 @@ async function generatePhotoHordeFallback(prompt, c) {
     }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
+    try {
+      if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
+        const wear = roleSexyPick(c).outfit;
+        payload.prompt = "(fully dressed:1.7), (wearing " + wear + ":1.65), role outfit, clothes on, NOT nude, NOT lingerie only, " + (payload.prompt || "");
+        payload.negative = "nude, naked, topless, lingerie only, bra and panties only, underwear only, bare breasts, " + (payload.negative || "");
+      }
+    } catch (_) {}
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
       payload.prompt = "(solo:1.7), (single adult woman:1.65), (exactly one head:1.8), (one face only:1.75), (one body:1.7), photorealistic photo, " + (payload.prompt || "");
       payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
@@ -6704,7 +6711,8 @@ async function generatePhoto() {
     const _c0 = character();
     if (_c0 && typeof isDuoCharacter === "function" && isDuoCharacter(_c0)) {
       const duo = (typeof duoCompositionBlock === "function" ? duoCompositionBlock(_c0) : "");
-      window._leaDuoOverride = "(2girls:1.95), exactly two adult women together in one living room, same background, no dividing line, both full bodies visible, " + duo + ", provocative pose, NOT solo, NOT headshot, NOT split screen";
+      const wear = (typeof roleSexyPick === "function") ? roleSexyPick(_c0).outfit : "clothes matching their role";
+      window._leaDuoOverride = "(2girls:1.95), exactly two adult women together in one room, same background, no dividing line, both fully dressed, wearing " + wear + ", provocative pose, NOT nude, NOT lingerie, NOT solo, NOT headshot, NOT split screen, " + duo;
     } else window._leaDuoOverride = "";
   } catch (_) { window._leaDuoOverride = ""; }
 
@@ -7053,6 +7061,13 @@ async function generatePhoto() {
     }
     const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "" };
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
+    try {
+      if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
+        const wear = roleSexyPick(c).outfit;
+        payload.prompt = "(fully dressed:1.7), (wearing " + wear + ":1.65), role outfit, clothes on, NOT nude, NOT lingerie only, " + (payload.prompt || "");
+        payload.negative = "nude, naked, topless, lingerie only, bra and panties only, underwear only, bare breasts, " + (payload.negative || "");
+      }
+    } catch (_) {}
     const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
     const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
     if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
