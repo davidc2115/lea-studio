@@ -6791,6 +6791,7 @@ function finalizeProfilePrompt(payload, c) {
     return payload;
   }
   payload.prompt = [
+    "raw photograph, photorealistic, natural skin pores, DSLR",
     "(" + age + " year old woman:1.7)",
     "(face fully visible:1.8)",
     "(head in frame:1.75)",
@@ -6801,7 +6802,7 @@ function finalizeProfilePrompt(payload, c) {
     "provocative but clothed, sharp well lit photo",
     payload.prompt || "",
   ].join(", ");
-  payload.negative = "headless, no head, cropped head, torso only, bust crop, bra only, green bra, armor, lingerie only, nude, naked, topless, painting, plastic doll, child, teen, " + (payload.negative || "");
+  payload.negative = "painting, oil painting, digital painting, illustration, drawing, anime, cartoon, cgi, plastic doll, airbrushed, headless, no head, cropped head, torso only, bust crop, bra only, green bra, armor, lingerie only, nude, naked, topless, child, teen, " + (payload.negative || "");
   delete payload.source_image;
   delete payload.source_processing;
   payload.force_img2img = false;
