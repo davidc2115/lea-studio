@@ -7289,11 +7289,20 @@ async function generatePhoto() {
             "anime, manga, cartoon, illustration, " +
             "collage, grid, 2x2, multipanel, split screen, mirror symmetry";
         }
-        // Forcer txt2img pur (pas d'img2img qui recolle la pose de la cover)
-        payload.force_img2img = false;
-        delete payload.source_image;
-        delete payload.source_processing;
-        delete payload.denoising;
+        // Solo : img2img sur la photo nette, denoise moyen (pose change, peau photo)
+        if (!isDuoCharacter(c)) {
+          await applyCharacterRefToPayload(payload, c);
+          if (payload.source_image) {
+            payload.force_img2img = true;
+            payload.denoising = 0.48;
+            payload.negative = (payload.negative || "") + ", oil painting, digital painting, illustration, plastic skin, airbrushed, doll, stretched face, elongated face";
+          }
+        } else {
+          payload.force_img2img = false;
+          delete payload.source_image;
+          delete payload.source_processing;
+          delete payload.denoising;
+        }
         // Analyse Gemini du visage ★ → face_lock SANS coller la pose de la ref
         try {
           if (!isDuoCharacter(c)) {
