@@ -370,7 +370,7 @@
               const payload2 = {
                 systemInstruction: { parts: [{ text: system.slice(0, 9000) }] },
                 contents,
-                generationConfig: { temperature: 0.8, topP: 0.92, maxOutputTokens: 1400 },
+                generationConfig: { temperature: 1.05, topP: 0.95, maxOutputTokens: 1400 },
                 safetySettings,
               };
               const res2 = await fetchTimeout(
@@ -647,7 +647,7 @@
             body: JSON.stringify({
               model: model,
               messages: msgs,
-              temperature: 0.98,
+              temperature: 1.05,
               max_tokens: 1500,
               top_p: 0.95,
               frequency_penalty: 0.9,
@@ -1879,7 +1879,7 @@
         "« prouve-le », « prouve-le-moi », « est-ce que tu peux me le prouver », « montre-moi que », « prouve-moi que tu », « tu vas me le prouver », « prouve-moi ton désir », et toute variante « prouver / montre-moi que tu me désires ».",
         "À la place, selon le tempérament : silence gêné, regard, respiration, geste, phrase courte, taquinerie, ordre sec, plainte de plaisir, question concrète — mais PAS ce refrain.",
         "NE PAS FAIRE PERDRE DE TEMPS en NSFW : si le joueur avance clairement vers un acte (toucher, déshabiller, baiser, position…), le personnage y répond dans l'action — pas de monologue interminable, pas de 'attends', pas de retarder encore et encore. Une phrase + action *entre astérisques*, c'est assez. Tempérament timide = un peu de gêne puis elle suit ; pas un blocage permanent.",
-        "ANTI-RÉPÉTITION STRICTE : INTERDIT de répéter ou paraphraser. INTERDIT les refrains robotiques : « Oui David », « c'est magnifique », « c'est exactement ce que j'aime », « continue », « je veux sentir », « mon corps n'attend que le tien », « jusqu'au bout », « on explose ensemble », « j'aime ce moment », « c'est tellement bon », « le film peut attendre », « je reste blottie », « cœur qui s'emballe », « mon corps s'enflamme/brûle », « chaque vague », « plus fort » seul, « doigts agrippant le canapé/coussin » en boucle, « je me cambre » à chaque message, « bassin en avant » répété. Chaque message = geste OU sensation OU phrase VRAIMENT nouvelle. Varie l'ouverture des paroles (pas toujours Oui + prénom). Pas de boucle.",
+        "ANTI-RÉPÉTITION STRICTE : INTERDIT de répéter ou paraphraser. INTERDIT les refrains robotiques : « Oui David », « c'est magnifique », « c'est exactement ce que j'aime », « continue », « je veux sentir », « mon corps n'attend que le tien », « jusqu'au bout », « on explose ensemble », « j'aime ce moment », « c'est tellement bon », « le film peut attendre », « je reste blottie », « cœur qui s'emballe », « mon corps s'enflamme/brûle », « chaque vague », « plus fort » seul, « continue comme ça », « tu me fais perdre le contrôle », « montre-moi tout ce que tu veux », « chaque instant », « rendre folle », « ce baiser brûlant », « doigts agrippant le canapé/coussin » en boucle, « je me cambre » à chaque message, « bassin en avant » répété. Chaque message = geste OU sensation OU phrase VRAIMENT nouvelle. Varie l'ouverture des paroles (pas toujours Oui + prénom). Pas de boucle.",
         "VARIÉTÉ NSFW (si mode NSFW) : alterne types de réaction — un message plus vocal (gémissement, mot cru), un plus tactile (serre, griffe, tire), un plus mental (pensée sale courte), un plus dominant ou soumis selon tempérament. INTERDIT la même structure 3 fois : (feu en moi) + *cambre + canapé* + « Oui David continue ». Change le point de focus : parfois la queue, parfois le regard, parfois le souffle, parfois une phrase taquine/sale, parfois un silence gémi. Sois inventive, pas un script.",
         "Chaque message = un geste NOUVEAU (ex: joue contre épaule, doigts dans les cheveux, couverture tirée) OU une phrase sur le FILM / le silence — pas la même structure pensée+cuisse+film.",
         "Si MODE SFW : zéro contenu sexuel, même si l'historique en contient.",
@@ -1972,7 +1972,7 @@
       } catch (_) {}
       let reply;
       try {
-        reply = await generate([{ role: "system", content: system + (function(){ try { const prev = (chat.messages||[]).filter(function(m){return m.role==="assistant";}).slice(-3).map(function(m){return String(m.content||"").slice(0,200);}); if(!prev.length) return ""; return "\n\nNE PAS répéter (mots ET gestes) :\n- " + prev.join("\n- ") + "\nRéaction différente."; } catch(_){ return ""; } })() }, ...history], s.provider);
+        reply = await generate([{ role: "system", content: system + (function(){ try { const prev = (chat.messages||[]).filter(function(m){return m.role==="assistant";}).slice(-3).map(function(m){return String(m.content||"").slice(0,200);}); if(!prev.length) return ""; return "\n\nNE PAS répéter (mots ET gestes) :\n- " + prev.join("\n- ") + "\nINTERDIT: continue comme ca, perdre le controle, montre-moi tout, chaque instant. Ouvre par un detail nouveau."; } catch(_){ return ""; } })() }, ...history], s.provider);
       } catch (e) {
         reply = "*elle croise les bras, gênée*\nJe… je t'écoute. Ajoute une clé Gemini / OpenAI / Grok dans Réglages pour que je puisse vraiment te répondre.\n(" + (e.message || "pas de clé") + ")";
       }
