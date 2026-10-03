@@ -6441,9 +6441,12 @@ async function generateScenePhoto() {
         if (ref) {
           payload.source_image = ref;
           payload.source_processing = "img2img";
-          // Denoise haut pour ne pas coller le buste de la ref
-          const bigChange = /missionnaire|doggy|nude|levrette|orgasme|full body|pose/i.test(prompt);
-          payload.denoising = bigChange ? 0.72 : 0.65;
+          payload.force_img2img = true;
+          // Denoise bas : garder visage + poitrine de la fiche
+          const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
+          payload.denoising = bigChange ? 0.5 : 0.42;
+          prompt = "(same face as reference:1.7), (same breast size as reference:1.55), (same hair as reference:1.5), " + prompt;
+          payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
         } else {
