@@ -131,7 +131,7 @@ function cupLock(c) {
   const table = [
     [/bonnet\s*j|\bj-cup\b/, "(massive J-cup breasts:1.7), extremely heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
     [/bonnet\s*i|\bi-cup\b/, "(enormous I-cup breasts:1.65), very heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
-    [/bonnet\s*h|\bh-cup\b/, "(huge H-cup breasts:1.6), heavy chest", "A-cup, B-cup, C-cup, small breasts, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "(huge heavy H-cup breasts:1.85), (massive chest:1.7), hyper busty, deep cleavage", "small breasts, medium breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
     [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
@@ -7349,17 +7349,25 @@ async function generatePhoto() {
             const idBlock = typeof buildCharacterIdentityBlock === "function"
               ? buildCharacterIdentityBlock(c)
               : "";
-            if (idBlock) {
-              payload.prompt = (
-                "(FULL BODY photograph head to knees:1.7), (hips and legs visible:1.55), wide shot, " +
-                "(new pose:1.5), " +
-                String(payload.prompt || prompt || "") + ", " +
-                "IDENTITY LOCK: " + idBlock + ", " +
-                "same hair color and natural eye color as identity, same breast size, " +
-                "photorealistic DSLR, natural skin pores, NOT face crop, NOT bust only, NOT headshot"
-              ).replace(/\s+/g, " ").trim();
+            const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
+            const idShort = String(idBlock || "").slice(0, 280);
+            payload.identity_head = [cup.pos, idShort, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
+            payload.prompt = (
+              (cup.pos ? cup.pos + ", " : "") +
+              idShort + ", " +
+              "one single photograph, one woman, one pose, same face as reference, " +
+              String(payload.prompt || prompt || "")
+            ).replace(/\s+/g, " ").trim();
+            if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
+            try {
+              await applyCharacterRefToPayload(payload, c);
+              payload.force_img2img = true;
+              payload.denoising = 0.62;
+              setGenStatus("Horde img2img · visage + poitrine fiche…");
+            } catch (e2) {
+              payload.force_img2img = false;
+              setGenStatus("Horde txt2img · identité fiche…");
             }
-            setGenStatus("Horde txt2img · corps entier + identité fiche…");
           }
         } catch (e) { console.warn("[face_lock]", e); }
         try {

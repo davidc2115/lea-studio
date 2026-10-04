@@ -2560,7 +2560,8 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const photoLock = "one single photograph, one woman only, one pose, candid photo, natural indoor light, real skin, ";
+        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 320);
+        const photoLock = (idHead ? idHead + ", " : "") + "one single photograph, one woman only, one pose, candid photo, natural indoor light, real skin, ";
         promptSafe = String(promptSafe || "")
           .replace(/iris verts/gi, "natural green iris not glowing")
           .replace(/regard expressif,?/gi, "")
