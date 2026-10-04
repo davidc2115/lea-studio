@@ -6513,7 +6513,7 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = 0.72;
+          payload.denoising = 0.42;
           prompt = "(FULL BODY head to knees:1.65), (completely new pose:1.6), new outfit, new camera angle, hips and legs visible, not a face crop, not a bust crop, not a copy of the reference, same face hair and breast size, natural eyes not glowing, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
@@ -7266,17 +7266,17 @@ async function generatePhoto() {
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
     if (userEx.hasAny) {
-      payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
+      payload.denoising = Math.min(0.48, Math.max(0.36, Number(payload.denoising) || 0.42));
       payload.negative = (payload.negative || "") + ", ignore user request, copy of reference pose only, wrong scene";
     }
     if (userEx.overridesOutfit) {
       payload.negative = (payload.negative || "") + ", wrong outfit, default lingerie when other clothes requested, nude when clothes requested";
-      payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
+      payload.denoising = Math.min(0.48, Math.max(0.36, Number(payload.denoising) || 0.42));
     }
     if (userEx.overridesAct) {
       payload.negative = (payload.negative || "") + ", solo female only, 1girl only, alone, no male, missing male body, disembodied penis, floating penis, penis without man, severed cock, censored, mosaic censor, bar censor, softcore only, portrait selfie, bust crop only";
       payload.nsfw = true;
-      payload.denoising = Math.max(0.60, Number(payload.denoising) || 0.65);
+      payload.denoising = Math.min(0.48, Math.max(0.36, Number(payload.denoising) || 0.42));
     }
     if (c.id === "lea") payload.nsfw = true;
     try {
@@ -7305,13 +7305,13 @@ async function generatePhoto() {
         // Acte + lieu imposés → denoise très haut ou txt2img pour ne pas garder le décor de la ref
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.max(0.60, Number(payload.denoising) || 0.65);
+        payload.denoising = Math.min(0.48, Math.max(0.36, Number(payload.denoising) || 0.42));
         setGenStatus("Horde img2img · acte+lieu · denoise " + payload.denoising + "…");
       } else if (userEx.hasAny) {
         // Options partielles → img2img léger
         setGenStatus("Chargement référence visage…");
         await applyCharacterRefToPayload(payload, c);
-        payload.denoising = Math.max(0.58, Number(payload.denoising) || 0.62);
+        payload.denoising = Math.min(0.48, Math.max(0.36, Number(payload.denoising) || 0.42));
         payload.seed = Math.floor(Math.random() * 2_000_000_000);
         setGenStatus("Horde img2img · options · denoise " + payload.denoising + "…");
       } else {
