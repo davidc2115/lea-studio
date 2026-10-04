@@ -7474,10 +7474,12 @@ async function generatePhoto() {
             else if (/brown iris/i.test(eyeLock)) payload.negative = "blue eyes, green eyes, grey eyes, " + (payload.negative || "");
             payload.negative = "wrong eye color, glowing eyes, " + (payload.negative || "");
             try {
-              await applyCharacterRefToPayload(payload, c);
-              payload.force_img2img = true;
-              payload.denoising = 0.42;
-              setGenStatus("Horde img2img · yeux+bonnet " + (hugeCup ? "gros" : smallCup ? "petit" : "fiche") + " · denoise " + payload.denoising);
+              // Profil aléatoire : PAS d'img2img, sinon la pose étoilée est recopiée.
+              payload.force_img2img = false;
+              delete payload.source_image;
+              delete payload.source_processing;
+              delete payload.denoising;
+              setGenStatus("Horde txt2img · pose et tenue libres");
             } catch (e2) {
               payload.force_img2img = false;
               delete payload.source_image;
@@ -7524,6 +7526,28 @@ async function generatePhoto() {
       setGenStatus("Horde txt2img…");
     }
     try { finalizeProfilePrompt(payload, c, profileVariant); } catch (_) {}
+    // Dernier mot : pose sexy + tenue scénario en tête, jamais img2img sur profil solo
+    try {
+      if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
+        payload.force_img2img = false;
+        delete payload.source_image;
+        delete payload.source_processing;
+        delete payload.denoising;
+        const wear = (profileVariant && profileVariant.outfit) || "short tight dress with deep neckline";
+        const pose = (profileVariant && profileVariant.pose) || "standing full body looking at camera";
+        const place = (profileVariant && profileVariant.place) || "indoor room";
+        payload.prompt = [
+          "photorealistic photograph, exactly one adult woman, not twins, not mirrored,",
+          "wearing " + wear + ",",
+          pose + ",",
+          "location " + place + ",",
+          "sexy provocative full body pose, hips and legs visible,",
+          String(payload.prompt || "")
+        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
+        payload.seed = Math.floor(Math.random() * 2e9);
+        showPromptStatus("Prompt envoyé", payload.prompt);
+      }
+    } catch (_) {}
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
