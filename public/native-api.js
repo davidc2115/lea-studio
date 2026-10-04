@@ -2410,7 +2410,7 @@
 
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
-      let prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
+      let prompt = String(body.prompt || "photorealistic full body photo of adult woman standing").slice(0, 2800);
       // Gemini native image (Nano Banana)
       if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
         try {
@@ -2484,7 +2484,7 @@
       if (profileSceneLock && !isDuoPrompt) {
         promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
         promptSafe = [
-          "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone",
+          "(FULL BODY head to knees:1.75), (exactly one woman:1.7), (wide shot hips and legs visible:1.55), not a pair, not a clone, NOT face crop, NOT headshot",
           faceLockText,
           profileSceneLock,
           promptSafe,
@@ -2493,7 +2493,7 @@
         if (faceLockText) promptSafe = prioritizeIdentity(faceLockText + ", " + promptSafe);
         if (!isDuoPrompt) {
           promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
-          promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+          promptSafe = "(FULL BODY head to knees:1.75), (exactly one woman:1.7), (wide shot hips and legs visible:1.55), not a pair, not a clone, NOT face crop, NOT headshot, " + promptSafe;
         }
       }
       if (!/photorealistic|photograph/i.test(promptSafe)) {
@@ -2531,8 +2531,8 @@
       const H = isDuoPrompt ? 512 : 512;
       const steps = hasHordeAccount ? 28 : 22;
       const photoModels = hasHordeAccount
-        ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
-        : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
+        ? ["AbsoluteReality", "ICBINP - I Can't Believe It's Not Photography", "Realistic Vision"]
+        : ["AbsoluteReality", "ICBINP - I Can't Believe It's Not Photography", "Realistic Vision"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2547,7 +2547,7 @@
       const qualityNeg = isDuoPrompt
         ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, missing legs, cropped at chest,  exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const photoHead = "face crop only, bust only, headshot only, close-up portrait only, passport photo, selfie crop, painting, digital painting, illustration, anime, cartoon, cgi, 3d render, plastic skin, airbrushed, glowing eyes, neon eyes, doll face, empty room, ";
+      const photoHead = "face crop only, bust only, headshot only, close-up portrait only, passport photo, selfie crop, side profile portrait only, painting, oil painting, digital painting, illustration, concept art, anime, cartoon, cgi, 3d render, plastic skin, airbrushed skin, smooth plastic face, glowing eyes, neon eyes, doll face, beauty filter, empty room, dramatic studio rim light only, ";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
@@ -2560,7 +2560,7 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const photoLock = "FULL BODY photograph head to knees, wide shot, hips and legs visible, RAW photo DSLR, photorealistic, natural skin pores, natural eyes not glowing, ";
+        const photoLock = "FULL BODY photograph head to knees, wide shot, hips legs visible, RAW photo real camera, photorealistic, natural skin pores freckles natural, natural realistic eyes not glowing, film grain, NOT painting, NOT illustration, NOT digital art, ";
         promptSafe = String(promptSafe || "")
           .replace(/iris verts/gi, "natural green iris not glowing")
           .replace(/regard expressif,?/gi, "")
@@ -2622,7 +2622,7 @@
             if (bodyPayload.params) {
               bodyPayload.params.width = 512;
               bodyPayload.params.height = 512;
-              if (!hasHordeAccount && bodyPayload.params.steps > 20) bodyPayload.params.steps = 20;
+              if (!hasHordeAccount && bodyPayload.params.steps > 22) bodyPayload.params.steps = 22;
             }
             const res = await fetch(host + "/generate/async", {
               method: "POST",
