@@ -2536,8 +2536,8 @@
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
-      let den = typeof body.denoising === "number" ? body.denoising : 0.68;
-      den = Math.min(0.82, Math.max(0.58, den));
+      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
+      den = Math.min(0.48, Math.max(0.36, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
