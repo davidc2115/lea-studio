@@ -7401,7 +7401,7 @@ async function generatePhoto() {
             try {
               await applyCharacterRefToPayload(payload, c);
               payload.force_img2img = true;
-              payload.denoising = 0.8;
+              payload.denoising = 0.42;
               setGenStatus("Horde img2img · yeux+bonnet " + (hugeCup ? "gros" : smallCup ? "petit" : "fiche") + " · denoise " + payload.denoising);
             } catch (e2) {
               payload.force_img2img = false;
