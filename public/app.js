@@ -1220,14 +1220,15 @@ function profileIdentityAnchor(c, referenceDescription = "") {
   try { physical = physicalLocksFromText(c) || physical; } catch (_) {}
   const keyTraits = (physical.positive || []).filter((item) => /hair|eyes|breasts|bust|chest|cup/i.test(item));
   const cup = cupLock(c);
+  const age = Math.max(18, Number(c.age) || 25);
   return [
-    "(same exact face and person as the character reference:1.7)",
+    "raw photograph, photorealistic, natural skin, not a painting",
+    String(c.name || "woman") + ", " + age + " year old woman",
     identityFromCard(c),
-    ...keyTraits.slice(0, 5),
+    ...keyTraits.slice(0, 4),
     cup && cup.pos,
-    "(preserve exact face, eye color and shape, hair color and style, and chest size and shape:1.55)",
-    String(c.looks_en || "").replace(/\s+/g, " ").trim().slice(0, 120),
-    String(referenceDescription || "").replace(/\s+/g, " ").trim().slice(0, 100),
+    "natural iris, not glowing eyes, not neon eyes",
+    "(preserve hair color, eye color, skin tone and chest size:1.5)",
   ].filter(Boolean).join(", ");
 }
 
