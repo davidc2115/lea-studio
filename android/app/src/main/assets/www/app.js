@@ -129,9 +129,9 @@ function cupLock(c) {
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
   const src = [body, c && c.appearance, c && c.looks_en, tags].filter(Boolean).join(" ").toLowerCase();
   const table = [
-    [/bonnet\s*j|\bj-cup\b/, "(massive enormous J-cup breasts:1.95), (extremely huge heavy chest:1.85), hyper busty, breasts larger than head, deep heavy cleavage", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*i|\bi-cup\b/, "(enormous I-cup breasts:1.9), (very heavy chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*h|\bh-cup\b/, "(huge heavy H-cup breasts:1.9), (massive chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
+    [/bonnet\s*j|\bj-cup\b/, "massive J-cup breasts, (extremely huge heavy chest:1.85), hyper busty, breasts larger than head, deep heavy cleavage", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, (very heavy chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "huge H-cup breasts, (massive chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
     [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
@@ -6849,51 +6849,78 @@ function roleScenePack(c) {
 
 function finalizeProfilePrompt(payload, c, scenarioVariant) {
   if (!payload || !c) return payload;
-  const requestedAge = Number(c.age) || 25;
-  const age = requestedAge < 21 ? 22 : requestedAge;
-  if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
+  const ageRaw = Number(c.age) || 25;
+  const age = ageRaw < 21 ? 22 : ageRaw;
+  const duo = typeof isDuoCharacter === "function" && isDuoCharacter(c);
+
+  if (duo && typeof buildDuoShot === "function") {
     payload.prompt = buildDuoShot(c, scenarioVariant);
     payload.is_duo = true;
     delete payload.source_image;
-    payload.negative = "solo, 1girl, headshot, split screen, diptych, headless, cropped head, " + (payload.negative || "");
+    payload.negative = "solo, 1girl, single woman, headshot, split screen, diptych, collage, anime, cartoon, illustration, painting, deformed, blurry, text, watermark";
     return payload;
   }
-  const promptBase = String(payload.prompt || "");
-  if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
-    payload.prompt = [
-      "(one single photo:1.7), (wide shot:1.5), hips and legs visible,",
-      "(photorealistic DSLR photograph:1.45), natural skin texture,",
-      "(" + age + " year old adult woman:1.45),",
-      "(face visible not close-up:1.3),",
-      speciesLock(c),
-      promptBase,
-      "NOT face crop, NOT headshot, NOT bust only",
-    ].filter(Boolean).join(" ");
-    payload.negative = "face crop, headshot, bust only, headless, cropped head, blurry, doll, " + (payload.negative || "");
-    return payload;
+
+  let looks = "";
+  try { looks = (typeof describeLooks === "function" ? describeLooks(c) : "") || ""; } catch (e) {}
+  if (!looks) looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
+  looks = looks.slice(0, 400);
+
+  let outfit = "", place = "", pose = "";
+  try {
+    const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
+    if (pick) { outfit = pick.outfit || ""; place = pick.place || ""; pose = pick.pose || ""; }
+  } catch (e) {}
+  if (scenarioVariant) {
+    if (scenarioVariant.outfit) outfit = scenarioVariant.outfit;
+    if (scenarioVariant.place) place = scenarioVariant.place;
   }
-  // Corps entier EN TÊTE (poids > visage) — sinon Horde sort des portraits
+  if (!pose) {
+    const poses = [
+      "standing three-quarter view looking at camera",
+      "sitting on a sofa looking at camera",
+      "leaning against a wall full body",
+      "standing with weight on one leg full body",
+      "walking toward camera full body"
+    ];
+    pose = poses[Math.floor(Math.random() * poses.length)];
+  }
+
+  let cup = "";
+  try {
+    if (typeof cupLock === "function") {
+      const ck = cupLock(c);
+      if (ck && ck.pos) cup = String(ck.pos).replace(/:\d+(\.\d+)?/g, "").replace(/[()]/g, "").trim();
+    }
+  } catch (e) {}
+
+  let species = "";
+  try {
+    if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+      species = String(speciesLock(c) || "").replace(/:\d+(\.\d+)?/g, "").slice(0, 160);
+    }
+  } catch (e) {}
+
   payload.prompt = [
-    "(one single photograph:1.7), (one woman one pose:1.6), hips and legs visible",
-    "(wide environmental shot:1.55)",
-    "(hips legs and feet visible:1.55)",
-    "(raw photorealistic DSLR photograph:1.45), natural skin pores, sharp focus",
-    "(" + age + " year old adult woman:1.45)",
-    "(face visible but not a close-up:1.3)",
-    promptBase,
-    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo, NOT close-up portrait",
-  ].join(", ");
-  payload.negative = "face crop only, headshot only, bust only, close-up portrait, passport photo, selfie crop, painting, oil painting, digital painting, illustration, drawing, anime, cartoon, cgi, plastic doll, airbrushed, headless, no head, blurry, " + (payload.negative || "");
-  const keepIdentityReference =
-    payload.force_img2img === true &&
-    payload.source_processing === "img2img" &&
-    typeof payload.source_image === "string" &&
-    payload.source_image.length > 800;
-  if (!keepIdentityReference) {
-    delete payload.source_image;
-    delete payload.source_processing;
-    payload.force_img2img = false;
-  }
+    "photorealistic photograph of a real woman",
+    age + " year old adult woman",
+    looks,
+    cup,
+    species,
+    outfit ? ("wearing " + outfit) : "",
+    pose,
+    place ? ("at " + place) : "",
+    "full body visible head to feet, natural skin, natural eyes, sharp focus"
+  ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 900);
+
+  payload.negative = [
+    "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic doll,",
+    "deformed, extra limbs, bad anatomy, blurry, lowres, text, watermark,",
+    "split screen, collage, character sheet, face crop, headshot only, bust only,",
+    "glowing eyes, empty room, no person, different person"
+  ].join(" ");
+
+  payload.identity_head = [age + " year old woman", looks.slice(0, 180), cup].filter(Boolean).join(", ").slice(0, 260);
   return payload;
 }
 
@@ -7373,7 +7400,7 @@ async function generatePhoto() {
             const eyeLock = eyeBit ? "(" + eyeBit + ":1.8), exact eye color, not a different eye color" : "";
             payload.identity_head = [cup.pos, eyeLock, idClean, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
             payload.prompt = (
-              "(new pose:1.75), (" + pose + ":1.7), NOT the same sitting pose, " +
+              "new pose, (" + pose + ":1.7), NOT the same sitting pose, " +
               (cup.pos ? cup.pos + ", " : "") +
               idClean + ", " +
               "one single photograph, one woman, " +
@@ -7388,7 +7415,7 @@ async function generatePhoto() {
             try { wear = (typeof roleSexyPick === "function" ? roleSexyPick(c).outfit : "") || ""; } catch (_) {}
             payload.seed = Math.floor(Math.random() * 2_000_000_000);
             payload.prompt = (
-              "(different pose each photo:1.7), (" + pose + ":1.65), " +
+              "different pose, (" + pose + ":1.65), " +
               (wear ? "(wearing " + wear + ":1.55), role outfit, " : "") +
               (cup.pos ? cup.pos + ", " : "") +
               (eyeLock ? eyeLock + ", " : "") +
