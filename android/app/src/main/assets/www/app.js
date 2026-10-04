@@ -127,11 +127,13 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function cupLock(c) {
   const body = String((c && c.body) || "");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
-  const src = [body, c && c.appearance, c && c.looks_en, tags].filter(Boolean).join(" ").toLowerCase();
+  // Tags d'abord : sinon "bonnet h" cité dans un descriptif écrase un vrai bonnet B.
+  const tagSrc = tags.toLowerCase();
+  const src = (tagSrc + " " + [body, c && c.appearance, c && c.looks_en].filter(Boolean).join(" ")).toLowerCase();
   const table = [
-    [/bonnet\s*j|\bj-cup\b/, "massive J-cup breasts, (extremely huge heavy chest:1.85), hyper busty, breasts larger than head, deep heavy cleavage", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, (very heavy chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*h|\bh-cup\b/, "huge H-cup breasts, (massive chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
+    [/bonnet\s*j|\bj-cup\b/, "massive J-cup breasts, extremely heavy chest, deep cleavage, full body visible, not a crop of the chest", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, very heavy chest, deep cleavage, full body visible", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "huge H-cup breasts, very large chest, deep cleavage, breasts proportional on a full body shot", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
     [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
@@ -569,6 +571,8 @@ function pickProfileScenarioVariant(c) {
     ? "casual knit top and jeans"
     : /fantasy|elfe|kitsune|succube|dragon|vampire|catgirl|sir[eè]ne|ange/.test(role)
     ? "a costume appropriate to the character's fantasy role"
+    : /fille d'une amie|fille d.amie|cuisine|kitchen/.test(role)
+    ? "fitted crop top and tight jeans, casual home clothes, not lingerie"
     : "everyday clothes appropriate to the character's role and scenario";
   // Keep variant indexes paired, but replace generic wardrobe placeholders
   // with a role-appropriate outfit instead of sending the literal placeholder.
@@ -7536,14 +7540,25 @@ async function generatePhoto() {
         const wear = (profileVariant && profileVariant.outfit) || "short tight dress with deep neckline";
         const pose = (profileVariant && profileVariant.pose) || "standing full body looking at camera";
         const place = (profileVariant && profileVariant.place) || "indoor room";
+        const scenario = String((c && c.scenario) || "");
+        const lieu = (scenario.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,80})/i) || [])[1] || place;
+        const roleBlob = [c && c.title, c && c.role, scenario, (c && c.tags || []).join(" ")].join(" ").toLowerCase();
+        let wearFinal = wear;
+        if (/cuisine|kitchen/.test(roleBlob + " " + lieu)) wearFinal = "casual crop top and tight jeans, home clothes, not a bra, not lingerie";
+        else if (/secr[eé]taire|bureau/.test(roleBlob)) wearFinal = "office blouse open at the neck and pencil skirt, stockings, heels";
+        else if (/belle-?m[eè]re|belle-?s[oœ]eur|voisine/.test(roleBlob)) wearFinal = "fitted dress with cleavage, not underwear only";
+        const cup = (typeof cupLock === "function" ? cupLock(c) : {}) || {};
         payload.prompt = [
           "photorealistic photograph, exactly one adult woman, not twins, not mirrored,",
-          "wearing " + wear + ",",
+          "full body from head to knees, not a close-up of the chest,",
+          "wearing " + wearFinal + ",",
           pose + ",",
-          "location " + place + ",",
-          "sexy provocative full body pose, hips and legs visible,",
-          String(payload.prompt || "")
-        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
+          "location: " + lieu + ",",
+          cup.pos || "",
+          "sexy provocative pose, hips and legs visible,",
+          String(payload.prompt || "").slice(0, 400)
+        ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
+        payload.negative = "close-up of breasts, cropped at chest, headless torso, bra only photo, bust crop, face crop, twins, mirror, " + (cup.neg || "") + ", " + (payload.negative || "");
         payload.seed = Math.floor(Math.random() * 2e9);
         showPromptStatus("Prompt envoyé", payload.prompt);
       }
