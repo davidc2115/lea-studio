@@ -2460,6 +2460,11 @@
         return s.slice(0, 1500);
       }
       let promptSafe = prioritizeIdentity(prompt);
+      const profileSceneLock = String(body.profile_scene_lock || "")
+        .replace(/[<>]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 920);
       // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
       if (!isDuoPrompt) {
         promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
@@ -2467,17 +2472,29 @@
         promptSafe = "(2girls:1.95), (exactly two adult women in one photo:1.9), (both fully visible:1.85), (same room no split:1.8), NOT solo, NOT 1girl, NOT single woman, NOT headshot, NOT split screen, " + promptSafe;
       }
       promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
+      let faceLockText = "";
       if (body.face_lock && String(body.face_lock).length > 20) {
-        let fl = String(body.face_lock)
+        const fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
           .replace(/\s+/g, " ")
           .trim()
-          .slice(0, 220);
-        promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
+          .slice(0, body.profile_identity_lock === true ? 360 : 220);
+        faceLockText = "(identical face to reference:1.55), " + fl;
       }
-      if (!isDuoPrompt) {
+      if (profileSceneLock && !isDuoPrompt) {
         promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
-        promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+        promptSafe = [
+          "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone",
+          faceLockText,
+          profileSceneLock,
+          promptSafe,
+        ].filter(Boolean).join(", ");
+      } else {
+        if (faceLockText) promptSafe = prioritizeIdentity(faceLockText + ", " + promptSafe);
+        if (!isDuoPrompt) {
+          promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
+          promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+        }
       }
       if (!/photorealistic|photograph/i.test(promptSafe)) {
         promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
@@ -2496,14 +2513,16 @@
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
       let hordeKey = "0000000000";
-      try {
-        const st = settings();
-        if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
-      } catch (_) {}
-      try {
-        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
-      } catch (_) {}
+      if (body.horde_anonymous !== true) {
+        try {
+          const st = settings();
+          if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
+        } catch (_) {}
+        try {
+          const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+          if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
+        } catch (_) {}
+      }
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
@@ -2528,7 +2547,7 @@
       const qualityNeg = isDuoPrompt
         ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const photoHead = "painting, oil painting, digital art, illustration, anime, cartoon, cgi, plastic skin, ";
+      const photoHead = "painting, oil painting, digital art, illustration, anime, cartoon, cgi, plastic skin, glowing eyes, neon eyes, doll face, airbrushed, ";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
@@ -2541,8 +2560,13 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
+        const photoLock = "RAW photo, photorealistic, natural skin pores, DSLR, natural eyes, ";
         const base = {
-          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
+          prompt: (
+            photoLock + promptSafe.slice(0, profileSceneLock ? 1300 : 820) +
+            " ### " +
+            negFull.slice(0, profileSceneLock ? 590 : 1050)
+          ).slice(0, 2000),
           params: {
             width: w,
             height: h,
@@ -2563,7 +2587,10 @@
           base.source_image = src;
           base.source_processing = "img2img";
           base.params.denoising_strength = den;
-          base.params.steps = Math.min(st, hasHordeAccount ? 28 : 12);
+          const img2imgStepLimit = body.profile_identity_lock === true
+            ? (hasHordeAccount ? 28 : 20)
+            : (hasHordeAccount ? 28 : 12);
+          base.params.steps = Math.min(st, img2imgStepLimit);
         }
         return base;
       }
