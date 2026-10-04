@@ -7382,15 +7382,21 @@ async function generatePhoto() {
             }
             if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
             payload.negative = "same pose as reference, identical pose, sitting on sofa copy, medium breasts, average breasts, " + (payload.negative || "");
-            try {
-              await applyCharacterRefToPayload(payload, c);
-              payload.force_img2img = true;
-              payload.denoising = smallCup ? 0.78 : (hugeCup ? 0.8 : 0.7);
-              setGenStatus("Horde img2img · pose nouvelle · " + (hugeCup ? "gros bonnet" : smallCup ? "petit bonnet" : "poitrine fiche") + "…");
-            } catch (e2) {
-              payload.force_img2img = false;
-              setGenStatus("Horde txt2img · identité fiche…");
-            }
+            let wear = "";
+            try { wear = (typeof roleSexyPick === "function" ? roleSexyPick(c).outfit : "") || ""; } catch (_) {}
+            payload.force_img2img = false;
+            delete payload.source_image;
+            delete payload.source_processing;
+            delete payload.denoising;
+            payload.seed = Math.floor(Math.random() * 2_000_000_000);
+            payload.prompt = (
+              "(different pose each photo:1.8), (" + pose + ":1.75), " +
+              (wear ? "(wearing " + wear + ":1.6), role outfit, " : "") +
+              (cup.pos ? cup.pos + ", " : "") +
+              payload.prompt
+            ).replace(/\s+/g, " ").trim();
+            payload.negative = "copy of previous photo, same pose, same outfit, same arm position, studio gray backdrop, topless only, " + (payload.negative || "");
+            setGenStatus("Horde txt2img · pose+tenue+bonnet " + (hugeCup ? "gros" : smallCup ? "petit" : "fiche") + "…");
           }
         } catch (e) { console.warn("[face_lock]", e); }
         try {
