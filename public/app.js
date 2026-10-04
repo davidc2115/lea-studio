@@ -6857,33 +6857,67 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.prompt = buildDuoShot(c, scenarioVariant);
     payload.is_duo = true;
     delete payload.source_image;
-    payload.negative = "solo, 1girl, single woman, headshot, split screen, diptych, collage, anime, cartoon, illustration, painting, deformed, blurry, text, watermark";
+    payload.negative = "solo, 1girl, single woman, headshot, split screen, diptych, collage, mirror symmetry, anime, cartoon, illustration, painting, deformed, blurry, text, watermark";
+    payload.seed = Math.floor(Math.random() * 2e9);
     return payload;
   }
 
   let looks = "";
   try { looks = (typeof describeLooks === "function" ? describeLooks(c) : "") || ""; } catch (e) {}
   if (!looks) looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
-  looks = looks.slice(0, 400);
+  looks = looks.slice(0, 380);
 
-  let outfit = "", place = "", pose = "";
+  let outfit = "", place = "";
   try {
     const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
-    if (pick) { outfit = pick.outfit || ""; place = pick.place || ""; pose = pick.pose || ""; }
+    if (pick) { outfit = pick.outfit || ""; place = pick.place || ""; }
   } catch (e) {}
   if (scenarioVariant) {
     if (scenarioVariant.outfit) outfit = scenarioVariant.outfit;
     if (scenarioVariant.place) place = scenarioVariant.place;
   }
-  if (!pose) {
-    const poses = [
-      "standing three-quarter view looking at camera",
-      "sitting on a sofa looking at camera",
-      "leaning against a wall full body",
-      "standing with weight on one leg full body",
-      "walking toward camera full body"
+
+  // Poses SEXY / provocantes — toujours une nouvelle à chaque génération
+  const sexyPoses = [
+    "standing arched back, hand on hip, looking over shoulder at camera, full body",
+    "leaning forward toward camera, deep cleavage visible, teasing smile, full body",
+    "sitting on kitchen counter legs crossed, short outfit, looking at camera",
+    "on all fours on the bed looking back at camera, arched back, full body",
+    "kneeling on the floor looking up at camera, hands on thighs, provocative",
+    "standing legs apart hands behind head, chest forward, full body",
+    "bent over slightly hands on knees looking back, provocative pose, full body",
+    "lying on side on sofa propped on elbow, hips forward, looking at camera",
+    "standing against wall one leg bent, pulling hem of top up slightly, teasing",
+    "sitting with legs open on chair, leaning back, seductive look at camera",
+    "walking toward camera hips swaying, looking at viewer, full body",
+    "from behind looking back over shoulder, hand on butt, full body",
+    "standing in doorway hand on frame, body angled, sultry expression",
+    "sitting on table edge, legs dangling, leaning forward teasingly"
+  ];
+  // éviter de répéter la dernière pose pour ce personnage
+  let pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
+  try {
+    const key = "lea.lastSexyPose." + (c.id || "x");
+    const last = localStorage.getItem(key) || "";
+    let guard = 0;
+    while (pose === last && guard++ < 8) {
+      pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
+    }
+    localStorage.setItem(key, pose);
+  } catch (e) {}
+
+  // Si pas de tenue scénario, tenue sexy liée au rôle / lieu
+  if (!outfit) {
+    const sexyOutfits = [
+      "tight crop top and short denim shorts",
+      "thin low-cut blouse and tight jeans",
+      "short summer dress with deep neckline",
+      "oversized shirt barely covering thighs",
+      "tank top and tight yoga pants",
+      "satin camisole and shorts",
+      "button shirt half open and mini skirt"
     ];
-    pose = poses[Math.floor(Math.random() * poses.length)];
+    outfit = sexyOutfits[Math.floor(Math.random() * sexyOutfits.length)];
   }
 
   let cup = "";
@@ -6897,30 +6931,44 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   let species = "";
   try {
     if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
-      species = String(speciesLock(c) || "").replace(/:\d+(\.\d+)?/g, "").slice(0, 160);
+      species = String(speciesLock(c) || "").replace(/:\d+(\.\d+)?/g, "").slice(0, 140);
     }
   } catch (e) {}
 
+  // Prompt unique à chaque fois (seed texte + pose)
+  const uniq = "variation " + Math.floor(Math.random() * 9999);
+
   payload.prompt = [
-    "photorealistic photograph of a real woman",
+    "photorealistic photograph of exactly one real woman",
+    "single person only, not twins, not mirrored, not duplicated",
     age + " year old adult woman",
     looks,
     cup,
     species,
-    outfit ? ("wearing " + outfit) : "",
+    "wearing " + outfit,
     pose,
-    place ? ("at " + place) : "",
-    "full body visible head to feet, natural skin, natural eyes, sharp focus"
-  ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 900);
+    place ? ("location: " + place) : "",
+    "sexy provocative pose, seductive expression",
+    "full body visible head to feet",
+    "natural skin, natural eyes, sharp focus, realistic lighting",
+    uniq
+  ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 950);
 
   payload.negative = [
+    "twins, clone, duplicate, mirror symmetry, two women, 2girls, multiple people,",
+    "same pose as before, identical composition, mirrored face,",
     "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic doll,",
     "deformed, extra limbs, bad anatomy, blurry, lowres, text, watermark,",
     "split screen, collage, character sheet, face crop, headshot only, bust only,",
     "glowing eyes, empty room, no person, different person"
   ].join(" ");
 
-  payload.identity_head = [age + " year old woman", looks.slice(0, 180), cup].filter(Boolean).join(", ").slice(0, 260);
+  payload.identity_head = [age + " year old woman", looks.slice(0, 160), cup].filter(Boolean).join(", ").slice(0, 240);
+  payload.seed = Math.floor(Math.random() * 2e9);
+  // Pose change > copie de la ref : denoise un peu plus haut sur profil
+  if (payload.force_img2img) {
+    payload.denoising = 0.52;
+  }
   return payload;
 }
 

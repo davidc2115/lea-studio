@@ -2541,7 +2541,7 @@
         const simpleNeg = [
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
-          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, split screen, collage, character sheet,",
+          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
           "glowing eyes, face crop, headshot only, empty room",
           String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
