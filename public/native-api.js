@@ -2460,6 +2460,11 @@
         return s.slice(0, 1500);
       }
       let promptSafe = prioritizeIdentity(prompt);
+      const profileSceneLock = String(body.profile_scene_lock || "")
+        .replace(/[<>]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 920);
       // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
       if (!isDuoPrompt) {
         promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
@@ -2467,17 +2472,29 @@
         promptSafe = "(2girls:1.95), (exactly two adult women in one photo:1.9), (both fully visible:1.85), (same room no split:1.8), NOT solo, NOT 1girl, NOT single woman, NOT headshot, NOT split screen, " + promptSafe;
       }
       promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
+      let faceLockText = "";
       if (body.face_lock && String(body.face_lock).length > 20) {
-        let fl = String(body.face_lock)
+        const fl = String(body.face_lock)
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
           .replace(/\s+/g, " ")
           .trim()
           .slice(0, body.profile_identity_lock === true ? 360 : 220);
-        promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
+        faceLockText = "(identical face to reference:1.55), " + fl;
       }
-      if (!isDuoPrompt) {
+      if (profileSceneLock && !isDuoPrompt) {
         promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
-        promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+        promptSafe = [
+          "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone",
+          faceLockText,
+          profileSceneLock,
+          promptSafe,
+        ].filter(Boolean).join(", ");
+      } else {
+        if (faceLockText) promptSafe = prioritizeIdentity(faceLockText + ", " + promptSafe);
+        if (!isDuoPrompt) {
+          promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
+          promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+        }
       }
       if (!/photorealistic|photograph/i.test(promptSafe)) {
         promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
@@ -2544,7 +2561,11 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const base = {
-          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
+          prompt: (
+            promptSafe.slice(0, profileSceneLock ? 1400 : 880) +
+            " ### " +
+            negFull.slice(0, profileSceneLock ? 590 : 1110)
+          ).slice(0, 2000),
           params: {
             width: w,
             height: h,
