@@ -149,8 +149,23 @@ function identityFromCard(c) {
   const name = String((c && c.name) || "woman");
   const requestedAge = Number(c && c.age) || 25;
   const age = requestedAge < 21 ? 22 : requestedAge;
-  const hair = (String((c && c.appearance) || "").match(/Cheveux\s*:\s*([^\n.]+)/i) || [])[1] || "";
-  const eyes = (String((c && c.appearance) || "").match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || "";
+  const app = String((c && c.appearance) || "") + " " + String((c && c.looks_en) || "");
+  const hairRaw = ((app.match(/Cheveux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
+  const eyesRaw = ((app.match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
+  let hair = "natural hair";
+  if (/platine|platinum/.test(hairRaw)) hair = "platinum blonde hair";
+  else if (/blond/.test(hairRaw)) hair = "blonde hair";
+  else if (/roux|auburn|ginger|red/.test(hairRaw)) hair = "natural red hair";
+  else if (/noir|black|jais/.test(hairRaw)) hair = "black hair";
+  else if (/ch[aâ]tain|chestnut|auburn/.test(hairRaw)) hair = "chestnut brown hair";
+  else if (/brun|brown/.test(hairRaw)) hair = "dark brown hair";
+  else if (/argent|silver|blanc/.test(hairRaw)) hair = "silver white hair";
+  let eyes = "natural realistic human eyes";
+  if (/vert|green/.test(eyesRaw) && !/noisette|hazel/.test(eyesRaw)) eyes = "natural green iris, soft realistic eyes, not glowing";
+  else if (/bleu|blue/.test(eyesRaw)) eyes = "natural blue iris, soft realistic eyes, not glowing";
+  else if (/noisette|hazel/.test(eyesRaw)) eyes = "natural hazel iris, soft realistic eyes";
+  else if (/marron|brun|brown/.test(eyesRaw)) eyes = "natural brown iris, soft realistic eyes";
+  else if (/gris|grey|gray/.test(eyesRaw)) eyes = "natural grey iris, soft realistic eyes";
   return name + ", " + age + " year old woman, " + hair + ", " + eyes;
 }
 function physicalLocksFromText(c) {
@@ -652,10 +667,14 @@ function profileScenePosePool(c, variant) {
     ];
   }
   return [
-    "standing naturally in the described location, candid expression",
-    "sitting near a prop from the scenario, relaxed posture",
-    "performing a small everyday action that fits her role",
-    "turning toward the viewer in a candid three-quarter view",
+    "standing naturally in the described location, weight on one leg, three-quarter view",
+    "sitting on a chair or desk edge, legs crossed, looking at the viewer",
+    "leaning against a wall or desk, arms loosely folded, casual",
+    "walking through the room mid-step, candid moment",
+    "looking back over one shoulder, rear three-quarter view, face visible",
+    "seated, one elbow on the table, relaxed smile",
+    "standing with hand on hip, confident posture, knees to head in frame",
+    "slightly bent forward reaching for something, candid action pose",
   ];
 }
 
@@ -6459,7 +6478,7 @@ async function generateScenePhoto() {
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
           payload.denoising = 0.62;
-          prompt = "new pose, new outfit, new posture, not a copy of the reference, not a picture frame, same face and hair color, " + prompt;
+          prompt = "(completely new pose:1.6), new outfit, new camera angle, full body or three-quarter, not a face crop, not a copy of the reference, not a picture frame, same face and hair color, natural eyes not glowing, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
@@ -6896,6 +6915,22 @@ async function generatePhoto() {
       console.log("[lea duo prompt]", prompt.slice(0, 450));
     }
   } catch (e) { console.warn("duo prompt", e); }
+  // Pose OBLIGATOIRE en tête (sinon Horde collège toujours le même portrait)
+  try {
+    if (!isDuoCharacter(c)) {
+      const forcedPose = (profileVariant && profileVariant.pose) || pickProfileScenePose(c, profileVariant || {});
+      const forcedCam = (profileVariant && profileVariant.cameraAngle) || pickProfileCameraAngle(c);
+      if (!/\bpose\b|sitting|standing|kneeling|leaning|looking over/i.test(prompt)) {
+        prompt = "(new pose:1.55), " + forcedPose + ", " + forcedCam + ", " + prompt;
+      } else {
+        prompt = "(new pose different from last:1.45), " + forcedPose + ", " + prompt;
+      }
+      prompt = prompt.replace(/iris verts/gi, "natural green iris not glowing")
+        .replace(/regard expressif/gi, "")
+        .replace(/cils d[eé]finis/gi, "")
+        .replace(/blonds? platine/gi, "platinum blonde hair");
+    }
+  } catch (_) {}
   // Renfort visage (tous personnages solo)
   try {
     if (!isDuoCharacter(c)) {

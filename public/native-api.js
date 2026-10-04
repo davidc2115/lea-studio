@@ -2561,6 +2561,14 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const photoLock = "RAW photo from DSLR camera, photorealistic, natural skin pores, realistic human skin, natural eyes not glowing, 85mm lens, natural light, ";
+        promptSafe = String(promptSafe || "")
+          .replace(/iris verts/gi, "natural green iris not glowing")
+          .replace(/regard expressif,?/gi, "")
+          .replace(/cils d[eé]finis,?/gi, "")
+          .replace(/blonds? platine/gi, "platinum blonde hair")
+          .replace(/\s+,/g, ",")
+          .replace(/,+/g, ", ")
+          .trim();
         const base = {
           prompt: (
             photoLock + promptSafe.slice(0, profileSceneLock ? 1300 : 820) +
