@@ -129,9 +129,9 @@ function cupLock(c) {
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
   const src = [body, c && c.appearance, c && c.looks_en, tags].filter(Boolean).join(" ").toLowerCase();
   const table = [
-    [/bonnet\s*j|\bj-cup\b/, "(massive J-cup breasts:1.7), extremely heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
-    [/bonnet\s*i|\bi-cup\b/, "(enormous I-cup breasts:1.65), very heavy chest", "A-cup, B-cup, C-cup, D-cup, small breasts, flat chest"],
-    [/bonnet\s*h|\bh-cup\b/, "(huge heavy H-cup breasts:1.85), (massive chest:1.7), hyper busty, deep cleavage", "small breasts, medium breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
+    [/bonnet\s*j|\bj-cup\b/, "(massive enormous J-cup breasts:1.95), (extremely huge heavy chest:1.85), hyper busty, breasts larger than head, deep heavy cleavage", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*i|\bi-cup\b/, "(enormous I-cup breasts:1.9), (very heavy chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "(huge heavy H-cup breasts:1.9), (massive chest:1.8), hyper busty, deep cleavage", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
     [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
@@ -7354,27 +7354,39 @@ async function generatePhoto() {
             const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
             const idShort = String(idBlock || "").slice(0, 280);
             const smallCup = /small [AB]-cup|modest small chest|petite natural/i.test(cup.pos || "");
+            const hugeCup = /J-cup|I-cup|H-cup|enormous|massive enormous/i.test(cup.pos || "");
             let idClean = idShort;
             if (smallCup) {
               idClean = idClean.replace(/voluptuous|hourglass|wide hips|full hips|deep cleavage/gi, " ").replace(/\s+/g, " ");
             }
+            const poses = [
+              "standing in the room, weight on one leg, full body",
+              "leaning on a doorframe, one knee bent, full body",
+              "sitting on the edge of the bed, legs crossed, torso turned",
+              "kneeling on the sofa, looking back over the shoulder",
+              "walking toward the camera in the hallway, mid-step",
+              "bent slightly forward, hands on thighs, full body",
+              "lying on her side on the bed, propped on one elbow",
+            ];
+            const pose = poses[Math.floor(Math.random() * poses.length)];
             payload.identity_head = [cup.pos, idClean, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
             payload.prompt = (
+              "(new pose:1.75), (" + pose + ":1.7), NOT the same sitting pose, " +
               (cup.pos ? cup.pos + ", " : "") +
               idClean + ", " +
-              "one single photograph, one woman, one pose, " +
+              "one single photograph, one woman, " +
               String(payload.prompt || prompt || "")
             ).replace(/\s+/g, " ").trim();
             if (smallCup) {
               payload.prompt = payload.prompt.replace(/voluptuous|huge breasts|large breasts|deep cleavage/gi, " ");
             }
             if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
+            payload.negative = "same pose as reference, identical pose, sitting on sofa copy, medium breasts, average breasts, " + (payload.negative || "");
             try {
               await applyCharacterRefToPayload(payload, c);
               payload.force_img2img = true;
-              // Denoise plus haut si petit bonnet : sinon la photo étoile trop grosse recopie la poitrine
-              payload.denoising = smallCup ? 0.78 : 0.62;
-              setGenStatus("Horde img2img · poitrine fiche " + (smallCup ? "petit bonnet" : "ok") + "…");
+              payload.denoising = smallCup ? 0.78 : (hugeCup ? 0.8 : 0.7);
+              setGenStatus("Horde img2img · pose nouvelle · " + (hugeCup ? "gros bonnet" : smallCup ? "petit bonnet" : "poitrine fiche") + "…");
             } catch (e2) {
               payload.force_img2img = false;
               setGenStatus("Horde txt2img · identité fiche…");
