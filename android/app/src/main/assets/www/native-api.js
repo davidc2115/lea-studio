@@ -2537,7 +2537,7 @@
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
       let den = typeof body.denoising === "number" ? body.denoising : 0.68;
-      den = Math.min(0.70, Math.max(0.55, den));
+      den = Math.min(0.82, Math.max(0.58, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
@@ -2561,7 +2561,7 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 320);
-        const photoLock = (idHead ? idHead + ", " : "") + "one single photograph, one woman only, one pose, candid photo, natural indoor light, real skin, ";
+        const photoLock = (idHead ? idHead + ", " : "") + "one single photograph, one woman only, a different pose than the reference, candid photo, natural indoor light, real skin, ";
         promptSafe = String(promptSafe || "")
           .replace(/iris verts/gi, "natural green iris not glowing")
           .replace(/regard expressif,?/gi, "")
@@ -2581,6 +2581,7 @@
             height: h,
             steps: st,
             n: 1,
+            seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
             sampler_name: "k_euler_a",
             cfg_scale: 5.5,
             clip_skip: 2,
