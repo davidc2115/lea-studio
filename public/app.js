@@ -7369,7 +7369,9 @@ async function generatePhoto() {
               "lying on her side on the bed, propped on one elbow",
             ];
             const pose = poses[Math.floor(Math.random() * poses.length)];
-            payload.identity_head = [cup.pos, idClean, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
+            const eyeBit = (String(idClean).match(/natural (?:green|blue|brown|hazel|grey|gray) iris[^,]*/i) || [""])[0];
+            const eyeLock = eyeBit ? "(" + eyeBit + ":1.8), exact eye color, not a different eye color" : "";
+            payload.identity_head = [cup.pos, eyeLock, idClean, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
             payload.prompt = (
               "(new pose:1.75), (" + pose + ":1.7), NOT the same sitting pose, " +
               (cup.pos ? cup.pos + ", " : "") +
@@ -7384,19 +7386,28 @@ async function generatePhoto() {
             payload.negative = "same pose as reference, identical pose, sitting on sofa copy, medium breasts, average breasts, " + (payload.negative || "");
             let wear = "";
             try { wear = (typeof roleSexyPick === "function" ? roleSexyPick(c).outfit : "") || ""; } catch (_) {}
-            payload.force_img2img = false;
-            delete payload.source_image;
-            delete payload.source_processing;
-            delete payload.denoising;
             payload.seed = Math.floor(Math.random() * 2_000_000_000);
             payload.prompt = (
-              "(different pose each photo:1.8), (" + pose + ":1.75), " +
-              (wear ? "(wearing " + wear + ":1.6), role outfit, " : "") +
+              "(different pose each photo:1.7), (" + pose + ":1.65), " +
+              (wear ? "(wearing " + wear + ":1.55), role outfit, " : "") +
               (cup.pos ? cup.pos + ", " : "") +
+              (eyeLock ? eyeLock + ", " : "") +
               payload.prompt
             ).replace(/\s+/g, " ").trim();
-            payload.negative = "copy of previous photo, same pose, same outfit, same arm position, studio gray backdrop, topless only, " + (payload.negative || "");
-            setGenStatus("Horde txt2img · pose+tenue+bonnet " + (hugeCup ? "gros" : smallCup ? "petit" : "fiche") + "…");
+            if (/green iris/i.test(eyeLock)) payload.negative = "blue eyes, brown eyes, grey eyes, " + (payload.negative || "");
+            else if (/blue iris/i.test(eyeLock)) payload.negative = "green eyes, brown eyes, " + (payload.negative || "");
+            else if (/brown iris/i.test(eyeLock)) payload.negative = "blue eyes, green eyes, grey eyes, " + (payload.negative || "");
+            payload.negative = "wrong eye color, glowing eyes, " + (payload.negative || "");
+            try {
+              await applyCharacterRefToPayload(payload, c);
+              payload.force_img2img = true;
+              payload.denoising = smallCup || hugeCup ? 0.74 : 0.68;
+              setGenStatus("Horde img2img · yeux+bonnet " + (hugeCup ? "gros" : smallCup ? "petit" : "fiche") + " · denoise " + payload.denoising);
+            } catch (e2) {
+              payload.force_img2img = false;
+              delete payload.source_image;
+              setGenStatus("Horde txt2img · pas de photo repère");
+            }
           }
         } catch (e) { console.warn("[face_lock]", e); }
         try {
