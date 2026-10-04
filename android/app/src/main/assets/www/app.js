@@ -201,10 +201,10 @@ function physicalLocksFromText(c) {
 
   // Yeux
   const eyeMap = [
-    [/yeux\s*verts|green\s*eyes/i, "green eyes"],
-    [/yeux\s*bleus|blue\s*eyes/i, "blue eyes"],
-    [/yeux\s*marron|brown\s*eyes|yeux\s*bruns/i, "brown eyes"],
-    [/yeux\s*noisette|hazel\s*eyes/i, "hazel eyes"],
+    [/yeux\s*verts|green\s*eyes/i, "natural green iris, realistic human eyes, soft natural eye color"],
+    [/yeux\s*bleus|blue\s*eyes/i, "natural blue iris, realistic human eyes, soft natural eye color"],
+    [/yeux\s*marron|brown\s*eyes|yeux\s*bruns/i, "natural brown iris, realistic human eyes"],
+    [/yeux\s*noisette|hazel\s*eyes/i, "natural hazel iris, realistic human eyes"],
     [/yeux\s*gris|grey\s*eyes|gray\s*eyes/i, "grey eyes"],
     [/yeux\s*noirs|black\s*eyes|dark\s*eyes/i, "dark brown eyes"],
   ];
@@ -217,7 +217,7 @@ function physicalLocksFromText(c) {
       } else if (/blue|bleu/i.test(pos)) {
         out.negative.push("brown eyes, green eyes, hazel eyes");
       } else if (/green|vert/i.test(pos) && !/hazel|noisette/i.test(pos)) {
-        out.negative.push("blue eyes, brown eyes, grey eyes");
+        out.negative.push("blue eyes, brown eyes, grey eyes, glowing eyes, neon eyes, phosphorescent eyes, bright green contacts, anime eyes");
       }
       break;
     }
@@ -1222,13 +1222,14 @@ function profileIdentityAnchor(c, referenceDescription = "") {
   const cup = cupLock(c);
   const age = Math.max(18, Number(c.age) || 25);
   return [
-    "raw photograph, photorealistic, natural skin, not a painting",
+    "RAW photograph from a real camera, photorealistic, natural skin pores, film grain",
     String(c.name || "woman") + ", " + age + " year old woman",
     identityFromCard(c),
     ...keyTraits.slice(0, 4),
     cup && cup.pos,
-    "natural iris, not glowing eyes, not neon eyes",
-    "(preserve hair color, eye color, skin tone and chest size:1.5)",
+    "natural realistic human eyes, soft natural iris, not glowing, not neon, not anime eyes",
+    "(three-quarter body visible:1.4), shoulders and chest in frame, not face crop only",
+    "(preserve hair color, natural eye color, skin tone and chest size:1.5)",
   ].filter(Boolean).join(", ");
 }
 
@@ -1476,7 +1477,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(solo:1.55), single adult woman only, one woman, NOT 2girls, NOT twins, NOT side by side duplicate,",
+      "(solo:1.55), single adult woman only, one woman in frame, photorealistic, natural eyes not glowing, NOT empty room, NOT 2girls, NOT twins, NOT face crop only,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
