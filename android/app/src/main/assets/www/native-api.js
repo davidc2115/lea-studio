@@ -2560,7 +2560,7 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const photoLock = "RAW photo from DSLR camera, photorealistic, natural skin pores, realistic human skin, natural eyes not glowing, 85mm lens, natural light, ";
+        const photoLock = "FULL BODY photograph head to knees, wide shot, hips and legs visible, RAW photo DSLR, photorealistic, natural skin pores, natural eyes not glowing, ";
         promptSafe = String(promptSafe || "")
           .replace(/iris verts/gi, "natural green iris not glowing")
           .replace(/regard expressif,?/gi, "")

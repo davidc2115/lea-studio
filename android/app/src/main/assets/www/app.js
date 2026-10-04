@@ -168,6 +168,40 @@ function identityFromCard(c) {
   else if (/gris|grey|gray/.test(eyesRaw)) eyes = "natural grey iris, soft realistic eyes";
   return name + ", " + age + " year old woman, " + hair + ", " + eyes;
 }
+function buildCharacterIdentityBlock(c) {
+  if (!c) return "";
+  const age = Math.max(22, Number(c.age) || 25);
+  const name = String(c.name || "woman").split("&")[0].trim();
+  const app = String(c.appearance || "");
+  const body = String(c.body || "");
+  const looks = String(c.looks_en || "");
+  const tags = Array.isArray(c.tags) ? c.tags.join(" ") : "";
+  const blob = (app + " " + body + " " + looks + " " + tags).toLowerCase();
+  const id = identityFromCard(c);
+  const cup = (typeof cupLock === "function" ? cupLock(c) : null);
+  let morph = "feminine figure";
+  if (/chubby|plus-size|ronde|curvy thick/.test(blob)) morph = "chubby soft body, full hips, soft belly";
+  else if (/hourglass|sablier|voluptueuse|voluptuous/.test(blob)) morph = "voluptuous hourglass, narrow waist, wide hips";
+  else if (/athl|athletic|toned/.test(blob)) morph = "athletic toned body, defined waist";
+  else if (/mince|slim|slender|petite/.test(blob)) morph = "slim slender frame";
+  else if (/bombée|curvy/.test(blob)) morph = "curvy feminine body, rounded hips";
+  let skin = "";
+  const eth = String(c.ethnicity || "").toLowerCase();
+  if (/africain|noire|black/.test(eth + blob)) skin = "deep dark brown skin";
+  else if (/m[eé]tisse|mixed/.test(eth + blob)) skin = "mixed light-brown skin";
+  else if (/latine|latina|olive/.test(eth + blob)) skin = "olive warm skin";
+  else if (/asiat/.test(eth + blob)) skin = "light east-asian skin";
+  else if (/slave|arabe|maghreb/.test(eth + blob)) skin = "warm medium skin";
+  else skin = "fair natural skin";
+  return [
+    id,
+    cup && cup.pos,
+    morph,
+    skin,
+    age + " year old adult woman, age-appropriate face",
+  ].filter(Boolean).join(", ");
+}
+
 function physicalLocksFromText(c) {
   const blob = [
     c && c.looks_en,
@@ -1496,7 +1530,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(solo:1.55), single adult woman only, full body or head-to-knees, hips and legs visible, photorealistic, natural eyes not glowing, NOT empty room, NOT face crop, NOT bust only, NOT 2girls,",
+      "(FULL BODY head to knees:1.7), (wide shot:1.5), (hips legs visible:1.55), (solo:1.5), single adult woman, photorealistic, natural eyes not glowing, NOT face crop, NOT bust only, NOT headshot, NOT empty room, NOT 2girls,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -6477,8 +6511,8 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = 0.62;
-          prompt = "(completely new pose:1.6), new outfit, new camera angle, full body or three-quarter, not a face crop, not a copy of the reference, not a picture frame, same face and hair color, natural eyes not glowing, " + prompt;
+          payload.denoising = 0.72;
+          prompt = "(FULL BODY head to knees:1.65), (completely new pose:1.6), new outfit, new camera angle, hips and legs visible, not a face crop, not a bust crop, not a copy of the reference, same face hair and breast size, natural eyes not glowing, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
@@ -7299,17 +7333,27 @@ async function generatePhoto() {
         delete payload.source_processing;
         delete payload.denoising;
         try {
+          // Profil scénario = txt2img (img2img depuis portrait force le face-crop)
           if (!isDuoCharacter(c)) {
-            await applyCharacterRefToPayload(payload, c, setGenStatus, {
-              allowFantasy: true,
-              addPromptLock: false,
-              forceImg2Img: true,
-              denoising: 0.65,
-              profileIdentityLock: true,
-            });
-            if (payload.force_img2img === true && payload.source_image) {
-              payload.profile_identity_lock = true;
+            payload.force_img2img = false;
+            delete payload.source_image;
+            delete payload.source_processing;
+            delete payload.denoising;
+            // Identité texte du personnage (visage/poitrine/morpho) sans coller la pose de la ref
+            const idBlock = typeof buildCharacterIdentityBlock === "function"
+              ? buildCharacterIdentityBlock(c)
+              : "";
+            if (idBlock) {
+              payload.prompt = (
+                "(FULL BODY photograph head to knees:1.7), (hips and legs visible:1.55), wide shot, " +
+                "(new pose:1.5), " +
+                String(payload.prompt || prompt || "") + ", " +
+                "IDENTITY LOCK: " + idBlock + ", " +
+                "same hair color and natural eye color as identity, same breast size, " +
+                "photorealistic DSLR, natural skin pores, NOT face crop, NOT bust only, NOT headshot"
+              ).replace(/\s+/g, " ").trim();
             }
+            setGenStatus("Horde txt2img · corps entier + identité fiche…");
           }
         } catch (e) { console.warn("[face_lock]", e); }
         try {
