@@ -695,13 +695,13 @@ function pickProfileScenePose(c, variant) {
 
 function pickProfileCameraAngle(c) {
   const angles = [
-    "three-quarter front view at eye level, medium-wide framing from mid-thigh up",
-    "slight low camera angle, knees to head in frame, office visible",
-    "rear three-quarter view looking back over one shoulder, face and hips visible",
-    "side three-quarter view, seated pose, knees to head in frame",
-    "slight high angle, waist to head in frame, face fully visible",
-    "wide full-body view with the room and desk visible",
-    "medium-wide view from thighs up, face, torso and hips visible",
+    "full body head to toes visible, wide shot, environment in frame",
+    "full body head to mid-calf, eye level, room visible",
+    "slight low angle, full body from feet to head, space around her",
+    "rear three-quarter full body looking back over shoulder, legs and hips visible",
+    "side full body view seated or standing, head to feet in frame",
+    "wide full-body view with the room and furniture visible",
+    "medium-wide from mid-thigh up only if standing far, hips clearly visible",
   ];
   const key = "lea.lastProfileCamera." + ((c && c.id) || "x");
   let recent = [];
@@ -1247,7 +1247,7 @@ function profileIdentityAnchor(c, referenceDescription = "") {
     ...keyTraits.slice(0, 4),
     cup && cup.pos,
     "natural realistic human eyes, soft natural iris, not glowing, not neon, not anime eyes",
-    "(three-quarter body visible:1.4), shoulders and chest in frame, not face crop only",
+    "(full body or head-to-knees:1.55), (hips and legs visible:1.5), wide shot, not face crop, not bust only",
     "(preserve hair color, natural eye color, skin tone and chest size:1.5)",
   ].filter(Boolean).join(", ");
 }
@@ -1496,7 +1496,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(solo:1.55), single adult woman only, one woman in frame, photorealistic, natural eyes not glowing, NOT empty room, NOT 2girls, NOT twins, NOT face crop only,",
+      "(solo:1.55), single adult woman only, full body or head-to-knees, hips and legs visible, photorealistic, natural eyes not glowing, NOT empty room, NOT face crop, NOT bust only, NOT 2girls,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -1551,8 +1551,8 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       "in " + loc + ",",
       "scenario moment: " + situation + ",",
       "(completely different pose:1.4), " + pos + ",",
-      "(full body head to mid-thigh:1.5), (hips and legs visible:1.4), wide shot,",
-      "NOT face crop, NOT bust only, NOT headshot,",
+      "(full body head to knees or toes:1.65), (hips legs and feet visible:1.5), wide environmental shot,",
+      "NOT face crop, NOT bust only, NOT headshot, NOT portrait selfie, NOT passport photo, NOT close-up face,",
     ].filter(Boolean).join(" ");
     const qualityPart = [
       "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
@@ -6904,7 +6904,7 @@ async function generatePhoto() {
         "(2girls:2.0), (two adult women:1.95), (people in the frame:1.9), photorealistic photo,",
         "EXACTLY TWO different adult women standing or sitting together,",
         duoCore || "LEFT woman and RIGHT woman, different hair, different breast sizes,",
-        "both fully visible head to thighs, faces and bodies visible,",
+        "both fully visible head to knees or toes, full bodies, hips and legs visible, wide shot,",
         "wearing " + String(outfitBit || "casual clothes").slice(0, 90) + ",",
         "background: " + placeShort + ",",
         "NOT empty room, NOT empty interior, NOT vacant living room, NOT furniture only, NOT no people,",
@@ -6936,8 +6936,8 @@ async function generatePhoto() {
     if (!isDuoCharacter(c)) {
       // Cadre corps entier OBLIGATOIRE (Horde adore les portraits sinon)
       const frame = profileVariant.cameraAngle
-        ? "(" + profileVariant.cameraAngle + ":1.35), "
-        : "(three-quarter body shot, torso and hips visible:1.5), ";
+        ? "(" + profileVariant.cameraAngle + ":1.5), (full body or head-to-knees:1.55), "
+        : "(full body head to knees:1.6), (hips and legs visible:1.5), wide shot, ";
       const soloLock = "(solo:1.45), single adult woman only, ";
       const idLock = profileIdentityAnchor(c);
       // Yeux + cheveux extraits en priorité absolue
