@@ -137,7 +137,7 @@ function cupLock(c) {
     [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
     [/bonnet\s*d|\bd-cup\b|95d/, "(D-cup breasts:1.5), full but not enormous", "A-cup, B-cup, flat chest, H-cup, I-cup, J-cup"],
     [/bonnet\s*c|\bc-cup\b/, "(medium C-cup breasts:1.55), modest cleavage", "huge breasts, D-cup, E-cup, F-cup, H-cup, I-cup"],
-    [/bonnet\s*b|\bb-cup\b/, "(small B-cup breasts:1.65), modest chest, small natural breasts", "large breasts, huge breasts, deep cleavage, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty"],
+    [/bonnet\s*b|\bb-cup\b/, "(small B-cup breasts:1.9), (modest small chest:1.8), petite natural breasts, NOT large, NOT busty", "large breasts, huge breasts, big breasts, deep cleavage, heavy breasts, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty, voluptuous chest, implants"],
     [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
   ];
   for (const [re, pos, neg] of table) {
@@ -179,9 +179,11 @@ function buildCharacterIdentityBlock(c) {
   const blob = (app + " " + body + " " + looks + " " + tags).toLowerCase();
   const id = identityFromCard(c);
   const cup = (typeof cupLock === "function" ? cupLock(c) : null);
+  const smallCup = /bonnet\s*[ab]|\b[ab]-cup\b|petits?\s*seins|petite slim/.test(blob);
   let morph = "feminine figure";
-  if (/chubby|plus-size|ronde|curvy thick/.test(blob)) morph = "chubby soft body, full hips, soft belly";
-  else if (/hourglass|sablier|voluptueuse|voluptuous/.test(blob)) morph = "voluptuous hourglass, narrow waist, wide hips";
+  if (/chubby|plus-size|ronde|curvy thick/.test(blob) && !smallCup) morph = "chubby soft body, full hips, soft belly";
+  else if (smallCup) morph = "slim petite frame, narrow chest, small natural breasts, NOT busty, NOT voluptuous chest";
+  else if (/hourglass|sablier|voluptueuse|voluptuous/.test(blob)) morph = "hourglass, narrow waist, wide hips, breast size as specified";
   else if (/athl|athletic|toned/.test(blob)) morph = "athletic toned body, defined waist";
   else if (/mince|slim|slender|petite/.test(blob)) morph = "slim slender frame";
   else if (/bombée|curvy/.test(blob)) morph = "curvy feminine body, rounded hips";
@@ -7351,19 +7353,28 @@ async function generatePhoto() {
               : "";
             const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
             const idShort = String(idBlock || "").slice(0, 280);
-            payload.identity_head = [cup.pos, idShort, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
+            const smallCup = /small [AB]-cup|modest small chest|petite natural/i.test(cup.pos || "");
+            let idClean = idShort;
+            if (smallCup) {
+              idClean = idClean.replace(/voluptuous|hourglass|wide hips|full hips|deep cleavage/gi, " ").replace(/\s+/g, " ");
+            }
+            payload.identity_head = [cup.pos, idClean, c.age ? (c.age + " year old woman") : ""].filter(Boolean).join(", ");
             payload.prompt = (
               (cup.pos ? cup.pos + ", " : "") +
-              idShort + ", " +
-              "one single photograph, one woman, one pose, same face as reference, " +
+              idClean + ", " +
+              "one single photograph, one woman, one pose, " +
               String(payload.prompt || prompt || "")
             ).replace(/\s+/g, " ").trim();
+            if (smallCup) {
+              payload.prompt = payload.prompt.replace(/voluptuous|huge breasts|large breasts|deep cleavage/gi, " ");
+            }
             if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
             try {
               await applyCharacterRefToPayload(payload, c);
               payload.force_img2img = true;
-              payload.denoising = 0.62;
-              setGenStatus("Horde img2img · visage + poitrine fiche…");
+              // Denoise plus haut si petit bonnet : sinon la photo étoile trop grosse recopie la poitrine
+              payload.denoising = smallCup ? 0.78 : 0.62;
+              setGenStatus("Horde img2img · poitrine fiche " + (smallCup ? "petit bonnet" : "ok") + "…");
             } catch (e2) {
               payload.force_img2img = false;
               setGenStatus("Horde txt2img · identité fiche…");
