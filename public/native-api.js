@@ -2448,57 +2448,30 @@
       ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
 
       // ——— Ne pas tronquer l'identité : poids (:1.x) et corps/fantasy en tête ———
+
+      // ——— Prompt propre (pas de stack de poids) ———
       function prioritizeIdentity(raw) {
-        // NE PAS dupliquer le prompt (head+full = double seins / miroir)
         let s = String(raw || "").replace(/\s+/g, " ").trim();
-        if (!s) return "photorealistic photo of an adult woman, sharp focus";
-        // Anti-miroir en tête (solo seulement — ne pas casser les duos)
-        const duo = /\b2girls\b|LEFT woman|RIGHT woman|two women side by side/i.test(s);
-        if (!duo && !/one torso|not mirrored/i.test(s)) {
-          s = "(one woman:1.5), (single torso:1.6), (exactly two natural breasts:1.45), asymmetric casual pose, not mirrored, not kaleidoscope, " + s;
-        }
-        return s.slice(0, 1500);
+        if (!s) return "photorealistic photo of an adult woman, full body, natural skin";
+        // enlever poids extrêmes :1.8 etc qui saturent Horde
+        s = s.replace(/:\d+(\.\d+)?/g, "");
+        s = s.replace(/[()]/g, "");
+        return s.slice(0, 900);
       }
       let promptSafe = prioritizeIdentity(prompt);
-      const profileSceneLock = String(body.profile_scene_lock || "")
-        .replace(/[<>]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 920);
-      // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
-      if (!isDuoPrompt) {
-        promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
+      const profileSceneLock = String(body.profile_scene_lock || "").replace(/[<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+      if (isDuoPrompt) {
+        promptSafe = "photorealistic photo of two adult women together in the same scene, both fully visible, " + promptSafe;
       } else {
-        promptSafe = "(2girls:1.95), (exactly two adult women in one photo:1.9), (both fully visible:1.85), (same room no split:1.8), NOT solo, NOT 1girl, NOT single woman, NOT headshot, NOT split screen, " + promptSafe;
+        promptSafe = "photorealistic photo of one adult woman, full body, " + promptSafe;
       }
-      promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
-      let faceLockText = "";
+      if (profileSceneLock) promptSafe += ", " + profileSceneLock;
       if (body.face_lock && String(body.face_lock).length > 20) {
-        const fl = String(body.face_lock)
-          .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
-          .replace(/\s+/g, " ")
-          .trim()
-          .slice(0, body.profile_identity_lock === true ? 360 : 220);
-        faceLockText = "(identical face to reference:1.55), " + fl;
+        const fl = String(body.face_lock).replace(/\s+/g, " ").trim().slice(0, 180);
+        promptSafe = fl + ", " + promptSafe;
       }
-      if (profileSceneLock && !isDuoPrompt) {
-        promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
-        promptSafe = [
-          "(one single photo:1.8), (exactly one woman:1.7), (one pose:1.6), hips and legs visible, not a pair, not a character sheet",
-          faceLockText,
-          profileSceneLock,
-          promptSafe,
-        ].filter(Boolean).join(", ");
-      } else {
-        if (faceLockText) promptSafe = prioritizeIdentity(faceLockText + ", " + promptSafe);
-        if (!isDuoPrompt) {
-          promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
-          promptSafe = "(one single photo:1.8), (exactly one woman:1.7), (one pose:1.6), hips and legs visible, not a pair, not a clone, not a character sheet, " + promptSafe;
-        }
-      }
-      if (!/photorealistic|photograph/i.test(promptSafe)) {
-        promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
-      }
+      promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, 1000);
+
 
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
@@ -2560,22 +2533,20 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 320);
-        const photoLock = (idHead ? idHead + ", " : "") + "one single photograph, one woman only, a different pose than the reference, candid photo, natural indoor light, real skin, ";
-        promptSafe = String(promptSafe || "")
-          .replace(/iris verts/gi, "natural green iris not glowing")
-          .replace(/regard expressif,?/gi, "")
-          .replace(/cils d[eé]finis,?/gi, "")
-          .replace(/blonds? platine/gi, "platinum blonde hair")
-          .replace(/\s+,/g, ",")
-          .replace(/,+/g, ", ")
-          .trim();
+        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
+        if (idHead && !promptSafe.includes(idHead.slice(0, 40))) {
+          promptSafe = idHead + ", " + promptSafe;
+        }
+        promptSafe = String(promptSafe || "").replace(/\s+/g, " ").trim().slice(0, 900);
+        const simpleNeg = [
+          "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
+          "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
+          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, split screen, collage, character sheet,",
+          "glowing eyes, face crop, headshot only, empty room",
+          String(body.negative || "")
+        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {
-          prompt: (
-            photoLock + promptSafe.slice(0, profileSceneLock ? 1300 : 820) +
-            " ### " +
-            negFull.slice(0, profileSceneLock ? 590 : 1050)
-          ).slice(0, 2000),
+          prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1600),
           params: {
             width: w,
             height: h,
