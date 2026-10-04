@@ -2537,7 +2537,7 @@
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
       let den = typeof body.denoising === "number" ? body.denoising : 0.68;
-      den = Math.min(0.75, Math.max(0.55, den));
+      den = Math.min(0.84, Math.max(0.55, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
@@ -2547,7 +2547,7 @@
       const qualityNeg = isDuoPrompt
         ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const photoHead = "painting, oil painting, digital art, illustration, anime, cartoon, cgi, plastic skin, glowing eyes, neon eyes, doll face, airbrushed, ";
+      const photoHead = "painting, oil painting, picture frame, wooden frame, photo in a frame, digital art, illustration, anime, cartoon, cgi, plastic skin, glowing eyes, doll face, ";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";

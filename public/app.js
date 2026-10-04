@@ -6457,8 +6457,8 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = 0.66;
-          prompt = "(same face as reference:1.45), (same breast size as reference:1.35), change clothes and pose, outfit and room from the dialogue, not a copy of the reference photo, " + prompt;
+          payload.denoising = 0.8;
+          prompt = "new pose, new outfit, new posture, not a copy of the reference, not a picture frame, same face and hair color, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
           setSceneProgress("📡 Horde img2img denoise " + payload.denoising + "…", 14);
@@ -7255,7 +7255,7 @@ async function generatePhoto() {
             "completely nude, fully naked, topless, mirror symmetry, fused faces, conjoined, two heads one body, " +
             "2girls, 3girls, twins, clone, multiple women, same woman twice, wrong age, different person, " +
             "anime, manga, cartoon, illustration, " +
-            "collage, grid, 2x2, multipanel, split screen, mirror symmetry";
+            "collage, grid, 2x2, multipanel, split screen, mirror symmetry, picture frame, wooden frame, photo in a frame, same pose as reference";
         }
         // Ancrer chaque nouvelle image sur la photo repère du personnage.
         // Le denoise modéré conserve l'identité tout en laissant changer la scène et la pose.
@@ -7269,7 +7269,7 @@ async function generatePhoto() {
               allowFantasy: true,
               addPromptLock: false,
               forceImg2Img: true,
-              denoising: 0.70,
+              denoising: 0.8,
               profileIdentityLock: true,
             });
             if (payload.force_img2img === true && payload.source_image) {
