@@ -2531,8 +2531,8 @@
       const H = isDuoPrompt ? 512 : 512;
       const steps = hasHordeAccount ? 28 : 22;
       const photoModels = hasHordeAccount
-        ? ["AbsoluteReality", "ICBINP - I Can't Believe It's Not Photography", "Realistic Vision"]
-        : ["AbsoluteReality", "ICBINP - I Can't Believe It's Not Photography", "Realistic Vision"];
+        ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"]
+        : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
       const payloads = [];
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
@@ -2547,7 +2547,7 @@
       const qualityNeg = isDuoPrompt
         ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
         : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, missing legs, cropped at chest,  exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const photoHead = "face crop only, bust only, headshot only, close-up portrait only, passport photo, selfie crop, side profile portrait only, painting, oil painting, digital painting, illustration, concept art, anime, cartoon, cgi, 3d render, plastic skin, airbrushed skin, smooth plastic face, glowing eyes, neon eyes, doll face, beauty filter, empty room, dramatic studio rim light only, ";
+      const photoHead = "plastic skin, waxy skin, mannequin, doll, cgi, 3d render, airbrushed, beauty filter, catalog photo, stiff pose, symmetrical pose, hands on hips, painting, oil painting, digital painting, illustration, anime, cartoon, glowing eyes, empty room, face crop only, bust only, headshot only, ";
       const mirrorHead = isDuoPrompt
         ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
         : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
@@ -2560,7 +2560,7 @@
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const photoLock = "FULL BODY photograph head to knees, wide shot, hips legs visible, RAW photo real camera, photorealistic, natural skin pores freckles natural, natural realistic eyes not glowing, film grain, NOT painting, NOT illustration, NOT digital art, ";
+        const photoLock = "candid RAW photograph, real camera, natural indoor lighting, real skin texture with pores, subtle imperfections, photorealistic, natural eyes, three-quarter or full body in frame, hips and legs visible, not a catalog pose, not a mannequin, ";
         promptSafe = String(promptSafe || "")
           .replace(/iris verts/gi, "natural green iris not glowing")
           .replace(/regard expressif,?/gi, "")
@@ -2580,8 +2580,8 @@
             height: h,
             steps: st,
             n: 1,
-            sampler_name: "k_dpmpp_2m",
-            cfg_scale: 7,
+            sampler_name: "k_euler_a",
+            cfg_scale: 5.5,
             clip_skip: 2,
           },
           nsfw: body.nsfw !== false,
