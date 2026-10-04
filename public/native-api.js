@@ -2472,7 +2472,7 @@
           .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
           .replace(/\s+/g, " ")
           .trim()
-          .slice(0, 220);
+          .slice(0, body.profile_identity_lock === true ? 360 : 220);
         promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
       }
       if (!isDuoPrompt) {
@@ -2496,14 +2496,16 @@
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
       let hordeKey = "0000000000";
-      try {
-        const st = settings();
-        if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
-      } catch (_) {}
-      try {
-        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
-      } catch (_) {}
+      if (body.horde_anonymous !== true) {
+        try {
+          const st = settings();
+          if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
+        } catch (_) {}
+        try {
+          const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+          if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
+        } catch (_) {}
+      }
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
@@ -2563,7 +2565,10 @@
           base.source_image = src;
           base.source_processing = "img2img";
           base.params.denoising_strength = den;
-          base.params.steps = Math.min(st, hasHordeAccount ? 28 : 12);
+          const img2imgStepLimit = body.profile_identity_lock === true
+            ? (hasHordeAccount ? 28 : 20)
+            : (hasHordeAccount ? 28 : 12);
+          base.params.steps = Math.min(st, img2imgStepLimit);
         }
         return base;
       }
