@@ -6878,20 +6878,19 @@ async function generatePhoto() {
       const poseBit = (ex && ex.poseLine) ? ex.poseLine : (profileVariant.pose || pickProfileScenePose(c, profileVariant));
       const placeBit = (ex && ex.placeLine) ? ex.placeLine : describePlaceDetail(profileVariant.place);
       // Contraste d'abord (âge / cheveux / poitrine) — Horde dilue sinon
+      // Place courte pour ne pas noyer les sujets (sinon Horde génère un salon vide)
+      const placeShort = String(placeBit || "indoor apartment").replace(/\s+/g, " ").trim().slice(0, 80);
       prompt = [
-        "photorealistic DSLR photo of EXACTLY TWO different adult women together in one scene,",
-        duoCore || "LEFT woman and RIGHT woman, different ages, different hair, different breast sizes,",
-        poseBit + ",",
-        "both fully visible head to mid-thigh, wide shot NOT close-up faces,",
-        "wearing " + outfitBit + ",",
-        "in " + placeBit + ",",
-        "scene from character scenario: " + profileScenarioText(c).slice(0, 130) + ",",
-        "two separate bodies, two faces, natural skin, sharp focus,",
-        "NOT same age both women, NOT both middle-aged, NOT both 40, NOT both young identical,",
-        "NOT same hair color both, NOT both brunette identical, NOT both blonde, NOT same breast size, NOT matching cup sizes,",
-        "NOT mirror symmetry, NOT identical twins same look, NOT fused bodies, NOT clones, NOT solo 1girl,",
-        "NOT face crop only, NOT portrait only,",
-        extra ? (String(extra).slice(0, 80) + ",") : "",
+        "(2girls:2.0), (two adult women:1.95), (people in the frame:1.9), photorealistic photo,",
+        "EXACTLY TWO different adult women standing or sitting together,",
+        duoCore || "LEFT woman and RIGHT woman, different hair, different breast sizes,",
+        "both fully visible head to thighs, faces and bodies visible,",
+        "wearing " + String(outfitBit || "casual clothes").slice(0, 90) + ",",
+        "background: " + placeShort + ",",
+        "NOT empty room, NOT empty interior, NOT vacant living room, NOT furniture only, NOT no people,",
+        "NOT solo, NOT 1girl, NOT single woman, NOT face crop only,",
+        "two separate bodies, two faces, natural skin,",
+        extra ? (String(extra).slice(0, 70) + ",") : "",
       ].filter(Boolean).join(" ");
       console.log("[lea duo prompt]", prompt.slice(0, 450));
     }
