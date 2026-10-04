@@ -6265,7 +6265,7 @@ async function generatePhotoHordeFallback(prompt, c) {
       }
     } catch (_) {}
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
-      payload.prompt = "(solo:1.7), (single adult woman:1.65), (exactly one head:1.8), (one face only:1.75), (one body:1.7), photorealistic photo, " + (payload.prompt || "");
+      payload.prompt = "(FULL BODY head to knees:1.7), (wide shot:1.55), (hips and legs visible:1.5), (solo:1.55), single adult woman, photorealistic photo, NOT face crop, NOT headshot, NOT bust only, " + (payload.prompt || "");
       payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
     }
     if (c.id === "duo_twins_lea") {
@@ -6859,23 +6859,29 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const promptBase = String(payload.prompt || "");
   if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
     payload.prompt = [
-      "(photorealistic DSLR photograph:1.5), natural skin texture,",
-      "(" + age + " year old adult woman:1.5),",
-      "(face fully visible, head in frame:1.5),",
+      "(FULL BODY head to knees:1.7), (wide shot:1.5), hips and legs visible,",
+      "(photorealistic DSLR photograph:1.45), natural skin texture,",
+      "(" + age + " year old adult woman:1.45),",
+      "(face visible not close-up:1.3),",
       speciesLock(c),
       promptBase,
+      "NOT face crop, NOT headshot, NOT bust only",
     ].filter(Boolean).join(" ");
-    payload.negative = "headless, cropped head, torso only, blurry, doll, " + (payload.negative || "");
+    payload.negative = "face crop, headshot, bust only, headless, cropped head, blurry, doll, " + (payload.negative || "");
     return payload;
   }
+  // Corps entier EN TÊTE (poids > visage) — sinon Horde sort des portraits
   payload.prompt = [
-    "(raw photorealistic DSLR photograph:1.5), natural skin pores, realistic lighting, sharp focus,",
-    "(" + age + " year old adult woman:1.5),",
-    "(face fully visible, head in frame:1.6),",
-    "(full body or three-quarter composition:1.45),",
+    "(FULL BODY photograph from head to knees or toes:1.75)",
+    "(wide environmental shot:1.55)",
+    "(hips legs and feet visible:1.55)",
+    "(raw photorealistic DSLR photograph:1.45), natural skin pores, sharp focus",
+    "(" + age + " year old adult woman:1.45)",
+    "(face visible but not a close-up:1.3)",
     promptBase,
+    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo, NOT close-up portrait",
   ].join(", ");
-  payload.negative = "painting, oil painting, digital painting, illustration, drawing, anime, cartoon, cgi, plastic doll, airbrushed, headless, no head, cropped head, blurry, " + (payload.negative || "");
+  payload.negative = "face crop only, headshot only, bust only, close-up portrait, passport photo, selfie crop, painting, oil painting, digital painting, illustration, drawing, anime, cartoon, cgi, plastic doll, airbrushed, headless, no head, blurry, " + (payload.negative || "");
   const keepIdentityReference =
     payload.force_img2img === true &&
     payload.source_processing === "img2img" &&

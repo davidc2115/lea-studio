@@ -2267,7 +2267,7 @@
       "Analyze ONLY the face and hair of the woman. Output ONE English prompt line (no markdown).",
       "Include: apparent age, face shape, skin tone, eye color and shape, brows, nose, lips, hair color length texture parting, marks.",
       "FORBIDDEN: pose, posture, body position, clothing, outfit, camera angle, background, nude, standing, sitting.",
-      "Max 70 words. Start with: same woman as reference photo, face only,",
+      "Max 70 words. Start with: same woman as reference photo, full body head to knees,",
     ].join(" ");
     const models = ["gemini-2.0-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
     let last = "";
