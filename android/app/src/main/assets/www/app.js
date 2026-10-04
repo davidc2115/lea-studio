@@ -6457,7 +6457,7 @@ async function generateScenePhoto() {
           payload.force_img2img = true;
           // Denoise bas : garder visage + poitrine de la fiche
           const bigChange = /missionnaire|doggy|levrette|orgasme/i.test(prompt);
-          payload.denoising = 0.8;
+          payload.denoising = 0.62;
           prompt = "new pose, new outfit, new posture, not a copy of the reference, not a picture frame, same face and hair color, " + prompt;
           payload.prompt = prompt;
           payload.seed = Math.floor(Math.random() * 2_000_000_000);
@@ -7269,7 +7269,7 @@ async function generatePhoto() {
               allowFantasy: true,
               addPromptLock: false,
               forceImg2Img: true,
-              denoising: 0.8,
+              denoising: 0.65,
               profileIdentityLock: true,
             });
             if (payload.force_img2img === true && payload.source_image) {
