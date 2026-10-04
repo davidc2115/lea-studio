@@ -1532,7 +1532,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(one single photo:1.7), (wide shot:1.5), (hips legs visible:1.55), (solo:1.5), single adult woman, photorealistic, natural eyes not glowing, NOT face crop, NOT bust only, NOT headshot, NOT empty room, NOT 2girls,",
+      "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural eyes,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -6262,12 +6262,12 @@ async function generatePhotoHordeFallback(prompt, c) {
     try {
       if (!(extra && String(extra).length > 2) && typeof roleSexyPick === "function") {
         const wear = roleSexyPick(c).outfit;
-        payload.prompt = "(fully dressed:1.7), (wearing " + wear + ":1.65), role outfit, clothes on, NOT nude, NOT lingerie only, " + (payload.prompt || "");
+        payload.prompt = "wearing " + wear + ", " + (payload.prompt || "");
         payload.negative = "nude, naked, topless, lingerie, bra only, panties only, underwear, bare breasts, bikini, id photo, passport photo, headshot only, split screen, diptych, " + (payload.negative || "");
       }
     } catch (_) {}
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
-      payload.prompt = "(one single photo:1.7), (wide shot:1.55), (hips and legs visible:1.5), (solo:1.55), single adult woman, photorealistic photo, NOT face crop, NOT headshot, NOT bust only, " + (payload.prompt || "");
+      payload.prompt = "photorealistic photograph of exactly one real woman, single person only, not twins, full body, " + (payload.prompt || "");
       payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
     }
     if (c.id === "duo_twins_lea") {
