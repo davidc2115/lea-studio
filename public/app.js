@@ -625,7 +625,7 @@ function profileScenePosePool(c, variant) {
     return [
       "sitting at a desk reviewing open books and notes",
       "standing beside the desk with a book in hand",
-      "organizing notes on the desk, candid three-quarter view",
+      "organizing notes on the desk, candid full body view",
       "sitting on a floor cushion beside study materials",
     ];
   }
@@ -639,7 +639,7 @@ function profileScenePosePool(c, variant) {
       ]
       : [
         "standing naturally in the doorway, one hand on the doorframe",
-        "opening the door to greet someone, candid three-quarter view",
+        "opening the door to greet someone, candid full body view",
         "standing in the hallway with a relaxed posture",
         "turning toward the viewer from the apartment entrance",
       ];
@@ -655,7 +655,7 @@ function profileScenePosePool(c, variant) {
   if (/office|bureau|desk|clinic|hospital|h[oô]pital/.test(place)) {
     return [
       "leaning against the desk with one hip angled, holding a file and giving a confident teasing glance",
-      "sitting on the front edge of the desk with legs crossed, torso turned three-quarter toward camera",
+      "sitting on the front edge of the desk with legs crossed, torso turned full body toward camera",
       "reaching for a folder beside the desk, hips angled away and looking back over her shoulder",
       "sitting in the office chair with one elbow on the desk, giving the camera a playful inviting smile",
     ];
@@ -680,7 +680,7 @@ function profileScenePosePool(c, variant) {
     return [
       "sitting at a desk reviewing open books and notes",
       "standing beside the desk with a book in hand",
-      "organizing notes on the desk, candid three-quarter view",
+      "organizing notes on the desk, candid full body view",
       "sitting on a floor cushion beside study materials",
     ];
   }
@@ -701,11 +701,11 @@ function profileScenePosePool(c, variant) {
     ];
   }
   return [
-    "standing naturally in the described location, weight on one leg, three-quarter view",
+    "standing naturally in the described location, weight on one leg, full body view",
     "sitting on a chair or desk edge, legs crossed, looking at the viewer",
     "leaning against a wall or desk, arms loosely folded, casual",
     "walking through the room mid-step, candid moment",
-    "looking back over one shoulder, rear three-quarter view, face visible",
+    "looking back over one shoulder, rear full body view, face visible",
     "seated, one elbow on the table, relaxed smile",
     "standing with hand on hip, confident posture, knees to head in frame",
     "slightly bent forward reaching for something, candid action pose",
@@ -732,7 +732,7 @@ function pickProfileCameraAngle(c) {
     "full body head to toes visible, wide shot, environment in frame",
     "full body head to mid-calf, eye level, room visible",
     "slight low angle, full body from feet to head, space around her",
-    "rear three-quarter full body looking back over shoulder, legs and hips visible",
+    "rear full body full body looking back over shoulder, legs and hips visible",
     "side full body view seated or standing, head to feet in frame",
     "wide full-body view with the room and furniture visible",
     "medium-wide from mid-thigh up only if standing far, hips clearly visible",
@@ -1346,7 +1346,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     "shot from slightly below, low angle, full body",
     "slight high angle looking down, full body visible",
     "side angle 45 degrees, full body",
-    "rear three-quarter view, looking back at camera",
+    "rear full body view, looking back at camera",
     "dutch angle slight tilt cinematic, full body",
   ];
   let pose;
@@ -1530,7 +1530,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "(FULL BODY head to knees:1.7), (wide shot:1.5), (hips legs visible:1.55), (solo:1.5), single adult woman, photorealistic, natural eyes not glowing, NOT face crop, NOT bust only, NOT headshot, NOT empty room, NOT 2girls,",
+      "(one single photo:1.7), (wide shot:1.5), (hips legs visible:1.55), (solo:1.5), single adult woman, photorealistic, natural eyes not glowing, NOT face crop, NOT bust only, NOT headshot, NOT empty room, NOT 2girls,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -6265,7 +6265,7 @@ async function generatePhotoHordeFallback(prompt, c) {
       }
     } catch (_) {}
     if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
-      payload.prompt = "(FULL BODY head to knees:1.7), (wide shot:1.55), (hips and legs visible:1.5), (solo:1.55), single adult woman, photorealistic photo, NOT face crop, NOT headshot, NOT bust only, " + (payload.prompt || "");
+      payload.prompt = "(one single photo:1.7), (wide shot:1.55), (hips and legs visible:1.5), (solo:1.55), single adult woman, photorealistic photo, NOT face crop, NOT headshot, NOT bust only, " + (payload.prompt || "");
       payload.negative = "character sheet, model sheet, turnaround, multiple views, multiple heads, five faces, extra faces, extra heads, floating heads, collage, grid, 2x2, 4x4, multipanel, split screen, same woman repeated, clone faces, reference sheet, expression chart, " + (payload.negative || "");
     }
     if (c.id === "duo_twins_lea") {
@@ -6837,7 +6837,7 @@ function roleScenePack(c) {
   const poses = [
     "leaning on a desk looking at camera, playful provocative smile",
     "sitting on the edge of a desk or sofa, legs crossed, cleavage visible",
-    "standing three-quarter, one hand on hip, looking over shoulder",
+    "standing full body, one hand on hip, looking over shoulder",
     "kneeling on a sofa looking up with a mischievous glance",
     "bending slightly forward, looking back at camera",
   ];
@@ -6859,7 +6859,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const promptBase = String(payload.prompt || "");
   if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
     payload.prompt = [
-      "(FULL BODY head to knees:1.7), (wide shot:1.5), hips and legs visible,",
+      "(one single photo:1.7), (wide shot:1.5), hips and legs visible,",
       "(photorealistic DSLR photograph:1.45), natural skin texture,",
       "(" + age + " year old adult woman:1.45),",
       "(face visible not close-up:1.3),",
@@ -6872,7 +6872,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   }
   // Corps entier EN TÊTE (poids > visage) — sinon Horde sort des portraits
   payload.prompt = [
-    "(FULL BODY photograph from head to knees or toes:1.75)",
+    "(one single photograph:1.7), (one woman one pose:1.6), hips and legs visible",
     "(wide environmental shot:1.55)",
     "(hips legs and feet visible:1.55)",
     "(raw photorealistic DSLR photograph:1.45), natural skin pores, sharp focus",
@@ -6991,7 +6991,7 @@ async function generatePhoto() {
       } catch (_) {}
       // Identité + corps EN TÊTE, prompt scène après
       prompt = soloLock + eyeFirst + frame + idLock + ", " + prompt;
-      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT bust only, NOT cropped at chest, NOT passport photo, NOT face-only, (full body or three-quarter body in frame:1.5), hips and thighs visible,";
+      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT bust only, NOT cropped at chest, NOT passport photo, NOT face-only, (full body or full body body in frame:1.5), hips and thighs visible,";
       prompt += ", NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry,";
       prompt += ", (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, NOT text, NOT watermark,";
     }
