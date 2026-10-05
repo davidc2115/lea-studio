@@ -1398,6 +1398,7 @@
       push(window.LEA_CAST_DIRECT);
       push(window.LEA_CAST_CUPS);
       push(window.LEA_CAST_COLLEGUES);
+      push(window.LEA_CAST_TAQUIN);
       push(window.EXTRA_CAST);
       push(window.LEA_CAST_EXTRA);
       try {
