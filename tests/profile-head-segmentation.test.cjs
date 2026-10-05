@@ -126,14 +126,25 @@ test("Frontal bootstrap uses the anonymous censored provider contract without he
     profile_scene_lock: "frontal head and shoulders, both eyes visible, adult woman in an opaque blouse",
     profile_frontal_reference: true, is_profile_photo: true, horde_anonymous: true,
     profile_identity_lock: true, source_image: "A".repeat(2000),
-    source_processing: "img2img", force_img2img: true, denoising: .75, nsfw: false,
+    source_processing: "img2img", force_img2img: true, denoising: .9, nsfw: false,
   }) });
   assert.equal(requests[0].options.headers.apikey, "0000000000");
   assert.equal(requests[0].body.censor_nsfw, true);
   assert.equal(requests[0].body.nsfw, false);
   assert.equal(requests[0].body.source_processing, "img2img");
-  assert.equal(requests[0].body.params.denoising_strength, .75);
+  assert.equal(requests[0].body.params.denoising_strength, .9);
+  assert.equal(requests[0].body.params.cfg_scale, 7);
+  assert.equal(requests[0].body.params.clip_skip, 1);
   assert.doesNotMatch(requests[0].body.prompt.split("###")[1], /headshot only/);
+});
+
+test("The measured three-quarter QA head is rejected rather than treated as frontal", () => {
+  const java = fs.readFileSync(path.join(__dirname,
+    "../android/app/src/main/java/com/leastudio/app/ProfileHeadProcessor.java"), "utf8");
+  const limit = Number(java.match(/Math\.abs\(face\[8\] - eyeX\) > (\.\d+)f \* faceWidth/)[1]);
+  const width = 242.3616, eyeMidpoint = (256.9127 + 343.9953) / 2, noseX = 327.0937;
+  assert(Math.abs(noseX - eyeMidpoint) / width > limit);
+  assert(limit <= .06);
 });
 
 function galleryPoll(result, restore) {

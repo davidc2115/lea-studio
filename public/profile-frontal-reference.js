@@ -15,7 +15,7 @@
       "frontal head-and-shoulders photograph, upright head, camera at eye level",
       "opaque fully buttoned blouse, chest covered, plain softly lit background",
       String(identity || "").replace(/full body or head to knees, face visible, setting visible/gi, "").slice(0, 300),
-      "same woman as reference when provided, natural facial proportions, photorealistic"].join(", ");
+      "same woman as reference when provided, natural facial proportions, natural eyes, RAW DSLR photograph, unretouched skin texture"].join(", ");
   }
   function readPreparation(source) {
     let result;
@@ -61,7 +61,7 @@
       is_profile_photo: true, horde_anonymous: true, nsfw: false,
       profile_frontal_reference: true,
       profile_identity_lock: true,
-      ...(selected ? { source_image: generationSource, source_processing: "img2img", force_img2img: true, denoising: .75 } : {}),
+      ...(selected ? { source_image: generationSource, source_processing: "img2img", force_img2img: true, denoising: .9 } : {}),
     });
     if (!image) throw new Error("Aucune référence de face reçue.");
     const prepared = readPreparation(image);

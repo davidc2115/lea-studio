@@ -2506,7 +2506,9 @@
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
       const isProfileImg2Img = Boolean(profileSceneLock && !isDuoPrompt && body.profile_identity_lock === true);
-      den = isMaskedProfile ? 1 : Math.min(isProfileImg2Img ? 0.75 : 0.48, Math.max(isProfileImg2Img ? 0.58 : 0.36, den));
+      den = isMaskedProfile ? 1 : body.profile_frontal_reference === true
+        ? Math.min(.95, Math.max(.85, den))
+        : Math.min(isProfileImg2Img ? 0.75 : 0.48, Math.max(isProfileImg2Img ? 0.58 : 0.36, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
@@ -2538,7 +2540,9 @@
           profileSceneLock && !isDuoPrompt ? String(body.negative || "").slice(0, 240) : "",
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
-          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
+          isDuoPrompt ? "solo, 1girl, split screen, collage," :
+            body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
+              "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
           body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, face crop, headshot only, empty room",
           profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
@@ -2551,8 +2555,8 @@
             n: 1,
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
             sampler_name: "k_euler_a",
-            cfg_scale: isMaskedProfile ? 7 : 5.5,
-            clip_skip: isMaskedProfile ? 1 : 2,
+            cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
+            clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
           nsfw: body.is_profile_photo || profileSceneLock ? false : body.nsfw !== false,
           censor_nsfw: Boolean(body.is_profile_photo || profileSceneLock),

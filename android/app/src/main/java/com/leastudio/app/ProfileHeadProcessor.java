@@ -87,7 +87,8 @@ final class ProfileHeadProcessor {
             float faceWidth = face[2], faceHeight = face[3];
             float eyeX = (face[4] + face[6]) / 2, eyeY = (face[5] + face[7]) / 2;
             float eyeGap = (float) Math.hypot(face[4] - face[6], face[5] - face[7]);
-            boolean profile = eyeGap < .29f * faceWidth || Math.abs(face[8] - eyeX) > .12f * faceWidth;
+            // A three-quarter head can show both eyes; that is not camera-facing.
+            boolean profile = eyeGap < .29f * faceWidth || Math.abs(face[8] - eyeX) > .06f * faceWidth;
             String direction = profile ? (face[8] > eyeX ? "right" : "left") : "frontal";
             if (faceWidth < 32 || faceHeight < 40) throw new IllegalArgumentException("Visage trop petit dans la référence.");
             if (profile) {
