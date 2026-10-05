@@ -225,6 +225,15 @@
         " Ton choix : " + goal[1] + ". La réponse modifie la prochaine action, pas seulement le ton du dialogue." + autonomy + pair;
       c.greeting = "*" + c.name + (duo ? " posent " : " pose ") + detail[0] + " à portée de vue dans " + locationFr + ". " + event + "*\n" +
         goal[2] + "\n" + (duo ? "Nous avons deux idées différentes. Tu veux les entendre avant de décider ?" : "Tu préfères " + goal[1] + " ?");
+      c.outfits = bank.outfits.slice();
+      c.places = bank.places.slice();
+      c.profile_scenes = bank.places.map((place, i) => ({
+        outfit: bank.outfits[i], place, prop: detail[1],
+         pose: mermaid
+           ? ["seated diagonally on a rock ledge, scaled tail curled beside her, face toward camera", "resting sideways against a smooth rock, one arm on the ledge, tail visible, face toward camera", "sitting upright on a stone ledge, shoulders angled, scaled tail extending beside her, face toward camera"][i]
+           : poses[(n + i * 2) % poses.length],
+         camera: mermaid ? "wide head-to-tail shot, mermaid tail and surroundings visible" : ["wide head-to-knees shot, furniture and room visible", "wide head-to-mid-calf shot, space around her", "full body with feet visible, room in background"][i],
+      }));
       c.scenario_version = "distinct-interactive";
     }
   }
@@ -232,6 +241,12 @@
   if (kenza) {
     kenza.scenario = "Kenza Cisse, 25 ans, la babysitter. Lieu : le salon, après la fin de son service. Les enfants dorment à l'étage, hors de la scène ; le babyphone est sur la table basse. Son dernier tram vient d'être annulé et elle vérifie le prochain départ avant d'appeler un taxi. Elle a promis à sa colocataire de rentrer, mais tient aussi à finir le petit défi de cartes commencé plus tôt. Elle dispose les cartes et te propose de choisir : faire une manche rapide, comparer les solutions de transport ou lui demander ce qui l'a fait rire dans le message reçu. Elle organise elle-même son retour ; ni sa présence ni un éventuel rapprochement ne sont imposés.";
     kenza.greeting = "*Kenza pose son téléphone près du babyphone, puis étale quelques cartes sur la table basse.*\nMon tram vient de disparaître du tableau. J'ai encore deux options pour rentrer… et une revanche à prendre. Tu m'aides à choisir le trajet, ou tu acceptes une dernière manche ?";
+    kenza.profile_scenes = [
+      { outfit: "a fitted opaque blouse with closed buttons and dark jeans", place: kenza.places[0], prop: "playing cards and a phone beside the baby monitor", pose: "seated diagonally on the sofa, legs crossed, one elbow on its arm, torso angled, face toward camera", camera: "wide head-to-knees shot, sofa and coffee table fully visible" },
+      { outfit: "an opaque fitted cotton top, cardigan and tailored trousers", place: kenza.places[1], prop: "a phone showing transit times beside the baby monitor", pose: "standing beside the sofa, one hip angled, one hand on the sofa back, face toward camera", camera: "full body head to feet, warm living room visible" },
+      { outfit: "an opaque fitted knit top and dark jeans", place: kenza.places[2], prop: "a deck of cards beside the baby monitor", pose: "sitting on a chair turned diagonally, crossed ankles, shoulders angled, confident playful gaze toward camera", camera: "wide head-to-mid-calf shot, armchair and lamp visible" },
+    ];
+    kenza.outfits = kenza.profile_scenes.map(s => s.outfit);
   }
   root.LeaScenarioLibrary = { count: seen.size, roleBank, banks };
 })(window);
