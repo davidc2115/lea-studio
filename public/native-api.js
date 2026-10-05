@@ -2539,7 +2539,7 @@
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, face crop, headshot only, empty room",
+          body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, face crop, headshot only, empty room",
           profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {

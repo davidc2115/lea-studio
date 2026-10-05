@@ -118,6 +118,24 @@ test("Provider censorship metadata is rejected even if its boolean flag is false
   assert.equal(result.url, undefined);
 });
 
+test("Frontal bootstrap uses the anonymous censored provider contract without headshot negatives", async () => {
+  const { context, requests } = nativeApi();
+  await context.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
+    engine: "horde", charId: "collegue_10",
+    prompt: "frontal head and shoulders, both eyes visible, adult woman in an opaque blouse",
+    profile_scene_lock: "frontal head and shoulders, both eyes visible, adult woman in an opaque blouse",
+    profile_frontal_reference: true, is_profile_photo: true, horde_anonymous: true,
+    profile_identity_lock: true, source_image: "A".repeat(2000),
+    source_processing: "img2img", force_img2img: true, denoising: .75, nsfw: false,
+  }) });
+  assert.equal(requests[0].options.headers.apikey, "0000000000");
+  assert.equal(requests[0].body.censor_nsfw, true);
+  assert.equal(requests[0].body.nsfw, false);
+  assert.equal(requests[0].body.source_processing, "img2img");
+  assert.equal(requests[0].body.params.denoising_strength, .75);
+  assert.doesNotMatch(requests[0].body.prompt.split("###")[1], /headshot only/);
+});
+
 function galleryPoll(result, restore) {
   const existing = ["previous-photo"];
   const writes = [], statuses = [];
@@ -220,7 +238,8 @@ test("The release wires preparation only into profile generation, not SD.cpp res
   assert.doesNotMatch(rescue, /headRestoration|prepareSegmentedProfileHead|LeaSegmentedProfile/);
   const prepare = app.indexOf("headRestoration = await window.LeaSegmentedProfile.prepareReference");
   assert(prepare > app.indexOf('console.warn("[profile final prompt]"'));
-  assert.match(app.slice(prepare, prepare + 900), /pollHordeJob\(start.jobId, start.host, c.id, headRestoration\)/);
+  assert.match(app.slice(prepare, app.indexOf("async function pollLocalJob", prepare)),
+    /pollHordeJob\(start.jobId, start.host, c.id, headRestoration\)/);
   assert(read("index.html").indexOf('src="profile-head-segmentation.js"') <
     read("index.html").indexOf('src="app.js"'));
 });

@@ -26,8 +26,6 @@ import java.io.InputStream;
 /** Local reference preparation only. No network, gallery or conversation writes. */
 final class ProfileHeadProcessor {
     private static final int WIDTH = 384, HEIGHT = 512;
-    // Enable only after uncensored profile renders have passed visual inspection.
-    private static final boolean PROFILE_RENDERING_VALIDATED = false;
     private static FaceDetectorYN detector;
 
     private ProfileHeadProcessor() {}
@@ -92,13 +90,27 @@ final class ProfileHeadProcessor {
             boolean profile = eyeGap < .29f * faceWidth || Math.abs(face[8] - eyeX) > .12f * faceWidth;
             String direction = profile ? (face[8] > eyeX ? "right" : "left") : "frontal";
             if (faceWidth < 32 || faceHeight < 40) throw new IllegalArgumentException("Visage trop petit dans la référence.");
-            if (profile && !PROFILE_RENDERING_VALIDATED) {
-                throw new IllegalArgumentException("Visage de profil reconnu. La nouvelle méthode est encore en validation ; aucune image envoyée ni remplacée.");
+            if (profile) {
+                int cropLeft = Math.max(0, (int) Math.floor(face[0] - 1.2 * faceWidth));
+                int cropRight = Math.min(width, (int) Math.ceil(face[0] + 2.2 * faceWidth));
+                int cropTop = Math.max(0, (int) Math.floor(face[1] - .8 * faceHeight));
+                int cropBottom = Math.min(height, (int) Math.ceil(face[1] + 1.15 * faceHeight));
+                head = Bitmap.createBitmap(source, cropLeft, cropTop, cropRight - cropLeft, cropBottom - cropTop);
+                return new JSONObject().put("ok", false)
+                        .put("needs_frontal_reference", true)
+                        .put("frontal_source", encode(head, Bitmap.CompressFormat.JPEG, 92))
+                        .put("error", "Cette référence est de profil : une vue de face est nécessaire pour montrer les deux yeux.")
+                        .toString();
             }
             detectorBitmap = Bitmap.createBitmap(width & ~1, height, Bitmap.Config.RGB_565);
             new Canvas(detectorBitmap).drawBitmap(source, 0, 0, null);
             FaceDetector.Face[] faces = new FaceDetector.Face[2];
             int count = new FaceDetector(detectorBitmap.getWidth(), height, 2).findFaces(detectorBitmap, faces);
+            if (count != 1 || faces[0] == null || faces[0].confidence() < .35f) {
+                return new JSONObject().put("ok", false).put("needs_frontal_reference", true)
+                        .put("error", "Les deux yeux ne sont pas suffisamment identifiables ; une référence de face plus lisible est nécessaire.")
+                        .toString();
+            }
             PointF eyes = new PointF();
             float distance = eyeGap;
             eyes.set(eyeX, eyeY);
