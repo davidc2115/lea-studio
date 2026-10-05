@@ -2880,8 +2880,19 @@ function compressToJpeg(src, maxW, quality) {
 }
 
 /** Persiste une image dans la galerie du personnage (disque Android si possible, sinon data URL). */
-async function addToGallery(src, charId) {
+async function addToGallery(src, charId, options = {}) {
   const cid = charId || state.current || "lea";
+  let preservedPhotos = null;
+  if (options.preserveExisting === true) {
+    try {
+      preservedPhotos = JSON.parse(localStorage.getItem("lea.photos." + cid) || "[]");
+      if (!Array.isArray(preservedPhotos) || !preservedPhotos.every(photo => typeof photo === "string")) {
+        throw new Error("Index de galerie invalide.");
+      }
+    } catch (error) {
+      throw new Error("Galerie existante illisible ; aucune photo remplacée.");
+    }
+  }
   let stored = src;
   try {
     // Toujours compresser puis écrire sur disque Android si possible (persistance)
@@ -2918,9 +2929,10 @@ async function addToGallery(src, charId) {
       }
     } catch (_) {}
   }
-  let list = extraPhotos(cid).filter((x) => x !== stored);
+  let list = (preservedPhotos || extraPhotos(cid)).filter((x) => x !== stored);
   // Éviter doublon visuel : même taille data URL déjà présente
   try {
+    if (!preservedPhotos) {
     const fp = String(stored).startsWith("data:")
       ? (stored.slice(0, 100) + ":" + stored.length)
       : stored;
@@ -2931,9 +2943,16 @@ async function addToGallery(src, charId) {
       }
       return true;
     });
+    }
   } catch (_) {}
   list.unshift(stored);
-  saveExtra(list, cid);
+  if (preservedPhotos) {
+    // No quota cleanup or count pruning: an unwritable index must fail explicitly,
+    // not delete older photos or conversations to make room for this new one.
+    localStorage.setItem("lea.photos." + cid, JSON.stringify(list));
+  } else {
+    saveExtra(list, cid);
+  }
   // Première génération = cover auto (Découvrir / chat) si pas déjà choisie
   maybeAutoCover(cid, stored);
   // Rafraîchir fond de chat en direct si on est sur ce personnage
@@ -7779,7 +7798,8 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const completedUrl = headRestoration
           ? await window.LeaSegmentedProfile.restoreImage(st.url, headRestoration)
           : st.url;
-        stored = await addToGallery(completedUrl, cid);
+        stored = await addToGallery(completedUrl, cid,
+          headRestoration ? { preserveExisting: true } : {});
       } catch (error) {
         window._leaGenBusy = false;
         setGenStatus("Photo non ajoutée : " + (error.message || error));

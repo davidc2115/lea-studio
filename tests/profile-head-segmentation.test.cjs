@@ -171,6 +171,48 @@ test("A censored result is never restored over or added to a gallery", async () 
   assert.deepEqual(writes, []);
 });
 
+function protectedGallery(quotaFailure = false) {
+  const prior = Array.from({ length: 80 }, (_, i) => "gallery:old-" + i);
+  const values = new Map([
+    ["lea.photos.target", JSON.stringify(prior)],
+    ["lea.chat.target", JSON.stringify({ messages: ["existing conversation"] })],
+  ]);
+  const context = {
+    window: { LeaAndroid: { saveGalleryImage: () => "gallery:new-scene" } },
+    state: { current: "other", view: "chat" }, console,
+    localStorage: {
+      getItem: key => values.get(key) ?? null,
+      setItem: (key, value) => {
+        if (quotaFailure) throw new Error("quota exceeded");
+        values.set(key, value);
+      },
+    },
+    compressToJpeg: async () => "data:image/jpeg;base64,new-scene",
+    extraPhotos() { throw new Error("must not prune the existing index"); },
+    saveExtra() { throw new Error("must not use quota cleanup for protected writes"); },
+    maybeAutoCover() {},
+  };
+  vm.createContext(context);
+  vm.runInContext(read("app.js").match(/async function addToGallery[\s\S]*?^\}/m)[0], context);
+  return { context, values, prior };
+}
+
+test("Protected gallery writes retain all existing photos beyond the legacy limit and preserve chat", async () => {
+  const { context, values, prior } = protectedGallery();
+  const chat = values.get("lea.chat.target");
+  await context.addToGallery("data:image/png;base64,restored", "target", { preserveExisting: true });
+  assert.deepEqual(JSON.parse(values.get("lea.photos.target")), ["gallery:new-scene", ...prior]);
+  assert.equal(values.get("lea.chat.target"), chat);
+});
+
+test("A full storage index fails explicitly instead of deleting earlier photos or chat", async () => {
+  const { context, values } = protectedGallery(true);
+  const before = [...values.entries()];
+  await assert.rejects(context.addToGallery("data:image/png;base64,restored", "target",
+    { preserveExisting: true }), /quota exceeded/);
+  assert.deepEqual([...values.entries()], before);
+});
+
 test("The release wires preparation only into profile generation, not SD.cpp rescue", () => {
   const app = read("app.js");
   const rescue = app.slice(app.indexOf("async function generatePhotoHordeFallback"),
