@@ -1603,12 +1603,19 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       anti,
       hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",
     ].filter(Boolean).join(" ");
-    // Identité d'abord, scène coupée si besoin (max ~1350)
-    const maxLen = 1350;
-    let short = [idCore, bodyBoost, fantBoost, scenePart, qualityPart].filter(Boolean).join(" ");
+    // Scène d'abord (tenue habillée + lieu + pose), identité ensuite, sinon Horde ne voit que le bonnet
+    const maxLen = 1400;
+    const sceneFirst = [
+      "she is fully dressed in clothes, not bra only, not lingerie only,",
+      "(wearing " + wear + ":1.6),",
+      "location: " + loc + ",",
+      "pose: " + pos + ",",
+      "full body from head to knees, hips and legs visible,",
+    ].join(" ");
+    let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
     if (short.length > maxLen) {
-      const head = [idCore, bodyBoost, fantBoost].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+      const head = [sceneFirst, fantBoost].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
       const tailBudget = Math.max(200, maxLen - head.length - 10);
       const tail = (scenePart + " " + qualityPart).replace(/\s+/g, " ").trim().slice(0, tailBudget);
       short = (head + ", " + tail).slice(0, maxLen);
@@ -4882,7 +4889,7 @@ function renderProfile() {
     try {
       const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
       const pr = buildLeaImagePrompt(extra);
-      $("prompt-preview").textContent = "Prompt : " + pr.slice(0, 280) + (pr.length > 280 ? "…" : "");
+      $("prompt-preview").textContent = "Prompt : " + pr.slice(0, 420) + (pr.length > 420 ? "…" : "");
     } catch (e) {
       $("prompt-preview").textContent = "";
     }
