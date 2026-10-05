@@ -124,12 +124,25 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 /** Extrait cheveux / yeux / traits non-humains depuis appearance + looks_en (FR ou EN). */
 
+function canonicalProfileCup(c) {
+  const appearance = String((c && c.appearance) || "");
+  const declared = (appearance.match(/(?:^|\n)\s*Poitrine\s*:\s*([^\n]+)/i) || [])[1] || "";
+  const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
+  const sources = [declared, c && c.body, c && c.looks_en, tags, c && c.title, appearance];
+  for (const source of sources) {
+    const match = String(source || "").match(/\b([A-J])[- ]cup\b|bonnet\s*([A-J])\b/i);
+    if (match) return String(match[1] || match[2]).toUpperCase();
+  }
+  return "";
+}
+
 function cupLock(c) {
   const body = String((c && c.body) || "");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
   // Tags d'abord : sinon "bonnet h" cité dans un descriptif écrase un vrai bonnet B.
   const tagSrc = tags.toLowerCase();
-  const src = (tagSrc + " " + [body, c && c.appearance, c && c.looks_en].filter(Boolean).join(" ")).toLowerCase();
+  const canonicalCup = canonicalProfileCup(c);
+  const src = canonicalCup ? canonicalCup.toLowerCase() + "-cup" : (tagSrc + " " + [body, c && c.appearance, c && c.looks_en].filter(Boolean).join(" ")).toLowerCase();
   const table = [
     [/bonnet\s*j|\bj-cup\b/, "massive J-cup breasts, extremely heavy chest, deep cleavage, full body visible, not a crop of the chest", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
     [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, very heavy chest, deep cleavage, full body visible", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
@@ -390,35 +403,37 @@ function physicalLocksFromText(c) {
   }
 
 
+  const selectedCup = canonicalProfileCup(c);
+  const breastSource = selectedCup ? selectedCup.toLowerCase() + "-cup" : blob;
   // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
-  if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
+  if (/bonnet\s*j|\bj-cup\b/i.test(breastSource)) {
     out.positive.push("(massive enormous J-cup breasts:1.7)", "(extremely huge heavy breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "top fabric stretched by massive breasts");
     out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest, small bust");
     out.features.push("J-cup breasts");
-  } else if (/bonnet\s*i|\bi-cup\b/i.test(blob)) {
+  } else if (/bonnet\s*i|\bi-cup\b/i.test(breastSource)) {
     out.positive.push("(enormous heavy I-cup breasts:1.7)", "(extremely large I-cup breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "blouse strained by huge breasts");
     out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest");
     out.features.push("I-cup breasts");
-  } else if (/bonnet\s*h|\bh-cup\b/i.test(blob)) {
+  } else if (/bonnet\s*h|\bh-cup\b/i.test(breastSource)) {
     out.positive.push("(huge heavy H-cup breasts:1.65)", "(extremely large H-cup breasts:1.6)", "(hyper busty:1.5)", "(deep heavy cleavage:1.4)", "fabric stretched by huge breasts");
     out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest, petite chest");
     out.features.push("H-cup breasts");
-  } else if (/bonnet\s*g|g-cup/i.test(blob)) {
+  } else if (/bonnet\s*g|g-cup/i.test(breastSource)) {
     out.positive.push("(very large heavy G-cup breasts:1.45)", "(deep cleavage:1.25)");
     out.negative.push("small breasts, flat chest, A-cup, B-cup");
-  } else if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(blob)) {
+  } else if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(breastSource)) {
     out.positive.push("(small flat A-cup breasts:1.3)");
     out.negative.push("large breasts, huge breasts, D-cup, E-cup, H-cup");
-  } else if (/bonnet\s*b|b-cup/i.test(blob)) {
+  } else if (/bonnet\s*b|b-cup/i.test(breastSource)) {
     out.positive.push("(small B-cup breasts:1.65)", "modest natural chest");
     out.negative.push("large breasts, huge breasts, deep cleavage, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty");
-  } else if (/bonnet\s*c|c-cup/i.test(blob)) {
+  } else if (/bonnet\s*c|c-cup/i.test(breastSource)) {
     out.positive.push("(medium C-cup breasts:1.25)");
-  } else if (/bonnet\s*d|d-cup|95d/i.test(blob)) {
+  } else if (/bonnet\s*d|d-cup|95d/i.test(breastSource)) {
     out.positive.push("(large D-cup breasts:1.3)");
-  } else if (/bonnet\s*[ef]|e-cup|f-cup|100e/i.test(blob)) {
+  } else if (/bonnet\s*[ef]|e-cup|f-cup|100e/i.test(breastSource)) {
     out.positive.push("(very large E-cup breasts:1.35)");
-  } else if (/gros\s*seins|huge\s*breasts|extremely\s*large\s*breast|busty\s*extreme/i.test(blob)) {
+  } else if (/gros\s*seins|huge\s*breasts|extremely\s*large\s*breast|busty\s*extreme/i.test(breastSource)) {
     out.positive.push("(extremely large heavy breasts:1.4)", "(deep cleavage:1.25)");
     out.negative.push("small breasts, flat chest, A-cup, B-cup");
   }
@@ -1275,20 +1290,16 @@ function faceIdentityLock(c) {
 
 function profileIdentityAnchor(c, referenceDescription = "") {
   if (!c) return "";
-  let physical = { positive: [] };
-  try { physical = physicalLocksFromText(c) || physical; } catch (_) {}
-  const keyTraits = (physical.positive || []).filter((item) => /hair|eyes|breasts|bust|chest|cup/i.test(item));
+  const physical = physicalLocksFromText(c);
   const cup = cupLock(c);
-  const age = Math.max(18, Number(c.age) || 25);
+  const traits = (physical.positive || []).filter((item) => /hair|eyes|skin|slim|athletic|hourglass|waist/i.test(item));
   return [
-    "RAW photograph from a real camera, photorealistic, natural skin pores, film grain",
-    String(c.name || "woman") + ", " + age + " year old woman",
+    cup.pos,
+    ...traits.slice(0, 6),
     identityFromCard(c),
-    ...keyTraits.slice(0, 4),
-    cup && cup.pos,
-    "natural realistic human eyes, soft natural iris, not glowing, not neon, not anime eyes",
-    "(full body or head-to-knees:1.55), (hips and legs visible:1.5), wide shot, not face crop, not bust only",
-    "(preserve hair color, natural eye color, skin tone and chest size:1.5)",
+    "photorealistic adult woman, natural skin and eyes",
+    "same face and hair as the reference, chest size from the written character card",
+    "full body or head to knees, face visible, setting visible",
   ].filter(Boolean).join(", ");
 }
 
@@ -5919,7 +5930,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
         const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
         payload.prompt = [
           cup.pos,
-          "same woman as the reference photo, same face, eye color, hair style, skin tone and breast size; do not enlarge or shrink the chest",
+          "same woman as the reference photo, same face, eye color, hair style and skin tone; breast size must match the written character card, not the reference image",
           payload.prompt || "",
         ].filter(Boolean).join(", ");
         if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
