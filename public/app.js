@@ -7727,11 +7727,20 @@ async function generatePhoto() {
       payload.profile_scene_lock = profileSceneLock;
       // Re-resolve immediately before preparation: the star outranks all legacy refs.
       payload.source_image = await resolveCharacterRefB64(c);
+      if (payload.source_image && payload.source_image.length > 400000) {
+        const compactRef = await compressToJpeg("data:image/jpeg;base64," + payload.source_image, 512, .85);
+        if (!String(compactRef).startsWith("data:image/")) throw new Error("La référence choisie ne peut pas être préparée.");
+        payload.source_image = compactRef.slice(compactRef.indexOf(",") + 1);
+      }
       headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus, {
         character: c,
         identity: profileIdentityAnchor(c),
         generate: request => generateFrontalProfileReference(request, setGenStatus),
         resolve: async stored => {
+          if (String(stored).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.readGallery) {
+            const data = window.LeaAndroid.readGallery(String(stored).slice(8));
+            if (String(data).startsWith("data:image/")) return data.slice(data.indexOf(",") + 1);
+          }
           const src = resolvePhotoSrc(stored) || stored;
           return imageToBase64(src);
         },
