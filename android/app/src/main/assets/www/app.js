@@ -6883,20 +6883,18 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
 
   // Poses SEXY / provocantes — toujours une nouvelle à chaque génération
   const sexyPoses = [
-    "standing arched back, hand on hip, looking over shoulder at camera, full body",
-    "leaning forward toward camera, deep cleavage visible, teasing smile, full body",
-    "sitting on kitchen counter legs crossed, short outfit, looking at camera",
-    "on all fours on the bed looking back at camera, arched back, full body",
-    "kneeling on the floor looking up at camera, hands on thighs, provocative",
-    "standing legs apart hands behind head, chest forward, full body",
-    "bent over slightly hands on knees looking back, provocative pose, full body",
-    "lying on side on sofa propped on elbow, hips forward, looking at camera",
-    "standing against wall one leg bent, pulling hem of top up slightly, teasing",
-    "sitting with legs open on chair, leaning back, seductive look at camera",
-    "walking toward camera hips swaying, looking at viewer, full body",
-    "from behind looking back over shoulder, hand on butt, full body",
-    "standing in doorway hand on frame, body angled, sultry expression",
-    "sitting on table edge, legs dangling, leaning forward teasingly"
+    "leaning forward toward camera showing deep cleavage, full body, sexy smile",
+    "standing full body lifting the hem of her short skirt slightly, teasing look",
+    "bent over slightly with hands on knees looking back over shoulder, arched back",
+    "standing in doorway hand on the frame, body angled, short outfit, full body",
+    "sitting on kitchen counter legs crossed in short top and jeans, looking at camera",
+    "pulling her crop top up slightly teasingly, full body, provocative pose",
+    "standing with weight on one leg, hand on hip, short dress, looking at camera",
+    "from behind looking back over shoulder, hand on hip, short outfit, full body",
+    "kneeling on one knee looking up seductively, full body visible",
+    "walking toward camera hips swaying in tight short clothes, full body",
+    "leaning back against a counter or wall, chest forward, short top, full body",
+    "standing legs slightly apart hands behind head, short outfit, full body"
   ];
   // éviter de répéter la dernière pose pour ce personnage
   let pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
@@ -7530,35 +7528,79 @@ async function generatePhoto() {
       setGenStatus("Horde txt2img…");
     }
     try { finalizeProfilePrompt(payload, c, profileVariant); } catch (_) {}
-    // Dernier mot : pose sexy + tenue scénario en tête, jamais img2img sur profil solo
+    // Dernier mot : TENUE HABILLÉE sexy + pose provocante + lieu scénario (pas de lingerie seule)
     try {
       if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
         payload.force_img2img = false;
         delete payload.source_image;
         delete payload.source_processing;
         delete payload.denoising;
-        const wear = (profileVariant && profileVariant.outfit) || "short tight dress with deep neckline";
-        const pose = (profileVariant && profileVariant.pose) || "standing full body looking at camera";
-        const place = (profileVariant && profileVariant.place) || "indoor room";
+
         const scenario = String((c && c.scenario) || "");
-        const lieu = (scenario.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,80})/i) || [])[1] || place;
-        const roleBlob = [c && c.title, c && c.role, scenario, (c && c.tags || []).join(" ")].join(" ").toLowerCase();
-        let wearFinal = wear;
-        if (/cuisine|kitchen/.test(roleBlob + " " + lieu)) wearFinal = "casual crop top and tight jeans, home clothes, not a bra, not lingerie";
-        else if (/secr[eé]taire|bureau/.test(roleBlob)) wearFinal = "office blouse open at the neck and pencil skirt, stockings, heels";
-        else if (/belle-?m[eè]re|belle-?s[oœ]eur|voisine/.test(roleBlob)) wearFinal = "fitted dress with cleavage, not underwear only";
+        const roleBlob = [c && c.title, c && c.role, c && c.name, scenario, ((c && c.tags) || []).join(" ")].join(" ").toLowerCase();
+        const lieuMatch = scenario.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,90})/i);
+        let lieu = (lieuMatch && lieuMatch[1]) ? lieuMatch[1].trim() : ((profileVariant && profileVariant.place) || "indoor apartment");
+
+        // Tenues HABILLÉES sexy selon rôle / lieu (jamais soutien-gorge seul)
+        const sexyOutfits = {
+          kitchen: "tight short crop top and very tight jeans, casual sexy home outfit, fully dressed, not lingerie",
+          door: "short tight mini dress with deep neckline and heels, standing at the door, fully dressed",
+          office: "fitted white blouse unbuttoned at the top, tight pencil skirt, sheer stockings, heels, office sexy",
+          home: "oversized shirt barely covering the thighs or short satin robe, sexy casual, fully dressed",
+          default: "short tight dress with deep cleavage and high heels, sexy provocative outfit, fully dressed"
+        };
+        let wearFinal = sexyOutfits.default;
+        if (/cuisine|kitchen/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.kitchen; lieu = "modern kitchen interior"; }
+        else if (/porte|door|entrée|seuil/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.door; lieu = "apartment doorway entrance"; }
+        else if (/bureau|office|secr[eé]taire|coll[eè]gue/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.office; lieu = "office desk at night"; }
+        else if (/salon|living|appartement|home|chambre/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.home; }
+        else if (/fille d.?amie|babysitter|amie/.test(roleBlob)) { wearFinal = sexyOutfits.kitchen; }
+
+        const sexyPoses = [
+          "leaning forward showing deep cleavage, full body from head to thighs",
+          "lifting the hem of her short skirt slightly with one hand, teasing smile, full body",
+          "bent over slightly hands on knees looking back over shoulder, arched back, full body",
+          "standing in the doorway hand on the doorframe, short outfit, full body",
+          "sitting on the kitchen counter legs crossed, short top and jeans, looking at camera",
+          "hand on hip weight on one leg, short dress, sultry look at camera, full body",
+          "from behind looking back over shoulder, hand on hip, short clothes, full body"
+        ];
+        let poseFinal = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
+        try {
+          const k = "lea.lastSexyPose." + (c.id || "x");
+          const last = localStorage.getItem(k) || "";
+          let g = 0;
+          while (poseFinal === last && g++ < 6) poseFinal = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
+          localStorage.setItem(k, poseFinal);
+        } catch (_) {}
+
         const cup = (typeof cupLock === "function" ? cupLock(c) : {}) || {};
+        // Identité courte sans écraser la tenue
+        let idBit = "";
+        try {
+          const age = (Number(c.age) || 22);
+          idBit = age + " year old woman, " + String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim().slice(0, 180);
+        } catch (_) {}
+
         payload.prompt = [
-          "photorealistic photograph, exactly one adult woman, not twins, not mirrored,",
-          "full body from head to knees, not a close-up of the chest,",
-          "wearing " + wearFinal + ",",
-          pose + ",",
-          "location: " + lieu + ",",
-          cup.pos || "",
-          "sexy provocative pose, hips and legs visible,",
-          String(payload.prompt || "").slice(0, 400)
-        ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
-        payload.negative = "close-up of breasts, cropped at chest, headless torso, bra only photo, bust crop, face crop, twins, mirror, " + (cup.neg || "") + ", " + (payload.negative || "");
+          "photorealistic full body photograph of exactly one adult woman",
+          "she is fully dressed in clothes, wearing " + wearFinal,
+          poseFinal,
+          "location: " + lieu,
+          "sexy provocative sensual pose, visible legs and hips",
+          cup.pos ? cup.pos.replace(/\(.*?\)/g, "").trim() : "",
+          idBit,
+          "natural skin, natural eyes, sharp focus, realistic lighting"
+        ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1050);
+
+        payload.negative = [
+          "bra only, lingerie only, underwear only, panties only, topless, nude, naked,",
+          "close-up of breasts, bust crop, cropped at chest, headless torso, face crop, headshot,",
+          "no clothes, bare midriff only, twin, clone, mirror, 2girls,",
+          "anime, cartoon, illustration, painting, deformed, blurry, text, watermark",
+          cup.neg || ""
+        ].join(" ");
+
         payload.seed = Math.floor(Math.random() * 2e9);
         showPromptStatus("Prompt envoyé", payload.prompt);
       }
