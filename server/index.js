@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import { generate, keyStatus, reloadPools } from "./providers.js";
 import { loadCharacters, loadSettings, saveSettings, getChat, saveChat } from "./store.js";
 import { buildMemoryBlock, maybeExtractMemory, modeInstructions, resolveMode, recentWindow } from "./memory.js";
+import { roleNarrativeInstructions } from "./role-narratives.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -163,7 +164,7 @@ app.post("/api/chat/:id/message", async (req, res) => {
 
   const system = [
     `Tu incarnes ${character.name}, ${character.age} ans.`,
-    (() => {
+    character.story_profile ? character.story_profile.relation : (() => {
       const t = String(character.title || "") + " " + String(character.scenario || "");
       const id = String(character.id || "");
       if (/belle[- ]?m[eè]re/i.test(t) || /_bm$/i.test(id)) {
@@ -183,6 +184,7 @@ app.post("/api/chat/:id/message", async (req, res) => {
     "Exemples:\n" + character.example_dialogue,
     buildMemoryBlock(chat),
     "Format STRICT: (pensée entre parenthèses) **action entre astérisques** puis la parole. Toujours une pensée et une action. En NSFW, décris les actes sexuels explicitement si le joueur le fait.",
+    roleNarrativeInstructions(character),
   ].join("\n\n");
 
   const history = recentWindow(chat.messages, 10).map((m) => ({

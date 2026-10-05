@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { applyRoleNarratives } from "./role-narratives.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA = path.join(__dirname, "..", "data");
@@ -21,7 +22,7 @@ function writeJson(file, data) {
 }
 
 export function loadCharacters() {
-  return readJson(path.join(DATA, "characters.json"), []);
+  return applyRoleNarratives(readJson(path.join(DATA, "characters.json"), []));
 }
 
 export function loadSettings() {

@@ -1670,7 +1670,9 @@
       if (!temperBits.length) {
         temperBits.push("TEMPÉRAMENT : suis STRICTEMENT ta personnalité écrite ci-dessus dans chaque phrase et chaque action.");
       }
-      const temperBlock = temperBits.join(" ") || ("TEMPÉRAMENT: " + String(PERSONA.personality || "naturelle, cohérente avec le rôle").slice(0, 400));
+      const temperBlock = PERSONA.story_profile
+        ? "TEMPÉRAMENT ACTUEL : " + PERSONA.personality + " La nuance complète le tempérament principal sans le remplacer. Pour un duo, chaque voix suit sa propre fiche."
+        : temperBits.join(" ") || ("TEMPÉRAMENT: " + String(PERSONA.personality || "naturelle, cohérente avec le rôle").slice(0, 400));
       const sharedPlayRules = [
         "=== RÈGLES PARTAGÉES (Gemini + Groq — même comportement) ===",
         "TEMPÉRAMENT = loi pour pensées, actions et paroles. Exemples:",
@@ -1916,6 +1918,9 @@
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
+      if (PERSONA.story_profile && window.LeaRoleNarratives) {
+        system += "\n\n" + window.LeaRoleNarratives.instructions(PERSONA);
+      }
       // Indice tour de jeu action/vérité selon le dernier message joueur
       try {
         const lastUser = String(txt || "");
