@@ -166,6 +166,8 @@
     "sitting on the front edge of a sofa, legs crossed at ankles, one elbow on its arm, face toward camera",
     "pausing beside a table while holding the scenario prop, body at a diagonal, face toward camera",
   ];
+  // Every character has seated, standing and action/leaning alternatives.
+  const poseGroups = [[poses[0], poses[4]], [poses[1], poses[3]], [poses[2], poses[5]]];
   function roleBank(c) {
     const text = [c.id, c.title, ...(c.tags || [])].join(" ").toLowerCase();
     if (/babysitter|baby.?sitter/.test(text)) return "babysitter";
@@ -231,7 +233,7 @@
         outfit: bank.outfits[i], place, prop: detail[1],
          pose: mermaid
            ? ["seated diagonally on a rock ledge, scaled tail curled beside her, face toward camera", "resting sideways against a smooth rock, one arm on the ledge, tail visible, face toward camera", "sitting upright on a stone ledge, shoulders angled, scaled tail extending beside her, face toward camera"][i]
-           : poses[(n + i * 2) % poses.length],
+           : poseGroups[(n + i) % poseGroups.length][(n + i) % 2],
          camera: mermaid ? "wide head-to-tail shot, mermaid tail and surroundings visible" : ["wide head-to-knees shot, furniture and room visible", "wide head-to-mid-calf shot, space around her", "full body with feet visible, room in background"][i],
       }));
       c.scenario_version = "distinct-interactive";

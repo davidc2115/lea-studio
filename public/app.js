@@ -6005,6 +6005,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       setS("Horde txt2img (pas encore de photo de ref — la 1ère image servira ensuite)…");
     }
   } catch (e) {
+    if (options.profileIdentityLock === true) throw e;
     setS("Horde txt2img (ref indisponible)…");
   }
   return payload;
@@ -6059,7 +6060,15 @@ async function resolveCharacterRefB64(c) {
   const id = c.id || "";
   const candidates = [];
 
-  // 1) Cover d'origine (pas la dernière peinture générée)
+  // The explicit star is authoritative, even if the original cast cover differs.
+  const starred = customCover(id);
+  if (starred) {
+    const selected = await trySrc(starred);
+    if (!selected) throw new Error("La photo marquée par l'étoile est illisible ; sélectionne à nouveau cette référence.");
+    return selected;
+  }
+
+  // 1) Original cast cover only when no explicit reference is selected.
   if (c.cover) candidates.push(c.cover);
 
   // 2) Cover résolue (resolvedCover)
@@ -6115,6 +6124,33 @@ async function resolveCharacterRefB64(c) {
     if (b) return b;
   }
   return null;
+}
+
+async function generateFrontalProfileReference(request, status) {
+  const started = await api("/api/image", { method: "POST", body: JSON.stringify(request) });
+  if (!started || !started.jobId) throw new Error(started && started.error || "Préparation de la référence de face impossible.");
+  for (let i = 0; i < 120; i++) {
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    const result = await api("/api/image-status", {
+      method: "POST", body: JSON.stringify({ jobId: started.jobId, host: started.host }),
+    });
+    if (result && result.error) {
+      if (/rate limit|pause|limite|429/i.test(result.error) && !result.done) {
+        status("Référence de face : attente Horde…");
+        continue;
+      }
+      throw new Error(result.error);
+    }
+    if (!result || !result.done) {
+      status("Référence de face : file Horde" + (result && result.wait != null ? " · ~" + result.wait + "s" : "") + "…");
+      continue;
+    }
+    if (!result.url) throw new Error("Horde a terminé sans référence exploitable.");
+    const encoded = await imageToBase64(result.url);
+    if (!encoded) throw new Error("Téléchargement de la référence de face impossible.");
+    return encoded;
+  }
+  throw new Error("La référence de face est encore en attente ; aucune photo existante modifiée.");
 }
 
 async function imageToBase64(src) {
@@ -7687,9 +7723,34 @@ async function generatePhoto() {
     let headRestoration = null;
     if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
       // Fail before submission if local preparation cannot retain the chosen face.
-      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus);
       payload.prompt = profileSceneLock;
       payload.profile_scene_lock = profileSceneLock;
+      // Re-resolve immediately before preparation: the star outranks all legacy refs.
+      payload.source_image = await resolveCharacterRefB64(c);
+      if (payload.source_image && payload.source_image.length > 400000) {
+        const compactRef = await compressToJpeg("data:image/jpeg;base64," + payload.source_image, 512, .85);
+        if (!String(compactRef).startsWith("data:image/")) throw new Error("La référence choisie ne peut pas être préparée.");
+        payload.source_image = compactRef.slice(compactRef.indexOf(",") + 1);
+      }
+      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus, {
+        character: c,
+        identity: profileIdentityAnchor(c),
+        generate: request => generateFrontalProfileReference(request, setGenStatus),
+        resolve: async stored => {
+          if (String(stored).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.readGallery) {
+            const data = window.LeaAndroid.readGallery(String(stored).slice(8));
+            if (String(data).startsWith("data:image/")) return data.slice(data.indexOf(",") + 1);
+          }
+          const src = resolvePhotoSrc(stored) || stored;
+          return imageToBase64(src);
+        },
+        persist: async (image, id) => {
+          const stored = await addToGallery("data:image/png;base64," + image, id, { preserveExisting: true });
+          if (state.current === id && state.view === "profile") renderProfile();
+          return stored;
+        },
+        storage: localStorage,
+      });
       payload.negative = [
         cupLock(c).neg,
         "nude, topless, transparent clothes, underwear, cleavage, wrong outfit,",

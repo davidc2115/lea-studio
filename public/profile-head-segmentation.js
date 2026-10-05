@@ -34,13 +34,14 @@
     const outfit = ex.overridesOutfit ? ex.outfitLine : v.outfit;
     const smallA = /\bA[\s-]?cup\b|bonnet\s*A\b|very small breast|flat.chested/i.test(identity || "");
     return [
-      compact(identity, 175),
+      "(complete face facing camera, both eyes visible, direct eye contact:1.4)",
+      compact(identity, 150),
       smallA ? "(very small A cup chest:1.4), (minimal breast projection:1.3)" : "",
       "one adult woman, " + Math.max(18, Number(c.age) || 25) + " years old",
       "CAMERA: " + compact(v.cameraAngle || "wide head-to-knees view", 65),
-      "POSE: " + compact(pose, 125),
-      "SETTING: " + compact(place, 100),
-      "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 130) + ":1.4)",
+      "POSE: " + compact(pose, 105),
+      "SETTING: " + compact(place, 80),
+      "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 110) + ":1.4)",
       scene.prop ? "PROP: " + compact(scene.prop, 50) : "",
       "fully clothed, face toward camera, soft natural light, environment visible, natural proportions",
     ].filter(Boolean).join(", ").slice(0, 920);
@@ -59,6 +60,13 @@
     }
   }
 
+  function orientPrompt(text, direction) {
+    if (["right", "left"].includes(direction)) {
+      throw new Error("Une référence de face est requise ; le profil ne sera pas recopié.");
+    }
+    return text;
+  }
+
   async function loadImage(source) {
     const image = new Image();
     await new Promise((resolve, reject) => {
@@ -69,17 +77,21 @@
     return image;
   }
 
-  async function prepareReference(payload, status) {
+  async function prepareReference(payload, status, options) {
     if (!active() || payload.is_duo) return null;
-    if (!payload.source_image) throw new Error("Choisis une photo de référence avant de générer la scène.");
+    if (!payload.source_image && !options) throw new Error("Choisis une photo de référence avant de générer la scène.");
     if (status) status("Segmentation locale du visage et des cheveux…");
     let prepared;
     try {
-      prepared = JSON.parse(root.LeaAndroid.prepareSegmentedProfileHead(payload.source_image));
+      prepared = options && root.LeaFrontalReference
+        ? await root.LeaFrontalReference.ensure(payload, status || (() => {}), options)
+        : JSON.parse(root.LeaAndroid.prepareSegmentedProfileHead(payload.source_image));
     } catch (error) {
       throw new Error("Préparation locale du visage : " + error.message);
     }
     validatePrepared(prepared);
+    payload.profile_scene_lock = orientPrompt(payload.profile_scene_lock, prepared.face_direction);
+    payload.prompt = orientPrompt(payload.prompt, prepared.face_direction);
     // The provider contract documents WebP masks. Keep the local restoration PNG
     // private to this job, rather than uploading or storing it in the gallery.
     const mask = await loadImage("data:image/png;base64," + prepared.source_mask);
@@ -136,5 +148,5 @@
   }
 
   root.LeaSegmentedProfile = { active, sceneLock, opaqueOutfit, prepareReference,
-    restoreImage, validatePrepared, WIDTH, HEIGHT };
+    restoreImage, validatePrepared, orientPrompt, WIDTH, HEIGHT };
 })(window);

@@ -1,5 +1,6 @@
 package com.leastudio.app;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -16,19 +17,24 @@ import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.FaceDetectorYN;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 
 /** Local reference preparation only. No network, gallery or conversation writes. */
 final class ProfileHeadProcessor {
     private static final int WIDTH = 384, HEIGHT = 512;
+    private static FaceDetectorYN detector;
 
     private ProfileHeadProcessor() {}
 
-    static String prepare(String encoded) {
+    static synchronized String prepare(Context context, String encoded) {
         Bitmap source = null, detectorBitmap = null, head = null, smallHead = null;
         Bitmap stage = null, maskBitmap = null;
         Mat rgba = null, rgb = null, labels = null;
-        Mat background = null, foreground = null, alpha = null;
+        Mat background = null, foreground = null, alpha = null, bgr = null, detected = null;
         try {
             if (encoded == null || encoded.length() > 3_000_000) {
                 throw new IllegalArgumentException("Référence trop volumineuse.");
@@ -55,34 +61,97 @@ final class ProfileHeadProcessor {
             source = BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
             if (source == null) throw new IllegalArgumentException("Référence non décodable.");
             int width = source.getWidth(), height = source.getHeight();
+            Utils.bitmapToMat(source, rgba);
+            Imgproc.cvtColor(rgba, rgb, Imgproc.COLOR_RGBA2RGB);
+            bgr = new Mat(); detected = new Mat();
+            Imgproc.cvtColor(rgb, bgr, Imgproc.COLOR_RGB2BGR);
+            if (detector == null) {
+                File model = new File(context.getCacheDir(), "profile-yunet-2023mar.onnx");
+                if (!model.isFile() || model.length() == 0) {
+                    try (InputStream in = context.getAssets().open("models/face_detection_yunet_2023mar.onnx");
+                         FileOutputStream out = new FileOutputStream(model)) {
+                        byte[] buffer = new byte[8192];
+                        int length;
+                        while ((length = in.read(buffer)) != -1) out.write(buffer, 0, length);
+                    }
+                }
+                detector = FaceDetectorYN.create(model.getAbsolutePath(), "", new Size(width, height), .75f, .3f, 20);
+            }
+            detector.setInputSize(new Size(width, height));
+            detector.detect(bgr, detected);
+            if (detected.rows() != 1) {
+                throw new IllegalArgumentException("Une seule personne adulte avec un visage identifiable est nécessaire.");
+            }
+            float[] face = new float[15];
+            detected.get(0, 0, face);
+            float faceWidth = face[2], faceHeight = face[3];
+            float eyeX = (face[4] + face[6]) / 2, eyeY = (face[5] + face[7]) / 2;
+            float eyeGap = (float) Math.hypot(face[4] - face[6], face[5] - face[7]);
+            // A three-quarter head can show both eyes; that is not camera-facing.
+            boolean profile = eyeGap < .29f * faceWidth || Math.abs(face[8] - eyeX) > .06f * faceWidth;
+            String direction = profile ? (face[8] > eyeX ? "right" : "left") : "frontal";
+            if (faceWidth < 32 || faceHeight < 40) throw new IllegalArgumentException("Visage trop petit dans la référence.");
+            if (profile) {
+                int cropLeft = Math.max(0, (int) Math.floor(face[0] - 1.2 * faceWidth));
+                int cropRight = Math.min(width, (int) Math.ceil(face[0] + 2.2 * faceWidth));
+                int cropTop = Math.max(0, (int) Math.floor(face[1] - .8 * faceHeight));
+                int cropBottom = Math.min(height, (int) Math.ceil(face[1] + 1.15 * faceHeight));
+                head = Bitmap.createBitmap(source, cropLeft, cropTop, cropRight - cropLeft, cropBottom - cropTop);
+                return new JSONObject().put("ok", false)
+                        .put("needs_frontal_reference", true)
+                        .put("frontal_source", encode(head, Bitmap.CompressFormat.JPEG, 92))
+                        .put("error", "Cette référence est de profil : une vue de face est nécessaire pour montrer les deux yeux.")
+                        .toString();
+            }
             detectorBitmap = Bitmap.createBitmap(width & ~1, height, Bitmap.Config.RGB_565);
             new Canvas(detectorBitmap).drawBitmap(source, 0, 0, null);
             FaceDetector.Face[] faces = new FaceDetector.Face[2];
             int count = new FaceDetector(detectorBitmap.getWidth(), height, 2).findFaces(detectorBitmap, faces);
             if (count != 1 || faces[0] == null || faces[0].confidence() < .35f) {
-                throw new IllegalArgumentException("Choisis une référence avec un seul visage adulte bien visible de face.");
+                return new JSONObject().put("ok", false).put("needs_frontal_reference", true)
+                        .put("error", "Les deux yeux ne sont pas suffisamment identifiables ; une référence de face plus lisible est nécessaire.")
+                        .toString();
             }
             PointF eyes = new PointF();
-            faces[0].getMidPoint(eyes);
-            float distance = faces[0].eyesDistance();
-            if (distance < 12) throw new IllegalArgumentException("Visage trop petit dans la référence.");
+            float distance = eyeGap;
+            eyes.set(eyeX, eyeY);
+            if (!profile && count == 1 && faces[0] != null && faces[0].confidence() >= .35f) {
+                faces[0].getMidPoint(eyes);
+                distance = faces[0].eyesDistance();
+            }
+            if (!profile && distance < 12) throw new IllegalArgumentException("Visage trop petit dans la référence.");
             int left = Math.max(0, (int) Math.floor(eyes.x - 1.9 * distance));
             int top = Math.max(0, (int) Math.floor(eyes.y - 2.3 * distance));
             int right = Math.min(width, (int) Math.ceil(eyes.x + 1.9 * distance));
             int bottom = Math.min(height, (int) Math.ceil(eyes.y + 2.5 * distance));
-
-            Utils.bitmapToMat(source, rgba);
-            Imgproc.cvtColor(rgba, rgb, Imgproc.COLOR_RGBA2RGB);
+            if (profile) {
+                left = Math.max(0, (int) Math.floor(face[0] - (direction.equals("right") ? 1.45 : .35) * faceWidth));
+                right = Math.min(width, (int) Math.ceil(face[0] + faceWidth + (direction.equals("left") ? 1.45 : .35) * faceWidth));
+                top = Math.max(0, (int) Math.floor(face[1] - .8 * faceHeight));
+                // Stop above shoulders: clothing is not part of facial identity.
+                bottom = Math.min(height, (int) Math.ceil(face[1] + 1.15 * faceHeight));
+            }
             labels.create(height, width, CvType.CV_8UC1);
             labels.setTo(new Scalar(Imgproc.GC_BGD));
             Imgproc.rectangle(labels, new Point(left, top), new Point(right - 1, bottom - 1),
                     new Scalar(Imgproc.GC_PR_FGD), -1);
-            Imgproc.ellipse(labels, new Point(eyes.x, eyes.y + .6 * distance),
-                    new Size(.85 * distance, 1.3 * distance), 0, 0, 360,
-                    new Scalar(Imgproc.GC_FGD), -1);
-            Imgproc.ellipse(labels, new Point(eyes.x, eyes.y - 1.3 * distance),
-                    new Size(.9 * distance, .35 * distance), 0, 0, 360,
-                    new Scalar(Imgproc.GC_FGD), -1);
+            if (profile) {
+                int neck = Math.min(bottom, (int) Math.ceil(face[1] + 1.08 * faceHeight));
+                int divider = (int) (face[0] + (direction.equals("right") ? .65 : .35) * faceWidth);
+                Imgproc.rectangle(labels, new Point(direction.equals("right") ? divider : left, neck),
+                        new Point(direction.equals("right") ? right - 1 : divider, bottom - 1),
+                        new Scalar(Imgproc.GC_BGD), -1);
+                Imgproc.ellipse(labels, new Point((eyeX + face[8]) / 2, eyeY + .2 * faceHeight),
+                        new Size(.17 * faceWidth, .25 * faceHeight), 0, 0, 360,
+                        new Scalar(Imgproc.GC_FGD), -1);
+            } else {
+                Imgproc.ellipse(labels, new Point(eyes.x, eyes.y + .6 * distance),
+                        new Size(.85 * distance, 1.3 * distance), 0, 0, 360,
+                        new Scalar(Imgproc.GC_FGD), -1);
+                Imgproc.ellipse(labels, new Point(eyes.x, eyes.y - 1.3 * distance),
+                        new Size(.9 * distance, .35 * distance), 0, 0, 360,
+                        new Scalar(Imgproc.GC_FGD), -1);
+            }
             Imgproc.grabCut(rgb, labels, new org.opencv.core.Rect(), background, foreground,
                     6, Imgproc.GC_INIT_WITH_MASK);
             byte[] labelPixels = new byte[width * height];
@@ -127,7 +196,12 @@ final class ProfileHeadProcessor {
             android.graphics.RectF destination = new android.graphics.RectF(
                     dx - minX * scale, dy - minY * scale,
                     dx - minX * scale + width * scale, dy - minY * scale + height * scale);
-            canvas.drawBitmap(source, null, destination, paint);
+            if (profile) {
+                // Do not carry the old torso, underwear or background into a new scene.
+                canvas.drawBitmap(smallHead, dx, dy, paint);
+            } else {
+                canvas.drawBitmap(source, null, destination, paint);
+            }
             int[] patch = new int[headWidth * headHeight];
             smallHead.getPixels(patch, 0, headWidth, 0, 0, headWidth, headHeight);
             byte[] protectedPixels = new byte[WIDTH * HEIGHT];
@@ -166,6 +240,7 @@ final class ProfileHeadProcessor {
             result.put("head_x", dx); result.put("head_y", dy);
             result.put("head_width", headWidth); result.put("head_height", headHeight);
             result.put("width", WIDTH); result.put("height", HEIGHT);
+            result.put("face_direction", direction);
             return result.toString();
         } catch (Throwable error) {
             try {
@@ -176,7 +251,7 @@ final class ProfileHeadProcessor {
                 return "{\"ok\":false,\"error\":\"Préparation du visage impossible.\"}";
             }
         } finally {
-            for (Mat mat : new Mat[]{rgba, rgb, labels, background, foreground, alpha}) {
+            for (Mat mat : new Mat[]{rgba, rgb, labels, background, foreground, alpha, bgr, detected}) {
                 if (mat != null) mat.release();
             }
             for (Bitmap bitmap : new Bitmap[]{source, detectorBitmap, head, smallHead, stage, maskBitmap}) {
