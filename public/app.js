@@ -1603,13 +1603,29 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       anti,
       hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",
     ].filter(Boolean).join(" ");
-    // Scène d'abord (tenue habillée + lieu + pose), identité ensuite, sinon Horde ne voit que le bonnet
+    // Scène d'abord : tenue concrète + lieu du scénario (pas le placeholder "exactly wearing")
     const maxLen = 1400;
+    const scenarioBlob = String((c && c.scenario) || "") + " " + String((c && c.title) || "") + " " + String((c && c.role) || "");
+    const lieuRaw = (scenarioBlob.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,60})/i) || [])[1] || "";
+    let wearClean = String(wear || "").replace(/exactly wearing:\s*/ig, "").replace(/wearing\s+/ig, "").trim();
+    let locClean = String(loc || "");
+    if (/cuisine|kitchen/i.test(scenarioBlob + " " + lieuRaw)) {
+      wearClean = "tight white crop top and dark skinny jeans, fully dressed, sneakers, not a bra, not lingerie";
+      locClean = "modern home kitchen, cabinets, countertop, fridge, indoor daylight";
+    } else if (/bureau|office|secr/i.test(scenarioBlob)) {
+      wearClean = "white office blouse unbuttoned at the top, tight pencil skirt, stockings, heels, fully dressed";
+      locClean = "office at night, desk, chair, window";
+    } else if (/porte|entrée|door/i.test(lieuRaw)) {
+      wearClean = "short tight mini dress with deep neckline and heels, fully dressed";
+      locClean = "apartment doorway, wooden door, indoor hallway";
+    } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
+      wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
+    }
     const sceneFirst = [
       "she is fully dressed in clothes, not bra only, not lingerie only,",
-      "(wearing " + wear + ":1.6),",
-      "location: " + loc + ",",
-      "pose: " + pos + ",",
+      "wearing " + wearClean + ",",
+      "location: " + locClean + ",",
+      "pose: leaning forward showing cleavage OR lifting the hem of her skirt slightly, full body,",
       "full body from head to knees, hips and legs visible,",
     ].join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
