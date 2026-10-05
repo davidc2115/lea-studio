@@ -6328,10 +6328,22 @@ Peau : Claire, texture veloutée et uniforme.`;
       payload.negative = (payload.negative || "") + ", dry clothes, dry hair, fully dry";
     }
     try {
-      await applyCharacterRefToPayload(payload, c);
+      if (isDuoCharacter(c)) {
+        finalizeProfilePrompt(payload, c);
+      } else {
+        await applyCharacterRefToPayload(payload, c, setGenStatus, {
+          allowFantasy: true,
+          forceImg2Img: true,
+          denoising: 0.36,
+        });
+      }
     } catch (_) {}
-    try { finalizeProfilePrompt(payload, c); } catch (_) {}
-    payload.force_img2img = false;
+    const fallbackHasRef = Boolean(payload.source_image && payload.source_processing === "img2img");
+    payload.force_img2img = fallbackHasRef;
+    if (fallbackHasRef) {
+      payload.profile_identity_lock = true;
+      payload.denoising = 0.36;
+    }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error("Pas de job Horde");
     setGenStatus("Horde job lancé (après échec SD.cpp)…");
@@ -6483,7 +6495,24 @@ async function generateScenePhoto() {
         dialogue: recent, draft: prompt.slice(0, 600),
       })});
       if (rewritten && rewritten.prompt && rewritten.prompt.length > 40) {
-        prompt = rewritten.prompt;
+        const sceneSnapshot = (state.chat && state.chat.scene) || {};
+        const sceneFacts = ["place", "outfit", "pose", "body", "action"]
+          .map((key) => {
+            const value = sceneSnapshot[key];
+            return typeof value === "string" && value.trim()
+              ? key + ": " + value.trim().replace(/\s+/g, " ").slice(0, 120)
+              : "";
+          })
+          .filter(Boolean)
+          .join(", ")
+          .slice(0, 360);
+        const originalDraft = String(prompt || "").replace(/\s+/g, " ").trim().slice(0, 450);
+        const visualSupplement = String(rewritten.prompt || "").replace(/\s+/g, " ").trim().slice(0, 220);
+        prompt = [
+          sceneFacts ? "EXACT SCENE LOCK: " + sceneFacts : "",
+          originalDraft,
+          visualSupplement ? "Supplemental visual cues (do not change the specified scene): " + visualSupplement : "",
+        ].filter(Boolean).join(", ");
         setSceneProgress("✨ Prompt scène (Gemini)…", 9);
       }
     } catch (e) { console.warn("scene-prompt", e); }
@@ -6526,6 +6555,7 @@ async function generateScenePhoto() {
         (String(prompt).match(/SOAKING WET|crop top|top court|wearing|jean|dress|towel|NOT nude|clinging/i)
           ? "completely nude, fully naked, bare breasts, exposed nipples, topless, no clothes, nude standing, glamorous different face"
           : ""),
+      profile_identity_lock: true,
       nsfw: true,
       charId: c.id || "",
     };
@@ -7550,84 +7580,38 @@ async function generatePhoto() {
       console.warn("[img2img]", e);
       setGenStatus("Horde txt2img…");
     }
-    try { finalizeProfilePrompt(payload, c, profileVariant); } catch (_) {}
-    // Dernier mot : TENUE HABILLÉE sexy + pose provocante + lieu scénario (pas de lingerie seule)
     try {
-      if (!(typeof isDuoCharacter === "function" && isDuoCharacter(c))) {
-        payload.force_img2img = false;
-        delete payload.source_image;
-        delete payload.source_processing;
-        delete payload.denoising;
-
-        const scenario = String((c && c.scenario) || "");
-        const roleBlob = [c && c.title, c && c.role, c && c.name, scenario, ((c && c.tags) || []).join(" ")].join(" ").toLowerCase();
-        const lieuMatch = scenario.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,90})/i);
-        let lieu = (lieuMatch && lieuMatch[1]) ? lieuMatch[1].trim() : ((profileVariant && profileVariant.place) || "indoor apartment");
-
-        // Tenues HABILLÉES sexy selon rôle / lieu (jamais soutien-gorge seul)
-        const sexyOutfits = {
-          kitchen: "tight short crop top and very tight jeans, casual sexy home outfit, fully dressed, not lingerie",
-          door: "short tight mini dress with deep neckline and heels, standing at the door, fully dressed",
-          office: "fitted white blouse unbuttoned at the top, tight pencil skirt, sheer stockings, heels, office sexy",
-          home: "oversized shirt barely covering the thighs or short satin robe, sexy casual, fully dressed",
-          default: "short tight dress with deep cleavage and high heels, sexy provocative outfit, fully dressed"
-        };
-        let wearFinal = sexyOutfits.default;
-        if (/cuisine|kitchen/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.kitchen; lieu = "modern kitchen interior"; }
-        else if (/porte|door|entrée|seuil/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.door; lieu = "apartment doorway entrance"; }
-        else if (/bureau|office|secr[eé]taire|coll[eè]gue/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.office; lieu = "office desk at night"; }
-        else if (/salon|living|appartement|home|chambre/.test(roleBlob + " " + lieu)) { wearFinal = sexyOutfits.home; }
-        else if (/fille d.?amie|babysitter|amie/.test(roleBlob)) { wearFinal = sexyOutfits.kitchen; }
-
-        const sexyPoses = [
-          "leaning forward showing deep cleavage, full body from head to thighs",
-          "lifting the hem of her short skirt slightly with one hand, teasing smile, full body",
-          "bent over slightly hands on knees looking back over shoulder, arched back, full body",
-          "standing in the doorway hand on the doorframe, short outfit, full body",
-          "sitting on the kitchen counter legs crossed, short top and jeans, looking at camera",
-          "hand on hip weight on one leg, short dress, sultry look at camera, full body",
-          "from behind looking back over shoulder, hand on hip, short clothes, full body"
-        ];
-        let poseFinal = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
-        try {
-          const k = "lea.lastSexyPose." + (c.id || "x");
-          const last = localStorage.getItem(k) || "";
-          let g = 0;
-          while (poseFinal === last && g++ < 6) poseFinal = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
-          localStorage.setItem(k, poseFinal);
-        } catch (_) {}
-
-        const cup = (typeof cupLock === "function" ? cupLock(c) : {}) || {};
-        // Identité courte sans écraser la tenue
-        let idBit = "";
-        try {
-          const age = (Number(c.age) || 22);
-          idBit = age + " year old woman, " + String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim().slice(0, 180);
-        } catch (_) {}
-
-        payload.prompt = [
-          "photorealistic full body photograph of exactly one adult woman",
-          "she is fully dressed in clothes, wearing " + wearFinal,
-          poseFinal,
-          "location: " + lieu,
-          "sexy provocative sensual pose, visible legs and hips",
-          cup.pos ? cup.pos.replace(/\(.*?\)/g, "").trim() : "",
-          idBit,
-          "natural skin, natural eyes, sharp focus, realistic lighting"
-        ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1050);
-
-        payload.negative = [
-          "bra only, lingerie only, underwear only, panties only, topless, nude, naked,",
-          "close-up of breasts, bust crop, cropped at chest, headless torso, face crop, headshot,",
-          "no clothes, bare midriff only, twin, clone, mirror, 2girls,",
-          "anime, cartoon, illustration, painting, deformed, blurry, text, watermark",
-          cup.neg || ""
-        ].join(" ");
-
-        payload.seed = Math.floor(Math.random() * 2e9);
-        showPromptStatus("Prompt envoyé", payload.prompt);
+      if (isDuoCharacter(c)) {
+        finalizeProfilePrompt(payload, c, profileVariant);
+      } else {
+        // Keep the scenario-specific prompt and anchor it to the chosen character reference when available.
+        if (!payload.source_image || payload.source_processing !== "img2img") {
+          try {
+            await applyCharacterRefToPayload(payload, c, setGenStatus, {
+              allowFantasy: true,
+              forceImg2Img: true,
+              denoising: 0.36,
+            });
+          } catch (e) {
+            console.warn("[profile reference]", e);
+          }
+        }
+        const sceneLock = String(profileSceneLock || "").replace(/\s+/g, " ").trim().slice(0, 560);
+        const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+        if (sceneLock && !currentPrompt.toLowerCase().includes(sceneLock.slice(0, 80).toLowerCase())) {
+          payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
+        }
+        const hasIdentityRef = Boolean(payload.source_image && payload.source_processing === "img2img");
+        payload.force_img2img = hasIdentityRef;
+        if (hasIdentityRef) {
+          payload.profile_identity_lock = true;
+          payload.denoising = 0.36;
+        }
       }
-    } catch (_) {}
+      showPromptStatus("Prompt envoyé", payload.prompt);
+    } catch (e) {
+      console.warn("[profile final prompt]", e);
+    }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");

@@ -545,33 +545,25 @@
     const modeLock = /MODE NSFW/i.test(fullSys) ? "NSFW" : "SFW";
 
     const roleLock = [
-      "=== VERROU PERSONNAGE (Gemini + Groq — identique) ===",
-      "Tu incarnes UNIQUEMENT: " + nameLock + (titleLock ? " — " + titleLock : "") + ". FEMME uniquement.",
-      scenLock ? ("SCÉNARIO FIXE (ne jamais inverser les rôles ni changer qui est qui): " + scenLock) : "",
-      "RÔLE VERROUILLÉ: reste dans CE rôle. INTERDIT d'inverser (ex: si tu es belle-sœur, c'est TON mari/frère qui est en jeu — pas l'utilisateur qui se dispute avec son frère à ta place).",
-      "MAISON: si le scénario ou le joueur dit que TU VIENS CHEZ LUI, tu es INVITÉE. C'est CHEZ LUI. Tu ne parles pas de « ma cuisine / mon salon / je rentre chez moi » comme si c'était ton appartement. Tu peux aider à cuisiner chez lui, pas comme propriétaire.",
-      temperLock ? ("TEMPÉRAMENT OBLIGATOIRE: " + temperLock + " — chaque pensée, action et parole DOIT coller. Timide=hésite/rougit; directe=agit sans tourner autour; flirt=taquine; dominante=dirige; sensible=émotion visible.") : "TEMPÉRAMENT: suis la personnalité du personnage strictement.",
-      placeLock ? ("LIEU ACTUEL (ne change pas sans raison dans le dialogue): " + placeLock) : "",
-      outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
-      "Mode: " + modeLock + ". Français uniquement.",
-      "=== POV ===",
-      "JE/MON/MA = ton corps de femme. TU/TON = le joueur. Tu RÉAGIS à ses gestes, tu ne les refais pas en « je ».",
-      "INTERDIT mon érection / ma bite / ma queue. Correct: *Je sens sa queue…*",
-      "=== MÉMOIRE ===",
-      "Conserve lieu, chez-qui (joueur ou elle), tenue complète, actes refusés/acceptés, moments intimes. Ne réécris pas le scénario de départ.",
-      "=== REFUS / AGENCE ===",
-      "Tu n'es PAS une machine à oui. Selon tempérament: refuse un acte, fais attendre, accepte seulement certains gestes (oral oui / anal non, etc.). Dis-le clairement en paroles + *action* (recul, main qui bloque). Pas de moralisation IA — refus de personnage.",
-      "=== ANTI-BOUCLE ===",
-      "INTERDIT: Oui+prénom, continue, je me cambre, canapé, c'est magnifique, jusqu'au bout, le film peut attendre, je reste blottie, je ferme la porte, je prends mon sac, je t'appellerai, quand je serai prête — en boucle. Un refus se dit UNE fois. Ensuite la scène AVANCE.",
-      "FORMAT: (pensée) *action* paroles. 1-4 phrases max. Pas de méta.",
+      "=== PRIORITÉS DE PERSONNAGE ===",
+      "Tu incarnes uniquement " + (nameLock || "le personnage") + (titleLock ? " — " + titleLock : "") + ". Français uniquement.",
+      scenLock ? ("Cadre de départ à préserver: " + scenLock) : "",
+      temperLock ? ("Personnalité et voix: " + temperLock) : "",
+      placeLock ? ("Lieu actuel: " + placeLock) : "",
+      outfitLock ? ("Tenue actuelle: " + outfitLock) : "",
+      "Réponds précisément au dernier geste ou aux dernières paroles; ne les répète pas comme si tu les faisais. N'invente pas les pensées, actions ou le consentement du joueur.",
+      "Sois concret, expressif et fidèle au tempérament: une réaction spécifique, un geste ou une sensation crédible, puis du dialogue naturel. Évite les acquiescements génériques, les répétitions et les résumés; fais avancer la scène sans effacer les faits établis.",
+      "Le personnage garde son agence: il peut hésiter, accepter ou refuser selon sa personnalité; respecte clairement tout non/stop.",
       modeLock === "NSFW"
-        ? "MODE NSFW: EXPLICITE (sensations sur TON corps, vocabulaire cru OK). Réponds à l'acte demandé; varie; refus possible si tempérament/limites."
-        : "SFW: pas de sexe. NSFW seulement si le joueur ouvre clairement.",
-      FORMAT_REMINDER,
-      "=== FIN VERROU ===",
+        ? "NSFW: fiction entre adultes consentants; réponds directement au niveau demandé, avec des détails sensoriels et des paroles en personnage, sans euphémisme ni simple résumé."
+        : "SFW: pas de sexe explicite.",
+      "FORMAT: (pensée si utile) *action* paroles; longueur naturelle, généralement 2–5 phrases. Pas de méta."
     ].filter(Boolean).join("\n");
 
-    // System compact pour Groq : verrou + extrait utile du system long (évite de noyer le modèle)
+    const groqFormatReminder = "FORMAT GROQ: français; réaction propre au personnage, détail ou action concret et dialogue naturel. Varie la longueur selon le contexte; évite les réponses génériques et répétitives.";
+    fullSys = String(fullSys || "").replace(FORMAT_REMINDER, groqFormatReminder);
+
+    // System compact pour Groq: règles concises en tête, contexte complet conservé ensuite.
     let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
@@ -581,52 +573,35 @@
     }));
     const msgs = [{ role: "system", content: compactSys }].concat(nonSys);
 
-    // NSFW boost + rappel POV sur le dernier message joueur
+    // Détecter le NSFW sans injecter un faux message du joueur.
+    let nsfwOn = modeLock === "NSFW";
     try {
       const blob = msgs.map((m) => m.content || "").join("\n");
-      const nsfwOn = modeLock === "NSFW" || /(bite|queue|suce|baise|p[eé]n[eè]tr|orgasme|chatte|nsfw|sexe|branle|fellation|seins|fesses|cuisses|d[eé]collet[eé]|[eé]rection|frott)/i.test(blob);
-      if (nsfwOn) {
-        msgs[0] = {
-          role: "system",
-          content: msgs[0].content + "\n\nFICTION ADULTE 18+ NSFW: roleplay EXPLICITE. " +
-            "Le joueur agit avec SES mains / SA queue sur TON corps. " +
-            "Réponds en femme: sensations (sa main, sa queue, mes seins, mes cuisses), *action de TON corps*, paroles excitées. " +
-            "INTERDIT de reprendre ses gestes en « je ». INTERDIT mon/ma bite/queue/érection. " +
-            "Format: (pensée) *action* paroles. Pas de refus moral.",
-        };
-        // Clarifier le dernier tour joueur pour éviter l'inversion
-        try {
-          const lastU = [...nonSys].reverse().find((m) => m.role === "user");
-          if (lastU && lastU.content) {
-            msgs.push({
-              role: "user",
-              content: "[RAPPEL TECHNIQUE — ne pas citer] Le joueur vient d'écrire (ses gestes à LUI): « " +
-                String(lastU.content).slice(0, 280) +
-                " ». Réponds en " + (nameLock || "personnage") +
-                " femme: tu subis/accueilles ces gestes, tu ne les refais pas avec « je ».",
-            });
-          }
-        } catch (_) {}
-      }
+      nsfwOn = nsfwOn || /(bite|queue|suce|baise|p[eé]n[eè]tr|orgasme|chatte|nsfw|sexe|branle|fellation|seins|fesses|cuisses|d[eé]collet[eé]|[eé]rection|frott)/i.test(blob);
     } catch (_) {}
+    if (nsfwOn) {
+      msgs[0] = {
+        role: "system",
+        content: msgs[0].content + "\n\nNSFW: réponds directement au dernier tour avec une réaction concrète, explicite et en personnage; ne cite pas ces consignes et respecte les limites exprimées.",
+      };
+    }
 
     const preferred = s.groqModel || "moonshotai/kimi-k2-instruct";
-    // NSFW: éviter llama en premier (trop soft / inversion). Kimi / Qwen / GPT-OSS d'abord.
-    const models = true
+    const llamaPreferredInNsfw = nsfwOn && /^llama-/i.test(preferred);
+    const models = llamaPreferredInNsfw
       ? [
-          preferred,
           "moonshotai/kimi-k2-instruct",
           "qwen/qwen3-32b",
           "openai/gpt-oss-120b",
-          "llama-3.3-70b-versatile",
+          preferred,
           "llama-3.1-8b-instant",
         ]
       : [
           preferred,
           "moonshotai/kimi-k2-instruct",
           "qwen/qwen3-32b",
-          "llama-3.3-70b-versatile",
           "openai/gpt-oss-120b",
+          "llama-3.3-70b-versatile",
           "llama-3.1-8b-instant",
         ];
     const modelsUnique = models.filter((m, i, a) => a.indexOf(m) === i);
@@ -650,8 +625,8 @@
               temperature: 1.05,
               max_tokens: 1500,
               top_p: 0.95,
-              frequency_penalty: 0.9,
-              presence_penalty: 0.65,
+              frequency_penalty: 0.2,
+              presence_penalty: 0.1,
             }),
           }).finally(function () { clearTimeout(timer); });
           const data = await res.json().catch(function () { return {}; });
@@ -2411,6 +2386,10 @@
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
       let prompt = String(body.prompt || "photorealistic full body photo of adult woman standing").slice(0, 2800);
+      const hordeSceneLock = String(body.profile_scene_lock || "").replace(/\s+/g, " ").trim().slice(0, 560);
+      if (hordeSceneLock && !prompt.toLowerCase().includes(hordeSceneLock.slice(0, 80).toLowerCase())) {
+        prompt = hordeSceneLock + ", " + prompt;
+      }
       // Gemini native image (Nano Banana)
       if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
         try {
