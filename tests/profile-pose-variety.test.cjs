@@ -42,3 +42,30 @@ test("Every human character gets both a seated and a standing alternative", () =
     assert.match(poses, /standing/, c.id + ": no standing alternative");
   }
 });
+
+test("The final submission keeps the orientation produced by native preparation", async () => {
+  const payload = {};
+  const context = {
+    window: { LeaSegmentedProfile: {
+      active: () => true,
+      prepareReference: async request => {
+        assert.equal(request.prompt, "face toward camera");
+        request.prompt = "head in right-facing profile";
+        request.profile_scene_lock = request.prompt;
+        return { head_image: "reference" };
+      },
+    } },
+    duoProfile: false, payload, profileSceneLock: "face toward camera",
+    setGenStatus() {}, cupLock: () => ({ neg: "" }), bodyNegatives: () => "", c: {},
+    api: async (_url, options) => JSON.parse(options.body),
+  };
+  vm.createContext(context);
+  const source = read("app.js");
+  const from = source.indexOf("let headRestoration = null;");
+  const until = source.indexOf("\n    if (!start.jobId)", from);
+  assert(from >= 0 && until > from);
+  const submitted = await vm.runInContext("(async()=>{" + source.slice(from, until) +
+    "\nreturn start;})()", context);
+  assert.equal(submitted.prompt, "head in right-facing profile");
+  assert.equal(submitted.profile_scene_lock, submitted.prompt);
+});

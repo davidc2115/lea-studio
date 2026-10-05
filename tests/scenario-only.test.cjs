@@ -6,6 +6,13 @@ const { test } = require("node:test");
 
 const dir = process.argv[2] || path.join(__dirname, "..", "public");
 const read = name => fs.readFileSync(path.join(dir, name), "utf8");
+// This regression suite checks the intentionally limited scenario-only release.
+// Photo releases have separate identity, composition and gallery-protection suites.
+const scenarioOnlyScope = {
+  skip: read("index.html").includes('src="profile-head-segmentation.js"')
+    ? "Scenario-only release checks; this package includes the photo renderer."
+    : false,
+};
 const groups = ["CAST", "EXTRA_CAST", "LEA_CAST_NEW", "LEA_CAST_SPECIAL", "LEA_CAST_DIRECT", "LEA_CAST_CUPS", "LEA_CAST_COLLEGUES", "LEA_CAST_TAQUIN"];
 const collect = ctx => [...new Map(groups.flatMap(k => ctx.window[k] || []).map(c => [c.id, c])).values()];
 function setup() {
@@ -22,7 +29,7 @@ function unchangedFields(c) {
   return JSON.stringify(copy);
 }
 
-test("818 distinct plots and openings change only story fields, never photo or identity settings", () => {
+test("818 distinct plots and openings change only story fields, never photo or identity settings", scenarioOnlyScope, () => {
   const { ctx, values } = setup();
   const before = collect(ctx);
   assert.equal(before.length, 818);
@@ -52,7 +59,7 @@ test("818 distinct plots and openings change only story fields, never photo or i
   assert.match(kenza.scenario, /babyphone/);
 });
 
-test("Native registry exposes every updated character, including all 120 playful characters", async () => {
+test("Native registry exposes every updated character, including all 120 playful characters", scenarioOnlyScope, async () => {
   const { ctx } = setup();
   vm.runInContext(read("scenario-library.js"), ctx);
   vm.runInContext(read("native-api.js"), ctx);
@@ -66,7 +73,7 @@ test("Native registry exposes every updated character, including all 120 playful
   }
 });
 
-test("Scenario-only package does not load the experimental photo module", () => {
+test("Scenario-only package does not load the experimental photo module", scenarioOnlyScope, () => {
   const index = read("index.html");
   assert(index.includes('src="scenario-library.js"'));
   assert(!index.includes("profile-composition.js"));

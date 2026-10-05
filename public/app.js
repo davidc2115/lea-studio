@@ -7687,9 +7687,9 @@ async function generatePhoto() {
     let headRestoration = null;
     if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
       // Fail before submission if local preparation cannot retain the chosen face.
-      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus);
       payload.prompt = profileSceneLock;
       payload.profile_scene_lock = profileSceneLock;
+      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus);
       payload.negative = [
         cupLock(c).neg,
         "nude, topless, transparent clothes, underwear, cleavage, wrong outfit,",
