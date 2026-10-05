@@ -59,6 +59,12 @@
     }
   }
 
+  function orientPrompt(text, direction) {
+    if (!["right", "left"].includes(direction)) return text;
+    return String(text || "").replace(/face toward camera|gaze toward camera|looking (?:at|toward) camera/gi,
+      "head in " + direction + "-facing profile, body pose independent of head");
+  }
+
   async function loadImage(source) {
     const image = new Image();
     await new Promise((resolve, reject) => {
@@ -80,6 +86,8 @@
       throw new Error("Préparation locale du visage : " + error.message);
     }
     validatePrepared(prepared);
+    payload.profile_scene_lock = orientPrompt(payload.profile_scene_lock, prepared.face_direction);
+    payload.prompt = orientPrompt(payload.prompt, prepared.face_direction);
     // The provider contract documents WebP masks. Keep the local restoration PNG
     // private to this job, rather than uploading or storing it in the gallery.
     const mask = await loadImage("data:image/png;base64," + prepared.source_mask);
@@ -136,5 +144,5 @@
   }
 
   root.LeaSegmentedProfile = { active, sceneLock, opaqueOutfit, prepareReference,
-    restoreImage, validatePrepared, WIDTH, HEIGHT };
+    restoreImage, validatePrepared, orientPrompt, WIDTH, HEIGHT };
 })(window);

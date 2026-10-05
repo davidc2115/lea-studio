@@ -95,7 +95,7 @@ public class LeaBridge {
     /** Local-only preparation for the visually validated segmented profile flow. */
     @JavascriptInterface
     public String prepareSegmentedProfileHead(String encoded) {
-        return ProfileHeadProcessor.prepare(encoded);
+        return ProfileHeadProcessor.prepare(ctx, encoded);
     }
 
     private synchronized boolean ensureNative() {
