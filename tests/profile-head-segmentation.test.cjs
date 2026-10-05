@@ -1,0 +1,184 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const publicDir = path.join(__dirname, "../public");
+const read = name => fs.readFileSync(path.join(publicDir, name), "utf8");
+
+function helper() {
+  const context = { window: {}, console };
+  vm.createContext(context);
+  vm.runInContext(read("profile-head-segmentation.js"), context);
+  return { context, api: context.window.LeaSegmentedProfile };
+}
+
+function nativeApi() {
+  const settings = new Map([["lea.settings", JSON.stringify({ hordeKey: "fictional-test-setting" })]]);
+  const requests = [];
+  const context = {
+    window: {}, console, Date, setTimeout, clearTimeout, setInterval, clearInterval,
+    location: { protocol: "file:", hostname: "", href: "file:///android_asset/www/index.html" },
+    localStorage: {
+      getItem: key => settings.get(key) ?? null,
+      setItem: (key, value) => settings.set(key, String(value)),
+      removeItem: key => settings.delete(key),
+    },
+    fetch: async (url, options) => {
+      requests.push({ url, options, body: JSON.parse(options.body) });
+      return { ok: true, status: 202, json: async () => ({ id: "head-job" }) };
+    },
+  };
+  vm.createContext(context);
+  for (const [, file] of read("index.html").matchAll(/src="(characters[^"/]*\.js)"/g)) {
+    vm.runInContext(read(file), context);
+  }
+  vm.runInContext(read("native-api.js"), context);
+  return { context, requests, settings };
+}
+
+test("The segmented method requires its local Android bridge; the old mask stays disabled", () => {
+  const { context, api } = helper();
+  assert(!api.active());
+  context.window.LeaAndroid = { prepareSegmentedProfileHead() {} };
+  assert(api.active());
+  assert.equal(context.window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK, undefined);
+});
+
+test("Scene instructions retain A-cup morphology, varied action, props and opaque role clothing", () => {
+  const { api } = helper();
+  const c = { id: "cup_babysitter_07", age: 25, title: "Baby-sitter", body: "Poitrine : bonnet A" };
+  const before = JSON.stringify(c);
+  const prompt = api.sceneLock(c, {
+    pose: "seated sideways, holding a mug", place: "bright kitchen",
+    cameraAngle: "wide head-to-knees view", outfit: "transparent lingerie",
+    scene: { prop: "baby monitor" },
+  }, {}, "(small A-cup breasts:1.7), narrow torso");
+  assert.match(prompt, /very small A cup/);
+  assert.match(prompt, /minimal breast projection/);
+  assert.match(prompt, /seated sideways/);
+  assert.match(prompt, /baby monitor/);
+  assert.match(prompt, /opaque closed role-appropriate blouse/);
+  assert.doesNotMatch(prompt, /transparent lingerie/);
+  assert.equal(JSON.stringify(c), before);
+  const long = "x".repeat(3000);
+  const bounded = api.sceneLock(c, { pose: long, place: long, cameraAngle: long, outfit: long,
+    scene: { prop: long } }, {}, long);
+  assert(bounded.length <= 920);
+  for (const token of ["CAMERA:", "POSE:", "SETTING:", "WARDROBE:", "PROP:"]) assert(bounded.includes(token));
+});
+
+test("Malformed native preparations fail before any provider request", () => {
+  const { api } = helper();
+  assert.throws(() => api.validatePrepared({ ok: false, error: "one face required" }), /one face required/);
+  assert.throws(() => api.validatePrepared({ ok: true }), /incohérente/);
+  assert.doesNotThrow(() => api.validatePrepared({
+    ok: true, width: 384, height: 512, head_x: 134, head_y: 20,
+    head_width: 116, head_height: 146, source_image: "source", source_mask: "mask", head_image: "head",
+  }));
+});
+
+test("A compact valid matte keeps 384x512, 20 steps, inpainting, censorship and anonymous auth", async () => {
+  const { context, requests, settings } = nativeApi();
+  const savedSettings = settings.get("lea.settings");
+  await context.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
+    engine: "horde", charId: "cup_babysitter_07",
+    prompt: "one clothed adult woman, A-cup, seated sideways in a kitchen",
+    profile_scene_lock: "one adult woman, A-cup, opaque blouse, visible kitchen",
+    profile_face_mask: true, profile_head_segmented: true, profile_identity_lock: true,
+    is_profile_photo: true, horde_anonymous: true, source_image: "A".repeat(1000),
+    source_mask: "B".repeat(128), source_processing: "inpainting", force_img2img: true,
+    denoising: 1,
+  }) });
+  assert.equal(requests.length, 1);
+  const { body, options } = requests[0];
+  assert.equal(options.headers.apikey, "0000000000");
+  assert.equal(body.params.width, 384);
+  assert.equal(body.params.height, 512);
+  assert.equal(body.params.steps, 20);
+  assert.equal(body.params.denoising_strength, 1);
+  assert.equal(body.source_mask, "B".repeat(128));
+  assert.equal(body.source_processing, "inpainting");
+  assert(body.models.every(model => model.includes("Inpainting")));
+  assert.equal(body.nsfw, false);
+  assert.equal(body.censor_nsfw, true);
+  assert.equal(settings.get("lea.settings"), savedSettings);
+});
+
+test("Provider censorship metadata is rejected even if its boolean flag is false", async () => {
+  const { context } = nativeApi();
+  context.fetch = async url => ({ ok: true, json: async () => url.includes("/check/")
+    ? { done: true }
+    : { generations: [{ censored: false, img: "https://example.invalid/censored.webp",
+      gen_metadata: [{ type: "censorship", value: "nsfw" }] }] } });
+  const result = await context.window.leaNativeApi("/api/image-status", {
+    method: "POST", body: JSON.stringify({ jobId: "censored-job", host: "https://aihorde.net/api/v2" }),
+  });
+  assert.match(result.error, /censuré/);
+  assert.equal(result.url, undefined);
+});
+
+function galleryPoll(result, restore) {
+  const existing = ["previous-photo"];
+  const writes = [], statuses = [];
+  const context = {
+    window: { _leaGenBusy: true, LeaSegmentedProfile: { restoreImage: restore } },
+    state: { current: "different-character", view: "chat" }, console, Date,
+    setTimeout: callback => { callback(); return 1; },
+    localStorage: { getItem: () => null, setItem: () => {} },
+    api: async () => result,
+    addToGallery: async (url, id) => { writes.push({ url, id }); return url; },
+    setGenStatus: text => statuses.push(text),
+    renderProfile() { throw new Error("must not switch the current conversation"); },
+  };
+  vm.createContext(context);
+  const fn = read("app.js").match(/async function pollHordeJob[\s\S]*?^\}/m)[0];
+  vm.runInContext(fn, context);
+  return { context, existing, writes, statuses };
+}
+
+test("Only the restored image is added to the requested profile, without changing existing photos", async () => {
+  const { context, writes, existing } = galleryPoll(
+    { done: true, url: "https://example.invalid/scene.webp" },
+    async () => "data:image/png;base64,restored-head",
+  );
+  await context.pollHordeJob("job", "host", "requested-character", { head_image: "selected-reference" });
+  assert.deepEqual(writes, [{ url: "data:image/png;base64,restored-head", id: "requested-character" }]);
+  assert.deepEqual(existing, ["previous-photo"]);
+  assert.equal(context.state.current, "different-character");
+  assert.equal(context.window._leaGenBusy, false);
+});
+
+test("Failed facial restoration never silently saves the generated replacement face", async () => {
+  const { context, writes, statuses } = galleryPoll(
+    { done: true, url: "https://example.invalid/scene.webp" },
+    async () => { throw new Error("unexpected dimensions"); },
+  );
+  await context.pollHordeJob("job", "host", "requested-character", { head_image: "selected-reference" });
+  assert.deepEqual(writes, []);
+  assert(statuses.some(text => text.includes("unexpected dimensions")));
+  assert.equal(context.window._leaGenBusy, false);
+});
+
+test("A censored result is never restored over or added to a gallery", async () => {
+  let restored = false;
+  const { context, writes } = galleryPoll(
+    { done: true, error: "Horde a censuré cette image." },
+    async () => { restored = true; },
+  );
+  await context.pollHordeJob("job", "host", "requested-character", {});
+  assert.equal(restored, false);
+  assert.deepEqual(writes, []);
+});
+
+test("The release wires preparation only into profile generation, not SD.cpp rescue", () => {
+  const app = read("app.js");
+  const rescue = app.slice(app.indexOf("async function generatePhotoHordeFallback"),
+    app.indexOf("async function pollSdCppJob"));
+  assert.doesNotMatch(rescue, /headRestoration|prepareSegmentedProfileHead|LeaSegmentedProfile/);
+  const prepare = app.indexOf("headRestoration = await window.LeaSegmentedProfile.prepareReference");
+  assert(prepare > app.indexOf('console.warn("[profile final prompt]"'));
+  assert.match(app.slice(prepare, prepare + 900), /pollHordeJob\(start.jobId, start.host, c.id, headRestoration\)/);
+  assert(read("index.html").indexOf('src="profile-head-segmentation.js"') <
+    read("index.html").indexOf('src="app.js"'));
+});

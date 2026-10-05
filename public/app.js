@@ -572,6 +572,23 @@ function profileScenarioText(c) {
 
 function pickProfileScenarioVariant(c) {
   const data = c || {};
+  if ((window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true ||
+      window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) &&
+      Array.isArray(data.profile_scenes) && data.profile_scenes.length) {
+    const key = "lea.lastProfileScenario." + (data.id || "x");
+    let recent = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "[]");
+      recent = Array.isArray(saved) ? saved : [Number(saved)];
+    } catch (_) {}
+    const available = data.profile_scenes.map((scene, index) => index).filter(index => !recent.includes(index));
+    const indexes = available.length ? available :
+      data.profile_scenes.map((scene, index) => index).filter(index => index !== recent[recent.length - 1]);
+    const index = indexes[Math.floor(Math.random() * indexes.length)] || 0;
+    try { localStorage.setItem(key, JSON.stringify(recent.concat(index).slice(-2))); } catch (_) {}
+    const scene = data.profile_scenes[index];
+    return { index, outfit: scene.outfit, place: scene.place, pose: scene.pose, cameraAngle: scene.camera, scene };
+  }
   const cleanList = (value) => Array.isArray(value)
     ? value.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
@@ -773,6 +790,20 @@ function pickProfileCameraAngle(c) {
 
 function buildProfileSceneLock(c, variant, extra = "") {
   if (!c || !variant) return "";
+  if (window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+    const physical = physicalLocksFromText(c);
+    const traits = physical.positive.filter(item => /plus.size|soft belly|thick thighs|slim|athletic|waist|hips|curvy|muscular|shoulders|petite|tall|hourglass/i.test(item)).slice(0, 3);
+    const identity = [cupLock(c).pos.split(",")[0], ...(physical.features || []).slice(0, 3), ...traits].filter(Boolean).join(", ");
+    const scene = { ...variant, pose: variant.pose || pickProfileScenePose(c, variant), cameraAngle: variant.cameraAngle || pickProfileCameraAngle(c) };
+    return window.LeaSegmentedProfile.sceneLock(c, scene, expandProfileExtra(extra), identity);
+  }
+  if (window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true && window.LeaProfileComposition) {
+    const physical = physicalLocksFromText(c);
+    const bodyTraits = physical.positive.filter(item => /slim|athletic|waist|hips|curvy|muscular|shoulders|petite|tall/i.test(item)).slice(0, 2);
+    const identity = [cupLock(c).pos.split(",")[0], ...(physical.features || []).slice(0, 3), ...bodyTraits].filter(Boolean).join(", ");
+    const scene = { ...variant, pose: variant.pose || pickProfileScenePose(c, variant), cameraAngle: variant.cameraAngle || pickProfileCameraAngle(c) };
+    return window.LeaProfileComposition.sceneLock(c, scene, expandProfileExtra(extra), identity);
+  }
   const ex = expandProfileExtra(extra || "");
   const age = Number(c.age) || 21;
   const adultAge = age < 21 ? 22 : age;
@@ -5938,7 +5969,10 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
-        const faceLock = await ensureFaceLockFromGemini(c, ref, setS);
+        const keepProfileLocal = options.profileIdentityLock === true &&
+          (window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true ||
+          window.LeaSegmentedProfile && window.LeaSegmentedProfile.active());
+        const faceLock = keepProfileLocal ? "" : await ensureFaceLockFromGemini(c, ref, setS);
         if (options.profileIdentityLock === true) {
           payload.face_lock = profileIdentityAnchor(c, faceLock);
         } else if (faceLock) {
@@ -7056,8 +7090,8 @@ async function generatePhoto() {
   const profileVariant = pickProfileScenarioVariant(c);
   const duoProfile = isDuoCharacter(c);
   if (!duoProfile) {
-    profileVariant.pose = pickProfileScenePose(c, profileVariant);
-    profileVariant.cameraAngle = pickProfileCameraAngle(c);
+    profileVariant.pose = profileVariant.pose || pickProfileScenePose(c, profileVariant);
+    profileVariant.cameraAngle = profileVariant.cameraAngle || pickProfileCameraAngle(c);
   }
   const profileSceneLock = duoProfile ? "" : buildProfileSceneLock(c, profileVariant, extra);
   let prompt;
@@ -7621,15 +7655,32 @@ async function generatePhoto() {
           payload.profile_identity_lock = true;
           payload.denoising = 0.70;
         }
+        if (window.LeaProfileComposition && hasIdentityRef) {
+          await window.LeaProfileComposition.prepareReference(payload, setGenStatus);
+        }
       }
+      payload.nsfw = false;
+      payload.is_profile_photo = true;
       showPromptStatus("Prompt envoyé", payload.prompt);
     } catch (e) {
       console.warn("[profile final prompt]", e);
     }
+    let headRestoration = null;
+    if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+      // Fail before submission if local preparation cannot retain the chosen face.
+      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus);
+      payload.prompt = profileSceneLock;
+      payload.profile_scene_lock = profileSceneLock;
+      payload.negative = [
+        cupLock(c).neg,
+        "nude, topless, transparent clothes, underwear, cleavage, wrong outfit,",
+        bodyNegatives(c),
+      ].filter(Boolean).join(" ");
+    }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
-    pollHordeJob(start.jobId, start.host, c.id);
+    pollHordeJob(start.jobId, start.host, c.id, headRestoration);
   } catch (e) {
     window._leaGenBusy = false;
     setGenStatus(String(e.message || e));
@@ -7684,7 +7735,7 @@ async function persistImageUrl(url) {
   }
 }
 
-async function pollHordeJob(jobId, host, charId) {
+async function pollHordeJob(jobId, host, charId, headRestoration = null) {
   const cid = charId || state.current || "lea";
   for (let i = 0; i < 120; i++) {
     // Poll adaptatif : plus espacé = moins de ban IP
@@ -7713,16 +7764,28 @@ async function pollHordeJob(jobId, host, charId) {
         }
         continue;
       }
-      window._leaGenBusy = false;
       if (st.error) {
+        window._leaGenBusy = false;
         setGenStatus(st.error);
         return;
       }
       if (!st.url) {
+        window._leaGenBusy = false;
         setGenStatus("Horde : job terminé sans image");
         return;
       }
-      const stored = await addToGallery(st.url, cid);
+      let stored;
+      try {
+        const completedUrl = headRestoration
+          ? await window.LeaSegmentedProfile.restoreImage(st.url, headRestoration)
+          : st.url;
+        stored = await addToGallery(completedUrl, cid);
+      } catch (error) {
+        window._leaGenBusy = false;
+        setGenStatus("Photo non ajoutée : " + (error.message || error));
+        return;
+      }
+      window._leaGenBusy = false;
       // Cooldown 60s après succès pour ne pas re-ban l'IP anonyme
       try {
         const coolUntil = Date.now() + 60000;

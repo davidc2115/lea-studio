@@ -23,6 +23,11 @@ android {
     sourceSets {
         main { jniLibs.srcDirs = ["src/main/jni/prebuilt"] }
     }
+    packaging {
+        jniLibs {
+            pickFirsts += ["**/libc++_shared.so"]
+        }
+    }
     externalNativeBuild {
         cmake { path "src/main/jni/CMakeLists.txt" }
     }
@@ -59,4 +64,5 @@ android {
 
 
 dependencies {
+    implementation "org.opencv:opencv:4.12.0"
 }

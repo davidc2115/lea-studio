@@ -35,7 +35,68 @@ public class LeaBridge {
         nativeOk = false;
     }
 
+    /** Locate one frontal face without uploading the reference to another service. */
+    @JavascriptInterface
+    public String detectProfileFace(String encoded) {
+        android.graphics.Bitmap decoded = null;
+        android.graphics.Bitmap rgb = null;
+        try {
+            if (encoded == null || encoded.length() > 3000000) {
+                return "{\"ok\":false,\"error\":\"Référence trop volumineuse.\"}";
+            }
+            int comma = encoded.indexOf(',');
+            if (encoded.startsWith("data:") && comma >= 0) encoded = encoded.substring(comma + 1);
+            byte[] bytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+            android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
+            int originalWidth = opts.outWidth, originalHeight = opts.outHeight;
+            if (originalWidth < 40 || originalHeight < 40) {
+                return "{\"ok\":false,\"error\":\"Référence illisible ou trop petite.\"}";
+            }
+            opts.inSampleSize = 1;
+            while (Math.max(originalWidth, originalHeight) / opts.inSampleSize > 1024) opts.inSampleSize *= 2;
+            opts.inJustDecodeBounds = false;
+            opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+            decoded = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
+            if (decoded == null) return "{\"ok\":false,\"error\":\"Image non décodable.\"}";
+            int width = decoded.getWidth() & ~1, height = decoded.getHeight();
+            rgb = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.RGB_565);
+            new android.graphics.Canvas(rgb).drawBitmap(decoded, 0, 0, null);
+            android.media.FaceDetector.Face[] faces = new android.media.FaceDetector.Face[2];
+            int count = new android.media.FaceDetector(width, height, 2).findFaces(rgb, faces);
+            if (count != 1 || faces[0] == null || faces[0].confidence() < .35f) {
+                return "{\"ok\":false,\"error\":\"Choisis une photo avec un seul visage bien visible de face.\"}";
+            }
+            android.graphics.PointF eyes = new android.graphics.PointF();
+            faces[0].getMidPoint(eyes);
+            float distance = faces[0].eyesDistance();
+            double sx = (double) originalWidth / decoded.getWidth();
+            double sy = (double) originalHeight / decoded.getHeight();
+            double x = Math.max(0, (eyes.x - distance * 1.6) * sx);
+            double y = Math.max(0, (eyes.y - distance * 2.4) * sy);
+            JSONObject face = new JSONObject();
+            face.put("x", x); face.put("y", y);
+            face.put("width", Math.min(distance * 3.2 * sx, originalWidth - x));
+            face.put("height", Math.min(distance * 4.3 * sy, originalHeight - y));
+            JSONObject result = new JSONObject();
+            result.put("ok", true); result.put("face", face);
+            return result.toString();
+        } catch (Throwable error) {
+            return "{\"ok\":false,\"error\":\"Détection du visage indisponible.\"}";
+        } finally {
+            if (rgb != null) rgb.recycle();
+            if (decoded != null) decoded.recycle();
+        }
+    }
+
     public native String nativeSd(String prompt, String modelDir, String outPath);
+
+    /** Local-only preparation for the visually validated segmented profile flow. */
+    @JavascriptInterface
+    public String prepareSegmentedProfileHead(String encoded) {
+        return ProfileHeadProcessor.prepare(encoded);
+    }
 
     private synchronized boolean ensureNative() {
         if (nativeOk) return true;
