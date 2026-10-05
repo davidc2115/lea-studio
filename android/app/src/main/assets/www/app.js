@@ -779,11 +779,11 @@ function buildProfileSceneLock(c, variant, extra = "") {
     "(profile scene, wardrobe, pose and framing are high priority:1.5)",
     identityAnchor,
     "(" + adultAge + " year old adult woman:1.4)",
-    style,
     "WARDROBE: " + outfit,
     "SETTING: " + place,
     "POSE: " + pose,
     "CAMERA: " + camera,
+    style,
     "(face fully visible, torso and hips in frame, background scene visible:1.4)",
     "show a distinct pose and body angle, visibly different from the reference composition",
   ].filter(Boolean).join(", ").replace(/\s+/g, " ").slice(0, 920);
@@ -7590,22 +7590,25 @@ async function generatePhoto() {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
               allowFantasy: true,
               forceImg2Img: true,
-              denoising: 0.36,
+              denoising: 0.70,
+              profileIdentityLock: true,
+              addPromptLock: false,
             });
           } catch (e) {
             console.warn("[profile reference]", e);
           }
         }
-        const sceneLock = String(profileSceneLock || "").replace(/\s+/g, " ").trim().slice(0, 560);
+        const sceneLock = String(profileSceneLock || "").replace(/\s+/g, " ").trim().slice(0, 920);
         const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
         if (sceneLock && !currentPrompt.toLowerCase().includes(sceneLock.slice(0, 80).toLowerCase())) {
           payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
         }
+        payload.profile_user_detail = extra.slice(0, 360);
         const hasIdentityRef = Boolean(payload.source_image && payload.source_processing === "img2img");
         payload.force_img2img = hasIdentityRef;
         if (hasIdentityRef) {
           payload.profile_identity_lock = true;
-          payload.denoising = 0.36;
+          payload.denoising = 0.70;
         }
       }
       showPromptStatus("Prompt envoyé", payload.prompt);

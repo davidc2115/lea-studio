@@ -2437,20 +2437,27 @@
         s = s.replace(/[()]/g, "");
         return s.slice(0, 900);
       }
-      let promptSafe = prioritizeIdentity(prompt);
-      const profileSceneLock = String(body.profile_scene_lock || "").replace(/[<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
-      if (isDuoPrompt) {
-        promptSafe = "photorealistic photo of two adult women together in the same scene, both fully visible, " + promptSafe;
+      const profileSceneLock = String(body.profile_scene_lock || "").replace(/[<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 920);
+      let promptSafe;
+      if (profileSceneLock && !isDuoPrompt) {
+        promptSafe = [
+          "photorealistic photograph of exactly one adult woman",
+          profileSceneLock,
+          body.profile_user_detail ? "USER REQUEST: " + String(body.profile_user_detail).slice(0, 360) : "",
+        ].filter(Boolean).join(", ");
       } else {
-        promptSafe = "photorealistic photo of one adult woman, full body, " + promptSafe;
+        promptSafe = prioritizeIdentity(prompt);
+        promptSafe = (isDuoPrompt
+          ? "photorealistic photo of two adult women together in the same scene, both fully visible, "
+          : "photorealistic photo of one adult woman, full body, ") + promptSafe;
       }
-      if (profileSceneLock) promptSafe += ", " + profileSceneLock;
       if (body.face_lock && String(body.face_lock).length > 20) {
-        const fl = String(body.face_lock).replace(/\s+/g, " ").trim().slice(0, 180);
+        const fl = String(body.face_lock)
+          .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
+          .replace(/\s+/g, " ").trim().slice(0, 180);
         promptSafe = fl + ", " + promptSafe;
       }
-      promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, 1000);
-
+      promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 1000);
 
       let src = null;
       if (body.source_image && body.source_processing === "img2img") {
@@ -2489,7 +2496,8 @@
 
       // Denoise HAUT si img2img : sinon la pose de la ref est recopié
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      den = Math.min(0.48, Math.max(0.36, den));
+      const isProfileImg2Img = Boolean(profileSceneLock && !isDuoPrompt && body.profile_identity_lock === true);
+      den = Math.min(isProfileImg2Img ? 0.75 : 0.48, Math.max(isProfileImg2Img ? 0.58 : 0.36, den));
 
       // Négatifs anti-clone + anti-âge + anti-pose figée
       const soloNeg = isDuoPrompt
@@ -2513,19 +2521,20 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
-        if (idHead && !promptSafe.includes(idHead.slice(0, 40))) {
+        if (!profileSceneLock && idHead && !promptSafe.includes(idHead.slice(0, 40))) {
           promptSafe = idHead + ", " + promptSafe;
         }
-        promptSafe = String(promptSafe || "").replace(/\s+/g, " ").trim().slice(0, 900);
+        promptSafe = String(promptSafe || "").replace(/\s+/g, " ").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 900);
         const simpleNeg = [
+          profileSceneLock && !isDuoPrompt ? String(body.negative || "").slice(0, 240) : "",
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
           "glowing eyes, face crop, headshot only, empty room",
-          String(body.negative || "")
+          profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {
-          prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1600),
+          prompt: (promptSafe + " ### " + simpleNeg.slice(0, profileSceneLock && !isDuoPrompt ? 440 : 700)).slice(0, profileSceneLock && !isDuoPrompt ? 2000 : 1600),
           params: {
             width: w,
             height: h,
