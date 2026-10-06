@@ -2499,8 +2499,8 @@
       const detailedProfile = isMaskedProfile && body.profile_head_segmented === true &&
         body.profile_render_width === 512 && body.profile_render_height === 640;
       const W = 512;
-      const H = isMaskedProfile ? 640 : 640;
-      const steps = isMaskedProfile ? 10 : (hasHordeAccount ? 14 : 8);
+      const H = 512;
+      const steps = 8;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2559,7 +2559,7 @@
             steps: st,
             n: 1,
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
-            sampler_name: isMaskedProfile ? "k_dpmpp_2m" : "k_euler_a",
+            sampler_name: "k_euler",
             ...(isMaskedProfile ? { karras: true } : {}),
             cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
@@ -2569,7 +2569,7 @@
           censor_nsfw: false,
           models: models,
           r2: true,
-          slow_workers: true,
+          slow_workers: false,
           shared: false,
         };
         if (opts.img2img && src) {

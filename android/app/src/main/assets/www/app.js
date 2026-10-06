@@ -7158,7 +7158,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "wearing " + outfit,
     pose,
     place ? ("location: " + place) : "",
-    "sexy provocative pose, seductive expression, alluring body language",
+    "sexy provocative sensual pose, leaning forward, looking at camera, short tight dress or crop top and mini skirt, deep neckline, flirtatious smile, full body visible",
     (scenarioVariant && scenarioVariant.cameraAngle) || "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
     "natural skin pores, natural eyes without glow, sharp focus across body and clothing, detailed fabric texture, deep focus, realistic lighting",
     uniq
@@ -7785,8 +7785,10 @@ async function generatePhoto() {
           payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
         }
         payload.profile_user_detail = extra.slice(0, 360);
-        const hasIdentityRef = Boolean(payload.source_image && payload.source_processing === "img2img");
-        payload.force_img2img = hasIdentityRef;
+        // Profil : txt2img (plus rapide, pose/tenue libres, ne recopie pas une ref peinte)
+        payload.force_img2img = false;
+        delete payload.source_image;
+        delete payload.source_processing;
         if (hasIdentityRef) {
           payload.profile_identity_lock = true;
           payload.denoising = 0.70;
@@ -7901,7 +7903,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
   for (let i = 0; i < 120; i++) {
     // Poll adaptatif : plus espacé = moins de ban IP
     // Base 8s, puis 10s, max 15s ; si wait_time API élevé, dormir ce temps
-    let sleepMs = i < 5 ? 8000 : (i < 20 ? 10000 : 15000);
+    let sleepMs = i < 8 ? 4000 : 6000;
     await new Promise((r) => setTimeout(r, sleepMs));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
@@ -7919,10 +7921,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const p = st.processing ? " · calcul" : "";
         setGenStatus("Horde en cours" + q + w + p + " · essai " + (i + 1) + "");
         // Si Horde dit wait 30s+, ne pas re-poller trop tôt
-        if (st.wait && Number(st.wait) >= 20) {
-          const extra = Math.min(45, Number(st.wait)) * 1000;
-          await new Promise((r) => setTimeout(r, extra));
-        }
+        // ne pas ajouter l'attente API par-dessus le poll
         continue;
       }
       if (st.error) {
