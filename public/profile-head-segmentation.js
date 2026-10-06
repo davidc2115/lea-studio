@@ -41,11 +41,11 @@
       smallA ? "(very small A cup chest:1.4), (minimal breast projection:1.3)" : "",
       "one adult woman, " + Math.max(18, Number(c.age) || 25) + " years old",
       "CAMERA: " + compact(v.cameraAngle || "wide head-to-knees view", 65),
-      "POSE: " + compact(pose, 105),
+      "POSE: " + compact(pose, 140),
       "SETTING: " + compact(place, 80),
       "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 165) + ":1.4)",
       scene.prop ? "PROP: " + compact(scene.prop, 50) : "",
-      "chest and pelvis covered by the selected outfit, face toward camera, soft natural light, environment visible, natural proportions",
+      "selected outfit, face toward camera, sharp body and fabric detail, deep focus, environment visible, natural proportions",
     ].filter(Boolean).join(", ").slice(0, 920);
   }
 
@@ -96,28 +96,56 @@
     payload.prompt = orientPrompt(payload.prompt, prepared.face_direction);
     // The provider contract documents WebP masks. Keep the local restoration PNG
     // private to this job, rather than uploading or storing it in the gallery.
-    const mask = await loadImage("data:image/png;base64," + prepared.source_mask);
-    const canvas = document.createElement("canvas");
-    canvas.width = WIDTH; canvas.height = HEIGHT;
-    canvas.getContext("2d").drawImage(mask, 0, 0);
-    payload.source_image = prepared.source_image;
-    payload.source_mask = canvas.toDataURL("image/webp", 1).split(",")[1];
     payload.source_processing = "inpainting";
     payload.profile_face_mask = true;
     payload.profile_head_segmented = true;
     payload.profile_identity_lock = true;
     payload.force_img2img = true;
-    payload.width = WIDTH; payload.height = HEIGHT;
     payload.denoising = 1;
     payload.nsfw = false;
     payload.is_profile_photo = true;
     payload.horde_anonymous = true;
-    return {
+    const restoration = {
       head_image: prepared.head_image,
       head_x: prepared.head_x, head_y: prepared.head_y,
       head_width: prepared.head_width, head_height: prepared.head_height,
       width: WIDTH, height: HEIGHT,
+      prepared,
     };
+    await setRenderSize(payload, restoration, false);
+    return restoration;
+  }
+
+  async function setRenderSize(payload, restoration, compactMode = false) {
+    const prepared = restoration.prepared;
+    if (!prepared) throw new Error("Préparation du visage manquante.");
+    const width = compactMode ? WIDTH : 512, height = compactMode ? HEIGHT : 640;
+    const scale = width / WIDTH;
+    const [source, mask] = await Promise.all([
+      loadImage("data:image/webp;base64," + prepared.source_image),
+      loadImage("data:image/png;base64," + prepared.source_mask),
+    ]);
+    const canvas = document.createElement("canvas");
+    canvas.width = width; canvas.height = height;
+    const context = canvas.getContext("2d");
+    context.fillStyle = "#a6a49e";
+    context.fillRect(0, 0, width, height);
+    // Uniform scaling preserves the head's proportions. Extra bottom space
+    // belongs to the generated scene, not a stretched reference face.
+    context.drawImage(source, 0, 0, WIDTH * scale, HEIGHT * scale);
+    payload.source_image = canvas.toDataURL("image/webp", .98).split(",")[1];
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, width, height);
+    context.imageSmoothingEnabled = false;
+    context.drawImage(mask, 0, 0, WIDTH * scale, HEIGHT * scale);
+    payload.source_mask = canvas.toDataURL("image/webp", 1).split(",")[1];
+    payload.width = payload.profile_render_width = width;
+    payload.height = payload.profile_render_height = height;
+    Object.assign(restoration, {
+      width, height,
+      head_x: Math.round(prepared.head_x * scale), head_y: Math.round(prepared.head_y * scale),
+      head_width: Math.round(prepared.head_width * scale), head_height: Math.round(prepared.head_height * scale),
+    });
   }
 
   async function restoreImage(url, restoration) {
@@ -150,5 +178,5 @@
   }
 
   root.LeaSegmentedProfile = { active, sceneLock, opaqueOutfit, prepareReference,
-    restoreImage, validatePrepared, orientPrompt, WIDTH, HEIGHT };
+    restoreImage, setRenderSize, validatePrepared, orientPrompt, WIDTH, HEIGHT };
 })(window);

@@ -2898,9 +2898,11 @@ async function addToGallery(src, charId, options = {}) {
   }
   let stored = src;
   try {
-    // Toujours compresser puis écrire sur disque Android si possible (persistance)
+    // Restored profile PNGs retain facial pixels and fine outfit detail.
     let dataUrl = src;
-    if (!String(src).startsWith("data:image")) {
+    if (options.preserveExisting === true && String(src).startsWith("data:image/png")) {
+      dataUrl = src;
+    } else if (!String(src).startsWith("data:image")) {
       dataUrl = await compressToJpeg(src, 768, 0.82);
     } else {
       dataUrl = await compressToJpeg(src, 768, 0.82);
@@ -7121,7 +7123,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     place ? ("location: " + place) : "",
     "sexy provocative pose, seductive expression, alluring body language",
     (scenarioVariant && scenarioVariant.cameraAngle) || "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
-    "natural skin pores, natural eyes without glow, sharp focus, realistic lighting",
+    "natural skin pores, natural eyes without glow, sharp focus across body and clothing, detailed fabric texture, deep focus, realistic lighting",
     uniq
   ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
 
@@ -7131,7 +7133,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "same pose as before, identical composition, mirrored face,",
     "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi, plastic doll,",
     "airbrushed, overly smooth skin, wax skin, doll face,",
-    "deformed, extra limbs, bad anatomy, blurry, lowres, text, watermark,",
+    "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, lowres, text, watermark,",
     "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
     "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes,",
     "empty room, no person, different person"
@@ -7144,6 +7146,23 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.denoising = 0.58;
   }
   return payload;
+}
+
+async function submitProfileImage(payload, restoration) {
+  const submit = () => api("/api/image", { method: "POST", body: JSON.stringify(payload) });
+  let start, failure;
+  try {
+    start = await submit();
+    if (start && start.jobId) return start;
+    failure = new Error(start && start.error || "Pas de job Horde");
+  } catch (error) { failure = error; }
+  if (!restoration || restoration.width <= 384 ||
+      !/kudos|upfront|anonymous.*(?:limit|resolution|pixels|steps)/i.test(String(failure.message || failure))) {
+    throw failure;
+  }
+  setGenStatus("Horde limite le format détaillé anonyme ; reprise au format compact, visage conservé…");
+  await window.LeaSegmentedProfile.setRenderSize(payload, restoration, true);
+  return submit();
 }
 
 async function generatePhoto() {
@@ -7782,7 +7801,7 @@ async function generatePhoto() {
         bodyNegatives(c),
       ].filter(Boolean).join(" ");
     }
-    const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
+    const start = await submitProfileImage(payload, headRestoration);
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
     pollHordeJob(start.jobId, start.host, c.id, headRestoration);

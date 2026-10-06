@@ -47,7 +47,8 @@ test("Eight reference-inspired outfits preserve scenario, body, star, chats and 
     const selected = api.choose(character, variant, style.id);
     assert.equal(selected.outfit, style.outfit);
     assert.equal(selected.place, variant.place);
-    assert.equal(selected.pose, variant.pose);
+    assert(selected.pose.startsWith(variant.pose + ", "));
+    assert.match(selected.pose, /arched|shoulders|leaning/);
     assert.equal(selected.index, variant.index);
     assert.match(selected.cameraAngle, /face toward camera/);
   }

@@ -2498,9 +2498,11 @@
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
-      const W = isMaskedProfile && body.profile_head_segmented === true ? 384 : 512;
-      const H = isMaskedProfile && body.profile_head_segmented === true ? 512 : isMaskedProfile ? 704 : 512;
-      const steps = hasHordeAccount ? 28 : 22;
+      const detailedProfile = isMaskedProfile && body.profile_head_segmented === true &&
+        body.profile_render_width === 512 && body.profile_render_height === 640;
+      const W = isMaskedProfile && body.profile_head_segmented === true && !detailedProfile ? 384 : 512;
+      const H = detailedProfile ? 640 : isMaskedProfile && body.profile_head_segmented === true ? 512 : isMaskedProfile ? 704 : 512;
+      const steps = isMaskedProfile ? (detailedProfile ? 26 : 22) : hasHordeAccount ? 28 : 22;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2544,7 +2546,7 @@
         const simpleNeg = [
           profileSceneLock && !isDuoPrompt ? String(body.negative || "").slice(0, 240) : "",
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
-          "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
+          "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," :
             body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
               "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
@@ -2559,7 +2561,8 @@
             steps: st,
             n: 1,
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
-            sampler_name: "k_euler_a",
+            sampler_name: isMaskedProfile ? "k_dpmpp_2m" : "k_euler_a",
+            ...(isMaskedProfile ? { karras: true } : {}),
             cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
@@ -2576,7 +2579,7 @@
           base.source_processing = isMaskedProfile ? "inpainting" : "img2img";
           if (isMaskedProfile) base.source_mask = sourceMask;
           base.params.denoising_strength = den;
-          const img2imgStepLimit = body.profile_identity_lock === true
+          const img2imgStepLimit = isMaskedProfile ? steps : body.profile_identity_lock === true
             ? (hasHordeAccount ? 28 : 20)
             : (hasHordeAccount ? 28 : 12);
           base.params.steps = Math.min(st, img2imgStepLimit);
@@ -2603,7 +2606,9 @@
             if (bodyPayload.params) {
               bodyPayload.params.width = W;
               bodyPayload.params.height = H;
-              if (!hasHordeAccount && bodyPayload.params.steps > 22) bodyPayload.params.steps = 22;
+              if (!hasHordeAccount && bodyPayload.params.steps > (detailedProfile ? 26 : 22)) {
+                bodyPayload.params.steps = detailedProfile ? 26 : 22;
+              }
             }
             const res = await fetch(host + "/generate/async", {
               method: "POST",

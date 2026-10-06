@@ -78,7 +78,7 @@ test("Malformed native preparations fail before any provider request", () => {
   }));
 });
 
-test("A compact valid matte keeps 384x512, 20 steps, inpainting and anonymous auth with current wardrobe settings", async () => {
+test("A compact valid matte keeps 384x512, 22 detail steps, inpainting and anonymous auth", async () => {
   const { context, requests, settings } = nativeApi();
   const savedSettings = settings.get("lea.settings");
   await context.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
@@ -95,7 +95,9 @@ test("A compact valid matte keeps 384x512, 20 steps, inpainting and anonymous au
   assert.equal(options.headers.apikey, "0000000000");
   assert.equal(body.params.width, 384);
   assert.equal(body.params.height, 512);
-  assert.equal(body.params.steps, 20);
+  assert.equal(body.params.steps, 22);
+  assert.equal(body.params.sampler_name, "k_dpmpp_2m");
+  assert.equal(body.params.karras, true);
   assert.equal(body.params.denoising_strength, 1);
   assert.equal(body.source_mask, "B".repeat(128));
   assert.equal(body.source_processing, "inpainting");
@@ -233,6 +235,20 @@ test("Protected gallery writes retain all existing photos beyond the legacy limi
   await context.addToGallery("data:image/png;base64,restored", "target", { preserveExisting: true });
   assert.deepEqual(JSON.parse(values.get("lea.photos.target")), ["gallery:new-scene", ...prior]);
   assert.equal(values.get("lea.chat.target"), chat);
+});
+
+test("Restored profile PNG is saved without another lossy JPEG conversion", async () => {
+  const { context } = protectedGallery();
+  const original = "data:image/png;base64,restored-face-and-fabric";
+  let written;
+  context.compressToJpeg = async () => { throw new Error("must not recompress restored PNG"); };
+  context.window.LeaAndroid.saveGalleryImage = (id, data) => {
+    assert.equal(id, "target");
+    written = data;
+    return "gallery:new-scene";
+  };
+  await context.addToGallery(original, "target", { preserveExisting: true });
+  assert.equal(written, original);
 });
 
 test("A full storage index fails explicitly instead of deleting earlier photos or chat", async () => {

@@ -57,6 +57,7 @@ test("The final submission keeps the orientation produced by native preparation"
     profileIdentityAnchor: () => "same adult woman",
     localStorage: {},
     api: async (_url, options) => JSON.parse(options.body),
+    submitProfileImage: async request => request,
   };
   vm.createContext(context);
   const source = read("app.js");
