@@ -2484,16 +2484,14 @@
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
       let hordeKey = "0000000000";
-      if (body.horde_anonymous !== true) {
-        try {
-          const st = settings();
-          if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
-        } catch (_) {}
-        try {
-          const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-          if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
-        } catch (_) {}
-      }
+      try {
+        const st = settings();
+        if (st.hordeKey && String(st.hordeKey).trim().length > 8) hordeKey = String(st.hordeKey).trim();
+      } catch (_) {}
+      try {
+        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        if (st2.hordeKey && String(st2.hordeKey).trim().length > 8) hordeKey = String(st2.hordeKey).trim();
+      } catch (_) {}
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";

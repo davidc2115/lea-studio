@@ -4806,14 +4806,14 @@ function renderProfile() {
       }).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario (tenue + lieu du personnage)</h3>
-    <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Horde utilise le mode anonyme, sans clé.</p>
+    <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Utilise ta clé AI Horde des réglages si elle est enregistrée.</p>
     <label for="profile-wardrobe" style="display:block;margin-top:10px">Tenue de la photo</label>
     <select id="profile-wardrobe">${window.LeaProfileWardrobe ? window.LeaProfileWardrobe.options() : '<option value="scenario">Tenue du scénario</option>'}</select>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Détail prioritaire : tenue, pose ou lieu (ex. robe bordeaux, assise au bord du lit, escarpins noirs)"></textarea>
     <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
-      <option value="horde">Horde anonyme (gratuit · recommandé profil)</option>
+      <option value="horde">Horde (clé gratuite si configurée)</option>
       <option value="gemini">Gemini Nano Banana (clés Studio · NSFW souvent filtré)</option>
       <option value="cloudflare">Cloudflare FLUX (gratuit ~150–230/j · SFW/léger)</option>
       <option value="sd_cpp">SD.cpp (local)</option>
@@ -7527,7 +7527,7 @@ async function generatePhoto() {
     } else if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
       prompt = window._leaDuoOverride;
     }
-    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "", engine: "horde", horde_anonymous: true };
+    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "", engine: "horde", horde_anonymous: false };
     if (!duoProfile) payload.profile_scene_lock = profileSceneLock;
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
     try {
@@ -9494,14 +9494,13 @@ function renderSettings() {
         provider: $("chatprovider") ? $("chatprovider").value : "gemini",
         personaName: $("pname").value,
         personaBio: $("pbio").value,
-        hordeKey: ($("hordekey") && $("hordekey").value || "").trim(),
+        hordeKey: (($("hordekey") && $("hordekey").value) || ($("horde-key") && $("horde-key").value) || "").trim(),
         geminiKeys: $("gemini").value,
         grokKeys: $("grok") ? $("grok").value : "",
         groqKeys: $("groq") ? $("groq").value : "",
         groqModel: $("groqmodel") ? $("groqmodel").value : "openai/gpt-oss-120b",
         imageProvider: "gemini",
         imageEngine: $("imgengine") ? $("imgengine").value : "horde",
-        hordeKey: $("horde-key") ? $("horde-key").value.trim() : "",
         cfAccount: $("cf-account") ? $("cf-account").value.trim() : "",
         cfToken: $("cf-token") ? $("cf-token").value.trim() : "",
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
