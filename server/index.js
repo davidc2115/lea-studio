@@ -58,42 +58,58 @@ app.post("/api/image", async (req, res) => {
   const s = loadSettings();
   const gemini = splitKeys(s.geminiKeys || process.env.GEMINI_API_KEYS);
   let last = "Aucune clé Gemini AI Studio";
+  // gemini-2.5-flash-image (Nano Banana) a un quota gratuit sur les clés AI Studio ;
+  // gemini-3.1-flash-image est souvent réservé au niveau payant → essayé en dernier recours.
   const prefModel = s.geminiImageModel || "auto";
   const models = prefModel === "gemini-2.5-flash-image"
-    ? ["gemini-2.5-flash-image", "gemini-3.1-flash-image"]
+    ? ["gemini-2.5-flash-image", "gemini-3.1-flash-lite-image", "gemini-3.1-flash-image"]
     : prefModel === "gemini-3.1-flash-image"
-      ? ["gemini-3.1-flash-image", "gemini-2.5-flash-image"]
-      : ["gemini-3.1-flash-image", "gemini-2.5-flash-image"];
+      ? ["gemini-3.1-flash-image", "gemini-3.1-flash-lite-image", "gemini-2.5-flash-image"]
+      : ["gemini-2.5-flash-image", "gemini-3.1-flash-lite-image", "gemini-3.1-flash-image"];
+  // Références visage (cover) envoyées par le client → inline_data (img2img)
+  const partsIn = [{ text: prompt }];
+  for (const u of (Array.isArray(req.body?.ref_images) ? req.body.ref_images : []).slice(0, 3)) {
+    const str = String(u || "");
+    const m = /^data:([^;]+);base64,(.+)$/s.exec(str);
+    if (m) {
+      partsIn.push({ text: "Reference image " + (Math.floor((partsIn.length - 1) / 2) + 1) + ":" });
+      partsIn.push({ inline_data: { mime_type: m[1], data: m[2] } });
+    }
+  }
   const tries = [];
   for (const model of models) {
     for (let i = 0; i < gemini.length; i++) {
       const key = gemini[i];
       const tag = "clé" + (i + 1) + "/" + model;
-      try {
-        const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: prompt }] }],
-            generationConfig: {
-              responseModalities: ["IMAGE", "TEXT"],
-              imageConfig: { aspectRatio: "2:3" }
-            }
-          })
-        });
-        const data = await r.json();
-        const err = data.error?.message || data.error?.status || "";
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        const img = parts.find((x) => {
-          const blob = x.inlineData || x.inline_data;
-          return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
-        });
-        if (img) {
-          const blob = img.inlineData || img.inline_data;
-          return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
-        }
-        tries.push(tag + " → " + (err || "pas d'image"));
-      } catch (e) { tries.push(tag + " → " + e.message); }
+      for (const withImageConfig of [true, false]) {
+        try {
+          const gen = {
+            contents: [{ role: "user", parts: partsIn }],
+            generationConfig: { responseModalities: ["IMAGE", "TEXT"] }
+          };
+          if (withImageConfig) gen.generationConfig.imageConfig = { aspectRatio: "2:3" };
+          const r = await fetch("https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + encodeURIComponent(key), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(gen)
+          });
+          const data = await r.json();
+          const err = data.error?.message || data.error?.status || "";
+          const finish = data.candidates?.[0]?.finishReason || "";
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          const img = parts.find((x) => {
+            const blob = x.inlineData || x.inline_data;
+            return blob && String(blob.mimeType || blob.mime_type || "").startsWith("image/");
+          });
+          if (img) {
+            const blob = img.inlineData || img.inline_data;
+            return res.json({ url: "data:" + (blob.mimeType || blob.mime_type) + ";base64," + blob.data });
+          }
+          tries.push(tag + " → " + (err || finish || "pas d'image (filtre sécurité Google ?)"));
+          // imageConfig refusé par ce modèle : réessayer sans ; sinon clé/modèle suivant
+          if (!/INVALID_ARGUMENT|imageConfig|Unknown name/i.test(String(err) + finish)) break;
+        } catch (e) { tries.push(tag + " → " + e.message); break; }
+      }
     }
   }
   res.status(400).json({ error: "Échec " + gemini.length + " clés × " + models.length + " modèles : " + tries.join(" | ") });
