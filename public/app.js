@@ -872,8 +872,14 @@ function roleSexyPick(c) {
       "black leather mini skirt, crop top, fishnet stockings, stiletto pumps",
       "burgundy satin wrap mini dress with thigh slit, black stilettos",
       "fitted blouse slightly unbuttoned, short pencil skirt, sheer stockings, heels",
-      "lace lingerie bodysuit under an open sheer robe, seductive pose",
-      "tiny crop top and micro shorts, high heels, provocative stance"
+      "red lace lingerie set, garter belt, sheer stockings, high heels",
+      "tiny crop top and micro shorts, high heels, provocative stance",
+      "sheer black mesh top over lace bra, high-waisted mini skirt, pumps",
+      "emerald satin slip dress with deep slit, bare shoulders, stiletto heels",
+      "office blouse tied under the bust, short pencil skirt, stockings, heels",
+      "white wet t-shirt clinging to breasts, denim mini skirt, bare legs",
+      "black corset top, tight leather pants, stiletto boots",
+      "silk kimono robe half open over lingerie, bedroom soft light"
     ];
     outfit = pool[Math.floor(Math.random() * pool.length)];
   }
@@ -883,7 +889,12 @@ function roleSexyPick(c) {
       "leaning forward showing cleavage, full body visible head to shoes",
       "sitting on edge of furniture, legs crossed, short hemline, looking at camera",
       "standing three-quarter view looking back over shoulder, full body",
-      "leaning against wall, arched back, full body head to shoes"
+      "leaning against wall, arched back, full body head to shoes",
+      "on all fours on a bed looking back at camera, full body",
+      "kneeling on sofa, back arched, looking at camera, full body",
+      "walking toward camera, full body, dynamic angle",
+      "lying on side on bed propped on elbow, legs visible, full body",
+      "bending at the waist tying shoe, looking at camera, full body"
     ];
     pose = poses[Math.floor(Math.random() * poses.length)];
   }
@@ -7146,14 +7157,16 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   payload.prompt = [
     "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
     id + ",",
-    idBlock ? idBlock.slice(0, 420) + "," : "",
+    idBlock ? idBlock.slice(0, 360) + "," : "",
     cupPos ? cupPos + "," : "",
     age + " year old adult woman,",
-    "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
+    "(completely different pose from reference:1.55), (new outfit not the same as source:1.5), different camera angle,",
+    "wearing exactly one outfit: " + wear + ", NOT mixed clothes, NOT the same clothes as the reference photo,",
     "pose: " + pose + ",",
     place ? ("location: " + place + ",") : "",
     "sexy provocative sensual pose, full body from head to shoes, hips and legs visible,",
-    "same identity as character sheet, correct hair color, correct eye color, correct breast size"
+    "same face hair skin and breast size as identity, correct hair color, correct eye color, correct breast size,",
+    "NOT a copy of the reference composition"
   ].filter(Boolean).join(" ");
   payload.negative = [
     hairNeg,
@@ -7162,6 +7175,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes,",
     "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, blurry, text, watermark,",
     "wrong age, different person, blue streak hair, colored highlights unless specified,",
+    "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
     payload.negative || ""
   ].filter(Boolean).join(" ");
   payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.58;
@@ -7174,7 +7188,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   } else {
     payload.force_img2img = true;
     payload.source_processing = "img2img";
-    payload.denoising = Math.max(0.55, Math.min(0.68, Number(payload.denoising) || 0.58));
+    payload.denoising = Math.max(0.65, Math.min(0.78, Number(payload.denoising) || 0.72));
   }
   return payload;
 }
@@ -7767,7 +7781,7 @@ async function generatePhoto() {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
               allowFantasy: true,
               forceImg2Img: true,
-              denoising: 0.58,
+              denoising: 0.72,
               profileIdentityLock: true,
               addPromptLock: false,
             });
@@ -7789,11 +7803,14 @@ async function generatePhoto() {
           payload.force_img2img = true;
           payload.source_processing = "img2img";
           payload.profile_identity_lock = true;
-          payload.denoising = Math.max(0.55, Math.min(0.68, Number(payload.denoising) || 0.58));
+          // Haut denoise = nouvelle pose/tenue ; visage gardé via identité + ref
+          payload.denoising = 0.72;
+          payload.seed = Math.floor(Math.random() * 2000000000);
         } else {
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
+          payload.seed = Math.floor(Math.random() * 2000000000);
         }
       }
       payload.nsfw = false;

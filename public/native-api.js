@@ -2477,9 +2477,16 @@
       const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
       const payloads = [];
 
-      // Denoise historique qui fonctionnait bien
+      // Profile + ref: denoise haut pour changer pose/tenue; bas seulement si force_low_denoise
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      den = Math.min(0.48, Math.max(0.36, den));
+      if (body.force_low_denoise === true) {
+        den = Math.min(0.48, Math.max(0.36, den));
+      } else if (body.is_profile_photo === true || body.profile_identity_lock === true) {
+        // Assez haut pour ne pas recopier la pose/tenue de la ref
+        den = Math.min(0.78, Math.max(0.62, den));
+      } else {
+        den = Math.min(0.72, Math.max(0.42, den));
+      }
 
       let src = null;
       if (body.source_image && (body.source_processing === "img2img" || body.force_img2img === true)) {
@@ -2511,8 +2518,9 @@
           "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, face crop, headshot only, wrong hair color"
-        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
+          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, face crop, headshot only, wrong hair color,",
+          "identical composition to reference, same pose as source, same outfit as reference, static copy of reference, duplicate frame"
+        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 950);
         const base = {
           prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1800),
           params: {
@@ -2536,7 +2544,7 @@
           base.source_image = src;
           base.source_processing = "img2img";
           base.params.denoising_strength = den;
-          base.params.steps = Math.min(st, 12);
+          base.params.steps = Math.min(Math.max(st, 12), 18);
         }
         return base;
       }
