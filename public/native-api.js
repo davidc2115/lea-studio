@@ -2564,8 +2564,8 @@
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
           // Keep the current GitHub generation settings.
-          nsfw: body.profile_frontal_reference !== true,
-          censor_nsfw: body.profile_frontal_reference === true,
+          nsfw: true,
+          censor_nsfw: false,
           models: models,
           r2: true,
           slow_workers: true,

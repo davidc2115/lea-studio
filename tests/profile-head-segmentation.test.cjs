@@ -118,7 +118,7 @@ test("Provider censorship metadata is rejected even if its boolean flag is false
   assert.equal(result.url, undefined);
 });
 
-test("Frontal bootstrap uses the anonymous censored provider contract without headshot negatives", async () => {
+test("Frontal bootstrap does not re-enable Horde censorship even with legacy nsfw:false input", async () => {
   const { context, requests } = nativeApi();
   await context.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
     engine: "horde", charId: "collegue_10",
@@ -129,8 +129,9 @@ test("Frontal bootstrap uses the anonymous censored provider contract without he
     source_processing: "img2img", force_img2img: true, denoising: .9, nsfw: false,
   }) });
   assert.equal(requests[0].options.headers.apikey, "0000000000");
-  assert.equal(requests[0].body.censor_nsfw, true);
-  assert.equal(requests[0].body.nsfw, false);
+  assert.equal(requests[0].body.censor_nsfw, false);
+  assert.equal(requests[0].body.nsfw, true);
+  assert.equal(requests[0].body.shared, false);
   assert.equal(requests[0].body.source_processing, "img2img");
   assert.equal(requests[0].body.params.denoising_strength, .9);
   assert.equal(requests[0].body.params.cfg_scale, 7);

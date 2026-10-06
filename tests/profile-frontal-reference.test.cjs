@@ -36,14 +36,15 @@ test("An existing frontal reference is reused without a new generation", async (
   assert.equal(f.saved.length, 0);
 });
 
-test("A profile prepares one cropped, anonymous, censored frontal request and caches its validated result", async () => {
+test("A profile prepares one cropped anonymous frontal request without censorship and caches its validated result", async () => {
   const f = fixture();
   await f.api.ensure(f.payload, () => {}, f.options);
   assert.equal(f.generated.length, 1);
   const request = f.generated[0];
   assert.equal(request.source_image, "cropped-star-head");
   assert.equal(request.horde_anonymous, true);
-  assert.equal(request.nsfw, false);
+  assert.equal(request.nsfw, true);
+  assert.equal(request.censor_nsfw, false);
   assert.equal(request.force_img2img, true);
   assert.match(request.prompt, /both eyes visible, direct eye contact/);
   assert.deepEqual(f.saved, [{ image: "frontal", id: "target" }]);

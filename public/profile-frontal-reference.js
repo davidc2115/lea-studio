@@ -58,7 +58,7 @@
       prompt: prompt(character, options.identity),
       profile_scene_lock: prompt(character, options.identity),
       negative: "side profile, head turned away, looking away, hidden eye, covered face, cropped head, nude, underwear, transparent clothing",
-      is_profile_photo: true, horde_anonymous: true, nsfw: false,
+      is_profile_photo: true, horde_anonymous: true, nsfw: true, censor_nsfw: false,
       profile_frontal_reference: true,
       profile_identity_lock: true,
       ...(selected ? { source_image: generationSource, source_processing: "img2img", force_img2img: true, denoising: .9 } : {}),
