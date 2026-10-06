@@ -2497,18 +2497,22 @@
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
         let promptSafe = String(body.prompt || "").replace(/\s+/g, " ").trim();
+        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
+        if (idHead && !promptSafe.toLowerCase().includes(idHead.slice(0, 24).toLowerCase())) {
+          promptSafe = idHead + ", " + promptSafe;
+        }
         if (!promptSafe) promptSafe = "photorealistic DSLR photograph of one real adult woman, full body, natural skin";
-        if (!/photorealistic|photograph/i.test(promptSafe)) {
-          promptSafe = (promptSafe + ", photorealistic photograph, real skin, sharp focus").slice(0, 1400);
+        if (!/photorealistic|photograph|RAW/i.test(promptSafe)) {
+          promptSafe = (promptSafe + ", RAW photorealistic photograph, real skin pores, sharp focus").slice(0, 1400);
         }
         promptSafe = promptSafe.slice(0, 1400);
         const simpleNeg = [
-          String(body.negative || "").slice(0, 300),
-          "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
+          String(body.negative || "").slice(0, 500),
+          "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, face crop, headshot only"
-        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
+          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, face crop, headshot only, wrong hair color"
+        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 900);
         const base = {
           prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1800),
           params: {

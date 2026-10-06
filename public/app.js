@@ -7098,7 +7098,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
     return payload;
   }
-  // Tenue sexy aléatoire (pas de sélecteur) + pose provocante
+  // Identité d'abord (cheveux/yeux/poitrine/âge), puis tenue sexy aléatoire
   let wear = "", pose = "", place = "";
   try {
     const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
@@ -7106,18 +7106,42 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   } catch (_) {}
   if (!wear) wear = "tight short mini dress with deep neckline, heels, sexy provocative outfit";
   if (!pose) pose = "full body standing, teasing look at camera, hips and legs visible";
+  const id = (typeof identityFromCard === "function" ? identityFromCard(c) : (age + " year old woman"));
+  const idBlock = (typeof buildCharacterIdentityBlock === "function" ? buildCharacterIdentityBlock(c) : id);
+  const cup = (typeof cupLock === "function" ? cupLock(c) : null);
+  const cupPos = cup && cup.pos ? cup.pos : "";
+  const cupNeg = cup && cup.neg ? cup.neg : "";
+  // Négatifs cheveux selon identité
+  let hairNeg = "wrong hair color, dyed fantasy hair,";
+  const idLow = (id + " " + idBlock).toLowerCase();
+  if (/blonde|blond|platinum/.test(idLow)) hairNeg += " black hair, dark brown hair, brunette, blue hair, green hair, purple hair, pink hair, red hair,";
+  else if (/black hair|noir/.test(idLow)) hairNeg += " blonde hair, red hair, blue hair, green hair, purple hair,";
+  else if (/red|ginger|roux/.test(idLow)) hairNeg += " blonde hair, black hair, blue hair, green hair,";
+  else if (/brown|brun|chestnut|châtain|chatain/.test(idLow)) hairNeg += " blonde hair, black hair, blue hair, red hair, green hair,";
+  else if (/silver|white|argent/.test(idLow)) hairNeg += " blonde hair, black hair, brown hair, blue hair,";
   payload.prompt = [
-    "photorealistic DSLR photograph of exactly one real adult woman, sharp focus, natural skin pores, natural eyes no glow,",
+    "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
+    id + ",",
+    idBlock ? idBlock.slice(0, 420) + "," : "",
+    cupPos ? cupPos + "," : "",
     age + " year old adult woman,",
-    promptBase,
     "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
     "pose: " + pose + ",",
     place ? ("location: " + place + ",") : "",
-    "sexy provocative sensual pose, full body head to shoes, hips and legs visible,",
-    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo, NOT opaque office blouse only"
+    "sexy provocative sensual pose, full body from head to shoes, hips and legs visible,",
+    "same identity as character sheet, correct hair color, correct eye color, correct breast size"
   ].filter(Boolean).join(" ");
-  payload.negative = "face crop only, headshot only, bust only, close-up portrait, passport photo, painting, oil painting, illustration, drawing, anime, cartoon, cgi, plastic doll, glowing eyes, neon eyes, headless, blurry, " + (payload.negative || "");
+  payload.negative = [
+    hairNeg,
+    cupNeg,
+    "painting, oil painting, digital painting, illustration, drawing, anime, manga, cartoon, cgi, 3d render, plastic doll, airbrushed,",
+    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes,",
+    "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, blurry, text, watermark,",
+    "wrong age, different person, blue streak hair, colored highlights unless specified,",
+    payload.negative || ""
+  ].filter(Boolean).join(" ");
   payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+  payload.identity_head = id.slice(0, 240);
   // Ne pas coller la pose de la ref peinte : txt2img par défaut
   delete payload.source_image;
   delete payload.source_processing;
