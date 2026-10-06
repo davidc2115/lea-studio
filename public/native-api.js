@@ -2484,13 +2484,15 @@
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
       let hordeKey = "0000000000";
+      const bodyKey = String(body.hordeKey || body.horde_key || "").trim();
+      if (bodyKey.length > 8) hordeKey = bodyKey;
       try {
         const st = settings();
-        if (st.hordeKey && String(st.hordeKey).trim().length > 8) hordeKey = String(st.hordeKey).trim();
+        if (hordeKey === "0000000000" && st.hordeKey && String(st.hordeKey).trim().length > 8) hordeKey = String(st.hordeKey).trim();
       } catch (_) {}
       try {
         const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        if (st2.hordeKey && String(st2.hordeKey).trim().length > 8) hordeKey = String(st2.hordeKey).trim();
+        if (hordeKey === "0000000000" && st2.hordeKey && String(st2.hordeKey).trim().length > 8) hordeKey = String(st2.hordeKey).trim();
       } catch (_) {}
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
@@ -2500,7 +2502,7 @@
         body.profile_render_width === 512 && body.profile_render_height === 640;
       const W = 512;
       const H = 512;
-      const steps = body.profile_frontal_reference === true ? 6 : 8;
+      const steps = 5;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2591,6 +2593,7 @@
       } else {
         payloads.push(makePayload({}));
       }
+      payloads.push(makePayload({ w: 512, h: 512, steps: 4, models: ["Realistic Vision"], img2img: false }));
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];
@@ -2639,7 +2642,7 @@
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
             console.warn("[horde]", host, last, "params", bodyPayload.params && (bodyPayload.params.width + "x" + bodyPayload.params.height + " s" + bodyPayload.params.steps));
             // Kudos ≠ ban IP : essayer le payload suivant (512x512 minimal)
-            if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
+            if (/kudos|heavy demand|work budget|576x576|728x728|657x657|first-order-equivalent/i.test(String(last))) {
               continue;
             }
             markHordeRateLimit(last);

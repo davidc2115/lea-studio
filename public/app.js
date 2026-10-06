@@ -6161,6 +6161,10 @@ async function resolveCharacterRefB64(c) {
 }
 
 async function generateFrontalProfileReference(request, status) {
+  try {
+    const s = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    if (s.hordeKey) request.hordeKey = String(s.hordeKey).trim();
+  } catch (_) {}
   const started = await api("/api/image", { method: "POST", body: JSON.stringify(request) });
   if (!started || !started.jobId) throw new Error(started && started.error || "Préparation de la référence de face impossible.");
   for (let i = 0; i < 120; i++) {
@@ -7186,6 +7190,10 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
 }
 
 async function submitProfileImage(payload, restoration) {
+  try {
+    const s = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    if (s.hordeKey) payload.hordeKey = String(s.hordeKey).trim();
+  } catch (_) {}
   const submit = () => api("/api/image", { method: "POST", body: JSON.stringify(payload) });
   let start, failure;
   try {
