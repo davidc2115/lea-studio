@@ -30,7 +30,9 @@
   function choose(character, variant, selection) {
     selection = selection || "auto";
     const c = character || {};
-    const sourcePose = String(variant && variant.pose || "standing, face toward camera");
+    const posePool = (typeof root.pickProfileScenePose === "function" && root.pickProfileScenePose(c, variant)) ||
+      (typeof root.profileScenePosePool === "function" && (root.profileScenePosePool(c, variant) || [])[0]) || "";
+    const sourcePose = String((variant && variant.pose) || posePool || "standing, face toward camera");
     const accents = /sir[eè]ne|mermaid|lamia|naga/i.test([c.title, c.body].join(" "))
       ? ["arched torso, flirty gaze", "shoulders back, alluring gaze", "body angled, teasing smile"]
       : /seat|sitt|sofa|chair|bed|assise/i.test(sourcePose)
