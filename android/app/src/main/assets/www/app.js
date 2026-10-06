@@ -136,6 +136,60 @@ function canonicalProfileCup(c) {
   return "";
 }
 
+/** Texte cheveux déclaré par la fiche : ligne "Cheveux :" > looks_en "(... hair:1.x)" > tag "cheveux ...". */
+function cardHairText(c) {
+  const appearance = String((c && c.appearance) || "");
+  const declared = (appearance.match(/(?:^|\n|\\n)\s*Cheveux\s*:\s*([^\n]+)/i) || [])[1];
+  if (declared) return declared.split(/\\n|\.\s|\.$/)[0];
+  const looks = (String((c && c.looks_en) || "").match(/\(([^()]*\bhair\b[^()]*?)(?::\d+(?:\.\d+)?)?\)/i) || [])[1];
+  if (looks) return looks;
+  const tags = Array.isArray(c && c.tags) ? c.tags : [];
+  return tags.find((t) => /^cheveux\s/i.test(String(t))) || "";
+}
+
+/** Couleur de cheveux de la fiche (null si non déclarée) — jamais déduite du scénario. */
+function cardHairColor(c) {
+  const s = String(cardHairText(c)).toLowerCase();
+  if (!s) return null;
+  const all = ["blonde hair", "black hair", "brown hair", "red hair", "silver hair", "pink hair", "purple hair", "blue hair", "green hair"];
+  const neg = (...keep) => all.filter((h) => !keep.includes(h)).join(", ");
+  const table = [
+    [/platin/, "platinum blonde hair", neg("blonde hair", "silver hair")],
+    [/ch[aâ]tain|chestnut/, "chestnut brown hair", neg("brown hair")],
+    [/roux|rousse|ginger|auburn|cuivr|copper|\bred\b/, "natural red ginger hair", neg("red hair")],
+    [/blond|golden hair/, "blonde hair", neg("blonde hair")],
+    [/noir|jais|black|ebony/, "black hair", neg("black hair")],
+    [/brun|brown/, "dark brown hair", neg("brown hair")],
+    [/argent|silver|blanc|white|gris|grey|gray/, "silver white hair", neg("silver hair")],
+    [/\broses?\b|pink/, "pink hair", neg("pink hair")],
+    [/violet|purple|lavande|lavender|mauve/, "purple hair", neg("purple hair")],
+    [/bleu|blue/, "blue hair", neg("blue hair")],
+    [/vert|green/, "green hair", neg("green hair")],
+  ];
+  for (const [re, pos, negative] of table) {
+    if (re.test(s)) return { pos, neg: negative, raw: s };
+  }
+  return null;
+}
+
+/** Type / longueur de cheveux de la fiche. */
+function cardHairStyle(c) {
+  const s = String(cardHairText(c)).toLowerCase();
+  const out = [];
+  if (/tr[eè]s\s*longs|reins|lower back|very long/.test(s)) out.push("very long hair");
+  else if (/mi-longs|[eé]paules|shoulder/.test(s)) out.push("shoulder-length hair");
+  else if (/courts?|carr[eé]|bob|pixie|short/.test(s)) out.push("short hair");
+  else if (/longs?|long/.test(s)) out.push("long hair");
+  if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(s)) out.push("coily afro textured hair");
+  else if (/boucl|curly/.test(s)) out.push("curly hair");
+  else if (/ondul|wavy/.test(s)) out.push("wavy hair");
+  else if (/lisse|raide|straight/.test(s)) out.push("straight hair");
+  if (/tress|braid/.test(s)) out.push("braided hair");
+  if (/chignon|bun/.test(s)) out.push("hair in a bun");
+  if (/queue\s*de\s*cheval|ponytail/.test(s)) out.push("ponytail");
+  return out;
+}
+
 function cupLock(c) {
   const body = String((c && c.body) || "");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
@@ -156,7 +210,14 @@ function cupLock(c) {
     [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
   ];
   for (const [re, pos, neg] of table) {
-    if (re.test(src)) return { pos, neg };
+    if (re.test(src)) {
+      const shapeSrc = [body, c && c.looks_en, (String((c && c.appearance) || "").match(/Poitrine\s*:\s*([^\n]+)/i) || [])[1]].filter(Boolean).join(" ").toLowerCase();
+      const shape = /ferme|firm|perky|haute/.test(shapeSrc) ? "firm perky natural breasts"
+        : /implant|silicone|refait|fake/.test(shapeSrc) ? "round breast implants"
+        : /heavy|lourd|pendul|tombant/.test(shapeSrc) ? "heavy natural breasts"
+        : /\bronde|round breast/.test(shapeSrc) ? "round natural breasts" : "natural breasts";
+      return { pos: pos + ", " + shape, neg };
+    }
   }
   return { pos: "", neg: "" };
 }
@@ -170,7 +231,10 @@ function identityFromCard(c) {
   const eyesRaw = ((app.match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
   const blob = app.toLowerCase();
   let hair = "natural hair";
-  if (/platine|platinum/.test(hairRaw + blob)) hair = "platinum blonde hair";
+  const declaredHair = cardHairColor(c);
+  if (declaredHair) {
+    hair = [declaredHair.pos, ...cardHairStyle(c)].join(", ");
+  } else if (/platine|platinum/.test(hairRaw + blob)) hair = "platinum blonde hair";
   else if (/blond/.test(hairRaw + " " + blob)) hair = "blonde hair";
   else if (/roux|auburn|ginger|red\s*hair|redhead|rousse/.test(hairRaw + " " + blob)) hair = "natural red ginger hair";
   else if (/noir|black|jais/.test(hairRaw + " " + blob)) hair = "black hair";
@@ -178,7 +242,8 @@ function identityFromCard(c) {
   else if (/brun|brown/.test(hairRaw + " " + blob)) hair = "dark brown hair";
   else if (/argent|silver|blanc/.test(hairRaw + " " + blob)) hair = "silver white hair";
   // Texture
-  if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(blob)) hair += ", coily afro textured hair";
+  if (declaredHair) {}
+  else if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(blob)) hair += ", coily afro textured hair";
   else if (/boucl|curly/.test(blob)) hair += ", curly hair";
   else if (/ondul|wavy/.test(blob)) hair += ", wavy hair";
   else if (/lisse|straight/.test(blob)) hair += ", straight hair";
@@ -191,7 +256,8 @@ function identityFromCard(c) {
   else if (/gris|grey|gray/.test(eyesRaw)) eyes = "natural grey iris, soft realistic eyes";
   // Peau / ethnicité
   let skin = "";
-  if (/\bnoire?\b|black\s*woman|dark\s*skin|peau\s*noire|african/.test(blob)) skin = "dark brown skin, black woman";
+  const ethField = String((c && c.ethnicity) || "").toLowerCase();
+  if (/africain|noire|black/.test(ethField) || (!ethField && /black\s*woman|dark\s*skin|peau\s*noire|african/.test(blob))) skin = "dark brown skin, black woman";
   else if (/m[eé]tisse|mixed|mulatto|light\s*brown\s*skin/.test(blob)) skin = "light brown mixed skin";
   else if (/asiatique|asian|east\s*asian|chinese|japanese|korean/.test(blob)) skin = "east asian features, light skin";
   else if (/latina|latine|hispanic|olive\s*skin|peau\s*mate/.test(blob)) skin = "olive tan skin, latina features";
@@ -220,11 +286,13 @@ function buildCharacterIdentityBlock(c) {
   else if (/bombée|curvy/.test(blob)) morph = "curvy feminine body, rounded hips";
   let skin = "";
   const eth = String(c.ethnicity || "").toLowerCase();
-  if (/africain|noire|black/.test(eth + blob)) skin = "deep dark brown skin";
-  else if (/m[eé]tisse|mixed/.test(eth + blob)) skin = "mixed light-brown skin";
-  else if (/latine|latina|olive/.test(eth + blob)) skin = "olive warm skin";
-  else if (/asiat/.test(eth + blob)) skin = "light east-asian skin";
-  else if (/slave|arabe|maghreb/.test(eth + blob)) skin = "warm medium skin";
+  // Ethnie déclarée d'abord ; dans le texte libre, jamais "black hair" / "jupe noire" → peau noire
+  const ethSrc = eth || blob.replace(/(?:cheveux|hair|jupe|robe|lingerie|collants|bas|talons|top|dentelle)[^,.;\n]{0,24}/g, " ");
+  if (/africain|\bnoire\b|peau\s*(?:tr[eè]s\s*)?fonc|dark\s*skin|black\s*woman/.test(ethSrc)) skin = "deep dark brown skin";
+  else if (/m[eé]tisse|mixed/.test(ethSrc)) skin = "mixed light-brown skin";
+  else if (/latine|latina|olive|br[eé]sil/.test(ethSrc)) skin = "olive warm skin";
+  else if (/asiat|chinois|japonais|cor[eé]en|vietnam/.test(ethSrc)) skin = "light east-asian skin";
+  else if (/slave|arabe|maghreb/.test(ethSrc)) skin = "warm medium skin";
   else skin = "fair natural skin";
   return [
     id,
@@ -262,7 +330,11 @@ function physicalLocksFromText(c) {
     [/cheveux\s*roses|pink\s*hair/i, "pink hair", "brown hair, blonde hair, black hair"],
     [/cheveux\s*violets|purple\s*hair|lavender\s*hair/i, "purple hair", "brown hair, blonde hair, black hair"],
   ];
-  for (const [re, pos, neg] of hairMap) {
+  const declaredHair = cardHairColor(c);
+  if (declaredHair) {
+    out.positive.push("(" + declaredHair.pos + ":1.55)", ...cardHairStyle(c));
+    out.negative.push(declaredHair.neg);
+  } else for (const [re, pos, neg] of hairMap) {
     if (re.test(blob)) {
       out.positive.push("(" + pos + ":1.55)");
       out.negative.push(neg);
@@ -271,15 +343,18 @@ function physicalLocksFromText(c) {
   }
 
   // Style cheveux
-  if (/attach[ée]s?|en\s*chignon|bun|pony\s*tail|queue\s*de\s*cheval|tied\s*up/i.test(blob)) {
+  if (declaredHair) {}
+  else if (/attach[ée]s?|en\s*chignon|bun|pony\s*tail|queue\s*de\s*cheval|tied\s*up/i.test(blob)) {
     out.positive.push("hair tied up or in a bun or ponytail");
   }
-  if (/longs?\s*(cheveux|hair)|long\s*(straight|wavy)|jusqu.?au\s*rein|lower\s*back/i.test(blob)) {
-    out.positive.push("long hair");
+  if (!declaredHair) {
+    if (/longs?\s*(cheveux|hair)|long\s*(straight|wavy)|jusqu.?au\s*rein|lower\s*back/i.test(blob)) {
+      out.positive.push("long hair");
+    }
+    if (/lisse|straight\s*hair/i.test(blob)) out.positive.push("straight hair");
+    if (/ondul[ée]s?|wavy/i.test(blob)) out.positive.push("wavy hair");
+    if (/boucl[ée]s?|curly/i.test(blob)) out.positive.push("curly hair");
   }
-  if (/lisse|straight\s*hair/i.test(blob)) out.positive.push("straight hair");
-  if (/ondul[ée]s?|wavy/i.test(blob)) out.positive.push("wavy hair");
-  if (/boucl[ée]s?|curly/i.test(blob)) out.positive.push("curly hair");
 
   // Yeux
   const eyeMap = [
@@ -4881,6 +4956,12 @@ function renderProfile() {
       <option value="cloudflare">Cloudflare FLUX (gratuit ~150–230/j · SFW/léger)</option>
       <option value="sd_cpp">SD.cpp (local)</option>
     </select>
+    <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
+    <select id="profile-ref-mode">
+      <option value="off">Non — variété max, cheveux/poitrine de la fiche (recommandé)</option>
+      <option value="soft">Souple — visage proche, scène/tenue/corps libres (denoise 0.65)</option>
+      <option value="strong">Forte — quasi copie de la photo ★ (denoise 0.45)</option>
+    </select>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer la photo</button>
       <!-- Local Dream retiré à la demande utilisateur -->
@@ -5039,6 +5120,14 @@ function renderProfile() {
       cur.imageEngine = $("imgengine-profile").value;
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     };
+    if ($("profile-ref-mode")) {
+      $("profile-ref-mode").value = profileRefMode();
+      $("profile-ref-mode").onchange = () => {
+        const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        cur.profileRefMode = $("profile-ref-mode").value;
+        localStorage.setItem("lea.settings", JSON.stringify(cur));
+      };
+    }
   } catch (_) {}
   $("genimg").onclick = () => {
     try {
@@ -6036,6 +6125,13 @@ async function ensureFaceLockFromGemini(c, refB64, statusFn) {
   return "";
 }
 
+function profileRefMode() {
+  try {
+    const m = JSON.parse(localStorage.getItem("lea.settings") || "{}").profileRefMode;
+    return m === "soft" || m === "strong" ? m : "off";
+  } catch (_) { return "off"; }
+}
+
 async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
   const setS = statusFn || setGenStatus;
   try {
@@ -6078,7 +6174,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
         const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
         payload.prompt = [
           cup.pos,
-          "same woman as the reference photo, same face, eye color, hair style and skin tone; breast size must match the written character card, not the reference image",
+          "same face and skin tone as the reference photo; hair color, hair style, breast size must match the written character card, not the reference image",
           payload.prompt || "",
         ].filter(Boolean).join(", ");
         if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
@@ -7153,35 +7249,30 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const cup = (typeof cupLock === "function" ? cupLock(c) : null);
   const cupPos = cup && cup.pos ? cup.pos : "";
   const cupNeg = cup && cup.neg ? cup.neg : "";
-  // Négatifs cheveux selon identité
-  let hairNeg = "wrong hair color, dyed fantasy hair,";
-  const idLow = (id + " " + idBlock).toLowerCase();
-  if (/blonde|blond|platinum/.test(idLow)) hairNeg += " black hair, dark brown hair, brunette, blue hair, green hair, purple hair, pink hair, red hair,";
-  else if (/black hair|noir/.test(idLow)) hairNeg += " blonde hair, red hair, blue hair, green hair, purple hair,";
-  else if (/red|ginger|roux/.test(idLow)) hairNeg += " blonde hair, black hair, blue hair, green hair,";
-  else if (/brown|brun|chestnut|châtain|chatain/.test(idLow)) hairNeg += " blonde hair, black hair, blue hair, red hair, green hair,";
-  else if (/silver|white|argent/.test(idLow)) hairNeg += " blonde hair, black hair, brown hair, blue hair,";
+  // Négatifs cheveux depuis la ligne "Cheveux :" de la fiche (jamais depuis le scénario)
+  const hairCard = cardHairColor(c);
+  const fancyHair = hairCard && /pink|purple|blue|green/.test(hairCard.pos);
+  const hairNeg = "wrong hair color," + (hairCard ? " " + hairCard.neg + "," : "") + (fancyHair ? "" : " dyed fantasy hair, magenta hair,");
   payload.prompt = [
     "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
-    id + ",",
-    idBlock ? idBlock.slice(0, 360) + "," : "",
-    cupPos ? cupPos + "," : "",
+    (idBlock || id).slice(0, 420) + ",",
     age + " year old adult woman,",
     "(new camera angle:1.2), slight pose variation,",
     "wearing exactly one outfit: " + wear + ", NOT mixed clothes, NOT the same clothes as the reference photo,",
     "pose: " + pose + ",",
     place ? ("location: " + place + ",") : "",
     "sexy provocative sensual pose, full body from head to shoes, hips and legs visible,",
-    "same face hair skin and breast size as identity, correct hair color, correct eye color, correct breast size,",
-    "NOT a copy of the reference composition"
+    hairCard ? "(" + [hairCard.pos, ...cardHairStyle(c)].join(", ") + ":1.5)," : "",
+    cupPos ? "(" + cupPos.replace(/[()]|:\d+(\.\d+)?/g, "") + ":1.4)," : "",
+    "correct hair color, correct hair style, correct eye color, correct breast size and shape"
   ].filter(Boolean).join(" ");
   payload.negative = [
     hairNeg,
     cupNeg,
     "painting, oil painting, digital painting, illustration, drawing, anime, manga, cartoon, cgi, 3d render, plastic doll, airbrushed,",
-    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, pink hair, magenta hair, purple hair unless specified, censored face, black bar over face, pixelated face,",
+    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar over face, pixelated face,",
     "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, blurry, text, watermark,",
-    "wrong age, different person, blue streak hair, colored highlights unless specified,",
+    fancyHair ? "wrong age, different person," : "wrong age, different person, blue streak hair, colored highlights,",
     "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
     payload.negative || ""
   ].filter(Boolean).join(" ");
@@ -7783,36 +7874,38 @@ async function generatePhoto() {
         finalizeProfilePrompt(payload, c, profileVariant);
       } else {
         try { finalizeProfilePrompt(payload, c, profileVariant); } catch (e) { console.warn("[finalize solo]", e); }
-        // Référence profil (étoile) : img2img denoise bas = visage conservé (comme il y a quelques heures)
-        try {
-          await applyCharacterRefToPayload(payload, c, setGenStatus, {
-            allowFantasy: false,
-            forceImg2Img: true,
-            denoising: 0.42,
-            profileIdentityLock: true,
-            addPromptLock: true,
-          });
-        } catch (e) {
-          console.warn("[profile reference]", e);
+        // Référence ★ : désactivée par défaut (img2img 0.42 recopiait la photo → images identiques,
+        // cheveux/poitrine de la ref au lieu de la fiche). Réglable : off / soft (0.65) / strong (0.45).
+        const refMode = profileRefMode();
+        const refDenoise = refMode === "strong" ? 0.45 : 0.65;
+        if (refMode !== "off") {
+          try {
+            await applyCharacterRefToPayload(payload, c, setGenStatus, {
+              allowFantasy: false,
+              forceImg2Img: true,
+              denoising: refDenoise,
+              addPromptLock: true,
+            });
+          } catch (e) {
+            console.warn("[profile reference]", e);
+          }
         }
-        const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
-        payload.prompt = currentPrompt;
+        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
         payload.profile_user_detail = extra.slice(0, 360);
-        const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);
+        payload.seed = Math.floor(Math.random() * 2000000000);
+        const hasRef = refMode !== "off" && Boolean(payload.source_image && String(payload.source_image).length > 800);
         if (hasRef) {
           payload.force_img2img = true;
           payload.source_processing = "img2img";
-          payload.profile_identity_lock = true;
-          // 0.42 = conservation visage (historique qui fonctionnait)
-          payload.denoising = 0.42;
-          payload.seed = Math.floor(Math.random() * 2000000000);
-          setGenStatus("Horde img2img · ref profil · denoise 0.42 · visage verrouillé…");
+          payload.denoising = refDenoise;
+          setGenStatus("Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") + " · denoise " + refDenoise + " · seed " + payload.seed + "…");
         } else {
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
-          payload.seed = Math.floor(Math.random() * 2000000000);
-          setGenStatus("Horde txt2img · pas de photo étoilée — étoile une image pour verrouiller le visage…");
+          delete payload.denoising;
+          delete payload.face_lock;
+          setGenStatus("Horde txt2img · identité depuis la fiche (cheveux, yeux, poitrine) · seed " + payload.seed + "…");
         }
       }
       payload.nsfw = false;

@@ -2479,8 +2479,10 @@
 
       // Visage d'abord : denoise bas avec référence profil (0.42 historique)
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      if (body.force_low_denoise === true || body.profile_identity_lock === true || body.is_profile_photo === true) {
+      if (body.force_low_denoise === true || body.profile_identity_lock === true) {
         den = Math.min(0.48, Math.max(0.36, den));
+      } else if (body.is_profile_photo === true) {
+        den = Math.min(0.75, Math.max(0.4, den));
       } else {
         den = Math.min(0.65, Math.max(0.36, den));
       }
@@ -2515,7 +2517,8 @@
           "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, pink hair, magenta hair, purple hair, censored face, black bar, pixelated face, face crop, headshot only, wrong hair color,",
+          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar, pixelated face, face crop, headshot only, wrong hair color,",
+          /\b(pink|purple|magenta|lavender) hair\b/i.test(promptSafe) ? "" : "pink hair, magenta hair, purple hair,",
           "identical composition to reference, same pose as source, same outfit as reference, static copy of reference, duplicate frame"
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 950);
         const base = {
