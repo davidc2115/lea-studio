@@ -190,6 +190,50 @@ function cardHairStyle(c) {
   return out;
 }
 
+/** Texte visage déclaré par la fiche : ligne "Visage :" > ligne "Traits :" > looks_en "(... face:1.x)". */
+function cardFaceText(c) {
+  const appearance = String((c && c.appearance) || "");
+  const declared = (appearance.match(/(?:^|\n|\\n)\s*Visage\s*:\s*([^\n]+)/i) || [])[1];
+  if (declared) return declared;
+  const tr = (appearance.match(/(?:^|\n|\\n)\s*Trait(?:s)?(?: du visage)?\s*:\s*([^\n]+)/i) || [])[1];
+  if (tr) return tr;
+  const looks = String((c && c.looks_en) || "").match(/\(([^()]*\bface\b[^()]*?):/i);
+  return looks ? looks[1] : "";
+}
+
+/** Forme du visage + traits du visage (FR→EN, pondérés) depuis la fiche du personnage. */
+function faceShapeLocks(c) {
+  const face = String(cardFaceText(c) || "").toLowerCase();
+  const blob = [
+    c && c.appearance, c && c.looks_en, c && c.body, c && c.ethnicity,
+    Array.isArray(c && c.tags) ? c.tags.join(" ") : "",
+  ].filter(Boolean).join(" ").toLowerCase();
+  const src = face || blob;
+  const pos = [], negs = [];
+  if (/ovale|oval/.test(src)) { pos.push("(oval face:1.5)"); negs.push("round face, square face, wide face"); }
+  else if (/visage\s*ronde?|round\s*face/.test(src)) { pos.push("(round face:1.4)"); negs.push("oval face, square face, long face"); }
+  else if (/carr[eé]e?|square\s*(face|jaw)/.test(src)) { pos.push("(square face, strong square jawline:1.4)"); negs.push("oval face, round face"); }
+  else if (/c[œoe]eur|heart[\s-]shaped/.test(src)) { pos.push("(heart-shaped face:1.4), pointed chin"); negs.push("square face, long face"); }
+  else if (/allong[eé]|triangulaire|triangular|oblong/.test(src)) { pos.push("(long oval face:1.4)"); negs.push("round face, wide face"); }
+  if (/traits? (?:fins?|d[eé]li[eé]s?)|fine features|delicate features/.test(src)) pos.push("(delicate fine facial features:1.3)");
+  if (/traits? doux|soft features/.test(src)) pos.push("soft gentle facial features");
+  if (/joues (?:pleines|rondes)|full cheeks/.test(src)) pos.push("full soft cheeks");
+  if (/pommettes (?:saillantes|hautes)|high cheekbone/.test(src)) pos.push("(high defined cheekbones:1.35)");
+  else if (/pommettes discr[eé]tes|subtle cheekbone/.test(src)) pos.push("subtle soft cheekbones");
+  if (/m[aâ]choire marqu|jawline marqu|defined jaw|strong jaw/.test(src)) pos.push("(defined jawline:1.35)");
+  if (/menton (?:arrondi|d[eé]licat|petit)|small chin|rounded chin/.test(src)) pos.push("small rounded chin");
+  else if (/menton (?:pointu|fin)|pointed chin/.test(src)) pos.push("pointed chin");
+  if (/nez aquilin|roman nose|hooked nose/.test(src)) pos.push("aquiline roman nose");
+  else if (/nez retrouss[eé]|button nose|upturned nose/.test(src)) pos.push("small upturned button nose");
+  else if (/nez fin|slim nose|straight nose/.test(src)) pos.push("slim straight nose");
+  if (/l[eè]vres pulpeuses|full lips/.test(src)) pos.push("(full soft lips:1.35)");
+  else if (/l[eè]vres fines|thin lips/.test(src)) pos.push("thin lips");
+  if (/taches de rousseur|freckles|rousseurs/.test(src)) pos.push("(freckles on nose and cheeks:1.4)");
+  if (/grain de beaut[eé]|beauty mark/.test(src)) pos.push("beauty mark");
+  if (/lunettes|eyeglasses|glasses/.test(src)) pos.push("(round eyeglasses:1.4)");
+  return { pos, neg: negs.join(", ") };
+}
+
 function cupLock(c) {
   const body = String((c && c.body) || "");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
@@ -233,7 +277,7 @@ function identityFromCard(c) {
   let hair = "natural hair";
   const declaredHair = cardHairColor(c);
   if (declaredHair) {
-    hair = [declaredHair.pos, ...cardHairStyle(c)].join(", ");
+    hair = ["(" + declaredHair.pos + ":1.5)", ...cardHairStyle(c)].join(", ");
   } else if (/platine|platinum/.test(hairRaw + blob)) hair = "platinum blonde hair";
   else if (/blond/.test(hairRaw + " " + blob)) hair = "blonde hair";
   else if (/roux|auburn|ginger|red\s*hair|redhead|rousse/.test(hairRaw + " " + blob)) hair = "natural red ginger hair";
@@ -263,7 +307,8 @@ function identityFromCard(c) {
   else if (/latina|latine|hispanic|olive\s*skin|peau\s*mate/.test(blob)) skin = "olive tan skin, latina features";
   else if (/pale|porcelaine|porcelain|peau\s*claire|fair\s*skin|teint\s*clair/.test(blob)) skin = "fair porcelain skin";
   else if (/peau\s*dor[eé]e|golden\s*skin|sun-kissed/.test(blob)) skin = "sun-kissed golden skin";
-  return [name, age + " year old woman", hair, eyes, skin].filter(Boolean).join(", ");
+  const face = (typeof faceShapeLocks === "function" ? faceShapeLocks(c) : { pos: [] }).pos.join(", ");
+  return [name, age + " year old woman", face, hair, eyes, skin].filter(Boolean).join(", ");
 }
 function buildCharacterIdentityBlock(c) {
   if (!c) return "";
@@ -317,6 +362,13 @@ function physicalLocksFromText(c) {
 
   const out = { positive: [], negative: [], features: [] };
 
+  // —— Visage (forme + traits) ——
+  const faceLocks = (typeof faceShapeLocks === "function") ? faceShapeLocks(c) : null;
+  if (faceLocks && faceLocks.pos.length) {
+    out.positive.push(...faceLocks.pos);
+    if (faceLocks.neg) out.negative.push(faceLocks.neg);
+  }
+
   // —— Cheveux (couleur) ——
   const hairMap = [
     [/argent[ée]?s?|silver\s*hair|white\s*hair|cheveux\s*blancs|cheveux\s*argent/i, "silver white hair", "brown hair, black hair, blonde hair, red hair, green hair, blue hair, purple hair, pink hair"],
@@ -334,6 +386,12 @@ function physicalLocksFromText(c) {
   if (declaredHair) {
     out.positive.push("(" + declaredHair.pos + ":1.55)", ...cardHairStyle(c));
     out.negative.push(declaredHair.neg);
+    const hs = cardHairStyle(c).join(" ");
+    if (/very long|long hair/.test(hs)) out.negative.push("short hair, bob cut, pixie cut, shoulder-length hair");
+    else if (/short hair/.test(hs)) out.negative.push("long hair, waist-length hair");
+    if (/straight hair/.test(hs)) out.negative.push("curly hair, coily hair");
+    else if (/curly hair|coily/.test(hs)) out.negative.push("straight hair");
+    else if (/wavy hair/.test(hs)) out.negative.push("straight hair, coily hair");
   } else for (const [re, pos, neg] of hairMap) {
     if (re.test(blob)) {
       out.positive.push("(" + pos + ":1.55)");
@@ -1887,7 +1945,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     "No cartoon, no anime, no CGI, no illustration,",
     isDuo
       ? "NOT same breast size on both women, NOT identical bust, NOT matching cup sizes, NOT same hair color unless described, NOT solo portrait,"
-      : "no wrong hair color, no wrong eye color, no wrong cup size, no wrong body type,",
+      : "no wrong hair color, no wrong hair length, no wrong hair texture, no wrong face shape, no wrong facial features, no wrong eye color, no wrong cup size, no wrong body type,",
     "",
     hasUser
       ? "NOT ignore USER REQUEST, NOT wrong location, NOT swimming pool when bed requested, NOT lying on back when all fours requested, NOT copy cover pose,"
@@ -6042,7 +6100,7 @@ function fixedAppearanceBlock(c) {
     body ? ("morphology: " + body + ",") : "",
     eth ? ("ethnicity: " + eth + ",") : "",
     "(" + age + " year old:1.45), (looks exactly " + age + ":1.4),",
-    "IDENTICAL face, EXACT hair color, hair style, EXACT eye color locked, skin tone, breast size, body type,",
+    "IDENTICAL face, face shape locked as listed above, EXACT hair color, hair length, hair texture, hair style, EXACT eye color locked, skin tone, breast size, body type,",
     phys.features.length ? ("MUST show: " + phys.features.join(", ") + ",") : "",
     "(full body wide shot:1.45), hips visible, NOT bust crop only,",
     "same person as cover photo and profile, consistent identity lock,",
@@ -6106,9 +6164,11 @@ function identityLock(c) {
       ? "looks " + age + " not older, not elderly"
       : "mature adult looks exactly " + age + ", subtle age lines, not 22, not young adult, not teenage",
   ].join(", ");
+  const faceShape = (typeof faceShapeLocks === "function" ? faceShapeLocks(c) : { pos: [] }).pos.join(", ");
   return [
     "identity of " + name + ",",
     specific,
+    faceShape,
     looks,
     mw,
     ageLock,
