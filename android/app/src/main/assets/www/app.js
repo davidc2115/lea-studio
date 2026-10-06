@@ -6072,6 +6072,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       const requestedDenoising = Number(options.denoising);
       if (Number.isFinite(requestedDenoising)) payload.denoising = requestedDenoising;
       else if (payload.denoising == null) payload.denoising = duoDenoise(0.42);
+      if (options.profileIdentityLock === true) payload.denoising = 0.42;
       if (options.forceImg2Img === true) payload.force_img2img = true;
       if (options.addPromptLock !== false) {
         const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
@@ -7166,7 +7167,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     idBlock ? idBlock.slice(0, 360) + "," : "",
     cupPos ? cupPos + "," : "",
     age + " year old adult woman,",
-    "(completely different pose from reference:1.55), (new outfit not the same as source:1.5), different camera angle,",
+    "(new camera angle:1.2), slight pose variation,",
     "wearing exactly one outfit: " + wear + ", NOT mixed clothes, NOT the same clothes as the reference photo,",
     "pose: " + pose + ",",
     place ? ("location: " + place + ",") : "",
@@ -7184,17 +7185,17 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
     payload.negative || ""
   ].filter(Boolean).join(" ");
-  payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.58;
   payload.identity_head = id.slice(0, 240);
-  // Conserver la référence si déjà attachée (img2img) ; sinon txt2img
-  if (!(payload.source_image && String(payload.source_image).length > 800)) {
+  // Avec référence étoilée : img2img denoise 0.42 pour conserver le visage
+  if (payload.source_image && String(payload.source_image).length > 800) {
+    payload.force_img2img = true;
+    payload.source_processing = "img2img";
+    payload.denoising = 0.42;
+  } else {
     delete payload.source_image;
     delete payload.source_processing;
     payload.force_img2img = false;
-  } else {
-    payload.force_img2img = true;
-    payload.source_processing = "img2img";
-    payload.denoising = Math.max(0.65, Math.min(0.78, Number(payload.denoising) || 0.72));
+    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
   }
   return payload;
 }
@@ -7782,39 +7783,36 @@ async function generatePhoto() {
         finalizeProfilePrompt(payload, c, profileVariant);
       } else {
         try { finalizeProfilePrompt(payload, c, profileVariant); } catch (e) { console.warn("[finalize solo]", e); }
-        if (!payload.source_image || payload.source_processing !== "img2img") {
-          try {
-            await applyCharacterRefToPayload(payload, c, setGenStatus, {
-              allowFantasy: true,
-              forceImg2Img: true,
-              denoising: 0.72,
-              profileIdentityLock: true,
-              addPromptLock: false,
-            });
-          } catch (e) {
-            console.warn("[profile reference]", e);
-          }
-        } else {
-          payload.denoising = Math.max(Number(payload.denoising) || 0, 0.55);
+        // Référence profil (étoile) : img2img denoise bas = visage conservé (comme il y a quelques heures)
+        try {
+          await applyCharacterRefToPayload(payload, c, setGenStatus, {
+            allowFantasy: false,
+            forceImg2Img: true,
+            denoising: 0.42,
+            profileIdentityLock: true,
+            addPromptLock: true,
+          });
+        } catch (e) {
+          console.warn("[profile reference]", e);
         }
-        // Ne PAS re-préfixer sceneLock (opaque everyday dress, etc.) — finalize a déjà tout
         const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
         payload.prompt = currentPrompt;
         payload.profile_user_detail = extra.slice(0, 360);
-        // Référence profil : img2img pour garder visage/peau/cheveux, denoise assez haut pour changer pose/tenue
         const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);
         if (hasRef) {
           payload.force_img2img = true;
           payload.source_processing = "img2img";
           payload.profile_identity_lock = true;
-          // Haut denoise = nouvelle pose/tenue ; visage gardé via identité + ref
-          payload.denoising = 0.72;
+          // 0.42 = conservation visage (historique qui fonctionnait)
+          payload.denoising = 0.42;
           payload.seed = Math.floor(Math.random() * 2000000000);
+          setGenStatus("Horde img2img · ref profil · denoise 0.42 · visage verrouillé…");
         } else {
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
           payload.seed = Math.floor(Math.random() * 2000000000);
+          setGenStatus("Horde txt2img · pas de photo étoilée — étoile une image pour verrouiller le visage…");
         }
       }
       payload.nsfw = false;

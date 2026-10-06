@@ -2477,15 +2477,12 @@
       const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
       const payloads = [];
 
-      // Profile + ref: denoise haut pour changer pose/tenue; bas seulement si force_low_denoise
+      // Visage d'abord : denoise bas avec référence profil (0.42 historique)
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      if (body.force_low_denoise === true) {
+      if (body.force_low_denoise === true || body.profile_identity_lock === true || body.is_profile_photo === true) {
         den = Math.min(0.48, Math.max(0.36, den));
-      } else if (body.is_profile_photo === true || body.profile_identity_lock === true) {
-        // Assez haut pour ne pas recopier la pose/tenue de la ref
-        den = Math.min(0.78, Math.max(0.62, den));
       } else {
-        den = Math.min(0.72, Math.max(0.42, den));
+        den = Math.min(0.65, Math.max(0.36, den));
       }
 
       let src = null;
