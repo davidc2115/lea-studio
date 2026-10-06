@@ -2563,12 +2563,13 @@
             cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
-          nsfw: body.is_profile_photo || profileSceneLock ? false : body.nsfw !== false,
-          censor_nsfw: Boolean(body.is_profile_photo || profileSceneLock),
+          // Profil sexy / cleavage : ne pas activer la censure Horde (sinon "Horde a censuré")
+          nsfw: true,
+          censor_nsfw: false,
           models: models,
           r2: true,
           slow_workers: true,
-          shared: !body.is_profile_photo && !profileSceneLock,
+          shared: false,
         };
         if (opts.img2img && src) {
           base.source_image = src;
