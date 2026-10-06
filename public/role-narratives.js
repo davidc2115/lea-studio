@@ -14,7 +14,9 @@
     ["phenix", /phenix|phoenix/], ["fantome", /fantome|ghost/], ["sorciere", /sorciere|witch/],
   ];
   function classify(text) {
-    if (/belle.?mere|_bm\b/.test(text)) return "belle_mere";
+    if (/belle.?mere.*epouse|mere.?de.?((ta|sa).?)?femme|bm_epouse|gendre/.test(text)) return "belle_mere_epouse";
+    if (/belle.?mere.*pere|femme.?de.?((ton|son).?)?pere|maratre|bm_pere|_bm\b/.test(text)) return "belle_mere_pere";
+    if (/belle.?mere/.test(text)) return "belle_mere";
     if (/belle.?fille/.test(text)) return "belle_fille";
     if (/belle.?soeur/.test(text)) return "belle_soeur";
     if (/\btante\b/.test(text)) return "tante";
@@ -131,8 +133,8 @@
     const fallbackRanks = {};
     for (const c of characters) {
       if (!c || !c.id || c.imported || String(c.id).startsWith("imp_")) continue;
-      if (c.story_profile && c.story_profile.version === "role-scenes-v4") continue;
-      const role = roleOf(c), bank = banks[role];
+      if (c.story_profile && c.story_profile.version === "role-scenes-v5") continue;
+      const role = roleOf(c), bank = banks[role] || banks.belle_mere || banks.amie;
       if (!bank) throw new Error("Banque de scénarios absente : " + role);
       if (Number(c.age) < 18) throw new Error("Le catalogue de rôles nécessite des personnages adultes : " + c.id);
       const n = rankById.get(c.id) ?? (fallbackRanks[role] || 0);
@@ -141,49 +143,85 @@
       const eligible = Object.keys(temperaments);
       const primary = eligible[n % eligible.length], temperament = temperaments[primary];
       const secondary = temperament.nuance[Math.floor(n / eligible.length) % temperament.nuance.length];
-      const beat = n % bank.plots.length;
-      const obstacle = Math.floor(n / bank.plots.length) % complications[bank.category].length;
-      const motive = motives[(n + Math.floor(n / bank.plots.length)) % motives.length];
       const duo = Boolean(c.multiSpeaker || /^duo_/i.test(c.id) || String(c.name).includes("&"));
       const speakers = duo ? String(c.name).split(/\s*&\s*|\s+et\s+/i).filter(Boolean) : [];
-      const personalPremise = c.id === "cup_babysitter_07"
-        ? "Son dernier tram est annulé après son service. Elle a promis à sa colocataire de rentrer et veut comparer les trajets tout en terminant la revanche de cartes commencée plus tôt."
-        : bank.plots[beat];
+      // Belle-mère : distinguer mère de l'épouse vs femme du père
+      let effectiveRole = role;
+      let effectiveBank = bank;
+      if (role === "belle_mere" || role === "belle_mere_epouse" || role === "belle_mere_pere") {
+        const blob = normalize([c.id, c.title, ...(c.tags || [])].join(" "));
+        const forceEpouse = /epouse|mere.?de.?((ta|sa).?)?femme|gendre|bm_epouse/.test(blob);
+        const forcePere = /pere|maratre|femme.?de.?((ton|son).?)?pere|bm_pere|_bm\b/.test(blob);
+        if (role === "belle_mere_epouse" || forceEpouse) effectiveRole = "belle_mere_epouse";
+        else if (role === "belle_mere_pere" || forcePere) effectiveRole = "belle_mere_pere";
+        else effectiveRole = (n % 2 === 0) ? "belle_mere_epouse" : "belle_mere_pere";
+        effectiveBank = banks[effectiveRole] || banks.belle_mere || bank;
+      }
+      const plots = effectiveBank.plots;
+      const beat = n % plots.length;
+      const rawPlot = plots[beat];
+      let personalPremise, greetingExtra;
+      if (typeof rawPlot === "string" && rawPlot.includes("|||")) {
+        const parts = rawPlot.split("|||");
+        personalPremise = parts[0].trim();
+        greetingExtra = parts.slice(1).join("|||").trim().replace(/\\n/g, "\n");
+      } else if (rawPlot && typeof rawPlot === "object") {
+        personalPremise = rawPlot.s || rawPlot.scene || String(rawPlot);
+        greetingExtra = rawPlot.g || rawPlot.greeting || "";
+      } else {
+        personalPremise = c.id === "cup_babysitter_07"
+          ? "Son dernier tram est annulé après son service. Elle a promis à sa colocataire de rentrer et veut comparer les trajets tout en terminant la revanche de cartes commencée plus tôt."
+          : String(rawPlot);
+        greetingExtra = "";
+      }
       const premise = duo ? personalPremise.replace(/^Elle /, "La première ") : personalPremise;
-      const complication = complications[bank.category][obstacle];
-      // Keep the established visual scene: no changes to gallery, references, body, wardrobe or poses.
+      const complication = complications[effectiveBank.category] ? complications[effectiveBank.category][Math.floor(n / plots.length) % complications[effectiveBank.category].length] : "";
       const sourceScenario = String(c.scenario || "");
-      const place = (sourceScenario.match(/Lieu\s*:\s*([^,.]+)/i) || [])[1] || "le lieu habituel indiqué dans sa fiche";
+      const place = (sourceScenario.match(/Lieu\s*:\s*([^,.]+)/i) || [])[1] || "le lieu de la scène";
       const picturedProp = (sourceScenario.match(/Avec (.*?) comme point de départ/i) || [])[1];
-      const prop = picturedProp || (c.id === "cup_babysitter_07" ? "son téléphone près du babyphone" : bank.prop[0]);
+      const prop = picturedProp || (c.id === "cup_babysitter_07" ? "son téléphone près du babyphone" : (effectiveBank.prop && effectiveBank.prop[0]) || "un détail de la pièce");
       if (typeof c.personality_legacy === "undefined") c.personality_legacy = c.personality;
       if (typeof c.scenario_before_role_rewrite === "undefined") c.scenario_before_role_rewrite = c.scenario;
       if (typeof c.greeting_before_role_rewrite === "undefined") c.greeting_before_role_rewrite = c.greeting;
       c.title = String(c.title || "").split("·").map(part => part.trim().replace(/\s+taquine?s?$/i, "")).filter(part => part && !oldStyle.test(part)).join(" · ");
-      c.tags = (c.tags || []).filter(tag => !oldStyle.test(String(tag).trim()) && (!classify(normalize(tag)) || classify(normalize(tag)) === role));
+      c.tags = (c.tags || []).filter(tag => !oldStyle.test(String(tag).trim()) && (!classify(normalize(tag)) || classify(normalize(tag)) === role || classify(normalize(tag)) === effectiveRole));
       c.tags.unshift(temperament.label.toLowerCase(), secondary);
+      if (effectiveRole === "belle_mere_epouse" && !c.tags.includes("belle-mère")) c.tags.unshift("belle-mère", "mère de ta femme");
+      if (effectiveRole === "belle_mere_pere" && !c.tags.includes("belle-mère")) c.tags.unshift("belle-mère", "femme de ton père");
       const speakerProfiles = speakers.map((name, i) => {
         const key = eligible[(n + i * 3) % eligible.length], trait = temperaments[key];
-        return { name, primary: key, label: trait.label, voice: trait.voice, nuance: trait.nuance[(n + i) % trait.nuance.length] };
+        return { name: name.trim(), primary: key, line: trait.line, gesture: trait.gesture };
       });
-      c.story_profile = { version: "role-scenes-v4", role, category: bank.category, relation: bank.relation, family, primary, secondary, beat: c.id === "cup_babysitter_07" ? "tram-coloc" : beat, obstacle, motive, speakers: speakerProfiles };
-      c.personality = "Tempérament principal : " + temperament.label + ". Nuance : " + secondary + ".\n" +
-        temperament.voice + " " + temperament.response + "\n" +
-        "Dans cette situation, elle " + motive + ".";
-      if (duo) c.personality += "\n" + speakerProfiles.map(p => p.name + " : " + p.label + ", " + p.nuance + ". " + p.voice).join("\n");
       const limits = "Tout le monde est adulte (18+). Elle peut flirter, refuser, attendre ou aller plus loin selon son tempérament. Ne jamais inverser les rôles ni changer qui est qui.";
-      // Lead with the actual situation so truncated discovery cards do not all show role boilerplate.
-      c.scenario = c.name + " : " + premise + "\n" +
-        (duo ? "Deux personnages adultes." : c.age + " ans.") +
-        " Rôle : " + c.title + ". " + bank.relation + " Lieu : " + place + ".\n" +
-        complication + "\n" +
-        "Repère visible : " + prop + ". " + (duo ? "La première" : "Elle") + " " + motive + ".\n" +
-        (duo ? "La seconde donne son propre avis ; leurs préférences peuvent diverger. " : "") +
-        "Tu peux demander ce qui manque, proposer une autre solution ou refuser de participer. La suite dépend de cette décision. " + limits;
-      c.greeting = "*" + premise + " " + (duo ? "Les deux sont là." : "Elle te regarde.") + "*\n" +
-        (duo ? speakerProfiles.map((p, i) => p.name + " : " + (i ? "J'ai un autre point de vue. Écoutons les deux avant de choisir." : temperaments[p.primary].line)).join("\n")
-          : "*" + temperament.gesture.charAt(0).toUpperCase() + temperament.gesture.slice(1) + ".*\n" + temperament.line);
-      c.scenario_version = "role-scenes-v4";
+      // Scénario centré sur la scène (sans digressions génériques)
+      c.scenario = c.name + " — " + (effectiveBank.relation || bank.relation) + "\n" +
+        premise + "\n" +
+        (duo ? "Deux personnages adultes." : (c.age + " ans.")) +
+        " Rôle : " + c.title + ". Lieu : " + place + ".\n" +
+        "Repère : " + prop + ".\n" +
+        "La situation de départ ci-dessus reste la référence tant que l'historique ne l'a pas fait évoluer. " + limits;
+      // Message d'accueil = scène + réplique liée (plus de phrase de tempérament hors sujet)
+      if (greetingExtra) {
+        c.greeting = greetingExtra;
+      } else if (duo) {
+        c.greeting = "*" + premise + "*\n" + speakerProfiles.map((p, i) => p.name + " : " + (i ? "Je suis là aussi." : "On est là.")).join("\n");
+      } else {
+        c.greeting = "*" + premise + "*\n*Elle s'arrête face à toi, encore prise dans la situation.*\n" +
+          "Tu as une minute ? Il fallait que je te parle de ça.";
+      }
+      c.personality = temperament.label + ". " + (temperament.blurb || temperament.line || "") + " " + secondary + ". " +
+        (duo ? "Duo : chaque voix garde sa personnalité." : "Une seule voix.");
+      c.story_profile = {
+        version: "role-scenes-v5",
+        role: effectiveRole,
+        relation: effectiveBank.relation || bank.relation,
+        family: effectiveBank.category === "family",
+        temperament: primary,
+        secondary,
+        speakers: speakers,
+        premise: premise
+      };
+      c.scenario_version = "role-scenes-v5";
     }
     return characters;
   }
@@ -199,8 +237,7 @@
       "Apparence fixe : " + (c.appearance || "") + ". Morphologie fixe : " + (c.body || "") + ". Conserve tous les traits non humains éventuels.",
       "Reste dans le lieu et la situation réellement établis par l'historique ; le scénario de départ n'efface pas la progression sauvegardée.",
       "Un tempérament n'est pas une disponibilité automatique. Respecte les refus, le rythme choisi et les décisions du joueur.",
-      profile.family ? "Cadre familial uniquement : aucun flirt, aucune romance ni sexualisation entre les membres de la famille."
-        : "Une complicité ou un flirt peuvent rester légers et non explicites entre adultes sans parenté. N'impose ni couple ni attirance.",
+      "Cadre adulte 18+. Respecte le rôle exact (belle-mère = mère de la femme OU femme du père, jamais l'inverse des liens). Elle peut flirter ou refuser selon son tempérament. N'impose ni amour forcé ni refus systématique.",
       "Les situations de départ sont non explicites. Le goût de se montrer reste une expression choisie, sans imposer une exposition aux tiers.",
       profile.speakers.length ? "Deux voix distinctes. Préfixe chaque réplique par le nom de celle qui parle et respecte sa personnalité individuelle."
         : "Une seule voix, celle du personnage. N'écris pas les paroles, pensées ou décisions du joueur.",
