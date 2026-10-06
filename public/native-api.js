@@ -2465,99 +2465,62 @@
       }
       promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 1000);
 
+      // Génération classique restaurée (époque denoise 0.42 / Realistic Vision)
+      // Anonyme + 512x512 pour passer la file Horde actuelle
+      let hordeKey = "0000000000";
+
+      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
+      const hasHordeAccount = false;
+      const W = 512;
+      const H = 512;
+      const steps = 10;
+      const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
+      const payloads = [];
+
+      // Denoise historique qui fonctionnait bien
+      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
+      den = Math.min(0.48, Math.max(0.36, den));
+
       let src = null;
-      if (body.source_image && ["img2img", "inpainting"].includes(body.source_processing)) {
+      if (body.source_image && (body.source_processing === "img2img" || body.force_img2img === true)) {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 1_000_000) src = raw;
       }
-      const useImg2Img = Boolean(src);
-      const isMaskedProfile = Boolean(profileSceneLock && src && body.profile_face_mask === true && body.source_processing === "inpainting");
-      let sourceMask = "";
-      if (isMaskedProfile) {
-        sourceMask = String(body.source_mask || "").replace(/^data:[^,]*,/, "").replace(/\s+/g, "");
-        if (sourceMask.length < 32 || sourceMask.length >= 1000000) throw new Error("Masque de protection du visage invalide.");
-      }
 
-      const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
-      let last = "";
-      // Mode anonyme uniquement : la clé compte était refusée (0 kudos / taille).
-      let hordeKey = "0000000000";
-
-      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
-      const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
-      // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
-      const detailedProfile = isMaskedProfile && body.profile_head_segmented === true &&
-        body.profile_render_width === 512 && body.profile_render_height === 640;
-      const W = 512;
-      const H = 512;
-      const steps = 8;
-      const photoModels = isMaskedProfile
-        ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
-        : hasHordeAccount
-        ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"]
-        : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
-      const payloads = [];
-
-      // Denoise HAUT si img2img : sinon la pose de la ref est recopié
-      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      const isProfileImg2Img = Boolean(profileSceneLock && !isDuoPrompt && body.profile_identity_lock === true);
-      den = isMaskedProfile ? 1 : body.profile_frontal_reference === true
-        ? Math.min(.95, Math.max(.85, den))
-        : Math.min(isProfileImg2Img ? 0.75 : 0.48, Math.max(isProfileImg2Img ? 0.58 : 0.36, den));
-
-      // Négatifs anti-clone + anti-âge + anti-pose figée
-      const soloNeg = isDuoPrompt
-        ? ", 3girls, four women, crowd, identical clone twins"
-        : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
-      // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
-      const qualityNeg = isDuoPrompt
-        ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
-        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, missing legs, cropped at chest,  exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
-      const photoHead = "character sheet, model sheet, turnaround, reference sheet, multiple views, three panels, triptych, collage, grid, split screen, white divider, side profile lineup, same woman repeated, clone, plastic skin, mannequin, catalog photo, painting, illustration, cgi, ";
-      const mirrorHead = isDuoPrompt
-        ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
-        : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
-      const negFull = (photoHead + mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1800);
-
-      // UNE SEULE soumission — anonyme: coût kudos minimal
       function makePayload(opts) {
         opts = opts || {};
         const w = opts.w || W;
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
-        if (!profileSceneLock && idHead && !promptSafe.includes(idHead.slice(0, 40))) {
-          promptSafe = idHead + ", " + promptSafe;
+        let promptSafe = String(body.prompt || "").replace(/\s+/g, " ").trim();
+        if (!promptSafe) promptSafe = "photorealistic DSLR photograph of one real adult woman, full body, natural skin";
+        if (!/photorealistic|photograph/i.test(promptSafe)) {
+          promptSafe = (promptSafe + ", photorealistic photograph, real skin, sharp focus").slice(0, 1400);
         }
-        promptSafe = String(promptSafe || "").replace(/\s+/g, " ").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 900);
+        promptSafe = promptSafe.slice(0, 1400);
         const simpleNeg = [
-          profileSceneLock && !isDuoPrompt ? String(body.negative || "").slice(0, 240) : "",
+          String(body.negative || "").slice(0, 300),
           "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
-          "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, text, watermark,",
-          isDuoPrompt ? "solo, 1girl, split screen, collage," :
-            body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
-              "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
-          body.profile_frontal_reference === true ? "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, hidden eye, cropped head, looking away" : "glowing eyes, neon eyes, phosphorescent eyes, fluorescent eyes, cyan eyes, LED eyes, luminous iris, face crop, headshot only, empty room",
-          profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
+          "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
+          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
+          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, face crop, headshot only"
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {
-          prompt: (promptSafe + " ### " + simpleNeg.slice(0, profileSceneLock && !isDuoPrompt ? 440 : 700)).slice(0, profileSceneLock && !isDuoPrompt ? 2000 : 1600),
+          prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1800),
           params: {
             width: w,
             height: h,
             steps: st,
             n: 1,
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
-            sampler_name: "k_euler",
-            ...(isMaskedProfile ? { karras: true } : {}),
-            cfg_scale: 5.5,
-            clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
+            sampler_name: "k_euler_a",
+            cfg_scale: 6,
+            clip_skip: 2,
           },
-          // Keep the current GitHub generation settings.
           nsfw: true,
           censor_nsfw: false,
           models: models,
@@ -2567,20 +2530,21 @@
         };
         if (opts.img2img && src) {
           base.source_image = src;
-          base.source_processing = isMaskedProfile ? "inpainting" : "img2img";
-          if (isMaskedProfile) base.source_mask = sourceMask;
+          base.source_processing = "img2img";
           base.params.denoising_strength = den;
-          const img2imgStepLimit = isMaskedProfile ? steps : body.profile_identity_lock === true
-            ? (hasHordeAccount ? 16 : 12)
-            : (hasHordeAccount ? 16 : 10);
-          base.params.steps = Math.min(st, img2imgStepLimit);
+          base.params.steps = Math.min(st, 12);
         }
         return base;
       }
 
-      // Anonyme : une seule taille acceptée par Horde, sans img2img (ça gonfle le coût).
-      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["stable_diffusion"], img2img: false }));
-      payloads.push(makePayload({ w: 384, h: 384, steps: 6, models: ["stable_diffusion"], img2img: false }));
+      const useImg2Img = Boolean(src) && body.force_img2img === true;
+      if (useImg2Img) {
+        payloads.push(makePayload({ img2img: true }));
+      } else {
+        payloads.push(makePayload({}));
+      }
+      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["Realistic Vision"], img2img: false }));
+
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];

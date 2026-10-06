@@ -7044,148 +7044,42 @@ function roleScenePack(c) {
 
 function finalizeProfilePrompt(payload, c, scenarioVariant) {
   if (!payload || !c) return payload;
-  const ageRaw = Number(c.age) || 25;
-  const age = ageRaw < 18 ? 22 : ageRaw;
-  const ageLook = age >= 45
-    ? "face and body look exactly " + age + " years old, visible mature features, NOT a 25 year old"
-    : age >= 35
-    ? "face and body look exactly " + age + " years old, adult not youthful, NOT 22, NOT college age"
-    : age <= 24
-    ? "face and body look exactly " + age + " years old, young adult, smooth skin, NOT 35, NOT 40, NOT wrinkles"
-    : "face and body look exactly " + age + " years old";
-  const duo = typeof isDuoCharacter === "function" && isDuoCharacter(c);
-
-  if (duo && typeof buildDuoShot === "function") {
+  const requestedAge = Number(c.age) || 25;
+  const age = requestedAge < 21 ? 22 : requestedAge;
+  if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
     payload.prompt = buildDuoShot(c, scenarioVariant);
     payload.is_duo = true;
     delete payload.source_image;
-    payload.negative = "solo, 1girl, single woman, headshot, split screen, diptych, collage, mirror symmetry, anime, cartoon, illustration, painting, deformed, blurry, text, watermark";
-    payload.seed = Math.floor(Math.random() * 2e9);
+    payload.negative = "solo, 1girl, headshot, split screen, diptych, headless, cropped head, " + (payload.negative || "");
     return payload;
   }
-
-  let looks = "";
-  try { looks = (typeof describeLooks === "function" ? describeLooks(c) : "") || ""; } catch (e) {}
-  if (!looks) looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
-  looks = looks.slice(0, 380);
-
-  let outfit = "", place = "";
-  try {
-    const pick = scenarioVariant || (typeof roleSexyPick === "function" ? roleSexyPick(c) : null);
-    if (pick) { outfit = pick.outfit || ""; place = pick.place || ""; }
-  } catch (e) {}
-  if (scenarioVariant) {
-    if (scenarioVariant.outfit) outfit = scenarioVariant.outfit;
-    if (scenarioVariant.place) place = scenarioVariant.place;
+  const promptBase = String(payload.prompt || "");
+  if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+    payload.prompt = [
+      "photorealistic DSLR photograph of one real adult woman, full body, natural skin pores,",
+      age + " year old adult woman,",
+      speciesLock(c),
+      promptBase,
+      "face visible, hips and legs visible, not a face crop"
+    ].filter(Boolean).join(" ");
+    payload.negative = "face crop, headshot, bust only, headless, blurry, doll, anime, painting, " + (payload.negative || "");
+    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+    return payload;
   }
-
-  // Poses SEXY / provocantes — toujours une nouvelle à chaque génération
-  const sexyPoses = [
-    "leaning forward toward camera showing deep cleavage, full body, sexy smile",
-    "standing full body lifting the hem of her short skirt slightly, teasing look",
-    "bent over slightly with hands on knees looking back over shoulder, arched back",
-    "standing on marble stairs hand on the railing, body angled, short outfit, full body head to shoes",
-    "sitting on the edge of a bed legs crossed in short dress, looking at camera",
-    "walking toward camera in hallway hips swaying, tight clothes, full body",
-    "standing with weight on one leg, hand on hip, short dress, looking at camera",
-    "from behind looking back over shoulder, hand on hip, short outfit, full body",
-    "leaning on stair railing, one leg forward, seductive gaze, full body",
-    "hand in hair, arched back, crop top and tight jeans, full body",
-    "sitting on bed in open satin robe, legs visible, seductive smile",
-    "standing legs slightly apart hands on hips, lingerie or short dress, full body",
-    "leaning back against a wall, chest forward, short top, full body",
-    "one hand on railing, looking over shoulder, mini skirt and heels, full body"
-  ];
-  // éviter de répéter la dernière pose pour ce personnage
-  let pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
-  try {
-    const key = "lea.lastSexyPose." + (c.id || "x");
-    const last = localStorage.getItem(key) || "";
-    let guard = 0;
-    while (pose === last && guard++ < 8) {
-      pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
-    }
-    localStorage.setItem(key, pose);
-  } catch (e) {}
-
-  // The profile selector and scenario override outrank generic styling.
-  const selectedWardrobe = Boolean(scenarioVariant && scenarioVariant.wardrobeStyle);
-  if (!selectedWardrobe && (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|leggings only/i.test(outfit))) {
-    const sexyOutfits = [
-      "very tight short olive mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
-      "tight black long-sleeve backless dress, deep V neckline, high thigh slit, black heels",
-      "tight emerald bodycon mini dress deep V neckline, black sheer tights, heeled ankle boots",
-      "short burgundy satin wrap mini dress deep cleavage, thigh slit, black stiletto sandals",
-      "navy deep V wrap top with sheer mesh midriff, tight skinny jeans",
-      "soaking wet light blue crop top clinging to body, tight jeans, wet hair, water droplets",
-      "black crop top with chest cutout, tight ripped blue jeans, bare midriff",
-      "black crop top, leather mini skirt, fishnet stockings, black stiletto pumps",
-      "black one-shoulder crop, mini skirt, fishnet thigh-highs with garters, patent heels",
-      "black deep V top, green mini skirt, thigh-high heeled boots",
-      "black sheer lace lingerie bodysuit with underwire cups",
-      "tight olive satin bodycon mini dress deep plunging neckline",
-      "open burgundy satin robe with lace over lingerie, bare legs",
-      "tight white crop top, tight blue skinny jeans, bare midriff",
-      "very short tight black crop top, black micro mini skirt, stiletto pumps"
-    ];
-    outfit = sexyOutfits[Math.floor(Math.random() * sexyOutfits.length)];
-  } else if (!selectedWardrobe && !/heels|cleavage|mini|crop|short|low-cut|satin|bodycon/i.test(outfit)) {
-    outfit += ", short and tight, high heels";
-  }
-
-  let cup = "";
-  try {
-    if (typeof cupLock === "function") {
-      const ck = cupLock(c);
-      if (ck && ck.pos) cup = String(ck.pos).replace(/:\d+(\.\d+)?/g, "").replace(/[()]/g, "").trim();
-    }
-  } catch (e) {}
-
-  let species = "";
-  try {
-    if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
-      species = String(speciesLock(c) || "").replace(/:\d+(\.\d+)?/g, "").slice(0, 140);
-    }
-  } catch (e) {}
-
-  // Prompt unique à chaque fois (seed texte + pose)
-  const uniq = "variation " + Math.floor(Math.random() * 9999);
-
+  // Version classique qui fonctionnait : identité + corps, sans forcer une scène de scénario
   payload.prompt = [
-    "photorealistic DSLR photograph of exactly one real woman, real photo not painting",
-    "single person only, not twins, not mirrored, not duplicated",
-    "(" + age + " year old adult woman:1.6), " + ageLook,
-    "natural human eyes, normal iris, no glow, no neon, no LED, no cyan eyes",
-    looks,
-    cup,
-    species,
-    "wearing " + outfit,
-    pose,
-    place ? ("location: " + place) : "",
-    "sexy provocative sensual pose, leaning forward, looking at camera, short tight dress or crop top and mini skirt, deep neckline, flirtatious smile, full body visible",
-    (scenarioVariant && scenarioVariant.cameraAngle) || "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
-    "natural skin pores, natural eyes without glow, sharp focus across body and clothing, detailed fabric texture, deep focus, realistic lighting",
-    uniq
-  ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
-
-  payload.negative = [
-    "nude, topless, exposed nipples, exposed genitals,",
-    "twins, clone, duplicate, mirror symmetry, two women, 2girls, multiple people,",
-    "same pose as before, identical composition, mirrored face,",
-    "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi, plastic doll,",
-    "airbrushed, overly smooth skin, wax skin, doll face,",
-    "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, lowres, text, watermark,",
-    "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
-    "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes, cyan eyes, fluorescent eyes, anime eyes, luminous iris,",
-    "empty room, no person, different person"
+    "photorealistic DSLR photograph of exactly one real adult woman, sharp focus, natural skin pores, natural eyes no glow,",
+    age + " year old adult woman,",
+    promptBase,
+    "full body or head to mid-thigh, hips and legs visible, varied pose, sexy provocative pose if clothing allows,",
+    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo"
   ].join(" ");
-
-  payload.identity_head = [age + " year old woman", looks.slice(0, 160), cup].filter(Boolean).join(", ").slice(0, 240);
-  payload.seed = Math.floor(Math.random() * 2e9);
-  // Pose change > copie de la ref : denoise un peu plus haut sur profil
-  if (payload.force_img2img) {
-    payload.denoising = 0.58;
-  }
+  payload.negative = "face crop only, headshot only, bust only, close-up portrait, passport photo, painting, oil painting, illustration, drawing, anime, cartoon, cgi, plastic doll, glowing eyes, neon eyes, headless, blurry, " + (payload.negative || "");
+  payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+  // Ne pas coller la pose de la ref peinte : txt2img par défaut
+  delete payload.source_image;
+  delete payload.source_processing;
+  payload.force_img2img = false;
   return payload;
 }
 
@@ -7812,7 +7706,7 @@ async function generatePhoto() {
       console.warn("[profile final prompt]", e);
     }
     let headRestoration = null;
-    if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+    if (false && !duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
       // Fail before submission if local preparation cannot retain the chosen face.
       payload.prompt = profileSceneLock;
       payload.profile_scene_lock = profileSceneLock;
