@@ -164,24 +164,40 @@ function identityFromCard(c) {
   const name = String((c && c.name) || "woman");
   const requestedAge = Number(c && c.age) || 25;
   const age = requestedAge < 21 ? 22 : requestedAge;
-  const app = String((c && c.appearance) || "") + " " + String((c && c.looks_en) || "");
+  const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : "";
+  const app = String((c && c.appearance) || "") + " " + String((c && c.looks_en) || "") + " " + String((c && c.body) || "") + " " + tags;
   const hairRaw = ((app.match(/Cheveux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
   const eyesRaw = ((app.match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
+  const blob = app.toLowerCase();
   let hair = "natural hair";
-  if (/platine|platinum/.test(hairRaw)) hair = "platinum blonde hair";
-  else if (/blond/.test(hairRaw)) hair = "blonde hair";
-  else if (/roux|auburn|ginger|red/.test(hairRaw)) hair = "natural red hair";
-  else if (/noir|black|jais/.test(hairRaw)) hair = "black hair";
-  else if (/ch[aâ]tain|chestnut|auburn/.test(hairRaw)) hair = "chestnut brown hair";
-  else if (/brun|brown/.test(hairRaw)) hair = "dark brown hair";
-  else if (/argent|silver|blanc/.test(hairRaw)) hair = "silver white hair";
+  if (/platine|platinum/.test(hairRaw + blob)) hair = "platinum blonde hair";
+  else if (/blond/.test(hairRaw + " " + blob)) hair = "blonde hair";
+  else if (/roux|auburn|ginger|red\s*hair|redhead|rousse/.test(hairRaw + " " + blob)) hair = "natural red ginger hair";
+  else if (/noir|black|jais/.test(hairRaw + " " + blob)) hair = "black hair";
+  else if (/ch[aâ]tain|chestnut/.test(hairRaw + " " + blob)) hair = "chestnut brown hair";
+  else if (/brun|brown/.test(hairRaw + " " + blob)) hair = "dark brown hair";
+  else if (/argent|silver|blanc/.test(hairRaw + " " + blob)) hair = "silver white hair";
+  // Texture
+  if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(blob)) hair += ", coily afro textured hair";
+  else if (/boucl|curly/.test(blob)) hair += ", curly hair";
+  else if (/ondul|wavy/.test(blob)) hair += ", wavy hair";
+  else if (/lisse|straight/.test(blob)) hair += ", straight hair";
+  else if (/long/.test(blob)) hair += ", long hair";
   let eyes = "natural realistic human eyes";
   if (/vert|green/.test(eyesRaw) && !/noisette|hazel/.test(eyesRaw)) eyes = "natural green iris, soft realistic eyes, not glowing";
   else if (/bleu|blue/.test(eyesRaw)) eyes = "natural blue iris, soft realistic eyes, not glowing";
   else if (/noisette|hazel/.test(eyesRaw)) eyes = "natural hazel iris, soft realistic eyes";
   else if (/marron|brun|brown/.test(eyesRaw)) eyes = "natural brown iris, soft realistic eyes";
   else if (/gris|grey|gray/.test(eyesRaw)) eyes = "natural grey iris, soft realistic eyes";
-  return name + ", " + age + " year old woman, " + hair + ", " + eyes;
+  // Peau / ethnicité
+  let skin = "";
+  if (/\bnoire?\b|black\s*woman|dark\s*skin|peau\s*noire|african/.test(blob)) skin = "dark brown skin, black woman";
+  else if (/m[eé]tisse|mixed|mulatto|light\s*brown\s*skin/.test(blob)) skin = "light brown mixed skin";
+  else if (/asiatique|asian|east\s*asian|chinese|japanese|korean/.test(blob)) skin = "east asian features, light skin";
+  else if (/latina|latine|hispanic|olive\s*skin|peau\s*mate/.test(blob)) skin = "olive tan skin, latina features";
+  else if (/pale|porcelaine|porcelain|peau\s*claire|fair\s*skin|teint\s*clair/.test(blob)) skin = "fair porcelain skin";
+  else if (/peau\s*dor[eé]e|golden\s*skin|sun-kissed/.test(blob)) skin = "sun-kissed golden skin";
+  return [name, age + " year old woman", hair, eyes, skin].filter(Boolean).join(", ");
 }
 function buildCharacterIdentityBlock(c) {
   if (!c) return "";
@@ -7087,15 +7103,23 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   }
   const promptBase = String(payload.prompt || "");
   if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+    const sp = speciesLock(c) || "";
+    const idF = (typeof identityFromCard === "function" ? identityFromCard(c) : (age + " year old woman"));
     payload.prompt = [
-      "photorealistic DSLR photograph of one real adult woman, full body, natural skin pores,",
-      age + " year old adult woman,",
-      speciesLock(c),
+      sp + ",",
+      "photorealistic photograph of one adult fantasy woman, full body, natural skin texture,",
+      idF + ",",
+      age + " year old,",
+      "species traits clearly visible, non-human features required,",
       promptBase,
-      "face visible, hips and legs visible, not a face crop"
+      "face visible, hips and legs visible, not a face crop, not a plain human"
     ].filter(Boolean).join(" ");
-    payload.negative = "face crop, headshot, bust only, headless, blurry, doll, anime, painting, " + (payload.negative || "");
-    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+    payload.negative = "plain human, no fantasy traits, face crop, headshot, bust only, headless, blurry, doll, anime, painting, wrong species, mermaid tail unless mermaid, horns unless oni or demon, " + (payload.negative || "");
+    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.55;
+    // fantasy: prefer txt2img so traits are not erased by human ref
+    delete payload.source_image;
+    delete payload.source_processing;
+    payload.force_img2img = false;
     return payload;
   }
   // Identité d'abord (cheveux/yeux/poitrine/âge), puis tenue sexy aléatoire
@@ -7140,12 +7164,18 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "wrong age, different person, blue streak hair, colored highlights unless specified,",
     payload.negative || ""
   ].filter(Boolean).join(" ");
-  payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+  payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.58;
   payload.identity_head = id.slice(0, 240);
-  // Ne pas coller la pose de la ref peinte : txt2img par défaut
-  delete payload.source_image;
-  delete payload.source_processing;
-  payload.force_img2img = false;
+  // Conserver la référence si déjà attachée (img2img) ; sinon txt2img
+  if (!(payload.source_image && String(payload.source_image).length > 800)) {
+    delete payload.source_image;
+    delete payload.source_processing;
+    payload.force_img2img = false;
+  } else {
+    payload.force_img2img = true;
+    payload.source_processing = "img2img";
+    payload.denoising = Math.max(0.55, Math.min(0.68, Number(payload.denoising) || 0.58));
+  }
   return payload;
 }
 
@@ -7753,16 +7783,17 @@ async function generatePhoto() {
           payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
         }
         payload.profile_user_detail = extra.slice(0, 360);
-        // Profil : txt2img (plus rapide, pose/tenue libres, ne recopie pas une ref peinte)
-        payload.force_img2img = false;
-        delete payload.source_image;
-        delete payload.source_processing;
-        if (hasIdentityRef) {
+        // Référence profil : img2img pour garder visage/peau/cheveux, denoise assez haut pour changer pose/tenue
+        const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);
+        if (hasRef) {
+          payload.force_img2img = true;
+          payload.source_processing = "img2img";
           payload.profile_identity_lock = true;
-          payload.denoising = 0.70;
-        }
-        if (window.LeaProfileComposition && hasIdentityRef) {
-          await window.LeaProfileComposition.prepareReference(payload, setGenStatus);
+          payload.denoising = Math.max(0.55, Math.min(0.68, Number(payload.denoising) || 0.58));
+        } else {
+          payload.force_img2img = false;
+          delete payload.source_image;
+          delete payload.source_processing;
         }
       }
       payload.nsfw = false;
