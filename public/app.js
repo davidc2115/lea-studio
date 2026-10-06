@@ -610,18 +610,18 @@ function pickProfileScenarioVariant(c) {
     : [];
   const role = [data.title, data.role, data.scenario, (data.tags || []).join(" ")].filter(Boolean).join(" ").toLowerCase();
   const fallbackOutfit = /infirmi[eè]re|nurse|h[oô]pital|clinic/.test(role)
-    ? "clean medical uniform with a practical tunic and trousers"
+    ? "tight short medical-inspired dress, deep neckline, stockings, heels, sexy nurse look"
     : /secr[eé]taire|bureau|office|colleague|coll[eè]gue/.test(role)
-    ? "fitted office blouse with a flattering open neckline, tailored pencil skirt, sheer stockings and classic heels"
+    ? "fitted office blouse unbuttoned at the top, short pencil skirt, sheer stockings, stiletto heels"
     : /sport|dance|danse|yoga|athl[eé]tique/.test(role)
-    ? "practical athletic top and leggings"
+    ? "tight sports bra and tiny shorts, toned body, sneakers"
     : /[eé]tudiant|[eé]tudiante|student|study|intello|livre/.test(role)
-    ? "casual knit top and jeans"
+    ? "tiny crop top and short denim mini skirt, sneakers"
     : /fantasy|elfe|kitsune|succube|dragon|vampire|catgirl|sir[eè]ne|ange/.test(role)
-    ? "a costume appropriate to the character's fantasy role"
+    ? "revealing fantasy costume, deep cleavage, short hem, species traits visible"
     : /fille d'une amie|fille d.amie|cuisine|kitchen/.test(role)
-    ? "fitted crop top and tight jeans, casual home clothes, not lingerie"
-    : "everyday clothes appropriate to the character's role and scenario";
+    ? "tiny crop top and tight jeans, midriff bare, casual sexy"
+    : "tight short mini dress with deep plunging neckline, fishnet tights, black stiletto heels";
   // Keep variant indexes paired, but replace generic wardrobe placeholders
   // with a role-appropriate outfit instead of sending the literal placeholder.
   const outfits = cleanList(data.outfits).map((outfit) =>
@@ -1743,14 +1743,18 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       "leaning on a railing one leg forward, seductive gaze, full body"
     ];
     const posePick = (scenarioVariant && scenarioVariant.pose) || randPoses[Math.floor(Math.random() * randPoses.length)];
+    // Force sexy if residual opaque/everyday wording
+    if (/opaque|everyday dress|flat shoes|role-appropriate|appropriate to the character/i.test(wearClean)) {
+      wearClean = "tight short mini dress with deep plunging neckline, fishnet tights, stiletto heels";
+    }
     const sceneFirst = [
-      "photorealistic DSLR photograph of exactly one real adult woman, sharp focus, natural skin pores, natural eyes no glow,",
+      "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, natural eyes no glow, no pink hair unless specified,",
       bodyBoost || "",
       "wearing exactly one outfit: " + wearClean + ",",
-      "NOT a second outfit, NOT mixed clothes,",
+      "NOT a second outfit, NOT mixed clothes, NOT opaque everyday dress, NOT flat shoes,",
       "location: " + locClean + ",",
       "pose: " + posePick + ",",
-      "full body from head to shoes, hips and legs visible, not a bust crop,",
+      "sexy provocative full body from head to shoes, hips and legs visible, not a bust crop,",
     ].filter(Boolean).join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
@@ -7139,7 +7143,9 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
     if (pick) { wear = pick.outfit || ""; pose = pick.pose || ""; place = pick.place || ""; }
   } catch (_) {}
-  if (!wear) wear = "tight short mini dress with deep neckline, heels, sexy provocative outfit";
+  if (!wear || /opaque|everyday|flat shoes|role-appropriate|appropriate to/i.test(wear)) {
+    wear = "tight short mini dress with deep plunging neckline, fishnet tights, black stiletto heels";
+  }
   if (!pose) pose = "full body standing, teasing look at camera, hips and legs visible";
   const id = (typeof identityFromCard === "function" ? identityFromCard(c) : (age + " year old woman"));
   const idBlock = (typeof buildCharacterIdentityBlock === "function" ? buildCharacterIdentityBlock(c) : id);
@@ -7172,7 +7178,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     hairNeg,
     cupNeg,
     "painting, oil painting, digital painting, illustration, drawing, anime, manga, cartoon, cgi, 3d render, plastic doll, airbrushed,",
-    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes,",
+    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, pink hair, magenta hair, purple hair unless specified, censored face, black bar over face, pixelated face,",
     "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, blurry, text, watermark,",
     "wrong age, different person, blue streak hair, colored highlights unless specified,",
     "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
@@ -7791,11 +7797,9 @@ async function generatePhoto() {
         } else {
           payload.denoising = Math.max(Number(payload.denoising) || 0, 0.55);
         }
-        const sceneLock = String(profileSceneLock || "").replace(/\s+/g, " ").trim().slice(0, 920);
+        // Ne PAS re-préfixer sceneLock (opaque everyday dress, etc.) — finalize a déjà tout
         const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
-        if (sceneLock && !currentPrompt.toLowerCase().includes(sceneLock.slice(0, 80).toLowerCase())) {
-          payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
-        }
+        payload.prompt = currentPrompt;
         payload.profile_user_detail = extra.slice(0, 360);
         // Référence profil : img2img pour garder visage/peau/cheveux, denoise assez haut pour changer pose/tenue
         const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);

@@ -22,11 +22,11 @@
     const revealing = /nude|naked|topless|transparent|see.through|d[eé]nud|nue\b/i;
     if (!revealing.test(value)) return value;
     const role = [character && character.id, character && character.title, character && character.body].join(" ");
-    if (/mermaid|sir[eè]ne/i.test(role)) return "opaque scaled bodice covering the chest, complete mermaid tail";
-    if (/nurse|infirmi[eè]re|doctor|m[eé]decin/i.test(role)) return "opaque buttoned medical uniform and trousers";
-    if (/office|bureau|coll[eè]gue|secr[eé]taire/i.test(role)) return "opaque closed office blouse and tailored trousers";
-    if (/sport|coach|athl[eè]te/i.test(role)) return "opaque sports shirt and full length training trousers";
-    return "opaque closed role-appropriate blouse and trousers, no underwear visible";
+    if (/mermaid|sir[eè]ne/i.test(role)) return "revealing seashell top, mermaid tail, species traits visible";
+    if (/nurse|infirmi[eè]re|doctor|m[eé]decin/i.test(role)) return "sexy nurse mini dress, stockings, heels";
+    if (/office|bureau|coll[eè]gue|secr[eé]taire/i.test(role)) return "office blouse unbuttoned at top, short pencil skirt, sheer stockings, heels";
+    if (/sport|coach|athl[eè]te/i.test(role)) return "tight sports bra and tiny shorts";
+    return "tight short mini dress with deep neckline, heels";
   }
 
   function sceneLock(character, variant, extra, identity) {
