@@ -1667,12 +1667,11 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     }
     // Toujours forcer tenue sexy + yeux naturels (Horde ignore sinon)
     const sexyWearPool = [
-      "very short tight mini dress with deep cleavage and high heels",
-      "tiny crop top and micro mini skirt with high heels",
-      "low-cut tight blouse and short pencil skirt, stockings, heels",
-      "short satin slip dress with thin straps barely covering thighs, heels",
-      "tight bodycon dress with deep neckline and high heels",
-      "tight jeans and a very low-cut crop top, midriff visible, heels"
+      "short tight mini dress with deep cleavage and high heels",
+      "tight crop top and very short skirt, high heels",
+      "fitted low-cut blouse and tight pencil skirt, stockings, heels",
+      "short satin slip dress with thin straps and heels",
+      "tight jeans and a low-cut crop top, heels"
     ];
     if (!wearClean || /opaque|everyday|flat shoes|appropriate|casual home|knit dress/i.test(wearClean)) {
       wearClean = sexyWearPool[Math.floor(Math.random() * sexyWearPool.length)];
@@ -1682,9 +1681,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       "standing full body lifting the hem of her short dress slightly, teasing smile",
       "hand on hip, weight on one leg, short outfit, looking at camera, full body",
       "bent slightly forward hands on knees looking back over shoulder, arched back, full body",
-      "sitting on the edge of a table or sofa, legs crossed, short dress riding up, seductive look",
-      "standing legs slightly apart, hands behind head, short tight outfit, full body",
-      "from behind looking back over shoulder, hand on hip, short skirt, full body"
+      "sitting on the edge of a table or sofa, legs crossed, short dress, seductive look"
     ];
     const poseSexy = sexyPosePool[Math.floor(Math.random() * sexyPosePool.length)];
     const sceneFirst = [
@@ -7087,7 +7084,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     localStorage.setItem(key, pose);
   } catch (e) {}
 
-  // Toujours une tenue SEXY / provocante (écrase les tenues sages du scénario)
+  // Toujours une tenue SEXY / provocante (écrase les tenues sages)
   const sexyOutfits = [
     "very short tight mini dress with deep cleavage and high heels",
     "tiny crop top and micro mini skirt with high heels",
@@ -7095,13 +7092,11 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "short satin slip dress with thin straps barely covering thighs, heels",
     "tight low-cut bodycon dress hugging the body, high heels",
     "crop top and tight short shorts, heels, midriff visible",
-    "sheer blouse open over a lace bra and short skirt, heels",
     "tight jeans and a very low-cut crop top, heels"
   ];
-  if (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|office blouse fully|leggings only/i.test(outfit)) {
+  if (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|leggings only/i.test(outfit)) {
     outfit = sexyOutfits[Math.floor(Math.random() * sexyOutfits.length)];
   } else if (!/heels|cleavage|mini|crop|short|low-cut|satin|bodycon/i.test(outfit)) {
-    // garder le type de tenue mais forcer le côté sexy
     outfit = outfit + ", short and tight, sexy provocative, high heels";
   }
 
@@ -7142,13 +7137,148 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   payload.negative = [
     "twins, clone, duplicate, mirror symmetry, two women, 2girls, multiple people,",
     "same pose as before, identical composition, mirrored face,",
-    "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi,",
-    "plastic skin, wax skin, doll face, airbrushed, overly smooth skin,",
+    "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi, plastic doll,",
+    "airbrushed, overly smooth skin, wax skin, doll face,",
+    "deformed, extra limbs, bad anatomy, blurry, lowres, text, watermark,",
+    "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
     "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes,",
-    "face crop, headshot only, close-up face only, portrait only, bust only, torso only,",
-    "bra only, lingerie only, nude, fully naked,",
-    "text, watermark, logo, signature, deformed, blurry, low quality"
-  ];
+    "empty room, no person, different person, bra only, lingerie only"
+  ].join(" ");
+
+  payload.identity_head = [age + " year old woman", looks.slice(0, 160), cup].filter(Boolean).join(", ").slice(0, 240);
+  payload.seed = Math.floor(Math.random() * 2e9);
+  // Pose change > copie de la ref : denoise un peu plus haut sur profil
+  if (payload.force_img2img) {
+    payload.denoising = 0.58;
+  }
+  return payload;
+}
+
+async function generatePhoto() {
+  window._leaDuoOverride = "";
+
+  // antiban local complètement désactivé
+  try {
+    localStorage.removeItem("lea.hordeBlockedUntil");
+    localStorage.removeItem("lea.hordeLastSubmit");
+  } catch (_) {}
+
+  if (window._leaGenBusy) {
+    setGenStatus("Déjà une génération en cours…");
+    return;
+  }
+  const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
+  const c = character();
+  const profileVariant = pickProfileScenarioVariant(c);
+  const duoProfile = isDuoCharacter(c);
+  if (!duoProfile) {
+    profileVariant.pose = profileVariant.pose || pickProfileScenePose(c, profileVariant);
+    profileVariant.cameraAngle = profileVariant.cameraAngle || pickProfileCameraAngle(c);
+  }
+  const profileSceneLock = duoProfile ? "" : buildProfileSceneLock(c, profileVariant, extra);
+  let prompt;
+  try {
+    prompt = buildLeaImagePrompt(extra, profileVariant);
+  } catch (e) {
+    setGenStatus("Erreur prompt : " + (e.message || e));
+    console.error("[lea prompt]", e);
+    return;
+  }
+  if (!prompt || prompt.length < 20) {
+    setGenStatus("Prompt vide — réessaie.");
+    return;
+  }
+  // DUO: prompt COURT centré sur contraste cheveux + poitrine (Horde ignore les pavés)
+  try {
+    if (isDuoCharacter(c)) {
+      const duoCore = duoCompositionBlock(c);
+      const ex = expandProfileExtra(extra);
+      const outfitBit = (ex && ex.outfitLine) ? ex.outfitLine : profileVariant.outfit;
+      const poseBit = (ex && ex.poseLine) ? ex.poseLine : (profileVariant.pose || pickProfileScenePose(c, profileVariant));
+      const placeBit = (ex && ex.placeLine) ? ex.placeLine : describePlaceDetail(profileVariant.place);
+      // Contraste d'abord (âge / cheveux / poitrine) — Horde dilue sinon
+      // Place courte pour ne pas noyer les sujets (sinon Horde génère un salon vide)
+      const placeShort = String(placeBit || "indoor apartment").replace(/\s+/g, " ").trim().slice(0, 80);
+      prompt = [
+        "(2girls:2.0), (two adult women:1.95), (people in the frame:1.9), photorealistic photo,",
+        "EXACTLY TWO different adult women standing or sitting together,",
+        duoCore || "LEFT woman and RIGHT woman, different hair, different breast sizes,",
+        "both fully visible head to knees or toes, full bodies, hips and legs visible, wide shot,",
+        "wearing " + String(outfitBit || "casual clothes").slice(0, 90) + ",",
+        "background: " + placeShort + ",",
+        "NOT empty room, NOT empty interior, NOT vacant living room, NOT furniture only, NOT no people,",
+        "NOT solo, NOT 1girl, NOT single woman, NOT face crop only,",
+        "two separate bodies, two faces, natural skin,",
+        extra ? (String(extra).slice(0, 70) + ",") : "",
+      ].filter(Boolean).join(" ");
+      console.log("[lea duo prompt]", prompt.slice(0, 450));
+    }
+  } catch (e) { console.warn("duo prompt", e); }
+  // Pose OBLIGATOIRE en tête (sinon Horde collège toujours le même portrait)
+  try {
+    if (!isDuoCharacter(c)) {
+      const forcedPose = (profileVariant && profileVariant.pose) || pickProfileScenePose(c, profileVariant || {});
+      const forcedCam = (profileVariant && profileVariant.cameraAngle) || pickProfileCameraAngle(c);
+      if (!/\bpose\b|sitting|standing|kneeling|leaning|looking over/i.test(prompt)) {
+        prompt = "(new pose:1.55), " + forcedPose + ", " + forcedCam + ", " + prompt;
+      } else {
+        prompt = "(new pose different from last:1.45), " + forcedPose + ", " + prompt;
+      }
+      prompt = prompt.replace(/iris verts/gi, "natural green iris not glowing")
+        .replace(/regard expressif/gi, "")
+        .replace(/cils d[eé]finis/gi, "")
+        .replace(/blonds? platine/gi, "platinum blonde hair");
+    }
+  } catch (_) {}
+  // Renfort visage (tous personnages solo)
+  try {
+    if (!isDuoCharacter(c)) {
+      // Cadre corps entier OBLIGATOIRE (Horde adore les portraits sinon)
+      const frame = profileVariant.cameraAngle
+        ? "(" + profileVariant.cameraAngle + ":1.5), (full body or head-to-knees:1.55), "
+        : "(full body head to knees:1.6), (hips and legs visible:1.5), wide shot, ";
+      const soloLock = "(solo:1.45), single adult woman only, ";
+      const idLock = profileIdentityAnchor(c);
+      // Yeux + cheveux extraits en priorité absolue
+      let eyeFirst = "";
+      try {
+        const L = String(c.looks_en || "");
+        const em = L.match(/\(([^()]*eyes:1\.[0-9]+)\)/i);
+        const hm = L.match(/\(([^()]*hair:1\.[0-9]+)\)/i);
+        if (em) eyeFirst += "(" + em[1] + "), ";
+        if (hm) eyeFirst += "(" + hm[1] + "), ";
+      } catch (_) {}
+      // Identité + corps EN TÊTE, prompt scène après
+      prompt = soloLock + eyeFirst + frame + idLock + ", " + prompt;
+      prompt += ", NOT face crop only, NOT close-up portrait only, NOT headshot, NOT head and shoulders only, NOT bust only, NOT cropped at chest, NOT passport photo, NOT face-only, (full body or full body body in frame:1.5), hips and thighs visible,";
+      prompt += ", NOT 2girls, NOT twins, NOT clones, NOT mirror symmetry,";
+      prompt += ", (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, NOT text, NOT watermark,";
+    }
+  } catch (_) {}
+  window._leaGenBusy = true;
+  const engine = currentImageEngine();
+  // mémoriser le choix du profil
+  try {
+    const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    st.imageEngine = engine;
+    localStorage.setItem("lea.settings", JSON.stringify(st));
+  } catch (_) {}
+  showPromptStatus("Moteur : " + engine + " · préparation…", prompt);
+  try {
+    // —— Gemini Nano Banana (clés AI Studio, gratuit selon quota) ——
+    if (engine === "gemini" || engine === "nano") {
+      setGenStatus("Gemini Image…");
+      try {
+        const gemBody = {
+          prompt,
+          negative: bodyNegatives(c),
+          engine: "gemini",
+          aspect: "3:4",
+          fallback_horde: false,
+        };
+        try {
+          const refB64 = await resolveCharacterRefB64(c);
+          if (refB64) gemBody.ref_images = ["data:image/jpeg;base64," + refB64];
         } catch (_) {}
         setGenStatus(gemBody.ref_images ? "Gemini Image + img2img (cover)…" : "Gemini Image…");
         const start = await api("/api/image", {
@@ -7581,9 +7711,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
       if (isDuoCharacter(c)) {
         finalizeProfilePrompt(payload, c, profileVariant);
       } else {
-        // Toujours injecter tenue sexy + pose provocante (finalize écrase le prompt sage)
         try { finalizeProfilePrompt(payload, c, profileVariant); } catch (e) { console.warn("[finalize solo]", e); }
-        // img2img léger pour garder le visage, denoise assez haut pour changer pose/tenue
         if (!payload.source_image || payload.source_processing !== "img2img") {
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
