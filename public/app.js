@@ -5033,7 +5033,7 @@ function renderProfile() {
     </select>
     <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
     <select id="profile-ref-mode">
-      <option value="off">Non — variété max, cheveux/poitrine de la fiche (recommandé)</option>
+      <option value="off">Non — variété max, cheveux/poitrine de la fiche</option>
       <option value="soft">Souple — visage proche, scène/tenue/corps libres (denoise 0.65)</option>
       <option value="strong">Forte — quasi copie de la photo ★ (denoise 0.45)</option>
     </select>
@@ -6257,8 +6257,8 @@ function bindPoseLibrary(c) {
 function profileRefMode() {
   try {
     const m = JSON.parse(localStorage.getItem("lea.settings") || "{}").profileRefMode;
-    return m === "soft" || m === "strong" ? m : "off";
-  } catch (_) { return "off"; }
+    return m === "soft" || m === "strong" ? m : "strong"; // ★ visage conservé par défaut
+  } catch (_) { return "strong"; }
 }
 
 async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
