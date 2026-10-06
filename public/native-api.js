@@ -2558,8 +2558,8 @@
             if (bodyPayload.params) {
               bodyPayload.params.width = W;
               bodyPayload.params.height = H;
-              if (!hasHordeAccount && bodyPayload.params.steps > (detailedProfile ? 26 : 22)) {
-                bodyPayload.params.steps = detailedProfile ? 26 : 22;
+              if (bodyPayload.params.steps > 12) {
+                bodyPayload.params.steps = 10;
               }
             }
             const res = await fetch(host + "/generate/async", {

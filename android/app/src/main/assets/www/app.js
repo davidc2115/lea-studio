@@ -836,12 +836,45 @@ function buildProfileSceneLock(c, variant, extra = "") {
 }
 
 function roleSexyPick(c) {
-  const variant = pickProfileScenarioVariant(c);
-  return {
-    outfit: variant.outfit,
-    pose: pickProfileScenePose(c, variant),
-    place: variant.place,
-  };
+  const variant = pickProfileScenarioVariant(c) || {};
+  let outfit = variant.outfit || "";
+  let place = variant.place || "";
+  let pose = "";
+  try {
+    if (window.LeaProfileWardrobe && Array.isArray(window.LeaProfileWardrobe.styles) && window.LeaProfileWardrobe.styles.length) {
+      const styles = window.LeaProfileWardrobe.styles;
+      const style = styles[Math.floor(Math.random() * styles.length)];
+      if (style && style.outfit) outfit = style.outfit;
+      if (style && style.framing) pose = style.framing;
+    }
+  } catch (_) {}
+  if (!outfit || outfit.length < 12) {
+    const pool = [
+      "very tight short spaghetti-strap mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
+      "tight black bodycon mini dress, deep cleavage, sheer black tights, high heels",
+      "soaking wet light crop top clinging to the body, bare midriff, tight jeans, wet hair",
+      "black leather mini skirt, crop top, fishnet stockings, stiletto pumps",
+      "burgundy satin wrap mini dress with thigh slit, black stilettos",
+      "fitted blouse slightly unbuttoned, short pencil skirt, sheer stockings, heels",
+      "lace lingerie bodysuit under an open sheer robe, seductive pose",
+      "tiny crop top and micro shorts, high heels, provocative stance"
+    ];
+    outfit = pool[Math.floor(Math.random() * pool.length)];
+  }
+  if (!pose) {
+    const poses = [
+      "standing full body, one hand on hip, looking at camera, teasing expression",
+      "leaning forward showing cleavage, full body visible head to shoes",
+      "sitting on edge of furniture, legs crossed, short hemline, looking at camera",
+      "standing three-quarter view looking back over shoulder, full body",
+      "leaning against wall, arched back, full body head to shoes"
+    ];
+    pose = poses[Math.floor(Math.random() * poses.length)];
+  }
+  try {
+    if (typeof pickProfileScenePose === "function") pose = pickProfileScenePose(c, variant) || pose;
+  } catch (_) {}
+  return { outfit, pose, place: place || "indoor elegant interior, soft realistic lighting" };
 }
 
 function describeOutfitDetail(outfitStr, scenarioStr) {
@@ -4807,8 +4840,7 @@ function renderProfile() {
     </div>
     <h3 style="margin-top:18px">Photo du scénario (tenue + lieu du personnage)</h3>
     <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Utilise ta clé AI Horde des réglages si elle est enregistrée.</p>
-    <label for="profile-wardrobe" style="display:block;margin-top:10px">Tenue de la photo</label>
-    <select id="profile-wardrobe">${window.LeaProfileWardrobe ? window.LeaProfileWardrobe.options() : '<option value="scenario">Tenue du scénario</option>'}</select>
+    <p style="color:var(--muted);font-size:12px;margin-top:8px">Tenue sexy / provocante tirée au hasard à chaque génération (mini-robe, crop, résille, talons…).</p>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Détail prioritaire : tenue, pose ou lieu (ex. robe bordeaux, assise au bord du lit, escarpins noirs)"></textarea>
     <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
@@ -7066,14 +7098,24 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
     return payload;
   }
-  // Version classique qui fonctionnait : identité + corps, sans forcer une scène de scénario
+  // Tenue sexy aléatoire (pas de sélecteur) + pose provocante
+  let wear = "", pose = "", place = "";
+  try {
+    const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
+    if (pick) { wear = pick.outfit || ""; pose = pick.pose || ""; place = pick.place || ""; }
+  } catch (_) {}
+  if (!wear) wear = "tight short mini dress with deep neckline, heels, sexy provocative outfit";
+  if (!pose) pose = "full body standing, teasing look at camera, hips and legs visible";
   payload.prompt = [
     "photorealistic DSLR photograph of exactly one real adult woman, sharp focus, natural skin pores, natural eyes no glow,",
     age + " year old adult woman,",
     promptBase,
-    "full body or head to mid-thigh, hips and legs visible, varied pose, sexy provocative pose if clothing allows,",
-    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo"
-  ].join(" ");
+    "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
+    "pose: " + pose + ",",
+    place ? ("location: " + place + ",") : "",
+    "sexy provocative sensual pose, full body head to shoes, hips and legs visible,",
+    "NOT face crop, NOT headshot, NOT bust only, NOT passport photo, NOT opaque office blouse only"
+  ].filter(Boolean).join(" ");
   payload.negative = "face crop only, headshot only, bust only, close-up portrait, passport photo, painting, oil painting, illustration, drawing, anime, cartoon, cgi, plastic doll, glowing eyes, neon eyes, headless, blurry, " + (payload.negative || "");
   payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
   // Ne pas coller la pose de la ref peinte : txt2img par défaut
