@@ -572,6 +572,23 @@ function profileScenarioText(c) {
 
 function pickProfileScenarioVariant(c) {
   const data = c || {};
+  if ((window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true ||
+      window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) &&
+      Array.isArray(data.profile_scenes) && data.profile_scenes.length) {
+    const key = "lea.lastProfileScenario." + (data.id || "x");
+    let recent = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(key) || "[]");
+      recent = Array.isArray(saved) ? saved : [Number(saved)];
+    } catch (_) {}
+    const available = data.profile_scenes.map((scene, index) => index).filter(index => !recent.includes(index));
+    const indexes = available.length ? available :
+      data.profile_scenes.map((scene, index) => index).filter(index => index !== recent[recent.length - 1]);
+    const index = indexes[Math.floor(Math.random() * indexes.length)] || 0;
+    try { localStorage.setItem(key, JSON.stringify(recent.concat(index).slice(-2))); } catch (_) {}
+    const scene = data.profile_scenes[index];
+    return { index, outfit: scene.outfit, place: scene.place, pose: scene.pose, cameraAngle: scene.camera, scene };
+  }
   const cleanList = (value) => Array.isArray(value)
     ? value.map((item) => String(item || "").trim()).filter(Boolean)
     : [];
@@ -773,6 +790,20 @@ function pickProfileCameraAngle(c) {
 
 function buildProfileSceneLock(c, variant, extra = "") {
   if (!c || !variant) return "";
+  if (window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+    const physical = physicalLocksFromText(c);
+    const traits = physical.positive.filter(item => /plus.size|soft belly|thick thighs|slim|athletic|waist|hips|curvy|muscular|shoulders|petite|tall|hourglass/i.test(item)).slice(0, 3);
+    const identity = [cupLock(c).pos.split(",")[0], ...(physical.features || []).slice(0, 3), ...traits].filter(Boolean).join(", ");
+    const scene = { ...variant, pose: variant.pose || pickProfileScenePose(c, variant), cameraAngle: variant.cameraAngle || pickProfileCameraAngle(c) };
+    return window.LeaSegmentedProfile.sceneLock(c, scene, expandProfileExtra(extra), identity);
+  }
+  if (window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true && window.LeaProfileComposition) {
+    const physical = physicalLocksFromText(c);
+    const bodyTraits = physical.positive.filter(item => /slim|athletic|waist|hips|curvy|muscular|shoulders|petite|tall/i.test(item)).slice(0, 2);
+    const identity = [cupLock(c).pos.split(",")[0], ...(physical.features || []).slice(0, 3), ...bodyTraits].filter(Boolean).join(", ");
+    const scene = { ...variant, pose: variant.pose || pickProfileScenePose(c, variant), cameraAngle: variant.cameraAngle || pickProfileCameraAngle(c) };
+    return window.LeaProfileComposition.sceneLock(c, scene, expandProfileExtra(extra), identity);
+  }
   const ex = expandProfileExtra(extra || "");
   const age = Number(c.age) || 21;
   const adultAge = age < 21 ? 22 : age;
@@ -1547,7 +1578,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural eyes,",
+      "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural realistic eyes not glowing, no neon eyes,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -1607,10 +1638,12 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     ].filter(Boolean).join(" ");
     const qualityPart = [
       "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
+      "natural eyes, natural iris color, no glowing eyes, no neon eyes, no bioluminescent eyes, no LED eyes,",
+      "NOT glowing eyes, NOT neon blue eyes, NOT phosphorescent eyes, NOT anime eyes,",
       "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT painting, NOT 3d render, NOT cgi,",
       "NOT text, NOT watermark, NOT logo, NOT signature, NOT letters, NOT words on image,",
       "NOT 2girls, NOT twins, NOT mirror symmetry, NOT mirrored body, NOT double torso, NOT four breasts, NOT collage, NOT grid,",
-      "NOT same pose as reference,",
+      "NOT face crop, NOT headshot only, NOT bust only, NOT same pose as reference,",
       anti,
       hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",
     ].filter(Boolean).join(" ");
@@ -1632,12 +1665,33 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
     }
+    // Toujours forcer tenue sexy + yeux naturels (Horde ignore sinon)
+    const sexyWearPool = [
+      "short tight mini dress with deep cleavage and high heels",
+      "tight crop top and very short skirt, high heels",
+      "fitted low-cut blouse and tight pencil skirt, stockings, heels",
+      "short satin slip dress with thin straps and heels",
+      "tight jeans and a low-cut crop top, heels"
+    ];
+    if (!wearClean || /opaque|everyday|flat shoes|appropriate|casual home|knit dress/i.test(wearClean)) {
+      wearClean = sexyWearPool[Math.floor(Math.random() * sexyWearPool.length)];
+    }
+    const sexyPosePool = [
+      "leaning forward toward camera with deep cleavage visible, full body from head to mid-thigh",
+      "standing full body lifting the hem of her short dress slightly, teasing smile",
+      "hand on hip, weight on one leg, short outfit, looking at camera, full body",
+      "bent slightly forward hands on knees looking back over shoulder, arched back, full body",
+      "sitting on the edge of a table or sofa, legs crossed, short dress, seductive look"
+    ];
+    const poseSexy = sexyPosePool[Math.floor(Math.random() * sexyPosePool.length)];
     const sceneFirst = [
-      "she is fully dressed in clothes, not bra only, not lingerie only,",
+      "photorealistic full body photo of one adult woman,",
+      "natural realistic human eyes, brown or dark iris, no glow, no neon, no blue light in eyes,",
+      "she is fully dressed in sexy clothes, not bra only, not lingerie only,",
       "wearing " + wearClean + ",",
       "location: " + locClean + ",",
-      "pose: leaning forward showing cleavage OR lifting the hem of her skirt slightly, full body,",
-      "full body from head to knees, hips and legs visible,",
+      "pose: " + poseSexy + ",",
+      "full body head to knees, hips and legs visible, not a face crop,",
     ].join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
@@ -2849,8 +2903,19 @@ function compressToJpeg(src, maxW, quality) {
 }
 
 /** Persiste une image dans la galerie du personnage (disque Android si possible, sinon data URL). */
-async function addToGallery(src, charId) {
+async function addToGallery(src, charId, options = {}) {
   const cid = charId || state.current || "lea";
+  let preservedPhotos = null;
+  if (options.preserveExisting === true) {
+    try {
+      preservedPhotos = JSON.parse(localStorage.getItem("lea.photos." + cid) || "[]");
+      if (!Array.isArray(preservedPhotos) || !preservedPhotos.every(photo => typeof photo === "string")) {
+        throw new Error("Index de galerie invalide.");
+      }
+    } catch (error) {
+      throw new Error("Galerie existante illisible ; aucune photo remplacée.");
+    }
+  }
   let stored = src;
   try {
     // Toujours compresser puis écrire sur disque Android si possible (persistance)
@@ -2887,9 +2952,10 @@ async function addToGallery(src, charId) {
       }
     } catch (_) {}
   }
-  let list = extraPhotos(cid).filter((x) => x !== stored);
+  let list = (preservedPhotos || extraPhotos(cid)).filter((x) => x !== stored);
   // Éviter doublon visuel : même taille data URL déjà présente
   try {
+    if (!preservedPhotos) {
     const fp = String(stored).startsWith("data:")
       ? (stored.slice(0, 100) + ":" + stored.length)
       : stored;
@@ -2900,9 +2966,16 @@ async function addToGallery(src, charId) {
       }
       return true;
     });
+    }
   } catch (_) {}
   list.unshift(stored);
-  saveExtra(list, cid);
+  if (preservedPhotos) {
+    // No quota cleanup or count pruning: an unwritable index must fail explicitly,
+    // not delete older photos or conversations to make room for this new one.
+    localStorage.setItem("lea.photos." + cid, JSON.stringify(list));
+  } else {
+    saveExtra(list, cid);
+  }
   // Première génération = cover auto (Découvrir / chat) si pas déjà choisie
   maybeAutoCover(cid, stored);
   // Rafraîchir fond de chat en direct si on est sur ce personnage
@@ -5938,7 +6011,10 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       if (payload.seed == null) payload.seed = Math.floor(Math.random() * 2_000_000_000);
       // Analyse Gemini → prompt visage cohérent avec la photo
       try {
-        const faceLock = await ensureFaceLockFromGemini(c, ref, setS);
+        const keepProfileLocal = options.profileIdentityLock === true &&
+          (window.LEA_ENABLE_EXPERIMENTAL_FACE_MASK === true ||
+          window.LeaSegmentedProfile && window.LeaSegmentedProfile.active());
+        const faceLock = keepProfileLocal ? "" : await ensureFaceLockFromGemini(c, ref, setS);
         if (options.profileIdentityLock === true) {
           payload.face_lock = profileIdentityAnchor(c, faceLock);
         } else if (faceLock) {
@@ -5952,6 +6028,7 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       setS("Horde txt2img (pas encore de photo de ref — la 1ère image servira ensuite)…");
     }
   } catch (e) {
+    if (options.profileIdentityLock === true) throw e;
     setS("Horde txt2img (ref indisponible)…");
   }
   return payload;
@@ -6006,7 +6083,15 @@ async function resolveCharacterRefB64(c) {
   const id = c.id || "";
   const candidates = [];
 
-  // 1) Cover d'origine (pas la dernière peinture générée)
+  // The explicit star is authoritative, even if the original cast cover differs.
+  const starred = customCover(id);
+  if (starred) {
+    const selected = await trySrc(starred);
+    if (!selected) throw new Error("La photo marquée par l'étoile est illisible ; sélectionne à nouveau cette référence.");
+    return selected;
+  }
+
+  // 1) Original cast cover only when no explicit reference is selected.
   if (c.cover) candidates.push(c.cover);
 
   // 2) Cover résolue (resolvedCover)
@@ -6062,6 +6147,33 @@ async function resolveCharacterRefB64(c) {
     if (b) return b;
   }
   return null;
+}
+
+async function generateFrontalProfileReference(request, status) {
+  const started = await api("/api/image", { method: "POST", body: JSON.stringify(request) });
+  if (!started || !started.jobId) throw new Error(started && started.error || "Préparation de la référence de face impossible.");
+  for (let i = 0; i < 120; i++) {
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    const result = await api("/api/image-status", {
+      method: "POST", body: JSON.stringify({ jobId: started.jobId, host: started.host }),
+    });
+    if (result && result.error) {
+      if (/rate limit|pause|limite|429/i.test(result.error) && !result.done) {
+        status("Référence de face : attente Horde…");
+        continue;
+      }
+      throw new Error(result.error);
+    }
+    if (!result || !result.done) {
+      status("Référence de face : file Horde" + (result && result.wait != null ? " · ~" + result.wait + "s" : "") + "…");
+      continue;
+    }
+    if (!result.url) throw new Error("Horde a terminé sans référence exploitable.");
+    const encoded = await imageToBase64(result.url);
+    if (!encoded) throw new Error("Téléchargement de la référence de face impossible.");
+    return encoded;
+  }
+  throw new Error("La référence de face est encore en attente ; aucune photo existante modifiée.");
 }
 
 async function imageToBase64(src) {
@@ -7056,8 +7168,8 @@ async function generatePhoto() {
   const profileVariant = pickProfileScenarioVariant(c);
   const duoProfile = isDuoCharacter(c);
   if (!duoProfile) {
-    profileVariant.pose = pickProfileScenePose(c, profileVariant);
-    profileVariant.cameraAngle = pickProfileCameraAngle(c);
+    profileVariant.pose = profileVariant.pose || pickProfileScenePose(c, profileVariant);
+    profileVariant.cameraAngle = profileVariant.cameraAngle || pickProfileCameraAngle(c);
   }
   const profileSceneLock = duoProfile ? "" : buildProfileSceneLock(c, profileVariant, extra);
   let prompt;
@@ -7621,15 +7733,57 @@ async function generatePhoto() {
           payload.profile_identity_lock = true;
           payload.denoising = 0.70;
         }
+        if (window.LeaProfileComposition && hasIdentityRef) {
+          await window.LeaProfileComposition.prepareReference(payload, setGenStatus);
+        }
       }
+      payload.nsfw = false;
+      payload.is_profile_photo = true;
       showPromptStatus("Prompt envoyé", payload.prompt);
     } catch (e) {
       console.warn("[profile final prompt]", e);
     }
+    let headRestoration = null;
+    if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+      // Fail before submission if local preparation cannot retain the chosen face.
+      payload.prompt = profileSceneLock;
+      payload.profile_scene_lock = profileSceneLock;
+      // Re-resolve immediately before preparation: the star outranks all legacy refs.
+      payload.source_image = await resolveCharacterRefB64(c);
+      if (payload.source_image && payload.source_image.length > 400000) {
+        const compactRef = await compressToJpeg("data:image/jpeg;base64," + payload.source_image, 512, .85);
+        if (!String(compactRef).startsWith("data:image/")) throw new Error("La référence choisie ne peut pas être préparée.");
+        payload.source_image = compactRef.slice(compactRef.indexOf(",") + 1);
+      }
+      headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus, {
+        character: c,
+        identity: profileIdentityAnchor(c),
+        generate: request => generateFrontalProfileReference(request, setGenStatus),
+        resolve: async stored => {
+          if (String(stored).startsWith("gallery:") && window.LeaAndroid && window.LeaAndroid.readGallery) {
+            const data = window.LeaAndroid.readGallery(String(stored).slice(8));
+            if (String(data).startsWith("data:image/")) return data.slice(data.indexOf(",") + 1);
+          }
+          const src = resolvePhotoSrc(stored) || stored;
+          return imageToBase64(src);
+        },
+        persist: async (image, id) => {
+          const stored = await addToGallery("data:image/png;base64," + image, id, { preserveExisting: true });
+          if (state.current === id && state.view === "profile") renderProfile();
+          return stored;
+        },
+        storage: localStorage,
+      });
+      payload.negative = [
+        cupLock(c).neg,
+        "nude, topless, transparent clothes, underwear, cleavage, wrong outfit,",
+        bodyNegatives(c),
+      ].filter(Boolean).join(" ");
+    }
     const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
-    pollHordeJob(start.jobId, start.host, c.id);
+    pollHordeJob(start.jobId, start.host, c.id, headRestoration);
   } catch (e) {
     window._leaGenBusy = false;
     setGenStatus(String(e.message || e));
@@ -7684,7 +7838,7 @@ async function persistImageUrl(url) {
   }
 }
 
-async function pollHordeJob(jobId, host, charId) {
+async function pollHordeJob(jobId, host, charId, headRestoration = null) {
   const cid = charId || state.current || "lea";
   for (let i = 0; i < 120; i++) {
     // Poll adaptatif : plus espacé = moins de ban IP
@@ -7713,16 +7867,29 @@ async function pollHordeJob(jobId, host, charId) {
         }
         continue;
       }
-      window._leaGenBusy = false;
       if (st.error) {
+        window._leaGenBusy = false;
         setGenStatus(st.error);
         return;
       }
       if (!st.url) {
+        window._leaGenBusy = false;
         setGenStatus("Horde : job terminé sans image");
         return;
       }
-      const stored = await addToGallery(st.url, cid);
+      let stored;
+      try {
+        const completedUrl = headRestoration
+          ? await window.LeaSegmentedProfile.restoreImage(st.url, headRestoration)
+          : st.url;
+        stored = await addToGallery(completedUrl, cid,
+          headRestoration ? { preserveExisting: true } : {});
+      } catch (error) {
+        window._leaGenBusy = false;
+        setGenStatus("Photo non ajoutée : " + (error.message || error));
+        return;
+      }
+      window._leaGenBusy = false;
       // Cooldown 60s après succès pour ne pas re-ban l'IP anonyme
       try {
         const coolUntil = Date.now() + 60000;

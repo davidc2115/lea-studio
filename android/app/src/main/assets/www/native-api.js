@@ -2548,7 +2548,7 @@
           isDuoPrompt ? "solo, 1girl, split screen, collage," :
             body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
               "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
-          body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, face crop, headshot only, empty room",
+          body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, face crop, headshot only, empty room",
           profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {

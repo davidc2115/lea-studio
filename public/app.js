@@ -1578,7 +1578,7 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
     const idCore = [
-      "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural eyes,",
+      "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural realistic eyes not glowing, no neon eyes,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
@@ -1638,10 +1638,12 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     ].filter(Boolean).join(" ");
     const qualityPart = [
       "(photorealistic photograph:1.5), (real human skin pores:1.35), DSLR photo, natural lighting, sharp focus,",
+      "natural eyes, natural iris color, no glowing eyes, no neon eyes, no bioluminescent eyes, no LED eyes,",
+      "NOT glowing eyes, NOT neon blue eyes, NOT phosphorescent eyes, NOT anime eyes,",
       "NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT painting, NOT 3d render, NOT cgi,",
       "NOT text, NOT watermark, NOT logo, NOT signature, NOT letters, NOT words on image,",
       "NOT 2girls, NOT twins, NOT mirror symmetry, NOT mirrored body, NOT double torso, NOT four breasts, NOT collage, NOT grid,",
-      "NOT same pose as reference,",
+      "NOT face crop, NOT headshot only, NOT bust only, NOT same pose as reference,",
       anti,
       hasUser ? ((ex.text || "").slice(0, 80) + ",") : "",
     ].filter(Boolean).join(" ");
@@ -1663,12 +1665,33 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
     }
+    // Toujours forcer tenue sexy + yeux naturels (Horde ignore sinon)
+    const sexyWearPool = [
+      "short tight mini dress with deep cleavage and high heels",
+      "tight crop top and very short skirt, high heels",
+      "fitted low-cut blouse and tight pencil skirt, stockings, heels",
+      "short satin slip dress with thin straps and heels",
+      "tight jeans and a low-cut crop top, heels"
+    ];
+    if (!wearClean || /opaque|everyday|flat shoes|appropriate|casual home|knit dress/i.test(wearClean)) {
+      wearClean = sexyWearPool[Math.floor(Math.random() * sexyWearPool.length)];
+    }
+    const sexyPosePool = [
+      "leaning forward toward camera with deep cleavage visible, full body from head to mid-thigh",
+      "standing full body lifting the hem of her short dress slightly, teasing smile",
+      "hand on hip, weight on one leg, short outfit, looking at camera, full body",
+      "bent slightly forward hands on knees looking back over shoulder, arched back, full body",
+      "sitting on the edge of a table or sofa, legs crossed, short dress, seductive look"
+    ];
+    const poseSexy = sexyPosePool[Math.floor(Math.random() * sexyPosePool.length)];
     const sceneFirst = [
-      "she is fully dressed in clothes, not bra only, not lingerie only,",
+      "photorealistic full body photo of one adult woman,",
+      "natural realistic human eyes, brown or dark iris, no glow, no neon, no blue light in eyes,",
+      "she is fully dressed in sexy clothes, not bra only, not lingerie only,",
       "wearing " + wearClean + ",",
       "location: " + locClean + ",",
-      "pose: leaning forward showing cleavage OR lifting the hem of her skirt slightly, full body,",
-      "full body from head to knees, hips and legs visible,",
+      "pose: " + poseSexy + ",",
+      "full body head to knees, hips and legs visible, not a face crop,",
     ].join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
