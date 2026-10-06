@@ -841,8 +841,25 @@ function profileScenePosePool(c, variant) {
   ];
 }
 
+/** Bibliothèque de poses personnalisées par personnage (localStorage + champ fiche "poses"). */
+function customPoses(c) {
+  const id = (c && c.id) || "x";
+  try {
+    const saved = JSON.parse(localStorage.getItem("lea.poses." + id) || "null");
+    if (Array.isArray(saved)) return saved.map((p) => String(p).trim()).filter(Boolean);
+  } catch (_) {}
+  return Array.isArray(c && c.poses) ? c.poses.map((p) => String(p).trim()).filter(Boolean) : [];
+}
+
+function saveCustomPoses(c, list) {
+  const clean = [...new Set(list.map((p) => String(p).replace(/\s+/g, " ").trim()).filter(Boolean))].slice(0, 40);
+  try { localStorage.setItem("lea.poses." + ((c && c.id) || "x"), JSON.stringify(clean)); } catch (_) {}
+  return clean;
+}
+
 function pickProfileScenePose(c, variant) {
-  const poses = profileScenePosePool(c, variant);
+  const mine = customPoses(c);
+  const poses = mine.length ? mine : profileScenePosePool(c, variant);
   const key = "lea.lastProfilePose." + ((c && c.id) || "x");
   let recent = [];
   try {
@@ -4962,6 +4979,19 @@ function renderProfile() {
       <option value="soft">Souple — visage proche, scène/tenue/corps libres (denoise 0.65)</option>
       <option value="strong">Forte — quasi copie de la photo ★ (denoise 0.45)</option>
     </select>
+    <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
+      <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
+      <p style="color:var(--muted);font-size:12px;margin:6px 0">Si la liste n'est pas vide, chaque photo tire une de ces poses (sans répéter les 3 dernières). Vide = poses automatiques selon le lieu.</p>
+      <ul id="pose-list" style="list-style:none;padding:0;margin:0"></ul>
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <input class="field" id="pose-new" data-testid="pose-new-input" placeholder="ex. assise sur le comptoir, jambes croisées, regard par-dessus l'épaule" style="flex:1">
+        <button type="button" class="cta" id="pose-add" data-testid="pose-add-btn">Ajouter</button>
+      </div>
+      <p style="margin-top:6px">
+        <button type="button" class="cta" id="pose-suggest" data-testid="pose-suggest-btn" style="background:#2a3a48">Ajouter des suggestions</button>
+        <button type="button" class="cta" id="pose-clear" data-testid="pose-clear-btn" style="background:#4a2a2a;margin-left:6px">Tout effacer</button>
+      </p>
+    </details>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer la photo</button>
       <!-- Local Dream retiré à la demande utilisateur -->
@@ -5120,6 +5150,7 @@ function renderProfile() {
       cur.imageEngine = $("imgengine-profile").value;
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     };
+    if ($("pose-list")) bindPoseLibrary(c);
     if ($("profile-ref-mode")) {
       $("profile-ref-mode").value = profileRefMode();
       $("profile-ref-mode").onchange = () => {
@@ -6123,6 +6154,44 @@ async function ensureFaceLockFromGemini(c, refB64, statusFn) {
     setS("Analyse visage ignorée : " + (e.message || e));
   }
   return "";
+}
+
+function bindPoseLibrary(c) {
+  const render = () => {
+    const list = customPoses(c);
+    $("pose-count").textContent = String(list.length);
+    $("pose-list").innerHTML = list.map((p, i) =>
+      `<li style="display:flex;gap:6px;align-items:center;margin:4px 0"><span style="flex:1;font-size:13px">${escapeHtml(p)}</span>` +
+      `<button type="button" data-pose-del="${i}" data-testid="pose-del-${i}" title="Supprimer" style="background:#4a2a2a;color:#fff;border:0;border-radius:6px;padding:2px 9px;cursor:pointer">×</button></li>`).join("");
+  };
+  $("pose-list").onclick = (e) => {
+    const i = e.target.getAttribute("data-pose-del");
+    if (i == null) return;
+    const list = customPoses(c);
+    list.splice(Number(i), 1);
+    saveCustomPoses(c, list);
+    render();
+  };
+  const add = () => {
+    const v = $("pose-new").value.trim();
+    if (!v) return;
+    saveCustomPoses(c, customPoses(c).concat([v]));
+    $("pose-new").value = "";
+    render();
+  };
+  $("pose-add").onclick = add;
+  $("pose-new").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } };
+  $("pose-suggest").onclick = () => {
+    let extra = [];
+    try { extra = profileScenePosePool(c, pickProfileScenarioVariant(c) || {}); } catch (_) {}
+    saveCustomPoses(c, customPoses(c).concat(extra));
+    render();
+  };
+  $("pose-clear").onclick = () => {
+    try { localStorage.setItem("lea.poses." + ((c && c.id) || "x"), "[]"); } catch (_) {}
+    render();
+  };
+  render();
 }
 
 function profileRefMode() {
@@ -7259,7 +7328,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     age + " year old adult woman,",
     "(new camera angle:1.2), slight pose variation,",
     "wearing exactly one outfit: " + wear + ", NOT mixed clothes, NOT the same clothes as the reference photo,",
-    "pose: " + pose + ",",
+    "(pose: " + pose.replace(/[()]/g, " ") + ":1.4),",
     place ? ("location: " + place + ",") : "",
     "sexy provocative sensual pose, full body from head to shoes, hips and legs visible,",
     hairCard ? "(" + [hairCard.pos, ...cardHairStyle(c)].join(", ") + ":1.5)," : "",
