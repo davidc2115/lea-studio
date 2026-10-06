@@ -2483,17 +2483,8 @@
 
       const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
       let last = "";
+      // Mode anonyme uniquement : la clé compte était refusée (0 kudos / taille).
       let hordeKey = "0000000000";
-      const bodyKey = String(body.hordeKey || body.horde_key || "").trim();
-      if (bodyKey.length > 8) hordeKey = bodyKey;
-      try {
-        const st = settings();
-        if (hordeKey === "0000000000" && st.hordeKey && String(st.hordeKey).trim().length > 8) hordeKey = String(st.hordeKey).trim();
-      } catch (_) {}
-      try {
-        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        if (hordeKey === "0000000000" && st2.hordeKey && String(st2.hordeKey).trim().length > 8) hordeKey = String(st2.hordeKey).trim();
-      } catch (_) {}
 
       const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
       const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
@@ -2502,7 +2493,7 @@
         body.profile_render_width === 512 && body.profile_render_height === 640;
       const W = 512;
       const H = 512;
-      const steps = 5;
+      const steps = 8;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2571,8 +2562,8 @@
           censor_nsfw: false,
           models: models,
           r2: true,
-          slow_workers: false,
-          shared: false,
+          slow_workers: true,
+          shared: true,
         };
         if (opts.img2img && src) {
           base.source_image = src;
@@ -2587,13 +2578,9 @@
         return base;
       }
 
-      const forceImg2 = useImg2Img && body.force_img2img === true;
-      if (forceImg2 && useImg2Img) {
-        payloads.push(makePayload({ img2img: true }));
-      } else {
-        payloads.push(makePayload({}));
-      }
-      payloads.push(makePayload({ w: 512, h: 512, steps: 4, models: ["Realistic Vision"], img2img: false }));
+      // Anonyme : une seule taille acceptée par Horde, sans img2img (ça gonfle le coût).
+      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["stable_diffusion"], img2img: false }));
+      payloads.push(makePayload({ w: 384, h: 384, steps: 6, models: ["stable_diffusion"], img2img: false }));
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];
@@ -2660,7 +2647,7 @@
       }
       if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
         throw new Error(
-          "Horde file saturée (0 kudos). Réessaie dans 1–2 min, ou crée une clé gratuite sur aihorde.net (Clés → AI Horde) pour passer devant. " +
+          "Horde anonyme saturé. Réessaie dans 1–2 min. " +
           String(last).slice(0, 70)
         );
       }
