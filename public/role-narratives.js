@@ -131,14 +131,14 @@
     const fallbackRanks = {};
     for (const c of characters) {
       if (!c || !c.id || c.imported || String(c.id).startsWith("imp_")) continue;
-      if (c.story_profile && c.story_profile.version === "role-scenes-v3") continue;
+      if (c.story_profile && c.story_profile.version === "role-scenes-v4") continue;
       const role = roleOf(c), bank = banks[role];
       if (!bank) throw new Error("Banque de scénarios absente : " + role);
       if (Number(c.age) < 18) throw new Error("Le catalogue de rôles nécessite des personnages adultes : " + c.id);
       const n = rankById.get(c.id) ?? (fallbackRanks[role] || 0);
       fallbackRanks[role] = (fallbackRanks[role] || 0) + 1;
       const family = bank.category === "family";
-      const eligible = Object.keys(temperaments).filter(key => !family || !["flirt", "romantique", "exhibitionniste"].includes(key));
+      const eligible = Object.keys(temperaments);
       const primary = eligible[n % eligible.length], temperament = temperaments[primary];
       const secondary = temperament.nuance[Math.floor(n / eligible.length) % temperament.nuance.length];
       const beat = n % bank.plots.length;
@@ -166,12 +166,12 @@
         const key = eligible[(n + i * 3) % eligible.length], trait = temperaments[key];
         return { name, primary: key, label: trait.label, voice: trait.voice, nuance: trait.nuance[(n + i) % trait.nuance.length] };
       });
-      c.story_profile = { version: "role-scenes-v3", role, category: bank.category, relation: bank.relation, family, primary, secondary, beat: c.id === "cup_babysitter_07" ? "tram-coloc" : beat, obstacle, motive, speakers: speakerProfiles };
+      c.story_profile = { version: "role-scenes-v4", role, category: bank.category, relation: bank.relation, family, primary, secondary, beat: c.id === "cup_babysitter_07" ? "tram-coloc" : beat, obstacle, motive, speakers: speakerProfiles };
       c.personality = "Tempérament principal : " + temperament.label + ". Nuance : " + secondary + ".\n" +
         temperament.voice + " " + temperament.response + "\n" +
         "Dans cette situation, elle " + motive + ".";
       if (duo) c.personality += "\n" + speakerProfiles.map(p => p.name + " : " + p.label + ", " + p.nuance + ". " + p.voice).join("\n");
-      const limits = "Tout le monde est adulte. Elle peut flirter, refuser, attendre ou aller plus loin selon son tempérament. Ne jamais inverser les rôles.";
+      const limits = "Tout le monde est adulte (18+). Elle peut flirter, refuser, attendre ou aller plus loin selon son tempérament. Ne jamais inverser les rôles ni changer qui est qui.";
       // Lead with the actual situation so truncated discovery cards do not all show role boilerplate.
       c.scenario = c.name + " : " + premise + "\n" +
         (duo ? "Deux personnages adultes." : c.age + " ans.") +
@@ -183,7 +183,7 @@
       c.greeting = "*" + premise + " " + (duo ? "Les deux sont là." : "Elle te regarde.") + "*\n" +
         (duo ? speakerProfiles.map((p, i) => p.name + " : " + (i ? "J'ai un autre point de vue. Écoutons les deux avant de choisir." : temperaments[p.primary].line)).join("\n")
           : "*" + temperament.gesture.charAt(0).toUpperCase() + temperament.gesture.slice(1) + ".*\n" + temperament.line);
-      c.scenario_version = "role-scenes-v3";
+      c.scenario_version = "role-scenes-v4";
     }
     return characters;
   }
