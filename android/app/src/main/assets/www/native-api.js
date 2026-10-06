@@ -2500,9 +2500,9 @@
       // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
       const detailedProfile = isMaskedProfile && body.profile_head_segmented === true &&
         body.profile_render_width === 512 && body.profile_render_height === 640;
-      const W = isMaskedProfile && body.profile_head_segmented === true && !detailedProfile ? 384 : 512;
-      const H = detailedProfile ? 640 : isMaskedProfile && body.profile_head_segmented === true ? 512 : isMaskedProfile ? 704 : 512;
-      const steps = isMaskedProfile ? (detailedProfile ? 16 : 12) : hasHordeAccount ? 18 : 12;
+      const W = 512;
+      const H = isMaskedProfile ? 640 : 640;
+      const steps = isMaskedProfile ? 10 : (hasHordeAccount ? 14 : 8);
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount

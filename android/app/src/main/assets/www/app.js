@@ -847,8 +847,15 @@ function roleSexyPick(c) {
 function describeOutfitDetail(outfitStr, scenarioStr) {
   const raw = String(outfitStr || "").trim();
   const o = (raw + " " + String(scenarioStr || "")).toLowerCase();
+  // Une seule tenue : ne pas empiler jean + chemise + robe (Horde mélange tout).
+  if (raw && raw.length > 12 && !/^(casual|everyday|appropriate)/i.test(raw)) {
+    const wet = /wet|tremp|soaked|mouill|pluie|orage|rain/.test(o)
+      ? ", soaking wet clothes clinging to skin, wet hair"
+      : "";
+    return raw.replace(/^exactly wearing:\s*/i, "") + wet;
+  }
   const bits = [];
-  if (raw) bits.push("exactly wearing: " + raw);
+  if (raw) bits.push(raw);
 
   // État humidité / pluie
   if (/wet|tremp|soaked|mouill|pluie|orage|rain|dripping|moites?|sweaty|sueur/.test(o)) {
@@ -1665,14 +1672,26 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
     }
+    const randPoses = [
+      "leaning forward showing cleavage, full body, seductive smile",
+      "standing lifting the hem of her short skirt slightly, teasing look, full body",
+      "bent forward hands on knees looking back over shoulder, arched back, full body",
+      "sitting on the edge of a bed legs crossed, short outfit, looking at camera",
+      "from behind looking back over shoulder, hand on hip, full body",
+      "walking toward camera hips swaying, tight clothes, full body head to shoes",
+      "one hand on hip weight on one leg, short dress, looking at camera, full body",
+      "leaning on a railing one leg forward, seductive gaze, full body"
+    ];
+    const posePick = (scenarioVariant && scenarioVariant.pose) || randPoses[Math.floor(Math.random() * randPoses.length)];
     const sceneFirst = [
-      "photorealistic full body photo of one adult woman, natural realistic human eyes without glow,",
-      "chest and pelvis covered by the selected outfit,",
-      "wearing " + wearClean + ",",
+      "photorealistic DSLR photograph of exactly one real adult woman, sharp focus, natural skin pores, natural eyes no glow,",
+      bodyBoost || "",
+      "wearing exactly one outfit: " + wearClean + ",",
+      "NOT a second outfit, NOT mixed clothes,",
       "location: " + locClean + ",",
-      "pose: " + ((scenarioVariant && scenarioVariant.pose) || "hand on hip, weight on one leg, looking at camera") + ",",
-      "full body from head to knees, hips and legs visible,",
-    ].join(" ");
+      "pose: " + posePick + ",",
+      "full body from head to shoes, hips and legs visible, not a bust crop,",
+    ].filter(Boolean).join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
     if (short.length > maxLen) {
@@ -7898,7 +7917,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const q = st.queue != null ? " · file " + st.queue : "";
         const w = st.wait != null ? " · ~" + st.wait + "s" : "";
         const p = st.processing ? " · calcul" : "";
-        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/120)");
+        setGenStatus("Horde en cours" + q + w + p + " · essai " + (i + 1) + "");
         // Si Horde dit wait 30s+, ne pas re-poller trop tôt
         if (st.wait && Number(st.wait) >= 20) {
           const extra = Math.min(45, Number(st.wait)) * 1000;
