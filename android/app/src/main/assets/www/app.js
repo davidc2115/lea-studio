@@ -7022,7 +7022,14 @@ function roleScenePack(c) {
 function finalizeProfilePrompt(payload, c, scenarioVariant) {
   if (!payload || !c) return payload;
   const ageRaw = Number(c.age) || 25;
-  const age = ageRaw < 21 ? 22 : ageRaw;
+  const age = ageRaw < 18 ? 22 : ageRaw;
+  const ageLook = age >= 45
+    ? "face and body look exactly " + age + " years old, visible mature features, NOT a 25 year old"
+    : age >= 35
+    ? "face and body look exactly " + age + " years old, adult not youthful, NOT 22, NOT college age"
+    : age <= 24
+    ? "face and body look exactly " + age + " years old, young adult, smooth skin, NOT 35, NOT 40, NOT wrinkles"
+    : "face and body look exactly " + age + " years old";
   const duo = typeof isDuoCharacter === "function" && isDuoCharacter(c);
 
   if (duo && typeof buildDuoShot === "function") {
@@ -7124,7 +7131,8 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   payload.prompt = [
     "photorealistic DSLR photograph of exactly one real woman, real photo not painting",
     "single person only, not twins, not mirrored, not duplicated",
-    age + " year old adult woman",
+    "(" + age + " year old adult woman:1.6), " + ageLook,
+    "natural human eyes, normal iris, no glow, no neon, no LED, no cyan eyes",
     looks,
     cup,
     species,
@@ -7145,7 +7153,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "airbrushed, overly smooth skin, wax skin, doll face,",
     "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, lowres, text, watermark,",
     "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
-    "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes,",
+    "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes, cyan eyes, fluorescent eyes, anime eyes, luminous iris,",
     "empty room, no person, different person"
   ].join(" ");
 

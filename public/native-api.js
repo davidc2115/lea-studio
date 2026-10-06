@@ -2502,7 +2502,7 @@
         body.profile_render_width === 512 && body.profile_render_height === 640;
       const W = isMaskedProfile && body.profile_head_segmented === true && !detailedProfile ? 384 : 512;
       const H = detailedProfile ? 640 : isMaskedProfile && body.profile_head_segmented === true ? 512 : isMaskedProfile ? 704 : 512;
-      const steps = isMaskedProfile ? (detailedProfile ? 26 : 22) : hasHordeAccount ? 28 : 22;
+      const steps = isMaskedProfile ? (detailedProfile ? 16 : 12) : hasHordeAccount ? 18 : 12;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2550,7 +2550,7 @@
           isDuoPrompt ? "solo, 1girl, split screen, collage," :
             body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
               "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
-          body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, face crop, headshot only, empty room",
+          body.profile_frontal_reference === true ? "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, hidden eye, cropped head, looking away" : "glowing eyes, neon eyes, phosphorescent eyes, fluorescent eyes, cyan eyes, LED eyes, luminous iris, face crop, headshot only, empty room",
           profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {
@@ -2580,8 +2580,8 @@
           if (isMaskedProfile) base.source_mask = sourceMask;
           base.params.denoising_strength = den;
           const img2imgStepLimit = isMaskedProfile ? steps : body.profile_identity_lock === true
-            ? (hasHordeAccount ? 28 : 20)
-            : (hasHordeAccount ? 28 : 12);
+            ? (hasHordeAccount ? 16 : 12)
+            : (hasHordeAccount ? 16 : 10);
           base.params.steps = Math.min(st, img2imgStepLimit);
         }
         return base;
