@@ -2500,7 +2500,7 @@
         body.profile_render_width === 512 && body.profile_render_height === 640;
       const W = 512;
       const H = 512;
-      const steps = 8;
+      const steps = body.profile_frontal_reference === true ? 6 : 8;
       const photoModels = isMaskedProfile
         ? ["Realistic Vision Inpainting", "Deliberate Inpainting"]
         : hasHordeAccount
@@ -2561,7 +2561,7 @@
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
             sampler_name: "k_euler",
             ...(isMaskedProfile ? { karras: true } : {}),
-            cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
+            cfg_scale: 5.5,
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
           // Keep the current GitHub generation settings.

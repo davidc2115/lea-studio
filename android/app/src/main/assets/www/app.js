@@ -6164,7 +6164,7 @@ async function generateFrontalProfileReference(request, status) {
   const started = await api("/api/image", { method: "POST", body: JSON.stringify(request) });
   if (!started || !started.jobId) throw new Error(started && started.error || "Préparation de la référence de face impossible.");
   for (let i = 0; i < 120; i++) {
-    await new Promise(resolve => setTimeout(resolve, 15000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
     const result = await api("/api/image-status", {
       method: "POST", body: JSON.stringify({ jobId: started.jobId, host: started.host }),
     });
@@ -7815,6 +7815,7 @@ async function generatePhoto() {
         if (!String(compactRef).startsWith("data:image/")) throw new Error("La référence choisie ne peut pas être préparée.");
         payload.source_image = compactRef.slice(compactRef.indexOf(",") + 1);
       }
+      try {
       headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus, {
         character: c,
         identity: profileIdentityAnchor(c),
@@ -7834,6 +7835,14 @@ async function generatePhoto() {
         },
         storage: localStorage,
       });
+      } catch (prepErr) {
+        console.warn("[face-prep]", prepErr);
+        setGenStatus("Référence visage ignorée (" + String(prepErr.message || prepErr).slice(0, 120) + "). Photo du scénario quand même…");
+        headRestoration = null;
+        payload.force_img2img = false;
+        delete payload.source_image;
+        delete payload.source_processing;
+      }
       payload.negative = [
         cupLock(c).neg,
         "nude, topless, exposed nipples, exposed genitals, wrong outfit,",
