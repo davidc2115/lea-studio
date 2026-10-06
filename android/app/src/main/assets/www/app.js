@@ -1665,33 +1665,13 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
     }
-    // Toujours forcer tenue sexy + yeux naturels (Horde ignore sinon)
-    const sexyWearPool = [
-      "short tight mini dress with deep cleavage and high heels",
-      "tight crop top and very short skirt, high heels",
-      "fitted low-cut blouse and tight pencil skirt, stockings, heels",
-      "short satin slip dress with thin straps and heels",
-      "tight jeans and a low-cut crop top, heels"
-    ];
-    if (!wearClean || /opaque|everyday|flat shoes|appropriate|casual home|knit dress/i.test(wearClean)) {
-      wearClean = sexyWearPool[Math.floor(Math.random() * sexyWearPool.length)];
-    }
-    const sexyPosePool = [
-      "leaning forward toward camera with deep cleavage visible, full body from head to mid-thigh",
-      "standing full body lifting the hem of her short dress slightly, teasing smile",
-      "hand on hip, weight on one leg, short outfit, looking at camera, full body",
-      "bent slightly forward hands on knees looking back over shoulder, arched back, full body",
-      "sitting on the edge of a table or sofa, legs crossed, short dress, seductive look"
-    ];
-    const poseSexy = sexyPosePool[Math.floor(Math.random() * sexyPosePool.length)];
     const sceneFirst = [
-      "photorealistic full body photo of one adult woman,",
-      "natural realistic human eyes, brown or dark iris, no glow, no neon, no blue light in eyes,",
-      "she is fully dressed in sexy clothes, not bra only, not lingerie only,",
+      "photorealistic full body photo of one adult woman, natural realistic human eyes without glow,",
+      "chest and pelvis covered by the selected outfit,",
       "wearing " + wearClean + ",",
       "location: " + locClean + ",",
-      "pose: " + poseSexy + ",",
-      "full body head to knees, hips and legs visible, not a face crop,",
+      "pose: " + ((scenarioVariant && scenarioVariant.pose) || "hand on hip, weight on one leg, looking at camera") + ",",
+      "full body from head to knees, hips and legs visible,",
     ].join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
@@ -2918,9 +2898,11 @@ async function addToGallery(src, charId, options = {}) {
   }
   let stored = src;
   try {
-    // Toujours compresser puis écrire sur disque Android si possible (persistance)
+    // Restored profile PNGs retain facial pixels and fine outfit detail.
     let dataUrl = src;
-    if (!String(src).startsWith("data:image")) {
+    if (options.preserveExisting === true && String(src).startsWith("data:image/png")) {
+      dataUrl = src;
+    } else if (!String(src).startsWith("data:image")) {
       dataUrl = await compressToJpeg(src, 768, 0.82);
     } else {
       dataUrl = await compressToJpeg(src, 768, 0.82);
@@ -4805,8 +4787,10 @@ function renderProfile() {
       }).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario (tenue + lieu du personnage)</h3>
-    <p style="color:var(--muted);font-size:13px">Tenue, lieu et scène tirés du scénario et des variantes définies pour le personnage. Horde utilise le mode anonyme, sans clé. × pour supprimer une image générée.</p>
-    <textarea class="field" id="imgprompt" rows="2" placeholder="Optionnel PRIORITAIRE : pose, tenue, acte… (ex: à genoux, lingerie rouge, elle suce…) — pris en compte dans la génération"></textarea>
+    <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Horde utilise le mode anonyme, sans clé.</p>
+    <label for="profile-wardrobe" style="display:block;margin-top:10px">Tenue de la photo</label>
+    <select id="profile-wardrobe">${window.LeaProfileWardrobe ? window.LeaProfileWardrobe.options() : '<option value="scenario">Tenue du scénario</option>'}</select>
+    <textarea class="field" id="imgprompt" rows="2" placeholder="Détail prioritaire : tenue, pose ou lieu (ex. robe bordeaux, assise au bord du lit, escarpins noirs)"></textarea>
     <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
@@ -4816,7 +4800,7 @@ function renderProfile() {
       <option value="sd_cpp">SD.cpp (local)</option>
     </select>
     <p style="margin-top:8px">
-      <button class="cta" id="genimg">Générer (aléatoire)</button>
+      <button class="cta" id="genimg">Générer la photo</button>
       <!-- Local Dream retiré à la demande utilisateur -->
       <button class="cta" id="dl-sdcpp2" type="button" style="margin-left:8px;background:#2a3a48">Pack SD.cpp</button>
     </p>
@@ -4833,6 +4817,14 @@ function renderProfile() {
     show("chat");
     renderChat();
   };
+  if ($("profile-wardrobe")) {
+    const key = "lea.profileWardrobe." + c.id;
+    try { $("profile-wardrobe").value = localStorage.getItem(key) || "auto"; } catch (_) {}
+    if (!$("profile-wardrobe").value) $("profile-wardrobe").value = "auto";
+    $("profile-wardrobe").onchange = event => {
+      try { localStorage.setItem(key, event.target.value); } catch (_) {}
+    };
+  }
   if ($("prof-fav")) {
     $("prof-fav").onclick = () => {
       const on = toggleFavorite(c.id);
@@ -7049,7 +7041,7 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
 
   let outfit = "", place = "";
   try {
-    const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
+    const pick = scenarioVariant || (typeof roleSexyPick === "function" ? roleSexyPick(c) : null);
     if (pick) { outfit = pick.outfit || ""; place = pick.place || ""; }
   } catch (e) {}
   if (scenarioVariant) {
@@ -7062,15 +7054,17 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "leaning forward toward camera showing deep cleavage, full body, sexy smile",
     "standing full body lifting the hem of her short skirt slightly, teasing look",
     "bent over slightly with hands on knees looking back over shoulder, arched back",
-    "standing in doorway hand on the frame, body angled, short outfit, full body",
-    "sitting on kitchen counter legs crossed in short top and jeans, looking at camera",
-    "pulling her crop top up slightly teasingly, full body, provocative pose",
+    "standing on marble stairs hand on the railing, body angled, short outfit, full body head to shoes",
+    "sitting on the edge of a bed legs crossed in short dress, looking at camera",
+    "walking toward camera in hallway hips swaying, tight clothes, full body",
     "standing with weight on one leg, hand on hip, short dress, looking at camera",
     "from behind looking back over shoulder, hand on hip, short outfit, full body",
-    "kneeling on one knee looking up seductively, full body visible",
-    "walking toward camera hips swaying in tight short clothes, full body",
-    "leaning back against a counter or wall, chest forward, short top, full body",
-    "standing legs slightly apart hands behind head, short outfit, full body"
+    "leaning on stair railing, one leg forward, seductive gaze, full body",
+    "hand in hair, arched back, crop top and tight jeans, full body",
+    "sitting on bed in open satin robe, legs visible, seductive smile",
+    "standing legs slightly apart hands on hips, lingerie or short dress, full body",
+    "leaning back against a wall, chest forward, short top, full body",
+    "one hand on railing, looking over shoulder, mini skirt and heels, full body"
   ];
   // éviter de répéter la dernière pose pour ce personnage
   let pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
@@ -7084,20 +7078,29 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     localStorage.setItem(key, pose);
   } catch (e) {}
 
-  // Toujours une tenue SEXY / provocante (écrase les tenues sages)
-  const sexyOutfits = [
-    "very short tight mini dress with deep cleavage and high heels",
-    "tiny crop top and micro mini skirt with high heels",
-    "low-cut tight blouse unbuttoned low and short pencil skirt, stockings, heels",
-    "short satin slip dress with thin straps barely covering thighs, heels",
-    "tight low-cut bodycon dress hugging the body, high heels",
-    "crop top and tight short shorts, heels, midriff visible",
-    "tight jeans and a very low-cut crop top, heels"
-  ];
-  if (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|leggings only/i.test(outfit)) {
+  // The profile selector and scenario override outrank generic styling.
+  const selectedWardrobe = Boolean(scenarioVariant && scenarioVariant.wardrobeStyle);
+  if (!selectedWardrobe && (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|leggings only/i.test(outfit))) {
+    const sexyOutfits = [
+      "very tight short olive mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
+      "tight black long-sleeve backless dress, deep V neckline, high thigh slit, black heels",
+      "tight emerald bodycon mini dress deep V neckline, black sheer tights, heeled ankle boots",
+      "short burgundy satin wrap mini dress deep cleavage, thigh slit, black stiletto sandals",
+      "navy deep V wrap top with sheer mesh midriff, tight skinny jeans",
+      "soaking wet light blue crop top clinging to body, tight jeans, wet hair, water droplets",
+      "black crop top with chest cutout, tight ripped blue jeans, bare midriff",
+      "black crop top, leather mini skirt, fishnet stockings, black stiletto pumps",
+      "black one-shoulder crop, mini skirt, fishnet thigh-highs with garters, patent heels",
+      "black deep V top, green mini skirt, thigh-high heeled boots",
+      "black sheer lace lingerie bodysuit with underwire cups",
+      "tight olive satin bodycon mini dress deep plunging neckline",
+      "open burgundy satin robe with lace over lingerie, bare legs",
+      "tight white crop top, tight blue skinny jeans, bare midriff",
+      "very short tight black crop top, black micro mini skirt, stiletto pumps"
+    ];
     outfit = sexyOutfits[Math.floor(Math.random() * sexyOutfits.length)];
-  } else if (!/heels|cleavage|mini|crop|short|low-cut|satin|bodycon/i.test(outfit)) {
-    outfit = outfit + ", short and tight, sexy provocative, high heels";
+  } else if (!selectedWardrobe && !/heels|cleavage|mini|crop|short|low-cut|satin|bodycon/i.test(outfit)) {
+    outfit += ", short and tight, high heels";
   }
 
   let cup = "";
@@ -7129,20 +7132,21 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     pose,
     place ? ("location: " + place) : "",
     "sexy provocative pose, seductive expression, alluring body language",
-    "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
-    "natural skin pores, natural eyes without glow, sharp focus, realistic lighting",
+    (scenarioVariant && scenarioVariant.cameraAngle) || "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
+    "natural skin pores, natural eyes without glow, sharp focus across body and clothing, detailed fabric texture, deep focus, realistic lighting",
     uniq
   ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
 
   payload.negative = [
+    "nude, topless, exposed nipples, exposed genitals,",
     "twins, clone, duplicate, mirror symmetry, two women, 2girls, multiple people,",
     "same pose as before, identical composition, mirrored face,",
     "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi, plastic doll,",
     "airbrushed, overly smooth skin, wax skin, doll face,",
-    "deformed, extra limbs, bad anatomy, blurry, lowres, text, watermark,",
+    "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, lowres, text, watermark,",
     "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
     "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes,",
-    "empty room, no person, different person, bra only, lingerie only"
+    "empty room, no person, different person"
   ].join(" ");
 
   payload.identity_head = [age + " year old woman", looks.slice(0, 160), cup].filter(Boolean).join(", ").slice(0, 240);
@@ -7152,6 +7156,23 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.denoising = 0.58;
   }
   return payload;
+}
+
+async function submitProfileImage(payload, restoration) {
+  const submit = () => api("/api/image", { method: "POST", body: JSON.stringify(payload) });
+  let start, failure;
+  try {
+    start = await submit();
+    if (start && start.jobId) return start;
+    failure = new Error(start && start.error || "Pas de job Horde");
+  } catch (error) { failure = error; }
+  if (!restoration || restoration.width <= 384 ||
+      !/kudos|upfront|anonymous.*(?:limit|resolution|pixels|steps)/i.test(String(failure.message || failure))) {
+    throw failure;
+  }
+  setGenStatus("Horde limite le format détaillé anonyme ; reprise au format compact, visage conservé…");
+  await window.LeaSegmentedProfile.setRenderSize(payload, restoration, true);
+  return submit();
 }
 
 async function generatePhoto() {
@@ -7169,8 +7190,12 @@ async function generatePhoto() {
   }
   const extra = ($("imgprompt") && $("imgprompt").value || "").trim();
   const c = character();
-  const profileVariant = pickProfileScenarioVariant(c);
+  let profileVariant = pickProfileScenarioVariant(c);
   const duoProfile = isDuoCharacter(c);
+  if (window.LeaProfileWardrobe) {
+    profileVariant = window.LeaProfileWardrobe.choose(c, profileVariant,
+      ($("profile-wardrobe") && $("profile-wardrobe").value) || "auto");
+  }
   if (!duoProfile) {
     profileVariant.pose = profileVariant.pose || pickProfileScenePose(c, profileVariant);
     profileVariant.cameraAngle = profileVariant.cameraAngle || pickProfileCameraAngle(c);
@@ -7782,11 +7807,11 @@ async function generatePhoto() {
       });
       payload.negative = [
         cupLock(c).neg,
-        "nude, topless, transparent clothes, underwear, cleavage, wrong outfit,",
+        "nude, topless, exposed nipples, exposed genitals, wrong outfit,",
         bodyNegatives(c),
       ].filter(Boolean).join(" ");
     }
-    const start = await api("/api/image", { method: "POST", body: JSON.stringify(payload) });
+    const start = await submitProfileImage(payload, headRestoration);
     if (!start.jobId) throw new Error((start && start.error) || "Pas de job Horde");
     setGenStatus("Horde " + (start.mode || "txt2img") + " lancé — file d’attente…");
     pollHordeJob(start.jobId, start.host, c.id, headRestoration);

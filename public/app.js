@@ -7054,15 +7054,17 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     "leaning forward toward camera showing deep cleavage, full body, sexy smile",
     "standing full body lifting the hem of her short skirt slightly, teasing look",
     "bent over slightly with hands on knees looking back over shoulder, arched back",
-    "standing in doorway hand on the frame, body angled, short outfit, full body",
-    "sitting on kitchen counter legs crossed in short top and jeans, looking at camera",
-    "pulling her crop top up slightly teasingly, full body, provocative pose",
+    "standing on marble stairs hand on the railing, body angled, short outfit, full body head to shoes",
+    "sitting on the edge of a bed legs crossed in short dress, looking at camera",
+    "walking toward camera in hallway hips swaying, tight clothes, full body",
     "standing with weight on one leg, hand on hip, short dress, looking at camera",
     "from behind looking back over shoulder, hand on hip, short outfit, full body",
-    "kneeling on one knee looking up seductively, full body visible",
-    "walking toward camera hips swaying in tight short clothes, full body",
-    "leaning back against a counter or wall, chest forward, short top, full body",
-    "standing legs slightly apart hands behind head, short outfit, full body"
+    "leaning on stair railing, one leg forward, seductive gaze, full body",
+    "hand in hair, arched back, crop top and tight jeans, full body",
+    "sitting on bed in open satin robe, legs visible, seductive smile",
+    "standing legs slightly apart hands on hips, lingerie or short dress, full body",
+    "leaning back against a wall, chest forward, short top, full body",
+    "one hand on railing, looking over shoulder, mini skirt and heels, full body"
   ];
   // éviter de répéter la dernière pose pour ce personnage
   let pose = sexyPoses[Math.floor(Math.random() * sexyPoses.length)];
@@ -7080,13 +7082,21 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const selectedWardrobe = Boolean(scenarioVariant && scenarioVariant.wardrobeStyle);
   if (!selectedWardrobe && (!outfit || /yoga|tank top|everyday|opaque|flat shoes|casual|knit|appropriate|leggings only/i.test(outfit))) {
     const sexyOutfits = [
-      "very short tight mini dress with deep cleavage and high heels",
-      "tiny crop top and micro mini skirt with high heels",
-      "low-cut tight blouse unbuttoned low and short pencil skirt, stockings, heels",
-      "short satin slip dress with thin straps barely covering thighs, heels",
-      "tight low-cut bodycon dress hugging the body, high heels",
-      "crop top and tight short shorts, heels, midriff visible",
-      "tight jeans and a very low-cut crop top, heels"
+      "very tight short olive mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
+      "tight black long-sleeve backless dress, deep V neckline, high thigh slit, black heels",
+      "tight emerald bodycon mini dress deep V neckline, black sheer tights, heeled ankle boots",
+      "short burgundy satin wrap mini dress deep cleavage, thigh slit, black stiletto sandals",
+      "navy deep V wrap top with sheer mesh midriff, tight skinny jeans",
+      "soaking wet light blue crop top clinging to body, tight jeans, wet hair, water droplets",
+      "black crop top with chest cutout, tight ripped blue jeans, bare midriff",
+      "black crop top, leather mini skirt, fishnet stockings, black stiletto pumps",
+      "black one-shoulder crop, mini skirt, fishnet thigh-highs with garters, patent heels",
+      "black deep V top, green mini skirt, thigh-high heeled boots",
+      "black sheer lace lingerie bodysuit with underwire cups",
+      "tight olive satin bodycon mini dress deep plunging neckline",
+      "open burgundy satin robe with lace over lingerie, bare legs",
+      "tight white crop top, tight blue skinny jeans, bare midriff",
+      "very short tight black crop top, black micro mini skirt, stiletto pumps"
     ];
     outfit = sexyOutfits[Math.floor(Math.random() * sexyOutfits.length)];
   } else if (!selectedWardrobe && !/heels|cleavage|mini|crop|short|low-cut|satin|bodycon/i.test(outfit)) {
