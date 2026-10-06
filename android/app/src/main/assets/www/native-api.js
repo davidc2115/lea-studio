@@ -2586,7 +2586,7 @@
                 jobId: data.id,
                 host,
                 pending: true,
-                mode: isMaskedProfile ? "inpainting · visage protégé" : body.profile_reference_note ? "img2img · référence entière (masque indisponible)" : bodyPayload.source_processing || "txt2img",
+                mode: bodyPayload.source_processing || "txt2img",
                 models: (bodyPayload.models || []).slice(0, 3),
               };
             }
