@@ -1890,14 +1890,17 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     const lieuRaw = (scenarioBlob.match(/(?:lieu|location)\s*[:\-]\s*([^.!\n]{3,60})/i) || [])[1] || "";
     let wearClean = String(wear || "").replace(/exactly wearing:\s*/ig, "").replace(/wearing\s+/ig, "").trim();
     let locClean = String(loc || "");
+    // La tenue tirée au hasard (garde-robe) ne doit plus être écrasée à chaque
+    // génération : une tenue de secours n'est utilisée que si elle est absente ou générique.
+    const genericWear = !wearClean || /casual home clothes|appropriate to|role-appropriate/i.test(wearClean);
     if (/cuisine|kitchen/i.test(scenarioBlob + " " + lieuRaw)) {
-      wearClean = "tight white crop top and dark skinny jeans, fully dressed, sneakers, not a bra, not lingerie";
+      if (genericWear) wearClean = "tight white crop top and dark skinny jeans, fully dressed, sneakers, not a bra, not lingerie";
       locClean = "modern home kitchen, cabinets, countertop, fridge, indoor daylight";
     } else if (/bureau|office|secr/i.test(scenarioBlob)) {
-      wearClean = "white office blouse unbuttoned at the top, tight pencil skirt, stockings, heels, fully dressed";
+      if (genericWear) wearClean = "white office blouse unbuttoned at the top, tight pencil skirt, stockings, heels, fully dressed";
       locClean = "office at night, desk, chair, window";
     } else if (/porte|entrée|door/i.test(lieuRaw)) {
-      wearClean = "short tight mini dress with deep neckline and heels, fully dressed";
+      if (genericWear) wearClean = "short tight mini dress with deep neckline and heels, fully dressed";
       locClean = "apartment doorway, wooden door, indoor hallway";
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
@@ -1929,10 +1932,13 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
     if (short.length > maxLen) {
-      const head = [sceneFirst, fantBoost].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+      // Verrou identité (visage, poitrine, peau, cheveux) : il ne doit jamais être coupé.
+      const idPart = [idCore, bodyBoost, fantBoost].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+      const sceneBudget = Math.max(260, Math.min(620, maxLen - idPart.length - 170));
+      const head = String(sceneFirst || "").replace(/\s+/g, " ").trim().slice(0, sceneBudget);
       const tailBudget = Math.max(200, maxLen - head.length - 10);
-      const tail = (scenePart + " " + qualityPart).replace(/\s+/g, " ").trim().slice(0, tailBudget);
-      short = (head + ", " + tail).slice(0, maxLen);
+      const tail = String(qualityPart || "").replace(/\s+/g, " ").trim().slice(0, tailBudget);
+      short = (head + " " + idPart + " " + tail).slice(0, maxLen);
     }
     return short;
   }
