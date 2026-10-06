@@ -136,6 +136,20 @@ function canonicalProfileCup(c) {
   return "";
 }
 
+/** Retire toute mention de poitrine/bonnet d'un texte — le bonnet canonique est fourni par cupLock. */
+function stripBreastMentions(text) {
+  return String(text || "")
+    .replace(/Poitrine\s*:[^\n.]*\.?/gi, " ")
+    .replace(/\b(?:very\s+small|small|petite|medium|large|very\s+large|huge|enormous|massive|full|flat|heavy|prominent|generous|extremely\s+large)\s+(?:natural\s+|heavy\s+|flat\s+)?(?:[A-J][- ]?cup\s+)?breasts?\b/gi, " ")
+    .replace(/\b[A-J][- ]cup(?:\s+breasts?)?\b/gi, " ")
+    .replace(/\bbonnet\s*[A-J]\b/gi, " ")
+    .replace(/\b9[05][A-J]\b|\b100[EF]\b/gi, " ")
+    .replace(/\b(?:flat chest|small breasts|large breasts|huge breasts|deep cleavage|modest cleavage)\b/gi, " ")
+    .replace(/\s{2,}/g, " ")
+    .replace(/,\s*,/g, ",")
+    .trim();
+}
+
 /** Texte cheveux déclaré par la fiche : ligne "Cheveux :" > looks_en "(... hair:1.x)" > tag "cheveux ...". */
 function cardHairText(c) {
   const appearance = String((c && c.appearance) || "");
@@ -1794,13 +1808,19 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
       .replace(/\(?(?:18|19|20)[ -]year[- ]old[^)]*\)?/gi, "")
       .replace(/\b(?:18|19|20)[ -]year[- ]old woman\b/gi, "22 year old adult woman")
       .replace(/\s+/g, " ").trim();
+    // Bonnet canonique : supprime les autres mentions de poitrine (sinon "95D" + "A-cup" se contredisent)
+    const canonicalCupLooks = (typeof canonicalProfileCup === "function") ? canonicalProfileCup(c) : "";
+    const looksFinal = canonicalCupLooks ? stripBreastMentions(looksClean) : looksClean;
+    const physPos = canonicalCupLooks
+      ? stripBreastMentions((phys.positive || []).slice(0, 12).join(", "))
+      : (phys.positive || []).slice(0, 12).join(", ");
     const idCore = [
       "photorealistic photograph of exactly one real woman, single person only, full body head to feet, natural realistic eyes not glowing, no neon eyes,",
       (cupLock(c).pos || ""),
       identityFromCard(c) + ",",
       ageLock,
-      looksClean, // contains body type + fantasy + hair/eyes/breasts
-      (phys.positive || []).slice(0, 12).join(", "),
+      looksFinal, // contains body type + fantasy + hair/eyes (poitrine = cupLock uniquement)
+      physPos,
       (phys.features || []).slice(0, 8).join(", "),
     ].filter(Boolean).join(", ");
     // Boost corps explicite
@@ -5330,13 +5350,18 @@ function bodyNegatives(c) {
   let _duoSkipChest = false;
   try { _duoSkipChest = isDuoCharacter(c); } catch (_) {}
   if (!_duoSkipChest) {
+  // Bonnet canonique ("Poitrine : bonnet X") prioritaire — évite les négatifs contradictoires
+  // quand le reste du descriptif cite un autre bonnet (ex. "95D" + "Fiche body : A-cup").
+  const canonicalCupNeg = (typeof canonicalProfileCup === "function") ? canonicalProfileCup(c) : "";
   // Petite / plate poitrine
-  const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
-    || /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe|marine|noemie)$/.test(id);
+  const smallChest = canonicalCupNeg ? /^[AB]$/.test(canonicalCupNeg)
+    : (/petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
+    || /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe|marine|noemie)$/.test(id));
   // Grosse poitrine
-  const hugeChest = /gros\s*seins|généreuse|95d|100e|bonnet\s*[defghij]|\b[defghij]-cup\b|large\s*(full\s*)?(d|e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob)
+  const hugeChest = canonicalCupNeg ? /^[DEFGHIJ]$/.test(canonicalCupNeg)
+    : (/gros\s*seins|généreuse|95d|100e|bonnet\s*[defghij]|\b[defghij]-cup\b|large\s*(full\s*)?(d|e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob)
     || /^(sofia|amelie|fatou|elise|olga|yasmine|priya|myriam|keisha|lea|lucia)$/.test(id)
-    || (Array.isArray(c.tags) && c.tags.some((t) => /bonnet\s*[hij]|gros seins/i.test(String(t))));
+    || (Array.isArray(c.tags) && c.tags.some((t) => /bonnet\s*[hij]|gros seins/i.test(String(t)))));
   // Gros fessier
   const bigButt = /gros(se)?\s*fess|fessier|round butt|thick\s*(round\s*)?butt|brazilian butt|huge\s*round\s*butt|fesses\s*rondes|very round butt|thick hips/i.test(blob)
     || /^(bruna|camila|keisha|fatou)$/.test(id);
@@ -7931,7 +7956,7 @@ async function generatePhoto() {
               payload.prompt = payload.prompt.replace(/voluptuous|huge breasts|large breasts|deep cleavage/gi, " ");
             }
             if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
-            payload.negative = "same pose as reference, identical pose, sitting on sofa copy, medium breasts, average breasts, " + (payload.negative || "");
+            payload.negative = "same pose as reference, identical pose, sitting on sofa copy, " + (smallCup ? "medium breasts, average breasts, " : "") + (payload.negative || "");
             let wear = "";
             try { wear = (typeof roleSexyPick === "function" ? roleSexyPick(c).outfit : "") || ""; } catch (_) {}
             payload.seed = Math.floor(Math.random() * 2_000_000_000);
