@@ -2555,7 +2555,7 @@
       } else {
         payloads.push(makePayload({}));
       }
-      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["Realistic Vision"], img2img: false }));
+      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["Realistic Vision"], img2img: Boolean(src) }));
 
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
