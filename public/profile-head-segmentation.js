@@ -17,8 +17,10 @@
 
   function opaqueOutfit(outfit, character) {
     const value = compact(outfit, 150);
-    const revealing = /lingerie|transparent|sheer|see.through|nude|naked|topless|bra\b|panties|thong|nuisette|sous.v[eê]tement|d[eé]nud|nue\b/i;
-    if (!revealing.test(value)) return "opaque fabric, " + value + ", fully closed clothing";
+    // Preserve selected necklines, skirts and lined lingerie; only replace
+    // instructions that request exposed intimate anatomy.
+    const revealing = /nude|naked|topless|transparent|see.through|d[eé]nud|nue\b/i;
+    if (!revealing.test(value)) return value;
     const role = [character && character.id, character && character.title, character && character.body].join(" ");
     if (/mermaid|sir[eè]ne/i.test(role)) return "opaque scaled bodice covering the chest, complete mermaid tail";
     if (/nurse|infirmi[eè]re|doctor|m[eé]decin/i.test(role)) return "opaque buttoned medical uniform and trousers";
@@ -41,9 +43,9 @@
       "CAMERA: " + compact(v.cameraAngle || "wide head-to-knees view", 65),
       "POSE: " + compact(pose, 105),
       "SETTING: " + compact(place, 80),
-      "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 110) + ":1.4)",
+      "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 165) + ":1.4)",
       scene.prop ? "PROP: " + compact(scene.prop, 50) : "",
-      "fully clothed, face toward camera, soft natural light, environment visible, natural proportions",
+      "chest and pelvis covered by the selected outfit, face toward camera, soft natural light, environment visible, natural proportions",
     ].filter(Boolean).join(", ").slice(0, 920);
   }
 

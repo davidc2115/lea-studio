@@ -142,8 +142,8 @@ test("The real native API forwards the mask, compatible models, portrait dimensi
   assert.equal(payload.params.height, 704, "Late submission must not squash the face canvas to a square");
   assert.equal(payload.params.denoising_strength, 1);
   assert(payload.models.every(m => m.includes("Inpainting")));
-  assert.equal(payload.nsfw, false);
-  assert.equal(payload.censor_nsfw, true);
+  assert.equal(payload.nsfw, true);
+  assert.equal(payload.censor_nsfw, false);
   assert.equal(payload.shared, false);
 });
 

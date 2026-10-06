@@ -2563,9 +2563,9 @@
             cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
             clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
-          // Profil sexy / cleavage : ne pas activer la censure Horde (sinon "Horde a censuré")
-          nsfw: true,
-          censor_nsfw: false,
+          // Keep the current GitHub generation settings.
+          nsfw: body.profile_frontal_reference !== true,
+          censor_nsfw: body.profile_frontal_reference === true,
           models: models,
           r2: true,
           slow_workers: true,

@@ -78,7 +78,7 @@ test("Malformed native preparations fail before any provider request", () => {
   }));
 });
 
-test("A compact valid matte keeps 384x512, 20 steps, inpainting, censorship and anonymous auth", async () => {
+test("A compact valid matte keeps 384x512, 20 steps, inpainting and anonymous auth with current wardrobe settings", async () => {
   const { context, requests, settings } = nativeApi();
   const savedSettings = settings.get("lea.settings");
   await context.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
@@ -100,8 +100,8 @@ test("A compact valid matte keeps 384x512, 20 steps, inpainting, censorship and 
   assert.equal(body.source_mask, "B".repeat(128));
   assert.equal(body.source_processing, "inpainting");
   assert(body.models.every(model => model.includes("Inpainting")));
-  assert.equal(body.nsfw, false);
-  assert.equal(body.censor_nsfw, true);
+  assert.equal(body.nsfw, true);
+  assert.equal(body.censor_nsfw, false);
   assert.equal(settings.get("lea.settings"), savedSettings);
 });
 
