@@ -33,6 +33,7 @@ function setup() {
     },
   });
   vm.runInContext(read("image-provider-models.js"), context);
+  vm.runInContext(read("profile-morphology.js"), context);
   const app = read("app.js");
   const speciesStart = app.indexOf("function fantasyKind(");
   const speciesEnd = app.indexOf("\n\nfunction roleScenePack", speciesStart);
@@ -96,6 +97,28 @@ test("Pollinations does not turn an unreadable starred reference into text-only 
     /photo étoilée est illisible/
   );
   assert.equal(requests.length, 0);
+});
+
+test("Pollinations receives very-round morphology from real round-tagged profiles", async () => {
+  const { context, requests } = setup();
+  const fixtures = [
+    { file: "characters-direct.js", list: "LEA_CAST_DIRECT", id: "fille_ami_03", cup: "B" },
+    { file: "characters-cups.js", list: "LEA_CAST_CUPS", id: "cup_secretaire_06", cup: "J" },
+  ];
+
+  for (const fixture of fixtures) {
+    vm.runInContext(read(fixture.file), context);
+    const character = context.window[fixture.list].find((card) => card.id === fixture.id);
+    assert(character, "the real character card is available: " + fixture.id);
+    context.window.LeaProfileMorphology.normalizeCard(character);
+
+    await context.generatePollinationsImage("full body in a kitchen", character, null);
+
+    const prompt = JSON.parse(requests[requests.length - 1].options.body).prompt;
+    assert.match(prompt, /Authoritative body morphology; match this exactly: very full-bodied plus-size figure with a prominent soft rounded abdomen/);
+    assert.match(prompt, new RegExp(fixture.cup + "-cup breasts, matching the explicit character description"));
+    assert.doesNotMatch(prompt, /slim|slender|narrow waist|petite frame/i);
+  }
 });
 
 test("Cloudflare and Pollinations keep species traits and remove contradictory species features", async () => {

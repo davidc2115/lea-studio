@@ -21,8 +21,49 @@
     return rest.slice(0, next < 0 ? undefined : next).replace(/\s+/g, " ").trim().replace(/[.;]+$/, "");
   }
 
+  function roundnessKind(card, shape) {
+    const tags = Array.isArray(card && card.tags)
+      ? card.tags.map((tag) => String(tag || "").toLowerCase())
+      : [];
+    const shapeText = String(shape || "").toLowerCase();
+    const bodyText = [card && card.body, card && card.morphology_en]
+      .filter(Boolean).join(" ").toLowerCase();
+    const looksText = String((card && card.looks_en) || "").toLowerCase();
+    const taggedVery = tags.some((tag) => /\btr[eè]s\s+ronde?\b/.test(tag));
+    const taggedRound = tags.some((tag) => /\bron(de|d)\b/.test(tag));
+    const shapeVery = /\btr[eè]s\s+ronde?\b/.test(shapeText);
+    const shapeRound = /\b(?:ronde?|plus[\s-]?size|chubby|plump|corpulent)\b/.test(shapeText);
+    const veryBody = /\b(?:very|extremely)\s+(?:plus[\s-]?size|chubby|plump|full[- ]figured|full[- ]bodied)\b/.test(bodyText);
+    const roundBody = /\b(?:plus[\s-]?size|chubby|plump|corpulent|full[- ]figured|full[- ]bodied)\s+(?:soft\s+|rounded\s+)?(?:body|figure|physique|frame|woman|silhouette)\b|\bsoft belly\b/.test(bodyText);
+    const veryLooks = /\b(?:very|extremely)\s+(?:plus[\s-]?size|chubby|plump|full[- ]figured|full[- ]bodied)\b[^,;]{0,30}\b(?:body|figure|physique|frame|woman|silhouette)\b/.test(looksText);
+    const roundLooks = /\b(?:plus[\s-]?size|chubby|plump|corpulent|full[- ]figured|full[- ]bodied)\b[^,;]{0,30}\b(?:body|figure|physique|frame|woman|silhouette)\b|\bsoft belly\b/.test(looksText);
+
+    if (taggedVery || shapeVery || veryBody || veryLooks) {
+      return "very";
+    }
+    if (taggedRound || shapeRound || roundBody || roundLooks) {
+      return "round";
+    }
+    return "";
+  }
+
+  function roundnessShapeText(kind) {
+    return kind === "very"
+      ? "silhouette très ronde, corps très généreux, ventre souple et arrondi, bras, hanches et cuisses très pleins"
+      : "silhouette ronde, formes pleines et douces, ventre arrondi, hanches et cuisses généreuses";
+  }
+
   function translateShape(value) {
     const text = String(value || "").toLowerCase();
+    if (
+      /\btr[eè]s\s+ronde?\b/.test(text) ||
+      /\b(?:very|extremely)\s+(?:plus[\s-]?size|chubby|plump|full[- ]figured)\b/.test(text)
+    ) {
+      return "very full-bodied plus-size figure with a prominent soft rounded abdomen, full upper arms, broad hips and thick thighs";
+    }
+    if (/\b(?:ronde?|plus[\s-]?size|chubby|plump|corpulent)\b/.test(text) || /\bsoft belly\b/.test(text)) {
+      return "full-figured softly rounded body with a rounded abdomen, full hips and thick thighs";
+    }
     if (/sablier|hourglass/.test(text)) {
       return "curvy hourglass figure with a defined waist, full hips and rounded curves";
     }
@@ -32,8 +73,8 @@
     if (/mince|slim|longiligne|élanc[eé]e|lean/.test(text)) {
       return "slim, slender figure with a narrow waist and long lines";
     }
-    if (/ronde|pulpeuse|plus[\s-]?size|chubby|plump|corpulent/.test(text)) {
-      return "fuller, soft-curved figure with natural proportions";
+    if (/pulpeuse|voluptuous|voluptueuse/.test(text)) {
+      return "curvy, full-figured body with naturally rounded hips";
     }
     if (/harmonieuse|harmonieux|proportions naturelles|balanced|natural proportions/.test(text)) {
       return "balanced feminine figure with natural proportions";
@@ -59,10 +100,12 @@
 
   function shapeTag(shape) {
     const text = String(shape || "").toLowerCase();
+    if (/tr[eè]s\s+ronde?/.test(text) || /\bvery\s+plus[\s-]?size\b/.test(text)) return "très ronde";
     if (/sablier|hourglass/.test(text)) return "silhouette sablier";
     if (/athl[eé]t|athletic|tonique|toned/.test(text)) return "athlétique";
     if (/mince|slim|longiligne|élanc[eé]e|lean/.test(text)) return "mince";
-    if (/ronde|pulpeuse|plus[\s-]?size|chubby|plump|corpulent/.test(text)) return "ronde";
+    if (/\b(?:ronde?|plus[\s-]?size|chubby|plump|corpulent)\b/.test(text) || /\bsoft belly\b/.test(text)) return "ronde";
+    if (/pulpeuse|voluptuous|voluptueuse/.test(text)) return "pulpeuse";
     if (/harmonieuse|harmonieux|balanced|proportions naturelles/.test(text)) return "proportions naturelles";
     if (/fine|finement|d[eé]licate|petite/.test(text)) return "petite";
     return "";
@@ -82,14 +125,30 @@
 
     const cup = explicitCup(card);
     const shapeFr = explicitShape(card);
-    if (!cup && !shapeFr) return card;
+    const roundness = roundnessKind(card, shapeFr);
+    if (!cup && !shapeFr && !roundness) return card;
 
-    const shapeText = shapeFr || card.morphology_fr || legacyShape(card.body);
+    const shapeText = roundness
+      ? roundnessShapeText(roundness)
+      : (shapeFr || card.morphology_fr || legacyShape(card.body));
     const shapeEn = translateShape(shapeText);
     const cupEn = cupDescription(cup);
     const morphology = [shapeEn, cupEn].filter(Boolean).join(", ");
     card.morphology_fr = shapeText || "";
     card.morphology_en = morphology || card.morphology_en || "";
+
+    if (roundness) {
+      const appearance = String(card.appearance || "");
+      const shapeLine = /((?:^|\n)\s*(?:Corps et silhouette|Silhouette)\s*:\s*)[^\n]*/i;
+      if (shapeLine.test(appearance)) {
+        card.appearance = appearance.replace(shapeLine, "$1" + shapeText + ".");
+      } else {
+        const nextField = /(^|\n)(\s*(?:Poitrine|Peau|Origine|Fiche\s+body)\s*:)/i;
+        card.appearance = nextField.test(appearance)
+          ? appearance.replace(nextField, "$1Corps et silhouette : " + shapeText + ".\n$2")
+          : [appearance.trim(), "Corps et silhouette : " + shapeText + "."].filter(Boolean).join("\n");
+      }
+    }
 
     if (cup) {
       card.appearance = String(card.appearance || "")
@@ -108,7 +167,7 @@
       const bodyTag = /bonnet\s*[A-J]|\b[A-J]\s*-?\s*cup\b|seins?|poitrine|breast|chest|bust|ronde|pulpeuse|mince|slim|\bthin\b|slender|lean|athl[eé]t|athletic|sablier|hourglass|curvy|chubby|plus[\s-]?size|plump|corpulent|toned|skinny|voluptuous|thick/i;
       const kept = card.tags.filter((tag) => !bodyTag.test(String(tag)));
       if (cup) kept.push("bonnet " + cup);
-      const translatedTag = shapeTag(shapeFr);
+      const translatedTag = shapeTag(shapeText);
       if (translatedTag) kept.push(translatedTag);
       card.tags = [...new Set(kept)];
     }

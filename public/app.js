@@ -194,11 +194,12 @@ function buildCharacterIdentityBlock(c) {
   const blob = (app + " " + body + " " + looks + " " + tags).toLowerCase();
   const id = identityFromCard(c);
   const cup = (typeof cupLock === "function" ? cupLock(c) : null);
-  const smallCup = /bonnet\s*[ab]|\b[ab]-cup\b|petits?\s*seins|petite slim/.test(blob);
   let morph = "feminine figure";
-  if (/chubby|plus-size|ronde|curvy thick/.test(blob) && !smallCup) morph = "chubby soft body, full hips, soft belly";
-  else if (smallCup) morph = "slim petite frame, narrow chest, small natural breasts, NOT busty, NOT voluptuous chest";
-  else if (/hourglass|sablier|voluptueuse|voluptuous/.test(blob)) morph = "hourglass, narrow waist, wide hips, breast size as specified";
+  if (/tr[eè]s\s+ronde|very\s+(?:plus-size|chubby|plump)|very full-bodied/.test(blob)) {
+    morph = "very full-bodied plus-size body, prominent soft rounded abdomen, full upper arms, broad hips and thick thighs";
+  } else if (/chubby|plus-size|ronde|curvy thick|soft belly/.test(blob)) {
+    morph = "full-figured softly rounded body, full hips and soft belly";
+  } else if (/hourglass|sablier|voluptueuse|voluptuous/.test(blob)) morph = "hourglass, narrow waist, wide hips, breast size as specified";
   else if (/athl|athletic|toned/.test(blob)) morph = "athletic toned body, defined waist";
   else if (/mince|slim|slender|petite/.test(blob)) morph = "slim slender frame";
   else if (/bombée|curvy/.test(blob)) morph = "curvy feminine body, rounded hips";
@@ -7624,9 +7625,7 @@ async function generatePhoto() {
             const smallCup = /small [AB]-cup|modest small chest|petite natural/i.test(cup.pos || "");
             const hugeCup = /J-cup|I-cup|H-cup|enormous|massive enormous/i.test(cup.pos || "");
             let idClean = idShort;
-            if (smallCup) {
-              idClean = idClean.replace(/voluptuous|hourglass|wide hips|full hips|deep cleavage/gi, " ").replace(/\s+/g, " ");
-            }
+            if (smallCup) idClean = idClean.replace(/deep cleavage/gi, " ").replace(/\s+/g, " ");
             const poses = [
               "standing in the room, weight on one leg, full body",
               "leaning on a doorframe, one knee bent, full body",
@@ -7648,7 +7647,7 @@ async function generatePhoto() {
               String(payload.prompt || prompt || "")
             ).replace(/\s+/g, " ").trim();
             if (smallCup) {
-              payload.prompt = payload.prompt.replace(/voluptuous|huge breasts|large breasts|deep cleavage/gi, " ");
+              payload.prompt = payload.prompt.replace(/huge breasts|large breasts|deep cleavage/gi, " ");
             }
             if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
             payload.negative = "same pose as reference, identical pose, sitting on sofa copy, medium breasts, average breasts, " + (payload.negative || "");
