@@ -2477,16 +2477,12 @@
       const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
       const payloads = [];
 
-      // Souple = denoise haut (pose/tenue changent) ; Forte = bas (visage figé)
+      // Visage d'abord : denoise bas avec référence profil (0.42 historique)
       let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      const refMode = String(body.ref_mode || "");
-      if (refMode === "soft") {
-        // Assez haut pour changer la tenue, assez bas pour garder le visage
-        den = Math.min(0.72, Math.max(0.62, den));
-      } else if (refMode === "strong" || body.force_low_denoise === true || body.profile_identity_lock === true) {
-        den = Math.min(0.50, Math.max(0.40, den));
+      if (body.force_low_denoise === true || body.profile_identity_lock === true) {
+        den = Math.min(0.48, Math.max(0.36, den));
       } else if (body.is_profile_photo === true) {
-        den = Math.min(0.72, Math.max(0.40, den));
+        den = Math.min(0.75, Math.max(0.4, den));
       } else {
         den = Math.min(0.65, Math.max(0.36, den));
       }

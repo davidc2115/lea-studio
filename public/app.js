@@ -202,9 +202,9 @@ function cupLock(c) {
     [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, very heavy chest, deep cleavage, full body visible", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
     [/bonnet\s*h|\bh-cup\b/, "huge H-cup breasts, very large chest, deep cleavage, breasts proportional on a full body shot", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
     [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
-    [/bonnet\s*f|\bf-cup\b/, "(very large F-cup breasts:1.65), deep cleavage, heavy chest", "A-cup, B-cup, small breasts, flat chest, modest chest"],
-    [/bonnet\s*e|\be-cup\b/, "(large E-cup breasts:1.65), deep cleavage, heavy full chest", "A-cup, B-cup, small breasts, flat chest, modest chest"],
-    [/bonnet\s*d|\bd-cup\b|95d/, "(full D-cup breasts:1.6), generous cleavage, ample chest", "A-cup, B-cup, flat chest, small breasts, H-cup, I-cup, J-cup"],
+    [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
+    [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
+    [/bonnet\s*d|\bd-cup\b|95d/, "(D-cup breasts:1.5), full but not enormous", "A-cup, B-cup, flat chest, H-cup, I-cup, J-cup"],
     [/bonnet\s*c|\bc-cup\b/, "(medium C-cup breasts:1.55), modest cleavage", "huge breasts, D-cup, E-cup, F-cup, H-cup, I-cup"],
     [/bonnet\s*b|\bb-cup\b/, "(small B-cup breasts:1.9), (modest small chest:1.8), petite natural breasts, NOT large, NOT busty", "large breasts, huge breasts, big breasts, deep cleavage, heavy breasts, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty, voluptuous chest, implants"],
     [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
@@ -958,22 +958,20 @@ function roleSexyPick(c) {
   } catch (_) {}
   if (!outfit || outfit.length < 12) {
     const pool = [
-      "red satin mini dress with deep V neckline, black stilettos",
-      "white blouse unbuttoned, short navy pencil skirt, sheer stockings, heels",
-      "emerald green bodycon dress, thigh slit, stiletto sandals",
-      "burgundy wrap dress, gold heels, living room light",
-      "pink lace lingerie bodysuit under open sheer robe",
-      "denim mini skirt, white crop top, sneakers, casual sexy",
-      "leopard print mini skirt, black crop top, ankle boots",
-      "office secretary look: cream blouse, tight black pencil skirt, heels",
-      "wet white t-shirt clinging to chest, short denim shorts",
-      "silk champagne slip dress, thin straps, bare legs",
-      "red cocktail dress, deep cleavage, diamond earrings",
-      "yoga set: fitted sports top and high-waist leggings, studio",
-      "leather jacket over lace bra, micro shorts, boots",
-      "floral summer dress, short hem, sandals, sunny interior",
-      "black evening gown with high slit, elegant heels",
-      "striped oversized shirt as dress, only a few buttons closed"
+      "very tight short spaghetti-strap mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
+      "tight black bodycon mini dress, deep cleavage, sheer black tights, high heels",
+      "soaking wet light crop top clinging to the body, bare midriff, tight jeans, wet hair",
+      "black leather mini skirt, crop top, fishnet stockings, stiletto pumps",
+      "burgundy satin wrap mini dress with thigh slit, black stilettos",
+      "fitted blouse slightly unbuttoned, short pencil skirt, sheer stockings, heels",
+      "red lace lingerie set, garter belt, sheer stockings, high heels",
+      "tiny crop top and micro shorts, high heels, provocative stance",
+      "sheer black mesh top over lace bra, high-waisted mini skirt, pumps",
+      "emerald satin slip dress with deep slit, bare shoulders, stiletto heels",
+      "office blouse tied under the bust, short pencil skirt, stockings, heels",
+      "white wet t-shirt clinging to breasts, denim mini skirt, bare legs",
+      "black corset top, tight leather pants, stiletto boots",
+      "silk kimono robe half open over lingerie, bedroom soft light"
     ];
     outfit = pool[Math.floor(Math.random() * pool.length)];
   }
@@ -4977,9 +4975,9 @@ function renderProfile() {
     </select>
     <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
     <select id="profile-ref-mode">
-      <option value="soft">Souple — img2img ★ : visage gardé, tenue/pose qui changent (denoise 0.68) · recommandé</option>
-      <option value="strong">Forte — img2img ★ : visage très collé (denoise 0.45)</option>
-      <option value="off">Non — txt2img sans référence ★</option>
+      <option value="soft">Souple — conserve le visage de la ★, pose/tenue libres (denoise 0.55) · recommandé</option>
+      <option value="strong">Forte — visage très fidèle à la ★ (denoise 0.42)</option>
+      <option value="off">Non — txt2img seul, pas de référence ★</option>
     </select>
     <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
       <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
@@ -7326,19 +7324,19 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const hairCard = cardHairColor(c);
   const fancyHair = hairCard && /pink|purple|blue|green/.test(hairCard.pos);
   const hairNeg = "wrong hair color," + (hairCard ? " " + hairCard.neg + "," : "") + (fancyHair ? "" : " dyed fantasy hair, magenta hair,");
-  const cupClean = cupPos ? cupPos.replace(/[()]|:\d+(\.\d+)?/g, "").replace(/\s+/g, " ").trim() : "";
-  const hairBits = hairCard ? [hairCard.pos, ...cardHairStyle(c)].filter(Boolean).join(", ") : "";
   payload.prompt = [
-    "RAW photorealistic DSLR photograph of exactly one real adult woman, natural skin pores, sharp focus,",
-    "(face fully visible:1.6), head in frame, not headless,",
-    (idBlock || id).slice(0, 320) + ",",
+    "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
+    "(face fully visible:1.65), (head and face in frame:1.6), (eyes visible:1.45), not headless, not cropped head,",
+    (idBlock || id).slice(0, 380) + ",",
     age + " year old adult woman,",
-    hairBits ? "(" + hairBits + ":1.55)," : "",
-    cupClean ? "(" + cupClean + ":1.55)," : "",
-    "wearing " + wear + ",",
-    "pose: " + pose.replace(/[()]/g, " ") + ",",
+    "(new camera angle:1.2), slight pose variation,",
+    "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
+    "(pose: " + pose.replace(/[()]/g, " ") + ":1.35),",
     place ? ("location: " + place + ",") : "",
-    "full body head to mid-thigh, face visible"
+    "sexy provocative sensual pose, full body from head to mid-thigh or shoes, hips and legs visible,",
+    hairCard ? "(" + [hairCard.pos, ...cardHairStyle(c)].join(", ") + ":1.5)," : "",
+    cupPos ? "(" + cupPos.replace(/[()]|:\d+(\.\d+)?/g, "") + ":1.35)," : "",
+    "correct hair color, correct hair style, correct eye color, correct breast size and shape, face must be visible"
   ].filter(Boolean).join(" ");
   payload.negative = [
     hairNeg,
@@ -7351,11 +7349,16 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
     payload.negative || ""
   ].filter(Boolean).join(" ");
   payload.identity_head = id.slice(0, 240);
-  // Ne pas forcer le denoise ici : soft/strong le fixent après
-  if (!(payload.source_image && String(payload.source_image).length > 800)) {
+  // Avec référence étoilée : img2img denoise 0.42 pour conserver le visage
+  if (payload.source_image && String(payload.source_image).length > 800) {
+    payload.force_img2img = true;
+    payload.source_processing = "img2img";
+    payload.denoising = 0.42;
+  } else {
     delete payload.source_image;
     delete payload.source_processing;
     payload.force_img2img = false;
+    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
   }
   return payload;
 }
@@ -7950,80 +7953,35 @@ async function generatePhoto() {
         // Référence ★ : désactivée par défaut (img2img 0.42 recopiait la photo → images identiques,
         // cheveux/poitrine de la ref au lieu de la fiche). Réglable : off / soft (0.65) / strong (0.45).
         const refMode = profileRefMode();
-        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
-        payload.profile_user_detail = extra.slice(0, 360);
-        payload.seed = Math.floor(Math.random() * 2000000000);
-        payload.ref_mode = refMode;
-
-        // Tenue + pose aléatoires en tête de prompt (poids fort pour battre la ref img2img)
-        let forcedWear = "", forcedPose = "";
-        try {
-          const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
-          if (pick) {
-            forcedWear = String(pick.outfit || "").slice(0, 130);
-            forcedPose = String(pick.pose || "").slice(0, 90);
-          }
-        } catch (_) {}
-        if (forcedWear) {
-          let pr = payload.prompt || "";
-          pr = pr.replace(/\(wearing[^)]{0,180}\)\s*,?/gi, "")
-                 .replace(/wearing[^,]{0,160},/gi, "")
-                 .replace(/\(pose:[^)]{0,120}\)\s*,?/gi, "")
-                 .replace(/pose:\s*[^,]{0,100},/gi, "");
-          payload.prompt = [
-            "(wearing exactly " + forcedWear + ":1.75),",
-            forcedPose ? ("(pose: " + forcedPose.replace(/[()]/g, " ") + ":1.6),") : "",
-            "(different outfit from the reference photo:1.45),",
-            "same face as reference, same person,",
-            pr
-          ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-        }
-
-        if (refMode === "strong" || refMode === "soft") {
-          const den = refMode === "strong" ? 0.45 : 0.68;
+        const refDenoise = refMode === "strong" ? 0.42 : 0.55;
+        if (refMode !== "off") {
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
               allowFantasy: false,
               forceImg2Img: true,
-              denoising: den,
+              denoising: refDenoise,
               addPromptLock: true,
             });
           } catch (e) {
             console.warn("[profile reference]", e);
           }
-          const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);
-          if (hasRef) {
-            payload.force_img2img = true;
-            payload.source_processing = "img2img";
-            payload.denoising = den;
-            payload.ref_mode = refMode;
-            if (refMode === "strong") payload.profile_identity_lock = true;
-            else delete payload.profile_identity_lock;
-            payload.negative = [
-              payload.negative || "",
-              "same outfit as reference, identical clothes as source, copy of reference clothing,",
-              "identical pose as reference, static duplicate of source photo"
-            ].join(" ");
-            setGenStatus(
-              "Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") +
-              " · denoise " + den + " · seed " + payload.seed + "…"
-            );
-          } else {
-            payload.force_img2img = false;
-            delete payload.source_image;
-            delete payload.source_processing;
-            delete payload.denoising;
-            setGenStatus("Horde txt2img · pas de ★ — seed " + payload.seed + "…");
-          }
+        }
+        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+        payload.profile_user_detail = extra.slice(0, 360);
+        payload.seed = Math.floor(Math.random() * 2000000000);
+        const hasRef = refMode !== "off" && Boolean(payload.source_image && String(payload.source_image).length > 800);
+        if (hasRef) {
+          payload.force_img2img = true;
+          payload.source_processing = "img2img";
+          payload.denoising = refDenoise;
+          setGenStatus("Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") + " · denoise " + refDenoise + " · seed " + payload.seed + "…");
         } else {
-          // off
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
           delete payload.denoising;
           delete payload.face_lock;
-          delete payload.profile_identity_lock;
-          setGenStatus("Horde txt2img · sans ref · seed " + payload.seed + "…");
+          setGenStatus("Horde txt2img · identité depuis la fiche (cheveux, yeux, poitrine) · seed " + payload.seed + "…");
         }
       }
       payload.nsfw = false;
