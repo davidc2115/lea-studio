@@ -39,6 +39,24 @@ function setup() {
   const speciesEnd = app.indexOf("\n\nfunction roleScenePack", speciesStart);
   assert(speciesStart >= 0 && speciesEnd > speciesStart, "species prompt locks are available");
   vm.runInContext(app.slice(speciesStart, speciesEnd), context);
+  const identityStart = app.indexOf("function profileAppearanceField(");
+  const identityEnd = app.indexOf("function describeLooks(", identityStart);
+  assert(identityStart >= 0 && identityEnd > identityStart, "character identity prompt helpers are available");
+  vm.runInContext(app.slice(identityStart, identityEnd), context);
+  const anchorStart = app.indexOf("function profileIdentityAnchor(");
+  const anchorEnd = app.indexOf("function buildLeaImagePrompt(", anchorStart);
+  assert(anchorStart >= 0 && anchorEnd > anchorStart, "the identity anchor is available");
+  vm.runInContext(app.slice(anchorStart, anchorEnd), context);
+  const lookStart = app.indexOf("function describeLooks(");
+  const lookEnd = app.indexOf("\n\n/** Place détaillée", lookStart);
+  vm.runInContext(app.slice(lookStart, lookEnd), context);
+  const roleStart = app.indexOf("function roleScenePack(");
+  const finalizerStart = app.indexOf("function finalizeProfilePrompt(", roleStart);
+  assert(roleStart >= 0 && finalizerStart > roleStart, "profile prompt finalizer is available");
+  vm.runInContext(app.slice(roleStart, finalizerStart), context);
+  const finalizerEnd = app.indexOf("\n\nasync function submitProfileImage", finalizerStart);
+  assert(finalizerEnd > finalizerStart, "profile prompt finalizer end is available");
+  vm.runInContext(app.slice(finalizerStart, finalizerEnd), context);
   const start = app.indexOf("async function nativeHttpPostJson(");
   const end = app.indexOf("\n\nasync function generatePhotoHordeFallback", start);
   assert(start >= 0 && end > start, "provider connector functions are available");
@@ -116,7 +134,10 @@ test("Pollinations receives very-round morphology from real round-tagged profile
 
     const prompt = JSON.parse(requests[requests.length - 1].options.body).prompt;
     assert.match(prompt, /Authoritative body morphology; match this exactly: very full-bodied plus-size figure with a prominent soft rounded abdomen/);
-    assert.match(prompt, new RegExp(fixture.cup + "-cup breasts, matching the explicit character description"));
+    const cupCue = fixture.cup === "J"
+      ? /massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection/i
+      : new RegExp(fixture.cup + "-cup breasts, matching the explicit character description");
+    assert.match(prompt, cupCue);
     assert.doesNotMatch(prompt, /slim|slender|narrow waist|petite frame/i);
   }
 });
@@ -154,5 +175,49 @@ test("Cloudflare and Pollinations keep species traits and remove contradictory s
     const pollinations = JSON.parse(requests[before + 1].options.body);
     assert.match(pollinations.prompt, fixture.expected);
     assert.doesNotMatch(pollinations.prompt, fixture.forbidden);
+  }
+});
+
+test("D-through-J band-cup sizes reach Horde, Cloudflare, and Pollinations prompts intact", async () => {
+  const { context, requests } = setup();
+  const cues = {
+    D: /full D-cup breasts with clearly visible natural projection and rounded volume/i,
+    E: /prominent full E-cup breasts with clearly visible natural projection and rounded volume/i,
+    F: /large full F-cup breasts with pronounced natural projection and rounded volume/i,
+    G: /very large heavy G-cup breasts with clear natural projection/i,
+    H: /huge heavy H-cup breasts with natural weight and clearly visible projection/i,
+    I: /enormous heavy I-cup breasts with clearly visible natural projection and rounded volume/i,
+    J: /massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection/i,
+  };
+
+  for (const cup of ["D", "E", "F", "G", "H", "I", "J"]) {
+    const card = {
+      id: "delivery_cup_" + cup.toLowerCase(),
+      name: "Example Woman",
+      age: 28,
+      appearance: `Poitrine : 95${cup} / bonnet ${cup}.`,
+      body: `${cup}-cup breasts`,
+      looks_en: `${cup}-cup breasts`,
+      tags: [],
+    };
+    context.window.LeaProfileMorphology.normalizeCard(card);
+    const payload = context.finalizeProfilePrompt(
+      { prompt: "Adult woman in the selected scene." },
+      card,
+      { outfit: "role-appropriate outfit", place: "quiet room", pose: "standing", cameraAngle: "full body" }
+    );
+    const assertCupPrompt = (prompt) => {
+      assert.match(prompt, new RegExp(`95${cup} bra size`, "i"));
+      assert.match(prompt, cues[cup]);
+    };
+    assertCupPrompt(payload.prompt);
+
+    const cloudflareIndex = requests.length;
+    await context.generateCloudflareImage(payload.prompt, card);
+    assertCupPrompt(JSON.parse(requests[cloudflareIndex].options.body).prompt);
+
+    const pollinationsIndex = requests.length;
+    await context.generatePollinationsImage(payload.prompt, card, null);
+    assertCupPrompt(JSON.parse(requests[pollinationsIndex].options.body).prompt);
   }
 });

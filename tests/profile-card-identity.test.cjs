@@ -10,13 +10,27 @@ const cards = fs.readFileSync(path.join(sourceDir, "characters-cups.js"), "utf8"
 const context = { window: {} };
 vm.createContext(context);
 vm.runInContext(cards, context);
-const from = app.indexOf("function canonicalProfileCup(");
+const from = app.indexOf("function profileAppearanceField(");
 const to = app.indexOf("function describeLooks(", from);
 assert(from >= 0 && to > from, "Canonical morphology helpers must exist");
 vm.runInContext(app.slice(from, to), context);
 const anchorFrom = app.indexOf("function profileIdentityAnchor(");
 const anchorTo = app.indexOf("function buildLeaImagePrompt(", anchorFrom);
 vm.runInContext(app.slice(anchorFrom, anchorTo), context);
+context.isDuoCharacter = () => false;
+context.ageNegatives = () => "";
+const morphFrom = app.indexOf("function morphWeights(");
+const morphTo = app.indexOf("\n\n/** Traits OBLIGATOIRES", morphFrom);
+assert(morphFrom >= 0 && morphTo > morphFrom, "Cup morphology weights must exist");
+vm.runInContext(app.slice(morphFrom, morphTo), context);
+const negativeFrom = app.indexOf("function bodyNegatives(");
+const negativeTo = app.indexOf("\n\n/** Poids morphologie", negativeFrom);
+assert(negativeFrom >= 0 && negativeTo > negativeFrom, "Body negatives must exist");
+vm.runInContext(app.slice(negativeFrom, negativeTo), context);
+const detailFrom = app.indexOf("function enrichLooksDetail(");
+const detailTo = app.indexOf("\nfunction fixedAppearanceBlock(", detailFrom);
+assert(detailFrom >= 0 && detailTo > detailFrom, "Detailed identity prompts must exist");
+vm.runInContext(app.slice(detailFrom, detailTo), context);
 const kenza = context.window.LEA_CAST_CUPS.find((c) => c.id === "cup_babysitter_07");
 
 test("Kenza has a consistent A-cup card, without legacy H-cup instructions", () => {
@@ -66,3 +80,52 @@ test("Kenza variants contain her scenario prop rather than an unspecified room",
   for (const place of kenza.places) assert.match(place, /baby monitor/i);
   assert.match(kenza.scenario, /babyphone/i);
 });
+
+test("D-to-J sizes stay visibly full through identity, morphology, and negative prompt helpers", () => {
+  const cues = {
+    D: /full D-cup breasts with clearly visible natural projection and rounded volume/i,
+    E: /prominent full E-cup breasts with clearly visible natural projection and rounded volume/i,
+    F: /large full F-cup breasts with pronounced natural projection and rounded volume/i,
+    G: /very large heavy G-cup breasts with clear natural projection/i,
+    H: /huge heavy H-cup breasts with natural weight and clearly visible projection/i,
+    I: /enormous heavy I-cup breasts with clearly visible natural projection and rounded volume/i,
+    J: /massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection/i,
+  };
+
+  for (const cup of ["D", "E", "F", "G", "H", "I", "J"]) {
+    const card = {
+      id: "cup_size_" + cup.toLowerCase(),
+      name: "Example Woman",
+      age: 28,
+      appearance: `Poitrine : 95${cup} / bonnet ${cup}.`,
+      body: `${cup}-cup breasts`,
+      looks_en: `${cup}-cup breasts`,
+      tags: [],
+    };
+    const lock = context.cupLock(card);
+    const physical = context.physicalLocksFromText(card);
+    const weight = context.morphWeights(card);
+    const negatives = context.bodyNegatives(card);
+    const detailed = context.enrichLooksDetail(card);
+
+    assert.match(lock.pos, new RegExp(`95${cup} bra size`, "i"));
+    assert.match(lock.pos, cues[cup]);
+    assert.match(weight, new RegExp(`95${cup} bra size`, "i"));
+    assert.match(weight, cues[cup]);
+    assert(physical.positive.some((item) => cues[cup].test(item)));
+    assert(physical.features.includes(`${cup}-cup breasts`));
+    assert.match(negatives, /medium breasts/);
+    assert.match(negatives, /average breasts/);
+    assert.match(negatives, /modest chest/);
+    assert.match(detailed, cues[cup]);
+    if (cup === "F") assert.doesNotMatch(detailed, /E-cup breasts/i);
+  }
+
+  const cCupNegatives = context.bodyNegatives({
+    appearance: "Poitrine : bonnet C.",
+    body: "medium C-cup breasts",
+    tags: [],
+  });
+  assert.doesNotMatch(cCupNegatives, /medium breasts|average breasts|modest chest/i);
+});
+

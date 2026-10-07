@@ -11,6 +11,13 @@
     return match ? String(match[1] || match[2]).toUpperCase() : "";
   }
 
+  function explicitBandCup(card) {
+    const appearance = String((card && card.appearance) || "");
+    const line = (appearance.match(/(?:^|\n)\s*Poitrine\s*:\s*([^\n]+)/i) || [])[1] || "";
+    const match = line.match(/\b(\d{2,3})\s*([A-J])\b/i);
+    return match ? String(match[1]) + String(match[2]).toUpperCase() : "";
+  }
+
   function explicitShape(card) {
     const appearance = String((card && card.appearance) || "");
     const start = appearance.match(/(?:^|\n)\s*Corps et silhouette\s*:\s*/i);
@@ -95,7 +102,16 @@
 
   function cupDescription(cup) {
     if (!cup) return "";
-    return cup + "-cup breasts, matching the explicit character description";
+    const visibleVolume = {
+      D: "full D-cup breasts with clearly visible natural projection and rounded volume",
+      E: "prominent full E-cup breasts with clearly visible natural projection and rounded volume",
+      F: "large full F-cup breasts with pronounced natural projection and rounded volume",
+      G: "very large heavy G-cup breasts with clear natural projection and visibly full volume",
+      H: "huge heavy H-cup breasts with natural weight and clearly visible projection",
+      I: "enormous heavy I-cup breasts with clearly visible natural projection and rounded volume",
+      J: "massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection",
+    };
+    return (visibleVolume[cup] || cup + "-cup breasts") + ", matching the explicit character description";
   }
 
   function shapeTag(shape) {
@@ -124,6 +140,7 @@
     if (!card || typeof card !== "object" || isDuo(card)) return card;
 
     const cup = explicitCup(card);
+    const bandCup = explicitBandCup(card);
     const shapeFr = explicitShape(card);
     const roundness = roundnessKind(card, shapeFr);
     if (!cup && !shapeFr && !roundness) return card;
@@ -152,7 +169,10 @@
 
     if (cup) {
       card.appearance = String(card.appearance || "")
-        .replace(/((?:^|\n)\s*Poitrine\s*:\s*)[^\n]*/i, "$1bonnet " + cup + ".");
+        .replace(
+          /((?:^|\n)\s*Poitrine\s*:\s*)[^\n]*/i,
+          "$1" + (bandCup ? bandCup + " / bonnet " + cup : "bonnet " + cup) + "."
+        );
       card.title = String(card.title || "").replace(/bonnet\s*[A-J]\b/gi, "bonnet " + cup);
       card.title = card.title.replace(/\b\d{2,3}\s*[A-J]\b/gi, cup + "-cup");
     }
@@ -194,6 +214,7 @@
   normalizeAll();
   root.LeaProfileMorphology = {
     explicitCup,
+    explicitBandCup,
     explicitShape,
     normalizeCard,
     normalizeAll,

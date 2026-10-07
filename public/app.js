@@ -124,16 +124,28 @@ function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 /** Extrait cheveux / yeux / traits non-humains depuis appearance + looks_en (FR ou EN). */
 
-function canonicalProfileCup(c) {
+function profileAppearanceField(c, label) {
   const appearance = String((c && c.appearance) || "");
-  const declared = (appearance.match(/(?:^|\n)\s*Poitrine\s*:\s*([^\n]+)/i) || [])[1] || "";
+  const escaped = String(label || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = appearance.match(new RegExp("(?:^|\\n)\\s*" + escaped + "\\s*:\\s*([^\\n]+)", "i"));
+  return match ? String(match[1] || "").trim() : "";
+}
+
+function canonicalProfileCup(c) {
+  const declared = profileAppearanceField(c, "Poitrine");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
-  const sources = [declared, c && c.body, c && c.looks_en, tags, c && c.title, appearance];
+  const sources = [declared, c && c.body, c && c.looks_en, tags, c && c.title, c && c.appearance];
   for (const source of sources) {
-    const match = String(source || "").match(/\b([A-J])[- ]cup\b|bonnet\s*([A-J])\b/i);
-    if (match) return String(match[1] || match[2]).toUpperCase();
+    const match = String(source || "").match(/\b\d{2,3}\s*([A-J])\b|\b([A-J])[- ]cup\b|bonnet\s*([A-J])\b/i);
+    if (match) return String(match[1] || match[2] || match[3]).toUpperCase();
   }
   return "";
+}
+
+function canonicalProfileBandCup(c) {
+  const declared = profileAppearanceField(c, "Poitrine");
+  const match = declared.match(/\b(\d{2,3})\s*([A-J])\b/i);
+  return match ? String(match[1]) + String(match[2]).toUpperCase() : "";
 }
 
 function cupLock(c) {
@@ -143,23 +155,29 @@ function cupLock(c) {
   const tagSrc = tags.toLowerCase();
   const canonicalCup = canonicalProfileCup(c);
   const src = canonicalCup ? canonicalCup.toLowerCase() + "-cup" : (tagSrc + " " + [body, c && c.appearance, c && c.looks_en].filter(Boolean).join(" ")).toLowerCase();
+  const bandCup = canonicalProfileBandCup(c);
   const table = [
-    [/bonnet\s*j|\bj-cup\b/, "massive J-cup breasts, extremely heavy chest, deep cleavage, full body visible, not a crop of the chest", "small breasts, medium breasts, average breasts, modest chest, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*i|\bi-cup\b/, "enormous I-cup breasts, very heavy chest, deep cleavage, full body visible", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, flat chest"],
-    [/bonnet\s*h|\bh-cup\b/, "huge H-cup breasts, very large chest, deep cleavage, breasts proportional on a full body shot", "small breasts, medium breasts, average breasts, A-cup, B-cup, C-cup, D-cup, modest chest, flat chest"],
-    [/bonnet\s*g|\bg-cup\b/, "(very large G-cup breasts:1.55)", "A-cup, B-cup, small breasts, flat chest"],
-    [/bonnet\s*f|\bf-cup\b/, "(large F-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
-    [/bonnet\s*e|\be-cup\b/, "(full E-cup breasts:1.5)", "A-cup, B-cup, small breasts, flat chest"],
-    [/bonnet\s*d|\bd-cup\b|95d/, "(D-cup breasts:1.5), full but not enormous", "A-cup, B-cup, flat chest, H-cup, I-cup, J-cup"],
-    [/bonnet\s*c|\bc-cup\b/, "(medium C-cup breasts:1.55), modest cleavage", "huge breasts, D-cup, E-cup, F-cup, H-cup, I-cup"],
+    [/bonnet\s*j|\bj-cup\b/, "(massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection:1.8), bust dominates the upper torso in a full-body frame, deep heavy cleavage", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, flat chest"],
+    [/bonnet\s*i|\bi-cup\b/, "(enormous heavy I-cup breasts with clearly visible natural projection and rounded volume:1.75), very full bust clearly visible in a full-body frame, deep cleavage", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, E-cup, F-cup, G-cup, H-cup, flat chest"],
+    [/bonnet\s*h|\bh-cup\b/, "(huge heavy H-cup breasts with natural weight and clearly visible projection:1.7), very full bust visible in a full-body frame, deep cleavage", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, E-cup, F-cup, G-cup, flat chest"],
+    [/bonnet\s*g|\bg-cup\b/, "(very large heavy G-cup breasts with clear natural projection and visibly full volume:1.65), prominent bust in a full-body frame", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, E-cup, F-cup, flat chest"],
+    [/bonnet\s*f|\bf-cup\b/, "(large full F-cup breasts with pronounced natural projection and rounded volume:1.65), visibly prominent full bust", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, E-cup, flat chest"],
+    [/bonnet\s*e|\be-cup\b/, "(prominent full E-cup breasts with clearly visible natural projection and rounded volume:1.6), visibly fuller than an average bust", "small breasts, medium breasts, average breasts, modest chest, petite bust, A-cup, B-cup, C-cup, D-cup, flat chest"],
+    [/bonnet\s*d|\bd-cup\b|95d/, "(full D-cup breasts with clearly visible natural projection and rounded volume:1.6), distinctly full in a full-body frame", "small breasts, medium breasts, average breasts, tiny bust, modest chest, petite bust, A-cup, B-cup, C-cup, flat chest"],
+    [/bonnet\s*c|\bc-cup\b/, "(clearly visible medium C-cup breasts with natural rounded projection:1.55)", "flat chest, tiny bust, A-cup, B-cup, huge breasts, E-cup, F-cup, H-cup, I-cup"],
     [/bonnet\s*b|\bb-cup\b/, "(small B-cup breasts:1.9), (modest small chest:1.8), petite natural breasts, NOT large, NOT busty", "large breasts, huge breasts, big breasts, deep cleavage, heavy breasts, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty, voluptuous chest, implants"],
     [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
   ];
+  const bandCue = /^[DEFGHIJ]$/.test(canonicalCup) && bandCup
+    ? "(" + bandCup + " bra size:1.35), "
+    : "";
   for (const [re, pos, neg] of table) {
-    if (re.test(src)) return { pos, neg };
+    if (re.test(src)) return { pos: bandCue + pos, neg };
   }
   return { pos: "", neg: "" };
 }
+
+
 function identityFromCard(c) {
   const name = String((c && c.name) || "woman");
   const requestedAge = Number(c && c.age) || 25;
@@ -406,34 +424,11 @@ function physicalLocksFromText(c) {
 
   const selectedCup = canonicalProfileCup(c);
   const breastSource = selectedCup ? selectedCup.toLowerCase() + "-cup" : blob;
-  // Poitrine — H/I/J en priorité (extrême), puis E/F, D, C, B, A
-  if (/bonnet\s*j|\bj-cup\b/i.test(breastSource)) {
-    out.positive.push("(massive enormous J-cup breasts:1.7)", "(extremely huge heavy breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "top fabric stretched by massive breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest, small bust");
-    out.features.push("J-cup breasts");
-  } else if (/bonnet\s*i|\bi-cup\b/i.test(breastSource)) {
-    out.positive.push("(enormous heavy I-cup breasts:1.7)", "(extremely large I-cup breasts:1.65)", "(hyper busty:1.5)", "(deep heavy cleavage:1.45)", "blouse strained by huge breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, D-cup, medium breasts, modest chest, petite chest");
-    out.features.push("I-cup breasts");
-  } else if (/bonnet\s*h|\bh-cup\b/i.test(breastSource)) {
-    out.positive.push("(huge heavy H-cup breasts:1.65)", "(extremely large H-cup breasts:1.6)", "(hyper busty:1.5)", "(deep heavy cleavage:1.4)", "fabric stretched by huge breasts");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup, C-cup, medium breasts, modest chest, petite chest");
-    out.features.push("H-cup breasts");
-  } else if (/bonnet\s*g|g-cup/i.test(breastSource)) {
-    out.positive.push("(very large heavy G-cup breasts:1.45)", "(deep cleavage:1.25)");
-    out.negative.push("small breasts, flat chest, A-cup, B-cup");
-  } else if (/bonnet\s*a|a-cup|flat|presque\s*plate|petits?\s*seins/i.test(breastSource)) {
-    out.positive.push("(small flat A-cup breasts:1.3)");
-    out.negative.push("large breasts, huge breasts, D-cup, E-cup, H-cup");
-  } else if (/bonnet\s*b|b-cup/i.test(breastSource)) {
-    out.positive.push("(small B-cup breasts:1.65)", "modest natural chest");
-    out.negative.push("large breasts, huge breasts, deep cleavage, D-cup, E-cup, F-cup, G-cup, H-cup, I-cup, J-cup, busty");
-  } else if (/bonnet\s*c|c-cup/i.test(breastSource)) {
-    out.positive.push("(medium C-cup breasts:1.25)");
-  } else if (/bonnet\s*d|d-cup|95d/i.test(breastSource)) {
-    out.positive.push("(large D-cup breasts:1.3)");
-  } else if (/bonnet\s*[ef]|e-cup|f-cup|100e/i.test(breastSource)) {
-    out.positive.push("(very large E-cup breasts:1.35)");
+  const bustLock = cupLock(c);
+  if (bustLock.pos) {
+    out.positive.push(bustLock.pos);
+    if (bustLock.neg) out.negative.push(bustLock.neg);
+    out.features.push(selectedCup ? selectedCup + "-cup breasts" : "prominent breasts");
   } else if (/gros\s*seins|huge\s*breasts|extremely\s*large\s*breast|busty\s*extreme/i.test(breastSource)) {
     out.positive.push("(extremely large heavy breasts:1.4)", "(deep cleavage:1.25)");
     out.negative.push("small breasts, flat chest, A-cup, B-cup");
@@ -1300,9 +1295,8 @@ function faceIdentityLock(c) {
 
   // Poitrine si pas déjà dans looks
   if (!/cup breasts|95d|bonnet/i.test(looks)) {
-    if (/bonnet\s*e|e-cup|tr[eè]s gros seins/i.test(blob)) parts.push("(very large E-cup breasts:1.5)");
-    else if (/bonnet\s*d|d-cup|95d|gros seins/i.test(blob)) parts.push("(large D-cup breasts:1.45)");
-    else if (/bonnet\s*h|h-cup/i.test(blob)) parts.push("(huge H-cup breasts:1.5)");
+    const bust = typeof cupLock === "function" ? cupLock(c) : null;
+    if (bust && bust.pos) parts.push(bust.pos);
   }
 
   // Fantasy : uniquement speciesLock (jamais de "NOT mermaid" dans le positif)
@@ -4996,8 +4990,8 @@ function bodyNegatives(c) {
     : /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob);
   // Grosse poitrine
   const hugeChest = declaredCup
-    ? /^[FGHIJ]$/.test(declaredCup)
-    : /gros\s*seins|généreuse|95d|100e|bonnet\s*[efghij]|\b[efghij]-cup\b|large\s*(full\s*)?(e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob);
+    ? /^[DEFGHIJ]$/.test(declaredCup)
+    : /gros\s*seins|généreuse|\b\d{2,3}\s*d\b|100e|bonnet\s*[defghij]|\b[defghij]-cup\b|large\s*(full\s*)?(d|e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob);
   // Gros fessier
   const bigButt = /gros(se)?\s*fess|fessier|round butt|thick\s*(round\s*)?butt|brazilian butt|huge\s*round\s*butt|fesses\s*rondes|very round butt|thick hips/i.test(blob);
   // Fine / athlétique
@@ -5062,6 +5056,9 @@ function morphWeights(c) {
     c.body, c.appearance, c.looks_en, c.title,
     Array.isArray(c.tags) ? c.tags.join(" ") : "",
   ].filter(Boolean).join(" ").toLowerCase();
+  const declaredCup = canonicalProfileCup(c);
+  const declaredBandCup = canonicalProfileBandCup(c);
+  const bustSource = declaredCup ? declaredCup.toLowerCase() + "-cup" : blob;
   const parts = [];
   // Duo: ne PAS forcer une seule taille (géré dans duoCompositionBlock)
   try {
@@ -5072,39 +5069,57 @@ function morphWeights(c) {
       return "(two women with their own distinct bust sizes:1.35)";
     }
   } catch (_) {}
+  if (/^[DEFGHIJ]$/.test(declaredCup) && declaredBandCup) {
+    parts.push("(" + declaredBandCup + " bra size:1.35)");
+  }
   // Extreme cups FIRST (priority over small-chest heuristics)
-  if (/bonnet\s*j|\bj-cup\b/i.test(blob)) {
+  if (/bonnet\s*j|\bj-cup\b/i.test(bustSource)) {
     parts.push(
-      "(massive enormous J-cup breasts:1.7)",
+      "(massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection:1.8)",
       "(extremely huge heavy breasts:1.65)",
       "(hyper busty J-cup:1.55)",
       "(deep heavy cleavage:1.45)",
+      "bust dominates the upper torso in a full-body frame",
       "fabric stretched tight over massive breasts"
     );
-  } else if (/bonnet\s*i|\bi-cup\b/i.test(blob)) {
+  } else if (/bonnet\s*i|\bi-cup\b/i.test(bustSource)) {
     parts.push(
-      "(enormous heavy I-cup breasts:1.7)",
+      "(enormous heavy I-cup breasts with clearly visible natural projection and rounded volume:1.75)",
       "(extremely large I-cup breasts:1.65)",
       "(hyper busty I-cup:1.55)",
       "(deep heavy cleavage:1.45)",
+      "very full bust clearly visible in a full-body frame",
       "blouse strained by huge breasts"
     );
-  } else if (/bonnet\s*h|\bh-cup\b/i.test(blob)) {
+  } else if (/bonnet\s*h|\bh-cup\b/i.test(bustSource)) {
     parts.push(
-      "(huge heavy H-cup breasts:1.65)",
+      "(huge heavy H-cup breasts with natural weight and clearly visible projection:1.7)",
       "(extremely large H-cup breasts:1.6)",
       "(hyper busty H-cup:1.5)",
       "(deep heavy cleavage:1.4)",
       "top stretched by huge breasts"
     );
-  } else if (/petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|small breast|poitrine\s*petite/i.test(blob)
-      || /^(jade|aya|lina|hana|mei|sasha|thea|zoe)$/.test(id)) {
+  } else if (/bonnet\s*g|\bg-cup\b/i.test(bustSource)) {
+    parts.push("(very large heavy G-cup breasts with clear natural projection:1.6)", "(deep cleavage:1.3)", "very full bust clearly visible in a full-body frame");
+  } else if (/bonnet\s*f|\bf-cup\b/i.test(bustSource)) {
+    parts.push("(large full F-cup breasts with pronounced natural projection and rounded volume:1.6)", "visibly prominent full bust");
+  } else if (/bonnet\s*e|\be-cup\b/i.test(bustSource)) {
+    parts.push("(prominent full E-cup breasts with clearly visible natural projection and rounded volume:1.6)", "visibly fuller than an average bust");
+  } else if (/bonnet\s*d|\bd-cup\b/i.test(bustSource)) {
+    parts.push(
+      "(full D-cup breasts with clearly visible natural projection and rounded volume:1.6)",
+      "distinctly full in a full-body frame"
+    );
+  } else if (/bonnet\s*c|\bc-cup\b/i.test(bustSource)) {
+    parts.push("(clearly visible medium C-cup breasts with natural rounded projection:1.5)");
+  } else if (/petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|small breast|poitrine\s*petite/i.test(bustSource)
+      || (!declaredCup && /^(jade|aya|lina|hana|mei|sasha|thea|zoe)$/.test(id))) {
     parts.push("(very small flat A-cup breasts:1.35)", "(petite chest:1.2)", "slim upper body");
-  } else if (/bonnet\s*b|small-medium b|seins\s*moyens?\s*b|modest chest/i.test(blob)
-      || /^(chloe|marine|noemie|thea)$/.test(id)) {
+  } else if (/bonnet\s*b|small-medium b|seins\s*moyens?\s*b|modest chest/i.test(bustSource)
+      || (!declaredCup && /^(chloe|marine|noemie|thea)$/.test(id))) {
     parts.push("(small-medium B-cup breasts:1.25)", "modest chest, NOT large");
-  } else if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[defg]|extremely large|d-cup|e-cup|f-cup/i.test(blob)
-      || /^(sofia|lea|fatou|amelie)$/.test(id)) {
+  } else if (/95d|100e|généreuse|gros\s*seins|bonnet\s*[defg]|extremely large|d-cup|e-cup|f-cup/i.test(bustSource)
+      || (!declaredCup && /^(sofia|lea|fatou|amelie)$/.test(id))) {
     parts.push("(large full breasts:1.4)", "(generous D-E cup:1.3)");
   }
   if (/gros(se)?\s*fess|fessier|round butt|thick\s*butt|brazilian|fesses\s*rondes|huge\s*round\s*butt/i.test(blob)
@@ -5684,16 +5699,13 @@ function enrichLooksDetail(c) {
   else if (/dark brown|marron fonc/.test(blob)) eyes = "dark brown eyes";
   else if (/brown|marron/.test(blob)) eyes = "brown eyes";
   // Poitrine
-  let bust = "medium natural breasts";
-  if (/j-cup|bonnet j/.test(blob)) bust = "(enormous J-cup breasts:1.5)";
-  else if (/i-cup|bonnet i/.test(blob)) bust = "(huge I-cup breasts:1.5)";
-  else if (/h-cup|bonnet h/.test(blob)) bust = "(huge H-cup breasts:1.5)";
-  else if (/g-cup|bonnet g/.test(blob)) bust = "(very large G-cup breasts:1.45)";
-  else if (/f-cup|bonnet f|100e|e-cup|very large heavy/.test(blob)) bust = "(very large heavy E-cup breasts:1.45)";
-  else if (/95d|d-cup|large full d|généreuse 95d|poitrine généreuse/.test(blob)) bust = "(large prominent 95D breasts:1.5), deep cleavage";
-  else if (/c-cup|medium c|poitrine moyenne/.test(blob)) bust = "(medium natural C-cup breasts:1.3)";
-  else if (/b-cup|small b/.test(blob)) bust = "(small B-cup breasts:1.3)";
-  else if (/a-cup|flat|nearly flat|petite poitrine/.test(blob)) bust = "(very small flat A-cup breasts:1.4)";
+  const bustLock = typeof cupLock === "function" ? cupLock(c) : null;
+  let bust = (bustLock && bustLock.pos) || "medium natural breasts";
+  if (!bustLock || !bustLock.pos) {
+    if (/gros\s*seins|huge\s*breasts|very large breasts|full bust/i.test(blob)) {
+      bust = "(full prominent breasts with natural projection:1.4)";
+    }
+  }
   // Corps
   let morph = "feminine figure";
   if (/hourglass|sablier/.test(blob)) morph = "marked hourglass figure, narrow waist, rounded hips";

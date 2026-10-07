@@ -16,7 +16,7 @@ const appSource = fs.readFileSync(
   path.join(__dirname, "..", "public", "app.js"),
   "utf8"
 );
-const identityStart = appSource.indexOf("function canonicalProfileCup(");
+const identityStart = appSource.indexOf("function profileAppearanceField(");
 const identityEnd = appSource.indexOf("\n\nfunction physicalLocksFromText", identityStart);
 assert(identityStart >= 0 && identityEnd > identityStart, "character identity prompt helpers are available");
 vm.runInContext(appSource.slice(identityStart, identityEnd), context);
@@ -141,3 +141,30 @@ test("duo morphology remains untouched and is not collapsed to a solo card", () 
 
   assert.equal(JSON.stringify(duo), before);
 });
+
+test("D-through-J morphology normalization describes the declared visible bust volume", () => {
+  const cues = {
+    D: /full D-cup breasts with clearly visible natural projection and rounded volume/,
+    E: /prominent full E-cup breasts with clearly visible natural projection and rounded volume/,
+    F: /large full F-cup breasts with pronounced natural projection and rounded volume/,
+    G: /very large heavy G-cup breasts with clear natural projection and visibly full volume/,
+    H: /huge heavy H-cup breasts with natural weight and clearly visible projection/,
+    I: /enormous heavy I-cup breasts with clearly visible natural projection and rounded volume/,
+    J: /massive extremely heavy J-cup breasts with clearly visible natural volume and strong projection/,
+  };
+
+  for (const cup of ["D", "E", "F", "G", "H", "I", "J"]) {
+    const card = {
+      id: "normalized_cup_" + cup.toLowerCase(),
+      appearance: `Poitrine : 95${cup} / bonnet ${cup}.`,
+      body: `${cup}-cup breasts`,
+      tags: [],
+    };
+    normalizeCard(card);
+
+    assert.equal(context.window.LeaProfileMorphology.explicitBandCup(card), `95${cup}`);
+    assert.match(card.morphology_en, cues[cup]);
+    assert.match(card.appearance, new RegExp(`Poitrine : 95${cup} / bonnet ${cup}`));
+  }
+});
+
