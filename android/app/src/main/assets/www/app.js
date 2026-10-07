@@ -4977,9 +4977,9 @@ function renderProfile() {
     </select>
     <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
     <select id="profile-ref-mode">
-      <option value="soft">Souple — tenues/poses variées (txt2img, identité fiche) · recommandé</option>
-      <option value="strong">Forte — img2img sur la photo ★ (même visage, peu de variété)</option>
-      <option value="off">Non — txt2img sans référence</option>
+      <option value="soft">Souple — img2img ★ : visage gardé, tenue/pose qui changent (denoise 0.68) · recommandé</option>
+      <option value="strong">Forte — img2img ★ : visage très collé (denoise 0.45)</option>
+      <option value="off">Non — txt2img sans référence ★</option>
     </select>
     <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
       <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
@@ -7955,13 +7955,37 @@ async function generatePhoto() {
         payload.seed = Math.floor(Math.random() * 2000000000);
         payload.ref_mode = refMode;
 
-        if (refMode === "strong") {
-          // Forte : img2img pour coller au visage de la ★
+        // Tenue + pose aléatoires en tête de prompt (poids fort pour battre la ref img2img)
+        let forcedWear = "", forcedPose = "";
+        try {
+          const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
+          if (pick) {
+            forcedWear = String(pick.outfit || "").slice(0, 130);
+            forcedPose = String(pick.pose || "").slice(0, 90);
+          }
+        } catch (_) {}
+        if (forcedWear) {
+          let pr = payload.prompt || "";
+          pr = pr.replace(/\(wearing[^)]{0,180}\)\s*,?/gi, "")
+                 .replace(/wearing[^,]{0,160},/gi, "")
+                 .replace(/\(pose:[^)]{0,120}\)\s*,?/gi, "")
+                 .replace(/pose:\s*[^,]{0,100},/gi, "");
+          payload.prompt = [
+            "(wearing exactly " + forcedWear + ":1.75),",
+            forcedPose ? ("(pose: " + forcedPose.replace(/[()]/g, " ") + ":1.6),") : "",
+            "(different outfit from the reference photo:1.45),",
+            "same face as reference, same person,",
+            pr
+          ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+        }
+
+        if (refMode === "strong" || refMode === "soft") {
+          const den = refMode === "strong" ? 0.45 : 0.68;
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
               allowFantasy: false,
               forceImg2Img: true,
-              denoising: 0.48,
+              denoising: den,
               addPromptLock: true,
             });
           } catch (e) {
@@ -7971,9 +7995,19 @@ async function generatePhoto() {
           if (hasRef) {
             payload.force_img2img = true;
             payload.source_processing = "img2img";
-            payload.denoising = 0.48;
-            payload.profile_identity_lock = true;
-            setGenStatus("Horde img2img · ref ★ forte · denoise 0.48 · seed " + payload.seed + "…");
+            payload.denoising = den;
+            payload.ref_mode = refMode;
+            if (refMode === "strong") payload.profile_identity_lock = true;
+            else delete payload.profile_identity_lock;
+            payload.negative = [
+              payload.negative || "",
+              "same outfit as reference, identical clothes as source, copy of reference clothing,",
+              "identical pose as reference, static duplicate of source photo"
+            ].join(" ");
+            setGenStatus(
+              "Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") +
+              " · denoise " + den + " · seed " + payload.seed + "…"
+            );
           } else {
             payload.force_img2img = false;
             delete payload.source_image;
@@ -7982,31 +8016,14 @@ async function generatePhoto() {
             setGenStatus("Horde txt2img · pas de ★ — seed " + payload.seed + "…");
           }
         } else {
-          // Souple ou off : txt2img uniquement = tenue/pose vraiment aléatoires
-          // L'identité (cheveux, yeux, poitrine, ethnie) vient de la fiche, pas de la photo ★
+          // off
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
           delete payload.denoising;
           delete payload.face_lock;
           delete payload.profile_identity_lock;
-          // Forcer une tenue + pose du pool à chaque run (poids fort)
-          try {
-            const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
-            if (pick && pick.outfit) {
-              const wear = String(pick.outfit).slice(0, 120);
-              const pose = String(pick.pose || "standing full body").slice(0, 80);
-              let pr = payload.prompt || "";
-              // Retirer d'anciennes tenues/poses trop faibles
-              pr = pr.replace(/wearing[^,]{0,160},/gi, "").replace(/pose:\s*[^,]{0,100},/gi, "");
-              payload.prompt = [
-                "(wearing " + wear + ":1.7),",
-                "(pose: " + pose.replace(/[()]/g, " ") + ":1.55),",
-                pr
-              ].join(" ").replace(/\s+/g, " ").trim();
-            }
-          } catch (_) {}
-          setGenStatus("Horde txt2img · " + (refMode === "soft" ? "souple (variété tenue/pose)" : "sans ref") + " · seed " + payload.seed + "…");
+          setGenStatus("Horde txt2img · sans ref · seed " + payload.seed + "…");
         }
       }
       payload.nsfw = false;
