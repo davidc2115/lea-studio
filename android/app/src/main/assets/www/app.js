@@ -4975,9 +4975,9 @@ function renderProfile() {
     </select>
     <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
     <select id="profile-ref-mode">
-      <option value="off">Non — variété max, cheveux/poitrine de la fiche (recommandé)</option>
-      <option value="soft">Souple — visage proche, scène/tenue/corps libres (denoise 0.65)</option>
-      <option value="strong">Forte — quasi copie de la photo ★ (denoise 0.45)</option>
+      <option value="soft">Souple — conserve le visage de la ★, pose/tenue libres (denoise 0.55) · recommandé</option>
+      <option value="strong">Forte — visage très fidèle à la ★ (denoise 0.42)</option>
+      <option value="off">Non — txt2img seul, pas de référence ★</option>
     </select>
     <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
       <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
@@ -6197,8 +6197,10 @@ function bindPoseLibrary(c) {
 function profileRefMode() {
   try {
     const m = JSON.parse(localStorage.getItem("lea.settings") || "{}").profileRefMode;
-    return m === "soft" || m === "strong" ? m : "off";
-  } catch (_) { return "off"; }
+    if (m === "off" || m === "soft" || m === "strong") return m;
+  } catch (_) {}
+  // Défaut : souple = conserve le visage de la ★ sans figer toute la pose
+  return "soft";
 }
 
 async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
@@ -7324,23 +7326,24 @@ function finalizeProfilePrompt(payload, c, scenarioVariant) {
   const hairNeg = "wrong hair color," + (hairCard ? " " + hairCard.neg + "," : "") + (fancyHair ? "" : " dyed fantasy hair, magenta hair,");
   payload.prompt = [
     "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
-    (idBlock || id).slice(0, 420) + ",",
+    "(face fully visible:1.65), (head and face in frame:1.6), (eyes visible:1.45), not headless, not cropped head,",
+    (idBlock || id).slice(0, 380) + ",",
     age + " year old adult woman,",
     "(new camera angle:1.2), slight pose variation,",
-    "wearing exactly one outfit: " + wear + ", NOT mixed clothes, NOT the same clothes as the reference photo,",
-    "(pose: " + pose.replace(/[()]/g, " ") + ":1.4),",
+    "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
+    "(pose: " + pose.replace(/[()]/g, " ") + ":1.35),",
     place ? ("location: " + place + ",") : "",
-    "sexy provocative sensual pose, full body from head to shoes, hips and legs visible,",
+    "sexy provocative sensual pose, full body from head to mid-thigh or shoes, hips and legs visible,",
     hairCard ? "(" + [hairCard.pos, ...cardHairStyle(c)].join(", ") + ":1.5)," : "",
-    cupPos ? "(" + cupPos.replace(/[()]|:\d+(\.\d+)?/g, "") + ":1.4)," : "",
-    "correct hair color, correct hair style, correct eye color, correct breast size and shape"
+    cupPos ? "(" + cupPos.replace(/[()]|:\d+(\.\d+)?/g, "") + ":1.35)," : "",
+    "correct hair color, correct hair style, correct eye color, correct breast size and shape, face must be visible"
   ].filter(Boolean).join(" ");
   payload.negative = [
     hairNeg,
     cupNeg,
     "painting, oil painting, digital painting, illustration, drawing, anime, manga, cartoon, cgi, 3d render, plastic doll, airbrushed,",
     "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar over face, pixelated face,",
-    "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, blurry, text, watermark,",
+    "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, cropped head, head out of frame, neck only, no face, missing head, face cut off at top, blurry, text, watermark,",
     fancyHair ? "wrong age, different person," : "wrong age, different person, blue streak hair, colored highlights,",
     "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
     payload.negative || ""
@@ -7887,16 +7890,20 @@ async function generatePhoto() {
             else if (/brown iris/i.test(eyeLock)) payload.negative = "blue eyes, green eyes, grey eyes, " + (payload.negative || "");
             payload.negative = "wrong eye color, glowing eyes, " + (payload.negative || "");
             try {
-              // Profil aléatoire : PAS d'img2img, sinon la pose étoilée est recopiée.
-              payload.force_img2img = false;
-              delete payload.source_image;
-              delete payload.source_processing;
-              delete payload.denoising;
-              setGenStatus("Horde txt2img · pose et tenue libres");
+              // Ne pas écraser ici : le mode ★ (soft/strong) est appliqué juste après
+              if (profileRefMode() === "off") {
+                payload.force_img2img = false;
+                delete payload.source_image;
+                delete payload.source_processing;
+                delete payload.denoising;
+                setGenStatus("Horde txt2img · pose et tenue libres");
+              }
             } catch (e2) {
-              payload.force_img2img = false;
-              delete payload.source_image;
-              setGenStatus("Horde txt2img · pas de photo repère");
+              if (profileRefMode() === "off") {
+                payload.force_img2img = false;
+                delete payload.source_image;
+                setGenStatus("Horde txt2img · pas de photo repère");
+              }
             }
           }
         } catch (e) { console.warn("[face_lock]", e); }
@@ -7946,7 +7953,7 @@ async function generatePhoto() {
         // Référence ★ : désactivée par défaut (img2img 0.42 recopiait la photo → images identiques,
         // cheveux/poitrine de la ref au lieu de la fiche). Réglable : off / soft (0.65) / strong (0.45).
         const refMode = profileRefMode();
-        const refDenoise = refMode === "strong" ? 0.45 : 0.65;
+        const refDenoise = refMode === "strong" ? 0.42 : 0.55;
         if (refMode !== "off") {
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {

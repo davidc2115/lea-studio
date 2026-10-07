@@ -2517,7 +2517,7 @@
           "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
           "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
           isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar, pixelated face, face crop, headshot only, wrong hair color,",
+          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar, pixelated face, face crop, headshot only, headless, cropped head, head out of frame, no face, missing head, wrong hair color,",
           /\b(pink|purple|magenta|lavender) hair\b/i.test(promptSafe) ? "" : "pink hair, magenta hair, purple hair,",
           "identical composition to reference, same pose as source, same outfit as reference, static copy of reference, duplicate frame"
         ].join(" ").replace(/\s+/g, " ").trim().slice(0, 950);
