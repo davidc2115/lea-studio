@@ -196,6 +196,7 @@
       imageKeys: "",
       imageProvider: "gemini",
       imageEngine: "horde",
+      hordeModel: "Realistic Vision",
       geminiImageModel: "auto",
       geminiTextModel: "gemini-3.5-flash-lite",
     });
@@ -2465,98 +2466,145 @@
       }
       promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 1000);
 
-      // Génération classique restaurée (époque denoise 0.42 / Realistic Vision)
-      // Anonyme + 512x512 pour passer la file Horde actuelle
-      let hordeKey = "0000000000";
-
-      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
-      const hasHordeAccount = false;
-      const W = 512;
-      const H = 512;
-      const steps = 10;
-      const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
-      const payloads = [];
-
-      // Visage d'abord : denoise bas avec référence profil (0.42 historique)
-      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      if (body.force_low_denoise === true || body.profile_identity_lock === true) {
-        den = Math.min(0.48, Math.max(0.36, den));
-      } else if (body.is_profile_photo === true) {
-        den = Math.min(0.75, Math.max(0.4, den));
-      } else {
-        den = Math.min(0.65, Math.max(0.36, den));
-      }
-
       let src = null;
-      if (body.source_image && (body.source_processing === "img2img" || body.force_img2img === true)) {
+      if (body.source_image && ["img2img", "inpainting"].includes(body.source_processing)) {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 1_000_000) src = raw;
       }
+      const useImg2Img = Boolean(src);
+      const isMaskedProfile = Boolean(profileSceneLock && src && body.profile_face_mask === true && body.source_processing === "inpainting");
+      let sourceMask = "";
+      if (isMaskedProfile) {
+        sourceMask = String(body.source_mask || "").replace(/^data:[^,]*,/, "").replace(/\s+/g, "");
+        if (sourceMask.length < 32 || sourceMask.length >= 1000000) throw new Error("Masque de protection du visage invalide.");
+      }
 
+      const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
+      let last = "";
+      let hordeKey = "0000000000";
+      if (body.horde_anonymous !== true) {
+        try {
+          const st = settings();
+          if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
+        } catch (_) {}
+        try {
+          const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+          if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
+        } catch (_) {}
+      }
+
+      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
+      const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
+      // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
+      const detailedProfile = isMaskedProfile && body.profile_head_segmented === true &&
+        body.profile_render_width === 512 && body.profile_render_height === 640;
+      const W = isMaskedProfile && body.profile_head_segmented === true && !detailedProfile ? 384 : 512;
+      const H = detailedProfile ? 640 : isMaskedProfile && body.profile_head_segmented === true ? 512 : isMaskedProfile ? 704 : 512;
+      const steps = isMaskedProfile ? (detailedProfile ? 26 : 22) : hasHordeAccount ? 28 : 22;
+      const selectedHordeModel = String(body.hordeModel || settings().hordeModel || "Realistic Vision").trim();
+      let hordeModels;
+      try {
+        const modelResponse = await fetch("https://aihorde.net/api/v2/status/models?type=image");
+        if (!modelResponse.ok) throw new Error("HTTP " + modelResponse.status);
+        hordeModels = await modelResponse.json();
+      } catch (error) {
+        throw new Error("Impossible de vérifier le catalogue AI Horde : " + (error.message || error));
+      }
+      const selectedModelStatus = Array.isArray(hordeModels)
+        ? hordeModels.find((item) => String(item.name || "").toLowerCase() === selectedHordeModel.toLowerCase())
+        : null;
+      if (!selectedModelStatus || Number(selectedModelStatus.count) < 1) {
+        throw new Error("Le modèle AI Horde « " + selectedHordeModel + " » n'est pas disponible avec des travailleurs actifs. Vérifie la liste dans Réglages.");
+      }
+      const photoModels = [selectedHordeModel];
+      const payloads = [];
+
+      // Denoise HAUT si img2img : sinon la pose de la ref est recopié
+      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
+      const isProfileImg2Img = Boolean(profileSceneLock && !isDuoPrompt && body.profile_identity_lock === true);
+      den = isMaskedProfile ? 1 : body.profile_frontal_reference === true
+        ? Math.min(.95, Math.max(.85, den))
+        : Math.min(isProfileImg2Img ? 0.75 : 0.48, Math.max(isProfileImg2Img ? 0.58 : 0.36, den));
+
+      // Négatifs anti-clone + anti-âge + anti-pose figée
+      const soloNeg = isDuoPrompt
+        ? ", 3girls, four women, crowd, identical clone twins"
+        : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
+      // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
+      const qualityNeg = isDuoPrompt
+        ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
+        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, missing legs, cropped at chest,  exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
+      const photoHead = "character sheet, model sheet, turnaround, reference sheet, multiple views, three panels, triptych, collage, grid, split screen, white divider, side profile lineup, same woman repeated, clone, plastic skin, mannequin, catalog photo, painting, illustration, cgi, ";
+      const mirrorHead = isDuoPrompt
+        ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
+        : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
+      const negFull = (photoHead + mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1800);
+
+      // UNE SEULE soumission — anonyme: coût kudos minimal
       function makePayload(opts) {
         opts = opts || {};
         const w = opts.w || W;
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        let promptSafe = String(body.prompt || "").replace(/\s+/g, " ").trim();
         const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
-        if (idHead && !promptSafe.toLowerCase().includes(idHead.slice(0, 24).toLowerCase())) {
+        if (!profileSceneLock && idHead && !promptSafe.includes(idHead.slice(0, 40))) {
           promptSafe = idHead + ", " + promptSafe;
         }
-        if (!promptSafe) promptSafe = "photorealistic DSLR photograph of one real adult woman, full body, natural skin";
-        if (!/photorealistic|photograph|RAW/i.test(promptSafe)) {
-          promptSafe = (promptSafe + ", RAW photorealistic photograph, real skin pores, sharp focus").slice(0, 1400);
-        }
-        promptSafe = promptSafe.slice(0, 1400);
+        promptSafe = String(promptSafe || "").replace(/\s+/g, " ").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 900);
         const simpleNeg = [
-          String(body.negative || "").slice(0, 500),
-          "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
-          "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
-          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar, pixelated face, face crop, headshot only, headless, cropped head, head out of frame, no face, missing head, wrong hair color,",
-          /\b(pink|purple|magenta|lavender) hair\b/i.test(promptSafe) ? "" : "pink hair, magenta hair, purple hair,",
-          "identical composition to reference, same pose as source, same outfit as reference, static copy of reference, duplicate frame"
-        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 950);
+          profileSceneLock && !isDuoPrompt ? String(body.negative || "").slice(0, 240) : "",
+          "anime, manga, cartoon, illustration, painting, drawing, 3d render, cgi, plastic skin,",
+          "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, text, watermark,",
+          isDuoPrompt ? "solo, 1girl, split screen, collage," :
+            body.profile_frontal_reference === true ? "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet," :
+              "2girls, multiple women, twins, clone, mirror symmetry, duplicated body, split screen, collage, character sheet,",
+          body.profile_frontal_reference === true ? "glowing eyes, hidden eye, cropped head, looking away" : "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, face crop, headshot only, empty room",
+          profileSceneLock && !isDuoPrompt ? "" : String(body.negative || "")
+        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 700);
         const base = {
-          prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1800),
+          prompt: (promptSafe + " ### " + simpleNeg.slice(0, profileSceneLock && !isDuoPrompt ? 440 : 700)).slice(0, profileSceneLock && !isDuoPrompt ? 2000 : 1600),
           params: {
             width: w,
             height: h,
             steps: st,
             n: 1,
             seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
-            sampler_name: "k_euler_a",
-            cfg_scale: 6,
-            clip_skip: 2,
+            sampler_name: isMaskedProfile ? "k_dpmpp_2m" : "k_euler_a",
+            ...(isMaskedProfile ? { karras: true } : {}),
+            cfg_scale: isMaskedProfile || body.profile_frontal_reference === true ? 7 : 5.5,
+            clip_skip: isMaskedProfile || body.profile_frontal_reference === true ? 1 : 2,
           },
+          // Keep the current GitHub generation settings.
           nsfw: true,
           censor_nsfw: false,
           models: models,
           r2: true,
           slow_workers: true,
-          shared: true,
+          shared: false,
         };
         if (opts.img2img && src) {
           base.source_image = src;
-          base.source_processing = "img2img";
+          base.source_processing = isMaskedProfile ? "inpainting" : "img2img";
+          if (isMaskedProfile) base.source_mask = sourceMask;
           base.params.denoising_strength = den;
-          base.params.steps = Math.min(Math.max(st, 12), 18);
+          const img2imgStepLimit = isMaskedProfile ? steps : body.profile_identity_lock === true
+            ? (hasHordeAccount ? 28 : 20)
+            : (hasHordeAccount ? 28 : 12);
+          base.params.steps = Math.min(st, img2imgStepLimit);
         }
         return base;
       }
 
-      const useImg2Img = Boolean(src) && body.force_img2img === true;
-      if (useImg2Img) {
+      const forceImg2 = useImg2Img && body.force_img2img === true;
+      if (forceImg2 && useImg2Img) {
         payloads.push(makePayload({ img2img: true }));
       } else {
         payloads.push(makePayload({}));
       }
-      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["Realistic Vision"], img2img: false }));
-
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];
@@ -2570,8 +2618,8 @@
             if (bodyPayload.params) {
               bodyPayload.params.width = W;
               bodyPayload.params.height = H;
-              if (bodyPayload.params.steps > 12) {
-                bodyPayload.params.steps = 10;
+              if (!hasHordeAccount && bodyPayload.params.steps > (detailedProfile ? 26 : 22)) {
+                bodyPayload.params.steps = detailedProfile ? 26 : 22;
               }
             }
             const res = await fetch(host + "/generate/async", {
@@ -2598,14 +2646,14 @@
                 jobId: data.id,
                 host,
                 pending: true,
-                mode: bodyPayload.source_processing || "txt2img",
+                mode: isMaskedProfile ? "inpainting · visage protégé" : body.profile_reference_note ? "img2img · référence entière (masque indisponible)" : bodyPayload.source_processing || "txt2img",
                 models: (bodyPayload.models || []).slice(0, 3),
               };
             }
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
             console.warn("[horde]", host, last, "params", bodyPayload.params && (bodyPayload.params.width + "x" + bodyPayload.params.height + " s" + bodyPayload.params.steps));
             // Kudos ≠ ban IP : essayer le payload suivant (512x512 minimal)
-            if (/kudos|heavy demand|work budget|576x576|728x728|657x657|first-order-equivalent/i.test(String(last))) {
+            if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
               continue;
             }
             markHordeRateLimit(last);
@@ -2623,7 +2671,7 @@
       }
       if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
         throw new Error(
-          "Horde anonyme saturé. Réessaie dans 1–2 min. " +
+          "Horde file saturée (0 kudos). Réessaie dans 1–2 min, ou crée une clé gratuite sur aihorde.net (Clés → AI Horde) pour passer devant. " +
           String(last).slice(0, 70)
         );
       }

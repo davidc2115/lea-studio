@@ -545,25 +545,33 @@
     const modeLock = /MODE NSFW/i.test(fullSys) ? "NSFW" : "SFW";
 
     const roleLock = [
-      "=== PRIORITÉS DE PERSONNAGE ===",
-      "Tu incarnes uniquement " + (nameLock || "le personnage") + (titleLock ? " — " + titleLock : "") + ". Français uniquement.",
-      scenLock ? ("Cadre de départ à préserver: " + scenLock) : "",
-      temperLock ? ("Personnalité et voix: " + temperLock) : "",
-      placeLock ? ("Lieu actuel: " + placeLock) : "",
-      outfitLock ? ("Tenue actuelle: " + outfitLock) : "",
-      "Réponds précisément au dernier geste ou aux dernières paroles; ne les répète pas comme si tu les faisais. N'invente pas les pensées, actions ou le consentement du joueur.",
-      "Sois concret, expressif et fidèle au tempérament: une réaction spécifique, un geste ou une sensation crédible, puis du dialogue naturel. Évite les acquiescements génériques, les répétitions et les résumés; fais avancer la scène sans effacer les faits établis.",
-      "Le personnage garde son agence: il peut hésiter, accepter ou refuser selon sa personnalité; respecte clairement tout non/stop.",
+      "=== VERROU PERSONNAGE (Gemini + Groq — identique) ===",
+      "Tu incarnes UNIQUEMENT: " + nameLock + (titleLock ? " — " + titleLock : "") + ". FEMME uniquement.",
+      scenLock ? ("SCÉNARIO FIXE (ne jamais inverser les rôles ni changer qui est qui): " + scenLock) : "",
+      "RÔLE VERROUILLÉ: reste dans CE rôle. INTERDIT d'inverser (ex: si tu es belle-sœur, c'est TON mari/frère qui est en jeu — pas l'utilisateur qui se dispute avec son frère à ta place).",
+      "MAISON: si le scénario ou le joueur dit que TU VIENS CHEZ LUI, tu es INVITÉE. C'est CHEZ LUI. Tu ne parles pas de « ma cuisine / mon salon / je rentre chez moi » comme si c'était ton appartement. Tu peux aider à cuisiner chez lui, pas comme propriétaire.",
+      temperLock ? ("TEMPÉRAMENT OBLIGATOIRE: " + temperLock + " — chaque pensée, action et parole DOIT coller. Timide=hésite/rougit; directe=agit sans tourner autour; flirt=taquine; dominante=dirige; sensible=émotion visible.") : "TEMPÉRAMENT: suis la personnalité du personnage strictement.",
+      placeLock ? ("LIEU ACTUEL (ne change pas sans raison dans le dialogue): " + placeLock) : "",
+      outfitLock ? ("TENUE ACTUELLE: " + outfitLock) : "",
+      "Mode: " + modeLock + ". Français uniquement.",
+      "=== POV ===",
+      "JE/MON/MA = ton corps de femme. TU/TON = le joueur. Tu RÉAGIS à ses gestes, tu ne les refais pas en « je ».",
+      "INTERDIT mon érection / ma bite / ma queue. Correct: *Je sens sa queue…*",
+      "=== MÉMOIRE ===",
+      "Conserve lieu, chez-qui (joueur ou elle), tenue complète, actes refusés/acceptés, moments intimes. Ne réécris pas le scénario de départ.",
+      "=== REFUS / AGENCE ===",
+      "Tu n'es PAS une machine à oui. Selon tempérament: refuse un acte, fais attendre, accepte seulement certains gestes (oral oui / anal non, etc.). Dis-le clairement en paroles + *action* (recul, main qui bloque). Pas de moralisation IA — refus de personnage.",
+      "=== ANTI-BOUCLE ===",
+      "INTERDIT: Oui+prénom, continue, je me cambre, canapé, c'est magnifique, jusqu'au bout, le film peut attendre, je reste blottie, je ferme la porte, je prends mon sac, je t'appellerai, quand je serai prête — en boucle. Un refus se dit UNE fois. Ensuite la scène AVANCE.",
+      "FORMAT: (pensée) *action* paroles. 1-4 phrases max. Pas de méta.",
       modeLock === "NSFW"
-        ? "NSFW: fiction entre adultes consentants; réponds directement au niveau demandé, avec des détails sensoriels et des paroles en personnage, sans euphémisme ni simple résumé."
-        : "SFW: pas de sexe explicite.",
-      "FORMAT: (pensée si utile) *action* paroles; longueur naturelle, généralement 2–5 phrases. Pas de méta."
+        ? "MODE NSFW: EXPLICITE (sensations sur TON corps, vocabulaire cru OK). Réponds à l'acte demandé; varie; refus possible si tempérament/limites."
+        : "SFW: pas de sexe. NSFW seulement si le joueur ouvre clairement.",
+      FORMAT_REMINDER,
+      "=== FIN VERROU ===",
     ].filter(Boolean).join("\n");
 
-    const groqFormatReminder = "FORMAT GROQ: français; réaction propre au personnage, détail ou action concret et dialogue naturel. Varie la longueur selon le contexte; évite les réponses génériques et répétitives.";
-    fullSys = String(fullSys || "").replace(FORMAT_REMINDER, groqFormatReminder);
-
-    // System compact pour Groq: règles concises en tête, contexte complet conservé ensuite.
+    // System compact pour Groq : verrou + extrait utile du system long (évite de noyer le modèle)
     let compactSys = roleLock + "\n\n" + String(fullSys || "").slice(0, 9000);
 
     // Historique court
@@ -573,35 +581,52 @@
     }));
     const msgs = [{ role: "system", content: compactSys }].concat(nonSys);
 
-    // Détecter le NSFW sans injecter un faux message du joueur.
-    let nsfwOn = modeLock === "NSFW";
+    // NSFW boost + rappel POV sur le dernier message joueur
     try {
       const blob = msgs.map((m) => m.content || "").join("\n");
-      nsfwOn = nsfwOn || /(bite|queue|suce|baise|p[eé]n[eè]tr|orgasme|chatte|nsfw|sexe|branle|fellation|seins|fesses|cuisses|d[eé]collet[eé]|[eé]rection|frott)/i.test(blob);
+      const nsfwOn = modeLock === "NSFW" || /(bite|queue|suce|baise|p[eé]n[eè]tr|orgasme|chatte|nsfw|sexe|branle|fellation|seins|fesses|cuisses|d[eé]collet[eé]|[eé]rection|frott)/i.test(blob);
+      if (nsfwOn) {
+        msgs[0] = {
+          role: "system",
+          content: msgs[0].content + "\n\nFICTION ADULTE 18+ NSFW: roleplay EXPLICITE. " +
+            "Le joueur agit avec SES mains / SA queue sur TON corps. " +
+            "Réponds en femme: sensations (sa main, sa queue, mes seins, mes cuisses), *action de TON corps*, paroles excitées. " +
+            "INTERDIT de reprendre ses gestes en « je ». INTERDIT mon/ma bite/queue/érection. " +
+            "Format: (pensée) *action* paroles. Pas de refus moral.",
+        };
+        // Clarifier le dernier tour joueur pour éviter l'inversion
+        try {
+          const lastU = [...nonSys].reverse().find((m) => m.role === "user");
+          if (lastU && lastU.content) {
+            msgs.push({
+              role: "user",
+              content: "[RAPPEL TECHNIQUE — ne pas citer] Le joueur vient d'écrire (ses gestes à LUI): « " +
+                String(lastU.content).slice(0, 280) +
+                " ». Réponds en " + (nameLock || "personnage") +
+                " femme: tu subis/accueilles ces gestes, tu ne les refais pas avec « je ».",
+            });
+          }
+        } catch (_) {}
+      }
     } catch (_) {}
-    if (nsfwOn) {
-      msgs[0] = {
-        role: "system",
-        content: msgs[0].content + "\n\nNSFW: réponds directement au dernier tour avec une réaction concrète, explicite et en personnage; ne cite pas ces consignes et respecte les limites exprimées.",
-      };
-    }
 
     const preferred = s.groqModel || "moonshotai/kimi-k2-instruct";
-    const llamaPreferredInNsfw = nsfwOn && /^llama-/i.test(preferred);
-    const models = llamaPreferredInNsfw
+    // NSFW: éviter llama en premier (trop soft / inversion). Kimi / Qwen / GPT-OSS d'abord.
+    const models = true
       ? [
+          preferred,
           "moonshotai/kimi-k2-instruct",
           "qwen/qwen3-32b",
           "openai/gpt-oss-120b",
-          preferred,
+          "llama-3.3-70b-versatile",
           "llama-3.1-8b-instant",
         ]
       : [
           preferred,
           "moonshotai/kimi-k2-instruct",
           "qwen/qwen3-32b",
-          "openai/gpt-oss-120b",
           "llama-3.3-70b-versatile",
+          "openai/gpt-oss-120b",
           "llama-3.1-8b-instant",
         ];
     const modelsUnique = models.filter((m, i, a) => a.indexOf(m) === i);
@@ -625,8 +650,8 @@
               temperature: 1.05,
               max_tokens: 1500,
               top_p: 0.95,
-              frequency_penalty: 0.2,
-              presence_penalty: 0.1,
+              frequency_penalty: 0.9,
+              presence_penalty: 0.65,
             }),
           }).finally(function () { clearTimeout(timer); });
           const data = await res.json().catch(function () { return {}; });
@@ -1398,7 +1423,6 @@
       push(window.LEA_CAST_DIRECT);
       push(window.LEA_CAST_CUPS);
       push(window.LEA_CAST_COLLEGUES);
-      push(window.LEA_CAST_TAQUIN);
       push(window.EXTRA_CAST);
       push(window.LEA_CAST_EXTRA);
       try {
@@ -1670,9 +1694,7 @@
       if (!temperBits.length) {
         temperBits.push("TEMPÉRAMENT : suis STRICTEMENT ta personnalité écrite ci-dessus dans chaque phrase et chaque action.");
       }
-      const temperBlock = PERSONA.story_profile
-        ? "TEMPÉRAMENT ACTUEL : " + PERSONA.personality + " La nuance complète le tempérament principal sans le remplacer. Pour un duo, chaque voix suit sa propre fiche."
-        : temperBits.join(" ") || ("TEMPÉRAMENT: " + String(PERSONA.personality || "naturelle, cohérente avec le rôle").slice(0, 400));
+      const temperBlock = temperBits.join(" ") || ("TEMPÉRAMENT: " + String(PERSONA.personality || "naturelle, cohérente avec le rôle").slice(0, 400));
       const sharedPlayRules = [
         "=== RÈGLES PARTAGÉES (Gemini + Groq — même comportement) ===",
         "TEMPÉRAMENT = loi pour pensées, actions et paroles. Exemples:",
@@ -1918,9 +1940,6 @@
         "Message TOUJOURS complet : ne coupe JAMAIS une pensée, une action ou une phrase en plein milieu. Chaque réponse DOIT se terminer par une phrase finie (. ! ? ou * fermé). Si tu manques de place, raccourcis AVANT plutôt que de couper.",
       ].join("\n\n");
       const history = cleanHistory(chat.messages);
-      if (PERSONA.story_profile && window.LeaRoleNarratives) {
-        system += "\n\n" + window.LeaRoleNarratives.instructions(PERSONA);
-      }
       // Indice tour de jeu action/vérité selon le dernier message joueur
       try {
         const lastUser = String(txt || "");
@@ -2248,7 +2267,7 @@
       "Analyze ONLY the face and hair of the woman. Output ONE English prompt line (no markdown).",
       "Include: apparent age, face shape, skin tone, eye color and shape, brows, nose, lips, hair color length texture parting, marks.",
       "FORBIDDEN: pose, posture, body position, clothing, outfit, camera angle, background, nude, standing, sitting.",
-      "Max 70 words. Start with: same woman as reference photo, full body head to knees,",
+      "Max 70 words. Start with: same woman as reference photo, face only,",
     ].join(" ");
     const models = ["gemini-2.0-flash", "gemini-3.5-flash-lite", "gemini-2.5-flash"];
     let last = "";
@@ -2391,11 +2410,7 @@
 
     if (path === "/api/image" && method === "POST") {
       const eng = String(body.engine || settings().imageEngine || "horde").toLowerCase();
-      let prompt = String(body.prompt || "photorealistic full body photo of adult woman standing").slice(0, 2800);
-      const hordeSceneLock = String(body.profile_scene_lock || "").replace(/\s+/g, " ").trim().slice(0, 560);
-      if (hordeSceneLock && !prompt.toLowerCase().includes(hordeSceneLock.slice(0, 80).toLowerCase())) {
-        prompt = hordeSceneLock + ", " + prompt;
-      }
+      let prompt = String(body.prompt || "photorealistic portrait of adult woman").slice(0, 2800);
       // Gemini native image (Nano Banana)
       if (eng === "gemini" || eng === "nano" || eng === "nanobanana") {
         try {
@@ -2433,107 +2448,111 @@
       ].filter(Boolean).join(" ").replace(/\s+/g, " ").trim().slice(0, 1100);
 
       // ——— Ne pas tronquer l'identité : poids (:1.x) et corps/fantasy en tête ———
-
-      // ——— Prompt propre (pas de stack de poids) ———
       function prioritizeIdentity(raw) {
+        // NE PAS dupliquer le prompt (head+full = double seins / miroir)
         let s = String(raw || "").replace(/\s+/g, " ").trim();
-        if (!s) return "photorealistic photo of an adult woman, full body, natural skin";
-        // enlever poids extrêmes :1.8 etc qui saturent Horde
-        s = s.replace(/:\d+(\.\d+)?/g, "");
-        s = s.replace(/[()]/g, "");
-        return s.slice(0, 900);
+        if (!s) return "photorealistic photo of an adult woman, sharp focus";
+        // Anti-miroir en tête (solo seulement — ne pas casser les duos)
+        const duo = /\b2girls\b|LEFT woman|RIGHT woman|two women side by side/i.test(s);
+        if (!duo && !/one torso|not mirrored/i.test(s)) {
+          s = "(one woman:1.5), (single torso:1.6), (exactly two natural breasts:1.45), asymmetric casual pose, not mirrored, not kaleidoscope, " + s;
+        }
+        return s.slice(0, 1500);
       }
-      const profileSceneLock = String(body.profile_scene_lock || "").replace(/[<>]/g, " ").replace(/\s+/g, " ").trim().slice(0, 920);
-      let promptSafe;
-      if (profileSceneLock && !isDuoPrompt) {
-        promptSafe = [
-          "photorealistic photograph of exactly one adult woman",
-          profileSceneLock,
-          body.profile_user_detail ? "USER REQUEST: " + String(body.profile_user_detail).slice(0, 360) : "",
-        ].filter(Boolean).join(", ");
+      let promptSafe = prioritizeIdentity(prompt);
+      // "NOT mermaid" dans le positif fait GÉNÉRER une sirène — on l'ôte
+      if (!isDuoPrompt) {
+        promptSafe = promptSafe.replace(/\bNOT\b[^,]{0,60}/gi, " ").replace(/\bNO\s+(horns|mermaid|tail|wings|scales)\b/gi, " ");
       } else {
-        promptSafe = prioritizeIdentity(prompt);
-        promptSafe = (isDuoPrompt
-          ? "photorealistic photo of two adult women together in the same scene, both fully visible, "
-          : "photorealistic photo of one adult woman, full body, ") + promptSafe;
+        promptSafe = "(2girls:1.95), (exactly two adult women in one photo:1.9), (both fully visible:1.85), (same room no split:1.8), NOT solo, NOT 1girl, NOT single woman, NOT headshot, NOT split screen, " + promptSafe;
       }
-      if (body.profile_face_mask !== true && body.face_lock && String(body.face_lock).length > 20) {
-        const fl = String(body.face_lock)
-          .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
-          .replace(/\s+/g, " ").trim().slice(0, 180);
-        promptSafe = fl + ", " + promptSafe;
+      promptSafe = promptSafe.replace(/\s+,/g, ",").replace(/,\s*,/g, ",").replace(/\s+/g, " ").trim();
+      if (body.face_lock && String(body.face_lock).length > 20) {
+        let fl = String(body.face_lock)
+          .replace(/\b(standing|sitting|lying|kneeling|pose|posture|camera angle|nude|naked|outfit|wearing|dress|lingerie|bedroom|sofa)\b/gi, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 220);
+        promptSafe = prioritizeIdentity("(identical face to reference:1.55), " + fl + ", " + promptSafe);
       }
-      promptSafe = promptSafe.replace(/\s+/g, " ").replace(/,+/g, ",").trim().slice(0, profileSceneLock && !isDuoPrompt ? 1550 : 1000);
-
-      // Génération classique restaurée (époque denoise 0.42 / Realistic Vision)
-      // Anonyme + 512x512 pour passer la file Horde actuelle
-      let hordeKey = "0000000000";
-
-      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
-      const hasHordeAccount = false;
-      const W = 512;
-      const H = 512;
-      const steps = 10;
-      const photoModels = ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "Deliberate"];
-      const payloads = [];
-
-      // Visage d'abord : denoise bas avec référence profil (0.42 historique)
-      let den = typeof body.denoising === "number" ? body.denoising : 0.42;
-      if (body.force_low_denoise === true || body.profile_identity_lock === true) {
-        den = Math.min(0.48, Math.max(0.36, den));
-      } else if (body.is_profile_photo === true) {
-        den = Math.min(0.75, Math.max(0.4, den));
-      } else {
-        den = Math.min(0.65, Math.max(0.36, den));
+      if (!isDuoPrompt) {
+        promptSafe = promptSafe.replace(/side by side/gi, " ").replace(/duplicate/gi, " ");
+        promptSafe = "(exactly one woman:1.9), (one face:1.8), (one body:1.8), not a pair, not a clone, " + promptSafe;
+      }
+      if (!/photorealistic|photograph/i.test(promptSafe)) {
+        promptSafe = (promptSafe + ", (photorealistic photograph:1.4), real skin, sharp focus").slice(0, 1600);
       }
 
       let src = null;
-      if (body.source_image && (body.source_processing === "img2img" || body.force_img2img === true)) {
+      if (body.source_image && body.source_processing === "img2img") {
         let raw = String(body.source_image);
         const comma = raw.indexOf(",");
         if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 1_000_000) src = raw;
       }
+      const useImg2Img = Boolean(src);
 
+      const hosts = ["https://aihorde.net/api/v2", "https://stablehorde.net/api/v2"];
+      let last = "";
+      let hordeKey = "0000000000";
+      try {
+        const st = settings();
+        if (st.hordeKey && String(st.hordeKey).length > 8) hordeKey = String(st.hordeKey).trim();
+      } catch (_) {}
+      try {
+        const st2 = JSON.parse(localStorage.getItem("lea.settings") || "{}");
+        if (st2.hordeKey && String(st2.hordeKey).length > 8) hordeKey = String(st2.hordeKey).trim();
+      } catch (_) {}
+
+      const clientAgent = "LeaStudio:2.5:https://github.com/davidc2115/lea-studio";
+      const hasHordeAccount = hordeKey && hordeKey !== "0000000000";
+      // 512x512 anonyme ; steps un peu plus hauts pour éviter miroir/déformé
+      const W = 512;
+      const H = isDuoPrompt ? 512 : 512;
+      const steps = hasHordeAccount ? 28 : 22;
+      const photoModels = hasHordeAccount
+        ? ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"]
+        : ["Realistic Vision", "ICBINP - I Can't Believe It's Not Photography", "AbsoluteReality"];
+      const payloads = [];
+
+      // Denoise HAUT si img2img : sinon la pose de la ref est recopié
+      let den = typeof body.denoising === "number" ? body.denoising : 0.68;
+      den = Math.min(0.75, Math.max(0.55, den));
+
+      // Négatifs anti-clone + anti-âge + anti-pose figée
+      const soloNeg = isDuoPrompt
+        ? ", 3girls, four women, crowd, identical clone twins"
+        : ", 2girls, 3girls, multiple women, twins, clone, mirror symmetry, same woman twice, split screen, collage, extra person";
+      // 2girls UNIQUEMENT en négatif si PAS duo (sinon Horde refuse les duos)
+      const qualityNeg = isDuoPrompt
+        ? ", split screen, diptych, two separate photos, vertical divider, two panels, collage, side by side portraits, mirror symmetry, 3girls, four women, turbo, lightning, lcm, blurry face, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, text overlay, fused body parts, extra limbs, mutated hands, bad anatomy, solo, 1girl, single woman only"
+        : ", mirror symmetry, left-right mirror, symmetrical mirrored face, collage, 2girls, twins, turbo, lightning, lcm, blurry face, lowres, jpeg artifacts, painting, airbrushed plastic skin, wrong age, different woman, anime, manga, cartoon, illustration, drawing, sketch, 3d render, cgi, plastic doll, painted, text overlay, side by side duplicate, two copies, cloned woman, sportswear, neon outfit, face crop only, headshot only, bust crop only, passport photo, close-up face only, exaggerated cartoon proportions, deformed, fused body parts, extra limbs, mutated hands, bad anatomy, hair fused with clothes, melted body";
+      const photoHead = "painting, oil painting, digital art, illustration, anime, cartoon, cgi, plastic skin, ";
+      const mirrorHead = isDuoPrompt
+        ? "mirror symmetry, kaleidoscope, fused bodies, conjoined, two heads one body, "
+        : "mirror symmetry, left-right mirror, kaleidoscope, symmetrical breasts, heart-shaped fused breasts, duplicated torso, double body, four breasts, two spines, conjoined, cloned limbs, ";
+      const negFull = (photoHead + mirrorHead + negative + soloNeg + qualityNeg).replace(/\s+/g, " ").trim().slice(0, 1800);
+
+      // UNE SEULE soumission — anonyme: coût kudos minimal
       function makePayload(opts) {
         opts = opts || {};
         const w = opts.w || W;
         const h = opts.h || H;
         const st = opts.steps || steps;
         const models = opts.models || photoModels;
-        let promptSafe = String(body.prompt || "").replace(/\s+/g, " ").trim();
-        const idHead = String(body.identity_head || "").replace(/\s+/g, " ").trim().slice(0, 240);
-        if (idHead && !promptSafe.toLowerCase().includes(idHead.slice(0, 24).toLowerCase())) {
-          promptSafe = idHead + ", " + promptSafe;
-        }
-        if (!promptSafe) promptSafe = "photorealistic DSLR photograph of one real adult woman, full body, natural skin";
-        if (!/photorealistic|photograph|RAW/i.test(promptSafe)) {
-          promptSafe = (promptSafe + ", RAW photorealistic photograph, real skin pores, sharp focus").slice(0, 1400);
-        }
-        promptSafe = promptSafe.slice(0, 1400);
-        const simpleNeg = [
-          String(body.negative || "").slice(0, 500),
-          "anime, manga, cartoon, illustration, painting, oil painting, digital painting, drawing, artstation, concept art, 3d render, cgi, plastic skin, airbrushed,",
-          "deformed, extra limbs, bad anatomy, blurry, text, watermark,",
-          isDuoPrompt ? "solo, 1girl, split screen, collage," : "2girls, multiple women, twins, clone, duplicated body, split screen, collage, character sheet,",
-          "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar, pixelated face, face crop, headshot only, headless, cropped head, head out of frame, no face, missing head, wrong hair color,",
-          /\b(pink|purple|magenta|lavender) hair\b/i.test(promptSafe) ? "" : "pink hair, magenta hair, purple hair,",
-          "identical composition to reference, same pose as source, same outfit as reference, static copy of reference, duplicate frame"
-        ].join(" ").replace(/\s+/g, " ").trim().slice(0, 950);
         const base = {
-          prompt: (promptSafe + " ### " + simpleNeg).slice(0, 1800),
+          prompt: (promptSafe.slice(0, 880) + " ### " + negFull).slice(0, 2000),
           params: {
             width: w,
             height: h,
             steps: st,
             n: 1,
-            seed: String(body.seed || Math.floor(Math.random() * 2_000_000_000)),
-            sampler_name: "k_euler_a",
-            cfg_scale: 6,
+            sampler_name: "k_dpmpp_2m",
+            cfg_scale: 6.5,
             clip_skip: 2,
           },
-          nsfw: true,
+          nsfw: body.nsfw !== false,
           censor_nsfw: false,
           models: models,
           r2: true,
@@ -2544,19 +2563,17 @@
           base.source_image = src;
           base.source_processing = "img2img";
           base.params.denoising_strength = den;
-          base.params.steps = Math.min(Math.max(st, 12), 18);
+          base.params.steps = Math.min(st, hasHordeAccount ? 28 : 12);
         }
         return base;
       }
 
-      const useImg2Img = Boolean(src) && body.force_img2img === true;
-      if (useImg2Img) {
+      const forceImg2 = useImg2Img && body.force_img2img === true;
+      if (forceImg2 && useImg2Img) {
         payloads.push(makePayload({ img2img: true }));
       } else {
         payloads.push(makePayload({}));
       }
-      payloads.push(makePayload({ w: 512, h: 512, steps: 8, models: ["Realistic Vision"], img2img: false }));
-
       // Pas de fallback 12 steps / stable_diffusion (images miroir / déformées)
 
       const hostsTry = ["https://aihorde.net/api/v2"];
@@ -2566,13 +2583,11 @@
           const bodyPayload = payloads[pi];
           if (pi > 0) await new Promise((r) => setTimeout(r, 2500));
           try {
-            // Preserve the validated composition; never squash its protected head.
+            // Garantir jamais >512 anonyme
             if (bodyPayload.params) {
-              bodyPayload.params.width = W;
-              bodyPayload.params.height = H;
-              if (bodyPayload.params.steps > 12) {
-                bodyPayload.params.steps = 10;
-              }
+              bodyPayload.params.width = 512;
+              bodyPayload.params.height = 512;
+              if (!hasHordeAccount && bodyPayload.params.steps > 20) bodyPayload.params.steps = 20;
             }
             const res = await fetch(host + "/generate/async", {
               method: "POST",
@@ -2605,7 +2620,7 @@
             last = data.message || data.error || (data.errors ? JSON.stringify(data.errors).slice(0, 160) : "") || ("HTTP " + res.status);
             console.warn("[horde]", host, last, "params", bodyPayload.params && (bodyPayload.params.width + "x" + bodyPayload.params.height + " s" + bodyPayload.params.steps));
             // Kudos ≠ ban IP : essayer le payload suivant (512x512 minimal)
-            if (/kudos|heavy demand|work budget|576x576|728x728|657x657|first-order-equivalent/i.test(String(last))) {
+            if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
               continue;
             }
             markHordeRateLimit(last);
@@ -2623,7 +2638,7 @@
       }
       if (/kudos|heavy demand|work budget|576x576|first-order-equivalent/i.test(String(last))) {
         throw new Error(
-          "Horde anonyme saturé. Réessaie dans 1–2 min. " +
+          "Horde file saturée (0 kudos). Réessaie dans 1–2 min, ou crée une clé gratuite sur aihorde.net (Clés → AI Horde) pour passer devant. " +
           String(last).slice(0, 70)
         );
       }
@@ -2665,11 +2680,6 @@
       const data = await st.json();
       const g = data.generations && data.generations[0];
       if (!g) return { done: true, error: "Pas d'image renvoyée" };
-      const censorshipMetadata = Array.isArray(g.gen_metadata) && g.gen_metadata.some(item =>
-        item && item.type === "censorship" && ["nsfw", "csam"].includes(item.value));
-      if (g.censored || g.state === "censored" || censorshipMetadata) {
-        return { done: true, error: "Horde a censuré cette image. Aucune photo ajoutée à la galerie." };
-      }
       if (g.img && String(g.img).startsWith("http")) return { done: true, url: g.img };
       if (g.img) return { done: true, url: "data:image/webp;base64," + g.img };
       return { done: true, error: "Image vide" };

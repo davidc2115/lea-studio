@@ -2,8 +2,28 @@ plugins {
     id "com.android.application"
 }
 
-def versionMajor = (project.findProperty("versionName") ?: "1.0.0")
-def versionInt = (project.findProperty("versionCode") ?: "1").toInteger()
+def releaseVersion = new Properties()
+rootProject.file("version.properties").withInputStream { releaseVersion.load(it) }
+def versionMajor = releaseVersion.getProperty("versionName")
+if (versionMajor == null || !(versionMajor ==~ /(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)/)) {
+    throw new GradleException("versionName invalide dans android/version.properties (attendu : X.Y.Z)")
+}
+// Le nom vient toujours du fichier partagé, jamais d'un défaut propre à la CI.
+if (project.hasProperty("versionName") && project.property("versionName").toString() != versionMajor) {
+    throw new GradleException("Modifier android/version.properties pour changer versionName")
+}
+def minimumCode = releaseVersion.getProperty("versionCode")
+def requestedCode = (project.findProperty("versionCode") ?: minimumCode)?.toString()
+def validCode = { value ->
+    value != null && (value ==~ /[1-9][0-9]{0,9}/) && value.toLong() <= 2100000000L
+}
+if (!validCode(minimumCode) || !validCode(requestedCode)) {
+    throw new GradleException("versionCode invalide : entier Android positif requis")
+}
+def versionInt = requestedCode.toInteger()
+if (minimumCode.toInteger() <= 666 || versionInt < minimumCode.toInteger()) {
+    throw new GradleException("versionCode doit être >= ${minimumCode} et supérieur au dernier APK livré (666)")
+}
 
 android {
     namespace "com.leastudio.app"

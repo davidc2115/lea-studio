@@ -14,6 +14,9 @@ function setup() {
     location: { protocol: "file:", hostname: "", href: "file:///android_asset/www/index.html" },
     localStorage: { getItem: k => values.get(k) ?? null, setItem: (k, v) => values.set(k, String(v)), removeItem: k => values.delete(k) },
     fetch: async (url, opts) => {
+      if (String(url).includes("/status/models")) {
+        return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+      }
       if (opts && opts.body) requests.push({ url, opts, body: JSON.parse(opts.body) });
       return { ok: true, status: 202, json: async () => ({ id: "wardrobe-test" }) };
     },
@@ -48,7 +51,7 @@ test("Eight reference-inspired outfits preserve scenario, body, star, chats and 
     assert.equal(selected.outfit, style.outfit);
     assert.equal(selected.place, variant.place);
     assert(selected.pose.startsWith(variant.pose + ", "));
-    assert.match(selected.pose, /arched|shoulders|leaning/);
+    assert.match(selected.pose, /arched|shoulders|leaning|reclining/);
     assert.equal(selected.index, variant.index);
     assert.match(selected.cameraAngle, /face toward camera/);
   }
@@ -93,6 +96,36 @@ test("The authoritative scene lock keeps every selected outfit, including lace a
       assert(!custom.includes(style.outfit));
     }
   }
+});
+
+test("Office automatic styling uses four bolder role-compatible outfits without discarding the action", () => {
+  const { api } = setup();
+  const seen = new Set();
+  const office = { ...character, title: "Secrétaire" };
+  for (let n = 0; n < 40; n++) {
+    const selected = api.choose(office, variant);
+    seen.add(selected.wardrobeStyle);
+    assert.equal(selected.scenarioPose, variant.pose);
+    assert.equal(selected.place, variant.place);
+    assert.equal(selected.scene.prop, variant.scene.prop);
+    assert(selected.postureAccent.length <= 55);
+  }
+  assert.deepEqual([...seen].sort(), ["blouse-mini", "emerald-satin", "leather-skirt", "mini-boots"]);
+});
+
+test("A long scenario action cannot truncate the separate posture, and an explicit pose still wins", () => {
+  const { ctx, api } = setup();
+  const selected = api.choose(character, { ...variant, pose: variant.pose + " working at the table".repeat(15) }, "blouse-mini");
+  const lock = ctx.window.LeaSegmentedProfile.sceneLock(character, selected, {}, "small A-cup breasts, green eyes");
+  assert(lock.includes(selected.postureAccent));
+  assert(lock.includes(selected.outfit));
+  assert.match(lock, /POSTURE:/);
+  assert.match(lock, /POSE: seated on the sofa/);
+  assert.match(lock, /PROP: cards on the table/);
+  const custom = ctx.window.LeaSegmentedProfile.sceneLock(character, selected,
+    { overridesPose: true, poseLine: "standing upright holding a book" }, "green eyes");
+  assert.match(custom, /POSE: standing upright holding a book/);
+  assert.doesNotMatch(custom, /POSTURE:/);
 });
 
 test("Finalization does not replace selected clothing or ban lace bodysuits", () => {

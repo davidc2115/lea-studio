@@ -11,15 +11,11 @@
     return text.length + ":" + (a >>> 0) + ":" + (b >>> 0);
   }
   function prompt(character, identity) {
-    return [
-      "photorealistic DSLR photograph of one real adult woman, sharp focus, natural skin pores",
-      "natural human eyes, normal iris, no glow, no neon, no LED, no cyan eyes",
-      "single adult woman, " + Math.max(18, Number(character.age) || 25) + " years old",
-      "frontal head and shoulders, face toward camera, both eyes visible, eye level",
-      "wearing a simple fitted top, chest covered, soft indoor light, plain background",
-      String(identity || "").replace(/full body or head to knees, face visible, setting visible/gi, "").slice(0, 280),
-      "real photograph, not a painting, not an illustration, not cgi, not plastic skin"
-    ].join(", ");
+    return [FACE, "single adult woman, " + Math.max(18, Number(character.age) || 25) + " years old",
+      "frontal head-and-shoulders photograph, upright head, camera at eye level",
+      "opaque fully buttoned blouse, chest covered, plain softly lit background",
+      String(identity || "").replace(/full body or head to knees, face visible, setting visible/gi, "").slice(0, 300),
+      "same woman as reference when provided, natural facial proportions, natural eyes, RAW DSLR photograph, unretouched skin texture"].join(", ");
   }
   function readPreparation(source) {
     let result;
@@ -62,10 +58,10 @@
       prompt: prompt(character, options.identity),
       profile_scene_lock: prompt(character, options.identity),
       negative: "side profile, head turned away, looking away, hidden eye, covered face, cropped head, nude, underwear, transparent clothing",
-      is_profile_photo: true, horde_anonymous: false, nsfw: true, censor_nsfw: false,
+      is_profile_photo: true, horde_anonymous: true, nsfw: true, censor_nsfw: false,
       profile_frontal_reference: true,
       profile_identity_lock: true,
-      force_img2img: false,
+      ...(selected ? { source_image: generationSource, source_processing: "img2img", force_img2img: true, denoising: .9 } : {}),
     });
     if (!image) throw new Error("Aucune référence de face reçue.");
     const prepared = readPreparation(image);

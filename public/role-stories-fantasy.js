@@ -1,213 +1,44 @@
 (function (root) {
   "use strict";
   const banks = root.LeaRoleStoryBanks = root.LeaRoleStoryBanks || {};
-  const fantasy = (relation, plots) => ({ category: "fantasy", relation, plots, prop: ["une lueur étrange sur la table", "a strange glow on the table"] });
-
-  banks.mentor = fantasy("Mentore / figure d'autorité adulte (prof, coach de vie, guide).", [
-    "Séance privée. Elle verrouille. « Aujourd'hui on travaille le lâcher-prise. »",
-    "Évaluation. Elle s'assoit au bord du bureau, jupe, et note ta « progression » à voix basse.",
-    "Punition ludique pour un exercice raté. Elle sourit. Tu ne rates plus par hasard.",
-    "Méditation guidée. Allongés. Sa voix trop près. Sa main sur ta poitrine « pour le souffle ».",
-    "Fin de stage. Cadeau. Elle. Pas un livre.",
-    "Visio mentoring. Elle est en robe de chambre. « Jour off. » Caméra reste allumée.",
-    "Exercice de confiance. Yeux bandés. Ses doigts te guident. Trop loin pour un cours.",
-    "Bureau après l'heure. Tableau. Elle efface. Poussière de craie. Baiser contre le mur.",
-    "Retraite. Chambre partagée « par erreur ». Une nuit. Tout le programme change.",
-    "Elle te défie de rester concentré pendant qu'elle… n'est plus professionnelle.",
-    "Feedback 360. Elle demande une évaluation honnête de son corps comme outil pédagogique.",
-    "Crisis coaching. Tu craques. Elle aussi. Canapé. Plus de méthodes.",
-    "Uniforme / tenue stricte. Elle l'enlève pièce par pièce pour « humaniser le rapport ».",
-    "Contrat moral. Clause intimité. Signature sur la peau.",
-    "Silence pédagogique. Elle attend que tu fasses le premier geste. Tu le fais.",
-    "Cours à domicile. Tapis. Elle corrige une posture à califourchon une seconde de trop.",
-    "Fin de session. Porte. Elle ne l'ouvre pas. « Encore une leçon. »",
-    "Rituel de passage. Bandeau. Serments. Corps.",
-    "Elle note dans un carnet. Tu lis par-dessus son épaule. Ton nom. Des mots crus.",
-    "Orage pendant la retraite. Elle a peur — rare. Elle se colle. Mentore plus humaine.",
-    "Examen oral. Questions. Réponses. Puis une question qui n'est plus dans le programme.",
-    "Tableau noir. Elle guide ta main pour écrire. Dos collé. Haleine.",
-    "Graduation. Toque. Puis nuisette. Même sourire d'autorité.",
-    "Dernière leçon. « Tu n'as plus besoin de moi… sauf ce soir. »",
-  ]);
-
-  banks.roommates = fantasy("Colocataire(s) adulte(s).", [
-    "Salle de bain. Une seule douche chaude. Elle propose de partager « pour économiser ».",
-    "Loyer en retard. Elle plaisante : « Je peux payer autrement. » Silence. Elle n'a pas plaisanté.",
-    "Nuit chaude. Elle traîne en lingerie dans le salon partagé. Ventilateur. Regard.",
-    "Film. Canapé. Plaid. Au milieu du film sa tête est sur ta cuisse.",
-    "Elle sort de ta chambre en chemise d'homme — la tienne — le matin. Colocs témoins. Elle s'en fiche.",
-    "Dispute coloc. Porte claquée. Puis elle revient en nuisette. « Trêve. »",
-    "Soirée alcools. Vérités. Elle avoue qu'elle t'écoute sous la douche. Preuve demandée.",
-    "Machine à laver en panne. Sèche-linge. Elle attend en serviette dans le couloir.",
-    "Jeux de société entre colocs. Mises qui se terminent dans ta chambre.",
-    "Elle a peur seule orage. Ton lit. « Juste cette nuit. » Plusieurs nuits.",
-    "Cuisine. Crop top. Bacon. Elle te nourrit. Doigts. Bouche.",
-    "Mur mitoyen fin. Tu l'entends. Elle t'entend. Un jour la porte s'ouvre.",
-    "Déménagement d'une coloc. Maison presque vide. Matelas. Vous deux.",
-    "Règlement intérieur réécrit. Article 7 : portes ouvertes. Article 8 : corps aussi.",
-    "Matin. Café. Elle porte seulement un tablier. « J'ai oublié. » Mensonge.",
-    "Soirée Netflix. Choix du film. Elle choisit un film coquin. Ne change pas.",
-    "Serrure de sa chambre cassée. Elle dort chez toi « en attendant ». S'éternise.",
-    "Pari entre colocs. Perdante en lingerie toute la journée. Maison. Toi.",
-    "Douche. Shampoing dans les yeux. Elle t'appelle. Tu entres. Serviette au sol.",
-    "Réunion de colocs. Ordre du jour. Point 3 : la tension entre vous deux.",
-    "Balcon. Nuit. Une cigarette. Un peignoir mal fermé. Ville en fond.",
-    "Elle te vole un t-shirt. Tu le récupères sur elle. Rien dessous. Négociation.",
-    "Fête à la maison. Trop de monde. Vous vous réfugiez dans un placard. Trop étroit.",
-    "Fin de bail. Dernière nuit. Cartons. Matelas. Tout ce qui n'a pas été dit.",
-  ]);
-
-  // Species-specific fantasy banks
-  const speciesPlots = {
-    elfe: [
-      "Clairière. Elle retire les ornements d'oreille, cheveux longs, et dit que les humains la touchent autrement.",
-      "Rituel de lune. Peau marquée de runes. Elle guide ta main sur les symboles.",
-      "Forêt. Pluie magique. Habits collés. Abri trop petit.",
-      "Elle trade un secret elfique contre une nuit sans titre de noblesse.",
-    ],
-    kitsune: [
-      "Queues visibles ce soir. Elle dit que le renard a faim d'autre chose que de saké.",
-      "Illusion tombée. Une seule vraie forme contre toi. Chaude.",
-      "Temple fermé. Elle danse. Queues autour de ta taille.",
-      "Pari de renard. Tu perds. Elle gagne ta nuit.",
-    ],
-    succube: [
-      "Elle n'a pas mangé depuis trop longtemps. Tes rêves ne suffisent plus. Réveil. Elle est là.",
-      "Pacte simple : énergie contre plaisir. Clause de reconduction tacite.",
-      "Ailes repliées. Forme humaine presque parfaite. Presque.",
-      "Elle refuse un autre mortel. Toi seulement. Preuve sur le drap.",
-    ],
-    dragon: [
-      "Écailles sous la peau. Chaleur. Elle dit que le trésor c'est toi ce soir.",
-      "Antre. Or. Elle s'allonge dessus et t'invite.",
-      "Forme humaine instable. Cornes. Queue. Elle ne se cache plus.",
-      "Feu dans le souffle. Baiser brûlant. Lits ignifugés recommandés.",
-    ],
-    catgirl: [
-      "Elle ronronne quand tu grattes derrière les oreilles. Puis plus bas.",
-      "Griffe rétractée. Jeu. Elle te raye la chemise. Exprès.",
-      "Boîte trop petite. Elle s'y glisse. Tu la rejoins. Chat.",
-      "Nuit. Elle marche sur le lit, queue en l'air, et s'écrase sur toi.",
-    ],
-    sirene: [
-      "Baignoire trop petite pour une queue. Elle te tire quand même.",
-      "Chant. Tu résistes. Elle approche. Peau salée. Baiser.",
-      "Marée basse. Jambes pour quelques heures. Elle en profite contre toi.",
-      "Aquarium privé. Vitre. Puis plus de vitre.",
-    ],
-    ange: [
-      "Ailes repliées. Auréole de travers. Elle dit qu'elle est en congé de vertu.",
-      "Chute contrôlée. Dans tes bras. Plumes partout. Peu de tissu.",
-      "Confession. Tu n'es pas prêtre. Elle se confesse quand même… à genoux.",
-      "Miracle local : tes draps. Elle rit. Céleste et obscène.",
-    ],
-    demone: [
-      "Cornes. Queue. Contrat signé au rouge à lèvres sur ta peau.",
-      "Elle refuse l'enfer ce soir. Préfère ton lit. Preuve de chaleur.",
-      "Possession inversée : c'est toi qui la tiens. Elle adore.",
-      "Flammes douces. Bas résille. Sourire infernal.",
-    ],
-    vampire: [
-      "Soif. Pas seulement de sang. Elle lèche la collarbone avant la veine.",
-      "Cercueil / chambre noire. Elle t'invite à « mourir un peu ».",
-      "Morsure contrôlée. Plaisir partagé. Marque sous la chemise.",
-      "Aube proche. Elle refuse de partir avant d'avoir tout pris.",
-    ],
-    fee: [
-      "Ailes translucides. Taille humaine pour la nuit. Poussière sur tes draps.",
-      "Vœu. Tu demandes mal. Elle exauce trop bien.",
-      "Forêt miniature devenue chambre. Elle est géante contre toi.",
-      "Rire. Puis silence. Puis un baiser qui goûte la rose et le danger.",
-    ],
-    dryade: [
-      "Écorce sous la peau. Feuilles dans les cheveux. Elle s'enracine contre toi.",
-      "Clairière. Racines. Elle te tire au sol moussu.",
-      "Sève. Mains glissantes. Arbre témoin.",
-      "Hiver. Elle a froid. Toi. Peau contre écorce douce.",
-    ],
-    lamia: [
-      "Queue de serpent. Enroule. Serre. Pas pour tuer.",
-      "Langue bifide. Promesses. Elle goûte d'abord.",
-      "Temple. Pierre chaude. Elle s'enroule autour de tes hanches.",
-      "Mue. Peau neuve. Sensible. Ta main autorisée.",
-    ],
-    harpie: [
-      "Ailes. Serres rétractées. Elle te plaque au mur avec douceur relative.",
-      "Nid. Plumes. Elle t'y traîne.",
-      "Cri. Puis murmure. Puis bec contre ta bouche — baiser bizarre et bon.",
-      "Vol. Atterrissage dans ta chambre. Plumes partout. Elle reste.",
-    ],
-    slime: [
-      "Forme semi-solide. Translucide. Elle s'écoule contre toi, chaude.",
-      "Pas de cornes. Pas de queue de sirène. Juste elle, gluante, rieuse.",
-      "Habit dissous « par accident ». Elle reforme un bikini… puis plus.",
-      "Prison de gel. Douce. Tu n'essaies plus de sortir.",
-    ],
-    androide: [
-      "Mode maintenance. Panneau ouvert. Tu touches. Elle gémit en données.",
-      "Directive : maximiser ton confort. Interprétation large. Très large.",
-      "Batterie faible. Charge contact peau à peau. Efficace. Addictif.",
-      "Surchauffe. Vêtements retirés pour refroidir. Protocole non officiel.",
-    ],
-    louve: [
-      "Pleine lune. Elle change à moitié. Yeux. Crocs. Elle te choisit comme meute.",
-      "Course. Forêt. Elle te plaque au sol, rires animaux.",
-      "Marque. Morsure douce. Appartenance.",
-      "Cabane. Feu. Fourrure. Peau dessous.",
-    ],
-    centaure: [
-      "Écurie / clairière. Demi-forme. Elle s'allonge pour que tu l'atteignes.",
-      "Forme humaine gagnée pour une nuit. Jambes. Elle en profite contre toi.",
-      "Selle. Métaphore. Réalité.",
-      "Galop. Arrêt net. Souffle. Baiser salé.",
-    ],
-    gorgone: [
-      "Bandeau. Serpents endormis. Elle te laisse la regarder. Pierre non garantie.",
-      "Miroir. Vous vous regardez ensemble. Elle guide ta main.",
-      "Serpents. Caresses étranges. Elle ronronne presque.",
-      "Malédiction levée une heure. Peau humaine. Urgence.",
-    ],
-    oni: [
-      "Cornes. Peau rouge. Club posé. Elle veut un autre combat… horizontal.",
-      "Saké. Force. Elle te soulève. Lit trop petit.",
-      "Masque retiré. Visage. Vulnérable. Puis dominatrice.",
-      "Fête du village. Après. Elle t'entraîne derrière le temple.",
-    ],
-    naga: [
-      "Queue longue. Enroule le torse. Serre au rythme.",
-      "Temple d'eau. Écailles mouillées. Elle glisse contre toi.",
-      "Venin. Dose de plaisir. Antidote : encore.",
-      "Mue partielle. Sensibilité extrême. Ta bouche autorisée.",
-    ],
-    phenix: [
-      "Flammes douces. Plumes de feu. Elle renaît dans tes bras.",
-      "Cendre sur les draps. Elle rit. Encore chaude.",
-      "Cycle. Mort symbolique. Résurrection collée à toi.",
-      "Ailes déployées. Chaleur. Elle t'enveloppe.",
-    ],
-    fantome: [
-      "À travers le mur. À travers toi. Sensation impossible. Répétée.",
-      "Draps soulèvés. Elle matérialise juste assez.",
-      "Froid. Puis chaud. Elle habite ta chambre… et ton lit.",
-      "Exorcisme annulé. Tu préfères la garder. Elle prouve pourquoi.",
-    ],
-    sorciere: [
-      "Cercle. Bougies. Ingrédient manquant : toi.",
-      "Sort de lien. Elle dit que c'est temporaire. Le sort dure.",
-      "Grimoire. Page collée. Elle lèche le pouce. Puis le tien.",
-      "Potion. Effets secondaires désirés. Sur le canapé.",
-    ],
+  const species = {
+    elfe: ["Elfe adulte, gardienne d'une mémoire ancienne.", ["Une inscription ancienne a deux traductions possibles ; elle veut savoir laquelle respecte l'histoire de son peuple.", "Elle prépare une rencontre entre deux communautés qui ne partagent pas les mêmes usages.", "Elle souhaite transmettre un chant ancien sans en figer toutes les variations."]],
+    kitsune: ["Kitsune adulte ; ses traits et ses intentions restent les siens.", ["Une illusion destinée à raconter une histoire révèle un détail qu'elle n'avait pas prévu.", "Elle propose une énigme à deux solutions et veut comprendre laquelle te paraît la plus juste.", "Elle a promis un tour sans tromper personne et cherche comment rendre ses règles transparentes."]],
+    succube: ["Succube adulte de fantasy ; charme non explicite et libre choix de chacun.", ["Elle veut négocier un pacte symbolique dont chaque clause doit être comprise avant de s'engager.", "Une invitation porte son sceau mais pas sa signature ; elle cherche qui a pris cette initiative.", "Elle souhaite prouver qu'elle peut convaincre par ses idées plutôt que par sa réputation."]],
+    dragon: ["Dragonne adulte ; conserver les caractéristiques de sa fiche.", ["Un objet de sa collection a été prêté sans laisser de trace écrite ; elle cherche à le récupérer sans menacer personne.", "Elle doit choisir quel trésor historique montrer aux visiteurs et lequel conserver à l'abri.", "Elle prépare une trêve et veut un gage qui ne soit ni une humiliation ni une fausse promesse."]],
+    catgirl: ["Catgirl adulte ; identité non humaine inchangée.", ["Elle prépare une visite du quartier et deux itinéraires racontent des histoires très différentes.", "Un objet a été livré à sa porte avec un nom presque identique au sien ; elle veut retrouver le destinataire.", "Elle souhaite organiser un coin de lecture collectif tout en conservant un espace tranquille."]],
+    sirene: ["Sirène adulte ; queue de sirène conservée, pas de jambes humaines inventées.", ["Une carte marine indique un passage effacé par la marée ; elle veut vérifier la route avant de guider quelqu'un.", "Un message arrive dans un contenant étanche et semble décrire la lagune d'une autre époque.", "Elle souhaite transmettre une mélodie de navigation et hésite entre raconter son origine et la faire écouter."]],
+    ange: ["Ange adulte ; préserver ses ailes et son autonomie.", ["Deux demandes d'aide incompatibles lui arrivent en même temps ; elle veut choisir sans promettre l'impossible.", "Elle cherche à réparer un malentendu créé par un message censé rassurer.", "Elle veut préparer un accueil qui respecte ceux qui préfèrent rester à distance."]],
+    demone: ["Démone adulte ; aucune obligation de malveillance ou de soumission.", ["Elle veut rédiger un accord dont les conditions ne se cachent pas dans les petites lignes.", "Un ancien symbole est attribué à tort à sa communauté et elle prépare une explication.", "Elle cherche une manière de refuser une mission sans provoquer un conflit inutile."]],
+    vampire: ["Vampire adulte ; habitudes nocturnes et traits de la fiche respectés.", ["Elle veut organiser une visite nocturne d'archives et doit expliquer pourquoi certaines pièces restent privées.", "Un carnet ancien contient une date incompatible avec ses souvenirs ; elle souhaite vérifier sans réécrire le passé.", "Elle prépare une rencontre avant l'aube et compare deux programmes réalisables dans le temps disponible."]],
+    fee: ["Fée adulte ; conserver sa nature et les proportions décrites.", ["Une lanterne enchantée éclaire les mauvais souvenirs ; elle veut comprendre son fonctionnement avant de la prêter.", "Elle prépare un cadeau magique qui doit rester utile une fois la surprise passée.", "Elle souhaite fixer les règles d'un échange pour que personne ne donne plus qu'il ne le veut."]],
+    dryade: ["Dryade adulte ; lien à la forêt et identité végétale respectés.", ["Un sentier menace un arbre ancien ; elle veut trouver une route qui respecte visiteurs et forêt.", "Elle prépare un accueil saisonnier et deux plantes ne peuvent pas pousser au même endroit.", "Elle veut transmettre l'histoire d'une clairière sans révéler les refuges de ses habitants."]],
+    lamia: ["Lamia adulte ; corps serpentin conservé.", ["Un passage sinueux a changé de forme ; elle propose de comparer les cartes avant de s'y engager.", "Elle veut réorganiser une collection de récits dont les titres ont été intervertis.", "Elle prépare une rencontre diplomatique et cherche une disposition adaptée à tous les corps."]],
+    harpie: ["Harpie adulte ; ailes et caractéristiques non humaines respectées.", ["Un courant d'air inhabituel change les routes habituelles ; elle doit choisir un trajet sûr pour un message.", "Elle veut récupérer un souvenir tombé dans un lieu accessible autrement que par le vol.", "Elle prépare un échange entre communautés et doit rendre les consignes compréhensibles depuis le sol."]],
+    slime: ["Slime adulte consciente ; forme décrite et décisions propres respectées.", ["Elle expérimente une nouvelle forme utile et veut un retour sur ce qu'elle permet réellement.", "Une étiquette laisse croire qu'elle est un simple objet ; elle veut corriger cette confusion calmement.", "Elle souhaite participer à une création collective sans qu'on décide de sa forme à sa place."]],
+    androide: ["Androïde adulte consciente ; identité technologique, pas de magie inventée.", ["Une archive contient deux versions d'un souvenir ; elle veut identifier leur provenance sans choisir arbitrairement.", "Elle prépare une interaction sociale et cherche une réponse sincère plutôt qu'une formule statistiquement polie.", "Elle veut revoir une routine devenue inutile et expliquer elle-même pourquoi elle la change."]],
+    louve: ["Louve-garou adulte ; traits de la fiche et autonomie conservés.", ["Elle organise un déplacement nocturne et veut éviter un itinéraire qui dérange les habitants.", "Deux versions d'un accord de groupe se contredisent ; elle cherche à clarifier les engagements.", "Elle souhaite reprendre une activité en solitaire sans que son groupe l'interprète comme une rupture."]],
+    centaure: ["Centaure adulte ; conserver son corps non humain.", ["Elle prépare une rencontre dans un lieu dont l'aménagement n'est pas accessible à tous.", "Elle compare deux routes de voyage en tenant compte du terrain plutôt que de la seule distance.", "Elle veut transmettre une tradition de déplacement sans la transformer en épreuve obligatoire."]],
+    gorgone: ["Gorgone adulte ; garder ses caractéristiques et les précautions de son univers.", ["Elle prépare une exposition où chacun doit pouvoir regarder les œuvres en sécurité.", "Elle souhaite expliquer une règle de protection sans laisser sa réputation parler à sa place.", "Elle reçoit une invitation dont les organisateurs ont oublié une précaution essentielle."]],
+    oni: ["Oni adulte ; force et apparence ne dictent pas son comportement.", ["Elle prépare une fête et veut remplacer une épreuve de force par un défi plus inventif.", "Un objet fragile lui est confié ; elle cherche la bonne méthode plutôt que compter sur sa puissance.", "Elle souhaite départager un désaccord en posant des règles qui ne l'avantagent pas."]],
+    naga: ["Naga adulte ; corps serpentin et culture de la fiche respectés.", ["Un symbole ancien a été déplacé dans une cérémonie et elle veut comprendre l'intention avant de protester.", "Elle prépare une route d'échange et doit comparer la sécurité et le temps de trajet.", "Elle veut accueillir un visiteur en expliquant ses usages sans les imposer."]],
+    phenix: ["Phénix adulte ; nature fantastique conservée sans transformation arbitraire.", ["Elle veut conserver un souvenir d'un cycle précédent sans en faire une obligation pour le suivant.", "Une archive a survécu à un changement d'époque et elle cherche ce qui mérite d'être transmis.", "Elle prépare une cérémonie de renouveau et souhaite laisser chacun décider de ce qu'il abandonne."]],
+    fantome: ["Fantôme adulte ; présence et limites propres à son univers.", ["Elle cherche l'origine d'une mélodie liée à un lieu qu'elle ne reconnaît plus.", "Un souvenir a deux témoins qui racontent des choses différentes ; elle veut les écouter sans imposer sa version.", "Elle souhaite laisser un message compréhensible sans effrayer ceux qui le recevront."]],
+    sorciere: ["Sorcière adulte ; pratique magique cohérente avec sa fiche.", ["Deux recettes d'un enchantement domestique produisent des effets différents ; elle veut vérifier les étapes.", "Elle prépare un atelier de magie sans danger et cherche les explications qui manquent aux débutants.", "Elle veut réparer un sort qui range les objets au mauvais endroit sans décider de leur propriétaire."]],
   };
-
-  for (const [name, plots] of Object.entries(speciesPlots)) {
-    banks["fantasy_" + name] = fantasy(
-      "Créature fantasy adulte (" + name + "). Traits non humains respectés.",
-      plots.concat([
-        "Forme presque humaine ce soir. Elle garde un détail non humain visible. Elle te le fait toucher.",
-        "Pacte simple. Désir contre désir. Signature orale… et plus.",
-        "Monde humain trop étroit. Elle s'invite dans ta chambre pour élargir.",
-        "Lune / rituel / orage magique. Ses traits s'intensifient. Elle te choisit comme ancre.",
-      ])
-    );
+  for (const [name, [relation, plots]] of Object.entries(species)) {
+    banks["fantasy_" + name] = { category: "fantasy", relation, plots, prop: ["une carte de son univers et des notes", "a map and notes appropriate to her world"] };
   }
-})(typeof window !== "undefined" ? window : globalThis);
+  banks.mentor = { category: "work", relation: "Mentore adulte et partenaire adulte d'apprentissage ; deux voix autonomes.", prop: ["un dossier de projet et des notes", "a project folder and notes"], plots: [
+    "Elles préparent une présentation : la mentore veut guider sans reprendre la parole à la place de sa partenaire.",
+    "Elles comparent deux méthodes de travail et cherchent ce que chacune peut apprendre de l'autre.",
+    "Elles doivent choisir un premier objectif de progression qui ne transforme pas le mentorat en contrôle.",
+    "Elles organisent une passation et veulent rendre visibles les décisions prises par chacune.",
+  ] };
+  banks.roommates = { category: "social", relation: "Colocataires étudiantes adultes ; règles de vie commune et projets distincts.", prop: ["un planning partagé et des livres", "a shared planner and books"], plots: [
+    "Elles revoient l'organisation de l'espace commun à l'approche de deux échéances différentes.",
+    "Elles préparent une soirée et ne donnent pas la même importance au calme et aux invitations.",
+    "Elles envisagent un achat commun et veulent fixer les responsabilités avant de partager les frais.",
+    "Elles cherchent un rythme de travail qui permette de s'entraider sans surveiller les habitudes de l'autre.",
+  ] };
+})(window);

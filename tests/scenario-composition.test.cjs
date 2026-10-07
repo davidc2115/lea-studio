@@ -20,6 +20,9 @@ function setup() {
       removeItem: k => values.delete(k),
     },
     fetch: async (url, opts) => {
+      if (String(url).includes("/status/models")) {
+        return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+      }
       requests.push({ url, ...opts, payload: JSON.parse(opts.body) });
       return { ok: true, status: 202, json: async () => ({ id: "test-job" }) };
     },
@@ -67,6 +70,7 @@ test("The entire 818-character catalog gets distinct plots, without rewriting ph
 
 test("Every scene keeps camera, pose, place and wardrobe within the native prompt budget", () => {
   const { ctx } = setup();
+  vm.runInContext(read("profile-morphology.js"), ctx);
   vm.runInContext(read("scenario-library.js"), ctx);
   vm.runInContext(read("profile-composition.js"), ctx);
   for (const c of collect(ctx)) {
@@ -75,10 +79,16 @@ test("Every scene keeps camera, pose, place and wardrobe within the native promp
       const prompt = ctx.window.LeaProfileComposition.sceneLock(c, variant, {}, "natural adult body proportions");
       assert(prompt.length <= 920, c.id + ": " + prompt.length);
       for (const field of ["CAMERA:", "POSE:", "SETTING:", "WARDROBE:", "PROP:"]) assert(prompt.includes(field));
-      assert.match(prompt, /fully clothed/);
+  assert.match(prompt, /fully clothed/);
       assert(prompt.indexOf("CAMERA:") < prompt.indexOf("WARDROBE:"));
     }
   }
+  const kenza = collect(ctx).find((card) => card.id === "cup_babysitter_07");
+  const selectedScene = kenza.profile_scenes[0];
+  const locked = ctx.window.LeaProfileComposition.sceneLock(
+    kenza, { ...selectedScene, scene: selectedScene }, {}, "same face"
+  );
+  assert.match(locked, /AUTHORITATIVE MORPHOLOGY: .*A-cup/);
 });
 
 test("Face-only canvas isolates the head, leaving most of the composition free", () => {
@@ -131,6 +141,7 @@ test("The real native API forwards the mask, compatible models, portrait dimensi
     profile_face_mask: true, profile_identity_lock: true, is_profile_photo: true,
     horde_anonymous: true, source_image: "A".repeat(1000), source_mask: "B".repeat(1000),
     source_processing: "inpainting", force_img2img: true, denoising: 1,
+    hordeModel: "Realistic Vision",
   }) });
   assert.match(result.mode, /visage protégé/);
   assert.equal(requests.length, 1);
@@ -141,10 +152,48 @@ test("The real native API forwards the mask, compatible models, portrait dimensi
   assert.equal(payload.params.width, 512);
   assert.equal(payload.params.height, 704, "Late submission must not squash the face canvas to a square");
   assert.equal(payload.params.denoising_strength, 1);
-  assert(payload.models.every(m => m.includes("Inpainting")));
+  assert.deepEqual(Array.from(payload.models), ["Realistic Vision"]);
   assert.equal(payload.nsfw, true);
   assert.equal(payload.censor_nsfw, false);
   assert.equal(payload.shared, false);
+});
+
+test("Horde submits only the selected model and fails if that exact model is unavailable", async () => {
+  const { ctx, requests } = setup();
+  const originalFetch = ctx.fetch;
+  ctx.fetch = async (url, options) => {
+    if (String(url).includes("/status/models")) {
+      return { ok: true, json: async () => [
+        { name: "Realistic Vision", count: 1 },
+        { name: "Juggernaut XL", count: 2 },
+      ] };
+    }
+    return originalFetch(url, options);
+  };
+  vm.runInContext(read("native-api.js"), ctx);
+  await ctx.window.leaNativeApi("/api/image", { method: "POST", body: JSON.stringify({
+    engine: "horde", charId: "fixture", prompt: "one adult woman",
+    horde_anonymous: true, hordeModel: "Juggernaut XL",
+  }) });
+  assert.deepEqual(Array.from(requests.at(-1).payload.models), ["Juggernaut XL"]);
+
+  const unavailable = setup();
+  const oldFetch = unavailable.ctx.fetch;
+  unavailable.ctx.fetch = async (url, options) => {
+    if (String(url).includes("/status/models")) {
+      return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+    }
+    return oldFetch(url, options);
+  };
+  vm.runInContext(read("native-api.js"), unavailable.ctx);
+  await assert.rejects(unavailable.ctx.window.leaNativeApi("/api/image", {
+    method: "POST",
+    body: JSON.stringify({
+      engine: "horde", charId: "fixture", prompt: "one adult woman",
+      horde_anonymous: true, hordeModel: "Juggernaut XL v9",
+    }),
+  }), /Juggernaut XL v9.*pas disponible/i);
+  assert.equal(unavailable.requests.length, 0);
 });
 
 test("A missing mask fails explicitly, instead of inventing a different face", async () => {
@@ -172,9 +221,14 @@ test("The unvalidated face-mask experiment remains disabled by default", async (
 
 test("A censored provider result is never added to the gallery as a successful photo", async () => {
   const { ctx } = setup();
-  ctx.fetch = async url => ({ ok: true, json: async () => url.includes("/generate/check/")
-    ? { done: true, faulted: false }
-    : { generations: [{ img: "not-an-image", censored: true, state: "ok" }] } });
+  ctx.fetch = async url => {
+    if (String(url).includes("/status/models")) {
+      return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+    }
+    return { ok: true, json: async () => url.includes("/generate/check/")
+      ? { done: true, faulted: false }
+      : { generations: [{ img: "not-an-image", censored: true, state: "ok" }] } };
+  };
   vm.runInContext(read("native-api.js"), ctx);
   const result = await ctx.window.leaNativeApi("/api/image-status", { method: "POST", body: JSON.stringify({ jobId: "test-job", host: "https://aihorde.net/api/v2" }) });
   assert.equal(result.done, true);

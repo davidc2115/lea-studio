@@ -22,16 +22,17 @@
     const revealing = /nude|naked|topless|transparent|see.through|d[eé]nud|nue\b/i;
     if (!revealing.test(value)) return value;
     const role = [character && character.id, character && character.title, character && character.body].join(" ");
-    if (/mermaid|sir[eè]ne/i.test(role)) return "revealing seashell top, mermaid tail, species traits visible";
-    if (/nurse|infirmi[eè]re|doctor|m[eé]decin/i.test(role)) return "sexy nurse mini dress, stockings, heels";
-    if (/office|bureau|coll[eè]gue|secr[eé]taire/i.test(role)) return "office blouse unbuttoned at top, short pencil skirt, sheer stockings, heels";
-    if (/sport|coach|athl[eè]te/i.test(role)) return "tight sports bra and tiny shorts";
-    return "tight short mini dress with deep neckline, heels";
+    if (/mermaid|sir[eè]ne/i.test(role)) return "opaque scaled bodice covering the chest, complete mermaid tail";
+    if (/nurse|infirmi[eè]re|doctor|m[eé]decin/i.test(role)) return "opaque buttoned medical uniform and trousers";
+    if (/office|bureau|coll[eè]gue|secr[eé]taire/i.test(role)) return "opaque closed office blouse and tailored trousers";
+    if (/sport|coach|athl[eè]te/i.test(role)) return "opaque sports shirt and full length training trousers";
+    return "opaque closed role-appropriate blouse and trousers, no underwear visible";
   }
 
   function sceneLock(character, variant, extra, identity) {
     const c = character || {}, v = variant || {}, ex = extra || {}, scene = v.scene || {};
-    const pose = ex.overridesPose ? ex.poseLine : v.pose;
+    const pose = ex.overridesPose ? ex.poseLine : v.scenarioPose || v.pose;
+    const posture = ex.overridesPose ? "" : v.postureAccent;
     const place = ex.overridesPlace ? ex.placeLine : v.place;
     const outfit = ex.overridesOutfit ? ex.outfitLine : v.outfit;
     const smallA = /\bA[\s-]?cup\b|bonnet\s*A\b|very small breast|flat.chested/i.test(identity || "");
@@ -41,11 +42,12 @@
       smallA ? "(very small A cup chest:1.4), (minimal breast projection:1.3)" : "",
       "one adult woman, " + Math.max(18, Number(c.age) || 25) + " years old",
       "CAMERA: " + compact(v.cameraAngle || "wide head-to-knees view", 65),
-      "POSE: " + compact(pose, 140),
-      "SETTING: " + compact(place, 80),
       "WARDROBE: (" + compact(opaqueOutfit(outfit, c), 165) + ":1.4)",
+      posture ? "POSTURE: (" + compact(posture, 55) + ":1.3)" : "",
+      "POSE: " + compact(pose, 100),
+      "SETTING: " + compact(place, 65),
       scene.prop ? "PROP: " + compact(scene.prop, 50) : "",
-      "selected outfit, face toward camera, sharp body and fabric detail, deep focus, environment visible, natural proportions",
+      "sharp body and fabric detail, hands in focus, deep focus, natural proportions, environment visible",
     ].filter(Boolean).join(", ").slice(0, 920);
   }
 
@@ -102,9 +104,9 @@
     payload.profile_identity_lock = true;
     payload.force_img2img = true;
     payload.denoising = 1;
-    payload.nsfw = true;
+    payload.nsfw = false;
     payload.is_profile_photo = true;
-    payload.horde_anonymous = false;
+    payload.horde_anonymous = true;
     const restoration = {
       head_image: prepared.head_image,
       head_x: prepared.head_x, head_y: prepared.head_y,
@@ -148,6 +150,34 @@
     });
   }
 
+  function sharpenScenePixels(pixels, width, height) {
+    if (width < 3 || height < 3 || pixels.length !== width * height * 4) {
+      throw new Error("Pixels de la scène incohérents.");
+    }
+    // Bounded luminance-only unsharp mask: modest contrast, no invented detail,
+    // no colour shift, and no amplification of near-flat texture noise.
+    const original = new Uint8ClampedArray(pixels);
+    const luminance = new Float32Array(width * height);
+    for (let n = 0; n < luminance.length; n++) {
+      const p = n * 4;
+      luminance[n] = .2126 * original[p] + .7152 * original[p + 1] + .0722 * original[p + 2];
+    }
+    for (let y = 1; y < height - 1; y++) {
+      for (let x = 1; x < width - 1; x++) {
+        const n = y * width + x, p = n * 4;
+        if (original[p + 3] !== 255) continue;
+        const blur = (luminance[n - width - 1] + 2 * luminance[n - width] + luminance[n - width + 1] +
+          2 * luminance[n - 1] + 4 * luminance[n] + 2 * luminance[n + 1] +
+          luminance[n + width - 1] + 2 * luminance[n + width] + luminance[n + width + 1]) / 16;
+        const detail = luminance[n] - blur;
+        if (Math.abs(detail) < 1.5) continue;
+        const boost = Math.max(-8, Math.min(8, .75 * detail));
+        for (let channel = 0; channel < 3; channel++) pixels[p + channel] = original[p + channel] + boost;
+      }
+    }
+    return pixels;
+  }
+
   async function restoreImage(url, restoration) {
     if (!restoration) return url;
     let dataUrl = url;
@@ -171,6 +201,11 @@
     canvas.width = restoration.width; canvas.height = restoration.height;
     const context = canvas.getContext("2d");
     context.drawImage(image, 0, 0);
+    const scene = context.getImageData(0, 0, canvas.width, canvas.height);
+    sharpenScenePixels(scene.data, canvas.width, canvas.height);
+    context.putImageData(scene, 0, 0);
+    // Restore the protected head AFTER sharpening, so reference pixels are not
+    // sharpened or repainted along with the generated body.
     context.drawImage(head, restoration.head_x, restoration.head_y,
       restoration.head_width, restoration.head_height);
     // Lossless output keeps the selected facial pixels; never repaint the face.
@@ -178,5 +213,5 @@
   }
 
   root.LeaSegmentedProfile = { active, sceneLock, opaqueOutfit, prepareReference,
-    restoreImage, setRenderSize, validatePrepared, orientPrompt, WIDTH, HEIGHT };
+    restoreImage, sharpenScenePixels, setRenderSize, validatePrepared, orientPrompt, WIDTH, HEIGHT };
 })(window);

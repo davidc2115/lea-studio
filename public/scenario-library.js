@@ -47,7 +47,7 @@
         "Elle arrive avec une invitation dont le destinataire n'est pas celui qu'elle pensait.",
       ],
       places: ["a cozy living room with a coffee table and warm lamp", "a cafe booth with a table and evening windows", "an apartment balcony with two chairs and city lights"],
-      outfits: ["fitted low-cut blouse and tight jeans", "a tailored casual jacket over a cotton top and trousers", "a tight knit mini dress with heeled ankle boots"],
+      outfits: ["fitted opaque blouse and jeans", "a tailored casual jacket over a cotton top and trousers", "an opaque knit dress with ankle boots"],
     },
     visitor: {
       events: [
@@ -59,7 +59,7 @@
         "La musique s'arrête et une conversation jusque-là évitée peut enfin commencer.",
       ],
       places: ["a living room after a gathering, cushions and game cards on a table", "a dining area with empty cups and a folded tablecloth", "an apartment lounge beside a warm floor lamp"],
-      outfits: ["a deep-V evening top and tight trousers", "a short casual dress with cleavage", "a satin blouse unbuttoned at the top and dark skinny jeans"],
+      outfits: ["a fitted opaque evening top and tailored trousers", "an opaque casual dress and cardigan", "a satin blouse with closed buttons and dark jeans"],
     },
     office: {
       events: [
@@ -71,7 +71,7 @@
         "Un message de remerciement a été envoyé à la mauvaise personne et elle veut comprendre pourquoi.",
       ],
       places: ["an office desk with folders, a notebook and a warm desk lamp", "a meeting room with a whiteboard and conference table", "an office lounge with a coffee table and city windows"],
-      outfits: ["fitted office blouse unbuttoned at top, short pencil skirt, sheer stockings, heels", "fitted blazer over low-cut top and short pencil skirt", "tight knit office mini dress with stilettos"],
+      outfits: ["a fitted opaque office blouse and tailored pencil skirt", "a fitted blazer, cotton top and tailored trousers", "an opaque knit office dress with classic shoes"],
     },
     student: {
       events: [
@@ -83,7 +83,7 @@
         "Une bibliothécaire lui remet une réservation qui porte le bon nom mais le mauvais titre.",
       ],
       places: ["an adult university reading room with books and a work table", "a study cafe with notebooks and a window", "a home desk with open books and a reading lamp"],
-      outfits: ["tiny crop top and tight jeans", "crop top and short skirt", "cardigan open over a short tight dress"],
+      outfits: ["a fitted opaque knit top and jeans", "a casual cotton blouse and corduroy trousers", "a cardigan over an opaque dress"],
     },
     family: {
       events: [
@@ -95,7 +95,7 @@
         "Une réparation imprévue interrompt votre visite et elle veut répartir les tâches équitablement.",
       ],
       places: ["a family kitchen with a wooden table and recipe notebook", "a living room with family albums and a warm lamp", "a dining room with a sideboard and framed photos"],
-      outfits: ["low-cut blouse and tight trousers", "crop top and skinny jeans", "a tight short mini dress with deep neckline and stiletto heels"],
+      outfits: ["a casual opaque blouse and trousers", "a cotton top, cardigan and jeans", "an opaque everyday dress with flat shoes"],
     },
     babysitter: {
       events: [
@@ -107,7 +107,7 @@
         "Elle termine sa journée avec un message inattendu et préfère demander un avis avant de répondre.",
       ],
       places: ["a dim living room, baby monitor on coffee table, sofa and warm lamp visible", "a living room beside a bookcase, baby monitor on a side table", "a living room with an armchair, baby monitor and a warm floor lamp"],
-      outfits: ["fitted low-cut blouse and tight jeans", "open cardigan over crop top and mini skirt", "tight knit crop top and dark skinny jeans"],
+      outfits: ["a fitted opaque casual blouse and jeans", "a soft cardigan over a fitted cotton top and trousers", "an opaque fitted knit top and dark jeans"],
     },
     sport: {
       events: [
@@ -119,7 +119,7 @@
         "Une inscription à un défi local se termine ce soir et elle ne veut pas décider sur un coup de tête.",
       ],
       places: ["a dance studio with mirrors, a barre and a sports bag", "a practice room with an exercise mat and a water bottle", "a gym lounge beside lockers and a wooden bench"],
-      outfits: ["tight sports bra and tiny shorts", "tight sports crop and leggings", "revealing dance top and short shorts"],
+      outfits: ["an opaque fitted sports top and full-length leggings", "a cotton training shirt and fitted exercise trousers", "an opaque dance top and full-length practice leggings"],
     },
     medical: {
       events: [
@@ -131,7 +131,7 @@
         "Une collègue a laissé un défi dans son carnet pour égayer la prochaine pause.",
       ],
       places: ["a clinic staff lounge with chairs, a table and a noticeboard", "a health education room with leaflets and a presentation board", "a hospital staff office with a desk and a coat hook"],
-      outfits: ["sexy nurse dress, stockings, heels", "tight medical-inspired mini dress", "fitted work blouse unbuttoned, pencil skirt, heels"],
+      outfits: ["a clean opaque medical tunic and trousers", "a cardigan over a medical uniform", "an opaque work blouse and tailored trousers"],
     },
     fantasy: {
       events: [
@@ -143,7 +143,7 @@
         "Une mélodie revient chaque soir au même endroit et elle cherche quelqu'un pour l'écouter avec elle.",
       ],
       places: ["a fantasy chamber with a carved table, lanterns and scrolls", "a moonlit courtyard with a stone bench and an old map", "an enchanted library with shelves and a glowing reading lamp"],
-      outfits: ["revealing fantasy bodice, short skirt, species traits visible", "revealing embroidered fantasy dress, deep cleavage", "revealing fantasy costume, deep cleavage, short hem"],
+      outfits: ["a fitted opaque fantasy tunic, belt and trousers", "an opaque embroidered fantasy dress and boots", "a tailored fantasy coat over an opaque costume"],
     },
     creative: {
       events: [
@@ -155,7 +155,7 @@
         "Une proposition de collaboration lui plaît mais elle refuse de perdre sa liberté créative.",
       ],
       places: ["an art studio with sketches, a work table and lamps", "a rehearsal room with music sheets and chairs", "a small gallery with framed artwork and a wooden bench"],
-      outfits: ["low-cut blouse and tight jeans", "a cotton top under a tailored jacket and jeans", "an opaque simple dress and ankle boots"],
+      outfits: ["an opaque fitted blouse and casual trousers", "a cotton top under a tailored jacket and jeans", "an opaque simple dress and ankle boots"],
     },
   };
   const poses = [
@@ -246,7 +246,7 @@
     kenza.profile_scenes = [
       { outfit: "a fitted opaque blouse with closed buttons and dark jeans", place: kenza.places[0], prop: "playing cards and a phone beside the baby monitor", pose: "seated diagonally on the sofa, legs crossed, one elbow on its arm, torso angled, face toward camera", camera: "wide head-to-knees shot, sofa and coffee table fully visible" },
       { outfit: "an opaque fitted cotton top, cardigan and tailored trousers", place: kenza.places[1], prop: "a phone showing transit times beside the baby monitor", pose: "standing beside the sofa, one hip angled, one hand on the sofa back, face toward camera", camera: "full body head to feet, warm living room visible" },
-      { outfit: "tight knit crop top and dark skinny jeans", place: kenza.places[2], prop: "a deck of cards beside the baby monitor", pose: "sitting on a chair turned diagonally, crossed ankles, shoulders angled, confident playful gaze toward camera", camera: "wide head-to-mid-calf shot, armchair and lamp visible" },
+      { outfit: "an opaque fitted knit top and dark jeans", place: kenza.places[2], prop: "a deck of cards beside the baby monitor", pose: "sitting on a chair turned diagonally, crossed ankles, shoulders angled, confident playful gaze toward camera", camera: "wide head-to-mid-calf shot, armchair and lamp visible" },
     ];
     kenza.outfits = kenza.profile_scenes.map(s => s.outfit);
   }

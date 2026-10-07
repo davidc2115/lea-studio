@@ -1,28 +1,48 @@
 name: Build APK Android
 
 on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Nom de version affiché (ex: 1.0.1)"
-        required: true
-        default: "1.0.1"
+  workflow_dispatch: {}
   push:
     branches: [main]
     paths:
       - "android/**"
       - "public/**"
       - ".github/workflows/build-apk.yml"
+      - "scripts/android-version.sh"
+      - "tests/android-version.test.cjs"
+      - "scripts/check-apk-narratives.sh"
+      - "tests/apk-narratives.test.cjs"
+      - "tests/role-narratives.test.cjs"
 
 permissions:
   contents: write
 
 jobs:
-  build:
-    name: Build Léa Studio APK
+  guard-tests:
+    name: Tester le garde-fou APK sans compilation Android
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Vérifier les petites archives APK de test
+        run: node --test tests/apk-narratives.test.cjs
+
+  build:
+    name: Build Léa Studio APK
+    needs: guard-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Résoudre la version Android commune
+        shell: bash
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          bash scripts/android-version.sh "$BUILD_NUMBER" >> "$GITHUB_ENV"
 
       - uses: actions/setup-java@v4
         with:
@@ -127,11 +147,8 @@ jobs:
       - name: Assemble APK signé
         working-directory: android
         run: |
-          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
-          CODE="${{ github.run_number }}"
           gradle assembleRelease --no-daemon --stacktrace \
-            -PversionName="$VERSION" \
-            -PversionCode="$CODE"
+            -PversionCode="$VERSION_CODE"
 
 
       - name: Finaliser et vérifier l'APK
@@ -164,13 +181,22 @@ jobs:
             echo "WARN: APK encore très gros ($SIZE)"
             unzip -l "$APK" | sort -n -k1 | tail -20
           fi
-          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
-          CODE="${{ github.run_number }}"
-          OUT="lea-studio-v${VERSION}-b${CODE}.apk"
+          OUT="lea-studio-v${VERSION_NAME}-b${VERSION_CODE}.apk"
           cp "$APK" "$OUT"
           cp "$APK" lea-studio.apk
           ls -lh "$OUT" lea-studio.apk
           unzip -l lea-studio.apk | grep -E "sd-arm64|libsd|classes.dex" || true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Vérifier la résolution des versions Android
+        run: node --test tests/android-version.test.cjs
+
+      - name: Vérifier les scénarios réellement embarqués dans l'APK
+        shell: bash
+        run: bash scripts/check-apk-narratives.sh lea-studio.apk
 
       - uses: actions/upload-artifact@v4
         with:

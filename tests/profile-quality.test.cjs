@@ -6,6 +6,56 @@ const assert = require("node:assert/strict");
 const dir = path.join(__dirname, "../public");
 const read = name => fs.readFileSync(path.join(dir, name), "utf8");
 
+test("Scene sharpening is bounded, preserves colour and alpha, and leaves flat areas unchanged", () => {
+  const ctx = vm.createContext({ window: {} });
+  vm.runInContext(read("profile-head-segmentation.js"), ctx);
+  const sharpen = ctx.window.LeaSegmentedProfile.sharpenScenePixels;
+  const flat = new Uint8ClampedArray(Array.from({ length: 25 }, () => [80, 100, 120, 255]).flat());
+  const before = flat.slice();
+  sharpen(flat, 5, 5);
+  assert.deepEqual(flat, before);
+  const edge = before.slice();
+  edge.set([110, 130, 150, 255], 12 * 4);
+  const original = edge.slice();
+  sharpen(edge, 5, 5);
+  assert(edge[48] > original[48]);
+  assert(edge[48] - original[48] <= 8);
+  assert.equal(edge[49] - edge[48], 20);
+  assert.equal(edge[50] - edge[49], 20);
+  for (let n = 3; n < edge.length; n += 4) assert.equal(edge[n], original[n]);
+  const translucent = before.slice();
+  translucent.set([110, 130, 150, 128], 48);
+  sharpen(translucent, 5, 5);
+  assert.deepEqual([...translucent.slice(48, 52)], [110, 130, 150, 128]);
+  assert.throws(() => sharpen(new Uint8ClampedArray(4), 5, 5), /incohérents/);
+});
+
+test("Actual restoration sharpens the scene before drawing the untouched reference head and exports PNG", async () => {
+  const events = [];
+  const pixels = new Uint8ClampedArray(Array.from({ length: 9 }, () => [100, 100, 100, 255]).flat());
+  class Image {
+    constructor() { this.naturalWidth = 3; this.naturalHeight = 3; }
+    set src(value) { this.source = value; this.onload(); }
+  }
+  const ctx = vm.createContext({
+    window: {}, Image,
+    document: { createElement() { return {
+      getContext() { return {
+        drawImage(image) { events.push(image.source.includes("original-head") ? "head" : "scene"); },
+        getImageData() { events.push("read"); return { data: pixels }; },
+        putImageData() { events.push("sharpened"); },
+      }; },
+      toDataURL(format) { events.push(format); return "data:" + format + ";base64,restored"; },
+    }; } },
+  });
+  vm.runInContext(read("profile-head-segmentation.js"), ctx);
+  const output = await ctx.window.LeaSegmentedProfile.restoreImage("data:image/webp;base64,scene", {
+    width: 3, height: 3, head_image: "original-head", head_x: 0, head_y: 0, head_width: 1, head_height: 1,
+  });
+  assert.deepEqual(events, ["scene", "read", "sharpened", "head", "image/png"]);
+  assert.match(output, /^data:image\/png/);
+});
+
 test("Detailed canvas preserves head proportions and compact fallback restores the original layout", async () => {
   const draws = [], canvases = [];
   class Image {
@@ -91,7 +141,10 @@ test("The actual provider request retains the larger canvas, 26 steps and detail
     window: {}, console, Date, setTimeout, clearTimeout, setInterval, clearInterval,
     location: { protocol: "file:", hostname: "", href: "file:///android_asset/www/index.html" },
     localStorage: { getItem: k => values.get(k) ?? null, setItem: (k, v) => values.set(k, String(v)), removeItem: k => values.delete(k) },
-    fetch: async (_url, options) => {
+    fetch: async (url, options) => {
+      if (String(url).includes("/status/models")) {
+        return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+      }
       requests.push(JSON.parse(options.body));
       return { ok: true, status: 202, json: async () => ({ id: "detailed-job" }) };
     },

@@ -25,6 +25,9 @@ function nativeApi() {
       removeItem: key => settings.delete(key),
     },
     fetch: async (url, options) => {
+      if (String(url).includes("/status/models")) {
+        return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+      }
       requests.push({ url, options, body: JSON.parse(options.body) });
       return { ok: true, status: 202, json: async () => ({ id: "head-job" }) };
     },
@@ -101,7 +104,7 @@ test("A compact valid matte keeps 384x512, 22 detail steps, inpainting and anony
   assert.equal(body.params.denoising_strength, 1);
   assert.equal(body.source_mask, "B".repeat(128));
   assert.equal(body.source_processing, "inpainting");
-  assert(body.models.every(model => model.includes("Inpainting")));
+  assert.deepEqual(Array.from(body.models), ["Realistic Vision"]);
   assert.equal(body.nsfw, true);
   assert.equal(body.censor_nsfw, false);
   assert.equal(settings.get("lea.settings"), savedSettings);
@@ -109,10 +112,15 @@ test("A compact valid matte keeps 384x512, 22 detail steps, inpainting and anony
 
 test("Provider censorship metadata is rejected even if its boolean flag is false", async () => {
   const { context } = nativeApi();
-  context.fetch = async url => ({ ok: true, json: async () => url.includes("/check/")
-    ? { done: true }
-    : { generations: [{ censored: false, img: "https://example.invalid/censored.webp",
-      gen_metadata: [{ type: "censorship", value: "nsfw" }] }] } });
+  context.fetch = async url => {
+    if (String(url).includes("/status/models")) {
+      return { ok: true, json: async () => [{ name: "Realistic Vision", count: 1 }] };
+    }
+    return { ok: true, json: async () => url.includes("/check/")
+      ? { done: true }
+      : { generations: [{ censored: false, img: "https://example.invalid/censored.webp",
+        gen_metadata: [{ type: "censorship", value: "nsfw" }] }] } };
+  };
   const result = await context.window.leaNativeApi("/api/image-status", {
     method: "POST", body: JSON.stringify({ jobId: "censored-job", host: "https://aihorde.net/api/v2" }),
   });

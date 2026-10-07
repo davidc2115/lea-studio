@@ -102,18 +102,20 @@
     const mermaid = /mermaid|sir[eè]ne/i.test([c.id, c.title, c.body, ...(c.tags || [])].join(" "));
     // Fixed budgets for each instruction, not a blind cut of the entire prompt.
     const compact = (s, max) => String(s || "").replace(/\s+/g, " ").trim().slice(0, max);
+    const morphology = compact(c.morphology_en || c.body, 90);
     return [
-      compact(identity, 140),
+      compact(identity, 130),
+      morphology ? "AUTHORITATIVE MORPHOLOGY: " + morphology : "",
       "one adult woman, " + Math.max(18, Number(c.age) || 25) + " years old",
-      "CAMERA: " + compact(camera, 72),
-      "POSE: " + compact(pose, 140),
-      "SETTING: " + compact(place, 110),
-      "WARDROBE: " + compact(outfit, 110),
-      scene.prop ? "PROP: " + compact(scene.prop, 50) : "",
-      "fully clothed fashion photo, playful confident gaze, natural body proportions",
+      "CAMERA: " + compact(camera, 58),
+      "POSE: " + compact(pose, 100),
+      "SETTING: " + compact(place, 80),
+      "WARDROBE: " + compact(outfit, 90),
+      scene.prop ? "PROP: " + compact(scene.prop, 35) : "",
+      "fully clothed sensual editorial photo, natural anatomy; use the selected wardrobe",
       mermaid
-        ? "body turned three quarters, face toward camera; scaled tail and environment visible, no human legs"
-        : "body turned three quarters, face toward camera; visible legs and environment",
+        ? "body turned three quarters, full face and both eyes visible, looking at camera; scaled tail and environment visible, no human legs"
+        : "body turned three quarters, full face and both eyes visible, looking at camera; visible legs and environment",
     ].filter(Boolean).join(", ");
   }
 

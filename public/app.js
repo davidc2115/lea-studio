@@ -136,60 +136,6 @@ function canonicalProfileCup(c) {
   return "";
 }
 
-/** Texte cheveux déclaré par la fiche : ligne "Cheveux :" > looks_en "(... hair:1.x)" > tag "cheveux ...". */
-function cardHairText(c) {
-  const appearance = String((c && c.appearance) || "");
-  const declared = (appearance.match(/(?:^|\n|\\n)\s*Cheveux\s*:\s*([^\n]+)/i) || [])[1];
-  if (declared) return declared.split(/\\n|\.\s|\.$/)[0];
-  const looks = (String((c && c.looks_en) || "").match(/\(([^()]*\bhair\b[^()]*?)(?::\d+(?:\.\d+)?)?\)/i) || [])[1];
-  if (looks) return looks;
-  const tags = Array.isArray(c && c.tags) ? c.tags : [];
-  return tags.find((t) => /^cheveux\s/i.test(String(t))) || "";
-}
-
-/** Couleur de cheveux de la fiche (null si non déclarée) — jamais déduite du scénario. */
-function cardHairColor(c) {
-  const s = String(cardHairText(c)).toLowerCase();
-  if (!s) return null;
-  const all = ["blonde hair", "black hair", "brown hair", "red hair", "silver hair", "pink hair", "purple hair", "blue hair", "green hair"];
-  const neg = (...keep) => all.filter((h) => !keep.includes(h)).join(", ");
-  const table = [
-    [/platin/, "platinum blonde hair", neg("blonde hair", "silver hair")],
-    [/ch[aâ]tain|chestnut/, "chestnut brown hair", neg("brown hair")],
-    [/roux|rousse|ginger|auburn|cuivr|copper|\bred\b/, "natural red ginger hair", neg("red hair")],
-    [/blond|golden hair/, "blonde hair", neg("blonde hair")],
-    [/noir|jais|black|ebony/, "black hair", neg("black hair")],
-    [/brun|brown/, "dark brown hair", neg("brown hair")],
-    [/argent|silver|blanc|white|gris|grey|gray/, "silver white hair", neg("silver hair")],
-    [/\broses?\b|pink/, "pink hair", neg("pink hair")],
-    [/violet|purple|lavande|lavender|mauve/, "purple hair", neg("purple hair")],
-    [/bleu|blue/, "blue hair", neg("blue hair")],
-    [/vert|green/, "green hair", neg("green hair")],
-  ];
-  for (const [re, pos, negative] of table) {
-    if (re.test(s)) return { pos, neg: negative, raw: s };
-  }
-  return null;
-}
-
-/** Type / longueur de cheveux de la fiche. */
-function cardHairStyle(c) {
-  const s = String(cardHairText(c)).toLowerCase();
-  const out = [];
-  if (/tr[eè]s\s*longs|reins|lower back|very long/.test(s)) out.push("very long hair");
-  else if (/mi-longs|[eé]paules|shoulder/.test(s)) out.push("shoulder-length hair");
-  else if (/courts?|carr[eé]|bob|pixie|short/.test(s)) out.push("short hair");
-  else if (/longs?|long/.test(s)) out.push("long hair");
-  if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(s)) out.push("coily afro textured hair");
-  else if (/boucl|curly/.test(s)) out.push("curly hair");
-  else if (/ondul|wavy/.test(s)) out.push("wavy hair");
-  else if (/lisse|raide|straight/.test(s)) out.push("straight hair");
-  if (/tress|braid/.test(s)) out.push("braided hair");
-  if (/chignon|bun/.test(s)) out.push("hair in a bun");
-  if (/queue\s*de\s*cheval|ponytail/.test(s)) out.push("ponytail");
-  return out;
-}
-
 function cupLock(c) {
   const body = String((c && c.body) || "");
   const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : String((c && c.tags) || "");
@@ -210,14 +156,7 @@ function cupLock(c) {
     [/bonnet\s*a|\ba-cup\b|petits?\s*seins/, "(small A-cup breasts:1.7), flat modest chest", "large breasts, huge breasts, cleavage, C-cup, D-cup, E-cup, F-cup, H-cup"],
   ];
   for (const [re, pos, neg] of table) {
-    if (re.test(src)) {
-      const shapeSrc = [body, c && c.looks_en, (String((c && c.appearance) || "").match(/Poitrine\s*:\s*([^\n]+)/i) || [])[1]].filter(Boolean).join(" ").toLowerCase();
-      const shape = /ferme|firm|perky|haute/.test(shapeSrc) ? "firm perky natural breasts"
-        : /implant|silicone|refait|fake/.test(shapeSrc) ? "round breast implants"
-        : /heavy|lourd|pendul|tombant/.test(shapeSrc) ? "heavy natural breasts"
-        : /\bronde|round breast/.test(shapeSrc) ? "round natural breasts" : "natural breasts";
-      return { pos: pos + ", " + shape, neg };
-    }
+    if (re.test(src)) return { pos, neg };
   }
   return { pos: "", neg: "" };
 }
@@ -225,45 +164,24 @@ function identityFromCard(c) {
   const name = String((c && c.name) || "woman");
   const requestedAge = Number(c && c.age) || 25;
   const age = requestedAge < 21 ? 22 : requestedAge;
-  const tags = Array.isArray(c && c.tags) ? c.tags.join(" ") : "";
-  const app = String((c && c.appearance) || "") + " " + String((c && c.looks_en) || "") + " " + String((c && c.body) || "") + " " + tags;
+  const app = String((c && c.appearance) || "") + " " + String((c && c.looks_en) || "");
   const hairRaw = ((app.match(/Cheveux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
   const eyesRaw = ((app.match(/Yeux\s*:\s*([^\n.]+)/i) || [])[1] || app).toLowerCase();
-  const blob = app.toLowerCase();
   let hair = "natural hair";
-  const declaredHair = cardHairColor(c);
-  if (declaredHair) {
-    hair = [declaredHair.pos, ...cardHairStyle(c)].join(", ");
-  } else if (/platine|platinum/.test(hairRaw + blob)) hair = "platinum blonde hair";
-  else if (/blond/.test(hairRaw + " " + blob)) hair = "blonde hair";
-  else if (/roux|auburn|ginger|red\s*hair|redhead|rousse/.test(hairRaw + " " + blob)) hair = "natural red ginger hair";
-  else if (/noir|black|jais/.test(hairRaw + " " + blob)) hair = "black hair";
-  else if (/ch[aâ]tain|chestnut/.test(hairRaw + " " + blob)) hair = "chestnut brown hair";
-  else if (/brun|brown/.test(hairRaw + " " + blob)) hair = "dark brown hair";
-  else if (/argent|silver|blanc/.test(hairRaw + " " + blob)) hair = "silver white hair";
-  // Texture
-  if (declaredHair) {}
-  else if (/fris[eé]|afro|cr[eé]pu|coily|kinky/.test(blob)) hair += ", coily afro textured hair";
-  else if (/boucl|curly/.test(blob)) hair += ", curly hair";
-  else if (/ondul|wavy/.test(blob)) hair += ", wavy hair";
-  else if (/lisse|straight/.test(blob)) hair += ", straight hair";
-  else if (/long/.test(blob)) hair += ", long hair";
+  if (/platine|platinum/.test(hairRaw)) hair = "platinum blonde hair";
+  else if (/blond/.test(hairRaw)) hair = "blonde hair";
+  else if (/roux|auburn|ginger|red/.test(hairRaw)) hair = "natural red hair";
+  else if (/noir|black|jais/.test(hairRaw)) hair = "black hair";
+  else if (/ch[aâ]tain|chestnut|auburn/.test(hairRaw)) hair = "chestnut brown hair";
+  else if (/brun|brown/.test(hairRaw)) hair = "dark brown hair";
+  else if (/argent|silver|blanc/.test(hairRaw)) hair = "silver white hair";
   let eyes = "natural realistic human eyes";
   if (/vert|green/.test(eyesRaw) && !/noisette|hazel/.test(eyesRaw)) eyes = "natural green iris, soft realistic eyes, not glowing";
   else if (/bleu|blue/.test(eyesRaw)) eyes = "natural blue iris, soft realistic eyes, not glowing";
   else if (/noisette|hazel/.test(eyesRaw)) eyes = "natural hazel iris, soft realistic eyes";
   else if (/marron|brun|brown/.test(eyesRaw)) eyes = "natural brown iris, soft realistic eyes";
   else if (/gris|grey|gray/.test(eyesRaw)) eyes = "natural grey iris, soft realistic eyes";
-  // Peau / ethnicité
-  let skin = "";
-  const ethField = String((c && c.ethnicity) || "").toLowerCase();
-  if (/africain|noire|black/.test(ethField) || (!ethField && /black\s*woman|dark\s*skin|peau\s*noire|african/.test(blob))) skin = "dark brown skin, black woman";
-  else if (/m[eé]tisse|mixed|mulatto|light\s*brown\s*skin/.test(blob)) skin = "light brown mixed skin";
-  else if (/asiatique|asian|east\s*asian|chinese|japanese|korean/.test(blob)) skin = "east asian features, light skin";
-  else if (/latina|latine|hispanic|olive\s*skin|peau\s*mate/.test(blob)) skin = "olive tan skin, latina features";
-  else if (/pale|porcelaine|porcelain|peau\s*claire|fair\s*skin|teint\s*clair/.test(blob)) skin = "fair porcelain skin";
-  else if (/peau\s*dor[eé]e|golden\s*skin|sun-kissed/.test(blob)) skin = "sun-kissed golden skin";
-  return [name, age + " year old woman", hair, eyes, skin].filter(Boolean).join(", ");
+  return name + ", " + age + " year old woman, " + hair + ", " + eyes;
 }
 function buildCharacterIdentityBlock(c) {
   if (!c) return "";
@@ -286,13 +204,11 @@ function buildCharacterIdentityBlock(c) {
   else if (/bombée|curvy/.test(blob)) morph = "curvy feminine body, rounded hips";
   let skin = "";
   const eth = String(c.ethnicity || "").toLowerCase();
-  // Ethnie déclarée d'abord ; dans le texte libre, jamais "black hair" / "jupe noire" → peau noire
-  const ethSrc = eth || blob.replace(/(?:cheveux|hair|jupe|robe|lingerie|collants|bas|talons|top|dentelle)[^,.;\n]{0,24}/g, " ");
-  if (/africain|\bnoire\b|peau\s*(?:tr[eè]s\s*)?fonc|dark\s*skin|black\s*woman/.test(ethSrc)) skin = "deep dark brown skin";
-  else if (/m[eé]tisse|mixed/.test(ethSrc)) skin = "mixed light-brown skin";
-  else if (/latine|latina|olive|br[eé]sil/.test(ethSrc)) skin = "olive warm skin";
-  else if (/asiat|chinois|japonais|cor[eé]en|vietnam/.test(ethSrc)) skin = "light east-asian skin";
-  else if (/slave|arabe|maghreb/.test(ethSrc)) skin = "warm medium skin";
+  if (/africain|noire|black/.test(eth + blob)) skin = "deep dark brown skin";
+  else if (/m[eé]tisse|mixed/.test(eth + blob)) skin = "mixed light-brown skin";
+  else if (/latine|latina|olive/.test(eth + blob)) skin = "olive warm skin";
+  else if (/asiat/.test(eth + blob)) skin = "light east-asian skin";
+  else if (/slave|arabe|maghreb/.test(eth + blob)) skin = "warm medium skin";
   else skin = "fair natural skin";
   return [
     id,
@@ -330,11 +246,7 @@ function physicalLocksFromText(c) {
     [/cheveux\s*roses|pink\s*hair/i, "pink hair", "brown hair, blonde hair, black hair"],
     [/cheveux\s*violets|purple\s*hair|lavender\s*hair/i, "purple hair", "brown hair, blonde hair, black hair"],
   ];
-  const declaredHair = cardHairColor(c);
-  if (declaredHair) {
-    out.positive.push("(" + declaredHair.pos + ":1.55)", ...cardHairStyle(c));
-    out.negative.push(declaredHair.neg);
-  } else for (const [re, pos, neg] of hairMap) {
+  for (const [re, pos, neg] of hairMap) {
     if (re.test(blob)) {
       out.positive.push("(" + pos + ":1.55)");
       out.negative.push(neg);
@@ -343,18 +255,15 @@ function physicalLocksFromText(c) {
   }
 
   // Style cheveux
-  if (declaredHair) {}
-  else if (/attach[ée]s?|en\s*chignon|bun|pony\s*tail|queue\s*de\s*cheval|tied\s*up/i.test(blob)) {
+  if (/attach[ée]s?|en\s*chignon|bun|pony\s*tail|queue\s*de\s*cheval|tied\s*up/i.test(blob)) {
     out.positive.push("hair tied up or in a bun or ponytail");
   }
-  if (!declaredHair) {
-    if (/longs?\s*(cheveux|hair)|long\s*(straight|wavy)|jusqu.?au\s*rein|lower\s*back/i.test(blob)) {
-      out.positive.push("long hair");
-    }
-    if (/lisse|straight\s*hair/i.test(blob)) out.positive.push("straight hair");
-    if (/ondul[ée]s?|wavy/i.test(blob)) out.positive.push("wavy hair");
-    if (/boucl[ée]s?|curly/i.test(blob)) out.positive.push("curly hair");
+  if (/longs?\s*(cheveux|hair)|long\s*(straight|wavy)|jusqu.?au\s*rein|lower\s*back/i.test(blob)) {
+    out.positive.push("long hair");
   }
+  if (/lisse|straight\s*hair/i.test(blob)) out.positive.push("straight hair");
+  if (/ondul[ée]s?|wavy/i.test(blob)) out.positive.push("wavy hair");
+  if (/boucl[ée]s?|curly/i.test(blob)) out.positive.push("curly hair");
 
   // Yeux
   const eyeMap = [
@@ -685,18 +594,18 @@ function pickProfileScenarioVariant(c) {
     : [];
   const role = [data.title, data.role, data.scenario, (data.tags || []).join(" ")].filter(Boolean).join(" ").toLowerCase();
   const fallbackOutfit = /infirmi[eè]re|nurse|h[oô]pital|clinic/.test(role)
-    ? "tight short medical-inspired dress, deep neckline, stockings, heels, sexy nurse look"
+    ? "clean medical uniform with a practical tunic and trousers"
     : /secr[eé]taire|bureau|office|colleague|coll[eè]gue/.test(role)
-    ? "fitted office blouse unbuttoned at the top, short pencil skirt, sheer stockings, stiletto heels"
+    ? "fitted office blouse with a flattering open neckline, tailored pencil skirt, sheer stockings and classic heels"
     : /sport|dance|danse|yoga|athl[eé]tique/.test(role)
-    ? "tight sports bra and tiny shorts, toned body, sneakers"
+    ? "practical athletic top and leggings"
     : /[eé]tudiant|[eé]tudiante|student|study|intello|livre/.test(role)
-    ? "tiny crop top and short denim mini skirt, sneakers"
+    ? "casual knit top and jeans"
     : /fantasy|elfe|kitsune|succube|dragon|vampire|catgirl|sir[eè]ne|ange/.test(role)
-    ? "revealing fantasy costume, deep cleavage, short hem, species traits visible"
+    ? "a costume appropriate to the character's fantasy role"
     : /fille d'une amie|fille d.amie|cuisine|kitchen/.test(role)
-    ? "tiny crop top and tight jeans, midriff bare, casual sexy"
-    : "tight short mini dress with deep plunging neckline, fishnet tights, black stiletto heels";
+    ? "fitted crop top and tight jeans, casual home clothes, not lingerie"
+    : "everyday clothes appropriate to the character's role and scenario";
   // Keep variant indexes paired, but replace generic wardrobe placeholders
   // with a role-appropriate outfit instead of sending the literal placeholder.
   const outfits = cleanList(data.outfits).map((outfit) =>
@@ -841,25 +750,8 @@ function profileScenePosePool(c, variant) {
   ];
 }
 
-/** Bibliothèque de poses personnalisées par personnage (localStorage + champ fiche "poses"). */
-function customPoses(c) {
-  const id = (c && c.id) || "x";
-  try {
-    const saved = JSON.parse(localStorage.getItem("lea.poses." + id) || "null");
-    if (Array.isArray(saved)) return saved.map((p) => String(p).trim()).filter(Boolean);
-  } catch (_) {}
-  return Array.isArray(c && c.poses) ? c.poses.map((p) => String(p).trim()).filter(Boolean) : [];
-}
-
-function saveCustomPoses(c, list) {
-  const clean = [...new Set(list.map((p) => String(p).replace(/\s+/g, " ").trim()).filter(Boolean))].slice(0, 40);
-  try { localStorage.setItem("lea.poses." + ((c && c.id) || "x"), JSON.stringify(clean)); } catch (_) {}
-  return clean;
-}
-
 function pickProfileScenePose(c, variant) {
-  const mine = customPoses(c);
-  const poses = mine.length ? mine : profileScenePosePool(c, variant);
+  const poses = profileScenePosePool(c, variant);
   const key = "lea.lastProfilePose." + ((c && c.id) || "x");
   let recent = [];
   try {
@@ -944,70 +836,19 @@ function buildProfileSceneLock(c, variant, extra = "") {
 }
 
 function roleSexyPick(c) {
-  const variant = pickProfileScenarioVariant(c) || {};
-  let outfit = variant.outfit || "";
-  let place = variant.place || "";
-  let pose = "";
-  try {
-    if (window.LeaProfileWardrobe && Array.isArray(window.LeaProfileWardrobe.styles) && window.LeaProfileWardrobe.styles.length) {
-      const styles = window.LeaProfileWardrobe.styles;
-      const style = styles[Math.floor(Math.random() * styles.length)];
-      if (style && style.outfit) outfit = style.outfit;
-      if (style && style.framing) pose = style.framing;
-    }
-  } catch (_) {}
-  if (!outfit || outfit.length < 12) {
-    const pool = [
-      "very tight short spaghetti-strap mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
-      "tight black bodycon mini dress, deep cleavage, sheer black tights, high heels",
-      "soaking wet light crop top clinging to the body, bare midriff, tight jeans, wet hair",
-      "black leather mini skirt, crop top, fishnet stockings, stiletto pumps",
-      "burgundy satin wrap mini dress with thigh slit, black stilettos",
-      "fitted blouse slightly unbuttoned, short pencil skirt, sheer stockings, heels",
-      "red lace lingerie set, garter belt, sheer stockings, high heels",
-      "tiny crop top and micro shorts, high heels, provocative stance",
-      "sheer black mesh top over lace bra, high-waisted mini skirt, pumps",
-      "emerald satin slip dress with deep slit, bare shoulders, stiletto heels",
-      "office blouse tied under the bust, short pencil skirt, stockings, heels",
-      "white wet t-shirt clinging to breasts, denim mini skirt, bare legs",
-      "black corset top, tight leather pants, stiletto boots",
-      "silk kimono robe half open over lingerie, bedroom soft light"
-    ];
-    outfit = pool[Math.floor(Math.random() * pool.length)];
-  }
-  if (!pose) {
-    const poses = [
-      "standing full body, one hand on hip, looking at camera, teasing expression",
-      "leaning forward showing cleavage, full body visible head to shoes",
-      "sitting on edge of furniture, legs crossed, short hemline, looking at camera",
-      "standing three-quarter view looking back over shoulder, full body",
-      "leaning against wall, arched back, full body head to shoes",
-      "on all fours on a bed looking back at camera, full body",
-      "kneeling on sofa, back arched, looking at camera, full body",
-      "walking toward camera, full body, dynamic angle",
-      "lying on side on bed propped on elbow, legs visible, full body",
-      "bending at the waist tying shoe, looking at camera, full body"
-    ];
-    pose = poses[Math.floor(Math.random() * poses.length)];
-  }
-  try {
-    if (typeof pickProfileScenePose === "function") pose = pickProfileScenePose(c, variant) || pose;
-  } catch (_) {}
-  return { outfit, pose, place: place || "indoor elegant interior, soft realistic lighting" };
+  const variant = pickProfileScenarioVariant(c);
+  return {
+    outfit: variant.outfit,
+    pose: pickProfileScenePose(c, variant),
+    place: variant.place,
+  };
 }
 
 function describeOutfitDetail(outfitStr, scenarioStr) {
   const raw = String(outfitStr || "").trim();
   const o = (raw + " " + String(scenarioStr || "")).toLowerCase();
-  // Une seule tenue : ne pas empiler jean + chemise + robe (Horde mélange tout).
-  if (raw && raw.length > 12 && !/^(casual|everyday|appropriate)/i.test(raw)) {
-    const wet = /wet|tremp|soaked|mouill|pluie|orage|rain/.test(o)
-      ? ", soaking wet clothes clinging to skin, wet hair"
-      : "";
-    return raw.replace(/^exactly wearing:\s*/i, "") + wet;
-  }
   const bits = [];
-  if (raw) bits.push(raw);
+  if (raw) bits.push("exactly wearing: " + raw);
 
   // État humidité / pluie
   if (/wet|tremp|soaked|mouill|pluie|orage|rain|dripping|moites?|sweaty|sueur/.test(o)) {
@@ -1511,30 +1352,22 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     const place = ex0.overridesPlace ? (ex0.placeLine || "as described in USER REQUEST") : placeDetail;
     const defaultWetOutfit = !ex0.overridesOutfit && /wet|soaked|mouill|tremp|pluie|rain/i.test(outfitContext + " " + variant.outfit);
     return [
-      "ultra photorealistic DSLR photo of Léa,",
-      "(solo:1.45), single adult woman only, NOT 2girls, NOT twins, NOT clones, NOT mirror,",
+      "photorealistic editorial photograph of " + String(c.name || "Léa") + ",",
+      "one adult woman only,",
       faceIdentityLock(c) + ",",
-      "(21 year old adult French woman:1.4), young adult woman,",
-      "oval porcelain face, delicate bone structure, soft jaw, subtle cheekbones,",
-      "(large almond hazel-green eyes:1.4), golden-green iris, long dark lashes,",
-      "dark chestnut thick arched brows, fine straight nose, full soft matte rose lips,",
-      "(long straight dark brown hair to lower back:1.45), subtle honey highlights,",
-      "NOT wavy salon hair, NOT short hair, NOT shoulder-length bob,",
-      "(large prominent generous 95D breasts:1.55), deep full cleavage, narrow defined waist hourglass,",
-      "delicate narrow shoulders, subtle collarbones, rounded hips, full buttocks, long slim legs,",
-      "fair flawless porcelain skin, natural soft makeup,",
+      Math.max(18, Number(c.age) || 21) + " year old adult woman,",
+      profileIdentityAnchor(c) + ",",
+      "AUTHORITATIVE MORPHOLOGY: " + (c.morphology_en || c.body || "natural body proportions") + ",",
+      "full face visible, both eyes visible, looking directly at the camera,",
       "OUTFIT REQUIRED: " + outfit + ",",
       "LOCATION: " + place + ",",
       "SCENARIO/ROLE: " + (variant.index === 0 ? scenario.slice(0, 150) : "an alternate moment for " + String(c.title || "Léa") + " in " + variant.place) + ",",
       defaultWetOutfit ? "wet skin sheen, water droplets, wet hair strands on face and shoulders," : "",
       defaultWetOutfit ? "rain visible outside, warm indoor entryway light," : "",
       pose + ",",
-      "natural skin pores, soft cinematic lighting, sharp detailed young face,",
-      "NOT middle-aged, NOT 30+, NOT mature face, NOT small breasts, NOT flat chest, NOT A-cup, NOT B-cup,",
-      "NOT different woman, NOT model stock face,",
-      defaultWetOutfit ? "NOT dry clothes, NOT dry fabric," : "",
+      "natural skin texture, soft cinematic lighting, sharp focus on face, body and clothing,",
       "NEW pose different from the reference photo, different camera angle, different body position,",
-      "NOT the same pose as source, NOT arms crossed looking down, NOT static copy of reference pose,",
+      "avoid copying the reference pose or framing,",
       ex0.hasAny ? "MUST follow USER REQUEST for clothes/pose/act," : "",
     ].filter(Boolean).join(" ");
   }
@@ -1565,55 +1398,13 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
   }
   const selectedOutfit = outfit;
 
-  let bodyLock = {
-    ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
-    aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
-    sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
-    jade: "slim young student, small A-cup nearly flat chest, thin arms, freckles, round glasses, brown hair in a bun",
-    myriam: "full soft figure, large D breasts, wide hips, NOT skinny",
-    chloe: "slim petite, small-medium B-cup, freckles, NOT huge chest",
-    nina: "TALL slim Slavic, medium C-cup, long legs, NOT plus-size",
-    keisha: "dark skin, large breasts, very round butt, NOT skinny",
-    lina: "petite Korean, VERY SMALL almost flat chest, slim, NOT busty",
-    priya: "Indian bronze skin, large D breasts, wide hips",
-    camila: "slim waist, THICK round butt, medium breasts, NOT plus-size",
-    amelie: "CHUBBY plus-size, soft belly, very LARGE breasts, round face, NOT slim",
-    zoe: "VERY THIN goth, small B-cup, pale, NOT busty",
-    fatou: "tall, extremely LARGE heavy F breasts, powerful hips",
-    hana: "petite Japanese, FLAT A-cup, short black bob, NOT busty",
-    lucia: "hourglass, large D breasts, defined waist",
-    marine: "athletic swimmer, medium breasts, toned, NOT chubby",
-    rania: "slim elegant, medium C-cup, NOT plus-size",
-    thea: "thin redhead, small B-cup, freckles, NOT busty",
-    viola: "soft plump, large D breasts, NOT skinny",
-    noemie: "short petite, small-medium B-cup",
-    daria: "sculpted, medium C-cup, NOT chubby",
-    mei: "thin Chinese woman, FLAT A-cup breasts, NOT busty, slender frame",
-    aisha: "dancer, medium B-cup, toned glutes, NOT plus-size",
-    bruna: "TINY waist, HUGE round Brazilian butt, medium C-cup",
-    elise: "soft, very LARGE E breasts, NOT skinny",
-    sasha: "androgynous slim, FLAT small A-cup, short hair, NOT busty",
-    yasmine: "glamorous, large 95D breasts, NOT plus-size",
-    olga: "plump Russian, heavy E breasts, full hips",
-    maya: "slim waist, medium C-cup, caramel skin",
-    lea: "SAME face as Léa reference, oval porcelain face, large almond hazel-green eyes golden reflections, dark chestnut arched brows, fine straight nose, full soft rose lips, long straight dark brown hair to lower back honey highlights, large prominent 95D breasts deep cleavage, narrow waist hourglass, delicate narrow shoulders, fair flawless skin",
-  }[c.id] || (c.body || "");
-
-  // Forçage bonnet H/I/J depuis tags/title si bodyLock générique
-  (function forceCup() {
-    const t = [c.tags && c.tags.join(" "), c.title, c.body, c.appearance].filter(Boolean).join(" ");
-    if (/bonnet\s*j|j-cup/i.test(t)) bodyLock = "(massive enormous J-cup breasts:1.7), hyper busty, extremely huge heavy chest, deep heavy cleavage, top strained by breast volume";
-    else if (/bonnet\s*i|i-cup/i.test(t)) bodyLock = "(enormous heavy I-cup breasts:1.7), hyper busty, extremely large chest, deep heavy cleavage, blouse strained";
-    else if (/bonnet\s*h|h-cup/i.test(t)) bodyLock = "(huge heavy H-cup breasts:1.65), hyper busty, extremely large chest, deep heavy cleavage, fabric stretched by breast volume";
-  })();
-  // bodyLock was const - need let
-  const smallChest = /jade|aya|lina|hana|mei|sasha|thea|zoe|chloe/.test(c.id);
-  const anti = smallChest
-    ? "NOT large breasts, NOT huge cleavage, NOT voluptuous, NOT 95D"
+  const explicitCup = canonicalProfileCup(c);
+  const anti = /^[AB]$/.test(explicitCup)
+    ? "the declared modest " + explicitCup + "-cup chest, natural and not enlarged"
     : "";
 
   const looks = describeLooks(c);
-  const body = (bodyLock || c.body || "").replace(/\s+/g, " ").trim();
+  const body = String(c.morphology_en || c.body || "").replace(/\s+/g, " ").trim();
   const outfitScenario = variant.index === 0 ? scenario : "";
   const outfitDetail = describeOutfitDetail(outfit, outfitScenario);
   const placeDetail = describePlaceDetail(place);
@@ -1824,30 +1615,14 @@ function buildLeaImagePrompt(extra = "", scenarioVariant) {
     } else if (!wearClean || /casual home clothes|appropriate to/i.test(wearClean)) {
       wearClean = "short tight dress with deep neckline and heels, fully dressed, not underwear";
     }
-    const randPoses = [
-      "leaning forward showing cleavage, full body, seductive smile",
-      "standing lifting the hem of her short skirt slightly, teasing look, full body",
-      "bent forward hands on knees looking back over shoulder, arched back, full body",
-      "sitting on the edge of a bed legs crossed, short outfit, looking at camera",
-      "from behind looking back over shoulder, hand on hip, full body",
-      "walking toward camera hips swaying, tight clothes, full body head to shoes",
-      "one hand on hip weight on one leg, short dress, looking at camera, full body",
-      "leaning on a railing one leg forward, seductive gaze, full body"
-    ];
-    const posePick = (scenarioVariant && scenarioVariant.pose) || randPoses[Math.floor(Math.random() * randPoses.length)];
-    // Force sexy if residual opaque/everyday wording
-    if (/opaque|everyday dress|flat shoes|role-appropriate|appropriate to the character/i.test(wearClean)) {
-      wearClean = "tight short mini dress with deep plunging neckline, fishnet tights, stiletto heels";
-    }
     const sceneFirst = [
-      "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, natural eyes no glow, no pink hair unless specified,",
-      bodyBoost || "",
-      "wearing exactly one outfit: " + wearClean + ",",
-      "NOT a second outfit, NOT mixed clothes, NOT opaque everyday dress, NOT flat shoes,",
+      "photorealistic full body photo of one adult woman, natural realistic human eyes without glow,",
+      "chest and pelvis covered by the selected outfit,",
+      "wearing " + wearClean + ",",
       "location: " + locClean + ",",
-      "pose: " + posePick + ",",
-      "sexy provocative full body from head to shoes, hips and legs visible, not a bust crop,",
-    ].filter(Boolean).join(" ");
+      "pose: " + ((scenarioVariant && scenarioVariant.pose) || "hand on hip, weight on one leg, looking at camera") + ",",
+      "full body from head to knees, hips and legs visible,",
+    ].join(" ");
     let short = [sceneFirst, fantBoost, bodyBoost, idCore, qualityPart].filter(Boolean).join(" ");
     short = short.replace(/\s+/g, " ").trim();
     if (short.length > maxLen) {
@@ -2299,40 +2074,7 @@ function buildSceneImagePrompt() {
 
   const age = c.age || 21;
 
-  // Réutilise le même bodyLock que le profil
-  const bodyLock = {
-    ines: "medium C-cup breasts, wide hips, golden tan, athletic-curvy NOT huge chest",
-    aya: "ATHLETIC lean, SMALL firm A-B breasts, sports body, NOT busty, NOT large breasts",
-    sofia: "hourglass, extremely LARGE 100E breasts, TINY waist, NOT plus-size, NOT chubby belly",
-    jade: "slim young student wearing round glasses, brown bun, freckles, small A-cup chest, thin arms",
-    myriam: "full soft figure, large D breasts, wide hips, Moroccan, NOT skinny",
-    chloe: "slim petite, small-medium B-cup, freckles, NOT huge chest",
-    nina: "TALL slim Slavic, medium C-cup, long legs, NOT plus-size",
-    keisha: "dark skin, large breasts, very round butt, NOT skinny",
-    lina: "petite Korean, VERY SMALL almost flat chest, slim, NOT busty",
-    priya: "Indian bronze skin, large D breasts, wide hips",
-    camila: "slim waist, THICK round butt, medium breasts, NOT plus-size",
-    amelie: "CHUBBY plus-size, soft belly, very LARGE breasts, round face, NOT slim",
-    zoe: "VERY THIN goth, small B-cup, pale, NOT busty",
-    fatou: "tall, extremely LARGE heavy F breasts, powerful hips",
-    hana: "petite Japanese, FLAT A-cup, short black bob, NOT busty",
-    lucia: "hourglass, large D breasts, defined waist",
-    marine: "athletic swimmer, medium breasts, toned, NOT chubby",
-    rania: "slim elegant, medium C-cup, NOT plus-size",
-    thea: "thin redhead, small B-cup, freckles, NOT busty",
-    viola: "soft plump, large D breasts, NOT skinny",
-    noemie: "short petite, small-medium B-cup",
-    daria: "sculpted, medium C-cup, NOT chubby",
-    mei: "thin Chinese woman, FLAT A-cup breasts, NOT busty, slender frame, long dark hair often in ponytail",
-    aisha: "dancer, medium B-cup, toned glutes, NOT plus-size",
-    bruna: "TINY waist, HUGE round Brazilian butt, medium C-cup",
-    elise: "soft, very LARGE E breasts, NOT skinny",
-    sasha: "androgynous slim, FLAT small A-cup, short hair, NOT busty",
-    yasmine: "glamorous, large 95D breasts, NOT plus-size",
-    olga: "plump Russian, heavy E breasts, full hips",
-    maya: "slim waist, medium C-cup, caramel skin",
-    lea: "SAME face as Léa reference, oval porcelain face, large almond hazel-green eyes golden reflections, dark chestnut arched brows, fine straight nose, full soft rose lips, long straight dark brown hair to lower back honey highlights, large prominent 95D breasts deep cleavage, narrow waist hourglass, delicate narrow shoulders, fair flawless skin",
-  }[c.id] || (c.body || "");
+  const bodyLock = String(c.morphology_en || c.body || cupLock(c).pos || "").replace(/\s+/g, " ").trim();
 
   const appearance = (c.appearance || "").replace(/\s+/g, " ").trim();
   const ethnicity = c.ethnicity || "";
@@ -4962,36 +4704,19 @@ function renderProfile() {
       }).join("")}
     </div>
     <h3 style="margin-top:18px">Photo du scénario (tenue + lieu du personnage)</h3>
-    <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Utilise ta clé AI Horde des réglages si elle est enregistrée.</p>
-    <p style="color:var(--muted);font-size:12px;margin-top:8px">Tenue sexy / provocante tirée au hasard à chaque génération (mini-robe, crop, résille, talons…).</p>
+    <p style="color:var(--muted);font-size:13px">Choisis une tenue ou laisse varier les styles. Le lieu et la scène restent ceux du personnage. Horde utilise le mode anonyme, sans clé.</p>
+    <label for="profile-wardrobe" style="display:block;margin-top:10px">Tenue de la photo</label>
+    <select id="profile-wardrobe">${window.LeaProfileWardrobe ? window.LeaProfileWardrobe.options() : '<option value="scenario">Tenue du scénario</option>'}</select>
     <textarea class="field" id="imgprompt" rows="2" placeholder="Détail prioritaire : tenue, pose ou lieu (ex. robe bordeaux, assise au bord du lit, escarpins noirs)"></textarea>
     <p id="prompt-preview" style="color:var(--muted);font-size:12px;margin-top:6px;max-height:4.5em;overflow:auto"></p>
     <label style="display:block;margin-top:10px">Moteur images</label>
     <select id="imgengine-profile">
-      <option value="horde">Horde (clé gratuite si configurée)</option>
+      <option value="horde">Horde anonyme (gratuit · recommandé profil)</option>
       <option value="gemini">Gemini Nano Banana (clés Studio · NSFW souvent filtré)</option>
-      <option value="cloudflare">Cloudflare FLUX (gratuit ~150–230/j · SFW/léger)</option>
+      <option value="cloudflare">Cloudflare Workers AI · FLUX.2 [dev]</option>
+      <option value="pollinations">Pollinations · FLUX.2 Klein 4B / FLUX</option>
       <option value="sd_cpp">SD.cpp (local)</option>
     </select>
-    <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
-    <select id="profile-ref-mode">
-      <option value="soft">Souple — conserve le visage de la ★, pose/tenue libres (denoise 0.55) · recommandé</option>
-      <option value="strong">Forte — visage très fidèle à la ★ (denoise 0.42)</option>
-      <option value="off">Non — txt2img seul, pas de référence ★</option>
-    </select>
-    <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
-      <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
-      <p style="color:var(--muted);font-size:12px;margin:6px 0">Si la liste n'est pas vide, chaque photo tire une de ces poses (sans répéter les 3 dernières). Vide = poses automatiques selon le lieu.</p>
-      <ul id="pose-list" style="list-style:none;padding:0;margin:0"></ul>
-      <div style="display:flex;gap:6px;margin-top:6px">
-        <input class="field" id="pose-new" data-testid="pose-new-input" placeholder="ex. assise sur le comptoir, jambes croisées, regard par-dessus l'épaule" style="flex:1">
-        <button type="button" class="cta" id="pose-add" data-testid="pose-add-btn">Ajouter</button>
-      </div>
-      <p style="margin-top:6px">
-        <button type="button" class="cta" id="pose-suggest" data-testid="pose-suggest-btn" style="background:#2a3a48">Ajouter des suggestions</button>
-        <button type="button" class="cta" id="pose-clear" data-testid="pose-clear-btn" style="background:#4a2a2a;margin-left:6px">Tout effacer</button>
-      </p>
-    </details>
     <p style="margin-top:8px">
       <button class="cta" id="genimg">Générer la photo</button>
       <!-- Local Dream retiré à la demande utilisateur -->
@@ -5150,15 +4875,6 @@ function renderProfile() {
       cur.imageEngine = $("imgengine-profile").value;
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     };
-    if ($("pose-list")) bindPoseLibrary(c);
-    if ($("profile-ref-mode")) {
-      $("profile-ref-mode").value = profileRefMode();
-      $("profile-ref-mode").onchange = () => {
-        const cur = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-        cur.profileRefMode = $("profile-ref-mode").value;
-        localStorage.setItem("lea.settings", JSON.stringify(cur));
-      };
-    }
   } catch (_) {}
   $("genimg").onclick = () => {
     try {
@@ -5248,8 +4964,9 @@ function setGenStatus(t) {
 
 function bodyNegatives(c) {
   const id = (c && c.id) || "";
+  const declaredCup = canonicalProfileCup(c);
   const blob = [
-    c && c.body, c && c.appearance, c && c.looks_en, c && c.ethnicity
+    c && (c.morphology_en || c.body), c && c.appearance, c && c.looks_en, c && c.ethnicity
   ].filter(Boolean).join(" ").toLowerCase();
   const base = "child, teen, underage, wrong ethnicity, deformed, extra limbs, different face, different person, face morph, identity change, another woman, celebrity lookalike, wrong face shape, different eyes, different nose";
   let neg = base;
@@ -5273,21 +4990,19 @@ function bodyNegatives(c) {
   try { _duoSkipChest = isDuoCharacter(c); } catch (_) {}
   if (!_duoSkipChest) {
   // Petite / plate poitrine
-  const smallChest = /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob)
-    || /^(jade|aya|lina|hana|mei|sasha|thea|zoe|chloe|marine|noemie)$/.test(id);
+  const smallChest = declaredCup
+    ? /^[AB]$/.test(declaredCup)
+    : /petit(s)?\s*seins|flat|a-cup|bonnet\s*a|nearly flat|très petits|petits seins|small breast|slim.*chest|not busty|poitrine\s*petite|seins\s*moyens?\s*b\b|bonnet\s*b/i.test(blob);
   // Grosse poitrine
-  const hugeChest = /gros\s*seins|généreuse|95d|100e|bonnet\s*[defghij]|\b[defghij]-cup\b|large\s*(full\s*)?(d|e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob)
-    || /^(sofia|amelie|fatou|elise|olga|yasmine|priya|myriam|keisha|lea|lucia)$/.test(id)
-    || (Array.isArray(c.tags) && c.tags.some((t) => /bonnet\s*[hij]|gros seins/i.test(String(t))));
+  const hugeChest = declaredCup
+    ? /^[FGHIJ]$/.test(declaredCup)
+    : /gros\s*seins|généreuse|95d|100e|bonnet\s*[efghij]|\b[efghij]-cup\b|large\s*(full\s*)?(e|f|g|h|i|j)-cup|extremely large|busty|voluptuous|poitrine\s*généreuse|hyper busty|massive enormous|heavy H-cup|heavy I-cup|J-cup/i.test(blob);
   // Gros fessier
-  const bigButt = /gros(se)?\s*fess|fessier|round butt|thick\s*(round\s*)?butt|brazilian butt|huge\s*round\s*butt|fesses\s*rondes|very round butt|thick hips/i.test(blob)
-    || /^(bruna|camila|keisha|fatou)$/.test(id);
+  const bigButt = /gros(se)?\s*fess|fessier|round butt|thick\s*(round\s*)?butt|brazilian butt|huge\s*round\s*butt|fesses\s*rondes|very round butt|thick hips/i.test(blob);
   // Fine / athlétique
   const thin = /mince|slim|thin|athlétique|athletic|fine\b|élancée/i.test(blob);
   // Ronde / plus-size (tags + body + ids connus)
-  const chubby = /chubby|plus-size|ronde|pulpeuse|soft belly|gros ventre|bbw|plump/i.test(blob)
-    || /^(amelie|olga|viola|myriam|sp_plus1|sp_plus2|amelie_bs)$/.test(id)
-    || (Array.isArray(c.tags) && c.tags.some((t) => /ronde|plus-size|chubby|pulpeuse/i.test(String(t))));
+  const chubby = /chubby|plus-size|ronde|pulpeuse|soft belly|gros ventre|bbw|plump/i.test(blob);
 
   if (smallChest) {
     neg += ", large breasts, huge breasts, heavy breasts, massive breasts, busty, voluptuous, deep cleavage, 95D, 100E, F-cup, DD-cup, curvy hourglass bust, enhanced breasts, implants";
@@ -5310,7 +5025,7 @@ function bodyNegatives(c) {
 
 
   if (id === "jade") {
-    neg += ", no glasses, missing glasses, long loose wavy hair past shoulders, glamorous makeup, mature woman, soccer mom, C-cup, D-cup";
+    neg += ", no glasses, missing glasses, long loose wavy hair past shoulders, glamorous makeup, mature woman, soccer mom";
   }
   if (id === "chloe") {
     neg += ", mature face, wrinkles, no freckles, brown hair, black hair, MILF";
@@ -5319,7 +5034,7 @@ function bodyNegatives(c) {
     neg += ", black hair, blonde hair, dry hair when wet scene, middle-aged, wrong face, mature woman, 30 year old, 35 year old, glamorous heavy makeup, smoky eyes, hollywood wavy hair, salon blowout waves, different person, celebrity lookalike, plastic surgery face";
   }
   if (id === "zoe" || id === "zoe_bs") {
-    neg += ", brown hair, auburn hair, redhead, blonde, bangs fringe, large breasts, D-cup, E-cup, busty, curvy thick, tanned skin, warm skin, denim only casual, not goth";
+    neg += ", brown hair, auburn hair, redhead, blonde, bangs fringe, tanned skin, warm skin, denim only casual, not goth";
   }
   // Cheveux noirs génériques
   if (/cheveux noirs|black hair/i.test(blob)) {
@@ -6156,53 +5871,6 @@ async function ensureFaceLockFromGemini(c, refB64, statusFn) {
   return "";
 }
 
-function bindPoseLibrary(c) {
-  const render = () => {
-    const list = customPoses(c);
-    $("pose-count").textContent = String(list.length);
-    $("pose-list").innerHTML = list.map((p, i) =>
-      `<li style="display:flex;gap:6px;align-items:center;margin:4px 0"><span style="flex:1;font-size:13px">${escapeHtml(p)}</span>` +
-      `<button type="button" data-pose-del="${i}" data-testid="pose-del-${i}" title="Supprimer" style="background:#4a2a2a;color:#fff;border:0;border-radius:6px;padding:2px 9px;cursor:pointer">×</button></li>`).join("");
-  };
-  $("pose-list").onclick = (e) => {
-    const i = e.target.getAttribute("data-pose-del");
-    if (i == null) return;
-    const list = customPoses(c);
-    list.splice(Number(i), 1);
-    saveCustomPoses(c, list);
-    render();
-  };
-  const add = () => {
-    const v = $("pose-new").value.trim();
-    if (!v) return;
-    saveCustomPoses(c, customPoses(c).concat([v]));
-    $("pose-new").value = "";
-    render();
-  };
-  $("pose-add").onclick = add;
-  $("pose-new").onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } };
-  $("pose-suggest").onclick = () => {
-    let extra = [];
-    try { extra = profileScenePosePool(c, pickProfileScenarioVariant(c) || {}); } catch (_) {}
-    saveCustomPoses(c, customPoses(c).concat(extra));
-    render();
-  };
-  $("pose-clear").onclick = () => {
-    try { localStorage.setItem("lea.poses." + ((c && c.id) || "x"), "[]"); } catch (_) {}
-    render();
-  };
-  render();
-}
-
-function profileRefMode() {
-  try {
-    const m = JSON.parse(localStorage.getItem("lea.settings") || "{}").profileRefMode;
-    if (m === "off" || m === "soft" || m === "strong") return m;
-  } catch (_) {}
-  // Défaut : souple = conserve le visage de la ★ sans figer toute la pose
-  return "soft";
-}
-
 async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
   const setS = statusFn || setGenStatus;
   try {
@@ -6239,13 +5907,12 @@ async function applyCharacterRefToPayload(payload, c, statusFn, options = {}) {
       const requestedDenoising = Number(options.denoising);
       if (Number.isFinite(requestedDenoising)) payload.denoising = requestedDenoising;
       else if (payload.denoising == null) payload.denoising = duoDenoise(0.42);
-      if (options.profileIdentityLock === true) payload.denoising = 0.42;
       if (options.forceImg2Img === true) payload.force_img2img = true;
       if (options.addPromptLock !== false) {
         const cup = (typeof cupLock === "function") ? cupLock(c) : { pos: "", neg: "" };
         payload.prompt = [
           cup.pos,
-          "same face and skin tone as the reference photo; hair color, hair style, breast size must match the written character card, not the reference image",
+          "same woman as the reference photo, same face, eye color, hair style and skin tone; breast size must match the written character card, not the reference image",
           payload.prompt || "",
         ].filter(Boolean).join(", ");
         if (cup.neg) payload.negative = cup.neg + ", " + (payload.negative || "");
@@ -6392,14 +6059,10 @@ async function resolveCharacterRefB64(c) {
 }
 
 async function generateFrontalProfileReference(request, status) {
-  try {
-    const s = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-    if (s.hordeKey) request.hordeKey = String(s.hordeKey).trim();
-  } catch (_) {}
   const started = await api("/api/image", { method: "POST", body: JSON.stringify(request) });
   if (!started || !started.jobId) throw new Error(started && started.error || "Préparation de la référence de face impossible.");
   for (let i = 0; i < 120; i++) {
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 15000));
     const result = await api("/api/image-status", {
       method: "POST", body: JSON.stringify({ jobId: started.jobId, host: started.host }),
     });
@@ -6527,102 +6190,142 @@ async function nativeHttpPostJson(url, bodyObj, headerLines) {
   return await res.text();
 }
 
-/** Cloudflare Workers AI — FLUX 1 Schnell (quota gratuit journalier). */
-async function generateCloudflareImage(prompt, negative, width, height, sourceB64) {
-  width = width || 512;
-  height = height || 768;
+function fluxCharacterBlocks(c) {
+  const duo = Boolean(typeof isDuoCharacter === "function" && isDuoCharacter(c));
+  return {
+    isDuo: duo,
+    identity: duo ? "" : (typeof profileIdentityAnchor === "function" ? profileIdentityAnchor(c || character()) : ""),
+    morphology: duo ? "" : String((c && (c.morphology_en || c.body)) || ""),
+  };
+}
+
+/** Cloudflare Workers AI — modèles FLUX.2 sélectionnés dans les réglages. */
+async function generateCloudflareImage(prompt, c) {
   let account = "";
   let token = "";
+  let model = "";
   try {
     const st = JSON.parse(localStorage.getItem("lea.settings") || "{}");
     account = String(st.cfAccount || "").trim();
     token = String(st.cfToken || "").trim();
+    model = String(st.cfImageModel || "@cf/black-forest-labs/flux-2-dev").trim();
   } catch (_) {}
   if (!account || !token) {
     throw new Error("Configure Account ID + API Token Cloudflare dans Réglages");
   }
-  const fullPrompt = String(prompt || "").slice(0, 2000);
-  let lastErr = "";
-  // Si source → tenter img2img d'abord, sinon txt2img
-  const models = [];
-  if (sourceB64 && String(sourceB64).length > 500) {
-    models.push(
-      "@cf/runwayml/stable-diffusion-v1-5-img2img",
-      "@cf/stabilityai/stable-diffusion-xl-base-1.0"
-    );
-  }
-  models.push(
-    "@cf/black-forest-labs/flux-1-schnell",
-    "@cf/stabilityai/stable-diffusion-xl-base-1.0"
+  const allowed = window.LeaImageProviderModels.catalog.cloudflare.some((item) => item.id === model);
+  if (!allowed) throw new Error("Modèle Cloudflare inconnu : " + model);
+  const blocks = fluxCharacterBlocks(c);
+  const fullPrompt = window.LeaImageProviderModels.buildFluxPrompt(
+    prompt, blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
   );
-  for (const model of models) {
-    try {
-      const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(account) +
-        "/ai/run/" + model;
-      let payload;
-      if (model.indexOf("img2img") >= 0 && sourceB64) {
-        payload = {
-          prompt: fullPrompt,
-          negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
-          image: [String(sourceB64).replace(/^data:[^;]+;base64,/, "")],
-          strength: 0.65,
-          num_steps: 24,
-        };
-      } else if (model.indexOf("flux") >= 0) {
-        payload = { prompt: fullPrompt };
-      } else {
-        payload = {
-          prompt: fullPrompt,
-          negative_prompt: String(negative || "blurry, low quality, watermark, text").slice(0, 500),
-          width: Math.min(1024, Math.max(256, width)),
-          height: Math.min(1024, Math.max(256, height)),
-          num_steps: 20,
-        };
-      }
-      const raw = await nativeHttpPostJson(
-        url,
-        payload,
-        "Authorization: Bearer " + token + "\nAccept: application/json"
-      );
-      let data;
-      try { data = JSON.parse(raw); } catch (_) {
-        lastErr = "réponse non-JSON: " + String(raw).slice(0, 120);
-        continue;
-      }
-      if (data.error) {
-        lastErr = typeof data.error === "string" ? data.error : (data.error.message || JSON.stringify(data.error));
-        // body embeds
-        if (data.body) lastErr += " " + String(data.body).slice(0, 200);
-        continue;
-      }
-      // Formats possibles :
-      // { result: { image: "<b64>" } }
-      // { result: "<b64>" }
-      // { image: "..." }
-      // { result: { images: ["..."] } }
-      let b64 = "";
-      const r = data.result;
-      if (typeof r === "string") b64 = r;
-      else if (r && typeof r.image === "string") b64 = r.image;
-      else if (r && Array.isArray(r.images) && r.images[0]) b64 = r.images[0];
-      else if (typeof data.image === "string") b64 = data.image;
-      if (!b64 && data.success === false) {
-        lastErr = (data.errors && data.errors[0] && data.errors[0].message) || "success=false";
-        continue;
-      }
-      if (!b64) {
-        lastErr = "pas d'image dans la réponse CF";
-        continue;
-      }
-      b64 = String(b64).replace(/^data:image\/\w+;base64,/, "").trim();
-      return "data:image/jpeg;base64," + b64;
-    } catch (e) {
-      lastErr = e.message || String(e);
-    }
+  const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(account) +
+    "/ai/run/" + model;
+  const raw = await nativeHttpPostJson(
+    url,
+    { prompt: fullPrompt },
+    "Authorization: Bearer " + token + "\nAccept: application/json"
+  );
+  let data;
+  try { data = JSON.parse(raw); }
+  catch (_) { throw new Error("Cloudflare a renvoyé une réponse non JSON : " + String(raw).slice(0, 120)); }
+  if (data.error || data.success === false) {
+    const errors = Array.isArray(data.errors) ? data.errors.map((item) => item.message || item).join("; ") : "";
+    throw new Error(errors || (typeof data.error === "string" ? data.error : data.error && data.error.message) || "Échec du modèle " + model);
   }
-  throw new Error(lastErr || "Cloudflare FLUX échec");
+  const result = data.result;
+  let b64 = typeof result === "string" ? result :
+    result && typeof result.image === "string" ? result.image :
+      result && Array.isArray(result.images) ? result.images[0] :
+        typeof data.image === "string" ? data.image : "";
+  b64 = String(b64 || "").replace(/^data:image\/[\w.+-]+;base64,/, "").trim();
+  if (!b64) throw new Error("Cloudflare n'a renvoyé aucune image pour " + model);
+  const contentType = result && typeof result.content_type === "string" ? result.content_type : "";
+  const mime = contentType.startsWith("image/") ? contentType : (/^iVBOR/.test(b64) ? "image/png" : "image/jpeg");
+  return "data:" + mime + ";base64," + b64;
 }
 
+/** Pollinations — le modèle Klein accepte l'image étoilée via l'endpoint d'édition. */
+async function generatePollinationsImage(prompt, c, sourceB64) {
+  const settings = readImageSettings();
+  const key = String(settings.pollinationsKey || "").trim();
+  const modelId = String(settings.pollinationsModel || "black-forest-labs/flux.2-klein-4b");
+  const model = window.LeaImageProviderModels.catalog.pollinations.find((item) => item.id === modelId);
+  if (!model) throw new Error("Modèle Pollinations non reconnu : " + modelId);
+  if (!key) throw new Error("Ajoute une clé API Pollinations dans Réglages.");
+  if (sourceB64 && !model.acceptsReference) {
+    throw new Error("FLUX ne prend pas la référence étoilée en charge. Choisis FLUX.2 Klein 4B pour la conserver.");
+  }
+  const blocks = fluxCharacterBlocks(c);
+  const optimizedPrompt = window.LeaImageProviderModels.buildFluxPrompt(
+    prompt, blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
+  );
+  const finalPrompt = [
+    sourceB64
+      ? blocks.isDuo
+        ? "Use the attached starred photo only as an identity reference for both women. Keep their faces, hair and separate body morphologies distinct while following the new scene."
+        : "Use the attached starred photo only as an identity reference. Keep the same woman's facial identity, while following the requested new pose, outfit, location and camera framing."
+      : "",
+    optimizedPrompt,
+  ].filter(Boolean).join(" ").slice(0, 3600);
+  const payload = {
+    model: modelId,
+    prompt: finalPrompt,
+    size: "768x1024",
+    quality: "high",
+    response_format: "b64_json",
+    n: 1,
+  };
+  let endpoint = "https://gen.pollinations.ai/v1/images/generations";
+  if (sourceB64) {
+    const clean = String(sourceB64).replace(/^data:[^,]*,/, "").replace(/\s+/g, "");
+    if (clean.length < 500 || clean.length > 5_000_000) throw new Error("La référence étoilée est vide ou trop grande.");
+    payload.image = "data:image/jpeg;base64," + clean;
+    endpoint = "https://gen.pollinations.ai/v1/images/edits";
+  }
+  const raw = await nativeHttpPostJson(
+    endpoint,
+    payload,
+    "Authorization: Bearer " + key + "\nAccept: application/json"
+  );
+  let data;
+  try { data = JSON.parse(raw); }
+  catch (_) { throw new Error("Pollinations a renvoyé une réponse non JSON : " + String(raw).slice(0, 140)); }
+  const apiError = data.error && (data.error.message || data.error) || data.message;
+  if (apiError || data.success === false || data.status >= 400) {
+    const message = String(apiError || "Erreur API Pollinations");
+    if (data.status === 401 || /unauthori[sz]ed|invalid.*key/i.test(message)) {
+      throw new Error("Clé Pollinations refusée. Vérifie-la dans Réglages.");
+    }
+    if (data.status === 402 || /insufficient.*pollen|budget.*exhaust/i.test(message)) {
+      throw new Error("Solde Pollinations insuffisant. Vérifie ton solde de pollen.");
+    }
+    throw new Error(message.slice(0, 240));
+  }
+  const image = data.data && data.data[0];
+  if (image && image.b64_json) {
+    const clean = String(image.b64_json).replace(/^data:image\/[\w.+-]+;base64,/, "");
+    return "data:image/png;base64," + clean;
+  }
+  if (image && image.url) {
+    const response = await fetch(image.url);
+    if (!response.ok) throw new Error("Impossible de télécharger l'image Pollinations (HTTP " + response.status + ").");
+    const mime = response.headers.get("Content-Type") || "image/jpeg";
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    let binary = "";
+    for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
+    }
+    return "data:" + mime + ";base64," + btoa(binary);
+  }
+  throw new Error("Pollinations n'a renvoyé aucune image pour " + modelId);
+}
+
+async function generatePollinationsProfileImage(prompt, c) {
+  const sourceB64 = await resolveCharacterRefB64(c);
+  const dataUrl = await generatePollinationsImage(prompt, c, sourceB64);
+  return { dataUrl, hasReference: Boolean(sourceB64) };
+}
 
 async function generatePhotoHordeFallback(prompt, c) {
   c = c || character();
@@ -7275,99 +6978,93 @@ function roleScenePack(c) {
 
 function finalizeProfilePrompt(payload, c, scenarioVariant) {
   if (!payload || !c) return payload;
-  const requestedAge = Number(c.age) || 25;
-  const age = requestedAge < 21 ? 22 : requestedAge;
-  if (typeof isDuoCharacter === "function" && isDuoCharacter(c) && typeof buildDuoShot === "function") {
+  const scenePrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+  let userOverrides = {};
+  try {
+    if (typeof expandProfileExtra === "function") {
+      userOverrides = expandProfileExtra(String(payload.profile_user_detail || "")) || {};
+    }
+  } catch (_) {}
+  const ageRaw = Number(c.age) || 25;
+  const age = ageRaw < 21 ? 22 : ageRaw;
+  const duo = typeof isDuoCharacter === "function" && isDuoCharacter(c);
+
+  if (duo && typeof buildDuoShot === "function") {
     payload.prompt = buildDuoShot(c, scenarioVariant);
     payload.is_duo = true;
     delete payload.source_image;
-    payload.negative = "solo, 1girl, headshot, split screen, diptych, headless, cropped head, " + (payload.negative || "");
+    payload.negative = "solo, 1girl, single woman, headshot, split screen, diptych, collage, mirror symmetry, anime, cartoon, illustration, painting, deformed, blurry, text, watermark";
+    payload.seed = Math.floor(Math.random() * 2e9);
     return payload;
   }
-  const promptBase = String(payload.prompt || "");
-  if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
-    const sp = speciesLock(c) || "";
-    const idF = (typeof identityFromCard === "function" ? identityFromCard(c) : (age + " year old woman"));
-    payload.prompt = [
-      sp + ",",
-      "photorealistic photograph of one adult fantasy woman, full body, natural skin texture,",
-      idF + ",",
-      age + " year old,",
-      "species traits clearly visible, non-human features required,",
-      promptBase,
-      "face visible, hips and legs visible, not a face crop, not a plain human"
-    ].filter(Boolean).join(" ");
-    payload.negative = "plain human, no fantasy traits, face crop, headshot, bust only, headless, blurry, doll, anime, painting, wrong species, mermaid tail unless mermaid, horns unless oni or demon, " + (payload.negative || "");
-    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.55;
-    // fantasy: prefer txt2img so traits are not erased by human ref
-    delete payload.source_image;
-    delete payload.source_processing;
-    payload.force_img2img = false;
-    return payload;
-  }
-  // Identité d'abord (cheveux/yeux/poitrine/âge), puis tenue sexy aléatoire
-  let wear = "", pose = "", place = "";
+
+  let looks = "";
+  try { looks = (typeof describeLooks === "function" ? describeLooks(c) : "") || ""; } catch (e) {}
+  if (!looks) looks = String(c.looks_en || c.appearance || "").replace(/\s+/g, " ").trim();
+  looks = looks.slice(0, 380);
+
+  let cup = "";
   try {
-    const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
-    if (pick) { wear = pick.outfit || ""; pose = pick.pose || ""; place = pick.place || ""; }
-  } catch (_) {}
-  if (!wear || /opaque|everyday|flat shoes|role-appropriate|appropriate to/i.test(wear)) {
-    wear = "tight short mini dress with deep plunging neckline, fishnet tights, black stiletto heels";
-  }
-  if (!pose) pose = "full body standing, teasing look at camera, hips and legs visible";
-  const id = (typeof identityFromCard === "function" ? identityFromCard(c) : (age + " year old woman"));
-  const idBlock = (typeof buildCharacterIdentityBlock === "function" ? buildCharacterIdentityBlock(c) : id);
-  const cup = (typeof cupLock === "function" ? cupLock(c) : null);
-  const cupPos = cup && cup.pos ? cup.pos : "";
-  const cupNeg = cup && cup.neg ? cup.neg : "";
-  // Négatifs cheveux depuis la ligne "Cheveux :" de la fiche (jamais depuis le scénario)
-  const hairCard = cardHairColor(c);
-  const fancyHair = hairCard && /pink|purple|blue|green/.test(hairCard.pos);
-  const hairNeg = "wrong hair color," + (hairCard ? " " + hairCard.neg + "," : "") + (fancyHair ? "" : " dyed fantasy hair, magenta hair,");
+    if (typeof cupLock === "function") {
+      const ck = cupLock(c);
+      if (ck && ck.pos) cup = String(ck.pos).replace(/:\d+(\.\d+)?/g, "").replace(/[()]/g, "").trim();
+    }
+  } catch (e) {}
+
+  let species = "";
+  try {
+    if (typeof fantasyKind === "function" && fantasyKind(c) && typeof speciesLock === "function") {
+      species = String(speciesLock(c) || "").replace(/:\d+(\.\d+)?/g, "").slice(0, 140);
+    }
+  } catch (e) {}
+
+  // Prompt unique à chaque fois (seed texte + pose)
+  const uniq = "variation " + Math.floor(Math.random() * 9999);
+  const selectedScene = scenarioVariant || {};
+  const selectedDetails = [
+    !userOverrides.overridesOutfit && selectedScene.outfit ? "Selected wardrobe: " + selectedScene.outfit : "",
+    !userOverrides.overridesPlace && selectedScene.place ? "Selected location: " + selectedScene.place : "",
+    !userOverrides.overridesPose && (selectedScene.pose || selectedScene.poseDetail)
+      ? "Selected pose: " + (selectedScene.pose || selectedScene.poseDetail) : "",
+  ].filter(Boolean);
+
   payload.prompt = [
-    "RAW photorealistic DSLR photograph of exactly one real adult woman, 85mm lens, natural skin pores, realistic skin texture, sharp focus,",
-    "(face fully visible:1.65), (head and face in frame:1.6), (eyes visible:1.45), not headless, not cropped head,",
-    (idBlock || id).slice(0, 380) + ",",
-    age + " year old adult woman,",
-    "(new camera angle:1.2), slight pose variation,",
-    "wearing exactly one outfit: " + wear + ", NOT mixed clothes,",
-    "(pose: " + pose.replace(/[()]/g, " ") + ":1.35),",
-    place ? ("location: " + place + ",") : "",
-    "sexy provocative sensual pose, full body from head to mid-thigh or shoes, hips and legs visible,",
-    hairCard ? "(" + [hairCard.pos, ...cardHairStyle(c)].join(", ") + ":1.5)," : "",
-    cupPos ? "(" + cupPos.replace(/[()]|:\d+(\.\d+)?/g, "") + ":1.35)," : "",
-    "correct hair color, correct hair style, correct eye color, correct breast size and shape, face must be visible"
-  ].filter(Boolean).join(" ");
+    "photorealistic DSLR photograph of exactly one real woman, real photo not painting",
+    "single person only, not twins, not mirrored, not duplicated",
+    age + " year old adult woman",
+    looks,
+    cup,
+    c.morphology_en ? "AUTHORITATIVE MORPHOLOGY: " + c.morphology_en : "",
+    species,
+    "PRESERVE THE SELECTED SCENE, ACTION, WARDROBE, POSE, LOCATION AND PROPS: " + scenePrompt,
+    ...selectedDetails,
+    (scenarioVariant && scenarioVariant.cameraAngle) || "full body from head to mid-thigh at least, hips and legs visible, not a face crop, not headshot",
+    "sensual confident expression, natural skin pores, sharp focus on face, body and clothing, detailed fabric texture, realistic lighting",
+    uniq,
+  ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1750);
+
   payload.negative = [
-    hairNeg,
-    cupNeg,
-    "painting, oil painting, digital painting, illustration, drawing, anime, manga, cartoon, cgi, 3d render, plastic doll, airbrushed,",
-    "glowing eyes, neon eyes, fluorescent eyes, cyan eyes, LED eyes, censored face, black bar over face, pixelated face,",
-    "face crop only, headshot only, bust only, close-up portrait, passport photo, headless, cropped head, head out of frame, neck only, no face, missing head, face cut off at top, blurry, text, watermark,",
-    fancyHair ? "wrong age, different person," : "wrong age, different person, blue streak hair, colored highlights,",
-    "same pose as reference, identical pose, same outfit as reference, copy of source image, static duplicate frame,",
-    payload.negative || ""
-  ].filter(Boolean).join(" ");
-  payload.identity_head = id.slice(0, 240);
-  // Avec référence étoilée : img2img denoise 0.42 pour conserver le visage
-  if (payload.source_image && String(payload.source_image).length > 800) {
-    payload.force_img2img = true;
-    payload.source_processing = "img2img";
-    payload.denoising = 0.42;
-  } else {
-    delete payload.source_image;
-    delete payload.source_processing;
-    payload.force_img2img = false;
-    payload.denoising = typeof payload.denoising === "number" ? payload.denoising : 0.42;
+    "nude, topless, exposed nipples, exposed genitals,",
+    "twins, clone, duplicate, mirror symmetry, two women, 2girls, multiple people,",
+    "same pose as before, identical composition, mirrored face,",
+    "anime, manga, cartoon, illustration, painting, drawing, digital art, artstation, concept art, 3d render, cgi, plastic doll,",
+    "airbrushed, overly smooth skin, wax skin, doll face,",
+    "deformed, extra limbs, bad anatomy, blurry body, blurred clothing, out of focus, bokeh, motion blur, blurry, lowres, text, watermark,",
+    "split screen, collage, character sheet, face crop, headshot only, bust only, portrait only,",
+    "glowing eyes, neon eyes, phosphorescent eyes, LED eyes, blue light eyes,",
+    "empty room, no person, different person"
+  ].join(" ");
+
+  payload.identity_head = [age + " year old woman", looks.slice(0, 160), cup].filter(Boolean).join(", ").slice(0, 240);
+  payload.seed = Math.floor(Math.random() * 2e9);
+  // Pose change > copie de la ref : denoise un peu plus haut sur profil
+  if (payload.force_img2img) {
+    payload.denoising = 0.58;
   }
   return payload;
 }
 
 async function submitProfileImage(payload, restoration) {
-  try {
-    const s = JSON.parse(localStorage.getItem("lea.settings") || "{}");
-    if (s.hordeKey) payload.hordeKey = String(s.hordeKey).trim();
-  } catch (_) {}
   const submit = () => api("/api/image", { method: "POST", body: JSON.stringify(payload) });
   let start, failure;
   try {
@@ -7531,14 +7228,12 @@ async function generatePhoto() {
         // continue vers Horde
       }
     }
-    // —— Cloudflare Workers AI (FLUX Schnell, quota gratuit journalier) ——
+    // —— Cloudflare Workers AI : modèle FLUX.2 exact, sans bascule implicite ——
     if (engine === "cloudflare") {
-      setGenStatus("Cloudflare FLUX…");
+      setGenStatus("Cloudflare FLUX.2…");
       try {
-        let cfRef = null;
-        try { cfRef = await resolveCharacterRefB64(c); } catch (_) {}
-        setGenStatus(cfRef ? "Cloudflare FLUX/SD + img2img…" : "Cloudflare FLUX…");
-        const dataUrl = await generateCloudflareImage(prompt, bodyNegatives(c), 512, 768, cfRef);
+        setGenStatus("Cloudflare FLUX.2 · génération depuis la fiche du personnage…");
+        const dataUrl = await generateCloudflareImage(prompt, c);
         const stored = await addToGallery(dataUrl, c.id);
         setGenStatus("Image Cloudflare prête");
         window._leaGenBusy = false;
@@ -7559,8 +7254,32 @@ async function generatePhoto() {
           window._leaGenBusy = false;
           return; // ne pas basculer Horde si credentials manquants
         }
-        setGenStatus("Cloudflare: " + msg + " → bascule Horde…");
-        // continue to Horde below by forcing engine path
+        setGenStatus("Cloudflare: " + msg);
+        window._leaGenBusy = false;
+        return; // ne pas substituer un autre fournisseur ou modèle
+      }
+    }
+    // —— Pollinations FLUX.2 Klein / FLUX ——
+    if (engine === "pollinations") {
+      try {
+        const polliSettings = readImageSettings();
+        const polliModelId = String(polliSettings.pollinationsModel || "black-forest-labs/flux.2-klein-4b");
+        const polliModel = window.LeaImageProviderModels.catalog.pollinations.find((item) => item.id === polliModelId);
+        const polliLabel = polliModel ? polliModel.label : polliModelId;
+        const generated = await generatePollinationsProfileImage(prompt, c);
+        setGenStatus(generated.hasReference
+          ? "Pollinations " + polliLabel + " · référence étoilée…"
+          : "Pollinations " + polliLabel + " · génération depuis la fiche…");
+        const stored = await addToGallery(generated.dataUrl, c.id);
+        setGenStatus("Image Pollinations prête");
+        window._leaGenBusy = false;
+        if (state.view === "profile") renderProfile();
+        else if (state.view !== "chat") openFull(resolvePhotoSrc(stored) || stored);
+        return;
+      } catch (e) {
+        setGenStatus("Pollinations : " + (e.message || e));
+        window._leaGenBusy = false;
+        return;
       }
     }
     // —— Local Dream (API 127.0.0.1:8081) ——
@@ -7709,7 +7428,15 @@ async function generatePhoto() {
     } else if (window._leaDuoOverride && typeof isDuoCharacter === "function" && isDuoCharacter(c)) {
       prompt = window._leaDuoOverride;
     }
-    const payload = { prompt, negative: (bodyNegatives(c) || "") + duoNeg, nsfw: true, charId: c.id || "", engine: "horde", horde_anonymous: false };
+    const payload = {
+      prompt,
+      negative: (bodyNegatives(c) || "") + duoNeg,
+      nsfw: true,
+      charId: c.id || "",
+      engine: "horde",
+      horde_anonymous: true,
+      hordeModel: readImageSettings().hordeModel || "Realistic Vision",
+    };
     if (!duoProfile) payload.profile_scene_lock = profileSceneLock;
     if (typeof isDuoCharacter === "function" && isDuoCharacter(c)) payload.is_duo = true;
     try {
@@ -7718,13 +7445,9 @@ async function generatePhoto() {
         payload.negative = (payload.negative || "") + ", blurry, dark, doll, plastic, human only, wrong species";
       }
     } catch (_) {}
-    const small = /jade|aya|lina|hana|mei|sasha|thea|zoe/.test(c.id);
-    const busty = /lea|sofia|amelie|fatou|elise|olga|yasmine|myriam|priya/.test(c.id);
-    if (small) payload.negative = "large breasts, huge cleavage, 95D, voluptuous, middle-aged, 35 years old, red lipstick, office librarian, no glasses";
-    if (c.id === "jade") payload.negative = (payload.negative || "") + ", middle-aged woman, glamorous makeup, large breasts, C-cup, D-cup, missing glasses, no glasses, long loose hair, wavy long hair past shoulders, fitness model, abs, mature face";
-    if (c.id === "mei") payload.negative = (payload.negative || "") + ", large breasts, busty, blonde, european only features";
-    if (c.id === "sofia") payload.negative = (payload.negative || "") + ", flat chest, small breasts, A-cup, skinny boyish";
-    if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, large breasts, D-cup, no freckles, brown hair";
+    if (c.id === "jade") payload.negative = (payload.negative || "") + ", middle-aged woman, glamorous makeup, missing glasses, no glasses, long loose hair, wavy long hair past shoulders, fitness model, abs, mature face";
+    if (c.id === "mei") payload.negative = (payload.negative || "") + ", blonde, european only features";
+    if (c.id === "chloe") payload.negative = (payload.negative || "") + ", middle-aged, 35 years old, 40 years old, mature woman, MILF, no freckles, brown hair";
     if (c && typeof speciesNegative === "function") {
       payload.prompt = stripForeignSpecies(payload.prompt || "", c);
       payload.negative = speciesNegative(c) + ", " + (payload.negative || "");
@@ -7752,7 +7475,6 @@ async function generatePhoto() {
       }
     } catch (_) {}
     if (c.id === "lea") payload.negative = (payload.negative || "") + ", black hair, blonde, auburn hair, red hair, shoulder-length bob, short hair, seamless studio, plain background, stock photo, watermark, middle-aged, 30 years old, different face, different woman";
-    if (busty) payload.negative = (payload.negative || "") + ", flat chest, small breasts, androgynous body";
     // Toute option utilisateur → denoise plus fort + négatifs adaptés
     let userEx = { hasAny: false, overridesOutfit: false, overridesAct: false };
     try { userEx = expandProfileExtra(extra); } catch (_) {}
@@ -7890,20 +7612,16 @@ async function generatePhoto() {
             else if (/brown iris/i.test(eyeLock)) payload.negative = "blue eyes, green eyes, grey eyes, " + (payload.negative || "");
             payload.negative = "wrong eye color, glowing eyes, " + (payload.negative || "");
             try {
-              // Ne pas écraser ici : le mode ★ (soft/strong) est appliqué juste après
-              if (profileRefMode() === "off") {
-                payload.force_img2img = false;
-                delete payload.source_image;
-                delete payload.source_processing;
-                delete payload.denoising;
-                setGenStatus("Horde txt2img · pose et tenue libres");
-              }
+              // Profil aléatoire : PAS d'img2img, sinon la pose étoilée est recopiée.
+              payload.force_img2img = false;
+              delete payload.source_image;
+              delete payload.source_processing;
+              delete payload.denoising;
+              setGenStatus("Horde txt2img · pose et tenue libres");
             } catch (e2) {
-              if (profileRefMode() === "off") {
-                payload.force_img2img = false;
-                delete payload.source_image;
-                setGenStatus("Horde txt2img · pas de photo repère");
-              }
+              payload.force_img2img = false;
+              delete payload.source_image;
+              setGenStatus("Horde txt2img · pas de photo repère");
             }
           }
         } catch (e) { console.warn("[face_lock]", e); }
@@ -7945,43 +7663,40 @@ async function generatePhoto() {
       console.warn("[img2img]", e);
       setGenStatus("Horde txt2img…");
     }
+    payload.profile_user_detail = extra.slice(0, 360);
     try {
       if (isDuoCharacter(c)) {
         finalizeProfilePrompt(payload, c, profileVariant);
       } else {
         try { finalizeProfilePrompt(payload, c, profileVariant); } catch (e) { console.warn("[finalize solo]", e); }
-        // Référence ★ : désactivée par défaut (img2img 0.42 recopiait la photo → images identiques,
-        // cheveux/poitrine de la ref au lieu de la fiche). Réglable : off / soft (0.65) / strong (0.45).
-        const refMode = profileRefMode();
-        const refDenoise = refMode === "strong" ? 0.42 : 0.55;
-        if (refMode !== "off") {
+        if (!payload.source_image || payload.source_processing !== "img2img") {
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
-              allowFantasy: false,
+              allowFantasy: true,
               forceImg2Img: true,
-              denoising: refDenoise,
-              addPromptLock: true,
+              denoising: 0.58,
+              profileIdentityLock: true,
+              addPromptLock: false,
             });
           } catch (e) {
             console.warn("[profile reference]", e);
           }
-        }
-        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
-        payload.profile_user_detail = extra.slice(0, 360);
-        payload.seed = Math.floor(Math.random() * 2000000000);
-        const hasRef = refMode !== "off" && Boolean(payload.source_image && String(payload.source_image).length > 800);
-        if (hasRef) {
-          payload.force_img2img = true;
-          payload.source_processing = "img2img";
-          payload.denoising = refDenoise;
-          setGenStatus("Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") + " · denoise " + refDenoise + " · seed " + payload.seed + "…");
         } else {
-          payload.force_img2img = false;
-          delete payload.source_image;
-          delete payload.source_processing;
-          delete payload.denoising;
-          delete payload.face_lock;
-          setGenStatus("Horde txt2img · identité depuis la fiche (cheveux, yeux, poitrine) · seed " + payload.seed + "…");
+          payload.denoising = Math.max(Number(payload.denoising) || 0, 0.55);
+        }
+        const sceneLock = String(profileSceneLock || "").replace(/\s+/g, " ").trim().slice(0, 920);
+        const currentPrompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+        if (sceneLock && !currentPrompt.toLowerCase().includes(sceneLock.slice(0, 80).toLowerCase())) {
+          payload.prompt = [sceneLock, currentPrompt].filter(Boolean).join(", ");
+        }
+        const hasIdentityRef = Boolean(payload.source_image && payload.source_processing === "img2img");
+        payload.force_img2img = hasIdentityRef;
+        if (hasIdentityRef) {
+          payload.profile_identity_lock = true;
+          payload.denoising = 0.70;
+        }
+        if (window.LeaProfileComposition && hasIdentityRef) {
+          await window.LeaProfileComposition.prepareReference(payload, setGenStatus);
         }
       }
       payload.nsfw = false;
@@ -7991,7 +7706,7 @@ async function generatePhoto() {
       console.warn("[profile final prompt]", e);
     }
     let headRestoration = null;
-    if (false && !duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
+    if (!duoProfile && window.LeaSegmentedProfile && window.LeaSegmentedProfile.active()) {
       // Fail before submission if local preparation cannot retain the chosen face.
       payload.prompt = profileSceneLock;
       payload.profile_scene_lock = profileSceneLock;
@@ -8002,7 +7717,6 @@ async function generatePhoto() {
         if (!String(compactRef).startsWith("data:image/")) throw new Error("La référence choisie ne peut pas être préparée.");
         payload.source_image = compactRef.slice(compactRef.indexOf(",") + 1);
       }
-      try {
       headRestoration = await window.LeaSegmentedProfile.prepareReference(payload, setGenStatus, {
         character: c,
         identity: profileIdentityAnchor(c),
@@ -8022,14 +7736,6 @@ async function generatePhoto() {
         },
         storage: localStorage,
       });
-      } catch (prepErr) {
-        console.warn("[face-prep]", prepErr);
-        setGenStatus("Référence visage ignorée (" + String(prepErr.message || prepErr).slice(0, 120) + "). Photo du scénario quand même…");
-        headRestoration = null;
-        payload.force_img2img = false;
-        delete payload.source_image;
-        delete payload.source_processing;
-      }
       payload.negative = [
         cupLock(c).neg,
         "nude, topless, exposed nipples, exposed genitals, wrong outfit,",
@@ -8099,7 +7805,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
   for (let i = 0; i < 120; i++) {
     // Poll adaptatif : plus espacé = moins de ban IP
     // Base 8s, puis 10s, max 15s ; si wait_time API élevé, dormir ce temps
-    let sleepMs = i < 8 ? 4000 : 6000;
+    let sleepMs = i < 5 ? 8000 : (i < 20 ? 10000 : 15000);
     await new Promise((r) => setTimeout(r, sleepMs));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
@@ -8115,9 +7821,12 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const q = st.queue != null ? " · file " + st.queue : "";
         const w = st.wait != null ? " · ~" + st.wait + "s" : "";
         const p = st.processing ? " · calcul" : "";
-        setGenStatus("Horde en cours" + q + w + p + " · essai " + (i + 1) + "");
+        setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/120)");
         // Si Horde dit wait 30s+, ne pas re-poller trop tôt
-        // ne pas ajouter l'attente API par-dessus le poll
+        if (st.wait && Number(st.wait) >= 20) {
+          const extra = Math.min(45, Number(st.wait)) * 1000;
+          await new Promise((r) => setTimeout(r, extra));
+        }
         continue;
       }
       if (st.error) {
@@ -9545,10 +9254,90 @@ async function generateStudioImage(opts) {
   }
 }
 
+function readImageSettings() {
+  try { return JSON.parse(localStorage.getItem("lea.settings") || "{}"); }
+  catch (_) { return {}; }
+}
+
+function addImageModelOptions(select, models, selected) {
+  if (!select) return;
+  select.innerHTML = "";
+  for (const model of models || []) {
+    const option = document.createElement("option");
+    option.value = model.id;
+    option.textContent = model.label;
+    select.appendChild(option);
+  }
+  if (selected && [...select.options].some((option) => option.value === selected)) {
+    select.value = selected;
+  }
+}
+
+async function refreshHordeImageModels(preserveSaved) {
+  const select = $("horde-image-model");
+  const status = $("horde-model-status");
+  if (!select || !window.LeaImageProviderModels) return;
+  const saved = String(readImageSettings().hordeModel || "").trim();
+  const previous = preserveSaved ? (saved || select.value) : select.value;
+  const requested = window.LeaImageProviderModels.catalog.horde;
+  const url = "https://aihorde.net/api/v2/status/models?type=image";
+  if (status) status.textContent = "Vérification du catalogue Horde…";
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const rows = await response.json();
+    if (!Array.isArray(rows)) throw new Error("réponse modèle invalide");
+    select.innerHTML = "";
+    const activeOptions = [];
+    for (const requestedModel of requested) {
+      const found = rows.find((row) => requestedModel.match.test(String(row.name || "")));
+      const workers = found ? Number(found.count) || 0 : 0;
+      const option = document.createElement("option");
+      option.value = found ? String(found.name) : "__unavailable__:" + requestedModel.label;
+      option.textContent = requestedModel.label + " — " +
+        (workers > 0 ? found.name + " · " + workers + " travailleur(s)" : "indisponible actuellement");
+      option.disabled = workers <= 0;
+      select.appendChild(option);
+      if (workers > 0) activeOptions.push(option);
+    }
+    const savedAvailable = activeOptions.find((option) => option.value === previous);
+    if (saved && !savedAvailable) {
+      const missing = document.createElement("option");
+      missing.value = saved;
+      missing.textContent = saved + " — modèle enregistré, indisponible actuellement";
+      missing.disabled = true;
+      select.insertBefore(missing, select.firstChild);
+      select.value = saved;
+    } else if (savedAvailable) {
+      select.value = savedAvailable.value;
+    } else {
+      const preferred = activeOptions.find((option) => /FLUX\.1 \[dev\]/i.test(option.textContent));
+      const first = preferred || activeOptions[0];
+      if (first) {
+        select.value = first.value;
+        if (!saved) {
+          const settings = readImageSettings();
+          settings.hordeModel = first.value;
+          localStorage.setItem("lea.settings", JSON.stringify(settings));
+        }
+      } else if (select.options.length) {
+        select.selectedIndex = 0;
+      }
+    }
+    if (status) {
+      status.textContent = activeOptions.length
+        ? activeOptions.length + " variante(s) demandée(s) disponibles. Horde sera appelé avec le nom exact affiché."
+        : "Aucune variante de ta liste n'a de travailleur actif sur Horde pour le moment.";
+    }
+  } catch (error) {
+    if (status) status.textContent = "Catalogue Horde inaccessible : " + (error.message || error) + ". La disponibilité sera revérifiée à la génération.";
+  }
+}
+
 function renderSettings() {
   $("view-settings").innerHTML = `
     <h1>Clés Google AI Studio</h1>
-    <p style="color:var(--muted);font-size:13px">Chat : Gemini. Images : Horde (recommandé) ou SD.cpp intégré (expérimental).</p>
+    <p style="color:var(--muted);font-size:13px">Chat : Gemini. Images : Horde, Cloudflare Workers AI ou Pollinations. Chaque moteur garde son propre modèle.</p>
     <h2 style="margin-top:22px;font-size:16px">Sauvegarde galerie (GitHub)</h2>
     <p style="color:var(--muted);font-size:12px">Les images générées sont aussi sur le téléphone (disque app). Tu peux les pousser sur un dépôt GitHub pour backup.</p>
     <label class="lbl">Token GitHub (repo scope)</label>
@@ -9566,17 +9355,31 @@ function renderSettings() {
     <label>Clé AI Horde (optionnel — plus de kudos gratuits sur aihorde.net)</label>
     <input class="field" id="horde-key" type="password" placeholder="laisser vide = anonyme" autocomplete="off" />
     <p style="color:var(--muted);font-size:12px">Si erreur « kudos / heavy demand » : crée un compte sur aihorde.net et colle ta clé ici.</p>
-    <label>Cloudflare Account ID (Workers AI gratuit)</label>
+    <label>Cloudflare Account ID (Workers AI)</label>
     <input class="field" id="cf-account" type="text" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
     <label>Cloudflare API Token (Workers AI)</label>
     <input class="field" id="cf-token" type="password" placeholder="token Workers AI" autocomplete="off" />
-    <p style="color:var(--muted);font-size:12px">Gratuit sans CB : ~150–230 images/jour (FLUX Schnell). Créer sur dash.cloudflare.com → Workers AI. Moins adapté au NSFW explicite que Horde.</p>
+    <p style="color:var(--muted);font-size:12px">Le quota et le coût dépendent du compte et du modèle. Crée un jeton avec accès Workers AI dans Cloudflare.</p>
+    <label>Modèle Cloudflare</label>
+    <select id="cf-image-model"></select>
+    <p style="color:var(--muted);font-size:12px">Ce connecteur envoie le prompt FLUX.2 mais pas la photo étoilée. Pour éditer avec cette référence, utilise Pollinations FLUX.2 Klein 4B.</p>
+    <label>Clé API Pollinations</label>
+    <input class="field" id="pollinations-key" type="password" placeholder="Bearer token Pollinations" autocomplete="off" />
+    <p style="color:var(--muted);font-size:12px">La génération Pollinations consomme le solde de pollen associé à la clé. La clé est gardée dans les réglages locaux de l'app.</p>
+    <label>Modèle Pollinations</label>
+    <select id="pollinations-model"></select>
     <label>Moteur images</label>
     <select id="imgengine">
       <option value="horde">Horde (gratuit NSFW · recommandé)</option>
-      <option value="cloudflare">Cloudflare FLUX (gratuit · SFW/léger)</option>
+      <option value="cloudflare">Cloudflare Workers AI</option>
+      <option value="pollinations">Pollinations</option>
       <option value="sd_cpp">SD.cpp (local · lent au 1er load)</option>
     </select>
+    <label>Modèle AI Horde</label>
+    <select id="horde-image-model"></select>
+    <p style="color:var(--muted);font-size:12px">La liste est vérifiée auprès de Horde. Les variantes absentes ou sans travailleurs restent désactivées ; aucun modèle différent ne sera choisi automatiquement.</p>
+    <p id="horde-model-status" style="color:var(--muted);font-size:12px"></p>
+    <button type="button" class="cta" id="refresh-horde-models" style="background:#2a3a48">Vérifier les modèles Horde</button>
     <p style="color:var(--muted);font-size:13px">
       <b>Horde</b> : cloud gratuit, fiable.<br/>
       <b>SD.cpp</b> : modèle dans l'app (souvent trop lent sur téléphone → bascule Horde).
@@ -9642,6 +9445,27 @@ function renderSettings() {
     <p style="margin-top:12px"><button class="cta" id="save">Enregistrer</button>
     <button class="cta" id="testimg" type="button" style="margin-left:8px;background:#3a2048">Tester clés images</button></p>
     <p id="st" class="err"></p>`;
+  const imageSettings = readImageSettings();
+  const imageCatalog = window.LeaImageProviderModels && window.LeaImageProviderModels.catalog;
+  if (imageCatalog) {
+    addImageModelOptions($("cf-image-model"), imageCatalog.cloudflare, imageSettings.cfImageModel);
+    addImageModelOptions($("pollinations-model"), imageCatalog.pollinations, imageSettings.pollinationsModel);
+  }
+  if ($("cf-image-model") && !$("cf-image-model").value) $("cf-image-model").value = "@cf/black-forest-labs/flux-2-dev";
+  if ($("pollinations-model") && !$("pollinations-model").value) $("pollinations-model").value = "black-forest-labs/flux.2-klein-4b";
+  if ($("cf-account")) $("cf-account").value = imageSettings.cfAccount || "";
+  if ($("cf-token")) $("cf-token").value = imageSettings.cfToken || "";
+  if ($("pollinations-key")) $("pollinations-key").value = imageSettings.pollinationsKey || "";
+  if ($("imgengine")) $("imgengine").value = imageSettings.imageEngine || "horde";
+  if ($("refresh-horde-models")) $("refresh-horde-models").onclick = () => refreshHordeImageModels(true);
+  if ($("horde-image-model")) {
+    $("horde-image-model").onchange = () => {
+      const settings = readImageSettings();
+      settings.hordeModel = $("horde-image-model").value;
+      localStorage.setItem("lea.settings", JSON.stringify(settings));
+    };
+  }
+  refreshHordeImageModels(true);
   api("/api/status").then((s) => {
     try {
       window._leaStatus = s;
@@ -9662,10 +9486,10 @@ function renderSettings() {
     if ($("groq")) $("groq").value = s.settings.groqKeys || "";
     if ($("groqmodel")) $("groqmodel").value = s.settings.groqModel || "llama-3.3-70b-versatile";
     if ($("chatprovider")) $("chatprovider").value = s.settings.provider || "gemini";
-    if ($("imgengine")) $("imgengine").value = s.settings.imageEngine || "horde";
+    if ($("imgengine") && !imageSettings.imageEngine) $("imgengine").value = s.settings.imageEngine || "horde";
     if ($("horde-key") && s.settings.hordeKey) $("horde-key").value = s.settings.hordeKey;
-    if ($("cf-account") && s.settings.cfAccount) $("cf-account").value = s.settings.cfAccount;
-    if ($("cf-token") && s.settings.cfToken) $("cf-token").value = s.settings.cfToken;
+    if ($("cf-account") && !imageSettings.cfAccount && s.settings.cfAccount) $("cf-account").value = s.settings.cfAccount;
+    if ($("cf-token") && !imageSettings.cfToken && s.settings.cfToken) $("cf-token").value = s.settings.cfToken;
     $("st").textContent = `Clés Gemini : ${s.keys.gemini}`;
     $("st").style.color = "#9dffc2";
     try {
@@ -9681,6 +9505,16 @@ function renderSettings() {
       cur.personaName = $("pname").value;
       cur.personaBio = $("pbio").value;
       if ($("hordekey")) cur.hordeKey = $("hordekey").value.trim();
+      cur.imageEngine = $("imgengine") ? $("imgengine").value : "horde";
+      const selectedHordeModel = $("horde-image-model") ? $("horde-image-model").value : "";
+      if (selectedHordeModel && !selectedHordeModel.startsWith("__unavailable__:")) {
+        cur.hordeModel = selectedHordeModel;
+      }
+      cur.cfAccount = $("cf-account") ? $("cf-account").value.trim() : "";
+      cur.cfToken = $("cf-token") ? $("cf-token").value.trim() : "";
+      cur.cfImageModel = $("cf-image-model") ? $("cf-image-model").value : "@cf/black-forest-labs/flux-2-dev";
+      cur.pollinationsKey = $("pollinations-key") ? $("pollinations-key").value.trim() : "";
+      cur.pollinationsModel = $("pollinations-model") ? $("pollinations-model").value : "black-forest-labs/flux.2-klein-4b";
       localStorage.setItem("lea.settings", JSON.stringify(cur));
     } catch (_) {}
     const data = await api("/api/settings", {
@@ -9689,15 +9523,14 @@ function renderSettings() {
         provider: $("chatprovider") ? $("chatprovider").value : "gemini",
         personaName: $("pname").value,
         personaBio: $("pbio").value,
-        hordeKey: (($("hordekey") && $("hordekey").value) || ($("horde-key") && $("horde-key").value) || "").trim(),
+        hordeKey: ($("hordekey") && $("hordekey").value || "").trim(),
         geminiKeys: $("gemini").value,
         grokKeys: $("grok") ? $("grok").value : "",
         groqKeys: $("groq") ? $("groq").value : "",
         groqModel: $("groqmodel") ? $("groqmodel").value : "openai/gpt-oss-120b",
         imageProvider: "gemini",
         imageEngine: $("imgengine") ? $("imgengine").value : "horde",
-        cfAccount: $("cf-account") ? $("cf-account").value.trim() : "",
-        cfToken: $("cf-token") ? $("cf-token").value.trim() : "",
+        hordeKey: $("horde-key") ? $("horde-key").value.trim() : "",
         geminiImageModel: $("gemimgmodel") ? $("gemimgmodel").value : "auto",
         geminiTextModel: $("gemtextmodel") ? $("gemtextmodel").value : "gemini-3.5-flash-lite",
       }),
