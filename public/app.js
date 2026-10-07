@@ -958,20 +958,22 @@ function roleSexyPick(c) {
   } catch (_) {}
   if (!outfit || outfit.length < 12) {
     const pool = [
-      "very tight short spaghetti-strap mini dress with deep plunging V neckline, fishnet tights, black stiletto pumps",
-      "tight black bodycon mini dress, deep cleavage, sheer black tights, high heels",
-      "soaking wet light crop top clinging to the body, bare midriff, tight jeans, wet hair",
-      "black leather mini skirt, crop top, fishnet stockings, stiletto pumps",
-      "burgundy satin wrap mini dress with thigh slit, black stilettos",
-      "fitted blouse slightly unbuttoned, short pencil skirt, sheer stockings, heels",
-      "red lace lingerie set, garter belt, sheer stockings, high heels",
-      "tiny crop top and micro shorts, high heels, provocative stance",
-      "sheer black mesh top over lace bra, high-waisted mini skirt, pumps",
-      "emerald satin slip dress with deep slit, bare shoulders, stiletto heels",
-      "office blouse tied under the bust, short pencil skirt, stockings, heels",
-      "white wet t-shirt clinging to breasts, denim mini skirt, bare legs",
-      "black corset top, tight leather pants, stiletto boots",
-      "silk kimono robe half open over lingerie, bedroom soft light"
+      "red satin mini dress with deep V neckline, black stilettos",
+      "white blouse unbuttoned, short navy pencil skirt, sheer stockings, heels",
+      "emerald green bodycon dress, thigh slit, stiletto sandals",
+      "burgundy wrap dress, gold heels, living room light",
+      "pink lace lingerie bodysuit under open sheer robe",
+      "denim mini skirt, white crop top, sneakers, casual sexy",
+      "leopard print mini skirt, black crop top, ankle boots",
+      "office secretary look: cream blouse, tight black pencil skirt, heels",
+      "wet white t-shirt clinging to chest, short denim shorts",
+      "silk champagne slip dress, thin straps, bare legs",
+      "red cocktail dress, deep cleavage, diamond earrings",
+      "yoga set: fitted sports top and high-waist leggings, studio",
+      "leather jacket over lace bra, micro shorts, boots",
+      "floral summer dress, short hem, sandals, sunny interior",
+      "black evening gown with high slit, elegant heels",
+      "striped oversized shirt as dress, only a few buttons closed"
     ];
     outfit = pool[Math.floor(Math.random() * pool.length)];
   }
@@ -4975,9 +4977,9 @@ function renderProfile() {
     </select>
     <label style="display:block;margin-top:10px">Photo ★ comme référence visage</label>
     <select id="profile-ref-mode">
-      <option value="soft">Souple — visage de la ★ + pose/tenue différentes (denoise 0.65) · recommandé</option>
-      <option value="strong">Forte — visage collé à la ★ (denoise 0.48)</option>
-      <option value="off">Non — txt2img seul, pas de référence ★</option>
+      <option value="soft">Souple — tenues/poses variées (txt2img, identité fiche) · recommandé</option>
+      <option value="strong">Forte — img2img sur la photo ★ (même visage, peu de variété)</option>
+      <option value="off">Non — txt2img sans référence</option>
     </select>
     <details id="pose-library" data-testid="pose-library" style="margin-top:12px">
       <summary style="cursor:pointer">Bibliothèque de poses de ${escapeHtml(String((c && c.name) || "ce personnage"))} (<span id="pose-count">0</span>)</summary>
@@ -7948,42 +7950,63 @@ async function generatePhoto() {
         // Référence ★ : désactivée par défaut (img2img 0.42 recopiait la photo → images identiques,
         // cheveux/poitrine de la ref au lieu de la fiche). Réglable : off / soft (0.65) / strong (0.45).
         const refMode = profileRefMode();
-        // Souple = assez haut pour changer pose/tenue ; Forte = visage collé à la ★
-        const refDenoise = refMode === "strong" ? 0.48 : 0.65;
-        if (refMode !== "off") {
+        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
+        payload.profile_user_detail = extra.slice(0, 360);
+        payload.seed = Math.floor(Math.random() * 2000000000);
+        payload.ref_mode = refMode;
+
+        if (refMode === "strong") {
+          // Forte : img2img pour coller au visage de la ★
           try {
             await applyCharacterRefToPayload(payload, c, setGenStatus, {
               allowFantasy: false,
               forceImg2Img: true,
-              denoising: refDenoise,
+              denoising: 0.48,
               addPromptLock: true,
             });
           } catch (e) {
             console.warn("[profile reference]", e);
           }
-        }
-        payload.prompt = String(payload.prompt || "").replace(/\s+/g, " ").trim();
-        payload.profile_user_detail = extra.slice(0, 360);
-        payload.seed = Math.floor(Math.random() * 2000000000);
-        const hasRef = refMode !== "off" && Boolean(payload.source_image && String(payload.source_image).length > 800);
-        if (hasRef) {
-          payload.force_img2img = true;
-          payload.source_processing = "img2img";
-          payload.denoising = refDenoise;
-          payload.ref_mode = refMode;
-          // soft: ne pas verrouiller identity_lock (sinon native plafonne denoise à 0.48)
-          if (refMode === "strong") payload.profile_identity_lock = true;
-          else delete payload.profile_identity_lock;
-          setGenStatus("Horde img2img · ref ★ " + (refMode === "strong" ? "forte" : "souple") + " · denoise " + refDenoise + " · seed " + payload.seed + "…");
+          const hasRef = Boolean(payload.source_image && String(payload.source_image).length > 800);
+          if (hasRef) {
+            payload.force_img2img = true;
+            payload.source_processing = "img2img";
+            payload.denoising = 0.48;
+            payload.profile_identity_lock = true;
+            setGenStatus("Horde img2img · ref ★ forte · denoise 0.48 · seed " + payload.seed + "…");
+          } else {
+            payload.force_img2img = false;
+            delete payload.source_image;
+            delete payload.source_processing;
+            delete payload.denoising;
+            setGenStatus("Horde txt2img · pas de ★ — seed " + payload.seed + "…");
+          }
         } else {
+          // Souple ou off : txt2img uniquement = tenue/pose vraiment aléatoires
+          // L'identité (cheveux, yeux, poitrine, ethnie) vient de la fiche, pas de la photo ★
           payload.force_img2img = false;
           delete payload.source_image;
           delete payload.source_processing;
           delete payload.denoising;
           delete payload.face_lock;
           delete payload.profile_identity_lock;
-          delete payload.ref_mode;
-          setGenStatus("Horde txt2img · identité depuis la fiche (cheveux, yeux, poitrine) · seed " + payload.seed + "…");
+          // Forcer une tenue + pose du pool à chaque run (poids fort)
+          try {
+            const pick = typeof roleSexyPick === "function" ? roleSexyPick(c) : null;
+            if (pick && pick.outfit) {
+              const wear = String(pick.outfit).slice(0, 120);
+              const pose = String(pick.pose || "standing full body").slice(0, 80);
+              let pr = payload.prompt || "";
+              // Retirer d'anciennes tenues/poses trop faibles
+              pr = pr.replace(/wearing[^,]{0,160},/gi, "").replace(/pose:\s*[^,]{0,100},/gi, "");
+              payload.prompt = [
+                "(wearing " + wear + ":1.7),",
+                "(pose: " + pose.replace(/[()]/g, " ") + ":1.55),",
+                pr
+              ].join(" ").replace(/\s+/g, " ").trim();
+            }
+          } catch (_) {}
+          setGenStatus("Horde txt2img · " + (refMode === "soft" ? "souple (variété tenue/pose)" : "sans ref") + " · seed " + payload.seed + "…");
         }
       }
       payload.nsfw = false;
