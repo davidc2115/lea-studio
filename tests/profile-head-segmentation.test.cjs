@@ -158,15 +158,15 @@ test("The measured three-quarter QA head is rejected rather than treated as fron
   assert(limit <= .06);
 });
 
-function galleryPoll(result, restore) {
+function galleryPoll(result, restore, delays = []) {
   const existing = ["previous-photo"];
   const writes = [], statuses = [];
   const context = {
     window: { _leaGenBusy: true, LeaSegmentedProfile: { restoreImage: restore } },
     state: { current: "different-character", view: "chat" }, console, Date,
-    setTimeout: callback => { callback(); return 1; },
+    setTimeout: (callback, ms) => { delays.push(ms); callback(); return 1; },
     localStorage: { getItem: () => null, setItem: () => {} },
-    api: async () => result,
+    api: async (...args) => typeof result === "function" ? result(...args) : result,
     addToGallery: async (url, id) => { writes.push({ url, id }); return url; },
     setGenStatus: text => statuses.push(text),
     renderProfile() { throw new Error("must not switch the current conversation"); },
@@ -174,7 +174,7 @@ function galleryPoll(result, restore) {
   vm.createContext(context);
   const fn = read("app.js").match(/async function pollHordeJob[\s\S]*?^\}/m)[0];
   vm.runInContext(fn, context);
-  return { context, existing, writes, statuses };
+  return { context, existing, writes, statuses, delays };
 }
 
 test("Only the restored image is added to the requested profile, without changing existing photos", async () => {
@@ -209,6 +209,19 @@ test("A censored result is never restored over or added to a gallery", async () 
   await context.pollHordeJob("job", "host", "requested-character", {});
   assert.equal(restored, false);
   assert.deepEqual(writes, []);
+});
+
+test("Horde wait estimates replace the polling interval instead of being added to it", async () => {
+  let checks = 0;
+  const { context, delays } = galleryPoll(() => {
+    checks++;
+    return checks === 1
+      ? { done: false, wait: 30, queue: 3, processing: false }
+      : { done: true, url: "https://example.invalid/finished.webp" };
+  });
+  await context.pollHordeJob("job", "host", "requested-character");
+  assert.equal(checks, 2);
+  assert.deepEqual(delays, [5000, 15000]);
 });
 
 function protectedGallery(quotaFailure = false) {

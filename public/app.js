@@ -5125,44 +5125,56 @@ function duoDenoise(base) {
 }
 
 
+function duoProfileTraits(c) {
+  const looks = String((c && c.looks_en) || "");
+  const body = String((c && c.body) || "");
+  const appearance = String((c && c.appearance) || "");
+  const leftLook = (looks.match(/\bLEFT\b([\s\S]*?)\bRIGHT\b/i) || [])[1] || "";
+  const rightLook = (looks.match(/\bRIGHT\b([\s\S]*?)(?=,\s*(?:different\s+breast|NOT\s+(?:same|matching|both)|photorealistic)\b|$)/i) || [])[1] || "";
+  const bodyPair = body.match(/\bduo\s*:\s*([\s\S]*?)\s*\+\s*([\s\S]*)/i) ||
+    body.match(/([\s\S]*?)\s+\+\s+([\s\S]*)/);
+  const bodyParts = bodyPair ? [bodyPair[1], bodyPair[2]] : ["", ""];
+  const appLeft = (appearance.match(/\b(?:femme|woman)\s*1\s*[:.)-]\s*([\s\S]*?)(?=\b(?:femme|woman)\s*2\s*[:.)-]|$)/i) || [])[1] || "";
+  const appRight = (appearance.match(/\b(?:femme|woman)\s*2\s*[:.)-]\s*([\s\S]*)/i) || [])[1] || "";
+
+  function clean(text) {
+    return String(text || "").replace(/\s+/g, " ").replace(/^[\s,:;()-]+|[\s,:;()-]+$/g, "").trim().slice(0, 260);
+  }
+  function ageOf(text) {
+    const m = String(text || "").match(/\b(\d{2})\s*(?:years?\s*old|ans\b|yo\b)/i);
+    if (!m) return 0;
+    const age = parseInt(m[1], 10);
+    return age >= 18 && age <= 70 ? age : 0;
+  }
+  function cupOf(text) {
+    const m = String(text || "").match(/\bbonnet\s*([A-J])\b|\b([A-J])\s*-\s*cup\b|\b([A-J])\s*cup\b/i);
+    return m ? String(m[1] || m[2] || m[3] || "").toUpperCase() : "";
+  }
+  const sides = [
+    { look: clean(leftLook), body: clean(bodyParts[0]), appearance: clean(appLeft) },
+    { look: clean(rightLook), body: clean(bodyParts[1]), appearance: clean(appRight) },
+  ];
+  return sides.map((side) => ({
+    text: side.look || side.appearance || side.body,
+    age: ageOf(side.look) || ageOf(side.body) || ageOf(side.appearance),
+    cup: cupOf(side.look) || cupOf(side.body) || cupOf(side.appearance),
+  }));
+}
+
 function buildDuoShot(c, scenarioVariant) {
-  const text = [c.looks_en, c.body, c.appearance, c.name, c.scenario].filter(Boolean).join(" ");
   const variant = scenarioVariant || pickProfileScenarioVariant(c);
-  const ages = [];
-  let m; const re = /(\d{2})\s*(?:ans|year)/gi;
-  while ((m = re.exec(text)) && ages.length < 4) ages.push(parseInt(m[1], 10));
-  const uniq = [];
-  ages.forEach((a) => {
-    const adultAge = Math.max(21, a);
-    if (adultAge <= 65 && uniq.indexOf(adultAge) < 0) uniq.push(adultAge);
-  });
-  const older = uniq.length > 1 ? Math.max(uniq[0], uniq[1]) : (uniq[0] || 30);
-  const younger = uniq.length > 1 ? Math.min(uniq[0], uniq[1]) : older;
-  const cups = [];
-  const cr = /bonnet\s*([A-J])|([A-J])-cup/gi;
-  while ((m = cr.exec(text)) && cups.length < 3) cups.push((m[1] || m[2] || "").toUpperCase());
-  const hair = [];
-  if (/blond/i.test(text)) hair.push("blonde");
-  if (/brune|brown hair|dark hair/i.test(text)) hair.push("brunette");
-  if (/rousse|auburn|red hair/i.test(text)) hair.push("redhead");
-  if (/noir|black hair/i.test(text)) hair.push("black hair");
   const wear = variant.outfit || "clothes appropriate to the character's role";
   const place = describePlaceDetail(variant.place);
   const pose = pickProfileScenePose(c, variant);
   return [
     "(2girls:1.95)",
-    "(one photorealistic photograph of two women in the selected scenario setting:1.9)",
-    "(LEFT woman " + older + " years old:1.85)",
-    "(RIGHT woman " + younger + " years old:1.85)",
-    cups[0] ? "(LEFT " + cups[0] + "-cup breasts:1.7)" : "",
-    cups[1] ? "(RIGHT " + cups[1] + "-cup breasts:1.7)" : "(RIGHT different breast size:1.6)",
-    hair[0] ? "LEFT " + hair[0] : "",
-    hair[1] ? "RIGHT " + hair[1] : "RIGHT different hair color",
+    "(one photorealistic photograph of exactly two adult women in one shared scenario:1.9)",
+    duoCompositionBlock(c),
     "both adult women visible in one shared scene, wearing " + wear,
     pose,
     "in " + place + ", a scene consistent with " + profileScenarioText(c).slice(0, 130),
     "photorealistic DSLR photograph, natural skin texture, natural light, sharp focus",
-    "NOT solo, NOT 1girl, NOT split screen, NOT diptych, NOT headshot, NOT both the same age",
+    "NOT solo, NOT 1girl, NOT split screen, NOT diptych, NOT headshot",
   ].filter(Boolean).join(", ");
 }
 
@@ -5187,22 +5199,33 @@ function isDuoCharacter(c) {
 
 function duoAgeHead(c) {
   if (!c) return "";
-  const blob = [c.body, c.looks_en, c.appearance, c.name].filter(Boolean).join(" ");
-  const ages = [];
-  const re = /(\d{2})\s*(?:ans|year)/gi;
-  let m;
-  while ((m = re.exec(blob)) && ages.length < 4) ages.push(parseInt(m[1], 10));
-  const uniq = [];
-  ages.forEach((a) => { if (a >= 18 && a <= 70 && uniq.indexOf(a) < 0) uniq.push(a); });
-  if (uniq.length < 2) return "";
-  const older = Math.max(uniq[0], uniq[1]);
-  const younger = Math.min(uniq[0], uniq[1]);
-  if (older - younger < 8) return "(LEFT " + uniq[0] + " years old:1.4), (RIGHT " + uniq[1] + " years old:1.4),";
-  return "(2girls:1.95), (CLEAR AGE GAP:1.9), (LEFT woman is the older one " + older + " years old:1.9), (mature mother face crow's feet fine lines:1.75), (RIGHT woman is the younger one " + younger + " years old:1.9), (youthful daughter face smooth skin no wrinkles:1.8), obvious age difference, NOT same age, NOT both " + younger + ", NOT both " + older + ",";
+  const sides = duoProfileTraits(c);
+  if (!sides[0].age || !sides[1].age || sides[0].age === sides[1].age) return "";
+  return "(preserve LEFT age " + sides[0].age + " and RIGHT age " + sides[1].age + ", do not swap them:1.8), visibly different adult ages,";
 }
 
 function duoCompositionBlock(c) {
   if (!isDuoCharacter(c)) return "";
+  const sides = duoProfileTraits(c);
+  const lines = [
+    "(2girls:1.95), (exactly two distinct adult women together in one shared scene:1.9),",
+    sides[0].text ? "(LEFT fixed identity traits: " + sides[0].text.slice(0, 180) + ":1.65)," : "",
+    sides[0].age ? "(LEFT woman is " + sides[0].age + " years old:1.7)," : "",
+    sides[0].cup ? "(LEFT " + sides[0].cup + "-cup breasts:1.7)," : "",
+    sides[1].text ? "(RIGHT fixed identity traits: " + sides[1].text.slice(0, 180) + ":1.65)," : "",
+    sides[1].age ? "(RIGHT woman is " + sides[1].age + " years old:1.7)," : "",
+    sides[1].cup ? "(RIGHT " + sides[1].cup + "-cup breasts:1.7)," : "",
+    sides[0].age && sides[1].age && sides[0].age !== sides[1].age
+      ? "(preserve LEFT age " + sides[0].age + " and RIGHT age " + sides[1].age + ", do not swap them:1.8)," : "",
+    sides[0].cup && sides[1].cup && sides[0].cup !== sides[1].cup
+      ? "(preserve the different stated breast sizes:1.75)," : "",
+    "(two faces, two separate bodies, both visible in the same photograph:1.8),",
+    "NOT solo, NOT 1girl, NOT split screen, NOT diptych,",
+  ];
+  return lines.filter(Boolean).join(" ");
+
+  // Legacy parser retained below for old data shapes; the side-aware block above
+  // is authoritative for generated prompts.
   const names = String(c.name || "two women").replace(/\s+/g, " ").trim();
   const looks = String(c.looks_en || "").replace(/\s+/g, " ").trim();
   const appFr = String(c.appearance || "").replace(/\s+/g, " ").trim();
@@ -6217,7 +6240,7 @@ async function generateCloudflareImage(prompt, c) {
   if (!allowed) throw new Error("Modèle Cloudflare inconnu : " + model);
   const blocks = fluxCharacterBlocks(c);
   const fullPrompt = window.LeaImageProviderModels.buildFluxPrompt(
-    prompt, blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
+    applyFantasyPromptLock(prompt, c), blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
   );
   const url = "https://api.cloudflare.com/client/v4/accounts/" + encodeURIComponent(account) +
     "/ai/run/" + model;
@@ -6258,7 +6281,7 @@ async function generatePollinationsImage(prompt, c, sourceB64) {
   }
   const blocks = fluxCharacterBlocks(c);
   const optimizedPrompt = window.LeaImageProviderModels.buildFluxPrompt(
-    prompt, blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
+    applyFantasyPromptLock(prompt, c), blocks.identity, blocks.morphology, { isDuo: blocks.isDuo }
   );
   const finalPrompt = [
     sourceB64
@@ -6836,7 +6859,10 @@ function toastScene(msg) {
 
 
 function fantasyKind(c) {
-  const id = (String((c && c.id) || "") + " " + String((c && c.title) || "") + " " + ((c && c.tags) || []).join(" ")).toLowerCase();
+  const id = [
+    c && c.id, c && c.title, c && c.name, c && c.scenario, c && c.looks_en,
+    c && c.appearance, c && c.body, ...((c && c.tags) || []),
+  ].filter(Boolean).join(" ").toLowerCase();
   const order = ["slime","sirene","catgirl","kitsune","succube","dragon","harpie","lamia","naga","gorgone","dryade","elfe","ange","demon","vampire","fee","oni","centaure","louve","android","phenix","fantome"];
   const tests = {
     slime: /slime|gel[eé]e/,
@@ -6868,8 +6894,9 @@ function fantasyKind(c) {
 function stripForeignSpecies(prompt, c) {
   let s = String(prompt || "");
   const k = fantasyKind(c);
-  s = s.replace(/\bNOT\b[^,]{0,48}/gi, " ");
-  s = s.replace(/\bno horns\b|\bbald of horns\b|\bPAS de cornes\b/gi, " ");
+  if (["succube","dragon","demon","oni"].includes(k)) {
+    s = s.replace(/\bno horns\b|\bbald of horns\b|\bPAS de cornes\b/gi, " ");
+  }
   const ban = {
     mermaid: k !== "sirene",
     "fish tail": k !== "sirene",
@@ -6883,6 +6910,19 @@ function stripForeignSpecies(prompt, c) {
     "fox tail": k !== "kitsune",
     "cat ears": k !== "catgirl",
     "cat tail": k !== "catgirl",
+    "wolf ears": k !== "louve",
+    "wolf tail": k !== "louve",
+    "snake tail": !["lamia","naga"].includes(k),
+    "horse body": k !== "centaure",
+    "bird talons": k !== "harpie",
+    "living snakes": k !== "gorgone",
+    "insect wings": k !== "fee",
+    "feathered wings": !["harpie","ange","phenix"].includes(k),
+    "fire wings": k !== "phenix",
+    "spaded tail": !["succube","demon"].includes(k),
+    "jelly body": k !== "slime",
+    "gelatinous skin": k !== "slime",
+    "synthetic skin": k !== "android",
     "elf ears": k !== "elfe",
     "bat wings": !["succube","demon"].includes(k),
     slime: k !== "slime",
@@ -6949,6 +6989,15 @@ function speciesLock(c) {
     fantome: "(ghost woman:1.8), slightly translucent body, two human legs, old house",
   };
   return map[k] || "";
+}
+
+function applyFantasyPromptLock(prompt, c) {
+  const original = String(prompt || "");
+  if (!c || !fantasyKind(c)) return original;
+  const safeScene = stripForeignSpecies(original, c);
+  const lock = speciesLock(c);
+  if (!lock || safeScene.toLowerCase().includes(lock.toLowerCase())) return safeScene;
+  return [lock, safeScene].filter(Boolean).join(", ");
 }
 
 
@@ -7186,6 +7235,7 @@ async function generatePhoto() {
       prompt += ", (photorealistic DSLR photo:1.55), (real skin pores:1.4), natural lighting, NOT anime, NOT manga, NOT cartoon, NOT illustration, NOT drawing, NOT 3d render, NOT cgi, NOT plastic doll, NOT text, NOT watermark,";
     }
   } catch (_) {}
+  try { prompt = applyFantasyPromptLock(prompt, c); } catch (_) {}
   window._leaGenBusy = true;
   const engine = currentImageEngine();
   // mémoriser le choix du profil
@@ -7202,7 +7252,10 @@ async function generatePhoto() {
       try {
         const gemBody = {
           prompt,
-          negative: bodyNegatives(c),
+          negative: [
+            bodyNegatives(c),
+            fantasyKind(c) ? speciesNegative(c) : "",
+          ].filter(Boolean).join(", "),
           engine: "gemini",
           aspect: "3:4",
           fallback_horde: false,
@@ -7309,7 +7362,8 @@ async function generatePhoto() {
           return;
         }
       } catch (_) {}
-      const neg = bodyNegatives(c) + ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
+      const neg = bodyNegatives(c) + (fantasyKind(c) ? ", " + speciesNegative(c) : "") +
+        ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
       const ldPayload = JSON.stringify({
         prompt: String(prompt).slice(0, 1800),
         negative: String(neg).slice(0, 500),
@@ -7368,7 +7422,8 @@ async function generatePhoto() {
               if (!st.warm && window.LeaAndroid.sdCppPreload) {
                 try { window.LeaAndroid.sdCppPreload(); } catch (_) {}
               }
-              const neg = bodyNegatives(c) + ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
+              const neg = bodyNegatives(c) + (fantasyKind(c) ? ", " + speciesNegative(c) : "") +
+                ", cartoon, anime, collage, grid, 2x2, multipanel, mirror symmetry, deformed, child, underage, blurry, watermark";
               let sdRef = null;
               try { sdRef = await resolveCharacterRefB64(c); } catch (_) {}
               const sdPayload = {
@@ -7802,11 +7857,9 @@ async function persistImageUrl(url) {
 
 async function pollHordeJob(jobId, host, charId, headRestoration = null) {
   const cid = charId || state.current || "lea";
+  let nextPollMs = 5000;
   for (let i = 0; i < 120; i++) {
-    // Poll adaptatif : plus espacé = moins de ban IP
-    // Base 8s, puis 10s, max 15s ; si wait_time API élevé, dormir ce temps
-    let sleepMs = i < 5 ? 8000 : (i < 20 ? 10000 : 15000);
-    await new Promise((r) => setTimeout(r, sleepMs));
+    await new Promise((r) => setTimeout(r, nextPollMs));
     try {
       const st = await api("/api/image-status", { method: "POST", body: JSON.stringify({ jobId, host }) });
       if (st && st.error && /limite|pause|timeout for|abuse|rate limit|2 per|bloquée/i.test(String(st.error))) {
@@ -7814,7 +7867,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const m = String(st.error).match(/(\d+)\s*s/);
         const waitSec = m ? Math.min(120, Math.max(20, parseInt(m[1], 10))) : 45;
         setGenStatus(st.error + " — pause " + waitSec + "s puis reprise…");
-        await new Promise((r) => setTimeout(r, waitSec * 1000));
+        nextPollMs = waitSec * 1000;
         continue;
       }
       if (!st.done) {
@@ -7822,11 +7875,10 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
         const w = st.wait != null ? " · ~" + st.wait + "s" : "";
         const p = st.processing ? " · calcul" : "";
         setGenStatus("Horde en cours" + q + w + p + " (" + (i + 1) + "/120)");
-        // Si Horde dit wait 30s+, ne pas re-poller trop tôt
-        if (st.wait && Number(st.wait) >= 20) {
-          const extra = Math.min(45, Number(st.wait)) * 1000;
-          await new Promise((r) => setTimeout(r, extra));
-        }
+        const reportedWait = Number(st.wait);
+        nextPollMs = st.wait != null && Number.isFinite(reportedWait) && reportedWait > 0
+          ? Math.min(15000, Math.max(4000, reportedWait * 1000))
+          : 8000;
         continue;
       }
       if (st.error) {
@@ -7869,9 +7921,7 @@ async function pollHordeJob(jobId, host, charId, headRestoration = null) {
     } catch (e) {
       const msg = String(e.message || e);
       setGenStatus("Horde… " + msg);
-      if (/limite|pause|timeout for|abuse|2 per|429/i.test(msg)) {
-        await new Promise((r) => setTimeout(r, 5000));
-      }
+      nextPollMs = /limite|pause|timeout for|abuse|2 per|429/i.test(msg) ? 5000 : 4000;
     }
   }
   window._leaGenBusy = false;

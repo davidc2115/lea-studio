@@ -34,6 +34,10 @@ function setup() {
   });
   vm.runInContext(read("image-provider-models.js"), context);
   const app = read("app.js");
+  const speciesStart = app.indexOf("function fantasyKind(");
+  const speciesEnd = app.indexOf("\n\nfunction roleScenePack", speciesStart);
+  assert(speciesStart >= 0 && speciesEnd > speciesStart, "species prompt locks are available");
+  vm.runInContext(app.slice(speciesStart, speciesEnd), context);
   const start = app.indexOf("async function nativeHttpPostJson(");
   const end = app.indexOf("\n\nasync function generatePhotoHordeFallback", start);
   assert(start >= 0 && end > start, "provider connector functions are available");
@@ -92,4 +96,40 @@ test("Pollinations does not turn an unreadable starred reference into text-only 
     /photo étoilée est illisible/
   );
   assert.equal(requests.length, 0);
+});
+
+test("Cloudflare and Pollinations keep species traits and remove contradictory species features", async () => {
+  const { context, requests } = setup();
+  const fixtures = [
+    {
+      character: { id: "profile_kitsune", title: "Kitsune" },
+      scene: "adult woman, fox ears, mermaid tail, fish scales, cat ears",
+      expected: /kitsune|fox ears|fox tail/i,
+      forbidden: /mermaid tail|fish scales|cat ears/i,
+    },
+    {
+      character: { id: "profile_sirene", title: "Sirène" },
+      scene: "adult woman, mermaid tail, horns, cat ears, fox ears",
+      expected: /mermaid|fish tail/i,
+      forbidden: /demon horns|cat ears|fox ears/i,
+    },
+    {
+      character: { id: "profile_vampire", title: "Vampire" },
+      scene: "adult woman, pale skin, subtle fangs, dragon horns, mermaid tail, bat wings",
+      expected: /vampire woman|subtle fangs/i,
+      forbidden: /dragon horns|mermaid tail|bat wings/i,
+    },
+  ];
+  for (const fixture of fixtures) {
+    const before = requests.length;
+    await context.generateCloudflareImage(fixture.scene, fixture.character);
+    const cf = JSON.parse(requests[before].options.body);
+    assert.match(cf.prompt, fixture.expected);
+    assert.doesNotMatch(cf.prompt, fixture.forbidden);
+
+    await context.generatePollinationsImage(fixture.scene, fixture.character, null);
+    const pollinations = JSON.parse(requests[before + 1].options.body);
+    assert.match(pollinations.prompt, fixture.expected);
+    assert.doesNotMatch(pollinations.prompt, fixture.forbidden);
+  }
 });

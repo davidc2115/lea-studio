@@ -142,8 +142,12 @@ test("Finalization does not replace selected clothing or ban lace bodysuits", ()
 
 test("Duo generation uses the selected wardrobe without switching to a solo portrait", () => {
   const { ctx, api } = setup();
-  const source = read("app.js"), from = source.indexOf("function buildDuoShot(");
-  vm.runInContext(source.slice(from, source.indexOf("\nfunction ", from + 1)), ctx);
+  const source = read("app.js");
+  for (const name of ["duoProfileTraits", "buildDuoShot", "isDuoCharacter", "duoAgeHead", "duoCompositionBlock"]) {
+    const match = source.match(new RegExp("function " + name + "\\([\\s\\S]*?^\\}", "m"));
+    assert(match, name + " is available");
+    vm.runInContext(match[0], ctx);
+  }
   const scenario = source.indexOf("function profileScenarioText(");
   vm.runInContext(source.slice(scenario, source.indexOf("\nfunction pickProfileScenarioVariant(", scenario)), ctx);
   ctx.describePlaceDetail = place => place;
