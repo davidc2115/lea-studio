@@ -4,122 +4,122 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { generate, keyStatus, reloadPools } from "./providers.js";
-import { loadCharacters, loadSettings, saveSettings, getChat, saveChat } from "./store.js";
-import { buildMemoryBlock, maybeExtractMemory, modeInstructions, recentWindow } from "./memory.js";
+import { loadCharacters, getChat, saveChat, loadSettings, saveSettings } from "./store.js";
+import { buildMemoryBlock, maybeExtractMemory, recentWindow } from "./memory.js";
+import { parseKeys } from "./keys.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const PUBLIC = path.join(__dirname, "..", "public");
+const PORT = process.env.PORT || 3000;
+
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static(path.join(__dirname, "..", "public")));
+app.use(express.static(PUBLIC));
 
-app.get("/api/status", (_req, res) => {
-  res.json({ ok: true, keys: keyStatus(), settings: loadSettings() });
-});
-
-app.post("/api/settings", (req, res) => {
-  const { provider, personaName, personaBio, openaiKeys, geminiKeys } = req.body || {};
-  if (typeof openaiKeys === "string") process.env.OPENAI_API_KEYS = openaiKeys;
-  if (typeof geminiKeys === "string") process.env.GEMINI_API_KEYS = geminiKeys;
-  if (openaiKeys || geminiKeys) reloadPools();
-  const settings = saveSettings({
-    ...(provider ? { provider } : {}),
-    ...(personaName != null ? { personaName } : {}),
-    ...(personaBio != null ? { personaBio } : {}),
-  });
-  res.json({ settings, keys: keyStatus() });
-});
+function buildSystem(char, chat, settings) {
+  const mem = buildMemoryBlock(chat || { memories: [], summaries: [], relationship: {} });
+  const userName = settings?.personaName || settings?.userName || "toi";
+  const userBio = settings?.personaBio || settings?.userBio || "";
+  return [
+    "Tu incarnes exclusivement le personnage suivant (roleplay immersif, français).",
+    `Nom: ${char.name} · Âge: ${char.age} · ${char.title || ""}`,
+    `Scénario: ${char.scenario || ""}`,
+    `Personnalité: ${char.personality || ""}`,
+    `Apparence: ${char.appearance || ""}`,
+    char.system_extra || "",
+    `Joueur: ${userName}${userBio ? " — " + userBio : ""}`,
+    mem,
+    "Format: (pensées) *actions* dialogues sans marqueurs. 2–5 phrases. SFW↔NSFW selon le joueur. Pas d'amour forcé.",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
 
 app.get("/api/characters", (_req, res) => {
   res.json(loadCharacters());
+});
+
+app.get("/api/status", (_req, res) => {
+  res.json({ ok: true, keys: keyStatus() });
 });
 
 app.get("/api/chat/:id", (req, res) => {
   res.json(getChat(req.params.id));
 });
 
-app.post("/api/chat/:id/reset", (req, res) => {
-  const empty = {
-    messages: [],
-    memories: [],
-    summaries: [],
-    relationship: { closeness: 1, trust: 1, heat: 0 },
-    updatedAt: Date.now(),
-  };
-  res.json(saveChat(req.params.id, empty));
-});
-
-app.post("/api/chat/:id/memory", (req, res) => {
+app.delete("/api/chat/:id", (req, res) => {
   const chat = getChat(req.params.id);
-  const { text, pinned } = req.body || {};
-  if (!text) return res.status(400).json({ error: "texte requis" });
-  chat.memories.push({
-    id: Date.now(),
-    text: String(text).slice(0, 250),
-    pinned: Boolean(pinned),
-    createdAt: Date.now(),
-  });
-  res.json(saveChat(req.params.id, chat));
+  chat.messages = [];
+  saveChat(req.params.id, chat);
+  res.json({ ok: true });
 });
 
-app.patch("/api/chat/:id/memory/:mid", (req, res) => {
-  const chat = getChat(req.params.id);
-  const mem = chat.memories.find((m) => String(m.id) === String(req.params.mid));
-  if (!mem) return res.status(404).json({ error: "souvenir introuvable" });
-  if (req.body.text != null) mem.text = String(req.body.text).slice(0, 250);
-  if (req.body.pinned != null) mem.pinned = Boolean(req.body.pinned);
-  res.json(saveChat(req.params.id, chat));
-});
-
-app.delete("/api/chat/:id/memory/:mid", (req, res) => {
-  const chat = getChat(req.params.id);
-  chat.memories = chat.memories.filter((m) => String(m.id) !== String(req.params.mid));
-  res.json(saveChat(req.params.id, chat));
-});
-
-app.post("/api/chat/:id/message", async (req, res) => {
-  const character = loadCharacters().find((c) => c.id === req.params.id);
-  if (!character) return res.status(404).json({ error: "personnage inconnu" });
-
-  const { text, mode = "sfw", provider } = req.body || {};
-  if (!text) return res.status(400).json({ error: "message vide" });
-
-  const settings = loadSettings();
-  const chat = getChat(character.id);
-  chat.messages.push({ role: "user", content: String(text), ts: Date.now() });
-
-  const system = [
-    `Tu incarnes ${character.name}, ${character.age} ans.`,
-    character.personality,
-    "Apparence: " + character.appearance,
-    "Scénario: " + character.scenario,
-    character.system_extra,
-    modeInstructions(mode),
-    `Utilisateur: ${settings.personaName}. ${settings.personaBio}`,
-    "Exemples:\n" + character.example_dialogue,
-    buildMemoryBlock(chat),
-    "Réponds uniquement in-character. 1 à 3 courts paragraphes max sauf si la scène l'exige.",
-  ].join("\n\n");
-
-  const history = recentWindow(chat.messages, 18).map((m) => ({
-    role: m.role === "user" ? "user" : "assistant",
-    content: m.content,
-  }));
-
+app.post("/api/chat/:id", async (req, res) => {
   try {
-    const reply = await generate([{ role: "system", content: system }, ...history], provider || settings.provider);
-    chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
-    await maybeExtractMemory(chat, provider || settings.provider);
-    saveChat(character.id, chat);
-    res.json({ reply, chat });
+    const id = req.params.id;
+    const chars = loadCharacters();
+    const char = req.body.character || chars.find((c) => c.id === id) || chars[0];
+    const settings = { ...loadSettings(), ...(req.body.settings || {}) };
+
+    if (req.body.init && Array.isArray(req.body.messages)) {
+      const chat = getChat(id);
+      chat.messages = req.body.messages;
+      saveChat(id, chat);
+      return res.json({ messages: chat.messages });
+    }
+
+    const chat = getChat(id);
+    let messages = Array.isArray(req.body.messages)
+      ? req.body.messages.slice()
+      : chat.messages.slice();
+
+    if (req.body.message) {
+      const last = messages[messages.length - 1];
+      if (!last || last.role !== "user" || last.content !== req.body.message) {
+        messages.push({ role: "user", content: req.body.message, ts: Date.now() });
+      }
+    }
+
+    const system = buildSystem(char, chat, settings);
+    const window = recentWindow(messages, 16);
+    const apiMessages = [
+      { role: "system", content: system },
+      ...window.map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      })),
+    ];
+
+    const provider = settings.chatEngine || settings.provider || process.env.DEFAULT_PROVIDER;
+    const reply = await generate(apiMessages, provider);
+    messages.push({ role: "assistant", content: reply, ts: Date.now() });
+    chat.messages = messages;
+    await maybeExtractMemory(chat, provider);
+    saveChat(id, chat);
+    res.json({ reply, messages: chat.messages });
   } catch (e) {
-    chat.messages.pop();
-    saveChat(character.id, chat);
-    res.status(502).json({ error: e.message });
+    console.error(e);
+    res.status(500).json({ error: String(e.message || e) });
   }
 });
 
-const port = Number(process.env.PORT || 3000);
-app.listen(port, () => {
-  console.log(`Léa Studio → http://localhost:${port}`);
+app.get("/api/settings", (_req, res) => res.json(loadSettings()));
+app.post("/api/settings", (req, res) => {
+  const next = saveSettings(req.body || {});
+  if (req.body?.geminiKeys || req.body?.openaiKeys) {
+    if (req.body.geminiKeys) process.env.GEMINI_API_KEYS = req.body.geminiKeys;
+    if (req.body.openaiKeys) process.env.OPENAI_API_KEYS = req.body.openaiKeys;
+    reloadPools();
+  }
+  res.json(next);
+});
+
+app.get("*", (_req, res) => {
+  res.sendFile(path.join(PUBLIC, "index.html"));
+});
+
+app.listen(PORT, () => {
+  console.log(`💜 Léa Studio → http://localhost:${PORT}`);
+  console.log("Clés:", keyStatus());
 });

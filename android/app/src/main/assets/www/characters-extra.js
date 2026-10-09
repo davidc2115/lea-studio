@@ -1,1 +1,0 @@
-window.EXTRA_CAST = [];

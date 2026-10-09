@@ -2,58 +2,42 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="theme-color" content="#1a0a2e" />
   <title>Léa Studio</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div id="app">
+    <header class="topbar">
+      <div class="brand">💜 <span>Léa</span> Studio</div>
+      <div class="topbar-actions">
+        <button type="button" class="icon-btn" id="btn-edit-toggle" title="Modifier">✏️</button>
+      </div>
+    </header>
+
     <main>
       <section id="view-discover" class="view"></section>
       <section id="view-profile" class="view hidden"></section>
       <section id="view-chat" class="view hidden"></section>
-      <section id="view-chats" class="view hidden"></section>
-      <section id="view-memory" class="view hidden"></section>
       <section id="view-settings" class="view hidden"></section>
-      <section id="view-studio" class="view hidden"></section>
     </main>
+
     <nav class="tabbar" id="tabbar">
-      <button class="nav active" data-view="discover">Découvrir</button>
-      <button class="nav" data-view="chats">Chats</button>
-      <button class="nav" data-view="studio">Générer</button>
-      <button class="nav" data-view="settings">Clés</button>
+      <button type="button" class="nav active" data-view="discover">🌟<span>Découvrir</span></button>
+      <button type="button" class="nav" data-view="chat">💬<span>Chat</span></button>
+      <button type="button" class="nav" data-view="settings">⚙️<span>Réglages</span></button>
     </nav>
   </div>
-  <script src="characters.js"></script>
-  <script src="characters-extra.js"></script>
-  <script src="characters-new.js"></script>
-  <script src="characters-special.js"></script>
-  <script src="characters-direct.js"></script>
-  <script src="characters-cups.js"></script>
-  <script src="characters-collegues.js"></script>
-  <script src="characters-taquin.js"></script>
-  <script src="scenario-library.js"></script>
-  <script src="role-stories-family.js"></script>
-  <script src="role-stories-work.js"></script>
-  <script src="role-stories-social.js"></script>
-  <script src="role-stories-fantasy.js"></script>
-  <script src="role-temperaments.js"></script>
-  <script src="role-narratives.js"></script>
-  <script src="profile-composition.js"></script>
-  <script src="profile-head-segmentation.js"></script>
-  <script src="profile-frontal-reference.js"></script>
-  <script src="profile-wardrobe.js"></script>
+
+  <div id="lightbox" class="lightbox hidden" role="dialog">
+    <button type="button" class="lb-close" id="lb-close">✕</button>
+    <button type="button" class="lb-nav lb-prev" id="lb-prev">‹</button>
+    <img id="lightbox-img" alt="Photo Léa" />
+    <button type="button" class="lb-nav lb-next" id="lb-next">›</button>
+  </div>
+
   <script src="native-api.js"></script>
   <script src="app.js"></script>
-  <div id="lightbox" class="lightbox hidden" onclick="if(event.target===this)this.classList.add('hidden')">
-    <button type="button" class="lb-nav lb-prev" id="lb-prev" title="Précédente">‹</button>
-    <img id="lightbox-img" alt="Photo" />
-    <button type="button" class="lb-nav lb-next" id="lb-next" title="Suivante">›</button>
-    <div class="lb-actions">
-      <button class="cta" id="lb-dl" type="button">Télécharger</button>
-      <button class="cta" id="lb-bg" type="button">Utiliser comme fond</button>
-      <button class="cta lb-close" type="button" onclick="document.getElementById('lightbox').classList.add('hidden')">Fermer</button>
-    </div>
-  </div>
 </body>
 </html>
