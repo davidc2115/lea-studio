@@ -1,0 +1,4 @@
+node_modules
+.env
+data/chats.json
+data/settings.json

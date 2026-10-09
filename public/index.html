@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Léa Studio</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <aside class="rail">
+      <div class="brand">Léa<span>Studio</span></div>
+      <button class="nav active" data-view="discover">Découvrir</button>
+      <button class="nav" data-view="chat">Chat</button>
+      <button class="nav" data-view="memory">Mémoire</button>
+      <button class="nav" data-view="settings">Clés & réglages</button>
+    </aside>
+    <main>
+      <section id="view-discover" class="view"></section>
+      <section id="view-chat" class="view hidden"></section>
+      <section id="view-memory" class="view hidden"></section>
+      <section id="view-settings" class="view hidden"></section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
