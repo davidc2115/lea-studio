@@ -477,7 +477,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">Génération plein pied à partir du descriptif physique de cette fiche. La taille de poitrine et les traits non humains enregistrés sont conservés.</p>
+      <p class="hint">La photo de profil sert de référence d’identité. Génération plein pied à partir du descriptif physique; tailles de poitrine et traits non humains enregistrés conservés.</p>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
       ${knownMinor
         ? `<p class="hint bad">La génération est désactivée : l’âge renseigné est inférieur à 18 ans.</p>`
