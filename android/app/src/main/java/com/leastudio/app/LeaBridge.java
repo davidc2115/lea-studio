@@ -43,6 +43,87 @@ public class LeaBridge {
         nativeOk = false;
     }
 
+    /** Ouvre uniquement une fiche Chub publique dans un WebView isolé, sans pont JS exposé au site. */
+    @JavascriptInterface
+    public boolean openChubCharacter(String rawUrl) {
+        try {
+            Uri uri = Uri.parse(rawUrl);
+            String path = uri.getPath();
+            if (!"https".equalsIgnoreCase(uri.getScheme())
+                    || !"chub.ai".equalsIgnoreCase(uri.getHost())
+                    || path == null
+                    || !path.matches("^/characters/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/?$")) {
+                return false;
+            }
+            Intent intent = new Intent(ctx, ChubBrowserActivity.class);
+            intent.putExtra(ChubBrowserActivity.EXTRA_URL, uri.toString());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /** Renvoie la dernière paire JSON/PNG téléchargée depuis le navigateur Chub intégré. */
+    @JavascriptInterface
+    public String getPendingChubCard() {
+        File root = new File(ctx.getFilesDir(), "chub-pending");
+        File[] sessions = root.listFiles(File::isDirectory);
+        if (sessions == null) return "";
+        java.util.Arrays.sort(sessions, (a, b) -> b.getName().compareTo(a.getName()));
+        for (File session : sessions) {
+            if (!session.getName().matches("\\d{12,17}")) continue;
+            File jsonFile = new File(session, "card.json");
+            File pngFile = new File(session, "card.png");
+            try {
+                if (!jsonFile.isFile() || !pngFile.isFile()
+                        || jsonFile.length() > 5L * 1024 * 1024
+                        || pngFile.length() > 12L * 1024 * 1024) continue;
+                byte[] jsonBytes = readChubPendingFile(jsonFile, 5L * 1024 * 1024);
+                byte[] pngBytes = readChubPendingFile(pngFile, 12L * 1024 * 1024);
+                JSONObject payload = new JSONObject();
+                payload.put("sessionId", session.getName());
+                payload.put("cardText", new String(jsonBytes, StandardCharsets.UTF_8));
+                payload.put("imageDataUrl", "data:image/png;base64,"
+                        + android.util.Base64.encodeToString(pngBytes, android.util.Base64.NO_WRAP));
+                return payload.toString();
+            } catch (Exception ignored) {}
+        }
+        return "";
+    }
+
+    @JavascriptInterface
+    public boolean clearPendingChubCard(String sessionId) {
+        if (sessionId == null || !sessionId.matches("\\d{12,17}")) return false;
+        File root = new File(ctx.getFilesDir(), "chub-pending");
+        File session = new File(root, sessionId);
+        if (!session.getParentFile().equals(root) || !session.isDirectory()) return false;
+        deleteChubPendingTree(session);
+        return !session.exists();
+    }
+
+    private byte[] readChubPendingFile(File file, long maxBytes) throws Exception {
+        try (FileInputStream input = new FileInputStream(file);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int count;
+            long total = 0;
+            while ((count = input.read(buffer)) != -1) {
+                total += count;
+                if (total > maxBytes) throw new IllegalStateException("Chub card file too large");
+                output.write(buffer, 0, count);
+            }
+            return output.toByteArray();
+        }
+    }
+
+    private void deleteChubPendingTree(File file) {
+        File[] children = file.listFiles();
+        if (children != null) for (File child : children) deleteChubPendingTree(child);
+        file.delete();
+    }
+
     /** Locate one frontal face without uploading the reference to another service. */
     @JavascriptInterface
     public String detectProfileFace(String encoded) {
@@ -306,7 +387,7 @@ public class LeaBridge {
         out.write("\r\n".getBytes(StandardCharsets.UTF_8));
     }
 
-    /** Génère une image CF et l'enregistre sur disque. Retourne jobId. Résultat = done:gallery:… */
+    /** Génère une image CF et l'enregistre sur disque. Résultat = done:gallery:… */
     @JavascriptInterface
     public String cloudflareImageStart(final String accountId, final String token, final String model, final String prompt, final String charId, final String referenceImageB64) {
         final String id = "cf" + HTTP_SEQ.getAndIncrement();
@@ -341,8 +422,7 @@ public class LeaBridge {
                         referenceBytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
                         if (referenceBytes.length == 0) throw new IllegalArgumentException("photo de profil vide");
                     } catch (Exception e) {
-                        String message = "Référence visage invalide: " + String.valueOf(e.getMessage());
-                        HTTP_JOBS.put(id, "error:{\"error\":" + JSONObject.quote(message) + "}");
+                        HTTP_JOBS.put(id, "error:{\"error\":\"Référence visage invalide: " + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
                         return;
                     }
                 }
