@@ -43,26 +43,47 @@ public class LeaBridge {
         nativeOk = false;
     }
 
-    /** Ouvre uniquement une fiche Chub publique dans un WebView isolé, sans pont JS exposé au site. */
+    /** Ouvre Chub AI dans un WebView isolé, sans pont JS exposé au site. */
     @JavascriptInterface
     public boolean openChubCharacter(String rawUrl) {
         try {
             Uri uri = Uri.parse(rawUrl);
-            String path = uri.getPath();
             if (!"https".equalsIgnoreCase(uri.getScheme())
                     || !"chub.ai".equalsIgnoreCase(uri.getHost())
-                    || path == null
-                    || !path.matches("^/characters/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/?$")) {
+                    || uri.getUserInfo() != null) {
                 return false;
             }
             Intent intent = new Intent(ctx, ChubBrowserActivity.class);
             intent.putExtra(ChubBrowserActivity.EXTRA_URL, uri.toString());
+            intent.putExtra(ChubBrowserActivity.EXTRA_PROVIDER, "chub");
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(intent);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @JavascriptInterface
+    public boolean openBotbooru() {
+        try {
+            Intent intent = new Intent(ctx, ChubBrowserActivity.class);
+            intent.putExtra(ChubBrowserActivity.EXTRA_URL, "https://botbooru.com/");
+            intent.putExtra(ChubBrowserActivity.EXTRA_PROVIDER, "botbooru");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public String consumePendingBotbooruId() {
+        android.content.SharedPreferences prefs = ctx.getSharedPreferences("lea_catalog_import", Context.MODE_PRIVATE);
+        String id = prefs.getString("lea_catalog_pending_id", "");
+        prefs.edit().remove("lea_catalog_pending_id").apply();
+        return id != null && id.matches("\\d{1,12}") ? id : "";
     }
 
     /** Renvoie la dernière paire JSON/PNG téléchargée depuis le navigateur Chub intégré. */
