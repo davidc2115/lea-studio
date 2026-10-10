@@ -29,8 +29,11 @@ import java.util.concurrent.Executors;
 
 public final class ChubBrowserActivity extends Activity {
     public static final String EXTRA_URL = "com.leastudio.app.CHUB_URL";
+    public static final String EXTRA_PROVIDER = "com.leastudio.app.CATALOG_PROVIDER";
+    private static final String BOTBOORU_PENDING_ID = "lea_catalog_pending_id";
     private WebView browser;
     private File sessionDir;
+    private String provider;
 
     private static boolean isChubHost(String host) {
         if (host == null) return false;
@@ -39,38 +42,30 @@ public final class ChubBrowserActivity extends Activity {
                 || lower.equals("charhub.io") || lower.endsWith(".charhub.io");
     }
 
-    private static boolean isAllowedCardUrl(String value) {
-        try {
-            Uri uri = Uri.parse(value);
-            String path = uri.getPath();
-            return "https".equalsIgnoreCase(uri.getScheme())
-                    && "chub.ai".equalsIgnoreCase(uri.getHost())
-                    && path != null
-                    && path.matches("^/characters/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+/?$");
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        provider = getIntent().getStringExtra(EXTRA_PROVIDER);
         String url = getIntent().getStringExtra(EXTRA_URL);
-        if (!isAllowedCardUrl(url)) {
+        if (!isAllowedStartUrl(provider, url)) {
             finish();
             return;
         }
-        sessionDir = new File(new File(getFilesDir(), "chub-pending"), String.valueOf(System.currentTimeMillis()));
-        if (!sessionDir.mkdirs() && !sessionDir.isDirectory()) {
-            Toast.makeText(this, "Impossible de préparer l’import interne.", Toast.LENGTH_LONG).show();
-            finish();
-            return;
+        if ("chub".equals(provider)) {
+            sessionDir = new File(new File(getFilesDir(), "chub-pending"), String.valueOf(System.currentTimeMillis()));
+            if (!sessionDir.mkdirs() && !sessionDir.isDirectory()) {
+                Toast.makeText(this, "Impossible de préparer l’import interne.", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
         }
 
         LinearLayout page = new LinearLayout(this);
         page.setOrientation(LinearLayout.VERTICAL);
         TextView note = new TextView(this);
-        note.setText("Chub · les cartes téléchargées seront ajoutées à Ma bibliothèque au retour");
+        note.setText("botbooru".equals(provider)
+                ? "Botbooru · ouvre une fiche puis touche « Importer cette fiche »"
+                : "Chub AI · télécharge la carte et son PNG; l’ajout se fait au retour");
         note.setPadding(16, 12, 16, 12);
         page.addView(note, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -78,8 +73,11 @@ public final class ChubBrowserActivity extends Activity {
         page.addView(browser, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
         Button close = new Button(this);
-        close.setText("Retour à Léa Studio");
-        close.setOnClickListener(view -> finish());
+        close.setText("botbooru".equals(provider) ? "Importer cette fiche" : "Retour à Léa Studio");
+        close.setOnClickListener(view -> {
+            if ("botbooru".equals(provider)) importCurrentBotbooruPage();
+            else finish();
+        });
         page.addView(close, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         setContentView(page);
@@ -97,9 +95,42 @@ public final class ChubBrowserActivity extends Activity {
                 return !"https".equalsIgnoreCase(request.getUrl().getScheme());
             }
         });
-        browser.setDownloadListener(new ChubDownloadListener(this, sessionDir));
+        if ("chub".equals(provider)) browser.setDownloadListener(new ChubDownloadListener(this, sessionDir));
         CookieManager.getInstance().setAcceptCookie(true);
         browser.loadUrl(url);
+    }
+
+    private static boolean isAllowedStartUrl(String provider, String value) {
+        try {
+            Uri uri = Uri.parse(value);
+            return "https".equalsIgnoreCase(uri.getScheme())
+                    && uri.getUserInfo() == null
+                    && (("chub".equals(provider) && "chub.ai".equalsIgnoreCase(uri.getHost()))
+                        || ("botbooru".equals(provider) && "botbooru.com".equalsIgnoreCase(uri.getHost())));
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
+
+    private void importCurrentBotbooruPage() {
+        String currentUrl = browser == null ? null : browser.getUrl();
+        if (currentUrl == null || !"botbooru.com".equalsIgnoreCase(Uri.parse(currentUrl).getHost())) {
+            Toast.makeText(this, "Ouvre d’abord une fiche sur Botbooru.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String path = Uri.parse(currentUrl).getPath();
+        java.util.regex.Matcher match = java.util.regex.Pattern
+                .compile("/(?:post|posts)/(\\d{1,12})(?:/|$)", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(path == null ? "" : path);
+        if (!match.find()) {
+            Toast.makeText(this, "Cette adresse ne contient pas d’identifiant de personnage reconnu.", Toast.LENGTH_LONG).show();
+            return;
+        }
+        String id = match.group(1);
+        getSharedPreferences("lea_catalog_import", MODE_PRIVATE)
+                .edit().putString(BOTBOORU_PENDING_ID, id).apply();
+        Toast.makeText(this, "Fiche trouvée. Téléchargement et import dans Léa Studio…", Toast.LENGTH_LONG).show();
+        finish();
     }
 
     @Override
