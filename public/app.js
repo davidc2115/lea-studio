@@ -342,16 +342,19 @@ function renderDiscover() {
         const scenario = String(item.scenario || "").replace(/\s+/g, " ").trim();
         const summary = scenario.length > 150 ? scenario.slice(0, 147).trimEnd() + "…" : (scenario || "Scénario non renseigné.");
         const id = escapeHtml(item.id);
+        const canDelete = String(item.id) !== "lea";
         return `<article class="discover-card${item.id === c.id ? " is-active" : ""}">
           ${src
             ? `<img class="discover-image" src="${escapeHtml(src)}" alt="" loading="lazy" onerror="this.classList.add('cover-broken');this.removeAttribute('src');" />`
             : '<div class="discover-image discover-placeholder" role="img" aria-label="Image de personnage indisponible">🖼️</div>'}
+          <div class="discover-name">${escapeHtml(item.name || "Sans nom")}</div>
           <div class="discover-overlay">
             <div class="discover-tags">${tags}</div>
             <p class="discover-scenario">${escapeHtml(summary)}</p>
             <div class="discover-actions">
               <button type="button" class="discover-action discover-chat" data-character-id="${id}">💬 Discuter</button>
               <button type="button" class="discover-action discover-profile" data-character-id="${id}">Profil</button>
+              ${canDelete ? `<button type="button" class="discover-action discover-delete" data-character-id="${id}" title="Supprimer">🗑️</button>` : ""}
             </div>
           </div>
         </article>`;
@@ -373,6 +376,25 @@ function renderDiscover() {
       if (!selected) return;
       if (selected.id !== state.character.id) activateCharacter(selected);
       showView("profile");
+    };
+  });
+  root.querySelectorAll(".discover-delete").forEach((button) => {
+    button.onclick = (e) => {
+      e.stopPropagation();
+      const id = String(button.dataset.characterId || "");
+      if (!id || id === "lea") return;
+      const selected = characters.find((item) => String(item.id) === id);
+      const label = selected && selected.name ? selected.name : id;
+      if (!confirm("Supprimer définitivement « " + label + " » de ta bibliothèque ?")) return;
+      state.importedCharacters = (state.importedCharacters || []).filter((item) => String(item.id) !== id);
+      localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+      try { localStorage.removeItem("lea.chat." + id); } catch (_) {}
+      try { localStorage.removeItem("lea.memory." + id); } catch (_) {}
+      if (state.character && String(state.character.id) === id) {
+        state.character = state.leaCharacter || state.character;
+        localStorage.setItem("lea.activeCharacterId", "lea");
+      }
+      renderDiscover();
     };
   });
 }
@@ -887,7 +909,10 @@ async function generateProfileImage() {
       const stored = persistGeneratedImage(targetId, dataUrl);
       const next = persistImageToCharacter(targetId, stored, jobChar);
       state.genRunning = false;
-      setGenBanner("✓ Image ajoutée au profil de " + String(next.name || "la personne choisie"), "ok");
+      const via = res.fallbackFrom === "horde"
+        ? " (Horde indisponible → Cloudflare)"
+        : (res.engine === "horde" ? " via Horde" : "");
+      setGenBanner("✓ Image ajoutée au profil de " + String(next.name || "la personne choisie") + via, "ok");
       if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
         try { renderProfile(); } catch (_) {}
       }

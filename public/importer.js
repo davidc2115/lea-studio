@@ -150,6 +150,22 @@
     });
   }
 
+
+  function resolveImportAge(data, adapted) {
+    const explicit = explicitAge(data);
+    if (Number.isInteger(explicit) && explicit >= 18) return explicit;
+    if (Number.isInteger(explicit) && explicit < 18) {
+      throw new Error("Import refusé : âge source inférieur à 18 ans.");
+    }
+    const est = adapted && Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null;
+    if (est != null && est < 18) throw new Error("Import refusé : estimation d'âge inférieure à 18 ans.");
+    if (est != null && est >= 18) return est;
+    return null; // majeur non prouvé → case à cocher à la génération
+  }
+
+  function resolveImportBust(data, adapted) {
+    return importedBustSize(data) || String((adapted && adapted.bustEstimate) || "").trim() || "";
+  }
   async function importChubCard(root) {
     const button = root.querySelector("#chub-import");
     const jsonFile = root.querySelector("#chub-json")?.files?.[0];
@@ -187,7 +203,7 @@
         const localKey = window.LeaAndroid.saveGalleryImage(id, imageDataUrl);
         if (localKey && String(localKey).indexOf("gallery:") === 0) cover = localKey;
       }
-      const age = explicitAge(data);
+      const age = resolveImportAge(data, adapted);
       const originalScenario = String(data.scenario || "");
       const originalGreeting = String(data.first_mes || data.greeting || "");
       const character = {
@@ -202,12 +218,16 @@
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
         appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
-        Poitrine: importedBustSize(data),
+        Poitrine: resolveImportBust(data, adapted),
         bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
         estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
         nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
-        system_extra: age >= 18
-          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+        system_extra: (age >= 18)
+          ? ("Personnage importé (majeur). Respecte scénario et tempérament. " +
+             (String(adapted.nonHumanTraits || "").trim()
+               ? "Traits non humains à conserver : " + String(adapted.nonHumanTraits).trim() + ". "
+               : "") +
+             "L'intimité reste facultative et réciproque.")
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
         source: "Chub",
         sourceUrl,
@@ -266,7 +286,7 @@
         const localKey = bridge.saveGalleryImage(id, image);
         if (localKey && String(localKey).startsWith("gallery:")) cover = localKey;
       }
-      const age = explicitAge(data);
+      const age = resolveImportAge(data, adapted);
       const originalScenario = String(data.scenario || "");
       const originalGreeting = String(data.first_mes || data.greeting || "");
       const character = {
@@ -276,12 +296,16 @@
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
          appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
-        Poitrine: importedBustSize(data),
+        Poitrine: resolveImportBust(data, adapted),
          bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
          estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
          nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
-        system_extra: age >= 18
-          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+        system_extra: (age >= 18)
+          ? ("Personnage importé (majeur). Respecte scénario et tempérament. " +
+             (String(adapted.nonHumanTraits || "").trim()
+               ? "Traits non humains à conserver : " + String(adapted.nonHumanTraits).trim() + ". "
+               : "") +
+             "L'intimité reste facultative et réciproque.")
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
         source: "Chub",
         sourceUrl: normalizeChubUrl("https://chub.ai/characters/" + String(meta.full_path || "")),
@@ -385,7 +409,7 @@
         const localKey = window.LeaAndroid.saveGalleryImage(id, compact);
         if (localKey && String(localKey).indexOf("gallery:") === 0) cover = localKey;
       }
-      const age = explicitAge(data);
+      const age = resolveImportAge(data, adapted);
       const originalScenario = String(data.scenario || "");
       const originalGreeting = String(data.first_mes || data.greeting || "");
       const character = {
@@ -400,12 +424,16 @@
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
         appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
-        Poitrine: importedBustSize(data),
+        Poitrine: resolveImportBust(data, adapted),
         bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
         estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
         nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
-        system_extra: age >= 18
-          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+        system_extra: (age >= 18)
+          ? ("Personnage importé (majeur). Respecte scénario et tempérament. " +
+             (String(adapted.nonHumanTraits || "").trim()
+               ? "Traits non humains à conserver : " + String(adapted.nonHumanTraits).trim() + ". "
+               : "") +
+             "L'intimité reste facultative et réciproque.")
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
         source: "Botbooru",
         sourceUrl: `https://botbooru.com/post/${encodeURIComponent(post.id)}`,
@@ -440,7 +468,7 @@
         <label class="hint" for="import-tags" style="display:block;margin-top:10px">Tags supplémentaires</label>
         <input class="edit-input" id="import-tags" placeholder="Ex. fantasy, romance" />
         <button type="button" class="btn btn-primary" id="import-search" style="margin-top:12px">Rechercher</button>
-        <p class="hint import-status" id="import-status">Les résultats sont limités au contenu tout public.</p>
+        <p class="hint import-status" id="import-status">Recherche Botbooru (SFW + NSFW). Les fiches NSFW sont acceptées si le personnage est clairement majeur (18+).</p>
       </div>
       <div id="import-results" class="import-results"></div>
       <div class="section chub-import-section">
