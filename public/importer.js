@@ -83,8 +83,45 @@
 
   function explicitAge(data) {
     const raw = data && data.age;
-    const value = Number(raw);
+    const match = String(raw == null ? "" : raw).match(/^\s*(\d{1,3})\s*(?:\+|ans?|years?\s*old)?\s*$/i);
+    const value = match ? Number(match[1]) : NaN;
     return Number.isInteger(value) && value >= 1 && value <= 120 ? value : null;
+  }
+
+  function canonicalLea(data) {
+    const profile = window.__LEA_DEFAULT__;
+    if (!profile || !profile.name) return null;
+    const normalize = (value) => String(value || "").toLowerCase().replace(/é/g, "e").replace(/[^a-z0-9]/g, "");
+    const name = data && (data.name || data.char_name);
+    return normalize(name) === normalize(profile.name) ? profile : null;
+  }
+
+  function importedBustSize(data) {
+    const d = data || {};
+    const lea = canonicalLea(d);
+    if (lea) return String(lea.Poitrine || "");
+    const source = d.sourceCard && d.sourceCard.data && typeof d.sourceCard.data === "object"
+      ? d.sourceCard.data
+      : (d.sourceCard || {});
+    const explicit = d.Poitrine || d.poitrine || source.Poitrine || source.poitrine;
+    if (explicit != null && String(explicit).trim()) return String(explicit).trim();
+    return "";
+  }
+
+  function importedAppearance(data, visionAppearance) {
+    const d = data || {};
+    const ext = d.extensions && typeof d.extensions === "object" ? d.extensions : {};
+    const canonical = canonicalLea(d);
+    const explicit = [
+      d.appearance, d.physical_description, d.physicalDescription, d.physical_desc,
+      d.description_physical, ext.appearance, ext.physical_description,
+    ].map((value) => String(value || "").trim()).find(Boolean);
+    let result = (canonical && String(canonical.appearance || "").trim()) || explicit || String(visionAppearance || "").trim();
+    const bust = importedBustSize(d);
+    if (bust && !result.toLowerCase().includes(bust.toLowerCase())) {
+      result = (result ? result + "\n\n" : "") + "Poitrine — taille canonique : " + bust + ".";
+    }
+    return result;
   }
 
   function normalizeChubUrl(value) {
@@ -158,7 +195,8 @@
         scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: String(adapted.appearance || ""),
+        appearance: importedAppearance(data, adapted.appearance),
+        Poitrine: importedBustSize(data),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
@@ -228,7 +266,8 @@
         cover, gallery: [cover], scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: String(adapted.appearance || ""),
+        appearance: importedAppearance(data, adapted.appearance),
+        Poitrine: importedBustSize(data),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
@@ -338,7 +377,8 @@
         scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: String(adapted.appearance || ""),
+        appearance: importedAppearance(data, adapted.appearance),
+        Poitrine: importedBustSize(data),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
