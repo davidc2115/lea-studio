@@ -94,8 +94,17 @@ public class LeaBridge {
         File[] sessions = root.listFiles(File::isDirectory);
         if (sessions == null) return "";
         java.util.Arrays.sort(sessions, (a, b) -> b.getName().compareTo(a.getName()));
+        long nowMs = System.currentTimeMillis();
         for (File session : sessions) {
             if (!session.getName().matches("\\d{12,17}")) continue;
+            try {
+                long ts = Long.parseLong(session.getName());
+                if (nowMs - ts > 2L * 60L * 60L * 1000L) {
+                    deleteChubPendingTree(session);
+                    continue;
+                }
+            } catch (Exception ignoredAge) {}
+
             File jsonFile = new File(session, "card.json");
             File pngFile = new File(session, "card.png");
             try {
