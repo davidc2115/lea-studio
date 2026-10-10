@@ -220,22 +220,21 @@
     const c = char || LEA;
     const age = c.age || 18;
     const isAdult = Number(age) >= 18;
-    const bust = profileBustSpecification(c);
+    const bust = isAdult ? profileBustSpecification(c) : "";
     const options = extra && typeof extra === "object" ? extra : { note: extra || "" };
     // L'identité vient de la photo de profil étoilée; le texte renforce les mêmes traits.
     const faceLock =
-      "Use input_image_0 as the identity reference for the same adult woman. Preserve her recognizable face, facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
+      "Use input_image_0 as the identity reference for the same " + (isAdult ? "adult woman" : "young person") + ". Preserve recognizable facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
       "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
-    const bodyLock =
-      age + " years old, natural hourglass proportions, " +
+    const bodyLock = isAdult
+      ? age + " years old, natural hourglass proportions, " +
       (bust
         ? "preserve her explicitly specified " + bust + " bust exactly, visibly full and proportionate with clear natural forward projection; do not reduce the recorded size, "
         : "preserve the bust proportions stated in her appearance and reference; do not invent a cup size or reduce her described proportions, ") +
-      (isAdult
-        ? "wear the selected outfit exactly as specified; let the fabric follow her natural silhouette without compressing her chest, "
-        : "wear age-appropriate opaque clothing that follows her natural silhouette without compressing her chest, ") +
+      "wear the selected outfit exactly as specified; let the fabric follow her natural silhouette without compressing her chest, " +
       "rounded hips, long toned legs, " +
-      "very long straight dark brown hair to the lower back, center or side part, silky texture,";
+      "very long straight dark brown hair to the lower back, center or side part, silky texture,"
+      : age + " years old, age-appropriate natural proportions; modest opaque age-appropriate clothing, neutral posture, no emphasis on chest or curves,";
 
     const outfits = [
       { id: "rain-lace", prompt: "semi-sheer black lace crop top, rain-wet and clinging tastefully, layered over an opaque underlayer, tight dark wet jeans" },
