@@ -197,7 +197,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">Le prompt utilise tout le descriptif physique + la tenue du scénario (orage / trempée). Pose aléatoire à chaque fois.</p>
+      <p class="hint">Corps entier, pose sexy/provocante aléatoire, tenue scénario (trempée) ou lingerie. Jamais un simple portrait.</p>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>

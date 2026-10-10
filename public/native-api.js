@@ -123,40 +123,73 @@
     return creds;
   }
 
-  /** Prompt physique strict à partir de la fiche personnage */
+  /** Prompt physique strict — corps entier, poses sexy/variées (pas de portrait seul) */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
-    const appearance = String(c.appearance || "")
-      .replace(/[👤🖼️👁️👃👄💇👗💕🍑🦵✨眉毛]/g, " ")
-      .replace(/\n+/g, ", ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 1200);
-    const scenarioHint = /orage|tremp|pluie|mouill/i.test(String(c.scenario || "") + " " + String(c.greeting || ""))
-      ? "soaked wet clothes from rain storm, wet dark skinny jeans clinging to legs, short white crop top stuck to skin, long wet dark brown hair clinging to back,"
-      : "stylish casual outfit matching her role,";
+    // Identité courte (visage + corps), sans noyer le prompt en détails de peau
+    const identity =
+      age + " year old French woman, oval delicate face, porcelain fair skin, large almond hazel-green eyes with golden flecks, " +
+      "dark brown thick arched eyebrows, fine straight nose, full soft pink lips, " +
+      "very long straight dark brown hair down to lower back, " +
+      "slim hourglass figure, narrow shoulders, tiny waist, generous 95D full bust, rounded hips, long toned legs";
+
+    const wetOutfits = [
+      "soaked from rain storm: tight wet dark skinny jeans clinging to thighs and hips, short tight white crop top stuck translucent to skin and cleavage, no jacket, wet hair dripping on shoulders and back",
+      "just entered from storm: dripping wet dark skinny jeans, soaked white short crop top clinging to 95D bust, water droplets on collarbones, wet long hair plastered to face and back",
+      "standing in hallway after rain: wet clinging skinny jeans, crop top molded to body, bare midriff wet, hair soaked straight down the back",
+    ];
+    const sexyOutfits = [
+      "sheer red lace lingerie set, matching bra and panties, soft indoor light",
+      "short black mini skirt and deep V white blouse slightly open, strappy heels",
+      "satin champagne babydoll nightie, thin straps, thigh-length hem",
+      "ivory lace bra and high-waist briefs on a bed, sensual lounge pose",
+      "tight white shirt tied under the bust and black mini skirt, doorway pose",
+    ];
+    const isStorm = /orage|tremp|pluie|mouill/i.test(String(c.scenario || "") + " " + String(c.greeting || ""));
+    const outfitPool = isStorm ? wetOutfits.concat(sexyOutfits) : sexyOutfits.concat(wetOutfits);
+    const outfit = outfitPool[Math.floor(Math.random() * outfitPool.length)];
+
     const poses = [
-      "standing three-quarter view, shy soft smile looking at camera, full body",
-      "leaning in doorway, arms lightly crossed, timid expression, full body",
-      "sitting on edge of sofa, looking up, wet hair, three-quarter body",
-      "standing near window, rain outside, soft natural light, full body",
-      "slightly turned, looking over shoulder, coy expression, full body",
-      "kneeling by fireplace warming hands, wet clothes, full body",
+      "FULL BODY wide shot head to toe, standing in doorway leaning on frame, arched back, looking at camera with shy coy smile",
+      "FULL BODY from slightly low angle, leaning forward showing cleavage, hands on thighs, playful teasing look",
+      "FULL BODY three-quarter view, looking over shoulder at camera, weight on one leg, arched lower back, sensual",
+      "FULL BODY kneeling on rug by fireplace, sitting back on heels, wet clothes, looking up with soft smile",
+      "FULL BODY sitting on edge of bed or sofa, legs crossed, torso upright, inviting gaze",
+      "FULL BODY standing near window with rain outside, one hand in wet hair, hip cocked, body fully visible",
+      "FULL BODY on all fours on bed looking back over shoulder, playful expression, entire body in frame",
+      "FULL BODY lying on side on bed propped on elbow, curves visible, looking at camera",
+      "FULL BODY standing mirror pose, hands adjusting wet crop top, body in frame from head to feet",
+      "FULL BODY walking toward camera in hallway, confident hips, complete figure visible",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
+
+    const scenes = [
+      "cozy living room with warm lamp light",
+      "apartment hallway with wooden door",
+      "bedroom with white sheets soft bokeh",
+      "near a window with rain streaks",
+      "by a fireplace orange glow",
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+
     const base = [
-      "photorealistic photograph of a real young woman,",
-      age + " years old,",
-      "named character identity lock,",
-      appearance + ",",
-      scenarioHint,
+      "photorealistic DSLR photo of a real person, not a painting, not CGI,",
+      identity + ",",
+      outfit + ",",
       pose + ",",
-      "natural skin texture, realistic proportions, 95D generous bust as described, hourglass figure, porcelain fair skin, hazel-green eyes, long straight dark brown hair to lower back,",
-      "shot on 85mm lens, soft daylight, high detail, 8k, no text, no watermark, no cartoon, no anime, no deformed hands",
+      "environment: " + scene + ",",
+      "camera: 35mm lens, f/2.8, full-length framing, subject fully visible head to toe, generous negative space,",
+      "natural skin pores, realistic fabric wetness when wet, accurate 95D breast size, no exaggeration to cartoon,",
+      "sharp focus, high detail, 8k photo,",
+      "IMPORTANT: full body visible, not a face crop, not a headshot, not a close-up portrait, not upper body only,",
+      "no text, no watermark, no extra limbs, no deformed hands, no anime, no illustration",
     ].join(" ");
-    if (extra) return (base + ", " + String(extra).slice(0, 200)).slice(0, 2048);
-    return base.slice(0, 2048);
+
+    let out = base;
+    if (extra) out += ", " + String(extra).slice(0, 180);
+    // FLUX Schnell ~2048 chars max useful
+    return out.slice(0, 2000);
   }
 
   async function generateCloudflareImage(prompt, st) {
