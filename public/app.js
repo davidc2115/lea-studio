@@ -194,7 +194,7 @@ function showView(name) {
     b.classList.toggle("active", b.dataset.view === name || (name === "profile" && b.dataset.view === "discover"));
   });
   if (name === "discover") renderDiscover();
-  if (name === "profile") renderProfile();
+  if (name === "profile") { try { renderProfile(); } catch (error) { console.error("Affichage du profil impossible", error); const root = $("view-profile"); if (root) root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Cette fiche ne peut pas être affichée.</strong><span>Les données importées sont peut-être incomplètes. Réessaie après avoir relancé l’application.</span></div>'; } }
   if (name === "chat") renderChat();
   if (name === "settings") renderSettings();
   if (name === "import" && window.LeaImporter) window.LeaImporter.render($("view-import"));
@@ -272,73 +272,73 @@ function renderDiscover() {
   const root = $("view-discover");
   if (!root) return;
   if (!c) {
-    root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Le profil n’a pas pu se charger.</strong><span>Réessaie en touchant « Découvrir » ou ferme puis relance l’application.</span></div>';
+    root.innerHTML = `
+      <div class="startup-state startup-state--error" role="alert">
+        <strong>Le profil n’a pas pu se charger.</strong>
+        <span>Réessaie en touchant « Découvrir » ou ferme puis relance l’application.</span>
+      </div>`;
     return;
   }
-  const cover = c.cover || (c.gallery && c.gallery[0]) || "";
-  const coverSrc = resolveImgSrc(cover);
-  const tags = (c.tags || []).map(renderTagChip).join("");
+  const candidates = [c, state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+    .filter(Boolean);
+  const seen = new Set();
+  const characters = candidates.filter((item) => {
+    const id = String(item.id || "");
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
   root.innerHTML = `
-    <div class="hero-card">
-      ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
-      <div class="hero-gradient">
-        <h1>💜 ${escapeHtml(c.name)}</h1>
-        <div class="meta">${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</div>
-        <div class="tags">${tags}</div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary" id="go-chat">💬 Discuter</button>
-          <button type="button" class="btn btn-secondary" id="go-profile">👤 Profil</button>
-        </div>
-      </div>
+    <div class="discover-grid">
+      ${characters.map((item) => {
+        const cover = item.cover || (Array.isArray(item.gallery) && item.gallery[0]) || "";
+        const src = resolveImgSrc(cover);
+        const tags = (Array.isArray(item.tags) ? item.tags : []).slice(0, 8).map(renderTagChip).join("");
+        const scenario = String(item.scenario || "").replace(/\s+/g, " ").trim();
+        const summary = scenario.length > 150 ? scenario.slice(0, 147).trimEnd() + "…" : (scenario || "Scénario non renseigné.");
+        const id = escapeHtml(item.id);
+        return `<article class="discover-card${item.id === c.id ? " is-active" : ""}">
+          ${src
+            ? `<img class="discover-image" src="${escapeHtml(src)}" alt="" loading="lazy" onerror="this.classList.add('cover-broken');this.removeAttribute('src');" />`
+            : '<div class="discover-image discover-placeholder" role="img" aria-label="Image de personnage indisponible">🖼️</div>'}
+          <div class="discover-overlay">
+            <div class="discover-tags">${tags}</div>
+            <p class="discover-scenario">${escapeHtml(summary)}</p>
+            <div class="discover-actions">
+              <button type="button" class="discover-action discover-chat" data-character-id="${id}">💬 Discuter</button>
+              <button type="button" class="discover-action discover-profile" data-character-id="${id}">Profil</button>
+            </div>
+          </div>
+        </article>`;
+      }).join("")}
     </div>
-    <div class="section">
-      <h2>🌧️ Scénario</h2>
-      <p>${(c.scenario || "").slice(0, 280)}${(c.scenario || "").length > 280 ? "…" : ""}</p>
-    </div>
-    <div class="section">
-      <h2>💌 Message d'accueil</h2>
-      <div class="greeting-box">
-        <div class="label">Premier message de ${escapeHtml(c.name)}</div>
-        <div class="body-text">${formatMessageHtml(c.greeting || "")}</div>
-      </div>
-    </div>
-    ${state.importedCharacters.length ? `
-      <div class="section">
-        <h2>📚 Ma bibliothèque</h2>
-        <div class="import-library">
-          <button type="button" class="import-library-card" id="activate-lea">
-            <span class="cover-placeholder">💜</span>
-            <span><strong>Léa Moreau</strong><small>Personnage d’origine</small></span>
-          </button>
-          ${state.importedCharacters.map((item) => {
-            const src = resolveImgSrc(item.cover || "");
-            return `<button type="button" class="import-library-card" data-character-id="${escapeHtml(item.id)}">
-              ${src ? `<img src="${escapeHtml(src)}" alt="" />` : '<span class="cover-placeholder">🖼️</span>'}
-              <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.title || "Personnage importé")}</small></span>
-            </button>`;
-          }).join("")}
-        </div>
-      </div>
-    ` : ""}
   `;
-  $("go-chat") && ($("go-chat").onclick = () => { showView("chat"); });
-  $("go-profile") && ($("go-profile").onclick = () => { showView("profile"); });
-  root.querySelectorAll("[data-character-id]").forEach((button) => {
+  root.querySelectorAll(".discover-chat").forEach((button) => {
     button.onclick = () => {
-      const selected = state.importedCharacters.find((item) => item.id === button.dataset.characterId);
-      if (selected) activateCharacter(selected);
+      const selected = characters.find((item) => String(item.id) === button.dataset.characterId);
+      if (!selected) return;
+      if (selected.id !== state.character.id) activateCharacter(selected);
+      showView("chat");
     };
   });
-  const leaButton = $("activate-lea");
-  if (leaButton) leaButton.onclick = () => activateCharacter(state.leaCharacter);
+  root.querySelectorAll(".discover-profile").forEach((button) => {
+    button.onclick = () => {
+      const selected = characters.find((item) => String(item.id) === button.dataset.characterId);
+      if (!selected) return;
+      if (selected.id !== state.character.id) activateCharacter(selected);
+      showView("profile");
+    };
+  });
 }
 
 function renderProfile() {
   const c = state.character;
   const root = $("view-profile");
-  if (!c || !root) return;
+  if (!root) return;
+  if (!c) { root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Aucun personnage sélectionné.</strong><span>Retourne dans « Découvrir » et choisis une fiche.</span></div>'; return; }
   const edit = state.editMode;
-  const gallery = c.gallery || [];
+  const gallery = Array.isArray(c.gallery) ? c.gallery : [];
+  const tags = Array.isArray(c.tags) ? c.tags : [];
   const coverSrc = resolveImgSrc(c.cover || gallery[0] || "");
   const field = (key, label, emoji, multiline) => {
     const val = c[key] || "";
@@ -372,7 +372,7 @@ function renderProfile() {
         <label class="hint" style="margin-top:8px">Titre</label>
         <input class="edit-input" data-field="title" value="${(c.title || "").replace(/"/g, "&quot;")}" />
         <label class="hint" style="margin-top:8px">Tags (virgules)</label>
-        <input class="edit-input" data-field="tags" value="${(c.tags || []).join(", ")}" />
+        <input class="edit-input" data-field="tags" value="${tags.map((tag) => typeof tag === "string" ? tag : tag.name || "").join(", ")}" />
         <label class="hint" style="margin-top:8px">Image de couverture (chemin)</label>
         <input class="edit-input" data-field="cover" value="${(c.cover || "").replace(/"/g, "&quot;")}" />
       </div>
@@ -390,8 +390,8 @@ function renderProfile() {
         <label class="hint" style="display:block;margin-top:10px">Message d'accueil d'origine (inchangé)</label>
         <div class="body-text">${escapeHtml(c.sourceGreeting || "Aucun message source.")}</div>
         <details class="source-card-details">
-          <summary>Afficher la fiche source complète</summary>
-          <pre>${escapeHtml(JSON.stringify(c.sourceCard || {}, null, 2))}</pre>
+          <summary>Afficher un aperçu de la fiche source</summary>
+          <pre>Ouvre cette section pour charger l’aperçu.</pre>
         </details>
       </div>
     ` : ""}
@@ -464,6 +464,16 @@ function renderProfile() {
     `}
   `;
 
+  const sourceDetails = root.querySelector(".source-card-details");
+  if (sourceDetails) {
+    sourceDetails.addEventListener("toggle", () => {
+      if (!sourceDetails.open || sourceDetails.dataset.loaded) return;
+      sourceDetails.dataset.loaded = "true";
+      const preview = sourceDetails.querySelector("pre");
+      try { const source = JSON.stringify(c.sourceCard || {}, null, 2); preview.textContent = source.length > 12000 ? source.slice(0, 12000) + "\n… (aperçu tronqué)" : source; }
+      catch (_) { preview.textContent = "La fiche source ne peut pas être affichée."; }
+    });
+  }
   root.querySelectorAll(".gal-img-btn").forEach((btn) => {
     btn.onclick = () => openLightbox(Number(btn.dataset.i) || 0);
   });

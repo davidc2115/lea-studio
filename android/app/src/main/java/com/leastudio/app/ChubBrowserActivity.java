@@ -156,6 +156,29 @@ public final class ChubBrowserActivity extends Activity {
             return;
         }
 
+        // Botbooru can show the post ID in its Stats panel without putting it
+        // in the URL or download button attributes (for example, "Id: 65333").
+        // This is page content, not a probe of an unverified catalogue route.
+        browser.evaluateJavascript(
+                "(function(){var text=(document.body&&document.body.innerText)||'';"
+                        + "var m=text.match(/(?:^|\\n)\\s*(?:post\\s+)?id\\s*[:#]\\s*(\\d{1,12})\\b/im);"
+                        + "return m?m[1]:'';})()",
+                value -> {
+                    try {
+                        Object parsed = new JSONTokener(value == null ? "\"\"" : value).nextValue();
+                        String id = String.valueOf(parsed);
+                        if (id.matches("\\d{1,12}")) {
+                            queueBotbooruImport(id);
+                        } else {
+                            findBotbooruDownloadControl();
+                        }
+                    } catch (Exception error) {
+                        findBotbooruDownloadControl();
+                    }
+                });
+    }
+
+    private void findBotbooruDownloadControl() {
         // Some Botbooru pages use slugs instead of numeric paths. Read the allowed
         // download links already rendered by the page, including buttons exposing
         // their download target in a data attribute; do not probe catalogue routes.
@@ -182,7 +205,7 @@ public final class ChubBrowserActivity extends Activity {
                         else if ("clicked".equals(id)) {
                             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                                 if (!isFinishing()) Toast.makeText(this,
-                                        "Téléchargement JSON déclenché. Si l’import ne démarre pas, touche Download JSON sur la fiche.",
+                                        "Le bouton JSON a été activé, mais le lien de téléchargement n’a pas été capturé. Touche Download JSON puis réessaie.",
                                         Toast.LENGTH_LONG).show();
                             }, 1800);
                         } else Toast.makeText(this, "Fiche reconnue sans bouton Download JSON. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
