@@ -1120,8 +1120,12 @@ function bindNav() {
     await initCharacter();
     // Toujours rouvrir sur Découvrir (pas Import)
     showView("discover");
-    // Imports en attente seulement si l’utilisateur vient de télécharger une carte
-    // (ne force pas l’onglet Import à chaque retour dans l’app)
+    // Double-sécurité: si quelque chose bascule vers Import juste après le boot, revenir
+    setTimeout(() => {
+      try {
+        if (state.view === "import") showView("discover");
+      } catch (_) {}
+    }, 1200);
   } catch (error) {
     console.error("Léa Studio startup failed", error);
     const root = $("view-discover");

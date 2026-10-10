@@ -479,5 +479,22 @@
     return false;
   }
 
-  window.LeaImporter = { render, checkPendingChub, resumePendingImports, checkPendingBotbooru, hasPendingWork };
+  /** Uniquement si carte téléchargée récemment — ne rouvre pas Import au simple retour dans l'app */
+  async function resumePendingImportsIfFresh() {
+    try {
+      await checkPendingBotbooru(); // consomme id une seule fois
+      await checkPendingChub();
+    } catch (e) {
+      console.error("resumePendingImportsIfFresh", e);
+    }
+  }
+
+  window.LeaImporter = {
+    render,
+    checkPendingChub,
+    resumePendingImports,
+    resumePendingImportsIfFresh,
+    checkPendingBotbooru,
+    hasPendingWork,
+  };
 })();

@@ -39,7 +39,7 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                checkPendingChubImport();
+                // Ne pas ouvrir Import au démarrage — uniquement Découvrir
             }
         });
         web.setWebChromeClient(new WebChromeClient() {
@@ -70,16 +70,18 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (web != null) web.postDelayed(this::checkPendingChubImport, 700);
+        // Import auto uniquement si une carte FRAÎCHE est en attente (JS décide)
+        if (web != null) web.postDelayed(this::checkPendingChubImport, 900);
     }
 
     private void checkPendingChubImport() {
-        if (web != null) {
-            // N'ouvre Import que s'il y a une carte en attente (géré côté JS)
-            web.evaluateJavascript(
-                    "(function(){try{if(window.LeaImporter&&window.LeaImporter.hasPendingWork&&window.LeaImporter.hasPendingWork()){window.LeaImporter.resumePendingImports();}else if(window.LeaImporter&&window.LeaImporter.resumePendingImports){window.LeaImporter.resumePendingImports();}}catch(e){}})();",
-                    null);
-        }
+        if (web == null) return;
+        web.evaluateJavascript(
+                "(function(){try{"
+                + "if(window.LeaImporter&&window.LeaImporter.resumePendingImportsIfFresh)"
+                + "{window.LeaImporter.resumePendingImportsIfFresh();}"
+                + "}catch(e){}})();",
+                null);
     }
 
     private boolean ensureMediaPermission() {
