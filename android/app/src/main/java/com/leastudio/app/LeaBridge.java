@@ -536,7 +536,9 @@ public class LeaBridge {
             conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
             conn.setRequestProperty("Connection", "close");
             conn.setInstanceFollowRedirects(true);
-            conn.setRequestProperty("Referer", "https://chub.ai/");
+            conn.setRequestProperty("Referer", url.contains("botbooru.com")
+                ? "https://botbooru.com/"
+                : "https://chub.ai/");
             int code = conn.getResponseCode();
             if (code >= 400) return "";
             InputStream in = conn.getInputStream();
