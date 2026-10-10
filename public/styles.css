@@ -32,7 +32,16 @@ body {
               var(--bg);
 }
 
-#app { min-height: 100%; display: flex; flex-direction: column; padding-bottom: calc(var(--tab-h) + var(--safe-b)); }
+#app {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: calc(var(--tab-h) + var(--safe-b));
+}
 
 .topbar {
   position: sticky; top: 0; z-index: 20;
@@ -51,7 +60,16 @@ body {
 }
 .icon-btn:active { transform: scale(.96); }
 
-main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14px 24px; }
+main {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 14px 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .view.hidden { display: none !important; }
 .startup-state {
   min-height: 180px;
@@ -280,7 +298,10 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
 .chat-history-picker {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - var(--top-h) - var(--tab-h) - var(--safe-t) - var(--safe-b) - 64px);
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  margin-bottom: 0;
 }
 .chat-history-panel h2 {
   display: flex;
@@ -300,8 +321,9 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-.chat-history-picker .chat-history-list { flex: 1; max-height: none; }
+.chat-history-picker .chat-history-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; }
 .chat-back-button {
+  flex: 0 0 auto;
   width: fit-content;
   margin: 0 0 8px;
   padding: 8px 12px;
@@ -310,6 +332,12 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
   background: rgba(36,16,56,.8);
   color: var(--text);
   font: inherit;
+}
+#view-chat:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 }
 .chat-history-item {
   display: flex;
@@ -347,7 +375,10 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
 .chat-wrap {
   display: flex;
   flex-direction: column;
-  height: clamp(220px, calc(100vh - var(--top-h) - var(--tab-h) - var(--safe-t) - var(--safe-b) - 230px), 620px);
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+  overflow: hidden;
 }
 .chat-header {
   display: flex; align-items: center; gap: 12px; padding: 4px 0 12px;
