@@ -394,7 +394,9 @@ async function generateProfileImage() {
   const btn = $("btn-gen-img");
   const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
-  if (status) status.textContent = "Envoi à Cloudflare Workers AI (FLUX)…";
+  if (status) status.innerHTML = '<span class="status-pill">⏳ Envoi à Cloudflare… (l\'app reste utilisable)</span>';
+  // Laisser le temps au DOM de se peindre avant l'appel long
+  await new Promise((r) => setTimeout(r, 50));
   try {
     const res = await api("/api/image/cloudflare", {
       method: "POST",
@@ -404,7 +406,7 @@ async function generateProfileImage() {
     const dataUrl = res.image;
     // Ajouter en tête de galerie + overrides
     const next = Object.assign({}, c);
-    next.gallery = [dataUrl].concat((c.gallery || []).filter((x) => x !== dataUrl)).slice(0, 40);
+    next.gallery = [dataUrl].concat((c.gallery || []).filter((x) => x !== dataUrl)).slice(0, 12);
     next.cover = dataUrl;
     saveCharOverrides(next);
     state.character = next;

@@ -40,33 +40,59 @@
     const headerLines = Object.keys(headerMap || {})
       .map((k) => k + ": " + headerMap[k])
       .join("\n");
-    const onAndroid = hasNativeBridge() || /Android/i.test(navigator.userAgent || "");
 
-    // 1) Bridge natif (obligatoire sur APK)
-    if (hasNativeBridge()) {
+    // Async bridge: ne bloque pas le WebView (évite freeze pendant FLUX)
+    if (window.LeaAndroid && typeof window.LeaAndroid.httpPostJsonStart === "function"
+        && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
+      try {
+        const jobId = String(window.LeaAndroid.httpPostJsonStart(url, body, headerLines) || "");
+        if (!jobId || jobId === "missing") {
+          return { ok: false, status: 0, json: null, text: "", error: "httpPostJsonStart failed" };
+        }
+        const t0 = Date.now();
+        while (Date.now() - t0 < 150000) {
+          await new Promise((r) => setTimeout(r, 400));
+          let st = "";
+          try { st = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
+            return { ok: false, status: 0, json: null, text: "", error: "poll: " + e.message };
+          }
+          if (st === "pending") continue;
+          if (st === "missing") return { ok: false, status: 0, json: null, text: "", error: "job missing" };
+          let raw = st;
+          if (st.indexOf("done:") === 0) raw = st.slice(5);
+          else if (st.indexOf("error:") === 0) raw = st.slice(6);
+          let json = null;
+          try { json = JSON.parse(raw); } catch (_) {}
+          if (st.indexOf("error:") === 0 || (json && json.error && !json.candidates && !json.result && !json.choices && !json.success)) {
+            const extra = json && json.body ? (" | " + String(json.body).slice(0, 160)) : "";
+            return { ok: false, status: 0, json, text: raw, error: String((json && json.error) || raw).slice(0, 200) + extra };
+          }
+          return { ok: true, status: 200, json: json, text: raw, error: "" };
+        }
+        return { ok: false, status: 0, json: null, text: "", error: "timeout 150s" };
+      } catch (e) {
+        return { ok: false, status: 0, json: null, text: "", error: "async bridge: " + String(e.message || e) };
+      }
+    }
+
+    // Sync bridge (court) — peut bloquer l'UI, à éviter pour les images
+    if (window.LeaAndroid && typeof window.LeaAndroid.httpPostJson === "function") {
       try {
         const raw = String(window.LeaAndroid.httpPostJson(url, body, headerLines) || "");
         let json = null;
         try { json = JSON.parse(raw); } catch (_) {}
         if (json && json.error && !json.candidates && !json.result && !json.choices && !json.success) {
-          const extra = json.body ? (" | " + String(json.body).slice(0, 200)) : "";
+          const extra = json.body ? (" | " + String(json.body).slice(0, 160)) : "";
           return { ok: false, status: 0, json, text: raw, error: String(json.error) + extra };
         }
         return { ok: true, status: 200, json: json, text: raw, error: "" };
       } catch (e) {
-        return { ok: false, status: 0, json: null, text: "", error: "Bridge Android: " + String(e.message || e) };
+        return { ok: false, status: 0, json: null, text: "", error: "Bridge: " + String(e.message || e) };
       }
     }
 
-    // 2) Navigateur (web desktop uniquement)
-    if (onAndroid) {
-      return {
-        ok: false,
-        status: 0,
-        json: null,
-        text: "",
-        error: "Bridge Android absent (LeaAndroid). Réinstalle l'APK du dernier build GitHub.",
-      };
+    if (/Android/i.test(navigator.userAgent || "")) {
+      return { ok: false, status: 0, json: null, text: "", error: "Bridge Android absent — réinstalle l'APK" };
     }
     try {
       const headers = Object.assign({ "Content-Type": "application/json" }, headerMap || {});
@@ -83,6 +109,7 @@
       return { ok: false, status: 0, json: null, text: "", error: "Fetch web: " + String(e.message || e) };
     }
   }
+
 
   function splitKeys(raw) {
     // Accepte AIza…, aq…, gsk_…, sk-… (longueur min 10, pas de filtre de préfixe)

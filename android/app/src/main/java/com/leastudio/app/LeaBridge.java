@@ -6,6 +6,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentHashMap;
 import android.system.Os;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -28,6 +32,9 @@ import java.nio.charset.StandardCharsets;
 public class LeaBridge {
     private final Context ctx;
     private boolean nativeOk;
+    private static final ExecutorService HTTP_POOL = Executors.newCachedThreadPool();
+    private static final ConcurrentHashMap<String, String> HTTP_JOBS = new ConcurrentHashMap<>();
+    private static final AtomicLong HTTP_SEQ = new AtomicLong(1);
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
@@ -202,6 +209,39 @@ public class LeaBridge {
         }
     }
 
+
+
+    @JavascriptInterface
+    public String httpPostJsonStart(final String url, final String jsonBody, final String headersJoined) {
+        final String id = "j" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        HTTP_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String result = httpPostJson(url, jsonBody, headersJoined);
+                    if (result != null && result.length() >= 8 && result.startsWith("{\"error\"")) {
+                        HTTP_JOBS.put(id, "error:" + result);
+                    } else {
+                        HTTP_JOBS.put(id, "done:" + (result != null ? result : ""));
+                    }
+                } catch (Exception e) {
+                    HTTP_JOBS.put(id, "error:{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
+                }
+            }
+        });
+        return id;
+    }
+
+    @JavascriptInterface
+    public String httpPostJsonPoll(String jobId) {
+        if (jobId == null || jobId.length() == 0) return "missing";
+        String v = HTTP_JOBS.get(jobId);
+        if (v == null) return "missing";
+        if (v.equals("pending")) return "pending";
+        HTTP_JOBS.remove(jobId);
+        return v;
+    }
 
     /** GET binaire → data URL base64 (ex: carte PNG Chub). */
     @JavascriptInterface
