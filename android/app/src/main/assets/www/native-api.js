@@ -247,12 +247,14 @@
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
     const scenes = [
-      "a softly lit living room",
-      "a simple apartment hallway",
-      "a quiet reading room",
-      "a garden path in soft daylight",
-      "a clean studio with a subtle neutral background",
-      "a character-appropriate fantasy or science-fiction interior",
+      "cozy living room warm lamp and fireplace glow",
+      "apartment doorway after rain, wet floor reflections",
+      "bedroom soft bokeh fairy lights",
+      "rainy window at night city lights outside",
+      "dim hallway with warm wall light",
+      "bathroom doorway steam soft light",
+      "leather couch living room intimate mood",
+      "character-appropriate fantasy or chic interior",
     ];
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
@@ -269,7 +271,9 @@
       "location: " + scene + ",",
       "portrait-format full-length framing, entire subject visible head to toe with space above and below, medium-wide camera distance, face recognizable, front or front three-quarter view,",
       "match the same character as input_image_0 and preserve its recognizable identity,",
-      "adult sensual fashion portrait, tasteful flirtatious mood; opaque clothing fully covers chest, pelvis and buttocks; no nudity, no exposed nipples or genitals,",
+      "adult woman 18+, sensual seductive provocative fashion, flirty mood,",
+      "sexy outfit preferred: sheer lace, transparent fabric, deep cleavage, lingerie, wet clinging clothes, mini skirt, open blouse,",
+      "alluring pose and body language, glamorous magazine style,",
       "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
@@ -281,6 +285,9 @@
 
   function readableCloudflareImageError(value) {
     const text = String(value || "");
+    if (/3030|content.?polic|nsfw|not.?allowed|unsafe|blocked/i.test(text)) {
+      return "Filtre Cloudflare (contenu). Réessaie une autre pose/tenue, ou utilise AI Horde. " + text.slice(0, 120);
+    }
     return text.slice(0, 200);
   }
 
