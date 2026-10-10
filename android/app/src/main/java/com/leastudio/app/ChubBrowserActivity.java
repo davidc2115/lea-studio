@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.json.JSONTokener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -95,7 +96,59 @@ public final class ChubBrowserActivity extends Activity {
                 return !"https".equalsIgnoreCase(request.getUrl().getScheme());
             }
         });
-        if ("chub".equals(provider)) browser.setDownloadListener(new ChubDownloadListener(this, sessionDir));
+        if ("chub".equals(provider)) {
+            sessionDir = new File(new File(getFilesDir(), "chub-pending"), String.valueOf(System.currentTimeMillis()));
+            if (!sessionDir.mkdirs() && !sessionDir.isDirectory()) {
+                Toast.makeText(this, "Impossible de préparer l’import interne.", Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+        }
+
+        LinearLayout page = new LinearLayout(this);
+        page.setOrientation(LinearLayout.VERTICAL);
+        TextView note = new TextView(this);
+        note.setText("botbooru".equals(provider)
+                ? "Botbooru · ouvre une fiche puis touche « Importer cette fiche »"
+                : "Chub AI · télécharge la carte et son PNG; l’ajout se fait au retour");
+        note.setPadding(16, 12, 16, 12);
+        page.addView(note, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        browser = new WebView(this);
+        page.addView(browser, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+        Button close = new Button(this);
+        close.setText("botbooru".equals(provider) ? "Importer cette fiche" : "Retour à Léa Studio");
+        close.setOnClickListener(view -> {
+            if ("botbooru".equals(provider)) importCurrentBotbooruPage();
+            else finish();
+        });
+        page.addView(close, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        setContentView(page);
+
+        WebSettings settings = browser.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(false);
+        settings.setAllowContentAccess(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        browser.setWebChromeClient(new WebChromeClient());
+        browser.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                return !"https".equalsIgnoreCase(request.getUrl().getScheme());
+            }
+        });
+        if ("chub".equals(provider)) {
+            browser.setDownloadListener(new ChubDownloadListener(this, browser, sessionDir));
+        } else {
+            browser.setDownloadListener((url, userAgent, disposition, mime, length) -> {
+                String id = botbooruDownloadId(url);
+                if (id != null) queueBotbooruImport(id);
+                else Toast.makeText(this, "Téléchargement Botbooru non reconnu. Utilise Download JSON ou PNG sur la fiche.", Toast.LENGTH_LONG).show();
+            });
+        }
         CookieManager.getInstance().setAcceptCookie(true);
         browser.loadUrl(url);
     }
@@ -122,11 +175,41 @@ public final class ChubBrowserActivity extends Activity {
         java.util.regex.Matcher match = java.util.regex.Pattern
                 .compile("/(?:post|posts)/(\\d{1,12})(?:/|$)", java.util.regex.Pattern.CASE_INSENSITIVE)
                 .matcher(path == null ? "" : path);
-        if (!match.find()) {
-            Toast.makeText(this, "Cette adresse ne contient pas d’identifiant de personnage reconnu.", Toast.LENGTH_LONG).show();
+        if (match.find()) {
+            queueBotbooruImport(match.group(1));
             return;
         }
-        String id = match.group(1);
+
+        // Some Botbooru pages use slugs instead of numeric paths. Read the allowed
+        // download links already rendered by the page; do not probe catalogue routes.
+        browser.evaluateJavascript(
+                "(function(){var a=Array.from(document.querySelectorAll('a[href]'));for(var i=0;i<a.length;i++){var m=a[i].href.match(/^https:\\/\\/botbooru\\.com\\/download\\/(?:json|png)\\/(\\d{1,12})(?:[?#].*)?$/i);if(m)return m[1];}return '';})()",
+                value -> {
+                    try {
+                        Object parsed = new JSONTokener(value == null ? "\"\"" : value).nextValue();
+                        String id = String.valueOf(parsed);
+                        if (id.matches("\\d{1,12}")) queueBotbooruImport(id);
+                        else Toast.makeText(this, "ID introuvable dans cette fiche. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
+                    } catch (Exception error) {
+                        Toast.makeText(this, "ID introuvable dans cette fiche. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private static String botbooruDownloadId(String value) {
+        try {
+            Uri uri = Uri.parse(value);
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || !"botbooru.com".equalsIgnoreCase(uri.getHost())) return null;
+            java.util.regex.Matcher match = java.util.regex.Pattern
+                    .compile("^/download/(?:json|png)/(\\d{1,12})/?$", java.util.regex.Pattern.CASE_INSENSITIVE)
+                    .matcher(uri.getPath() == null ? "" : uri.getPath());
+            return match.matches() ? match.group(1) : null;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private void queueBotbooruImport(String id) {
         getSharedPreferences("lea_catalog_import", MODE_PRIVATE)
                 .edit().putString(BOTBOORU_PENDING_ID, id).apply();
         Toast.makeText(this, "Fiche trouvée. Téléchargement et import dans Léa Studio…", Toast.LENGTH_LONG).show();
@@ -141,12 +224,14 @@ public final class ChubBrowserActivity extends Activity {
 
     private static final class ChubDownloadListener implements DownloadListener {
         private final Context context;
+        private final WebView browser;
         private final File sessionDir;
         private final ExecutorService executor = Executors.newSingleThreadExecutor();
         private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-        ChubDownloadListener(Context context, File sessionDir) {
+        ChubDownloadListener(Context context, WebView browser, File sessionDir) {
             this.context = context;
+            this.browser = browser;
             this.sessionDir = sessionDir;
         }
 
@@ -155,6 +240,10 @@ public final class ChubBrowserActivity extends Activity {
                                    String mimeType, long contentLength) {
             try {
                 Uri uri = Uri.parse(url);
+                if ("blob".equalsIgnoreCase(uri.getScheme())) {
+                    captureChubBlob(url, contentDisposition, mimeType);
+                    return;
+                }
                 if (!"https".equalsIgnoreCase(uri.getScheme())) {
                     showToast("Seuls les téléchargements HTTPS sont autorisés.");
                     return;
@@ -179,6 +268,88 @@ public final class ChubBrowserActivity extends Activity {
                 executor.execute(() -> downloadIntoApp(url, agent, target, isJson));
             } catch (Exception error) {
                 showToast("Téléchargement impossible.");
+            }
+        }
+
+        private void captureChubBlob(String url, String disposition, String mimeType) {
+            String page = browser.getUrl();
+            Uri pageUri = Uri.parse(page == null ? "" : page);
+            Uri blobUri = Uri.parse(url.substring("blob:".length()));
+            if (!"https".equalsIgnoreCase(pageUri.getScheme()) || !isChubHost(pageUri.getHost())
+                    || !"https".equalsIgnoreCase(blobUri.getScheme()) || !isChubHost(blobUri.getHost())) {
+                showToast("Export Chub refusé : origine non autorisée.");
+                return;
+            }
+            String script = "(function(){window.__leaChubExportState='loading';window.__leaChubExportValue='';"
+                    + "fetch(" + org.json.JSONObject.quote(url) + ").then(function(r){return r.blob()}).then(function(b){"
+                    + "if(b.size>12582912)throw Error('Fichier trop volumineux');"
+                    + "return new Promise(function(ok,no){var f=new FileReader();f.onload=function(){ok(f.result)};"
+                    + "f.onerror=function(){no(Error('Lecture impossible'))};f.readAsDataURL(b)})"
+                    + "}).then(function(v){window.__leaChubExportValue=v;window.__leaChubExportState='done'})"
+                    + ".catch(function(e){window.__leaChubExportState='error:'+String(e).slice(0,100)});return 'started'})()";
+            browser.evaluateJavascript(script, null);
+            pollChubBlob(0, disposition, mimeType);
+        }
+
+        private void pollChubBlob(int attempt, String disposition, String mimeType) {
+            if (attempt >= 120) {
+                showToast("Délai dépassé pendant la récupération de l’export Chub.");
+                return;
+            }
+            browser.evaluateJavascript("window.__leaChubExportState||''", value -> {
+                String state;
+                try { state = String.valueOf(new JSONTokener(value == null ? "\"\"" : value).nextValue()); }
+                catch (Exception ignored) { state = ""; }
+                if ("done".equals(state)) {
+                    browser.evaluateJavascript("window.__leaChubExportValue||''", encoded -> {
+                        try {
+                            String dataUrl = String.valueOf(new JSONTokener(encoded).nextValue());
+                            browser.evaluateJavascript("window.__leaChubExportValue='';window.__leaChubExportState='';void 0", null);
+                            saveCapturedChubBlob(dataUrl, disposition, mimeType);
+                        } catch (Exception error) {
+                            showToast("Export Chub illisible.");
+                        }
+                    });
+                } else if (state.startsWith("error:")) {
+                    showToast("Export Chub impossible : " + state.substring(6));
+                } else {
+                    mainHandler.postDelayed(() -> pollChubBlob(attempt + 1, disposition, mimeType), 250);
+                }
+            });
+        }
+
+        private void saveCapturedChubBlob(String dataUrl, String disposition, String mimeType) {
+            try {
+                int comma = dataUrl.indexOf(',');
+                if (comma < 0) throw new IllegalArgumentException("data URI absente");
+                String header = dataUrl.substring(0, comma).toLowerCase();
+                String guessed = URLUtil.guessFileName("https://chub.ai/" + disposition, disposition, mimeType).toLowerCase();
+                boolean json = header.contains("application/json") || guessed.endsWith(".json");
+                boolean png = header.contains("image/png") || guessed.endsWith(".png");
+                if (json == png) throw new IllegalArgumentException("format non reconnu");
+                String base64 = dataUrl.substring(comma + 1);
+                if (base64.length() > (json ? 7_000_000 : 17_000_000)) throw new IllegalArgumentException("fichier trop volumineux");
+                byte[] bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+                if (json) {
+                    if (bytes.length == 0 || bytes.length > 5L * 1024 * 1024) throw new IllegalArgumentException("JSON trop volumineux");
+                    Object parsed = new JSONTokener(new String(bytes, java.nio.charset.StandardCharsets.UTF_8)).nextValue();
+                    if (!(parsed instanceof org.json.JSONObject)) throw new IllegalArgumentException("carte JSON invalide");
+                } else {
+                    if (bytes.length < 8 || bytes.length > 12L * 1024 * 1024
+                            || bytes[0] != (byte) 0x89 || bytes[1] != 0x50 || bytes[2] != 0x4e || bytes[3] != 0x47) {
+                        throw new IllegalArgumentException("PNG invalide");
+                    }
+                }
+                File target = new File(sessionDir, json ? "card.json" : "card.png");
+                File part = new File(sessionDir, (json ? "card.json" : "card.png") + ".part");
+                try (FileOutputStream output = new FileOutputStream(part)) {
+                    output.write(bytes);
+                    output.getFD().sync();
+                }
+                if (!part.renameTo(target)) throw new IllegalStateException("écriture impossible");
+                showToast(json ? "Carte Chub récupérée. L’image PNG est encore nécessaire." : "Image Chub récupérée. Le JSON est encore nécessaire.");
+            } catch (Exception error) {
+                showToast("Export Chub refusé : " + String.valueOf(error.getMessage()));
             }
         }
 
