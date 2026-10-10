@@ -270,7 +270,11 @@ function formatMessageHtml(text) {
 function renderDiscover() {
   const c = state.character;
   const root = $("view-discover");
-  if (!c || !root) return;
+  if (!root) return;
+  if (!c) {
+    root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Le profil n’a pas pu se charger.</strong><span>Réessaie en touchant « Découvrir » ou ferme puis relance l’application.</span></div>';
+    return;
+  }
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
   const coverSrc = resolveImgSrc(cover);
   const tags = (c.tags || []).map(renderTagChip).join("");
@@ -893,9 +897,12 @@ function closeLightbox() {
 }
 
 async function initCharacter() {
-  let base = null;
+  let base = window.__LEA_DEFAULT__ || null;
   try {
-    const list = await api("/api/characters");
+    const list = await Promise.race([
+      api("/api/characters"),
+      new Promise((resolve) => setTimeout(() => resolve(null), 3500)),
+    ]);
     if (Array.isArray(list) && list[0]) base = list.find((x) => x.id === "lea") || list[0];
   } catch (_) {}
   if (!base) {
