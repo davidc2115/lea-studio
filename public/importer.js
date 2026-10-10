@@ -3,6 +3,7 @@
     .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   let lastQuery = "";
+  let pendingChubSession = "";
 
   function message(root, text, error) {
     const status = root.querySelector("#import-status");
@@ -86,6 +87,193 @@
     return Number.isInteger(value) && value >= 1 && value <= 120 ? value : null;
   }
 
+  function normalizeChubUrl(value) {
+    try {
+      const url = new URL(String(value || "").trim());
+      if (url.protocol !== "https:" || url.hostname !== "chub.ai" ||
+          !/^\/characters\/[a-z0-9_-]+\/[a-z0-9_-]+\/?$/i.test(url.pathname)) return "";
+      return url.origin + url.pathname.replace(/\/$/, "");
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Lecture du PNG impossible."));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function importChubCard(root) {
+    const button = root.querySelector("#chub-import");
+    const jsonFile = root.querySelector("#chub-json")?.files?.[0];
+    const imageFile = root.querySelector("#chub-image")?.files?.[0];
+    if (!jsonFile || !imageFile) {
+      chubMessage(root, "Choisis le JSON et l’image PNG téléchargés depuis Chub.", true);
+      return;
+    }
+    if (jsonFile.size > 5 * 1024 * 1024 || imageFile.size > 12 * 1024 * 1024) {
+      chubMessage(root, "Fichier trop volumineux. Limites : JSON 5 Mo, PNG 12 Mo.", true);
+      return;
+    }
+    if (button) { button.disabled = true; button.textContent = "Analyse Gemini Vision…"; }
+    chubMessage(root, "Lecture de la carte et analyse de l’image…");
+    try {
+      const card = JSON.parse(await jsonFile.text());
+      const data = card && card.data && typeof card.data === "object" ? card.data : card;
+      if (!data || typeof data !== "object" || !String(data.name || data.char_name || "").trim()) {
+        throw new Error("Ce fichier ne contient pas de carte de personnage reconnue.");
+      }
+      const imageDataUrl = await compactImage(await readFileAsDataUrl(imageFile));
+      if (typeof window.leaVisionCharacter !== "function") throw new Error("Analyse Gemini Vision indisponible.");
+      const adapted = await window.leaVisionCharacter(card, imageDataUrl);
+      const chubMeta = data.extensions && data.extensions.chub || {};
+      const rawId = chubMeta.id || chubMeta.full_path || data.name;
+      const safeId = String(rawId).toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 90);
+      const id = "chub-" + (safeId || "character");
+      const inputUrl = root.querySelector("#chub-url")?.value;
+      const sourceUrl = normalizeChubUrl(inputUrl) ||
+        (String(chubMeta.full_path || "").match(/^[a-z0-9_-]+\/[a-z0-9_-]+$/i)
+          ? "https://chub.ai/characters/" + chubMeta.full_path
+          : "");
+      let cover = imageDataUrl;
+      if (window.LeaAndroid && typeof window.LeaAndroid.saveGalleryImage === "function") {
+        const localKey = window.LeaAndroid.saveGalleryImage(id, imageDataUrl);
+        if (localKey && String(localKey).indexOf("gallery:") === 0) cover = localKey;
+      }
+      const age = explicitAge(data);
+      const originalScenario = String(data.scenario || "");
+      const originalGreeting = String(data.first_mes || data.greeting || "");
+      const character = {
+        id,
+        name: String(data.name || data.char_name || "Personnage importé"),
+        age,
+        title: String(adapted.title || ""),
+        tags: Array.isArray(adapted.tags) ? adapted.tags.slice(0, 12) : [],
+        cover,
+        gallery: [cover],
+        scenario: String(adapted.scenario || originalScenario),
+        greeting: String(adapted.greeting || originalGreeting),
+        personality: String(adapted.personality || data.personality || ""),
+        appearance: String(adapted.appearance || ""),
+        system_extra: age >= 18
+          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+          : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
+        source: "Chub",
+        sourceUrl,
+        sourceScenario: originalScenario,
+        sourceGreeting: originalGreeting,
+        sourcePersonality: String(data.personality || ""),
+        sourceDescription: String(data.description || ""),
+        sourceCard: card,
+        importedAt: Date.now(),
+      };
+      const existing = JSON.parse(localStorage.getItem("lea.imported.characters") || "[]");
+      const next = Array.isArray(existing) ? existing.filter((item) => item.id !== id) : [];
+      next.unshift(character);
+      localStorage.setItem("lea.imported.characters", JSON.stringify(next));
+      if (typeof window.leaOnImportedCharacter === "function") window.leaOnImportedCharacter(character);
+      chubMessage(root, `« ${character.name} » ajouté à Ma bibliothèque. La carte JSON d’origine est conservée.`);
+    } catch (error) {
+      chubMessage(root, "Import non terminé : " + String(error.message || error), true);
+    } finally {
+      if (button) { button.disabled = false; button.textContent = "Importer la carte"; }
+    }
+  }
+
+  async function checkPendingChub() {
+    const bridge = window.LeaAndroid;
+    if (!bridge || typeof bridge.getPendingChubCard !== "function" || pendingChubSession) return;
+    let pending;
+    try {
+      const raw = bridge.getPendingChubCard();
+      if (!raw) return;
+      pending = JSON.parse(raw);
+      if (!pending.sessionId || !pending.cardText || !pending.imageDataUrl) return;
+    } catch (error) {
+      console.error("Lecture de la carte Chub en attente impossible", error);
+      return;
+    }
+
+    pendingChubSession = String(pending.sessionId);
+    document.querySelector('.tabbar .nav[data-view="import"]')?.click();
+    const root = document.querySelector("#view-import");
+    if (!root) { pendingChubSession = ""; return; }
+    chubMessage(root, "Carte reçue. Ajout du personnage à Ma bibliothèque…");
+    try {
+      const card = JSON.parse(pending.cardText);
+      const data = card && card.data && typeof card.data === "object" ? card.data : card;
+      if (!data || !String(data.name || data.char_name || "").trim()) throw new Error("Carte Chub illisible.");
+      if (typeof window.leaVisionCharacter !== "function") throw new Error("Analyse Gemini Vision indisponible.");
+      const image = await compactImage(pending.imageDataUrl);
+      const adapted = await window.leaVisionCharacter(card, image);
+      const meta = data.extensions && data.extensions.chub || {};
+      const rawId = meta.id || meta.full_path || data.name;
+      const safeId = String(rawId).toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 90);
+      const id = "chub-" + (safeId || "character");
+      let cover = image;
+      if (typeof bridge.saveGalleryImage === "function") {
+        const localKey = bridge.saveGalleryImage(id, image);
+        if (localKey && String(localKey).startsWith("gallery:")) cover = localKey;
+      }
+      const age = explicitAge(data);
+      const originalScenario = String(data.scenario || "");
+      const originalGreeting = String(data.first_mes || data.greeting || "");
+      const character = {
+        id, name: String(data.name || data.char_name || "Personnage importé"), age,
+        title: String(adapted.title || ""), tags: Array.isArray(adapted.tags) ? adapted.tags.slice(0, 12) : [],
+        cover, gallery: [cover], scenario: String(adapted.scenario || originalScenario),
+        greeting: String(adapted.greeting || originalGreeting),
+        personality: String(adapted.personality || data.personality || ""),
+        appearance: String(adapted.appearance || ""),
+        system_extra: age >= 18
+          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+          : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
+        source: "Chub",
+        sourceUrl: normalizeChubUrl("https://chub.ai/characters/" + String(meta.full_path || "")),
+        sourceScenario: originalScenario, sourceGreeting: originalGreeting,
+        sourcePersonality: String(data.personality || ""), sourceDescription: String(data.description || ""),
+        sourceCard: card, importedAt: Date.now(),
+      };
+      const current = JSON.parse(localStorage.getItem("lea.imported.characters") || "[]");
+      const next = Array.isArray(current) ? current.filter((item) => item.id !== id) : [];
+      next.unshift(character);
+      localStorage.setItem("lea.imported.characters", JSON.stringify(next));
+      if (typeof window.leaOnImportedCharacter === "function") window.leaOnImportedCharacter(character);
+      if (typeof bridge.clearPendingChubCard === "function") bridge.clearPendingChubCard(pendingChubSession);
+      pendingChubSession = "";
+      chubMessage(root, `« ${character.name} » a été ajouté directement à Ma bibliothèque.`);
+    } catch (error) {
+      chubMessage(root, "Ajout impossible : " + String(error.message || error), true);
+      pendingChubSession = "";
+    }
+  }
+
+  function chubMessage(root, text, error) {
+    const status = root.querySelector("#chub-status");
+    if (status) {
+      status.textContent = text;
+      status.className = "hint import-status" + (error ? " bad" : "");
+    }
+  }
+
+  function openChub(root) {
+    const url = normalizeChubUrl(root.querySelector("#chub-url")?.value);
+    if (!url) {
+      chubMessage(root, "Saisis un lien de fiche Chub valide avant de l’ouvrir.", true);
+      return;
+    }
+    if (window.LeaAndroid && typeof window.LeaAndroid.openChubCharacter === "function") {
+      if (!window.LeaAndroid.openChubCharacter(url)) chubMessage(root, "Impossible d’ouvrir cette fiche Chub.", true);
+      else chubMessage(root, "La fiche s’ouvre dans Léa Studio. Télécharge son JSON et son PNG : le personnage sera ajouté et sélectionné à ton retour.");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
+
   async function importCharacter(root, post) {
     if (!post || !post.id) return;
     const button = root.querySelector(`[data-import-id="${CSS.escape(String(post.id))}"]`);
@@ -161,12 +349,27 @@
         <p class="hint import-status" id="import-status">Les résultats sont limités au contenu tout public.</p>
       </div>
       <div id="import-results" class="import-results"></div>
+      <div class="section chub-import-section">
+        <h2>🌐 Importer depuis Chub</h2>
+        <p class="hint">Ouvre la fiche dans Léa Studio et télécharge sa carte JSON et son image PNG. À ton retour, le personnage est ajouté directement à Ma bibliothèque, sans passer par les Téléchargements publics.</p>
+        <label class="hint" for="chub-url">Lien public de la fiche</label>
+        <input class="edit-input" id="chub-url" type="url" placeholder="https://chub.ai/characters/auteur/personnage" />
+        <button type="button" class="btn btn-secondary" id="chub-open" style="margin-top:10px">Voir la fiche sur Chub</button>
+        <label class="hint" for="chub-json" style="display:block;margin-top:14px">Carte JSON</label>
+        <input class="edit-input" id="chub-json" type="file" accept=".json,application/json" />
+        <label class="hint" for="chub-image" style="display:block;margin-top:10px">Image PNG de la carte</label>
+        <input class="edit-input" id="chub-image" type="file" accept=".png,image/png" />
+        <button type="button" class="btn btn-primary" id="chub-import" style="margin-top:12px">Importer la carte</button>
+        <p class="hint import-status" id="chub-status">Tu peux aussi importer manuellement une paire JSON + PNG.</p>
+      </div>
     `;
     root.querySelector("#import-search").onclick = () => search(root);
     root.querySelector("#import-query").addEventListener("keydown", (event) => {
       if (event.key === "Enter") search(root);
     });
+    root.querySelector("#chub-open").onclick = () => openChub(root);
+    root.querySelector("#chub-import").onclick = () => importChubCard(root);
   }
 
-  window.LeaImporter = { render };
+  window.LeaImporter = { render, checkPendingChub };
 })();
