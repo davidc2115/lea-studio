@@ -88,12 +88,36 @@ function saveCharOverrides(c) {
   localStorage.setItem("lea.char.lea", JSON.stringify(c));
 }
 
+function mergeGalleries(baseGallery, overrideGallery) {
+  const base = Array.isArray(baseGallery) ? baseGallery.slice() : [];
+  const over = Array.isArray(overrideGallery) ? overrideGallery.slice() : [];
+  const seen = new Set();
+  const out = [];
+  // Générées / clés gallery: d'abord, puis assets d'origine
+  function push(src) {
+    if (!src || seen.has(src)) return;
+    seen.add(src);
+    out.push(src);
+  }
+  over.forEach(push);
+  base.forEach(push);
+  return out.slice(0, 300);
+}
+
 function mergeChar(base) {
   const o = loadCharOverrides();
   if (!o) return base;
+  const gallery = mergeGalleries(base.gallery, o.gallery);
+  // Si l'override avait écrasé les assets (ex: seulement 12 générées), on réécrit la fusion
+  try {
+    if (Array.isArray(o.gallery) && base.gallery && o.gallery.length < base.gallery.length) {
+      const fixed = Object.assign({}, o, { gallery: gallery, id: "lea" });
+      saveCharOverrides(fixed);
+    }
+  } catch (_) {}
   return Object.assign({}, base, o, {
     id: "lea",
-    gallery: Array.isArray(o.gallery) && o.gallery.length ? o.gallery : base.gallery,
+    gallery: gallery,
   });
 }
 
@@ -245,7 +269,14 @@ function renderProfile() {
   root.querySelectorAll(".gallery img").forEach((img) => {
     img.onclick = () => openLightbox(Number(img.dataset.i) || 0);
   });
-  if ($("btn-gen-img")) $("btn-gen-img").onclick = () => generateProfileImage();
+  if ($("btn-gen-img")) {
+    $("btn-gen-img").onclick = () => generateProfileImage();
+    if (state.genRunning) {
+      $("btn-gen-img").disabled = true;
+      $("btn-gen-img").textContent = "⏳ Génération…";
+      setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
+    }
+  }
   if ($("prof-chat")) $("prof-chat").onclick = () => showView("chat");
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
   if ($("cancel-edit")) $("cancel-edit").onclick = () => { state.editMode = false; renderProfile(); };
@@ -409,40 +440,83 @@ async function sendMessage() {
 }
 
 
+function setGenBanner(msg, kind) {
+  state.genStatus = { msg: msg, kind: kind || "", ts: Date.now() };
+  const status = $("gen-status");
+  if (status) {
+    const cls = kind === "ok" ? "ok" : kind === "bad" ? "bad" : "";
+    status.innerHTML = '<span class="status-pill ' + cls + '">' + msg + "</span>";
+  }
+  // Bandeau global discret
+  let bar = $("gen-banner");
+  if (!bar) {
+    bar = document.createElement("div");
+    bar.id = "gen-banner";
+    bar.style.cssText = "position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9999;max-width:90%;padding:8px 14px;border-radius:20px;font-size:13px;background:rgba(40,20,60,0.92);color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.35);display:none";
+    document.body.appendChild(bar);
+  }
+  if (msg && (state.genRunning || kind === "ok" || kind === "bad")) {
+    bar.style.display = "block";
+    bar.textContent = msg.replace(/<[^>]+>/g, "");
+    if (kind === "ok" || kind === "bad") {
+      setTimeout(() => { if (bar && !state.genRunning) bar.style.display = "none"; }, 5000);
+    }
+  } else if (!state.genRunning) {
+    bar.style.display = "none";
+  }
+}
+
 async function generateProfileImage() {
+  if (state.genRunning) {
+    setGenBanner("⏳ Une génération est déjà en cours…", "");
+    return;
+  }
   const c = state.character;
   if (!c) return;
   const st = loadSettings();
-  const status = $("gen-status");
-  const preview = $("gen-preview");
-  const btn = $("btn-gen-img");
   const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
+  const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
-  if (status) status.innerHTML = '<span class="status-pill">⏳ Envoi à Cloudflare… (l\'app reste utilisable)</span>';
-  // Laisser le temps au DOM de se peindre avant l'appel long
-  await new Promise((r) => setTimeout(r, 50));
-  try {
-    const res = await api("/api/image/cloudflare", {
-      method: "POST",
-      body: JSON.stringify({ character: c, settings: st, extra }),
-    });
-    if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
-    const dataUrl = res.image;
-    // Ajouter en tête de galerie + overrides
-    const next = Object.assign({}, c);
-    const stored = persistGeneratedImage(c.id || "lea", dataUrl);
-    next.gallery = [stored].concat((c.gallery || []).filter((x) => x !== stored && x !== dataUrl)).slice(0, 200);
-    next.cover = stored;
-    saveCharOverrides(next);
-    state.character = next;
-    if (status) status.innerHTML = '<span class="status-pill ok">✓ Image ajoutée à la galerie</span>';
-    if (preview) preview.innerHTML = '<img src="' + dataUrl + '" alt="Générée" style="width:100%;border-radius:14px;max-height:60vh;object-fit:contain" />';
-    // refresh gallery grid without full re-render if possible
-    renderProfile();
-  } catch (e) {
-    if (status) status.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 280) + '</span>';
-  }
-  if (btn) { btn.disabled = false; btn.textContent = "✨ Générer (physique fidèle)"; }
+  state.genRunning = true;
+  setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
+  await new Promise((r) => setTimeout(r, 30));
+  // Job détaché : survit au changement d'onglet
+  const jobChar = Object.assign({}, c);
+  (async () => {
+    try {
+      const res = await api("/api/image/cloudflare", {
+        method: "POST",
+        body: JSON.stringify({ character: jobChar, settings: st, extra }),
+      });
+      if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
+      const dataUrl = res.image;
+      const stored = persistGeneratedImage(jobChar.id || "lea", dataUrl);
+      // Fusionner avec base + générées (ne jamais perdre les images assets)
+      const baseGal = (state.character && state.character.gallery) || jobChar.gallery || [];
+      const next = Object.assign({}, state.character || jobChar);
+      next.gallery = mergeGalleries(
+        baseGal.filter((x) => String(x).indexOf("images/") === 0),
+        [stored].concat(baseGal.filter((x) => String(x).indexOf("images/") !== 0))
+      );
+      // generated first
+      next.gallery = [stored].concat(next.gallery.filter((x) => x !== stored)).slice(0, 300);
+      next.cover = stored;
+      saveCharOverrides(next);
+      state.character = next;
+      state.genRunning = false;
+      setGenBanner("✓ Image ajoutée à la galerie (" + next.gallery.length + ")", "ok");
+      if (state.view === "profile") {
+        try { renderProfile(); } catch (_) {}
+      }
+    } catch (e) {
+      state.genRunning = false;
+      setGenBanner("✗ " + String(e.message || e).slice(0, 160), "bad");
+      const status = $("gen-status");
+      if (status) status.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 280) + "</span>";
+    }
+    const b = $("btn-gen-img");
+    if (b) { b.disabled = false; b.textContent = "✨ Générer (physique fidèle)"; }
+  })();
 }
 
 function renderSettings() {

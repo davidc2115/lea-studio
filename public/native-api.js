@@ -235,9 +235,9 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
+    // Schnell uniquement en priorité (beaucoup plus rapide que SDXL)
     const models = [
       "@cf/black-forest-labs/flux-1-schnell",
-      "@cf/stabilityai/stable-diffusion-xl-base-1.0",
     ];
     let lastErr = "";
     // 2 passes (retry connection abort)
