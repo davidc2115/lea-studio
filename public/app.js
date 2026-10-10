@@ -194,7 +194,15 @@ function showView(name) {
     b.classList.toggle("active", b.dataset.view === name || (name === "profile" && b.dataset.view === "discover"));
   });
   if (name === "discover") renderDiscover();
-  if (name === "profile") { try { renderProfile(); } catch (error) { console.error("Affichage du profil impossible", error); const root = $("view-profile"); if (root) root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Cette fiche ne peut pas être affichée.</strong><span>Les données importées sont peut-être incomplètes. Réessaie après avoir relancé l’application.</span></div>'; } }
+  if (name === "profile") {
+    try {
+      renderProfile();
+    } catch (error) {
+      console.error("Affichage du profil impossible", error);
+      const root = $("view-profile");
+      if (root) root.innerHTML = `<div class="startup-state startup-state--error" role="alert"><strong>Cette fiche ne peut pas être affichée.</strong><span>${escapeHtml(String(error && error.message || error).slice(0, 180))}</span></div>`;
+    }
+  }
   if (name === "chat") renderChat();
   if (name === "settings") renderSettings();
   if (name === "import" && window.LeaImporter) window.LeaImporter.render($("view-import"));
@@ -335,10 +343,14 @@ function renderProfile() {
   const c = state.character;
   const root = $("view-profile");
   if (!root) return;
-  if (!c) { root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Aucun personnage sélectionné.</strong><span>Retourne dans « Découvrir » et choisis une fiche.</span></div>'; return; }
+  if (!c) {
+    root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Aucun personnage sélectionné.</strong><span>Retourne dans « Découvrir » et choisis une fiche.</span></div>';
+    return;
+  }
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
   const tags = Array.isArray(c.tags) ? c.tags : [];
+  const adultCharacter = Number(c.age || 18) >= 18;
   const coverSrc = resolveImgSrc(c.cover || gallery[0] || "");
   const field = (key, label, emoji, multiline) => {
     const val = c[key] || "";
@@ -359,22 +371,22 @@ function renderProfile() {
       ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" style="max-height:36vh" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil" style="max-height:36vh"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
       <div class="hero-gradient">
         <h1>💜 ${escapeHtml(c.name)}</h1>
-        <div class="meta">${c.age} ans · ${c.title || ""}</div>
+        <div class="meta">${escapeHtml(c.age == null ? "" : c.age)} ans · ${escapeHtml(c.title || "")}</div>
       </div>
     </div>
     ${edit ? `
       <div class="section">
         <h2>✏️ Identité</h2>
         <label class="hint">Nom</label>
-        <input class="edit-input" data-field="name" value="${(c.name || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="name" value="${escapeHtml(c.name || "")}" />
         <label class="hint" style="margin-top:8px">Âge</label>
         <input class="edit-input" data-field="age" type="number" value="${c.age || ""}" placeholder="Non précisé" />
         <label class="hint" style="margin-top:8px">Titre</label>
-        <input class="edit-input" data-field="title" value="${(c.title || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="title" value="${escapeHtml(c.title || "")}" />
         <label class="hint" style="margin-top:8px">Tags (virgules)</label>
-        <input class="edit-input" data-field="tags" value="${tags.map((tag) => typeof tag === "string" ? tag : tag.name || "").join(", ")}" />
+        <input class="edit-input" data-field="tags" value="${tags.map((tag) => typeof tag === "string" ? tag : (tag && tag.name) || "").join(", ")}" />
         <label class="hint" style="margin-top:8px">Image de couverture (chemin)</label>
-        <input class="edit-input" data-field="cover" value="${(c.cover || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="cover" value="${escapeHtml(c.cover || "")}" />
       </div>
     ` : ""}
     ${field("greeting", "Message d'accueil", "💌", true)}
@@ -404,7 +416,7 @@ function renderProfile() {
           const safe = String(src).replace(/"/g, "&quot;");
           return `<div class="gal-card">
             <button type="button" class="gal-img-btn" data-i="${i}">
-              <img src="${resolveImgSrc(src)}" alt="Léa ${i+1}" loading="lazy" />
+              <img src="${escapeHtml(resolveImgSrc(src))}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" />
               ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
             </button>
             <div class="gal-actions">
@@ -470,10 +482,15 @@ function renderProfile() {
       if (!sourceDetails.open || sourceDetails.dataset.loaded) return;
       sourceDetails.dataset.loaded = "true";
       const preview = sourceDetails.querySelector("pre");
-      try { const source = JSON.stringify(c.sourceCard || {}, null, 2); preview.textContent = source.length > 12000 ? source.slice(0, 12000) + "\n… (aperçu tronqué)" : source; }
-      catch (_) { preview.textContent = "La fiche source ne peut pas être affichée."; }
+      try {
+        const source = JSON.stringify(c.sourceCard || {}, null, 2);
+        preview.textContent = source.length > 12000 ? source.slice(0, 12000) + "\n… (aperçu tronqué)" : source;
+      } catch (_) {
+        preview.textContent = "La fiche source ne peut pas être affichée.";
+      }
     });
   }
+
   root.querySelectorAll(".gal-img-btn").forEach((btn) => {
     btn.onclick = () => openLightbox(Number(btn.dataset.i) || 0);
   });
@@ -546,9 +563,10 @@ async function ensureChatStarted() {
   const c = state.character;
   if (!c) return;
   try {
-      const data = await api(activeChatPath());
+    const data = await api(activeChatPath());
     if (data && Array.isArray(data.messages)) {
       state.chat = data;
+      localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
     }
   } catch (_) {}
   if (!state.chat.messages || !state.chat.messages.length) {
@@ -563,9 +581,76 @@ async function ensureChatStarted() {
         body: JSON.stringify({ messages: state.chat.messages, init: true }),
       });
     } catch (_) {
-      localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
+      // Keep the local conversation available even when the server is offline.
     }
+    localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
   }
+}
+
+function readSavedChats() {
+  const characterMap = new Map();
+  [state.leaCharacter, state.character, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+    .filter((item) => item && item.id)
+    .forEach((item) => characterMap.set(String(item.id), item));
+  const entries = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith("lea.chat.")) continue;
+    const id = key.slice("lea.chat.".length);
+    try {
+      const chat = JSON.parse(localStorage.getItem(key) || "{}");
+      if (Array.isArray(chat.messages) && chat.messages.length) {
+        const latest = chat.messages.reduce((max, message) => {
+          const ts = Number(message && message.ts) || Date.parse(message && message.ts) || 0;
+          return Math.max(max, ts);
+        }, 0);
+        entries.push({ id, character: characterMap.get(id) || { id, name: id }, messages: chat.messages, latest });
+      }
+    } catch (_) {}
+  }
+  const currentId = state.character && String(state.character.id);
+  if (currentId && state.chat && Array.isArray(state.chat.messages) && state.chat.messages.length &&
+      !entries.some((entry) => entry.id === currentId)) {
+    const latest = state.chat.messages.reduce((max, message) => Math.max(max, Number(message && message.ts) || 0), 0);
+    entries.push({ id: currentId, character: state.character, messages: state.chat.messages, latest });
+  }
+  return entries.sort((a, b) => b.latest - a.latest);
+}
+
+function renderChatHistory() {
+  const root = $("chat-history-list");
+  if (!root) return;
+  const entries = readSavedChats();
+  if (!entries.length) {
+    root.innerHTML = '<p class="chat-history-empty">Les conversations apparaîtront ici après le premier message.</p>';
+    return;
+  }
+  root.innerHTML = entries.map((entry) => {
+    const character = entry.character || {};
+    const last = entry.messages[entry.messages.length - 1] || {};
+    const preview = String(last.content || "").replace(/\s+/g, " ").trim().slice(0, 90);
+    const active = state.character && String(state.character.id) === entry.id;
+    const stamp = entry.latest ? new Date(entry.latest).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
+    const image = resolveImgSrc(character.cover || (Array.isArray(character.gallery) && character.gallery[0]) || "");
+    return `<button type="button" class="chat-history-item${active ? " is-active" : ""}" data-chat-id="${escapeHtml(entry.id)}">
+      ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="chat-history-avatar">💬</span>'}
+      <span class="chat-history-copy"><strong>${escapeHtml(character.name || entry.id)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
+    </button>`;
+  }).join("");
+  root.querySelectorAll("[data-chat-id]").forEach((button) => {
+    button.onclick = () => {
+      const id = button.dataset.chatId;
+      const selected = [state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+        .find((item) => item && String(item.id) === id);
+      if (!selected) return;
+      state.character = selected;
+      try { state.chat = JSON.parse(localStorage.getItem("lea.chat." + id) || '{"messages":[]}'); }
+      catch (_) { state.chat = { messages: [] }; }
+      state.editMode = false;
+      localStorage.setItem("lea.activeCharacterId", id);
+      showView("chat");
+    };
+  });
 }
 
 function renderChat() {
@@ -574,6 +659,10 @@ function renderChat() {
   if (!c || !root) return;
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
   root.innerHTML = `
+    <section class="chat-history-panel">
+      <h2>Conversations <span>plus récente en premier</span></h2>
+      <div class="chat-history-list" id="chat-history-list"></div>
+    </section>
     <div class="chat-wrap">
       <div class="chat-header">
           <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
@@ -591,8 +680,9 @@ function renderChat() {
       </div>
     </div>
   `;
+  renderChatHistory();
   paintMessages();
-  ensureChatStarted().then(() => paintMessages());
+  ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); });
 
   const input = $("chat-input");
   input && input.addEventListener("input", () => {
@@ -615,6 +705,7 @@ function renderChat() {
     } catch (_) {}
     await ensureChatStarted();
     paintMessages();
+    renderChatHistory();
   });
 }
 
@@ -674,9 +765,11 @@ async function sendMessage() {
       ts: Date.now(),
     });
   }
+  try { localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat)); } catch (_) {}
   state.sending = false;
   if (typing) typing.classList.add("hidden");
   paintMessages();
+  renderChatHistory();
 }
 
 

@@ -270,7 +270,69 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
 .edit-actions { display: flex; gap: 8px; margin-top: 10px; }
 
 /* Chat */
-.chat-wrap { display: flex; flex-direction: column; height: calc(100vh - var(--top-h) - var(--tab-h) - var(--safe-t) - var(--safe-b) - 24px); }
+.chat-history-panel {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(167,139,250,.18);
+  border-radius: 16px;
+  background: rgba(36,16,56,.8);
+}
+.chat-history-panel h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--pink2);
+  font-size: .95rem;
+}
+.chat-history-panel h2 span { color: var(--muted); font-size: .68rem; font-weight: 500; }
+.chat-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.chat-history-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 8px;
+  border: 1px solid rgba(167,139,250,.16);
+  border-radius: 12px;
+  background: rgba(18,8,31,.65);
+  color: var(--text);
+  text-align: left;
+  font: inherit;
+}
+.chat-history-item.is-active { border-color: var(--pink); background: rgba(255,107,203,.12); }
+.chat-history-item img, .chat-history-avatar {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.chat-history-avatar { display: grid; place-items: center; background: var(--card2); }
+.chat-history-copy { display: grid; min-width: 0; gap: 2px; }
+.chat-history-copy strong, .chat-history-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-history-copy strong { font-size: .82rem; }
+.chat-history-copy small { color: var(--muted); font-size: .68rem; }
+.chat-history-copy span { color: #e6dbf1; font-size: .73rem; }
+.chat-history-empty { margin: 4px 0; color: var(--muted); font-size: .78rem; }
+.chat-wrap {
+  display: flex;
+  flex-direction: column;
+  height: clamp(220px, calc(100vh - var(--top-h) - var(--tab-h) - var(--safe-t) - var(--safe-b) - 230px), 620px);
+}
 .chat-header {
   display: flex; align-items: center; gap: 12px; padding: 4px 0 12px;
   border-bottom: 1px solid rgba(167,139,250,.15); margin-bottom: 10px;
