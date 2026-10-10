@@ -261,22 +261,50 @@
   }
 
   function openChub(root) {
-    const url = normalizeChubUrl(root.querySelector("#chub-url")?.value);
+    const entered = String(root.querySelector("#chub-url")?.value || "").trim();
+    const url = entered ? normalizeChubUrl(entered) : "https://chub.ai/";
     if (!url) {
-      chubMessage(root, "Saisis un lien de fiche Chub valide avant de l’ouvrir.", true);
+      chubMessage(root, "Le lien doit être une fiche publique valide sur chub.ai.", true);
       return;
     }
     if (window.LeaAndroid && typeof window.LeaAndroid.openChubCharacter === "function") {
       if (!window.LeaAndroid.openChubCharacter(url)) chubMessage(root, "Impossible d’ouvrir cette fiche Chub.", true);
-      else chubMessage(root, "La fiche s’ouvre dans Léa Studio. Télécharge son JSON et son PNG : le personnage sera ajouté et sélectionné à ton retour.");
+      else chubMessage(root, "Chub AI s’ouvre dans Léa Studio. Touche les téléchargements JSON et PNG de la fiche; au retour, l’import se fait dans Ma bibliothèque.");
       return;
     }
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
+  function openBotbooru(root) {
+    if (window.LeaAndroid && typeof window.LeaAndroid.openBotbooru === "function") {
+      if (!window.LeaAndroid.openBotbooru()) message(root, "Impossible d’ouvrir Botbooru.", true);
+      else message(root, "Botbooru s’ouvre dans Léa Studio. Sur une fiche, touche « Importer cette fiche » pour la récupérer automatiquement.");
+      return;
+    }
+    window.open("https://botbooru.com/", "_blank", "noopener,noreferrer");
+  }
+
+  async function checkPendingBotbooru() {
+    const bridge = window.LeaAndroid;
+    if (!bridge || typeof bridge.consumePendingBotbooruId !== "function") return;
+    const id = String(bridge.consumePendingBotbooruId() || "");
+    if (!/^\d{1,12}$/.test(id)) return;
+    document.querySelector('.tabbar .nav[data-view="import"]')?.click();
+    const root = document.querySelector("#view-import");
+    if (!root) return;
+    message(root, "Téléchargement automatique de la fiche Botbooru et analyse de l’image…");
+    await importCharacter(root, { id });
+  }
+
+  async function resumePendingImports() {
+    await checkPendingChub();
+    await checkPendingBotbooru();
+  }
+
   async function importCharacter(root, post) {
     if (!post || !post.id) return;
-    const button = root.querySelector(`[data-import-id="${CSS.escape(String(post.id))}"]`);
+    const button = Array.from(root.querySelectorAll("[data-import-id]"))
+      .find((item) => item.dataset.importId === String(post.id));
     if (button) { button.disabled = true; button.textContent = "Analyse Gemini Vision…"; }
     message(root, `Téléchargement de la fiche et analyse visuelle de « ${post.character_name || "ce personnage"} »…`);
     try {
@@ -341,6 +369,7 @@
       <div class="section">
         <h2>⬇️ Importer un personnage</h2>
         <p class="hint">Recherche dans Botbooru par nom ou tags. La fiche d’origine reste conservée; Gemini Vision analyse l’image et adapte les champs de jeu.</p>
+        <button type="button" class="btn btn-secondary" id="botbooru-open" style="margin:8px 0 14px">Ouvrir le site Botbooru</button>
         <label class="hint" for="import-query">Nom ou mots-clés</label>
         <input class="edit-input" id="import-query" placeholder="Ex. mage, détective, fantasy" value="${esc(lastQuery)}" />
         <label class="hint" for="import-tags" style="display:block;margin-top:10px">Tags supplémentaires</label>
@@ -350,17 +379,20 @@
       </div>
       <div id="import-results" class="import-results"></div>
       <div class="section chub-import-section">
-        <h2>🌐 Importer depuis Chub</h2>
-        <p class="hint">Ouvre la fiche dans Léa Studio et télécharge sa carte JSON et son image PNG. À ton retour, le personnage est ajouté directement à Ma bibliothèque, sans passer par les Téléchargements publics.</p>
-        <label class="hint" for="chub-url">Lien public de la fiche</label>
-        <input class="edit-input" id="chub-url" type="url" placeholder="https://chub.ai/characters/auteur/personnage" />
-        <button type="button" class="btn btn-secondary" id="chub-open" style="margin-top:10px">Voir la fiche sur Chub</button>
-        <label class="hint" for="chub-json" style="display:block;margin-top:14px">Carte JSON</label>
-        <input class="edit-input" id="chub-json" type="file" accept=".json,application/json" />
-        <label class="hint" for="chub-image" style="display:block;margin-top:10px">Image PNG de la carte</label>
-        <input class="edit-input" id="chub-image" type="file" accept=".png,image/png" />
-        <button type="button" class="btn btn-primary" id="chub-import" style="margin-top:12px">Importer la carte</button>
-        <p class="hint import-status" id="chub-status">Tu peux aussi importer manuellement une paire JSON + PNG.</p>
+        <h2>🌐 Importer depuis Chub AI</h2>
+        <p class="hint">Ouvre le site ou colle une fiche. Dans Chub, touche ses téléchargements JSON et PNG; Léa Studio les récupère dans son espace privé et importe le personnage à ton retour, sans choisir de fichiers.</p>
+        <label class="hint" for="chub-url">Lien de fiche (facultatif)</label>
+        <input class="edit-input" id="chub-url" type="url" placeholder="Vide = ouvrir chub.ai" />
+        <button type="button" class="btn btn-secondary" id="chub-open" style="margin-top:10px">Ouvrir Chub AI</button>
+        <p class="hint import-status" id="chub-status"></p>
+        <details class="manual-import">
+          <summary>Import manuel si le téléchargement Chub échoue</summary>
+          <label class="hint" for="chub-json" style="display:block;margin-top:12px">Carte JSON</label>
+          <input class="edit-input" id="chub-json" type="file" accept=".json,application/json" />
+          <label class="hint" for="chub-image" style="display:block;margin-top:10px">Image PNG de la carte</label>
+          <input class="edit-input" id="chub-image" type="file" accept=".png,image/png" />
+          <button type="button" class="btn btn-primary" id="chub-import" style="margin-top:12px">Importer la paire</button>
+        </details>
       </div>
     `;
     root.querySelector("#import-search").onclick = () => search(root);
@@ -368,8 +400,9 @@
       if (event.key === "Enter") search(root);
     });
     root.querySelector("#chub-open").onclick = () => openChub(root);
+    root.querySelector("#botbooru-open").onclick = () => openBotbooru(root);
     root.querySelector("#chub-import").onclick = () => importChubCard(root);
   }
 
-  window.LeaImporter = { render, checkPendingChub };
+  window.LeaImporter = { render, checkPendingChub, resumePendingImports, checkPendingBotbooru };
 })();
