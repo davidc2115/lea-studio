@@ -77,6 +77,33 @@ function saveSettings(s) {
   localStorage.setItem("lea.settings", JSON.stringify(s));
 }
 
+const ROLEPLAY_MEMORY_KEY = "lea.memory.lea";
+function loadRoleplayMemory() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ROLEPLAY_MEMORY_KEY) || "{}");
+    return {
+      scene: typeof raw.scene === "string" ? raw.scene : "",
+      relationship: typeof raw.relationship === "string" ? raw.relationship : "",
+      intimacy: typeof raw.intimacy === "string" ? raw.intimacy : "",
+      facts: typeof raw.facts === "string" ? raw.facts : "",
+      updatedAt: Number(raw.updatedAt) || 0,
+    };
+  } catch (_) {
+    return { scene: "", relationship: "", intimacy: "", facts: "", updatedAt: 0 };
+  }
+}
+function saveRoleplayMemory(memory) {
+  const current = loadRoleplayMemory();
+  const next = { updatedAt: Date.now() };
+  Object.keys(current).filter((key) => key !== "updatedAt").forEach((key) => {
+    next[key] = String(memory[key] || "").trim().slice(0, key === "scene" ? 480 : 640);
+  });
+  localStorage.setItem(ROLEPLAY_MEMORY_KEY, JSON.stringify(next));
+}
+function escapeMemoryMarkup(value) {
+  return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 function loadCharOverrides() {
   try {
     return JSON.parse(localStorage.getItem("lea.char.lea") || "null");
@@ -568,6 +595,9 @@ async function generateProfileImage() {
 function renderSettings() {
   const root = $("view-settings");
   const s = loadSettings();
+  const memory = loadRoleplayMemory();
+  const origin = (state.character && state.character.scenario) ||
+    "Léa est surprise par un orage, vient frapper à la porte et est la meilleure amie de ta fille.";
   root.innerHTML = `
     <div class="section">
       <h2>🔑 Clés API (dialogue)</h2>
@@ -620,6 +650,33 @@ function renderSettings() {
       </div>
       <p class="hint">Images profil via Cloudflare (réglages ☁️). Dialogue via Gemini / OpenAI / Groq.</p>
     </div>
+    <div class="section memory-section">
+      <h2>🧠 Mémoire longue — stockée sur cet appareil</h2>
+      <p class="hint">Le scénario de départ reste fixe. Les résumés ci-dessous sont conservés séparément du chat et survivent à « Nouvelle conversation ». Ils ne sont pas synchronisés vers d’autres appareils.</p>
+      <div class="settings-block">
+        <label>Scénario d’origine (lecture seule)</label>
+        <p class="memory-origin">${escapeMemoryMarkup(origin)}</p>
+      </div>
+      <div class="settings-block">
+        <label>Scène actuelle et faits immédiats</label>
+        <textarea class="edit-area" id="memory-scene" rows="3" placeholder="Lieu, moment, objets, action en cours…">${escapeMemoryMarkup(memory.scene)}</textarea>
+      </div>
+      <div class="settings-block">
+        <label>Évolution de la relation</label>
+        <textarea class="edit-area" id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et évolution réciproque…">${escapeMemoryMarkup(memory.relationship)}</textarea>
+      </div>
+      <div class="settings-block">
+        <label>Moments intimes et limites explicites</label>
+        <textarea class="edit-area" id="memory-intimacy" rows="3" placeholder="Seulement les événements qui ont réellement eu lieu dans le jeu…">${escapeMemoryMarkup(memory.intimacy)}</textarea>
+      </div>
+      <div class="settings-block">
+        <label>Faits et promesses partagés</label>
+        <textarea class="edit-area" id="memory-facts" rows="3" placeholder="Informations durables à ne pas confondre avec la scène actuelle…">${escapeMemoryMarkup(memory.facts)}</textarea>
+      </div>
+      <button type="button" class="btn btn-primary" id="save-memory">💾 Enregistrer la mémoire</button>
+      <button type="button" class="btn btn-secondary" id="clear-memory">Effacer les souvenirs évolutifs</button>
+      <div id="memory-status"></div>
+    </div>
     <button type="button" class="btn btn-primary" id="save-settings">💾 Enregistrer les réglages</button>
     <div id="set-status"></div>
   `;
@@ -637,6 +694,21 @@ function renderSettings() {
     saveSettings(next);
     const st = $("set-status");
     st.innerHTML = `<span class="status-pill ok">✓ Enregistré</span>`;
+  };
+  $("save-memory").onclick = () => {
+    saveRoleplayMemory({
+      scene: $("memory-scene").value,
+      relationship: $("memory-relationship").value,
+      intimacy: $("memory-intimacy").value,
+      facts: $("memory-facts").value,
+    });
+    $("memory-status").innerHTML = '<span class="status-pill ok">✓ Mémoire enregistrée sur cet appareil</span>';
+  };
+  $("clear-memory").onclick = () => {
+    if (!confirm("Effacer la scène, la relation et les souvenirs mémorisés ? Le scénario d'origine et l'historique du chat resteront inchangés.")) return;
+    saveRoleplayMemory({ scene: "", relationship: "", intimacy: "", facts: "" });
+    ["memory-scene", "memory-relationship", "memory-intimacy", "memory-facts"].forEach((id) => { $(id).value = ""; });
+    $("memory-status").innerHTML = '<span class="status-pill ok">✓ Souvenirs évolutifs effacés</span>';
   };
 }
 

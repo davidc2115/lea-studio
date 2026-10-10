@@ -327,7 +327,89 @@
   }
 
 
-  function buildSystemPrompt(char, st) {
+  const LONG_TERM_MEMORY_KEY = "lea.memory.lea";
+  const LONG_TERM_MEMORY_FIELDS = {
+    scene: 480,
+    relationship: 640,
+    intimacy: 640,
+    facts: 640,
+  };
+
+  function normalizeLongTermMemory(value) {
+    const source = value && typeof value === "object" ? value : {};
+    const memory = { version: 1, updatedAt: Number(source.updatedAt) || 0 };
+    Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
+      memory[key] = typeof source[key] === "string"
+        ? source[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key])
+        : "";
+    });
+    return memory;
+  }
+
+  function loadLongTermMemory() {
+    try {
+      return normalizeLongTermMemory(JSON.parse(localStorage.getItem(LONG_TERM_MEMORY_KEY) || "{}"));
+    } catch (_) {
+      return normalizeLongTermMemory({});
+    }
+  }
+
+  function updateLongTermMemory(patch) {
+    const next = loadLongTermMemory();
+    if (patch && typeof patch === "object") {
+      Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
+        if (typeof patch[key] === "string") {
+          next[key] = patch[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+        }
+      });
+    }
+    next.updatedAt = Date.now();
+    localStorage.setItem(LONG_TERM_MEMORY_KEY, JSON.stringify(next));
+    return next;
+  }
+
+  function memoryPromptBlock(char, memory) {
+    const c = char || LEA;
+    const m = normalizeLongTermMemory(memory);
+    return [
+      "CONTINUITÉ ET MÉMOIRE LONGUE — règles prioritaires :",
+      "Le scénario d'origine ci-dessus est le point de départ canonique et permanent : Léa est surprise par un orage, vient frapper à la porte de l'utilisateur et est la meilleure amie de sa fille. Ne le remplace jamais par un événement survenu ensuite.",
+      "Les détails tels qu'un papier apporté pour le travail, un verre ou une confidence sont des événements de la discussion en cours : ils ne deviennent pas le scénario d'origine. Continue depuis la scène la plus récente, sans revenir à la première rencontre ni inventer une nouvelle arrivée.",
+      "La mémoire de scène décrit le présent; la relation décrit son évolution; les souvenirs intimes ne sont conservés que s'ils ont réellement eu lieu dans le jeu; les faits partagés restent distincts. Ces souvenirs concernent le roleplay, pas des affirmations sur la vraie vie de l'utilisateur.",
+      "Ne contredis pas les derniers messages. En cas de conflit, respecte le scénario canonique pour l'origine et les messages récents pour l'évolution de la scène. N'invente ni actions, paroles, promesses, limites ou événements passés.",
+      "SCÉNARIO D'ORIGINE (lecture seule) : " + (c.scenario || ""),
+      "SCÈNE EN COURS (mémoire persistante) : " + (m.scene || "Pas encore de résumé durable; suis les derniers messages."),
+      "ÉVOLUTION DE LA RELATION : " + (m.relationship || "Pas encore d'évolution durable enregistrée; ne présume pas d'attachement."),
+      "MOMENTS INTIMES ET LIMITES EXPLICITES : " + (m.intimacy || "Aucun souvenir intime durable enregistré; ne présume pas qu'un événement intime a eu lieu."),
+      "FAITS PARTAGÉS : " + (m.facts || "Aucun fait partagé durable enregistré."),
+      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>. Le JSON est un patch de mémoire invisible dans le chat : n'y mets que les catégories réellement changées parmi scene, relationship, intimacy, facts. Chaque valeur remplace le résumé de sa catégorie et doit rester cumulative, fidèle aux faits déjà mémorisés et aux messages récents, en 1 à 3 phrases courtes. Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch et ne crée pas de souvenir à partir d'une supposition.",
+    ].join("\n");
+  }
+
+  function extractMemoryEnvelope(output) {
+    const text = String(output || "");
+    const marker = /(?:\r?\n)?<LEA_MEMORY>([\s\S]*?)<\/LEA_MEMORY>\s*$/i;
+    const match = text.match(marker);
+    if (!match) return { reply: text.trim(), memoryUpdate: null };
+    let memoryUpdate = null;
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        memoryUpdate = {};
+        Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
+          if (typeof parsed[key] === "string") {
+            memoryUpdate[key] = parsed[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+          }
+        });
+      }
+    } catch (_) {}
+    return {
+      reply: text.replace(marker, "").trim(),
+      memoryUpdate,
+    };
+  }
+
+  function buildSystemPrompt(char, st, memory) {
     const c = char || LEA;
     const userName = (st && st.userName) || "toi";
     const userBio = (st && st.userBio) || "";
@@ -341,6 +423,7 @@
       "Apparence: " + (c.appearance || ""),
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
+      memoryPromptBlock(c, memory),
       "Format strict:",
       "- Pensées entre parenthèses: (comme ceci)",
       "- Actions entre astérisques: *comme ceci*",
@@ -548,7 +631,7 @@
   }
 
   async function generateReply(char, messages, st) {
-    const system = buildSystemPrompt(char, st);
+    const system = buildSystemPrompt(char, st, loadLongTermMemory());
     const engine = (st && st.chatEngine) || "gemini";
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
@@ -566,11 +649,11 @@
     for (const eng of order) {
       try {
         if (eng === "gemini" && geminiKeys.length)
-          return await callGemini(geminiKeys, system, hist);
+          return extractMemoryEnvelope(await callGemini(geminiKeys, system, hist));
         if (eng === "openai" && openaiKeys.length)
-          return await callOpenAI(openaiKeys, system, hist);
+          return extractMemoryEnvelope(await callOpenAI(openaiKeys, system, hist));
         if (eng === "groq" && groqKeys.length)
-          return await callGroq(groqKeys, system, hist);
+          return extractMemoryEnvelope(await callGroq(groqKeys, system, hist));
       } catch (e) {
         errors.push(eng + ": " + e.message);
       }
@@ -618,7 +701,9 @@
       }
       const char = body.character || load("lea.char.lea", null) || LEA;
       const st = body.settings || settings();
-      const reply = await generateReply(char, messages, st);
+      const generated = await generateReply(char, messages, st);
+      const reply = generated.reply;
+      if (generated.memoryUpdate) updateLongTermMemory(generated.memoryUpdate);
       messages.push({ role: "assistant", content: reply, ts: Date.now() });
       save(key, { messages });
       return { reply, messages };
