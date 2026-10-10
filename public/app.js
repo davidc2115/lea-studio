@@ -290,6 +290,10 @@ function promptCharacterPayload(char) {
     scenario: c.scenario,
     personality: c.personality,
     appearance: c.appearance,
+    Poitrine: c.Poitrine || c.poitrine || "",
+    bustEstimate: c.bustEstimate || "",
+    estimatedAge: c.estimatedAge || null,
+    nonHumanTraits: c.nonHumanTraits || "",
     system_extra: c.system_extra,
   };
 }
@@ -383,7 +387,9 @@ function renderProfile() {
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
   const tags = Array.isArray(c.tags) ? c.tags : [];
-  const adultCharacter = Number(c.age || 18) >= 18;
+  const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
+  const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
+  const knownMinor = Number.isInteger(declaredAge) && declaredAge < 18;
   const coverSrc = resolveImgSrc(c.cover || gallery[0] || "");
   const field = (key, label, emoji, multiline) => {
     const val = c[key] || "";
@@ -404,7 +410,7 @@ function renderProfile() {
       ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" style="max-height:36vh" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil" style="max-height:36vh"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
       <div class="hero-gradient">
         <h1>💜 ${escapeHtml(c.name)}</h1>
-        <div class="meta">${escapeHtml(c.age == null ? "" : c.age)} ans · ${escapeHtml(c.title || "")}</div>
+        <div class="meta">${escapeHtml(c.age == null ? "Âge non renseigné" : c.age + " ans")}${c.estimatedAge ? ` · Estimation visuelle : ${escapeHtml(c.estimatedAge)} ans (indicative)` : ""} · ${escapeHtml(c.title || "")}</div>
       </div>
     </div>
     ${edit ? `
@@ -426,6 +432,12 @@ function renderProfile() {
     ${field("scenario", "Scénario", "🌧️", true)}
     ${field("personality", "Tempérament & caractère", "🎭", true)}
     ${field("appearance", "Descriptif physique", "✨", true)}
+    ${(c.nonHumanTraits || edit) ? field("nonHumanTraits", "Traits non humains", "👽", true) : ""}
+    ${(c.Poitrine || c.bustEstimate) ? `
+      <div class="section">
+        <h2>📏 Taille de poitrine</h2>
+        <div class="body-text">${c.Poitrine ? `Valeur de la fiche : ${escapeHtml(c.Poitrine)}` : `Estimation visuelle indicative : ${escapeHtml(c.bustEstimate)}`}</div>
+      </div>` : ""}
     ${c.sourceScenario != null ? `
       <div class="section">
         <h2>📥 Fiche source conservée</h2>
@@ -462,12 +474,15 @@ function renderProfile() {
       ${edit ? `<label class="hint" style="margin-top:10px">Galerie (une URL / chemin par ligne)</label>
         <textarea class="edit-area" data-field="gallery">${gallery.join("\n")}</textarea>` : ""}
     </div>
-    ${!edit && String(c.id) === "lea" ? `
+    ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La photo étoilée sert de référence du visage. Image verticale plein pied; une seule tentative par clic pour limiter le quota.</p>
+      <p class="hint">La photo étoilée sert de référence d’identité. Image verticale plein pied, vêtements couvrants. Le descriptif physique, les traits non humains et la taille de poitrine de la fiche servent de référence.</p>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
-      <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
+      ${knownMinor
+        ? `<p class="hint bad">La génération est désactivée : l’âge renseigné est inférieur à 18 ans.</p>`
+        : `${adultCharacter ? "" : `<label class="hint" style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><input id="gen-adult-confirm" type="checkbox" /> Je confirme que ce personnage est majeur.</label>`}
+          <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>`}
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
     </div>
@@ -826,8 +841,15 @@ async function generateProfileImage() {
   }
   const c = state.character;
   if (!c) return;
-  if (String(c.id) !== "lea" || !Number.isFinite(Number(c.age)) || Number(c.age) < 18) {
-    setGenBanner("La génération d’origine est réservée à la fiche adulte de Léa.", "bad");
+  const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
+  if (Number.isInteger(declaredAge) && declaredAge < 18) {
+    setGenBanner("La génération est désactivée pour un personnage dont l’âge renseigné est inférieur à 18 ans.", "bad");
+    return;
+  }
+  const confirmedAdult = Number.isInteger(declaredAge) && declaredAge >= 18;
+  if (!confirmedAdult && (!Number.isInteger(Number(c.estimatedAge)) || Number(c.estimatedAge) < 18 ||
+      !$("gen-adult-confirm")?.checked)) {
+    setGenBanner("Confirme que le personnage est majeur; une estimation visuelle ne prouve pas son âge.", "bad");
     return;
   }
   const st = loadSettings();
@@ -846,6 +868,7 @@ async function generateProfileImage() {
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
             cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+            adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
           extra,
