@@ -289,6 +289,106 @@ public class LeaBridge {
         return v;
     }
 
+
+    /** Génère une image CF et l'enregistre sur disque. Retourne jobId. Résultat = done:gallery:… */
+    @JavascriptInterface
+    public String cloudflareImageStart(final String accountId, final String token, final String model, final String prompt, final String charId) {
+        final String id = "cf" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
+        final String mdl = (model == null || model.isEmpty()) ? "@cf/black-forest-labs/flux-1-schnell" : model;
+        HTTP_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection conn = null;
+                File tmp = null;
+                try {
+                    String urlStr = "https://api.cloudflare.com/client/v4/accounts/" + accountId + "/ai/run/" + mdl;
+                    URL u = new URL(urlStr);
+                    conn = (HttpURLConnection) u.openConnection();
+                    conn.setConnectTimeout(45000);
+                    conn.setReadTimeout(180000);
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                    conn.setRequestProperty("Authorization", "Bearer " + token);
+                    conn.setRequestProperty("User-Agent", "LeaStudio/3.1 (Android)");
+                    conn.setRequestProperty("Connection", "close");
+                    String json = "{\"prompt\":" + JSONObject.quote(prompt != null ? prompt : "") + "}";
+                    byte[] body = json.getBytes(StandardCharsets.UTF_8);
+                    conn.setFixedLengthStreamingMode(body.length);
+                    OutputStream os = conn.getOutputStream();
+                    os.write(body);
+                    os.flush();
+                    os.close();
+                    int code = conn.getResponseCode();
+                    InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                    if (in == null) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"http " + code + " empty\"}");
+                        return;
+                    }
+                    tmp = new File(ctx.getCacheDir(), "cf_" + System.currentTimeMillis() + ".json");
+                    FileOutputStream fos = new FileOutputStream(tmp);
+                    byte[] buf = new byte[65536];
+                    int n;
+                    while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
+                    fos.close();
+                    in.close();
+                    // Lire en String (peut être gros) uniquement ici en background
+                    byte[] bytes = new byte[(int) Math.min(tmp.length(), 22L * 1024 * 1024)];
+                    FileInputStream fis = new FileInputStream(tmp);
+                    int read = fis.read(bytes);
+                    fis.close();
+                    String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
+                    if (code >= 400) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(400, resp.length()))) + "}");
+                        return;
+                    }
+                    // Extraire base64 image
+                    int imgKey = resp.indexOf("\"image\"");
+                    if (imgKey < 0) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"no image field\"}");
+                        return;
+                    }
+                    int colon = resp.indexOf(':', imgKey);
+                    int q1 = resp.indexOf('"', colon + 1);
+                    if (q1 < 0) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"bad image field\"}");
+                        return;
+                    }
+                    StringBuilder sb = new StringBuilder(Math.min(resp.length(), 8 * 1024 * 1024));
+                    for (int pi = q1 + 1; pi < resp.length(); pi++) {
+                        char ch = resp.charAt(pi);
+                        if (ch == '"') break;
+                        sb.append(ch);
+                    }
+                    String b64 = sb.toString();
+                    if (b64.length() < 500) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"image too small\"}");
+                        return;
+                    }
+                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + b64);
+                    if (key == null || !key.startsWith("gallery:")) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"save failed\"}");
+                        return;
+                    }
+                    // Ne renvoyer QUE la clé — jamais le base64
+                    HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true}");
+                } catch (Exception e) {
+                    String msg = String.valueOf(e.getMessage());
+                    if (msg == null) msg = "error";
+                    msg = msg.replace("\"", "'");
+                    HTTP_JOBS.put(id, "error:{\"error\":\"" + e.getClass().getSimpleName() + ": " + msg + "\"}");
+                } finally {
+                    if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
+                    if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                }
+            }
+        });
+        return id;
+    }
+
+
     /** GET binaire → data URL base64 (ex: carte PNG Chub). */
     @JavascriptInterface
     public String httpGetDataUrl(String url) {

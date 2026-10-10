@@ -238,16 +238,19 @@ function renderProfile() {
     ${field("appearance", "Descriptif physique", "✨", true)}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
-      <p class="hint">Appui long ou boutons : photo de profil ★ · supprimer 🗑️</p>
-      <div class="gallery">
+      <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
+      <div class="gallery-grid">
         ${gallery.map((src, i) => {
           const isCover = (c.cover === src) || (!c.cover && i === 0);
-          return `<div class="gal-item" data-i="${i}" style="position:relative">
-            <img src="${resolveImgSrc(src)}" data-i="${i}" alt="Léa ${i + 1}" style="width:100%;display:block;border-radius:12px" />
-            ${isCover ? '<span style="position:absolute;top:6px;left:6px;background:rgba(180,80,200,0.9);color:#fff;font-size:11px;padding:2px 6px;border-radius:8px">★ Profil</span>' : ""}
-            <div style="display:flex;gap:4px;margin-top:4px">
-              <button type="button" class="btn btn-secondary gal-cover" data-i="${i}" style="flex:1;padding:6px;font-size:12px">★ Profil</button>
-              <button type="button" class="btn btn-secondary gal-del" data-i="${i}" style="flex:1;padding:6px;font-size:12px">🗑️</button>
+          const safe = String(src).replace(/"/g, "&quot;");
+          return `<div class="gal-card">
+            <button type="button" class="gal-img-btn" data-i="${i}">
+              <img src="${resolveImgSrc(src)}" alt="Léa ${i+1}" loading="lazy" />
+              ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
+            </button>
+            <div class="gal-actions">
+              <button type="button" class="gal-btn gal-cover" data-i="${i}" title="Photo de profil">★</button>
+              <button type="button" class="gal-btn gal-del" data-i="${i}" title="Supprimer">🗑️</button>
             </div>
           </div>`;
         }).join("")}
@@ -279,8 +282,8 @@ function renderProfile() {
     `}
   `;
 
-  root.querySelectorAll(".gallery img").forEach((img) => {
-    img.onclick = () => openLightbox(Number(img.dataset.i) || 0);
+  root.querySelectorAll(".gal-img-btn").forEach((btn) => {
+    btn.onclick = () => openLightbox(Number(btn.dataset.i) || 0);
   });
   root.querySelectorAll(".gal-cover").forEach((btn) => {
     btn.onclick = (e) => {
