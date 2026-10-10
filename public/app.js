@@ -8,6 +8,8 @@ const state = {
   editMode: false,
   lbIndex: 0,
   sending: false,
+  importedCharacters: [],
+  leaCharacter: null,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -41,6 +43,7 @@ async function api(path, opts = {}) {
   if (ct.includes("application/json")) return res.json();
   return res.text();
 }
+window.leaAppApi = api;
 
 
 function resolveImgSrc(src) {
@@ -77,10 +80,12 @@ function saveSettings(s) {
   localStorage.setItem("lea.settings", JSON.stringify(s));
 }
 
-const ROLEPLAY_MEMORY_KEY = "lea.memory.lea";
+function roleplayMemoryKey() {
+  return "lea.memory." + String((state.character && state.character.id) || "lea");
+}
 function loadRoleplayMemory() {
   try {
-    const raw = JSON.parse(localStorage.getItem(ROLEPLAY_MEMORY_KEY) || "{}");
+    const raw = JSON.parse(localStorage.getItem(roleplayMemoryKey()) || "{}");
     return {
       scene: typeof raw.scene === "string" ? raw.scene : "",
       relationship: typeof raw.relationship === "string" ? raw.relationship : "",
@@ -98,7 +103,7 @@ function saveRoleplayMemory(memory) {
   Object.keys(current).filter((key) => key !== "updatedAt").forEach((key) => {
     next[key] = String(memory[key] || "").trim().slice(0, key === "scene" ? 480 : 640);
   });
-  localStorage.setItem(ROLEPLAY_MEMORY_KEY, JSON.stringify(next));
+  localStorage.setItem(roleplayMemoryKey(), JSON.stringify(next));
 }
 function escapeMemoryMarkup(value) {
   return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -152,7 +157,7 @@ function mergeChar(base) {
 
 function showView(name) {
   state.view = name;
-  ["discover", "profile", "chat", "settings"].forEach((v) => {
+  ["discover", "profile", "chat", "settings", "import"].forEach((v) => {
     const el = $("view-" + v);
     if (el) el.classList.toggle("hidden", v !== name);
   });
@@ -163,6 +168,48 @@ function showView(name) {
   if (name === "profile") renderProfile();
   if (name === "chat") renderChat();
   if (name === "settings") renderSettings();
+  if (name === "import" && window.LeaImporter) window.LeaImporter.render($("view-import"));
+}
+
+function persistActiveCharacter(next) {
+  if (next.id === "lea") {
+    saveCharOverrides(next);
+  } else {
+    const index = state.importedCharacters.findIndex((c) => c.id === next.id);
+    if (index >= 0) {
+      state.importedCharacters[index] = next;
+      localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+    }
+  }
+  state.character = next;
+}
+
+function activateCharacter(next) {
+  if (!next) return;
+  persistActiveCharacter(next);
+  state.chat = { messages: [] };
+  state.editMode = false;
+  localStorage.setItem("lea.activeCharacterId", next.id);
+  showView("discover");
+}
+
+function activeChatPath() {
+  return "/api/chat/" + encodeURIComponent((state.character && state.character.id) || "lea");
+}
+
+function promptCharacterPayload(char) {
+  const c = char || {};
+  return {
+    id: c.id,
+    name: c.name,
+    age: c.age,
+    title: c.title,
+    tags: c.tags,
+    scenario: c.scenario,
+    personality: c.personality,
+    appearance: c.appearance,
+    system_extra: c.system_extra,
+  };
 }
 
 function formatMessageHtml(text) {
@@ -191,8 +238,8 @@ function renderDiscover() {
     <div class="hero-card">
       <img class="cover" src="${cover}" alt="${c.name}" onerror="this.style.background='#2a1445'" />
       <div class="hero-gradient">
-        <h1>💜 ${c.name}</h1>
-        <div class="meta">${c.age} ans · ${c.title || ""}</div>
+        <h1>💜 ${escapeHtml(c.name)}</h1>
+        <div class="meta">${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</div>
         <div class="tags">${tags}</div>
         <div class="btn-row">
           <button type="button" class="btn btn-primary" id="go-chat">💬 Discuter</button>
@@ -207,13 +254,39 @@ function renderDiscover() {
     <div class="section">
       <h2>💌 Message d'accueil</h2>
       <div class="greeting-box">
-        <div class="label">Premier message de Léa</div>
+        <div class="label">Premier message de ${escapeHtml(c.name)}</div>
         <div class="body-text">${formatMessageHtml(c.greeting || "")}</div>
       </div>
     </div>
+    ${state.importedCharacters.length ? `
+      <div class="section">
+        <h2>📚 Ma bibliothèque</h2>
+        <div class="import-library">
+          <button type="button" class="import-library-card" id="activate-lea">
+            <span class="cover-placeholder">💜</span>
+            <span><strong>Léa Moreau</strong><small>Personnage d’origine</small></span>
+          </button>
+          ${state.importedCharacters.map((item) => {
+            const src = resolveImgSrc(item.cover || "");
+            return `<button type="button" class="import-library-card" data-character-id="${escapeHtml(item.id)}">
+              ${src ? `<img src="${escapeHtml(src)}" alt="" />` : '<span class="cover-placeholder">🖼️</span>'}
+              <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.title || "Personnage importé")}</small></span>
+            </button>`;
+          }).join("")}
+        </div>
+      </div>
+    ` : ""}
   `;
   $("go-chat") && ($("go-chat").onclick = () => { showView("chat"); });
   $("go-profile") && ($("go-profile").onclick = () => { showView("profile"); });
+  root.querySelectorAll("[data-character-id]").forEach((button) => {
+    button.onclick = () => {
+      const selected = state.importedCharacters.find((item) => item.id === button.dataset.characterId);
+      if (selected) activateCharacter(selected);
+    };
+  });
+  const leaButton = $("activate-lea");
+  if (leaButton) leaButton.onclick = () => activateCharacter(state.leaCharacter);
 }
 
 function renderProfile() {
@@ -226,13 +299,13 @@ function renderProfile() {
     const val = c[key] || "";
     if (!edit) {
       return `<div class="section"><h2>${emoji} ${label}</h2><div class="body-text">${
-        key === "greeting" ? formatMessageHtml(val) : val.replace(/</g, "&lt;")
+        key === "greeting" ? formatMessageHtml(val) : escapeHtml(val)
       }</div></div>`;
     }
     return `<div class="section"><h2>${emoji} ${label}</h2>${
       multiline
-        ? `<textarea class="edit-area" data-field="${key}">${val.replace(/</g, "&lt;")}</textarea>`
-        : `<input class="edit-input" data-field="${key}" value="${String(val).replace(/"/g, "&quot;")}" />`
+        ? `<textarea class="edit-area" data-field="${key}">${escapeHtml(val)}</textarea>`
+        : `<input class="edit-input" data-field="${key}" value="${escapeHtml(val)}" />`
     }</div>`;
   };
 
@@ -240,7 +313,7 @@ function renderProfile() {
     <div class="hero-card" style="margin-bottom:12px">
       <img class="cover" src="${resolveImgSrc(c.cover || gallery[0] || "")}" alt="${c.name}" style="max-height:36vh" />
       <div class="hero-gradient">
-        <h1>💜 ${c.name}</h1>
+        <h1>💜 ${escapeHtml(c.name)}</h1>
         <div class="meta">${c.age} ans · ${c.title || ""}</div>
       </div>
     </div>
@@ -250,7 +323,7 @@ function renderProfile() {
         <label class="hint">Nom</label>
         <input class="edit-input" data-field="name" value="${(c.name || "").replace(/"/g, "&quot;")}" />
         <label class="hint" style="margin-top:8px">Âge</label>
-        <input class="edit-input" data-field="age" type="number" value="${c.age || 18}" />
+        <input class="edit-input" data-field="age" type="number" value="${c.age || ""}" placeholder="Non précisé" />
         <label class="hint" style="margin-top:8px">Titre</label>
         <input class="edit-input" data-field="title" value="${(c.title || "").replace(/"/g, "&quot;")}" />
         <label class="hint" style="margin-top:8px">Tags (virgules)</label>
@@ -263,6 +336,20 @@ function renderProfile() {
     ${field("scenario", "Scénario", "🌧️", true)}
     ${field("personality", "Tempérament & caractère", "🎭", true)}
     ${field("appearance", "Descriptif physique", "✨", true)}
+    ${c.sourceScenario != null ? `
+      <div class="section">
+        <h2>📥 Fiche source conservée</h2>
+        <p class="hint">Origine : <a href="${escapeHtml(c.sourceUrl || "#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(c.source || "Import")}</a></p>
+        <label class="hint">Scénario d'origine (inchangé)</label>
+        <div class="body-text">${escapeHtml(c.sourceScenario || "Aucun scénario source.")}</div>
+        <label class="hint" style="display:block;margin-top:10px">Message d'accueil d'origine (inchangé)</label>
+        <div class="body-text">${escapeHtml(c.sourceGreeting || "Aucun message source.")}</div>
+        <details class="source-card-details">
+          <summary>Afficher la fiche source complète</summary>
+          <pre>${escapeHtml(JSON.stringify(c.sourceCard || {}, null, 2))}</pre>
+        </details>
+      </div>
+    ` : ""}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
       <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
@@ -299,7 +386,7 @@ function renderProfile() {
       <div class="edit-actions">
         <button type="button" class="btn btn-primary" id="save-char">💾 Enregistrer</button>
         <button type="button" class="btn btn-secondary" id="cancel-edit">Annuler</button>
-        <button type="button" class="btn btn-secondary" id="reset-char">♻️ Défaut</button>
+        ${c.id === "lea" ? '<button type="button" class="btn btn-secondary" id="reset-char">♻️ Défaut</button>' : ""}
       </div>
     ` : `
       <div class="btn-row">
@@ -318,9 +405,8 @@ function renderProfile() {
       const i = Number(btn.dataset.i) || 0;
       const g = (state.character && state.character.gallery) || [];
       if (!g[i]) return;
-      const next = Object.assign({}, state.character, { cover: g[i] });
-      saveCharOverrides(next);
-      state.character = next;
+       const next = Object.assign({}, state.character, { cover: g[i] });
+       persistActiveCharacter(next);
       renderProfile();
     };
   });
@@ -337,8 +423,7 @@ function renderProfile() {
       }
       const next = Object.assign({}, state.character, { gallery: g });
       if (next.cover === removed) next.cover = g[0] || "";
-      saveCharOverrides(next);
-      state.character = next;
+       persistActiveCharacter(next);
       renderProfile();
     };
   });
@@ -359,17 +444,21 @@ function renderProfile() {
     initCharacter().then(() => renderProfile());
   };
   if ($("save-char")) $("save-char").onclick = () => {
-    const next = Object.assign({}, c);
+       const next = Object.assign({}, c);
     root.querySelectorAll("[data-field]").forEach((el) => {
       const k = el.dataset.field;
       let v = el.value;
-      if (k === "age") v = parseInt(v, 10) || 18;
+       if (k === "age") v = parseInt(v, 10) || null;
       if (k === "tags") v = v.split(/[,;#]+/).map((x) => x.trim()).filter(Boolean);
       if (k === "gallery") v = v.split("\n").map((x) => x.trim()).filter(Boolean);
       next[k] = v;
     });
-    saveCharOverrides(next);
-    state.character = next;
+      if (next.sourceScenario != null) {
+        next.system_extra = Number(next.age) >= 18
+          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+          : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.";
+      }
+     persistActiveCharacter(next);
     state.editMode = false;
     renderProfile();
   };
@@ -379,7 +468,7 @@ async function ensureChatStarted() {
   const c = state.character;
   if (!c) return;
   try {
-    const data = await api("/api/chat/lea");
+      const data = await api(activeChatPath());
     if (data && Array.isArray(data.messages)) {
       state.chat = data;
     }
@@ -391,12 +480,12 @@ async function ensureChatStarted() {
       messages: [{ role: "assistant", content: greet, ts: Date.now() }],
     };
     try {
-      await api("/api/chat/lea", {
+      await api(activeChatPath(), {
         method: "POST",
         body: JSON.stringify({ messages: state.chat.messages, init: true }),
       });
     } catch (_) {
-      localStorage.setItem("lea.chat.lea", JSON.stringify(state.chat));
+      localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
     }
   }
 }
@@ -409,10 +498,10 @@ function renderChat() {
   root.innerHTML = `
     <div class="chat-wrap">
       <div class="chat-header">
-        <img src="${cover}" alt="" />
+          <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
         <div class="info">
-          <strong>💜 ${c.name}</strong>
-          <small>${c.age} ans · ${c.title || ""}</small>
+           <strong>💜 ${escapeHtml(c.name)}</strong>
+           <small>${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</small>
         </div>
         <button type="button" class="icon-btn" id="chat-reset" title="Nouvelle conversation" style="margin-left:auto">🔄</button>
       </div>
@@ -440,11 +529,11 @@ function renderChat() {
     }
   });
   $("chat-reset") && ($("chat-reset").onclick = async () => {
-    if (!confirm("Recommencer la conversation avec Léa ?")) return;
+       if (!confirm("Recommencer la conversation avec " + c.name + " ?")) return;
     state.chat = { messages: [] };
-    localStorage.removeItem("lea.chat.lea");
+       localStorage.removeItem("lea.chat." + c.id);
     try {
-      await api("/api/chat/lea", { method: "DELETE" });
+         await api(activeChatPath(), { method: "DELETE" });
     } catch (_) {}
     await ensureChatStarted();
     paintMessages();
@@ -478,12 +567,12 @@ async function sendMessage() {
   const typing = $("chat-typing");
   if (typing) typing.classList.remove("hidden");
   try {
-    const res = await api("/api/chat/lea", {
+    const res = await api(activeChatPath(), {
       method: "POST",
       body: JSON.stringify({
         message: text,
         messages: state.chat.messages,
-        character: state.character,
+        character: promptCharacterPayload(state.character),
         settings: loadSettings(),
       }),
     });
@@ -499,7 +588,7 @@ async function sendMessage() {
         ts: Date.now(),
       });
     }
-    localStorage.setItem("lea.chat.lea", JSON.stringify(state.chat));
+    localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat));
   } catch (e) {
     state.chat.messages.push({
       role: "assistant",
@@ -559,7 +648,7 @@ async function generateProfileImage() {
     try {
       const res = await api("/api/image/cloudflare", {
         method: "POST",
-        body: JSON.stringify({ character: jobChar, settings: st, extra }),
+        body: JSON.stringify({ character: promptCharacterPayload(jobChar), settings: st, extra }),
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
       const dataUrl = res.image;
@@ -574,8 +663,7 @@ async function generateProfileImage() {
       // generated first
       next.gallery = [stored].concat(next.gallery.filter((x) => x !== stored)).slice(0, 300);
       next.cover = stored;
-      saveCharOverrides(next);
-      state.character = next;
+       persistActiveCharacter(next);
       state.genRunning = false;
       setGenBanner("✓ Image ajoutée à la galerie (" + next.gallery.length + ")", "ok");
       if (state.view === "profile") {
@@ -754,7 +842,10 @@ async function initCharacter() {
       appearance: "Brune, cheveux longs, 95D.",
     };
   }
-  state.character = mergeChar(base);
+  const lea = mergeChar(base);
+  state.leaCharacter = lea;
+  const activeId = localStorage.getItem("lea.activeCharacterId");
+  state.character = state.importedCharacters.find((item) => item.id === activeId) || lea;
 }
 
 function bindNav() {
