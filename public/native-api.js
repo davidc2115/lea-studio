@@ -193,7 +193,7 @@
     return profileReferenceImageB64(char, "image/webp");
   }
 
-  function buildPhysicalImagePrompt(char, extra) {
+  function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
@@ -202,61 +202,82 @@
     if ((Number.isInteger(age) && age < 18) || (!ageConfirmed && !visuallyAdultAndConfirmed)) {
       throw new Error("La génération nécessite un personnage majeur confirmé. Vérifie l’âge dans la fiche.");
     }
+    const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
     const name = String(c.name || "le personnage").slice(0, 100);
-    const appearance = String(c.appearance || "").trim().slice(0, 760);
-    const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 420);
+    const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
+    const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const faceLock =
       "Use input_image_0 as the identity reference for " + name + ". Preserve the recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette from the reference and canonical description. " +
       "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
 
-    const outfits = [
-      "sheer black lace crop top semi-transparent, deep cleavage, tight dark skinny jeans, seductive",
-      "white sheer lace camisole very low neckline, wet look, dark tight jeans, rain droplets on skin",
-      "red sheer lace bra under open blouse, mini skirt, provocative evening look",
-      "burgundy lace babydoll short hem, thin straps, deep cleavage, sensual",
-      "emerald satin slip dress plunging neckline, high slit on thigh, elegant sexy",
-      "black lace bodysuit open décolleté, high-cut hips, stockings, full body",
-      "wet white crop top clinging translucent to chest, no jacket, dark skinny jeans, storm look",
-      "ivory sheer lace lingerie set, soft bedroom light, teasing pose",
-      "hot pink lace bra and micro skirt, playful provocative",
-      "navy deep V blouse unbuttoned low, black mini skirt, heels, office seduction",
-      "champagne silk robe loosely tied over lace lingerie, bedroom doorway",
-      "black mesh top and leather mini skirt, edgy sexy",
-      "wet dark skinny jeans and short soaked white crop top stuck to skin, classic storm arrival",
-      "purple lace lingerie, kneeling by fireplace, soft lamp light",
-      "oversized open white shirt barely covering lace panties, bare legs, morning after vibe",
-      "strappy heels, short bodycon dress deep cleavage, club outfit",
-      "corset with lace panels, garter straps, opaque stockings, boudoir",
-      "tight satin camisole and high-waist shorts, cleavage emphasized, flirtatious",
+    // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
+    // Horde : tenues plus provocantes autorisées
+    const outfitsCf = [
+      "fitted black evening dress with deep V neckline, elegant heels, glamorous",
+      "red satin cocktail dress high thigh slit, confident pose, fashion editorial",
+      "white blouse deep neckline tucked into pencil skirt, office chic seductive",
+      "emerald bodycon mini dress, strappy heels, night out look",
+      "navy wrap dress accentuating waist, soft décolleté, elegant",
+      "black off-shoulder top and fitted jeans, casual sexy",
+      "burgundy velvet dress low back, sophisticated allure",
+      "silk camisole top and tailored trousers, refined sensual",
+      "wet-look white t-shirt style crop and dark jeans after rain, realistic, modest coverage",
+      "lace-detail blouse with modest coverage, short skirt, flirtatious fashion",
+      "leather jacket over fitted dress, edgy glam",
+      "pastel summer dress thin straps, sunny doorway, soft seduction",
     ];
+    const outfitsHorde = [
+      "sheer black lace crop top semi-transparent, deep cleavage, tight dark skinny jeans, seductive",
+      "white sheer lace camisole very low neckline, wet look, dark tight jeans",
+      "red lace under open blouse, mini skirt, provocative evening look",
+      "burgundy lace babydoll short hem, thin straps, deep cleavage, sensual",
+      "emerald satin slip dress plunging neckline, high slit on thigh",
+      "black lace bodysuit open neckline, stockings, full body",
+      "wet white crop top clinging to chest, dark skinny jeans, storm look",
+      "ivory lace lingerie set, soft bedroom light, teasing pose",
+      "hot pink lace top and micro skirt, playful provocative",
+      "navy deep V blouse unbuttoned low, black mini skirt, heels",
+      "champagne silk robe over lace, bedroom doorway",
+      "black mesh top and leather mini skirt, edgy sexy",
+      "purple lace set, kneeling by fireplace",
+      "oversized open white shirt over lace, bare legs",
+    ];
+    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "full-length, one hand on hip, weight shifted, confident teasing look toward camera",
-      "full-length, looking back over one shoulder with a playful smile",
-      "full-length, seated at the edge of a sofa, elegant crossed legs and direct gaze",
-      "full-length, leaning lightly against a doorway, relaxed confident posture",
-      "full-length, one hand brushing hair back, subtle arched posture and warm gaze",
-      "full-length, standing beside a window, torso turned toward camera, graceful pose",
-      "full-length, taking a confident step toward camera, natural body proportions",
-      "full-length, seated on a chair, shoulders relaxed, poised and subtly provocative",
-      "full-length, three-quarter view, one knee softly bent and a knowing smile",
-      "full-length, resting one hand on a table, looking toward camera with playful confidence",
+      "full-length standing, slight hip tilt, looking at camera with soft smile",
+      "full-length leaning in doorway, one hand on frame, inviting gaze",
+      "full-length sitting on sofa edge, legs crossed, elegant posture",
+      "full-length three-quarter turn looking over shoulder",
+      "full-length walking toward camera, confident stride",
+      "full-length by window soft light, hand in long hair",
+      "full-length kneeling on rug near fireplace, soft upward look",
+      "full-length standing arms relaxed, fashion magazine pose",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
-    const scenes = [
-      "cozy living room warm lamp and fireplace glow",
-      "apartment doorway after rain, wet floor reflections",
-      "bedroom soft bokeh fairy lights",
-      "rainy window at night city lights outside",
-      "dim hallway with warm wall light",
-      "bathroom doorway steam soft light",
-      "leather couch living room intimate mood",
-      "character-appropriate fantasy or chic interior",
-    ];
+    const scenes = forCloudflare
+      ? [
+          "softly lit living room",
+          "elegant apartment hallway",
+          "bedroom with soft natural light",
+          "city apartment window daylight",
+          "warm interior fashion setting",
+        ]
+      : [
+          "cozy living room warm lamp and fireplace",
+          "apartment doorway after rain",
+          "bedroom soft bokeh lights",
+          "rainy window at night",
+          "leather couch intimate mood",
+        ];
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
+
+    const mood = forCloudflare
+      ? "adult woman 18+, glamorous fashion photography, alluring but tasteful, magazine cover quality, seductive elegance without explicit content,"
+      : "adult woman 18+, sensual seductive provocative fashion, flirty mood, sexy outfit preferred,";
 
     const base = [
       "photorealistic full-body character portrait, one subject, natural proportions, not a close-up,",
@@ -264,23 +285,44 @@
       "Canonical physical description: " + (appearance || "match the reference image without adding permanent traits.") + ".",
       nonHumanTraits ? "Preserve these non-human traits exactly: " + nonHumanTraits + "." : "",
       bust
-        ? "Recorded bust size: " + bust + ". Match the stated band and cup proportion to the character's torso; do not exaggerate, reduce, flatten, or change this recorded size."
+        ? "Recorded bust size: " + bust + ". Match the stated band and cup proportion to the character's torso; do not exaggerate or reduce this recorded size."
         : "",
       outfit + ",",
       pose + ",",
       "location: " + scene + ",",
-      "portrait-format full-length framing, entire subject visible head to toe with space above and below, medium-wide camera distance, face recognizable, front or front three-quarter view,",
+      "portrait-format full-length framing, entire subject visible head to toe, medium-wide camera, face recognizable,",
       "match the same character as input_image_0 and preserve its recognizable identity,",
-      "adult woman 18+, sensual seductive provocative fashion, flirty mood,",
-      "sexy outfit preferred: sheer lace, transparent fabric, deep cleavage, lingerie, wet clinging clothes, mini skirt, open blouse,",
-      "alluring pose and body language, glamorous magazine style,",
-      "no close-up, no headshot, no cropped body, no extra people,",
-      "no text, no watermark, no deformed hands",
+      mood,
+      "no close-up, no headshot, no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
     let out = base;
-    if (extra) out += ", " + String(extra).slice(0, 160);
-    return out.slice(0, 1800);
+    if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
+    return out.slice(0, forCloudflare ? 1600 : 1800);
+  }
+
+  /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
+  function buildCloudflareSafeRetryPrompt(char, extra, attempt) {
+    const c = char || LEA;
+    const name = String(c.name || "woman").slice(0, 80);
+    const appearance = String(c.appearance || "").trim().slice(0, 400);
+    const softOutfits = [
+      "elegant black dress, professional fashion photo",
+      "casual chic blouse and jeans, natural beauty",
+      "evening gown modest neckline, red carpet style",
+      "cozy sweater and skirt, lifestyle photography",
+      "smart casual outfit, portrait full body",
+    ];
+    const outfit = softOutfits[Math.min(attempt, softOutfits.length - 1)];
+    return [
+      "photorealistic full body photo of adult woman 18+,",
+      "identity match reference input_image_0 for " + name + ",",
+      appearance ? appearance.slice(0, 300) + "," : "",
+      outfit + ",",
+      "standing full length, natural pose, soft indoor light,",
+      "fashion safe for work, no explicit content, no nudity,",
+      "single person, no text, high quality",
+    ].filter(Boolean).join(" ").slice(0, 1400);
   }
 
   function readableCloudflareImageError(value) {
@@ -947,11 +989,32 @@
     if ((path === "/api/image/cloudflare" || path === "/api/image/horde") && method === "POST") {
       const st = body.settings || settings();
       const char = body.character || LEA;
-      const prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "");
-      const dataUrl = path === "/api/image/horde"
-        ? await generateHordeImage(prompt, char, st)
-        : await generateCloudflareImage(prompt, st, char);
-      return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400) };
+      const isHorde = path === "/api/image/horde";
+      let prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "", isHorde ? "horde" : "cloudflare");
+      if (isHorde) {
+        const dataUrl = await generateHordeImage(prompt, char, st);
+        return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400) };
+      }
+      // Cloudflare: jusqu'à 3 essais si « output flagged »
+      let lastErr = "";
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (attempt > 0) {
+            prompt = buildCloudflareSafeRetryPrompt(char, body.extra || "", attempt);
+          }
+          const dataUrl = await generateCloudflareImage(prompt, st, char);
+          return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), attempt: attempt };
+        } catch (e) {
+          lastErr = String(e.message || e);
+          if (!/flagged|3030|content|filtre|blocked|choose another prompt/i.test(lastErr)) throw e;
+          // sinon réessai plus soft
+        }
+      }
+      throw new Error(
+        "Cloudflare refuse ce type d'image (filtre contenu). " +
+        "Passe sur AI Horde pour des tenues plus sexy, ou adoucis le champ optionnel. " +
+        lastErr.slice(0, 120)
+      );
     }
 
     return { error: "not_found", path };
