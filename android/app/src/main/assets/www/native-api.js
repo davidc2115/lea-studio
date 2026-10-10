@@ -193,11 +193,13 @@
       "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
     const bodyLock =
       age + " years old, slim hourglass body, narrow shoulders, defined tiny waist, " +
-      "generous full 95D breasts, rounded hips, long toned legs, " +
+      "conspicuously full, naturally heavy 95D breasts with clear forward projection and rounded volume, visibly prominent against her narrow shoulders and tiny waist, " +
+      "preserve this generous bust size in every pose and outfit; clothing and lingerie fit properly without flattening, minimizing, or compressing her chest, " +
+      "rounded hips, long toned legs, " +
       "very long straight dark brown hair to the lower back, center or side part, silky texture,";
 
     const outfits = [
-      "sheer black transparent lace crop top revealing bra underneath, tight dark skinny jeans, wet from rain",
+      "sheer black transparent lace crop top over a correctly sized supportive bra that does not compress her full bust, tight dark skinny jeans, wet from rain",
       "sheer white transparent lace camisole, no bra visible outline, wet dark jeans, rain droplets on skin",
       "red sheer lace bra and matching thong, standing indoors, soft warm light",
       "burgundy lace babydoll with deep cleavage, thigh-high hem, seductive pose",
@@ -218,16 +220,16 @@
     const poses = [
       "FULL BODY head-to-toe, leaning in doorway arched back, looking at camera coy smile",
       "FULL BODY low angle, leaning forward deep cleavage, hands on thighs, teasing look",
-      "FULL BODY looking over shoulder, weight on one leg, arched lower back, sensual",
+      "FULL BODY three-quarter front view, weight on one leg, shoulders and chest turned toward camera, soft sensual smile",
       "FULL BODY kneeling on rug by fireplace, sitting on heels, looking up softly",
       "FULL BODY sitting on bed edge, legs slightly apart, inviting gaze",
       "FULL BODY by rainy window, one hand in long hair, hip cocked",
-      "FULL BODY on all fours on bed looking back over shoulder",
+      "FULL BODY standing beside the bed, three-quarter front view, chest clearly visible, relaxed natural pose",
       "FULL BODY lying on side on bed propped on elbow, curves visible",
-      "FULL BODY standing mirror, adjusting top, complete figure visible",
+      "FULL BODY facing a mirror at a three-quarter front angle, complete figure and bust visible, one hand lightly touching her hair",
       "FULL BODY walking toward camera in hallway, confident hips",
       "FULL BODY sitting cross-legged on floor near fireplace, wet hair, soft smile",
-      "FULL BODY standing arms crossed under bust pushing cleavage, wet clothes",
+      "FULL BODY standing with arms relaxed at her sides, wet clothes, unobstructed front three-quarter view",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
@@ -247,10 +249,12 @@
       bodyLock,
       outfit + ",",
       pose + ",",
+      "camera sees her from the front or a front three-quarter angle; keep her chest unobstructed and clearly full, not hidden by a rear view, crossed arms, loose clothing, or a compressive bra,",
       "location: " + scene + ",",
       "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
       "same woman as input_image_0, preserve facial identity, direct visible face,",
-      "natural skin texture, realistic 95D breast size, sharp detail,",
+      "natural skin texture, clearly large and full natural 95D bust with visible volume and projection, sharp detail,",
+      "not small breasts, not medium breasts, not flat, minimized, or compressed,",
       "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
     ].join(" ");
