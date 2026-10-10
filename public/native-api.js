@@ -152,7 +152,7 @@
     return creds;
   }
 
-  async function profileReferenceJpegB64(char) {
+  async function profileReferenceImageB64(char, mime) {
     const c = char || LEA;
     const src = String(c.cover || (Array.isArray(c.gallery) && c.gallery[0]) || "").trim();
     if (!src) throw new Error("Choisis une photo de profil avant de générer.");
@@ -178,10 +178,19 @@
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+    const dataUrl = canvas.toDataURL(mime, 0.82);
+    if (!dataUrl.startsWith("data:" + mime + ";base64,")) throw new Error("Format de photo de référence non pris en charge.");
     const comma = dataUrl.indexOf(",");
     if (comma < 0 || dataUrl.length < 100) throw new Error("Impossible de préparer la photo de profil.");
     return dataUrl.slice(comma + 1);
+  }
+
+  async function profileReferenceJpegB64(char) {
+    return profileReferenceImageB64(char, "image/jpeg");
+  }
+
+  async function profileReferenceWebpB64(char) {
+    return profileReferenceImageB64(char, "image/webp");
   }
 
   function buildPhysicalImagePrompt(char, extra) {
@@ -202,32 +211,32 @@
       "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
 
     const outfits = [
-      "a well-fitted dark knit sweater, tailored trousers and simple boots",
-      "a modest blue shirt, fitted jacket and dark jeans",
-      "a clean-lined casual dress with opaque fabric and comfortable shoes",
-      "a practical fantasy tunic, fitted trousers and character-appropriate accessories",
-      "a neat high-neck blouse, long skirt and natural everyday styling",
-      "a weather-appropriate coat over ordinary fully covering clothes",
-      "a simple fitted t-shirt and straight-leg trousers, natural fabric folds",
-      "a modest formal outfit with a jacket and understated accessories",
-      "a character-appropriate uniform with all private areas fully covered",
-      "a relaxed cardigan over a plain top and jeans",
-      "a tasteful fantasy or science-fiction outfit that preserves the character's established species",
-      "a natural everyday outfit in colors that suit the reference image",
+      "an elegant opaque black lace bodysuit with a deep neckline, fully covering intimate areas",
+      "a fitted satin slip dress with a tasteful side slit and opaque lining",
+      "a tailored corset-style top with full opaque coverage, short skirt and sheer-free thigh-high stockings",
+      "a silky open-collar blouse, fitted pencil skirt and heels, confident evening styling",
+      "a chic opaque burgundy lingerie-inspired set with matching robe, tasteful and fully covered",
+      "a close-fitting evening dress with a deep but covered neckline and high slit",
+      "a fitted leather jacket over an opaque low-cut top and short skirt",
+      "a soft satin camisole with opaque coverage, fitted trousers and elegant heels",
+      "a character-appropriate fantasy outfit with a fitted bodice, tasteful cleavage and full coverage",
+      "a sleek science-fiction outfit with a fitted silhouette and opaque panels",
+      "a playful fitted top and high-waisted mini skirt, opaque fabric and fully covered",
+      "a character-appropriate sensual evening outfit in colors that suit the reference image",
     ];
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "full-length head-to-toe, standing naturally in a three-quarter front view",
-      "full-length, walking toward the camera with a relaxed expression",
-      "full-length, seated on a chair with hands visible and posture relaxed",
-      "full-length, standing beside a window, looking toward the camera",
-      "full-length, standing with arms relaxed at the sides, clear view of the outfit",
-      "full-length, one hand lightly touching the hair, friendly natural expression",
-      "full-length, seated on a low bench, three-quarter front view",
-      "full-length, standing in a simple character-appropriate environment",
-      "full-length, taking a casual step through a doorway, natural posture",
-      "full-length, turned slightly toward the camera, face and body clearly visible",
+      "full-length, one hand on hip, weight shifted, confident teasing look toward camera",
+      "full-length, looking back over one shoulder with a playful smile",
+      "full-length, seated at the edge of a sofa, elegant crossed legs and direct gaze",
+      "full-length, leaning lightly against a doorway, relaxed confident posture",
+      "full-length, one hand brushing hair back, subtle arched posture and warm gaze",
+      "full-length, standing beside a window, torso turned toward camera, graceful pose",
+      "full-length, taking a confident step toward camera, natural body proportions",
+      "full-length, seated on a chair, shoulders relaxed, poised and subtly provocative",
+      "full-length, three-quarter view, one knee softly bent and a knowing smile",
+      "full-length, resting one hand on a table, looking toward camera with playful confidence",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
@@ -252,9 +261,9 @@
       outfit + ",",
       pose + ",",
       "location: " + scene + ",",
-      "vertical 3:4 full-length framing, entire subject visible head to toe with space above and below, medium-wide camera distance, face recognizable, front or front three-quarter view,",
+      "portrait-format full-length framing, entire subject visible head to toe with space above and below, medium-wide camera distance, face recognizable, front or front three-quarter view,",
       "match the same character as input_image_0 and preserve its recognizable identity,",
-      "clothing fully covers chest, pelvis and buttocks; non-sexual fashion portrait, no nudity or lingerie,",
+      "adult sensual fashion portrait, tasteful flirtatious mood; opaque clothing fully covers chest, pelvis and buttocks; no nudity, no exposed nipples or genitals,",
       "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
@@ -329,6 +338,44 @@
     }
 
     throw new Error("La génération avec photo de référence requiert le pont natif Android.");
+  }
+
+  async function generateHordeImage(prompt, character, st) {
+    const referenceB64 = await profileReferenceWebpB64(character);
+    if (!window.LeaAndroid || typeof window.LeaAndroid.hordeImageStart !== "function" ||
+        typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
+      throw new Error("La génération AI Horde avec référence nécessite l’application Android.");
+    }
+    const jobId = String(window.LeaAndroid.hordeImageStart(
+      String(prompt).slice(0, 2048),
+      String(character && character.id || "lea"),
+      referenceB64,
+      String(st && st.hordeApiKey || "")
+    ) || "");
+    if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde.");
+    const started = Date.now();
+    let last = "La file AI Horde est toujours en attente.";
+    while (Date.now() - started < 600000) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      let result = "";
+      try { result = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); }
+      catch (error) { throw new Error("AI Horde : " + String(error.message || error)); }
+      if (result === "pending") continue;
+      if (result === "missing") throw new Error("Le travail AI Horde n’est plus disponible.");
+      if (result.indexOf("error:") === 0) {
+        const raw = result.slice(6);
+        let detail = raw;
+        try { detail = String(JSON.parse(raw).error || raw); } catch (_) {}
+        throw new Error("AI Horde : " + detail.slice(0, 180));
+      }
+      const raw = result.indexOf("done:") === 0 ? result.slice(5) : result;
+      let data = null;
+      try { data = JSON.parse(raw); } catch (_) {}
+      if (data && data.galleryKey) return String(data.galleryKey);
+      last = "Réponse AI Horde sans image enregistrée.";
+      break;
+    }
+    throw new Error(last);
   }
 
 
@@ -884,11 +931,13 @@
       };
     }
 
-    if (path === "/api/image/cloudflare" && method === "POST") {
+    if ((path === "/api/image/cloudflare" || path === "/api/image/horde") && method === "POST") {
       const st = body.settings || settings();
       const char = body.character || LEA;
       const prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "");
-      const dataUrl = await generateCloudflareImage(prompt, st, char);
+      const dataUrl = path === "/api/image/horde"
+        ? await generateHordeImage(prompt, char, st)
+        : await generateCloudflareImage(prompt, st, char);
       return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400) };
     }
 
