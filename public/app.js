@@ -48,11 +48,14 @@ window.leaAppApi = api;
 
 function resolveImgSrc(src) {
   if (!src) return "";
-  if (src.indexOf("gallery:") === 0 && window.LeaAndroid && typeof window.LeaAndroid.loadGalleryImage === "function") {
-    try {
-      const d = window.LeaAndroid.loadGalleryImage(src);
-      if (d && d.length > 32) return d;
-    } catch (_) {}
+  if (String(src).indexOf("gallery:") === 0) {
+    if (window.LeaAndroid && typeof window.LeaAndroid.loadGalleryImage === "function") {
+      try {
+        const d = window.LeaAndroid.loadGalleryImage(src);
+        if (d && d.length > 32) return d;
+      } catch (_) {}
+    }
+    return "";
   }
   return src;
 }
@@ -67,6 +70,32 @@ function persistGeneratedImage(charId, dataUrl) {
     } catch (_) {}
   }
   return dataUrl;
+}
+
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function tagPresentation(tag) {
+  const value = String(tag || "").trim().toLowerCase();
+  if (/^(nsfw|adult|18\+|explicite)$/.test(value)) return { icon: "🔞", kind: "adult", label: "Contenu adulte" };
+  if (/orage|pluie|temp[eê]te|feu|neige|for[eê]t/.test(value)) return { icon: "🌦️", kind: "story", label: "Univers et scénario" };
+  if (/timide|douce|espi[eè]gle|dr[oô]le|calme|rebelle/.test(value)) return { icon: "💭", kind: "personality", label: "Personnalité" };
+  if (/romance|amie|amour|relation|flirt/.test(value)) return { icon: "💞", kind: "relationship", label: "Relation" };
+  if (/brune|blonde|rousse|cheveux|yeux|voluptueuse|mince|grande|petite/.test(value)) return { icon: "✨", kind: "appearance", label: "Apparence" };
+  return { icon: "✦", kind: "default", label: "Tag" };
+}
+
+function renderTagChip(tag) {
+  const text = String(tag || "").trim().replace(/^#+/, "");
+  if (!text) return "";
+  const presentation = tagPresentation(text);
+  return `<span class="tag tag--${presentation.kind}" title="${presentation.label}"><span aria-hidden="true">${presentation.icon}</span><span>#${escapeHtml(text)}</span></span>`;
 }
 
 function loadSettings() {
@@ -193,6 +222,19 @@ function activateCharacter(next) {
   showView("discover");
 }
 
+window.leaOnImportedCharacter = function (character) {
+  if (!character || !character.id) return;
+  const existing = state.importedCharacters.findIndex((item) => item.id === character.id);
+  if (existing >= 0) state.importedCharacters[existing] = character;
+  else state.importedCharacters.unshift(character);
+  localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+  state.chat = { messages: [] };
+  state.editMode = false;
+  state.character = character;
+  localStorage.setItem("lea.activeCharacterId", character.id);
+  showView("discover");
+};
+
 function activeChatPath() {
   return "/api/chat/" + encodeURIComponent((state.character && state.character.id) || "lea");
 }
@@ -230,13 +272,11 @@ function renderDiscover() {
   const root = $("view-discover");
   if (!c || !root) return;
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
-  const tags = (c.tags || []).map((t) => {
-    const pink = /timide|nsfw|romance|orage/.test(t);
-    return `<span class="tag${pink ? " pink" : ""}">#${t}</span>`;
-  }).join("");
+  const coverSrc = resolveImgSrc(cover);
+  const tags = (c.tags || []).map(renderTagChip).join("");
   root.innerHTML = `
     <div class="hero-card">
-      <img class="cover" src="${cover}" alt="${c.name}" onerror="this.style.background='#2a1445'" />
+      ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
       <div class="hero-gradient">
         <h1>💜 ${escapeHtml(c.name)}</h1>
         <div class="meta">${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</div>
@@ -295,6 +335,7 @@ function renderProfile() {
   if (!c || !root) return;
   const edit = state.editMode;
   const gallery = c.gallery || [];
+  const coverSrc = resolveImgSrc(c.cover || gallery[0] || "");
   const field = (key, label, emoji, multiline) => {
     const val = c[key] || "";
     if (!edit) {
@@ -311,7 +352,7 @@ function renderProfile() {
 
   root.innerHTML = `
     <div class="hero-card" style="margin-bottom:12px">
-      <img class="cover" src="${resolveImgSrc(c.cover || gallery[0] || "")}" alt="${c.name}" style="max-height:36vh" />
+      ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" style="max-height:36vh" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil" style="max-height:36vh"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
       <div class="hero-gradient">
         <h1>💜 ${escapeHtml(c.name)}</h1>
         <div class="meta">${c.age} ans · ${c.title || ""}</div>
@@ -872,7 +913,19 @@ function bindNav() {
 }
 
 (async function boot() {
-  bindNav();
-  await initCharacter();
-  showView("discover");
+  try {
+    bindNav();
+    await initCharacter();
+    showView("discover");
+  } catch (error) {
+    console.error("Léa Studio startup failed", error);
+    const root = $("view-discover");
+    if (root) {
+      root.innerHTML = `
+        <div class="startup-state startup-state--error" role="alert">
+          <strong>Le profil n’a pas pu se charger.</strong>
+          <span>Ferme puis relance l’application. Si le problème revient, installe la dernière version.</span>
+        </div>`;
+    }
+  }
 })();
