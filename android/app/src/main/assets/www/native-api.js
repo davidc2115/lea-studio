@@ -22,6 +22,45 @@
     return load("lea.settings", {});
   }
 
+  /**
+   * POST JSON — via bridge Android si dispo (évite Failed to fetch / CORS WebView),
+   * sinon fetch navigateur.
+   * Retourne { ok, status, json, text, error }
+   */
+  async function httpPostJson(url, bodyObj, headerMap) {
+    const body = JSON.stringify(bodyObj || {});
+    const headerLines = Object.keys(headerMap || {})
+      .map((k) => k + ": " + headerMap[k])
+      .join("\n");
+    try {
+      if (window.LeaAndroid && typeof window.LeaAndroid.httpPostJson === "function") {
+        const raw = String(window.LeaAndroid.httpPostJson(url, body, headerLines) || "");
+        let json = null;
+        try { json = JSON.parse(raw); } catch (_) {}
+        if (json && json.error && !json.candidates && !json.result && !json.choices) {
+          return { ok: false, status: 0, json, text: raw, error: String(json.error) + (json.body ? " " + json.body : "") };
+        }
+        return { ok: true, status: 200, json, text: raw, error: "" };
+      }
+    } catch (e) {
+      return { ok: false, status: 0, json: null, text: "", error: String(e.message || e) };
+    }
+    try {
+      const headers = Object.assign({ "Content-Type": "application/json" }, headerMap || {});
+      const res = await fetch(url, { method: "POST", headers, body });
+      const text = await res.text();
+      let json = null;
+      try { json = JSON.parse(text); } catch (_) {}
+      if (!res.ok) {
+        const errMsg = (json && (json.error && (json.error.message || json.error) || (json.errors && json.errors[0] && json.errors[0].message))) || ("HTTP " + res.status);
+        return { ok: false, status: res.status, json, text, error: String(errMsg) };
+      }
+      return { ok: true, status: res.status, json, text, error: "" };
+    } catch (e) {
+      return { ok: false, status: 0, json: null, text: "", error: "Failed to fetch: " + String(e.message || e) };
+    }
+  }
+
   function splitKeys(raw) {
     // Accepte AIza…, aq…, gsk_…, sk-… (longueur min 10, pas de filtre de préfixe)
     return String(raw || "")
@@ -116,27 +155,15 @@
           const body = model.indexOf("flux") >= 0
             ? { prompt: String(prompt).slice(0, 2048) }
             : { prompt: String(prompt).slice(0, 2048), num_steps: 20 };
-          const res = await fetch(url, {
-            method: "POST",
-            headers: {
-              Authorization: "Bearer " + cred.token,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-          });
-          const text = await res.text();
-          let data = {};
-          try { data = JSON.parse(text); } catch (_) {}
-          if (!res.ok) {
-            lastErr = (data.errors && data.errors[0] && data.errors[0].message) ||
-              (data.error) || ("HTTP " + res.status);
-            // rotate on quota/auth
-            if (res.status === 400 || res.status === 401 || res.status === 429 || res.status === 402) {
+          const r = await httpPostJson(url, body, { Authorization: "Bearer " + cred.token });
+          const data = r.json || {};
+          if (!r.ok) {
+            lastErr = r.error || "Cloudflare error";
+            if (/400|401|429|402|quota|unauthorized|forbidden/i.test(lastErr)) {
               try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
             }
             continue;
           }
-          // FLUX returns result.image base64
           let b64 = (data.result && (data.result.image || data.result.b64_json)) ||
             data.image || data.result;
           if (typeof b64 === "object" && b64 && b64.image) b64 = b64.image;
@@ -211,14 +238,10 @@
               { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
             ],
           };
-          const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            lastErr = (data.error && data.error.message) || res.status;
+          const r = await httpPostJson(url, body, {});
+          const data = r.json || {};
+          if (!r.ok) {
+            lastErr = r.error || (data.error && data.error.message) || "gemini error";
             continue;
           }
           const text =
@@ -248,21 +271,14 @@
             content: m.content,
           }))
         );
-        const res = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + key,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: msgs,
-            temperature: 0.9,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          lastErr = (data.error && data.error.message) || res.status;
+        const r = await httpPostJson(
+          "https://api.openai.com/v1/chat/completions",
+          { model: "gpt-4o-mini", messages: msgs, temperature: 0.9 },
+          { Authorization: "Bearer " + key }
+        );
+        const data = r.json || {};
+        if (!r.ok) {
+          lastErr = r.error || (data.error && data.error.message) || "openai error";
           continue;
         }
         const text = data.choices && data.choices[0] && data.choices[0].message
@@ -286,21 +302,14 @@
             content: m.content,
           }))
         );
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + key,
-          },
-          body: JSON.stringify({
-            model: "llama-3.3-70b-versatile",
-            messages: msgs,
-            temperature: 0.9,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          lastErr = (data.error && data.error.message) || res.status;
+        const r = await httpPostJson(
+          "https://api.groq.com/openai/v1/chat/completions",
+          { model: "llama-3.3-70b-versatile", messages: msgs, temperature: 0.9 },
+          { Authorization: "Bearer " + key }
+        );
+        const data = r.json || {};
+        if (!r.ok) {
+          lastErr = r.error || (data.error && data.error.message) || "groq error";
           continue;
         }
         const text = data.choices && data.choices[0] && data.choices[0].message
@@ -342,7 +351,7 @@
         errors.push(eng + ": " + e.message);
       }
     }
-    throw new Error(errors.join(" · ") || "Aucune clé API configurée");
+    throw new Error(errors.join(" · ") || "Aucune clé API configurée — ajoute une clé Gemini (aq… ou AIza…) dans Réglages");
   }
 
   window.leaNativeApi = async function (path, opts) {
