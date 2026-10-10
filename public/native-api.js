@@ -202,11 +202,26 @@
     return (match[1] ? match[1] : "") + (match[2] || match[3] || match[4]).toUpperCase() + "-cup";
   }
 
+  function chooseVaried(items, storageKey) {
+    if (!items.length) return "";
+    let previous = -1;
+    try {
+      const saved = localStorage.getItem(storageKey);
+      previous = saved === null ? -1 : Number(saved);
+    } catch (_) {}
+    let next = Math.floor(Math.random() * items.length);
+    if (items.length > 1 && next === previous) next = (next + 1) % items.length;
+    try { localStorage.setItem(storageKey, String(next)); } catch (_) {}
+    return items[next];
+  }
+
   /** Prompt pour une identité faciale référencée et un cadrage vertical plein pied. */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
+    const isAdult = Number(age) >= 18;
     const bust = profileBustSpecification(c);
+    const options = extra && typeof extra === "object" ? extra : { note: extra || "" };
     // L'identité vient de la photo de profil étoilée; le texte renforce les mêmes traits.
     const faceLock =
       "Use input_image_0 as the identity reference for the same adult woman. Preserve her recognizable face, facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
@@ -216,44 +231,44 @@
       (bust
         ? "preserve her explicitly specified " + bust + " bust exactly, visibly full and proportionate with clear natural forward projection; do not reduce the recorded size, "
         : "preserve the bust proportions stated in her appearance and reference; do not invent a cup size or reduce her described proportions, ") +
-      "choose a fitted, opaque outfit that follows her natural silhouette without compressing her chest, " +
+      (isAdult
+        ? "wear the selected outfit exactly as specified; let the fabric follow her natural silhouette without compressing her chest, "
+        : "wear age-appropriate opaque clothing that follows her natural silhouette without compressing her chest, ") +
       "rounded hips, long toned legs, " +
       "very long straight dark brown hair to the lower back, center or side part, silky texture,";
 
     const outfits = [
-      "fitted opaque black lace top with full lining and dark tailored jeans, rain-damp outer layer",
-      "fitted opaque white wrap blouse and high-waisted dark jeans, soft natural light",
-      "elegant red satin dress with a secure opaque bodice, standing indoors",
-      "burgundy fitted evening dress with a tasteful neckline and knee-length hem",
-      "emerald satin dress with an opaque fitted bodice, elegant styling",
-      "fitted black lined bodysuit with opaque fabric and tailored trousers",
-      "opaque white fitted t-shirt and dark jeans, rain-damp fabric but not transparent",
-      "ivory fitted knit top and high-waisted skirt, warm bedroom light",
-      "hot pink fitted top and short opaque skirt, playful fashion portrait",
-      "navy fitted blouse, black mini skirt with opaque tights, heels",
-      "champagne satin robe closed over an opaque fitted dress",
-      "black fitted top and leather mini skirt with opaque tights, edgy fashion",
-      "dark jeans and fitted opaque white crop top, classic storm arrival",
-      "purple fitted satin dress with opaque fabric, soft lamp light",
-      "oversized white shirt buttoned over fitted shorts, bare legs",
+      { id: "rain-lace", prompt: "semi-sheer black lace crop top, rain-wet and clinging tastefully, layered over an opaque underlayer, tight dark wet jeans" },
+      { id: "satin-dress", prompt: "fitted satin evening dress with a deep tasteful neckline and high heels" },
+      { id: "mini-boots", prompt: "fitted mini skirt, elegant top and thigh-high boots" },
+      { id: "nightdress", adultOnly: true, prompt: "short satin nightdress with delicate lace trim, tasteful adult boudoir fashion" },
+      { id: "lingerie-robe", adultOnly: true, prompt: "tasteful lace lingerie set with a flowing open satin robe, adult boudoir fashion, no nudity" },
+      { id: "robe", prompt: "silk dressing gown over a fitted satin dress, elegant and alluring" },
+      { id: "towel", adultOnly: true, prompt: "spa towel wrapped securely around the body, damp hair and relaxed hotel-spa setting" },
     ];
-    const outfit = outfits[Math.floor(Math.random() * outfits.length)];
+    const usableOutfits = outfits.filter((item) => isAdult || !item.adultOnly);
+    const outfitId = String(options.outfit || "random");
+    const requestedOutfit = usableOutfits.find((item) => item.id === outfitId);
+    const outfit = requestedOutfit
+      ? requestedOutfit.prompt
+      : (outfitId === "random"
+        ? chooseVaried(usableOutfits, "lea.profile.lastOutfit." + String(c.id || "default")).prompt
+        : "fitted blouse with a short skirt and high heels");
 
     const poses = [
-      "FULL BODY head-to-toe, standing naturally in a doorway, relaxed posture, looking at camera with a warm smile",
-      "FULL BODY eye-level view, standing with hands relaxed at her sides, friendly expression",
-      "FULL BODY three-quarter front view, weight on one leg, shoulders and chest turned toward camera, confident smile",
-      "FULL BODY standing beside a fireplace, relaxed posture, looking toward the camera",
-      "FULL BODY seated on a chair, upright posture, calm direct gaze",
-      "FULL BODY by rainy window, one hand in long hair, hip cocked",
-      "FULL BODY standing beside the bed, three-quarter front view, chest clearly visible, relaxed natural pose",
-      "FULL BODY standing by a rainy window, natural posture, curves visible through fitted opaque clothes",
-      "FULL BODY facing a mirror at a three-quarter front angle, complete figure and bust visible, one hand lightly touching her hair",
-      "FULL BODY walking toward camera in hallway, natural posture",
-      "FULL BODY sitting cross-legged on floor near fireplace, wet hair, soft smile",
-      "FULL BODY standing with arms relaxed at her sides, wet clothes, unobstructed front three-quarter view",
+      { id: "standing", prompt: "standing in a three-quarter pose, one hand in her hair, one knee softly bent" },
+      { id: "seated", prompt: "seated sideways on a chair, legs crossed at the ankles, turning her face toward camera" },
+      { id: "walking", prompt: "mid-step walking toward camera, natural movement and confident posture" },
+      { id: "wall", prompt: "leaning lightly against a wall, looking back over one shoulder while keeping her face visible" },
+      { id: "bed", prompt: "sitting at the edge of a bed, legs angled to one side, relaxed shoulders" },
+      { id: "stretch", prompt: "standing with arms lifted in a natural stretch, elongated posture and visible face" },
+      { id: "window", prompt: "standing beside a rain-streaked window, one hand on the sill, looking directly at camera" },
     ];
-    const pose = poses[Math.floor(Math.random() * poses.length)];
+    const poseId = String(options.pose || "random");
+    const requestedPose = poses.find((item) => item.id === poseId);
+    const pose = requestedPose
+      ? requestedPose.prompt
+      : chooseVaried(poses, "lea.profile.lastPose." + String(c.id || "default")).prompt;
 
     const scenes = [
       "cozy living room warm lamp",
@@ -263,15 +278,16 @@
       "fireplace orange glow",
       "modern bathroom doorway",
     ];
-    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    const scene = chooseVaried(scenes, "lea.profile.lastScene." + String(c.id || "default"));
 
     const base = [
-      "photorealistic DSLR photograph of one real woman, not painting not CGI not anime,",
+      "photorealistic DSLR photograph of one " + (isAdult ? "adult " : "") + "woman, not painting not CGI not anime,",
       faceLock,
       bodyLock,
       outfit + ",",
       pose + ",",
-      "camera sees her from the front or a front three-quarter angle; keep her natural chest proportions visible through the fitted opaque clothing, not hidden by a rear view, crossed arms, or loose fabric,",
+      isAdult ? "sensual, confident fashion-editorial expression and body language, fully visible face, tasteful adult styling," : "natural, age-appropriate fashion pose, fully visible face,",
+      "camera sees her from the front or a front three-quarter angle; keep her natural chest proportions visible and do not hide her behind a rear view or crossed arms,",
       "location: " + scene + ",",
       "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
       "same woman as input_image_0, preserve facial identity, direct visible face,",
@@ -281,7 +297,8 @@
     ].join(" ");
 
     let out = base;
-    if (extra) out += ", " + String(extra).slice(0, 160);
+    const note = typeof options === "object" ? options.note : options;
+    if (note) out = out.slice(0, 1600) + ", additional user instruction: " + String(note).slice(0, 160);
     return out.slice(0, 1800);
   }
 
