@@ -296,96 +296,150 @@ public class LeaBridge {
         final String id = "cf" + HTTP_SEQ.getAndIncrement();
         HTTP_JOBS.put(id, "pending");
         final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
-        final String mdl = (model == null || model.isEmpty()) ? "@cf/black-forest-labs/flux-1-schnell" : model;
+        final String acc = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
+        final String tok = token == null ? "" : token.trim();
+        // Modèles text-to-image Workers AI (ordre de fallback)
+        final String[] models = new String[] {
+            (model != null && model.length() > 5) ? model.trim() : "@cf/black-forest-labs/flux-1-schnell",
+            "@cf/black-forest-labs/flux-1-schnell",
+            "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+            "@cf/bytedance/stable-diffusion-xl-lightning"
+        };
+        final String ptxt = (prompt == null ? "" : prompt).trim();
+        final String promptSafe = ptxt.length() > 2000 ? ptxt.substring(0, 2000) : ptxt;
         HTTP_POOL.execute(new Runnable() {
             @Override
             public void run() {
-                HttpURLConnection conn = null;
-                File tmp = null;
-                try {
-                    String urlStr = "https://api.cloudflare.com/client/v4/accounts/" + accountId + "/ai/run/" + mdl;
-                    URL u = new URL(urlStr);
-                    conn = (HttpURLConnection) u.openConnection();
-                    conn.setConnectTimeout(45000);
-                    conn.setReadTimeout(180000);
-                    conn.setRequestMethod("POST");
-                    conn.setDoOutput(true);
-                    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-                    conn.setRequestProperty("Authorization", "Bearer " + token);
-                    conn.setRequestProperty("User-Agent", "LeaStudio/3.1 (Android)");
-                    conn.setRequestProperty("Connection", "close");
-                    String json = "{\"prompt\":" + JSONObject.quote(prompt != null ? prompt : "") + "}";
-                    byte[] body = json.getBytes(StandardCharsets.UTF_8);
-                    conn.setFixedLengthStreamingMode(body.length);
-                    OutputStream os = conn.getOutputStream();
-                    os.write(body);
-                    os.flush();
-                    os.close();
-                    int code = conn.getResponseCode();
-                    InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-                    if (in == null) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"http " + code + " empty\"}");
-                        return;
-                    }
-                    tmp = new File(ctx.getCacheDir(), "cf_" + System.currentTimeMillis() + ".json");
-                    FileOutputStream fos = new FileOutputStream(tmp);
-                    byte[] buf = new byte[65536];
-                    int n;
-                    while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
-                    fos.close();
-                    in.close();
-                    // Lire en String (peut être gros) uniquement ici en background
-                    byte[] bytes = new byte[(int) Math.min(tmp.length(), 22L * 1024 * 1024)];
-                    FileInputStream fis = new FileInputStream(tmp);
-                    int read = fis.read(bytes);
-                    fis.close();
-                    String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
-                    if (code >= 400) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(400, resp.length()))) + "}");
-                        return;
-                    }
-                    // Extraire base64 image
-                    int imgKey = resp.indexOf("\"image\"");
-                    if (imgKey < 0) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"no image field\"}");
-                        return;
-                    }
-                    int colon = resp.indexOf(':', imgKey);
-                    int q1 = resp.indexOf('"', colon + 1);
-                    if (q1 < 0) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"bad image field\"}");
-                        return;
-                    }
-                    StringBuilder sb = new StringBuilder(Math.min(resp.length(), 8 * 1024 * 1024));
-                    for (int pi = q1 + 1; pi < resp.length(); pi++) {
-                        char ch = resp.charAt(pi);
-                        if (ch == '"') break;
-                        sb.append(ch);
-                    }
-                    String b64 = sb.toString();
-                    if (b64.length() < 500) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"image too small\"}");
-                        return;
-                    }
-                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + b64);
-                    if (key == null || !key.startsWith("gallery:")) {
-                        HTTP_JOBS.put(id, "error:{\"error\":\"save failed\"}");
-                        return;
-                    }
-                    // Ne renvoyer QUE la clé — jamais le base64
-                    HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true}");
-                } catch (Exception e) {
-                    String msg = String.valueOf(e.getMessage());
-                    if (msg == null) msg = "error";
-                    msg = msg.replace("\"", "'");
-                    HTTP_JOBS.put(id, "error:{\"error\":\"" + e.getClass().getSimpleName() + ": " + msg + "\"}");
-                } finally {
-                    if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
-                    if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                if (acc.isEmpty() || tok.isEmpty()) {
+                    HTTP_JOBS.put(id, "error:{\"error\":\"Account ID ou token Cloudflare manquant\"}");
+                    return;
                 }
+                if (promptSafe.length() < 3) {
+                    HTTP_JOBS.put(id, "error:{\"error\":\"prompt vide\"}");
+                    return;
+                }
+                String lastErr = "http 400";
+                for (int mi = 0; mi < models.length; mi++) {
+                    String mdl = models[mi];
+                    if (mdl == null || mdl.isEmpty()) continue;
+                    // Éviter doublons dans la liste
+                    boolean dup = false;
+                    for (int j = 0; j < mi; j++) if (mdl.equals(models[j])) { dup = true; break; }
+                    if (dup) continue;
+                    HttpURLConnection conn = null;
+                    File tmp = null;
+                    try {
+                        // @ doit être %40 dans le path, les / restent
+                        String mdlPath = mdl.replace("@", "%40");
+                        String urlStr = "https://api.cloudflare.com/client/v4/accounts/" + acc + "/ai/run/" + mdlPath;
+                        URL u = new URL(urlStr);
+                        conn = (HttpURLConnection) u.openConnection();
+                        conn.setConnectTimeout(45000);
+                        conn.setReadTimeout(180000);
+                        conn.setRequestMethod("POST");
+                        conn.setDoOutput(true);
+                        conn.setRequestProperty("Content-Type", "application/json");
+                        conn.setRequestProperty("Authorization", "Bearer " + tok);
+                        conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
+                        conn.setRequestProperty("Connection", "close");
+                        // Body FLUX: prompt (+ steps/seed). SDXL: prompt similaire.
+                        int seed = (int) (Math.random() * 2147483647);
+                        String json = "{\"prompt\":" + JSONObject.quote(promptSafe)
+                            + ",\"steps\":4"
+                            + ",\"seed\":" + seed
+                            + "}";
+                        byte[] body = json.getBytes(StandardCharsets.UTF_8);
+                        conn.setFixedLengthStreamingMode(body.length);
+                        OutputStream os = conn.getOutputStream();
+                        os.write(body);
+                        os.flush();
+                        os.close();
+                        int code = conn.getResponseCode();
+                        InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                        if (in == null) {
+                            lastErr = "http " + code + " empty (" + mdl + ")";
+                            continue;
+                        }
+                        tmp = new File(ctx.getCacheDir(), "cf_" + System.currentTimeMillis() + ".json");
+                        FileOutputStream fos = new FileOutputStream(tmp);
+                        byte[] buf = new byte[65536];
+                        int n;
+                        while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
+                        fos.close();
+                        in.close();
+                        byte[] bytes = new byte[(int) Math.min(tmp.length(), 22L * 1024 * 1024)];
+                        FileInputStream fis = new FileInputStream(tmp);
+                        int read = fis.read(bytes);
+                        fis.close();
+                        String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
+                        if (code >= 400) {
+                            // Extraire message Cloudflare
+                            String detail = resp.length() > 300 ? resp.substring(0, 300) : resp;
+                            detail = detail.replace("\"", "'").replace("\n", " ");
+                            lastErr = "http " + code + " " + detail + " [" + mdl + "]";
+                            // 401/403 → pas la peine d'essayer d'autres modèles avec le même token
+                            if (code == 401 || code == 403) {
+                                HTTP_JOBS.put(id, "error:{\"error\":\"" + lastErr.replace("\\", "/") + "\"}");
+                                return;
+                            }
+                            continue;
+                        }
+                        // Chercher base64 image dans result.image ou image
+                        String b64 = extractImageB64(resp);
+                        if (b64 == null || b64.length() < 500) {
+                            lastErr = "pas d'image dans réponse [" + mdl + "]";
+                            continue;
+                        }
+                        String key = saveGalleryImage(cid, "data:image/jpeg;base64," + b64);
+                        if (key == null || !key.startsWith("gallery:")) {
+                            lastErr = "échec sauvegarde galerie";
+                            continue;
+                        }
+                        HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true,\"model\":\"" + mdl.replace("\"", "") + "\"}");
+                        return;
+                    } catch (Exception e) {
+                        lastErr = e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage());
+                        if (lastErr.length() > 180) lastErr = lastErr.substring(0, 180);
+                    } finally {
+                        if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
+                        if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                    }
+                }
+                lastErr = lastErr.replace("\"", "'");
+                if (lastErr.length() > 280) lastErr = lastErr.substring(0, 280);
+                HTTP_JOBS.put(id, "error:{\"error\":\"" + lastErr + "\"}");
             }
         });
         return id;
+    }
+
+    /** Extrait le champ image base64 d'une réponse Workers AI. */
+    private String extractImageB64(String resp) {
+        if (resp == null) return null;
+        String[] keys = new String[] { "\"image\"", "\"b64_json\"", "\"image_b64\"" };
+        for (String key : keys) {
+            int imgKey = resp.indexOf(key);
+            if (imgKey < 0) continue;
+            int colon = resp.indexOf(':', imgKey);
+            if (colon < 0) continue;
+            int q1 = resp.indexOf('"', colon + 1);
+            if (q1 < 0) continue;
+            StringBuilder sb = new StringBuilder();
+            for (int pi = q1 + 1; pi < resp.length(); pi++) {
+                char ch = resp.charAt(pi);
+                if (ch == '"') break;
+                if (ch == '\\' && pi + 1 < resp.length()) {
+                    // ignorer échappements simples
+                    pi++;
+                    sb.append(resp.charAt(pi));
+                    continue;
+                }
+                sb.append(ch);
+            }
+            String b64 = sb.toString().trim();
+            if (b64.length() > 500) return b64;
+        }
+        return null;
     }
 
 

@@ -125,7 +125,8 @@
     const creds = [];
     const seen = new Set();
     function push(acc, tok) {
-      acc = String(acc || "").trim();
+      // Account ID: hex 32 chars, aucune espace
+      acc = String(acc || "").trim().replace(/\s+/g, "");
       tok = String(tok || "").trim();
       if (!acc || !tok || tok.length < 8) return;
       const k = acc + "|" + tok;
@@ -227,7 +228,7 @@
 
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, 160);
-    return out.slice(0, 2000);
+    return out.slice(0, 1800);
   }
 
   async function generateCloudflareImage(prompt, st) {
