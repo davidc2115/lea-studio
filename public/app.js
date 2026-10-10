@@ -689,7 +689,13 @@ async function generateProfileImage() {
     try {
       const res = await api("/api/image/cloudflare", {
         method: "POST",
-        body: JSON.stringify({ character: promptCharacterPayload(jobChar), settings: st, extra }),
+        body: JSON.stringify({
+          character: Object.assign(promptCharacterPayload(jobChar), {
+            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+          }),
+          settings: st,
+          extra,
+        }),
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
       const dataUrl = res.image;
