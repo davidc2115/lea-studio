@@ -193,6 +193,65 @@
     return profileReferenceImageB64(char, "image/webp");
   }
 
+
+  /** Traduit une taille (ex. 95D) en consignes réalistes pour le modèle */
+  function describeBustLock(bustRaw, appearanceText) {
+    let bust = String(bustRaw || "").trim();
+    if (!bust && appearanceText) {
+      const m = String(appearanceText).match(/\b(\d{2,3})\s*([A-Ka-k])\b/) ||
+        String(appearanceText).match(/bonnet\s*([A-Ka-k])\b/i) ||
+        String(appearanceText).match(/\b([A-Ka-k])\s*cup\b/i);
+      if (m) {
+        if (m[2]) bust = m[1] + m[2].toUpperCase();
+        else if (m[1] && m[1].length === 1) bust = m[1].toUpperCase();
+      }
+    }
+    if (!bust) {
+      return {
+        lock: "natural realistic breast size matching the reference image, proportional to the torso, do not enlarge",
+        neg: "huge breasts, hyper breasts, gigantic bust, disproportionate chest",
+      };
+    }
+    const parsed = bust.match(/(\d{2,3})\s*([A-Ka-k]+)/) || bust.match(/^([A-Ka-k]+)$/);
+    let band = "";
+    let cup = "";
+    if (parsed) {
+      if (parsed[2]) { band = parsed[1]; cup = parsed[2].toUpperCase(); }
+      else cup = parsed[1].toUpperCase();
+    } else {
+      cup = bust.toUpperCase().replace(/[^A-Z]/g, "") || "C";
+    }
+    // Cup guidance (realistic fashion, not hentai proportions)
+    const cupGuide = {
+      A: "small subtle A-cup, modest chest, flat-to-small natural breasts",
+      B: "natural B-cup, light rounded breasts, modest volume",
+      C: "average C-cup, balanced natural breasts, moderate fullness",
+      D: "full D-cup, generous but realistic breasts, clear cleavage possible without extreme size",
+      E: "large E-cup, very full natural breasts, heavy but still proportional to torso",
+      F: "very large F-cup, substantial volume still attached realistically to the ribcage",
+      G: "extremely full G-cup, very large but anatomically grounded",
+      H: "massive H-cup, maximum realistic volume for a human torso",
+    };
+    const cupKey = cup.charAt(0);
+    const guide = cupGuide[cupKey] || ("cup " + cup + ", realistic proportional breasts");
+    const sizeLabel = band ? (band + cup) : cup;
+    const lock =
+      "STRICT breast size lock: European size " + sizeLabel + " (" + guide + "). " +
+      "Breasts must match this exact cup on a realistic adult torso; " +
+      "same volume as a real " + sizeLabel + " bra fit; " +
+      "do NOT enlarge beyond " + sizeLabel + "; do NOT shrink below " + sizeLabel + "; " +
+      "no hyperbole, no cartoon proportions, no implants look unless stated.";
+    // Negatives scale with cup: always ban hyper; for A–D also ban "huge/gigantic"
+    let neg = "hyper breasts, gigantic breasts, balloon breasts, disproportionate huge chest, breast expansion";
+    if ("ABCD".indexOf(cupKey) >= 0) {
+      neg += ", enormous breasts, oversized bust, breasts larger than head, ultra voluptuous exaggeration";
+    }
+    if (cupKey === "A" || cupKey === "B") {
+      neg += ", deep heavy cleavage, oversized chest";
+    }
+    return { lock: lock, neg: neg, label: sizeLabel };
+  }
+
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -207,6 +266,7 @@
     const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bustInfo = describeBustLock(bust, appearance);
     const faceLock =
       "Use input_image_0 as the identity reference for " + name + ". Preserve the recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette from the reference and canonical description. " +
       "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
@@ -284,15 +344,16 @@
       faceLock,
       "Canonical physical description: " + (appearance || "match the reference image without adding permanent traits.") + ".",
       nonHumanTraits ? "Preserve these non-human traits exactly: " + nonHumanTraits + "." : "",
-      bust
-        ? "Recorded bust size: " + bust + ". Match the stated band and cup proportion to the character's torso; do not exaggerate or reduce this recorded size."
-        : "",
+      bustInfo.lock + ",",
+      "avoid: " + bustInfo.neg + ",",
       outfit + ",",
       pose + ",",
       "location: " + scene + ",",
       "portrait-format full-length framing, entire subject visible head to toe, medium-wide camera, face recognizable,",
       "match the same character as input_image_0 and preserve its recognizable identity,",
+      bustInfo.label ? ("breast size exactly " + bustInfo.label + " only,") : "",
       mood,
+      "anatomically correct torso, realistic clothing fit over the stated cup size,",
       "no close-up, no headshot, no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
@@ -314,14 +375,20 @@
       "smart casual outfit, portrait full body",
     ];
     const outfit = softOutfits[Math.min(attempt, softOutfits.length - 1)];
+    const bustInfo = describeBustLock(
+      String(c.Poitrine || c.poitrine || c.bustEstimate || ""),
+      appearance
+    );
     return [
       "photorealistic full body photo of adult woman 18+,",
       "identity match reference input_image_0 for " + name + ",",
-      appearance ? appearance.slice(0, 300) + "," : "",
+      appearance ? appearance.slice(0, 280) + "," : "",
+      bustInfo.lock + ",",
+      "avoid: " + bustInfo.neg + ",",
       outfit + ",",
       "standing full length, natural pose, soft indoor light,",
       "fashion safe for work, no explicit content, no nudity,",
-      "single person, no text, high quality",
+      "single person, no text, high quality, realistic proportions",
     ].filter(Boolean).join(" ").slice(0, 1400);
   }
 

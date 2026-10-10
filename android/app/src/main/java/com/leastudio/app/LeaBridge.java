@@ -701,7 +701,7 @@ public class LeaBridge {
                     params.put("denoising_strength", 0.55);
                     params.put("n", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptSafe + " ### child, underage, loli, young teen, baby");
+                    payload.put("prompt", promptSafe + " ### child, underage, loli, young teen, baby, hyper breasts, gigantic breasts, balloon breasts, disproportionate huge chest, breast expansion");
                     payload.put("params", params);
                     payload.put("source_image", reference);
                     payload.put("source_processing", "img2img");
