@@ -416,6 +416,7 @@
   const LONG_TERM_MEMORY_KEY = "lea.memory.";
   const LONG_TERM_MEMORY_FIELDS = {
     scene: 480,
+    wardrobe: 800,
     relationship: 640,
     intimacy: 640,
     facts: 640,
@@ -468,12 +469,14 @@
       "Les événements apparus dans la conversation ne deviennent pas le scénario d'origine. Continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
       "La mémoire de scène décrit le présent; la relation décrit son évolution; les souvenirs intimes ne sont conservés que s'ils ont réellement eu lieu dans le jeu; les faits partagés restent distincts. Ces souvenirs concernent le roleplay, pas des affirmations sur la vraie vie de l'utilisateur.",
       "Ne contredis pas les derniers messages. En cas de conflit, respecte le scénario canonique pour l'origine et les messages récents pour l'évolution de la scène. N'invente ni actions, paroles, promesses, limites ou événements passés.",
+      "La tenue et l'état des vêtements sont des faits persistants : mémorise la tenue complète portée actuellement, ainsi que chaque vêtement retiré, son état (mouillé, en train de sécher, sec) et son emplacement exact. Dès qu'un vêtement est déplacé, son nouvel emplacement remplace l'ancien; ne le récupère jamais depuis un ancien endroit sans action explicite qui l'y a remis. Un vêtement mis à sécher reste à cet endroit et en train de sécher jusqu'à ce qu'un événement établisse le contraire. Si l'emplacement est incertain, demande plutôt que d'inventer.",
       "SCÉNARIO D'ORIGINE (lecture seule) : " + (c.scenario || ""),
       "SCÈNE EN COURS (mémoire persistante) : " + (m.scene || "Pas encore de résumé durable; suis les derniers messages."),
+      "TENUE ACTUELLE ET ÉTAT/EMPLACEMENT DES VÊTEMENTS : " + (m.wardrobe || "Pas encore de tenue durable enregistrée; respecte les derniers messages et n'invente aucun vêtement retiré ou déplacé."),
       "ÉVOLUTION DE LA RELATION : " + (m.relationship || "Pas encore d'évolution durable enregistrée; ne présume pas d'attachement."),
       "MOMENTS INTIMES ET LIMITES EXPLICITES : " + (m.intimacy || "Aucun souvenir intime durable enregistré; ne présume pas qu'un événement intime a eu lieu."),
       "FAITS PARTAGÉS : " + (m.facts || "Aucun fait partagé durable enregistré."),
-      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>. Le JSON est un patch de mémoire invisible dans le chat : n'y mets que les catégories réellement changées parmi scene, relationship, intimacy, facts. Chaque valeur remplace le résumé de sa catégorie et doit rester cumulative, fidèle aux faits déjà mémorisés et aux messages récents, en 1 à 3 phrases courtes. Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch et ne crée pas de souvenir à partir d'une supposition.",
+      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>. Le JSON est un patch invisible dans le chat : n'y mets que les catégories réellement changées parmi scene, wardrobe, relationship, intimacy, facts. Chaque valeur remplace le résumé de sa catégorie et doit rester cumulative, fidèle aux faits déjà mémorisés et aux messages récents, en 1 à 3 phrases courtes. Mets à jour wardrobe dès qu'une tenue change ou qu'un vêtement est mouillé, retiré, déplacé, mis à sécher, récupéré ou remis; résume l'état actuel sans conserver un ancien emplacement devenu faux. Exemple : si des vêtements passent du sol à l'étendoir de la salle de bain, la mémoire dit qu'ils sont sur l'étendoir, pas au sol. Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch et ne crée pas de souvenir à partir d'une supposition.",
     ].join("\n");
   }
 
