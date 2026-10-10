@@ -355,6 +355,7 @@ public class LeaBridge {
                         os.flush();
                         os.close();
                         int code = conn.getResponseCode();
+                        String contentType = conn.getContentType();
                         InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
                         if (in == null) {
                             lastErr = "http " + code + " empty (" + mdl + ")";
@@ -369,8 +370,41 @@ public class LeaBridge {
                         in.close();
                         byte[] bytes = new byte[(int) Math.min(tmp.length(), 22L * 1024 * 1024)];
                         FileInputStream fis = new FileInputStream(tmp);
-                        int read = fis.read(bytes);
+                        int read = 0;
+                        while (read < bytes.length) {
+                            int count = fis.read(bytes, read, bytes.length - read);
+                            if (count < 0) break;
+                            read += count;
+                        }
                         fis.close();
+                        if (code < 400 && contentType != null
+                                && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("image/")) {
+                            // Cloudflare Workers AI renvoie le PNG directement, pas un objet JSON/base64.
+                            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, read);
+                            if (bitmap != null) {
+                                java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
+                                boolean compressed;
+                                try {
+                                    compressed = bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, jpeg);
+                                } finally {
+                                    bitmap.recycle();
+                                }
+                                if (compressed && jpeg.size() > 100) {
+                                    String imageB64 = android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP);
+                                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + imageB64);
+                                    if (key != null && key.startsWith("gallery:")) {
+                                        HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true,\"model\":\"" + mdl.replace("\"", "") + "\"}");
+                                        return;
+                                    }
+                                    lastErr = "échec sauvegarde galerie [" + mdl + "]";
+                                } else {
+                                    lastErr = "échec conversion de l'image [" + mdl + "]";
+                                }
+                            } else {
+                                lastErr = "image binaire illisible [" + mdl + "]";
+                            }
+                            continue;
+                        }
                         String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
                         if (code >= 400) {
                             // Extraire message Cloudflare
