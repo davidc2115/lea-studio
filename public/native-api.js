@@ -151,17 +151,46 @@
     return creds;
   }
 
-  /** Prompt physique strict — corps entier, poses sexy/variées (pas de portrait seul) */
+  async function profileReferenceJpegB64(char) {
+    const c = char || LEA;
+    const src = String(c.cover || (Array.isArray(c.gallery) && c.gallery[0]) || "").trim();
+    if (!src) throw new Error("Choisis une photo de profil avant de générer.");
+    let imageSource = src;
+    if (src.indexOf("gallery:") === 0) {
+      if (!window.LeaAndroid || typeof window.LeaAndroid.loadGalleryImage !== "function") {
+        throw new Error("La photo de profil locale n'est pas accessible.");
+      }
+      imageSource = String(window.LeaAndroid.loadGalleryImage(src) || "");
+    }
+    if (!imageSource) throw new Error("La photo de profil n'est pas accessible.");
+    const image = await new Promise((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error("Photo de profil illisible."));
+      element.src = imageSource;
+    });
+    if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
+    const scale = Math.min(480 / image.naturalWidth, 480 / image.naturalHeight, 1);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Impossible de préparer la photo de profil.");
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+    const comma = dataUrl.indexOf(",");
+    if (comma < 0 || dataUrl.length < 100) throw new Error("Impossible de préparer la photo de profil.");
+    return dataUrl.slice(comma + 1);
+  }
+
+  /** Prompt pour une identité faciale référencée et un cadrage vertical plein pied. */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
-    // Identité visage FORTE et stable (même femme à chaque génération)
+    // L'identité vient de la photo de profil étoilée; le texte renforce les mêmes traits.
     const faceLock =
-      "same consistent female face identity always: European French woman, oval delicate face, " +
-      "porcelain fair skin with light natural freckles across nose, " +
-      "large almond hazel-green eyes with warm golden flecks, long dark lashes, " +
-      "thick dark brown arched eyebrows, fine straight nose, full soft rose-pink lips, " +
-      "subtle shy or playful expression,";
+      "Use input_image_0 as the identity reference for the same adult woman. Preserve her recognizable face, facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
+      "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
     const bodyLock =
       age + " years old, slim hourglass body, narrow shoulders, defined tiny waist, " +
       "generous full 95D breasts, rounded hips, long toned legs, " +
@@ -219,10 +248,10 @@
       outfit + ",",
       pose + ",",
       "location: " + scene + ",",
-      "35mm full-length framing, entire body visible head to feet,",
-      "consistent face matching description above, same person every time,",
+      "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
+      "same woman as input_image_0, preserve facial identity, direct visible face,",
       "natural skin texture, realistic 95D breast size, sharp detail,",
-      "no face close-up only, no headshot, no portrait crop, no extra people,",
+      "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
     ].join(" ");
 
@@ -231,98 +260,70 @@
     return out.slice(0, 1800);
   }
 
-  async function generateCloudflareImage(prompt, st) {
+  async function generateCloudflareImage(prompt, st, character) {
     const creds = parseCloudflareCreds(st);
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    const model = "@cf/black-forest-labs/flux-1-schnell";
+    const model = "@cf/black-forest-labs/flux-2-klein-4b";
+    const referenceB64 = await profileReferenceJpegB64(character);
 
-    // Chemin natif dédié : jamais de gros base64 dans le bridge
+    // Klein 4B reçoit une photo de référence dans le pont Android natif.
     if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
         && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
-      let lastErr = "";
-      for (let attempt = 0; attempt < 2; attempt++) {
-        for (let i = 0; i < creds.length; i++) {
-          const cred = creds[(start + i) % creds.length];
-          try {
-            const jobId = String(window.LeaAndroid.cloudflareImageStart(
-              cred.account, cred.token, model, String(prompt).slice(0, 2048), "lea"
-            ) || "");
-            if (!jobId) { lastErr = "start failed"; continue; }
-            const t0 = Date.now();
-            while (Date.now() - t0 < 180000) {
-              await new Promise((r) => setTimeout(r, 500));
-              let stt = "";
-              try { stt = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
-                lastErr = "poll: " + e.message; break;
-              }
-              if (stt === "pending") continue;
-              if (stt === "missing") { lastErr = "job missing"; break; }
-              let raw = stt;
-              if (stt.indexOf("done:") === 0) raw = stt.slice(5);
-              else if (stt.indexOf("error:") === 0) {
-                raw = stt.slice(6);
-                let ej = null;
-                try { ej = JSON.parse(raw); } catch (_) {}
-                lastErr = (ej && ej.error) ? String(ej.error) : raw.slice(0, 160);
-                if (/abort|429|401|402/i.test(lastErr)) {
-                  try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
-                }
-                break;
-              }
-              let data = null;
-              try { data = JSON.parse(raw); } catch (_) {}
-              if (data && data.galleryKey) {
-                try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
-                if (window.LeaAndroid.loadGalleryImage) {
-                  const loaded = window.LeaAndroid.loadGalleryImage(String(data.galleryKey));
-                  if (loaded && loaded.length > 32) return loaded;
-                }
-                return String(data.galleryKey);
-              }
-              lastErr = "réponse sans galleryKey";
+      let lastErr = "délai d'attente dépassé";
+      const i = start % creds.length;
+      const cred = creds[i];
+      try {
+        const jobId = String(window.LeaAndroid.cloudflareImageStart(
+          cred.account, cred.token, model, String(prompt).slice(0, 2048), "lea", referenceB64
+        ) || "");
+        if (!jobId) {
+          lastErr = "démarrage Cloudflare impossible";
+        } else {
+          const t0 = Date.now();
+          while (Date.now() - t0 < 180000) {
+            await new Promise((r) => setTimeout(r, 500));
+            let stt = "";
+            try { stt = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
+              lastErr = "poll: " + e.message;
               break;
             }
-          } catch (e) {
-            lastErr = String(e.message || e);
+            if (stt === "pending") continue;
+            if (stt === "missing") { lastErr = "job missing"; break; }
+            let raw = stt;
+            if (stt.indexOf("done:") === 0) raw = stt.slice(5);
+            else if (stt.indexOf("error:") === 0) {
+              raw = stt.slice(6);
+              let ej = null;
+              try { ej = JSON.parse(raw); } catch (_) {}
+              lastErr = (ej && ej.error) ? String(ej.error) : raw.slice(0, 160);
+              if (/abort|429|401|402/i.test(lastErr)) {
+                try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
+              }
+              break;
+            }
+            let data = null;
+            try { data = JSON.parse(raw); } catch (_) {}
+            if (data && data.galleryKey) {
+              try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
+              if (window.LeaAndroid.loadGalleryImage) {
+                const loaded = window.LeaAndroid.loadGalleryImage(String(data.galleryKey));
+                if (loaded && loaded.length > 32) return loaded;
+              }
+              return String(data.galleryKey);
+            }
+            lastErr = "réponse sans galleryKey";
+            break;
           }
         }
-        if (attempt === 0) await new Promise((r) => setTimeout(r, 1000));
+      } catch (e) {
+        lastErr = String(e.message || e);
       }
       throw new Error(lastErr || "Cloudflare natif indisponible");
     }
 
-    // Fallback ancien chemin HTTP JSON
-
-    let lastErr = "";
-    for (let attempt = 0; attempt < 2; attempt++) {
-      for (let i = 0; i < creds.length; i++) {
-        const cred = creds[(start + i) % creds.length];
-        try {
-          const url = "https://api.cloudflare.com/client/v4/accounts/" +
-            encodeURIComponent(cred.account) + "/ai/run/" + model;
-          const r = await httpPostJson(url, { prompt: String(prompt).slice(0, 2048) }, { Authorization: "Bearer " + cred.token });
-          const data = r.json || {};
-          if (!r.ok) {
-            lastErr = r.error || "Cloudflare error";
-            continue;
-          }
-          if (data.galleryKey) return String(data.galleryKey);
-          let b64 = (data.result && (data.result.image || data.result.b64_json)) || data.image || data.result;
-          if (typeof b64 === "object" && b64 && b64.image) b64 = b64.image;
-          if (typeof b64 !== "string" || b64.length < 100) {
-            lastErr = "Réponse sans image";
-            continue;
-          }
-          b64 = b64.replace(/^data:image\/[^;]+;base64,/, "");
-          return "data:image/jpeg;base64," + b64;
-        } catch (e) {
-          lastErr = String(e.message || e);
-        }
-      }
-    }
-    throw new Error(lastErr || "Cloudflare indisponible");
+    throw new Error("La génération avec photo de référence requiert le pont natif Android.");
   }
 
 
@@ -638,7 +639,7 @@
       const st = body.settings || settings();
       const char = body.character || LEA;
       const prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "");
-      const dataUrl = await generateCloudflareImage(prompt, st);
+      const dataUrl = await generateCloudflareImage(prompt, st, char);
       return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400) };
     }
 

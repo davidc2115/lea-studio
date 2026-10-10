@@ -261,7 +261,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">Corps entier, pose sexy/provocante aléatoire, tenue scénario (trempée) ou lingerie. Jamais un simple portrait.</p>
+      <p class="hint">La photo étoilée sert de référence du visage. Image verticale plein pied; une seule tentative par clic pour limiter le quota.</p>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
@@ -594,7 +594,7 @@ function renderSettings() {
       <div class="settings-block">
         <label>Tokens API (un par ligne, ou accountId|token)</label>
         <textarea class="edit-area" id="set-cf-keys" placeholder="token…\nou\naccountId|token">${s.cfKeys || s.cfToken || ""}</textarea>
-        <p class="hint">Workers AI · FLUX.1 Schnell. Multi-clés avec rotation auto si quota / erreur 400-429.</p>
+        <p class="hint">Workers AI · FLUX.2 Klein 4B avec la photo de profil comme référence. Une seule requête par génération, sans bascule vers un modèle text-only.</p>
       </div>
     </div>
     <div class="section">

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import android.system.Os;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -290,21 +291,35 @@ public class LeaBridge {
     }
 
 
+    private static void writeMultipartField(OutputStream out, String boundary, String name, String value) throws Exception {
+        out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(value.getBytes(StandardCharsets.UTF_8));
+        out.write("\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void writeMultipartFile(OutputStream out, String boundary, String name, String filename, byte[] data) throws Exception {
+        out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + filename + "\"\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write("Content-Type: image/jpeg\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+        out.write(data);
+        out.write("\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
     /** Génère une image CF et l'enregistre sur disque. Retourne jobId. Résultat = done:gallery:… */
     @JavascriptInterface
-    public String cloudflareImageStart(final String accountId, final String token, final String model, final String prompt, final String charId) {
+    public String cloudflareImageStart(final String accountId, final String token, final String model, final String prompt, final String charId, final String referenceImageB64) {
         final String id = "cf" + HTTP_SEQ.getAndIncrement();
         HTTP_JOBS.put(id, "pending");
         final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
         final String acc = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
         final String tok = token == null ? "" : token.trim();
-        // Modèles text-to-image Workers AI (ordre de fallback)
-        final String[] models = new String[] {
-            (model != null && model.length() > 5) ? model.trim() : "@cf/black-forest-labs/flux-1-schnell",
-            "@cf/black-forest-labs/flux-1-schnell",
-            "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-            "@cf/bytedance/stable-diffusion-xl-lightning"
-        };
+        final String selectedModel = (model != null && model.length() > 5) ? model.trim() : "@cf/black-forest-labs/flux-1-schnell";
+        final boolean useReferenceModel = "@cf/black-forest-labs/flux-2-klein-4b".equals(selectedModel);
+        // Ne jamais dépenser du quota sur un modèle sans référence en cas d'échec du mode identité.
+        final String[] models = useReferenceModel
+            ? new String[] { selectedModel }
+            : new String[] { selectedModel, "@cf/black-forest-labs/flux-1-schnell", "@cf/stabilityai/stable-diffusion-xl-base-1.0", "@cf/bytedance/stable-diffusion-xl-lightning" };
         final String ptxt = (prompt == null ? "" : prompt).trim();
         final String promptSafe = ptxt.length() > 2000 ? ptxt.substring(0, 2000) : ptxt;
         HTTP_POOL.execute(new Runnable() {
@@ -317,6 +332,19 @@ public class LeaBridge {
                 if (promptSafe.length() < 3) {
                     HTTP_JOBS.put(id, "error:{\"error\":\"prompt vide\"}");
                     return;
+                }
+                byte[] referenceBytes = null;
+                if (useReferenceModel) {
+                    try {
+                        String encoded = referenceImageB64 == null ? "" : referenceImageB64.replaceFirst("^data:image/[^;]+;base64,", "").trim();
+                        if (encoded.isEmpty() || encoded.length() > 900000) throw new IllegalArgumentException("photo de profil absente ou trop volumineuse");
+                        referenceBytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+                        if (referenceBytes.length == 0) throw new IllegalArgumentException("photo de profil vide");
+                    } catch (Exception e) {
+                        String message = "Référence visage invalide: " + String.valueOf(e.getMessage());
+                        HTTP_JOBS.put(id, "error:{\"error\":" + JSONObject.quote(message) + "}");
+                        return;
+                    }
                 }
                 String lastErr = "http 400";
                 for (int mi = 0; mi < models.length; mi++) {
@@ -338,22 +366,39 @@ public class LeaBridge {
                         conn.setReadTimeout(180000);
                         conn.setRequestMethod("POST");
                         conn.setDoOutput(true);
-                        conn.setRequestProperty("Content-Type", "application/json");
                         conn.setRequestProperty("Authorization", "Bearer " + tok);
                         conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
                         conn.setRequestProperty("Connection", "close");
-                        // Body FLUX: prompt (+ steps/seed). SDXL: prompt similaire.
                         int seed = (int) (Math.random() * 2147483647);
-                        String json = "{\"prompt\":" + JSONObject.quote(promptSafe)
-                            + ",\"steps\":4"
-                            + ",\"seed\":" + seed
-                            + "}";
-                        byte[] body = json.getBytes(StandardCharsets.UTF_8);
-                        conn.setFixedLengthStreamingMode(body.length);
-                        OutputStream os = conn.getOutputStream();
-                        os.write(body);
-                        os.flush();
-                        os.close();
+                        if (useReferenceModel) {
+                            String boundary = "----LeaStudioCF" + id;
+                            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                            ByteArrayOutputStream multipart = new ByteArrayOutputStream();
+                            writeMultipartField(multipart, boundary, "prompt", promptSafe);
+                            writeMultipartFile(multipart, boundary, "input_image_0", "profile-reference.jpg", referenceBytes);
+                            writeMultipartField(multipart, boundary, "width", "768");
+                            writeMultipartField(multipart, boundary, "height", "1024");
+                            writeMultipartField(multipart, boundary, "seed", String.valueOf(seed));
+                            multipart.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+                            byte[] body = multipart.toByteArray();
+                            conn.setFixedLengthStreamingMode(body.length);
+                            OutputStream os = conn.getOutputStream();
+                            os.write(body);
+                            os.flush();
+                            os.close();
+                        } else {
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            String json = "{\"prompt\":" + JSONObject.quote(promptSafe)
+                                + ",\"steps\":4"
+                                + ",\"seed\":" + seed
+                                + "}";
+                            byte[] body = json.getBytes(StandardCharsets.UTF_8);
+                            conn.setFixedLengthStreamingMode(body.length);
+                            OutputStream os = conn.getOutputStream();
+                            os.write(body);
+                            os.flush();
+                            os.close();
+                        }
                         int code = conn.getResponseCode();
                         String contentType = conn.getContentType();
                         InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
