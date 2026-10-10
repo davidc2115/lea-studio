@@ -118,20 +118,22 @@ function loadRoleplayMemory() {
     const raw = JSON.parse(localStorage.getItem(roleplayMemoryKey()) || "{}");
     return {
       scene: typeof raw.scene === "string" ? raw.scene : "",
+      wardrobe: typeof raw.wardrobe === "string" ? raw.wardrobe : "",
       relationship: typeof raw.relationship === "string" ? raw.relationship : "",
       intimacy: typeof raw.intimacy === "string" ? raw.intimacy : "",
       facts: typeof raw.facts === "string" ? raw.facts : "",
       updatedAt: Number(raw.updatedAt) || 0,
     };
   } catch (_) {
-    return { scene: "", relationship: "", intimacy: "", facts: "", updatedAt: 0 };
+    return { scene: "", wardrobe: "", relationship: "", intimacy: "", facts: "", updatedAt: 0 };
   }
 }
 function saveRoleplayMemory(memory) {
   const current = loadRoleplayMemory();
   const next = { updatedAt: Date.now() };
   Object.keys(current).filter((key) => key !== "updatedAt").forEach((key) => {
-    next[key] = String(memory[key] || "").trim().slice(0, key === "scene" ? 480 : 640);
+    const limit = key === "scene" ? 480 : key === "wardrobe" ? 800 : 640;
+    next[key] = String(memory[key] || "").trim().slice(0, limit);
   });
   localStorage.setItem(roleplayMemoryKey(), JSON.stringify(next));
 }
@@ -941,6 +943,10 @@ function renderSettings() {
         <textarea class="edit-area" id="memory-scene" rows="3" placeholder="Lieu, moment, objets, action en cours…">${escapeMemoryMarkup(memory.scene)}</textarea>
       </div>
       <div class="settings-block">
+        <label>Tenue actuelle, état et emplacement des vêtements</label>
+        <textarea class="edit-area" id="memory-wardrobe" rows="3" placeholder="Ce que Léa porte; ce qui a été retiré, où les vêtements sont rangés ou mis à sécher, et leur état…">${escapeMemoryMarkup(memory.wardrobe)}</textarea>
+      </div>
+      <div class="settings-block">
         <label>Évolution de la relation</label>
         <textarea class="edit-area" id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et évolution réciproque…">${escapeMemoryMarkup(memory.relationship)}</textarea>
       </div>
@@ -977,6 +983,7 @@ function renderSettings() {
   $("save-memory").onclick = () => {
     saveRoleplayMemory({
       scene: $("memory-scene").value,
+      wardrobe: $("memory-wardrobe").value,
       relationship: $("memory-relationship").value,
       intimacy: $("memory-intimacy").value,
       facts: $("memory-facts").value,
@@ -984,9 +991,9 @@ function renderSettings() {
     $("memory-status").innerHTML = '<span class="status-pill ok">✓ Mémoire enregistrée sur cet appareil</span>';
   };
   $("clear-memory").onclick = () => {
-    if (!confirm("Effacer la scène, la relation et les souvenirs mémorisés ? Le scénario d'origine et l'historique du chat resteront inchangés.")) return;
-    saveRoleplayMemory({ scene: "", relationship: "", intimacy: "", facts: "" });
-    ["memory-scene", "memory-relationship", "memory-intimacy", "memory-facts"].forEach((id) => { $(id).value = ""; });
+    if (!confirm("Effacer la scène, la tenue, la relation et les souvenirs mémorisés ? Le scénario d'origine et l'historique du chat resteront inchangés.")) return;
+    saveRoleplayMemory({ scene: "", wardrobe: "", relationship: "", intimacy: "", facts: "" });
+    ["memory-scene", "memory-wardrobe", "memory-relationship", "memory-intimacy", "memory-facts"].forEach((id) => { $(id).value = ""; });
     $("memory-status").innerHTML = '<span class="status-pill ok">✓ Souvenirs évolutifs effacés</span>';
   };
 }
