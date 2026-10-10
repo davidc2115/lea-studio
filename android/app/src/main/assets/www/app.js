@@ -9,6 +9,7 @@ const state = {
   lbIndex: 0,
   sending: false,
   importedCharacters: [],
+  castCharacters: [],
   leaCharacter: null,
   chatListMode: true,
 };
@@ -211,7 +212,19 @@ function showView(name) {
   if (name === "import" && window.LeaImporter) window.LeaImporter.render($("view-import"));
 }
 
+function saveCastOverride(next) {
+  if (!next || !next.id || String(next.id) === "lea") return;
+  try {
+    const ov = JSON.parse(localStorage.getItem("lea.cast.overrides") || "{}");
+    ov[String(next.id)] = next;
+    localStorage.setItem("lea.cast.overrides", JSON.stringify(ov));
+  } catch (_) {}
+  const idx = (state.castCharacters || []).findIndex((c) => String(c.id) === String(next.id));
+  if (idx >= 0) state.castCharacters[idx] = next;
+}
+
 function persistActiveCharacter(next) {
+  if (!next || !next.id) return;
   if (next.id === "lea") {
     saveCharOverrides(next);
     state.leaCharacter = next;
@@ -220,6 +233,9 @@ function persistActiveCharacter(next) {
     if (index >= 0) {
       state.importedCharacters[index] = next;
       localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+    } else {
+      // Personnage du cast embarqué
+      saveCastOverride(next);
     }
   }
   state.character = next;
@@ -229,7 +245,10 @@ function persistImageToCharacter(charId, stored, fallbackCharacter) {
   const id = String(charId || "lea");
   const target = id === "lea"
     ? ((state.character && String(state.character.id) === id && state.character) || state.leaCharacter || fallbackCharacter)
-    : state.importedCharacters.find((item) => String(item.id) === id);
+    : (state.importedCharacters.find((item) => String(item.id) === id)
+      || (state.castCharacters || []).find((item) => String(item.id) === id)
+      || (state.character && String(state.character.id) === id ? state.character : null)
+      || fallbackCharacter);
   if (!target) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
 
   const currentGallery = Array.isArray(target.gallery)
@@ -246,9 +265,12 @@ function persistImageToCharacter(charId, stored, fallbackCharacter) {
     state.leaCharacter = next;
   } else {
     const index = state.importedCharacters.findIndex((item) => String(item.id) === id);
-    if (index < 0) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
-    state.importedCharacters[index] = next;
-    localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+    if (index >= 0) {
+      state.importedCharacters[index] = next;
+      localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+    } else {
+      saveCastOverride(next);
+    }
   }
   if (state.character && String(state.character.id) === id) state.character = next;
   return next;
@@ -324,8 +346,12 @@ function renderDiscover() {
       </div>`;
     return;
   }
-  const candidates = [c, state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
-    .filter(Boolean);
+  const candidates = [
+    ...(Array.isArray(state.castCharacters) ? state.castCharacters : []),
+    ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : []),
+  ].filter(Boolean);
+  // Toujours afficher le perso actif en premier si absent
+  if (c && !candidates.some((x) => String(x.id) === String(c.id))) candidates.unshift(c);
   const seen = new Set();
   const characters = candidates.filter((item) => {
     const id = String(item.id || "");
@@ -342,7 +368,7 @@ function renderDiscover() {
         const scenario = String(item.scenario || "").replace(/\s+/g, " ").trim();
         const summary = scenario.length > 150 ? scenario.slice(0, 147).trimEnd() + "…" : (scenario || "Scénario non renseigné.");
         const id = escapeHtml(item.id);
-        const canDelete = String(item.id) !== "lea";
+        const canDelete = String(item.id) !== "lea" && (state.importedCharacters || []).some((x) => String(x.id) === String(item.id));
         return `<article class="discover-card${item.id === c.id ? " is-active" : ""}">
           ${src
             ? `<img class="discover-image" src="${escapeHtml(src)}" alt="" loading="lazy" onerror="this.classList.add('cover-broken');this.removeAttribute('src');" />`
@@ -1074,6 +1100,56 @@ function closeLightbox() {
   $("lightbox").classList.add("hidden");
 }
 
+
+function mergeAllCasts() {
+  const lists = [
+    window.CAST,
+    window.EXTRA_CAST,
+    window.LEA_CAST_NEW,
+    window.LEA_CAST_SPECIAL,
+    window.LEA_CAST_DIRECT,
+    window.LEA_CAST_CUPS,
+    window.LEA_CAST_COLLEGUES,
+    window.LEA_CAST_TAQUIN,
+  ];
+  const byId = new Map();
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue;
+    for (const c of list) {
+      if (!c || c.id == null) continue;
+      const id = String(c.id);
+      if (byId.has(id)) continue;
+      const age = c.age == null || c.age === "" ? null : Number(c.age);
+      if (Number.isInteger(age) && age < 18) continue;
+      byId.set(id, Object.assign({}, c, {
+        id: id,
+        adultConfirmed: Number.isInteger(age) && age >= 18 ? true : c.adultConfirmed,
+      }));
+    }
+  }
+  // Overrides locaux (modifs utilisateur)
+  try {
+    const ov = JSON.parse(localStorage.getItem("lea.cast.overrides") || "{}");
+    if (ov && typeof ov === "object") {
+      for (const id of Object.keys(ov)) {
+        if (byId.has(id) && ov[id] && typeof ov[id] === "object") {
+          byId.set(id, Object.assign({}, byId.get(id), ov[id], { id: id }));
+        }
+      }
+    }
+  } catch (_) {}
+  return Array.from(byId.values());
+}
+
+function findCharacterById(id) {
+  const sid = String(id || "");
+  if (!sid) return null;
+  if (state.leaCharacter && String(state.leaCharacter.id) === sid) return state.leaCharacter;
+  const imp = (state.importedCharacters || []).find((x) => String(x.id) === sid);
+  if (imp) return imp;
+  return (state.castCharacters || []).find((x) => String(x.id) === sid) || null;
+}
+
 async function initCharacter() {
   try {
     const saved = JSON.parse(localStorage.getItem("lea.imported.characters") || "[]");
@@ -1109,8 +1185,13 @@ async function initCharacter() {
   }
   const lea = mergeChar(base);
   state.leaCharacter = lea;
+  state.castCharacters = mergeAllCasts();
+  // Remplacer lea du cast par la version enrichie
+  const leaIdx = state.castCharacters.findIndex((c) => String(c.id) === "lea");
+  if (leaIdx >= 0) state.castCharacters[leaIdx] = Object.assign({}, state.castCharacters[leaIdx], lea);
+  else state.castCharacters.unshift(lea);
   const activeId = localStorage.getItem("lea.activeCharacterId");
-  state.character = state.importedCharacters.find((item) => String(item.id) === String(activeId)) || lea;
+  state.character = findCharacterById(activeId) || lea;
 }
 
 function bindNav() {

@@ -17,16 +17,24 @@
     </header>
 
     <main>
-      <section id="view-discover" class="view"></section>
+      <section id="view-discover" class="view">
+        <div class="startup-state" role="status" aria-live="polite">
+          <span class="startup-spinner" aria-hidden="true"></span>
+          <strong>Léa Studio démarre…</strong>
+          <span>Le profil s’affichera ici dans un instant.</span>
+        </div>
+      </section>
       <section id="view-profile" class="view hidden"></section>
       <section id="view-chat" class="view hidden"></section>
       <section id="view-settings" class="view hidden"></section>
+      <section id="view-import" class="view hidden"></section>
     </main>
 
     <nav class="tabbar" id="tabbar">
       <button type="button" class="nav active" data-view="discover">🌟<span>Découvrir</span></button>
       <button type="button" class="nav" data-view="chat">💬<span>Chat</span></button>
       <button type="button" class="nav" data-view="settings">⚙️<span>Réglages</span></button>
+      <button type="button" class="nav" data-view="import">⬇️<span>Importer</span></button>
     </nav>
   </div>
 
@@ -37,7 +45,16 @@
     <button type="button" class="lb-nav lb-next" id="lb-next">›</button>
   </div>
 
+  <script src="characters.js"></script>
+  <script src="characters-extra.js"></script>
+  <script src="characters-new.js"></script>
+  <script src="characters-special.js"></script>
+  <script src="characters-direct.js"></script>
+  <script src="characters-cups.js"></script>
+  <script src="characters-collegues.js"></script>
+  <script src="characters-taquin.js"></script>
   <script src="native-api.js"></script>
+  <script src="importer.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
