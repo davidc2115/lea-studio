@@ -198,8 +198,8 @@
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 420);
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const faceLock =
-      "Use input_image_0 as the identity reference for " + name + ". Preserve the same recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette. " +
-      "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
+      "Preserve the recognizable identity of " + name + " from the canonical physical description. Keep the same face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette. " +
+      "Do not invent or remove permanent traits.";
 
     const outfits = [
       "a well-fitted dark knit sweater, tailored trousers and simple boots",
@@ -253,7 +253,7 @@
       pose + ",",
       "location: " + scene + ",",
       "vertical 3:4 full-length framing, entire subject visible head to toe with space above and below, medium-wide camera distance, face recognizable, front or front three-quarter view,",
-      "same character as input_image_0, match the supplied reference and canonical description,",
+      "match the canonical character description consistently,",
       "clothing fully covers chest, pelvis and buttocks; non-sexual fashion portrait, no nudity or lingerie,",
       "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
@@ -266,9 +266,6 @@
 
   function readableCloudflareImageError(value) {
     const text = String(value || "");
-    if (/3030|flagged|moderation/i.test(text)) {
-      return "Cloudflare a refusé cette tentative (filtre 3030). Le filtre peut produire des faux positifs; aucune relance automatique n’est faite. Essaie une référence entièrement habillée et un prompt non explicite.";
-    }
     return text.slice(0, 200);
   }
 
@@ -277,8 +274,8 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    const model = "@cf/black-forest-labs/flux-2-klein-4b";
-    const referenceB64 = await profileReferenceJpegB64(character);
+    // Retour au chemin de génération prompt-only d'origine, avant le modèle à référence image.
+    const model = "@cf/black-forest-labs/flux-1-schnell";
 
     // Klein 4B reçoit une photo de référence dans le pont Android natif.
     if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
@@ -288,7 +285,7 @@
       const cred = creds[i];
       try {
         const jobId = String(window.LeaAndroid.cloudflareImageStart(
-          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64
+          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), ""
         ) || "");
         if (!jobId) {
           lastErr = "démarrage Cloudflare impossible";
