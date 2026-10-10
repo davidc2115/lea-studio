@@ -99,8 +99,8 @@ public final class ChubBrowserActivity extends Activity {
         if ("chub".equals(provider)) {
             browser.setDownloadListener(new ChubDownloadListener(this, browser, sessionDir));
         } else {
-            browser.setDownloadListener((url, userAgent, disposition, mime, length) -> {
-                String id = botbooruDownloadId(url);
+            browser.setDownloadListener((downloadUrl, userAgent, disposition, mime, length) -> {
+                String id = botbooruDownloadId(downloadUrl);
                 if (id != null) queueBotbooruImport(id);
                 else Toast.makeText(this, "Téléchargement Botbooru non reconnu. Utilise Download JSON ou PNG sur la fiche.", Toast.LENGTH_LONG).show();
             });
