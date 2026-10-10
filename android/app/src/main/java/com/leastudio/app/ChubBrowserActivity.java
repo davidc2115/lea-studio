@@ -92,7 +92,17 @@ public final class ChubBrowserActivity extends Activity {
         browser.setWebChromeClient(new WebChromeClient());
         browser.setWebViewClient(new WebViewClient() {
             @Override
+            public void onPageFinished(WebView view, String pageUrl) {
+                super.onPageFinished(view, pageUrl);
+                if ("chub".equals(provider)) installChubBlobCapture(view);
+            }
+
+            @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if ("botbooru".equals(provider)) {
+                    String id = botbooruDownloadId(request.getUrl().toString());
+                    if (id != null) { queueBotbooruImport(id); return true; }
+                }
                 return !"https".equalsIgnoreCase(request.getUrl().getScheme());
             }
         });
@@ -107,6 +117,16 @@ public final class ChubBrowserActivity extends Activity {
         }
         CookieManager.getInstance().setAcceptCookie(true);
         browser.loadUrl(url);
+    }
+
+    private void installChubBlobCapture(WebView view) {
+        String script = "(function(){try{if(window.__leaBlobHooked)return;"
+                + "var original=URL.createObjectURL.bind(URL),map=Object.create(null),keys=[];"
+                + "window.__leaChubBlobs=map;URL.createObjectURL=function(blob){"
+                + "var url=original(blob);if(blob&&typeof blob.size==='number'){map[url]=blob;keys.push(url);"
+                + "while(keys.length>16){var old=keys.shift();delete map[old];}}return url;};"
+                + "window.__leaBlobHooked=true;}catch(e){}})();";
+        view.evaluateJavascript(script, null);
     }
 
     private static boolean isAllowedStartUrl(String provider, String value) {
@@ -150,15 +170,24 @@ public final class ChubBrowserActivity extends Activity {
                         + "}catch(x){}}"
                         + "if(e.tagName==='BUTTON'&&/download\\s*(json|png)/i.test(text)){"
                         + "var id=e.getAttribute('data-id')||e.getAttribute('data-post-id');if(id&&/^\\d{1,12}$/.test(id))return id;}}"
+                        + "var candidates=Array.from(document.querySelectorAll('a,button,[role=button]'));"
+                        + "for(var k=0;k<candidates.length;k++){var e=candidates[k],t=(e.innerText||e.textContent||e.getAttribute('aria-label')||'').trim();"
+                        + "if(/download\\s*json/i.test(t)&&e.getBoundingClientRect().width>0){e.click();return 'clicked';}}"
                         + "return '';})()",
                 value -> {
                     try {
                         Object parsed = new JSONTokener(value == null ? "\"\"" : value).nextValue();
                         String id = String.valueOf(parsed);
                         if (id.matches("\\d{1,12}")) queueBotbooruImport(id);
-                        else Toast.makeText(this, "ID introuvable dans cette fiche. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
+                        else if ("clicked".equals(id)) {
+                            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                                if (!isFinishing()) Toast.makeText(this,
+                                        "Téléchargement JSON déclenché. Si l’import ne démarre pas, touche Download JSON sur la fiche.",
+                                        Toast.LENGTH_LONG).show();
+                            }, 1800);
+                        } else Toast.makeText(this, "Fiche reconnue sans bouton Download JSON. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
                     } catch (Exception error) {
-                        Toast.makeText(this, "ID introuvable dans cette fiche. Touche Download JSON ou PNG sur Botbooru.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Impossible de lire les boutons de téléchargement de cette fiche.", Toast.LENGTH_LONG).show();
                     }
                 });
     }
@@ -248,7 +277,10 @@ public final class ChubBrowserActivity extends Activity {
                 return;
             }
             String script = "(function(){window.__leaChubExportState='loading';window.__leaChubExportValue='';"
-                    + "fetch(" + org.json.JSONObject.quote(url) + ").then(function(r){return r.blob()}).then(function(b){"
+                    + "var captured=window.__leaChubBlobs&&window.__leaChubBlobs[" + org.json.JSONObject.quote(url) + "];"
+                    + "var blobPromise=captured?Promise.resolve(captured):fetch(" + org.json.JSONObject.quote(url) + ").then(function(r){"
+                    + "if(!r.ok)throw Error('HTTP '+r.status);return r.blob()});"
+                    + "blobPromise.then(function(b){"
                     + "if(b.size>12582912)throw Error('Fichier trop volumineux');"
                     + "return new Promise(function(ok,no){var f=new FileReader();f.onload=function(){ok(f.result)};"
                     + "f.onerror=function(){no(Error('Lecture impossible'))};f.readAsDataURL(b)})"
