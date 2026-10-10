@@ -75,8 +75,9 @@ public class MainActivity extends Activity {
 
     private void checkPendingChubImport() {
         if (web != null) {
+            // N'ouvre Import que s'il y a une carte en attente (géré côté JS)
             web.evaluateJavascript(
-                    "window.LeaImporter&&window.LeaImporter.resumePendingImports&&window.LeaImporter.resumePendingImports();",
+                    "(function(){try{if(window.LeaImporter&&window.LeaImporter.hasPendingWork&&window.LeaImporter.hasPendingWork()){window.LeaImporter.resumePendingImports();}else if(window.LeaImporter&&window.LeaImporter.resumePendingImports){window.LeaImporter.resumePendingImports();}}catch(e){}})();",
                     null);
         }
     }

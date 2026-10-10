@@ -237,7 +237,8 @@ function persistImageToCharacter(charId, stored, fallbackCharacter) {
     : (Array.isArray(fallbackCharacter && fallbackCharacter.gallery) ? fallbackCharacter.gallery : []);
   const next = Object.assign({}, target, {
     gallery: [stored].concat(currentGallery.filter((item) => item !== stored)).slice(0, 300),
-    cover: stored,
+    // Ne pas changer automatiquement la photo de profil (★ manuel uniquement)
+    cover: target.cover || (currentGallery[0] || stored),
   });
 
   if (id === "lea") {
@@ -477,7 +478,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>🖼️ Générer une image</h2>
-      <p class="hint">La photo de profil sert de référence pour le visage. Tenue et pose sensuelles, sans nudité; descriptif et traits du personnage conservés. Horde peut attendre dans une file d’attente.</p>
+      <p class="hint">La photo de profil sert de référence pour le visage. Tenues sexy / dentelle / transparent / décolleté, poses provocantes. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
         <option value="cloudflare">Cloudflare · FLUX.2 Klein</option>
@@ -1117,7 +1118,10 @@ function bindNav() {
   try {
     bindNav();
     await initCharacter();
+    // Toujours rouvrir sur Découvrir (pas Import)
     showView("discover");
+    // Imports en attente seulement si l’utilisateur vient de télécharger une carte
+    // (ne force pas l’onglet Import à chaque retour dans l’app)
   } catch (error) {
     console.error("Léa Studio startup failed", error);
     const root = $("view-discover");
@@ -1130,3 +1134,16 @@ function bindNav() {
     }
   }
 })();
+
+// Au retour au premier plan: rester sur la vue actuelle, ne pas ouvrir Import sans raison
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (state.view === "import") {
+    // Si aucun import en cours, revenir à Découvrir
+    try {
+      if (window.LeaImporter && typeof window.LeaImporter.hasPendingWork === "function") {
+        if (!window.LeaImporter.hasPendingWork()) showView("discover");
+      }
+    } catch (_) {}
+  }
+});

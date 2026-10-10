@@ -8,6 +8,9 @@ const state = {
   editMode: false,
   lbIndex: 0,
   sending: false,
+  importedCharacters: [],
+  leaCharacter: null,
+  chatListMode: true,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -41,15 +44,19 @@ async function api(path, opts = {}) {
   if (ct.includes("application/json")) return res.json();
   return res.text();
 }
+window.leaAppApi = api;
 
 
 function resolveImgSrc(src) {
   if (!src) return "";
-  if (src.indexOf("gallery:") === 0 && window.LeaAndroid && typeof window.LeaAndroid.loadGalleryImage === "function") {
-    try {
-      const d = window.LeaAndroid.loadGalleryImage(src);
-      if (d && d.length > 32) return d;
-    } catch (_) {}
+  if (String(src).indexOf("gallery:") === 0) {
+    if (window.LeaAndroid && typeof window.LeaAndroid.loadGalleryImage === "function") {
+      try {
+        const d = window.LeaAndroid.loadGalleryImage(src);
+        if (d && d.length > 32) return d;
+      } catch (_) {}
+    }
+    return "";
   }
   return src;
 }
@@ -66,6 +73,32 @@ function persistGeneratedImage(charId, dataUrl) {
   return dataUrl;
 }
 
+function escapeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function tagPresentation(tag) {
+  const value = String(tag || "").trim().toLowerCase();
+  if (/^(nsfw|adult|18\+|explicite)$/.test(value)) return { icon: "🔞", kind: "adult", label: "Contenu adulte" };
+  if (/orage|pluie|temp[eê]te|feu|neige|for[eê]t/.test(value)) return { icon: "🌦️", kind: "story", label: "Univers et scénario" };
+  if (/timide|douce|espi[eè]gle|dr[oô]le|calme|rebelle/.test(value)) return { icon: "💭", kind: "personality", label: "Personnalité" };
+  if (/romance|amie|amour|relation|flirt/.test(value)) return { icon: "💞", kind: "relationship", label: "Relation" };
+  if (/brune|blonde|rousse|cheveux|yeux|voluptueuse|mince|grande|petite/.test(value)) return { icon: "✨", kind: "appearance", label: "Apparence" };
+  return { icon: "✦", kind: "default", label: "Tag" };
+}
+
+function renderTagChip(tag) {
+  const text = String(tag || "").trim().replace(/^#+/, "");
+  if (!text) return "";
+  const presentation = tagPresentation(text);
+  return `<span class="tag tag--${presentation.kind}" title="${presentation.label}"><span aria-hidden="true">${presentation.icon}</span><span>#${escapeHtml(text)}</span></span>`;
+}
+
 function loadSettings() {
   try {
     return JSON.parse(localStorage.getItem("lea.settings") || "{}");
@@ -77,28 +110,32 @@ function saveSettings(s) {
   localStorage.setItem("lea.settings", JSON.stringify(s));
 }
 
-const ROLEPLAY_MEMORY_KEY = "lea.memory.lea";
+function roleplayMemoryKey() {
+  return "lea.memory." + String((state.character && state.character.id) || "lea");
+}
 function loadRoleplayMemory() {
   try {
-    const raw = JSON.parse(localStorage.getItem(ROLEPLAY_MEMORY_KEY) || "{}");
+    const raw = JSON.parse(localStorage.getItem(roleplayMemoryKey()) || "{}");
     return {
       scene: typeof raw.scene === "string" ? raw.scene : "",
+      wardrobe: typeof raw.wardrobe === "string" ? raw.wardrobe : "",
       relationship: typeof raw.relationship === "string" ? raw.relationship : "",
       intimacy: typeof raw.intimacy === "string" ? raw.intimacy : "",
       facts: typeof raw.facts === "string" ? raw.facts : "",
       updatedAt: Number(raw.updatedAt) || 0,
     };
   } catch (_) {
-    return { scene: "", relationship: "", intimacy: "", facts: "", updatedAt: 0 };
+    return { scene: "", wardrobe: "", relationship: "", intimacy: "", facts: "", updatedAt: 0 };
   }
 }
 function saveRoleplayMemory(memory) {
   const current = loadRoleplayMemory();
   const next = { updatedAt: Date.now() };
   Object.keys(current).filter((key) => key !== "updatedAt").forEach((key) => {
-    next[key] = String(memory[key] || "").trim().slice(0, key === "scene" ? 480 : 640);
+    const limit = key === "scene" ? 480 : key === "wardrobe" ? 800 : 640;
+    next[key] = String(memory[key] || "").trim().slice(0, limit);
   });
-  localStorage.setItem(ROLEPLAY_MEMORY_KEY, JSON.stringify(next));
+  localStorage.setItem(roleplayMemoryKey(), JSON.stringify(next));
 }
 function escapeMemoryMarkup(value) {
   return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -152,7 +189,7 @@ function mergeChar(base) {
 
 function showView(name) {
   state.view = name;
-  ["discover", "profile", "chat", "settings"].forEach((v) => {
+  ["discover", "profile", "chat", "settings", "import"].forEach((v) => {
     const el = $("view-" + v);
     if (el) el.classList.toggle("hidden", v !== name);
   });
@@ -160,9 +197,106 @@ function showView(name) {
     b.classList.toggle("active", b.dataset.view === name || (name === "profile" && b.dataset.view === "discover"));
   });
   if (name === "discover") renderDiscover();
-  if (name === "profile") renderProfile();
+  if (name === "profile") {
+    try {
+      renderProfile();
+    } catch (error) {
+      console.error("Affichage du profil impossible", error);
+      const root = $("view-profile");
+      if (root) root.innerHTML = `<div class="startup-state startup-state--error" role="alert"><strong>Cette fiche ne peut pas être affichée.</strong><span>${escapeHtml(String(error && error.message || error).slice(0, 180))}</span></div>`;
+    }
+  }
   if (name === "chat") renderChat();
   if (name === "settings") renderSettings();
+  if (name === "import" && window.LeaImporter) window.LeaImporter.render($("view-import"));
+}
+
+function persistActiveCharacter(next) {
+  if (next.id === "lea") {
+    saveCharOverrides(next);
+    state.leaCharacter = next;
+  } else {
+    const index = state.importedCharacters.findIndex((c) => c.id === next.id);
+    if (index >= 0) {
+      state.importedCharacters[index] = next;
+      localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+    }
+  }
+  state.character = next;
+}
+
+function persistImageToCharacter(charId, stored, fallbackCharacter) {
+  const id = String(charId || "lea");
+  const target = id === "lea"
+    ? ((state.character && String(state.character.id) === id && state.character) || state.leaCharacter || fallbackCharacter)
+    : state.importedCharacters.find((item) => String(item.id) === id);
+  if (!target) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
+
+  const currentGallery = Array.isArray(target.gallery)
+    ? target.gallery
+    : (Array.isArray(fallbackCharacter && fallbackCharacter.gallery) ? fallbackCharacter.gallery : []);
+  const next = Object.assign({}, target, {
+    gallery: [stored].concat(currentGallery.filter((item) => item !== stored)).slice(0, 300),
+    // Ne pas changer automatiquement la photo de profil (★ manuel uniquement)
+    cover: target.cover || (currentGallery[0] || stored),
+  });
+
+  if (id === "lea") {
+    saveCharOverrides(next);
+    state.leaCharacter = next;
+  } else {
+    const index = state.importedCharacters.findIndex((item) => String(item.id) === id);
+    if (index < 0) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
+    state.importedCharacters[index] = next;
+    localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+  }
+  if (state.character && String(state.character.id) === id) state.character = next;
+  return next;
+}
+
+function activateCharacter(next) {
+  if (!next) return;
+  persistActiveCharacter(next);
+  state.chat = { messages: [] };
+  state.editMode = false;
+  localStorage.setItem("lea.activeCharacterId", next.id);
+  showView("discover");
+}
+
+window.leaOnImportedCharacter = function (character) {
+  if (!character || !character.id) return;
+  const existing = state.importedCharacters.findIndex((item) => item.id === character.id);
+  if (existing >= 0) state.importedCharacters[existing] = character;
+  else state.importedCharacters.unshift(character);
+  localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+  state.chat = { messages: [] };
+  state.editMode = false;
+  state.character = character;
+  localStorage.setItem("lea.activeCharacterId", character.id);
+  showView("discover");
+};
+
+function activeChatPath() {
+  return "/api/chat/" + encodeURIComponent((state.character && state.character.id) || "lea");
+}
+
+function promptCharacterPayload(char) {
+  const c = char || {};
+  return {
+    id: c.id,
+    name: c.name,
+    age: c.age,
+    title: c.title,
+    tags: c.tags,
+    scenario: c.scenario,
+    personality: c.personality,
+    appearance: c.appearance,
+    Poitrine: c.Poitrine || c.poitrine || "",
+    bustEstimate: c.bustEstimate || "",
+    estimatedAge: c.estimatedAge || null,
+    nonHumanTraits: c.nonHumanTraits || "",
+    system_extra: c.system_extra,
+  };
 }
 
 function formatMessageHtml(text) {
@@ -181,88 +315,144 @@ function formatMessageHtml(text) {
 function renderDiscover() {
   const c = state.character;
   const root = $("view-discover");
-  if (!c || !root) return;
-  const cover = c.cover || (c.gallery && c.gallery[0]) || "";
-  const tags = (c.tags || []).map((t) => {
-    const pink = /timide|nsfw|romance|orage/.test(t);
-    return `<span class="tag${pink ? " pink" : ""}">#${t}</span>`;
-  }).join("");
+  if (!root) return;
+  if (!c) {
+    root.innerHTML = `
+      <div class="startup-state startup-state--error" role="alert">
+        <strong>Le profil n’a pas pu se charger.</strong>
+        <span>Réessaie en touchant « Découvrir » ou ferme puis relance l’application.</span>
+      </div>`;
+    return;
+  }
+  const candidates = [c, state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+    .filter(Boolean);
+  const seen = new Set();
+  const characters = candidates.filter((item) => {
+    const id = String(item.id || "");
+    if (!id || seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
   root.innerHTML = `
-    <div class="hero-card">
-      <img class="cover" src="${cover}" alt="${c.name}" onerror="this.style.background='#2a1445'" />
-      <div class="hero-gradient">
-        <h1>💜 ${c.name}</h1>
-        <div class="meta">${c.age} ans · ${c.title || ""}</div>
-        <div class="tags">${tags}</div>
-        <div class="btn-row">
-          <button type="button" class="btn btn-primary" id="go-chat">💬 Discuter</button>
-          <button type="button" class="btn btn-secondary" id="go-profile">👤 Profil</button>
-        </div>
-      </div>
-    </div>
-    <div class="section">
-      <h2>🌧️ Scénario</h2>
-      <p>${(c.scenario || "").slice(0, 280)}${(c.scenario || "").length > 280 ? "…" : ""}</p>
-    </div>
-    <div class="section">
-      <h2>💌 Message d'accueil</h2>
-      <div class="greeting-box">
-        <div class="label">Premier message de Léa</div>
-        <div class="body-text">${formatMessageHtml(c.greeting || "")}</div>
-      </div>
+    <div class="discover-grid">
+      ${characters.map((item) => {
+        const cover = item.cover || (Array.isArray(item.gallery) && item.gallery[0]) || "";
+        const src = resolveImgSrc(cover);
+        const tags = (Array.isArray(item.tags) ? item.tags : []).slice(0, 8).map(renderTagChip).join("");
+        const scenario = String(item.scenario || "").replace(/\s+/g, " ").trim();
+        const summary = scenario.length > 150 ? scenario.slice(0, 147).trimEnd() + "…" : (scenario || "Scénario non renseigné.");
+        const id = escapeHtml(item.id);
+        return `<article class="discover-card${item.id === c.id ? " is-active" : ""}">
+          ${src
+            ? `<img class="discover-image" src="${escapeHtml(src)}" alt="" loading="lazy" onerror="this.classList.add('cover-broken');this.removeAttribute('src');" />`
+            : '<div class="discover-image discover-placeholder" role="img" aria-label="Image de personnage indisponible">🖼️</div>'}
+          <div class="discover-overlay">
+            <div class="discover-tags">${tags}</div>
+            <p class="discover-scenario">${escapeHtml(summary)}</p>
+            <div class="discover-actions">
+              <button type="button" class="discover-action discover-chat" data-character-id="${id}">💬 Discuter</button>
+              <button type="button" class="discover-action discover-profile" data-character-id="${id}">Profil</button>
+            </div>
+          </div>
+        </article>`;
+      }).join("")}
     </div>
   `;
-  $("go-chat") && ($("go-chat").onclick = () => { showView("chat"); });
-  $("go-profile") && ($("go-profile").onclick = () => { showView("profile"); });
+  root.querySelectorAll(".discover-chat").forEach((button) => {
+    button.onclick = () => {
+      const selected = characters.find((item) => String(item.id) === button.dataset.characterId);
+      if (!selected) return;
+      if (selected.id !== state.character.id) activateCharacter(selected);
+      state.chatListMode = false;
+      showView("chat");
+    };
+  });
+  root.querySelectorAll(".discover-profile").forEach((button) => {
+    button.onclick = () => {
+      const selected = characters.find((item) => String(item.id) === button.dataset.characterId);
+      if (!selected) return;
+      if (selected.id !== state.character.id) activateCharacter(selected);
+      showView("profile");
+    };
+  });
 }
 
 function renderProfile() {
   const c = state.character;
   const root = $("view-profile");
-  if (!c || !root) return;
+  if (!root) return;
+  if (!c) {
+    root.innerHTML = '<div class="startup-state startup-state--error" role="alert"><strong>Aucun personnage sélectionné.</strong><span>Retourne dans « Découvrir » et choisis une fiche.</span></div>';
+    return;
+  }
   const edit = state.editMode;
-  const gallery = c.gallery || [];
+  const gallery = Array.isArray(c.gallery) ? c.gallery : [];
+  const tags = Array.isArray(c.tags) ? c.tags : [];
+  const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
+  const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
+  const knownMinor = Number.isInteger(declaredAge) && declaredAge < 18;
+  const coverSrc = resolveImgSrc(c.cover || gallery[0] || "");
   const field = (key, label, emoji, multiline) => {
     const val = c[key] || "";
     if (!edit) {
       return `<div class="section"><h2>${emoji} ${label}</h2><div class="body-text">${
-        key === "greeting" ? formatMessageHtml(val) : val.replace(/</g, "&lt;")
+        key === "greeting" ? formatMessageHtml(val) : escapeHtml(val)
       }</div></div>`;
     }
     return `<div class="section"><h2>${emoji} ${label}</h2>${
       multiline
-        ? `<textarea class="edit-area" data-field="${key}">${val.replace(/</g, "&lt;")}</textarea>`
-        : `<input class="edit-input" data-field="${key}" value="${String(val).replace(/"/g, "&quot;")}" />`
+        ? `<textarea class="edit-area" data-field="${key}">${escapeHtml(val)}</textarea>`
+        : `<input class="edit-input" data-field="${key}" value="${escapeHtml(val)}" />`
     }</div>`;
   };
 
   root.innerHTML = `
     <div class="hero-card" style="margin-bottom:12px">
-      <img class="cover" src="${resolveImgSrc(c.cover || gallery[0] || "")}" alt="${c.name}" style="max-height:36vh" />
+      ${coverSrc ? `<img class="cover" src="${escapeHtml(coverSrc)}" alt="${escapeHtml(c.name)}" style="max-height:36vh" onerror="this.classList.add('cover-broken');this.removeAttribute('src');this.alt='Image indisponible';" />` : '<div class="cover cover-placeholder" role="img" aria-label="Aucune image de profil" style="max-height:36vh"><span>🖼️</span><span>Image de profil indisponible</span></div>'}
       <div class="hero-gradient">
-        <h1>💜 ${c.name}</h1>
-        <div class="meta">${c.age} ans · ${c.title || ""}</div>
+        <h1>💜 ${escapeHtml(c.name)}</h1>
+        <div class="meta">${escapeHtml(c.age == null ? "Âge non renseigné" : c.age + " ans")}${c.estimatedAge ? ` · Estimation visuelle : ${escapeHtml(c.estimatedAge)} ans (indicative)` : ""} · ${escapeHtml(c.title || "")}</div>
       </div>
     </div>
     ${edit ? `
       <div class="section">
         <h2>✏️ Identité</h2>
         <label class="hint">Nom</label>
-        <input class="edit-input" data-field="name" value="${(c.name || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="name" value="${escapeHtml(c.name || "")}" />
         <label class="hint" style="margin-top:8px">Âge</label>
-        <input class="edit-input" data-field="age" type="number" value="${c.age || 18}" />
+        <input class="edit-input" data-field="age" type="number" value="${c.age || ""}" placeholder="Non précisé" />
         <label class="hint" style="margin-top:8px">Titre</label>
-        <input class="edit-input" data-field="title" value="${(c.title || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="title" value="${escapeHtml(c.title || "")}" />
         <label class="hint" style="margin-top:8px">Tags (virgules)</label>
-        <input class="edit-input" data-field="tags" value="${(c.tags || []).join(", ")}" />
+        <input class="edit-input" data-field="tags" value="${tags.map((tag) => typeof tag === "string" ? tag : (tag && tag.name) || "").join(", ")}" />
         <label class="hint" style="margin-top:8px">Image de couverture (chemin)</label>
-        <input class="edit-input" data-field="cover" value="${(c.cover || "").replace(/"/g, "&quot;")}" />
+        <input class="edit-input" data-field="cover" value="${escapeHtml(c.cover || "")}" />
       </div>
     ` : ""}
     ${field("greeting", "Message d'accueil", "💌", true)}
     ${field("scenario", "Scénario", "🌧️", true)}
     ${field("personality", "Tempérament & caractère", "🎭", true)}
     ${field("appearance", "Descriptif physique", "✨", true)}
+    ${(c.nonHumanTraits || edit) ? field("nonHumanTraits", "Traits non humains", "👽", true) : ""}
+    ${(c.Poitrine || c.bustEstimate) ? `
+      <div class="section">
+        <h2>📏 Taille de poitrine</h2>
+        <div class="body-text">${c.Poitrine ? `Valeur de la fiche : ${escapeHtml(c.Poitrine)}` : `Estimation visuelle indicative : ${escapeHtml(c.bustEstimate)}`}</div>
+      </div>` : ""}
+    ${c.sourceScenario != null ? `
+      <div class="section">
+        <h2>📥 Fiche source conservée</h2>
+        <p class="hint">Origine : <a href="${escapeHtml(c.sourceUrl || "#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(c.source || "Import")}</a></p>
+        <label class="hint">Scénario d'origine (inchangé)</label>
+        <div class="body-text">${escapeHtml(c.sourceScenario || "Aucun scénario source.")}</div>
+        <label class="hint" style="display:block;margin-top:10px">Message d'accueil d'origine (inchangé)</label>
+        <div class="body-text">${escapeHtml(c.sourceGreeting || "Aucun message source.")}</div>
+        <details class="source-card-details">
+          <summary>Afficher un aperçu de la fiche source</summary>
+          <pre>Ouvre cette section pour charger l’aperçu.</pre>
+        </details>
+      </div>
+    ` : ""}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
       <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
@@ -272,7 +462,7 @@ function renderProfile() {
           const safe = String(src).replace(/"/g, "&quot;");
           return `<div class="gal-card">
             <button type="button" class="gal-img-btn" data-i="${i}">
-              <img src="${resolveImgSrc(src)}" alt="Léa ${i+1}" loading="lazy" />
+              <img src="${escapeHtml(resolveImgSrc(src))}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" />
               ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
             </button>
             <div class="gal-actions">
@@ -287,10 +477,18 @@ function renderProfile() {
     </div>
     ${!edit ? `
     <div class="section">
-      <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La photo étoilée sert de référence du visage. Image verticale plein pied; une seule tentative par clic pour limiter le quota.</p>
-      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
-      <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
+      <h2>🖼️ Générer une image</h2>
+      <p class="hint">La photo de profil sert de référence pour le visage. Tenues sexy / dentelle / transparent / décolleté, poses provocantes. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
+      <label class="hint" for="gen-provider">Moteur</label>
+      <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
+        <option value="cloudflare">Cloudflare · FLUX.2 Klein</option>
+        <option value="horde">AI Horde · img2img</option>
+      </select>
+      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
+      ${knownMinor
+        ? `<p class="hint bad">La génération est désactivée : l’âge renseigné est inférieur à 18 ans.</p>`
+        : `${adultCharacter ? "" : `<label class="hint" style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><input id="gen-adult-confirm" type="checkbox" /> Je confirme que ce personnage est majeur.</label>`}
+          <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>`}
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
     </div>
@@ -299,7 +497,7 @@ function renderProfile() {
       <div class="edit-actions">
         <button type="button" class="btn btn-primary" id="save-char">💾 Enregistrer</button>
         <button type="button" class="btn btn-secondary" id="cancel-edit">Annuler</button>
-        <button type="button" class="btn btn-secondary" id="reset-char">♻️ Défaut</button>
+        ${c.id === "lea" ? '<button type="button" class="btn btn-secondary" id="reset-char">♻️ Défaut</button>' : ""}
       </div>
     ` : `
       <div class="btn-row">
@@ -308,6 +506,21 @@ function renderProfile() {
       </div>
     `}
   `;
+
+  const sourceDetails = root.querySelector(".source-card-details");
+  if (sourceDetails) {
+    sourceDetails.addEventListener("toggle", () => {
+      if (!sourceDetails.open || sourceDetails.dataset.loaded) return;
+      sourceDetails.dataset.loaded = "true";
+      const preview = sourceDetails.querySelector("pre");
+      try {
+        const source = JSON.stringify(c.sourceCard || {}, null, 2);
+        preview.textContent = source.length > 12000 ? source.slice(0, 12000) + "\n… (aperçu tronqué)" : source;
+      } catch (_) {
+        preview.textContent = "La fiche source ne peut pas être affichée.";
+      }
+    });
+  }
 
   root.querySelectorAll(".gal-img-btn").forEach((btn) => {
     btn.onclick = () => openLightbox(Number(btn.dataset.i) || 0);
@@ -318,9 +531,8 @@ function renderProfile() {
       const i = Number(btn.dataset.i) || 0;
       const g = (state.character && state.character.gallery) || [];
       if (!g[i]) return;
-      const next = Object.assign({}, state.character, { cover: g[i] });
-      saveCharOverrides(next);
-      state.character = next;
+       const next = Object.assign({}, state.character, { cover: g[i] });
+       persistActiveCharacter(next);
       renderProfile();
     };
   });
@@ -337,8 +549,7 @@ function renderProfile() {
       }
       const next = Object.assign({}, state.character, { gallery: g });
       if (next.cover === removed) next.cover = g[0] || "";
-      saveCharOverrides(next);
-      state.character = next;
+       persistActiveCharacter(next);
       renderProfile();
     };
   });
@@ -350,7 +561,7 @@ function renderProfile() {
       setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
     }
   }
-  if ($("prof-chat")) $("prof-chat").onclick = () => showView("chat");
+  if ($("prof-chat")) $("prof-chat").onclick = () => { state.chatListMode = false; showView("chat"); };
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
   if ($("cancel-edit")) $("cancel-edit").onclick = () => { state.editMode = false; renderProfile(); };
   if ($("reset-char")) $("reset-char").onclick = () => {
@@ -359,17 +570,21 @@ function renderProfile() {
     initCharacter().then(() => renderProfile());
   };
   if ($("save-char")) $("save-char").onclick = () => {
-    const next = Object.assign({}, c);
+       const next = Object.assign({}, c);
     root.querySelectorAll("[data-field]").forEach((el) => {
       const k = el.dataset.field;
       let v = el.value;
-      if (k === "age") v = parseInt(v, 10) || 18;
+       if (k === "age") v = parseInt(v, 10) || null;
       if (k === "tags") v = v.split(/[,;#]+/).map((x) => x.trim()).filter(Boolean);
       if (k === "gallery") v = v.split("\n").map((x) => x.trim()).filter(Boolean);
       next[k] = v;
     });
-    saveCharOverrides(next);
-    state.character = next;
+      if (next.sourceScenario != null) {
+        next.system_extra = Number(next.age) >= 18
+          ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
+          : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.";
+      }
+     persistActiveCharacter(next);
     state.editMode = false;
     renderProfile();
   };
@@ -379,9 +594,10 @@ async function ensureChatStarted() {
   const c = state.character;
   if (!c) return;
   try {
-    const data = await api("/api/chat/lea");
+    const data = await api(activeChatPath());
     if (data && Array.isArray(data.messages)) {
       state.chat = data;
+      localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
     }
   } catch (_) {}
   if (!state.chat.messages || !state.chat.messages.length) {
@@ -391,28 +607,106 @@ async function ensureChatStarted() {
       messages: [{ role: "assistant", content: greet, ts: Date.now() }],
     };
     try {
-      await api("/api/chat/lea", {
+      await api(activeChatPath(), {
         method: "POST",
         body: JSON.stringify({ messages: state.chat.messages, init: true }),
       });
     } catch (_) {
-      localStorage.setItem("lea.chat.lea", JSON.stringify(state.chat));
+      // Keep the local conversation available even when the server is offline.
     }
+    localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat));
   }
+}
+
+function readSavedChats() {
+  const characterMap = new Map();
+  [state.leaCharacter, state.character, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+    .filter((item) => item && item.id)
+    .forEach((item) => characterMap.set(String(item.id), item));
+  const entries = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith("lea.chat.")) continue;
+    const id = key.slice("lea.chat.".length);
+    try {
+      const chat = JSON.parse(localStorage.getItem(key) || "{}");
+      if (Array.isArray(chat.messages) && chat.messages.length) {
+        const latest = chat.messages.reduce((max, message) => {
+          const ts = Number(message && message.ts) || Date.parse(message && message.ts) || 0;
+          return Math.max(max, ts);
+        }, 0);
+        entries.push({ id, character: characterMap.get(id) || { id, name: id }, messages: chat.messages, latest });
+      }
+    } catch (_) {}
+  }
+  const currentId = state.character && String(state.character.id);
+  if (currentId && state.chat && Array.isArray(state.chat.messages) && state.chat.messages.length &&
+      !entries.some((entry) => entry.id === currentId)) {
+    const latest = state.chat.messages.reduce((max, message) => Math.max(max, Number(message && message.ts) || 0), 0);
+    entries.push({ id: currentId, character: state.character, messages: state.chat.messages, latest });
+  }
+  return entries.sort((a, b) => b.latest - a.latest);
+}
+
+function renderChatHistory() {
+  const root = $("chat-history-list");
+  if (!root) return;
+  const entries = readSavedChats();
+  if (!entries.length) {
+    root.innerHTML = '<p class="chat-history-empty">Les conversations apparaîtront ici après le premier message.</p>';
+    return;
+  }
+  root.innerHTML = entries.map((entry) => {
+    const character = entry.character || {};
+    const last = entry.messages[entry.messages.length - 1] || {};
+    const preview = String(last.content || "").replace(/\s+/g, " ").trim().slice(0, 90);
+    const active = state.character && String(state.character.id) === entry.id;
+    const stamp = entry.latest ? new Date(entry.latest).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
+    const image = resolveImgSrc(character.cover || (Array.isArray(character.gallery) && character.gallery[0]) || "");
+    return `<button type="button" class="chat-history-item${active ? " is-active" : ""}" data-chat-id="${escapeHtml(entry.id)}">
+      ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="chat-history-avatar">💬</span>'}
+      <span class="chat-history-copy"><strong>${escapeHtml(character.name || entry.id)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
+    </button>`;
+  }).join("");
+  root.querySelectorAll("[data-chat-id]").forEach((button) => {
+    button.onclick = () => {
+      const id = button.dataset.chatId;
+      const selected = [state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
+        .find((item) => item && String(item.id) === id);
+      if (!selected) return;
+      state.character = selected;
+      try { state.chat = JSON.parse(localStorage.getItem("lea.chat." + id) || '{"messages":[]}'); }
+      catch (_) { state.chat = { messages: [] }; }
+      state.editMode = false;
+      state.chatListMode = false;
+      localStorage.setItem("lea.activeCharacterId", id);
+      showView("chat");
+    };
+  });
 }
 
 function renderChat() {
   const c = state.character;
   const root = $("view-chat");
   if (!c || !root) return;
+  if (state.chatListMode) {
+    root.innerHTML = `
+      <section class="chat-history-panel chat-history-picker">
+        <h2>Conversations <span>plus récente en premier</span></h2>
+        <div class="chat-history-list" id="chat-history-list"></div>
+      </section>`;
+    renderChatHistory();
+    return;
+  }
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
   root.innerHTML = `
+    <button type="button" class="chat-back-button" id="chat-back">← Conversations</button>
     <div class="chat-wrap">
       <div class="chat-header">
-        <img src="${cover}" alt="" />
+          <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
         <div class="info">
-          <strong>💜 ${c.name}</strong>
-          <small>${c.age} ans · ${c.title || ""}</small>
+           <strong>💜 ${escapeHtml(c.name)}</strong>
+           <small>${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</small>
         </div>
         <button type="button" class="icon-btn" id="chat-reset" title="Nouvelle conversation" style="margin-left:auto">🔄</button>
       </div>
@@ -425,7 +719,7 @@ function renderChat() {
     </div>
   `;
   paintMessages();
-  ensureChatStarted().then(() => paintMessages());
+  ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); });
 
   const input = $("chat-input");
   input && input.addEventListener("input", () => {
@@ -433,6 +727,10 @@ function renderChat() {
     input.style.height = Math.min(120, input.scrollHeight) + "px";
   });
   $("chat-send") && ($("chat-send").onclick = sendMessage);
+  $("chat-back") && ($("chat-back").onclick = () => {
+    state.chatListMode = true;
+    renderChat();
+  });
   input && input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -440,14 +738,15 @@ function renderChat() {
     }
   });
   $("chat-reset") && ($("chat-reset").onclick = async () => {
-    if (!confirm("Recommencer la conversation avec Léa ?")) return;
+       if (!confirm("Recommencer la conversation avec " + c.name + " ?")) return;
     state.chat = { messages: [] };
-    localStorage.removeItem("lea.chat.lea");
+       localStorage.removeItem("lea.chat." + c.id);
     try {
-      await api("/api/chat/lea", { method: "DELETE" });
+         await api(activeChatPath(), { method: "DELETE" });
     } catch (_) {}
     await ensureChatStarted();
     paintMessages();
+    renderChatHistory();
   });
 }
 
@@ -478,12 +777,12 @@ async function sendMessage() {
   const typing = $("chat-typing");
   if (typing) typing.classList.remove("hidden");
   try {
-    const res = await api("/api/chat/lea", {
+    const res = await api(activeChatPath(), {
       method: "POST",
       body: JSON.stringify({
         message: text,
         messages: state.chat.messages,
-        character: state.character,
+        character: promptCharacterPayload(state.character),
         settings: loadSettings(),
       }),
     });
@@ -499,7 +798,7 @@ async function sendMessage() {
         ts: Date.now(),
       });
     }
-    localStorage.setItem("lea.chat.lea", JSON.stringify(state.chat));
+    localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat));
   } catch (e) {
     state.chat.messages.push({
       role: "assistant",
@@ -507,9 +806,11 @@ async function sendMessage() {
       ts: Date.now(),
     });
   }
+  try { localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat)); } catch (_) {}
   state.sending = false;
   if (typing) typing.classList.add("hidden");
   paintMessages();
+  renderChatHistory();
 }
 
 
@@ -546,39 +847,48 @@ async function generateProfileImage() {
   }
   const c = state.character;
   if (!c) return;
+  const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
+  if (Number.isInteger(declaredAge) && declaredAge < 18) {
+    setGenBanner("La génération est désactivée pour un personnage dont l’âge renseigné est inférieur à 18 ans.", "bad");
+    return;
+  }
+  const confirmedAdult = Number.isInteger(declaredAge) && declaredAge >= 18;
+  if (!confirmedAdult && (!Number.isInteger(Number(c.estimatedAge)) || Number(c.estimatedAge) < 18 ||
+      !$("gen-adult-confirm")?.checked)) {
+    setGenBanner("Confirme que le personnage est majeur; une estimation visuelle ne prouve pas son âge.", "bad");
+    return;
+  }
   const st = loadSettings();
   const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
+  const provider = $("gen-provider")?.value === "horde" ? "horde" : "cloudflare";
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
-  setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
+  setGenBanner(provider === "horde" ? "⏳ Envoi à AI Horde; la file d’attente peut prendre plusieurs minutes…" : "⏳ Génération Cloudflare en arrière-plan…", "");
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);
   (async () => {
     try {
-      const res = await api("/api/image/cloudflare", {
+      const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
-        body: JSON.stringify({ character: jobChar, settings: st, extra }),
+        body: JSON.stringify({
+          character: Object.assign(promptCharacterPayload(jobChar), {
+            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+            adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
+          }),
+          settings: st,
+          extra,
+        }),
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
       const dataUrl = res.image;
-      const stored = persistGeneratedImage(jobChar.id || "lea", dataUrl);
-      // Fusionner avec base + générées (ne jamais perdre les images assets)
-      const baseGal = (state.character && state.character.gallery) || jobChar.gallery || [];
-      const next = Object.assign({}, state.character || jobChar);
-      next.gallery = mergeGalleries(
-        baseGal.filter((x) => String(x).indexOf("images/") === 0),
-        [stored].concat(baseGal.filter((x) => String(x).indexOf("images/") !== 0))
-      );
-      // generated first
-      next.gallery = [stored].concat(next.gallery.filter((x) => x !== stored)).slice(0, 300);
-      next.cover = stored;
-      saveCharOverrides(next);
-      state.character = next;
+      const targetId = String(jobChar.id || "lea");
+      const stored = persistGeneratedImage(targetId, dataUrl);
+      const next = persistImageToCharacter(targetId, stored, jobChar);
       state.genRunning = false;
-      setGenBanner("✓ Image ajoutée à la galerie (" + next.gallery.length + ")", "ok");
-      if (state.view === "profile") {
+      setGenBanner("✓ Image ajoutée au profil de " + String(next.name || "la personne choisie"), "ok");
+      if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
         try { renderProfile(); } catch (_) {}
       }
     } catch (e) {
@@ -628,6 +938,14 @@ function renderSettings() {
       </div>
     </div>
     <div class="section">
+      <h2>🎨 AI Horde (optionnel)</h2>
+      <div class="settings-block">
+        <label>Clé API AI Horde (facultative)</label>
+        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || "")}" placeholder="Clé de ton compte AI Horde" />
+        <p class="hint">Sans clé : accès anonyme, image 512 × 512 et file d’attente variable. Avec ta clé : cadrage vertical 512 × 768, 24 étapes, selon tes kudos disponibles. La clé reste enregistrée dans les réglages de cet appareil.</p>
+      </div>
+    </div>
+    <div class="section">
       <h2>👤 Toi (biographie joueur)</h2>
       <div class="settings-block">
         <label>Prénom / nom affiché</label>
@@ -662,6 +980,10 @@ function renderSettings() {
         <textarea class="edit-area" id="memory-scene" rows="3" placeholder="Lieu, moment, objets, action en cours…">${escapeMemoryMarkup(memory.scene)}</textarea>
       </div>
       <div class="settings-block">
+        <label>Tenue actuelle, état et emplacement des vêtements</label>
+        <textarea class="edit-area" id="memory-wardrobe" rows="3" placeholder="Ce que Léa porte; ce qui a été retiré, où les vêtements sont rangés ou mis à sécher, et leur état…">${escapeMemoryMarkup(memory.wardrobe)}</textarea>
+      </div>
+      <div class="settings-block">
         <label>Évolution de la relation</label>
         <textarea class="edit-area" id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et évolution réciproque…">${escapeMemoryMarkup(memory.relationship)}</textarea>
       </div>
@@ -687,6 +1009,7 @@ function renderSettings() {
       groqKeys: $("set-groq").value.trim(),
       cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
       cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
+      hordeApiKey: ($("set-horde-key") && $("set-horde-key").value.trim()) || "",
       userName: $("set-username").value.trim(),
       userBio: $("set-bio").value.trim(),
       chatEngine: $("set-model").value,
@@ -698,6 +1021,7 @@ function renderSettings() {
   $("save-memory").onclick = () => {
     saveRoleplayMemory({
       scene: $("memory-scene").value,
+      wardrobe: $("memory-wardrobe").value,
       relationship: $("memory-relationship").value,
       intimacy: $("memory-intimacy").value,
       facts: $("memory-facts").value,
@@ -705,9 +1029,9 @@ function renderSettings() {
     $("memory-status").innerHTML = '<span class="status-pill ok">✓ Mémoire enregistrée sur cet appareil</span>';
   };
   $("clear-memory").onclick = () => {
-    if (!confirm("Effacer la scène, la relation et les souvenirs mémorisés ? Le scénario d'origine et l'historique du chat resteront inchangés.")) return;
-    saveRoleplayMemory({ scene: "", relationship: "", intimacy: "", facts: "" });
-    ["memory-scene", "memory-relationship", "memory-intimacy", "memory-facts"].forEach((id) => { $(id).value = ""; });
+    if (!confirm("Effacer la scène, la tenue, la relation et les souvenirs mémorisés ? Le scénario d'origine et l'historique du chat resteront inchangés.")) return;
+    saveRoleplayMemory({ scene: "", wardrobe: "", relationship: "", intimacy: "", facts: "" });
+    ["memory-scene", "memory-wardrobe", "memory-relationship", "memory-intimacy", "memory-facts"].forEach((id) => { $(id).value = ""; });
     $("memory-status").innerHTML = '<span class="status-pill ok">✓ Souvenirs évolutifs effacés</span>';
   };
 }
@@ -726,18 +1050,22 @@ function closeLightbox() {
 }
 
 async function initCharacter() {
-  let base = null;
   try {
-    const list = await api("/api/characters");
+    const saved = JSON.parse(localStorage.getItem("lea.imported.characters") || "[]");
+    state.importedCharacters = Array.isArray(saved)
+      ? saved.filter((item) => item && item.id != null).map((item) => Object.assign({}, item, { id: String(item.id) }))
+      : [];
+  } catch (_) {
+    state.importedCharacters = [];
+  }
+  let base = window.__LEA_DEFAULT__ || null;
+  try {
+    const list = await Promise.race([
+      api("/api/characters"),
+      new Promise((resolve) => setTimeout(() => resolve(null), 3500)),
+    ]);
     if (Array.isArray(list) && list[0]) base = list.find((x) => x.id === "lea") || list[0];
   } catch (_) {}
-  if (!base) {
-    try {
-      const res = await fetch("characters.json");
-      // fallback embedded via native
-    } catch (_) {}
-  }
-  if (!base && window.__LEA_DEFAULT__) base = window.__LEA_DEFAULT__;
   if (!base) {
     // last resort minimal
     base = {
@@ -754,12 +1082,18 @@ async function initCharacter() {
       appearance: "Brune, cheveux longs, 95D.",
     };
   }
-  state.character = mergeChar(base);
+  const lea = mergeChar(base);
+  state.leaCharacter = lea;
+  const activeId = localStorage.getItem("lea.activeCharacterId");
+  state.character = state.importedCharacters.find((item) => String(item.id) === String(activeId)) || lea;
 }
 
 function bindNav() {
   document.querySelectorAll(".tabbar .nav").forEach((b) => {
-    b.onclick = () => showView(b.dataset.view);
+    b.onclick = () => {
+      if (b.dataset.view === "chat") state.chatListMode = true;
+      showView(b.dataset.view);
+    };
   });
   $("btn-edit-toggle") && ($("btn-edit-toggle").onclick = () => {
     if (state.view !== "profile") showView("profile");
@@ -781,7 +1115,35 @@ function bindNav() {
 }
 
 (async function boot() {
-  bindNav();
-  await initCharacter();
-  showView("discover");
+  try {
+    bindNav();
+    await initCharacter();
+    // Toujours rouvrir sur Découvrir (pas Import)
+    showView("discover");
+    // Imports en attente seulement si l’utilisateur vient de télécharger une carte
+    // (ne force pas l’onglet Import à chaque retour dans l’app)
+  } catch (error) {
+    console.error("Léa Studio startup failed", error);
+    const root = $("view-discover");
+    if (root) {
+      root.innerHTML = `
+        <div class="startup-state startup-state--error" role="alert">
+          <strong>Le profil n’a pas pu se charger.</strong>
+          <span>Ferme puis relance l’application. Si le problème revient, installe la dernière version.</span>
+        </div>`;
+    }
+  }
 })();
+
+// Au retour au premier plan: rester sur la vue actuelle, ne pas ouvrir Import sans raison
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (state.view === "import") {
+    // Si aucun import en cours, revenir à Découvrir
+    try {
+      if (window.LeaImporter && typeof window.LeaImporter.hasPendingWork === "function") {
+        if (!window.LeaImporter.hasPendingWork()) showView("discover");
+      }
+    } catch (_) {}
+  }
+});

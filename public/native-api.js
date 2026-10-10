@@ -211,18 +211,24 @@
       "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
 
     const outfits = [
-      "an elegant opaque black lace bodysuit with a deep neckline, fully covering intimate areas",
-      "a fitted satin slip dress with a tasteful side slit and opaque lining",
-      "a tailored corset-style top with full opaque coverage, short skirt and sheer-free thigh-high stockings",
-      "a silky open-collar blouse, fitted pencil skirt and heels, confident evening styling",
-      "a chic opaque burgundy lingerie-inspired set with matching robe, tasteful and fully covered",
-      "a close-fitting evening dress with a deep but covered neckline and high slit",
-      "a fitted leather jacket over an opaque low-cut top and short skirt",
-      "a soft satin camisole with opaque coverage, fitted trousers and elegant heels",
-      "a character-appropriate fantasy outfit with a fitted bodice, tasteful cleavage and full coverage",
-      "a sleek science-fiction outfit with a fitted silhouette and opaque panels",
-      "a playful fitted top and high-waisted mini skirt, opaque fabric and fully covered",
-      "a character-appropriate sensual evening outfit in colors that suit the reference image",
+      "sheer black lace crop top semi-transparent, deep cleavage, tight dark skinny jeans, seductive",
+      "white sheer lace camisole very low neckline, wet look, dark tight jeans, rain droplets on skin",
+      "red sheer lace bra under open blouse, mini skirt, provocative evening look",
+      "burgundy lace babydoll short hem, thin straps, deep cleavage, sensual",
+      "emerald satin slip dress plunging neckline, high slit on thigh, elegant sexy",
+      "black lace bodysuit open décolleté, high-cut hips, stockings, full body",
+      "wet white crop top clinging translucent to chest, no jacket, dark skinny jeans, storm look",
+      "ivory sheer lace lingerie set, soft bedroom light, teasing pose",
+      "hot pink lace bra and micro skirt, playful provocative",
+      "navy deep V blouse unbuttoned low, black mini skirt, heels, office seduction",
+      "champagne silk robe loosely tied over lace lingerie, bedroom doorway",
+      "black mesh top and leather mini skirt, edgy sexy",
+      "wet dark skinny jeans and short soaked white crop top stuck to skin, classic storm arrival",
+      "purple lace lingerie, kneeling by fireplace, soft lamp light",
+      "oversized open white shirt barely covering lace panties, bare legs, morning after vibe",
+      "strappy heels, short bodycon dress deep cleavage, club outfit",
+      "corset with lace panels, garter straps, opaque stockings, boudoir",
+      "tight satin camisole and high-waist shorts, cleavage emphasized, flirtatious",
     ];
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
