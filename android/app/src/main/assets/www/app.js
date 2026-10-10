@@ -375,7 +375,7 @@ async function sendMessage() {
   } catch (e) {
     state.chat.messages.push({
       role: "assistant",
-      content: `*elle regarde le sol*\nDésolée… j'ai un souci pour répondre (${String(e.message || e).slice(0, 80)}).\nVérifie tes clés API dans ⚙️ Réglages.`,
+      content: `*elle regarde le sol*\nDésolée… j'ai un souci pour répondre (${String(e.message || e).slice(0, 220)}).\nVérifie tes clés API dans ⚙️ Réglages.`,
       ts: Date.now(),
     });
   }
@@ -413,7 +413,7 @@ async function generateProfileImage() {
     // refresh gallery grid without full re-render if possible
     renderProfile();
   } catch (e) {
-    if (status) status.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 160) + '</span>';
+    if (status) status.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 280) + '</span>';
   }
   if (btn) { btn.disabled = false; btn.textContent = "✨ Générer (physique fidèle)"; }
 }
@@ -427,7 +427,7 @@ function renderSettings() {
       <div class="settings-block">
         <label>Gemini (une clé par ligne)</label>
         <textarea class="edit-area" id="set-gemini" placeholder="aq… ou AIza…">${s.geminiKeys || s.GEMINI_API_KEYS || ""}</textarea>
-        <p class="hint">Accepte les clés <strong>aq…</strong> et <strong>AIza…</strong>. Plusieurs clés = rotation auto. Modèles : gemini-2.0-flash / 2.5-flash.</p>
+        <p class="hint">Clés Google AI Studio (<strong>AIza…</strong> ou <strong>aq…</strong>). Modèles : <strong>gemini-3.5-flash-lite</strong>, 3.8-flash (les 2.x renvoient souvent 404).</p>
       </div>
       <div class="settings-block">
         <label>OpenAI (optionnel, une par ligne)</label>

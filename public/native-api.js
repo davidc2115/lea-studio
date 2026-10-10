@@ -182,7 +182,10 @@
           const data = r.json || {};
           if (!r.ok) {
             lastErr = r.error || "Cloudflare error";
-            if (/400|401|429|402|quota|unauthorized|forbidden/i.test(lastErr)) {
+            if (/401|unauthorized|Authentication/i.test(lastErr)) {
+              lastErr = "Cloudflare 401 — token ou Account ID incorrect. Workers AI > API token (Workers AI Read) + Account ID (32 car. hex) dans Réglages.";
+            }
+            if (/400|401|429|402|quota|unauthorized|forbidden/i.test(String(r.error || ""))) {
               try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
             }
             continue;
@@ -230,15 +233,26 @@
   }
 
   async function callGemini(keys, system, messages) {
+    // Modèles 2026 : les 2.x / 1.5 renvoient souvent 404 sur les nouvelles clés
+    const models = [
+      "gemini-3.5-flash-lite",
+      "gemini-3.8-flash",
+      "gemini-3.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-flash-latest",
+    ];
     let lastErr = "";
     for (const key of keys) {
-      for (const model of ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-1.5-flash"]) {
+      const k = String(key || "").trim();
+      if (k.length < 10) continue;
+      for (const model of models) {
         try {
+          // Clé en header (recommandé Google) — pas dans l'URL
           const url =
             "https://generativelanguage.googleapis.com/v1beta/models/" +
             model +
-            ":generateContent?key=" +
-            encodeURIComponent(key);
+            ":generateContent";
           const contents = [];
           for (const m of messages) {
             if (m.role === "system") continue;
@@ -247,12 +261,15 @@
               parts: [{ text: m.content }],
             });
           }
+          if (!contents.length) {
+            contents.push({ role: "user", parts: [{ text: "Bonjour" }] });
+          }
           const body = {
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
               temperature: 0.9,
-              maxOutputTokens: 800,
+              maxOutputTokens: 1024,
             },
             safetySettings: [
               { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -261,10 +278,15 @@
               { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
             ],
           };
-          const r = await httpPostJson(url, body, {});
+          const r = await httpPostJson(url, body, { "x-goog-api-key": k });
           const data = r.json || {};
           if (!r.ok) {
-            lastErr = r.error || (data.error && data.error.message) || "gemini error";
+            const msg =
+              (data.error && (data.error.message || data.error.status)) ||
+              r.error ||
+              "gemini error";
+            lastErr = model + ": " + String(msg).slice(0, 180);
+            // 404 = modèle inaccessible pour cette clé → essayer le suivant
             continue;
           }
           const text =
@@ -275,13 +297,14 @@
               ? data.candidates[0].content.parts.map((p) => p.text || "").join("")
               : "";
           if (text) return text.trim();
-          lastErr = "réponse vide";
+          const block = data.candidates && data.candidates[0] && data.candidates[0].finishReason;
+          lastErr = model + ": réponse vide" + (block ? " (" + block + ")" : "");
         } catch (e) {
-          lastErr = String(e.message || e);
+          lastErr = model + ": " + String(e.message || e);
         }
       }
     }
-    throw new Error(lastErr || "Gemini indisponible");
+    throw new Error(lastErr || "Gemini indisponible — crée une clé sur aistudio.google.com et utilise gemini-3.5-flash-lite");
   }
 
   async function callOpenAI(keys, system, messages) {
