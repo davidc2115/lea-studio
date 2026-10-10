@@ -693,15 +693,16 @@ public class LeaBridge {
                 try {
                     if (promptSafe.length() < 3 || reference.length() < 100) throw new IllegalArgumentException("Prompt ou photo de référence invalide.");
                     JSONObject params = new JSONObject();
-                    params.put("width", 512);
-                    params.put("height", registered ? 768 : 512);
-                    params.put("steps", registered ? 24 : 12);
-                    params.put("cfg_scale", 6.5);
-                    params.put("sampler_name", "k_euler");
-                    params.put("denoising_strength", 0.55);
+                    params.put("width", registered ? 576 : 512);
+                    params.put("height", registered ? 768 : 640);
+                    params.put("steps", registered ? 30 : 16);
+                    params.put("cfg_scale", 7.0);
+                    params.put("sampler_name", "k_euler_a");
+                    params.put("denoising_strength", 0.48);
                     params.put("n", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptSafe + " ### child, underage, loli, young teen, baby, hyper breasts, gigantic breasts, balloon breasts, disproportionate huge chest, breast expansion");
+                    payload.put("prompt", promptSafe
+                        + " ### child, underage, loli, young teen, baby, hyper breasts, gigantic breasts, balloon breasts, disproportionate huge chest, breast expansion, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
                     payload.put("source_image", reference);
                     payload.put("source_processing", "img2img");
