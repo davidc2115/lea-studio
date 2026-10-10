@@ -416,8 +416,31 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La photo étoilée sert de référence du visage. Image verticale plein pied; une seule tentative par clic pour limiter le quota.</p>
-      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
+      <p class="hint">La photo étoilée sert de référence du visage. Choisis une tenue et une pose, ou laisse « Aléatoire » pour alterner. Une seule tentative par clic.</p>
+      <label class="hint" for="gen-outfit">Tenue</label>
+      <select class="edit-input" id="gen-outfit" style="margin:4px 0 10px">
+        <option value="random">Aléatoire — styles variés</option>
+        <option value="rain-lace" ${adultCharacter ? "" : "disabled"}>Scénario pluie — crop top dentelle mouillé et jean moulant trempé${adultCharacter ? "" : " (18+)"}</option>
+        <option value="satin-dress">Robe satinée décolletée</option>
+        <option value="mini-boots">Mini-jupe et cuissardes</option>
+        <option value="nightdress" ${adultCharacter ? "" : "disabled"}>Nuisette satinée${adultCharacter ? "" : " (18+)"}</option>
+        <option value="lingerie-robe" ${adultCharacter ? "" : "disabled"}>Lingerie dentelle et peignoir${adultCharacter ? "" : " (18+)"}</option>
+        <option value="robe">Peignoir en satin</option>
+        <option value="towel" ${adultCharacter ? "" : "disabled"}>Serviette de bain, style spa${adultCharacter ? "" : " (18+)"}</option>
+      </select>
+      <label class="hint" for="gen-pose">Pose</label>
+      <select class="edit-input" id="gen-pose" style="margin:4px 0 10px">
+        <option value="random">Aléatoire — éviter la pose précédente</option>
+        <option value="standing">Debout, trois-quarts, main dans les cheveux</option>
+        <option value="seated">Assise de côté sur une chaise</option>
+        <option value="walking">En marche vers l’appareil photo</option>
+        <option value="wall">Appuyée contre un mur, regard par-dessus l’épaule</option>
+        <option value="bed">Assise au bord du lit, jambes de côté</option>
+        <option value="stretch">Debout, bras relevés, étirement naturel</option>
+        <option value="window">Près d’une fenêtre pluvieuse, regard caméra</option>
+      </select>
+      <input class="edit-input" id="gen-extra" placeholder="Détail facultatif : expression, accessoire, ambiance…" style="margin-bottom:10px" />
+      <p class="hint">Les options nuisette, lingerie et serviette sont réservées aux personnages adultes. Cloudflare peut refuser certains prompts de transparence ou de lingerie (filtre 3030).</p>
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
@@ -677,7 +700,12 @@ async function generateProfileImage() {
   const c = state.character;
   if (!c) return;
   const st = loadSettings();
-  const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
+  const generationOptions = {
+    outfit: ($("gen-outfit") && $("gen-outfit").value) || "random",
+    pose: ($("gen-pose") && $("gen-pose").value) || "random",
+    note: ($("gen-extra") && $("gen-extra").value.trim()) || "",
+  };
+
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
@@ -698,7 +726,7 @@ async function generateProfileImage() {
             collection: jobChar.collection || "",
           }),
           settings: st,
-          extra,
+          extra: generationOptions,
         }),
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
