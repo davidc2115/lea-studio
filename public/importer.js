@@ -108,7 +108,7 @@
     return "";
   }
 
-  function importedAppearance(data, visionAppearance) {
+  function importedAppearance(data, visionAppearance, visionBustEstimate) {
     const d = data || {};
     const ext = d.extensions && typeof d.extensions === "object" ? d.extensions : {};
     const canonical = canonicalLea(d);
@@ -116,10 +116,16 @@
       d.appearance, d.physical_description, d.physicalDescription, d.physical_desc,
       d.description_physical, ext.appearance, ext.physical_description,
     ].map((value) => String(value || "").trim()).find(Boolean);
-    let result = (canonical && String(canonical.appearance || "").trim()) || explicit || String(visionAppearance || "").trim();
-    const bust = importedBustSize(d);
+    let result = (canonical && String(canonical.appearance || "").trim()) || String(visionAppearance || "").trim();
+    if (explicit && result && !result.includes(explicit)) {
+      result += "\n\nÉléments canoniques de la fiche source : " + explicit;
+    } else if (!result) {
+      result = explicit;
+    }
+    const bust = importedBustSize(d) || String(visionBustEstimate || "").trim();
     if (bust && !result.toLowerCase().includes(bust.toLowerCase())) {
-      result = (result ? result + "\n\n" : "") + "Poitrine — taille canonique : " + bust + ".";
+      const label = importedBustSize(d) ? "taille canonique : " : "estimation visuelle indicative : ";
+      result = (result ? result + "\n\n" : "") + "Poitrine — " + label + bust + ".";
     }
     return result;
   }
@@ -195,8 +201,11 @@
         scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: importedAppearance(data, adapted.appearance),
+        appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
         Poitrine: importedBustSize(data),
+        bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
+        estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
+        nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
@@ -266,8 +275,11 @@
         cover, gallery: [cover], scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: importedAppearance(data, adapted.appearance),
+         appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
         Poitrine: importedBustSize(data),
+         bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
+         estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
+         nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
@@ -377,8 +389,11 @@
         scenario: String(adapted.scenario || originalScenario),
         greeting: String(adapted.greeting || originalGreeting),
         personality: String(adapted.personality || data.personality || ""),
-        appearance: importedAppearance(data, adapted.appearance),
+        appearance: importedAppearance(data, adapted.appearance, adapted.bustEstimate),
         Poitrine: importedBustSize(data),
+        bustEstimate: importedBustSize(data) ? "" : String(adapted.bustEstimate || ""),
+        estimatedAge: Number.isInteger(adapted.ageEstimate) ? adapted.ageEstimate : null,
+        nonHumanTraits: String(adapted.nonHumanTraits || "").trim(),
         system_extra: age >= 18
           ? "Personnage importé. Respecte son scénario et son tempérament; l'intimité doit rester facultative et réciproque."
           : "Âge adulte non confirmé. Roleplay strictement non sexuel; ne sexualise pas le personnage.",
