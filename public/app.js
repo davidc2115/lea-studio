@@ -107,18 +107,20 @@ function mergeGalleries(baseGallery, overrideGallery) {
 function mergeChar(base) {
   const o = loadCharOverrides();
   if (!o) return base;
-  const gallery = mergeGalleries(base.gallery, o.gallery);
-  // Si l'override avait écrasé les assets (ex: seulement 12 générées), on réécrit la fusion
-  try {
-    if (Array.isArray(o.gallery) && base.gallery && o.gallery.length < base.gallery.length) {
-      const fixed = Object.assign({}, o, { gallery: gallery, id: "lea" });
-      saveCharOverrides(fixed);
-    }
-  } catch (_) {}
-  return Object.assign({}, base, o, {
+  const gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+  const merged = Object.assign({}, base, o, {
     id: "lea",
     gallery: gallery,
   });
+  // Toujours réécrire si les assets d'origine manquent dans l'override
+  try {
+    const baseCount = (base.gallery || []).filter((x) => String(x).indexOf("images/") === 0).length;
+    const overAssets = (o.gallery || []).filter((x) => String(x).indexOf("images/") === 0).length;
+    if (baseCount > 0 && overAssets < baseCount) {
+      saveCharOverrides(merged);
+    }
+  } catch (_) {}
+  return merged;
 }
 
 function showView(name) {
@@ -236,8 +238,19 @@ function renderProfile() {
     ${field("appearance", "Descriptif physique", "✨", true)}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
+      <p class="hint">Appui long ou boutons : photo de profil ★ · supprimer 🗑️</p>
       <div class="gallery">
-        ${gallery.map((src, i) => `<img src="${resolveImgSrc(src)}" data-i="${i}" data-key="${String(src).replace(/"/g, "")}" alt="Léa ${i + 1}" />`).join("")}
+        ${gallery.map((src, i) => {
+          const isCover = (c.cover === src) || (!c.cover && i === 0);
+          return `<div class="gal-item" data-i="${i}" style="position:relative">
+            <img src="${resolveImgSrc(src)}" data-i="${i}" alt="Léa ${i + 1}" style="width:100%;display:block;border-radius:12px" />
+            ${isCover ? '<span style="position:absolute;top:6px;left:6px;background:rgba(180,80,200,0.9);color:#fff;font-size:11px;padding:2px 6px;border-radius:8px">★ Profil</span>' : ""}
+            <div style="display:flex;gap:4px;margin-top:4px">
+              <button type="button" class="btn btn-secondary gal-cover" data-i="${i}" style="flex:1;padding:6px;font-size:12px">★ Profil</button>
+              <button type="button" class="btn btn-secondary gal-del" data-i="${i}" style="flex:1;padding:6px;font-size:12px">🗑️</button>
+            </div>
+          </div>`;
+        }).join("")}
       </div>
       ${edit ? `<label class="hint" style="margin-top:10px">Galerie (une URL / chemin par ligne)</label>
         <textarea class="edit-area" data-field="gallery">${gallery.join("\n")}</textarea>` : ""}
@@ -268,6 +281,36 @@ function renderProfile() {
 
   root.querySelectorAll(".gallery img").forEach((img) => {
     img.onclick = () => openLightbox(Number(img.dataset.i) || 0);
+  });
+  root.querySelectorAll(".gal-cover").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const i = Number(btn.dataset.i) || 0;
+      const g = (state.character && state.character.gallery) || [];
+      if (!g[i]) return;
+      const next = Object.assign({}, state.character, { cover: g[i] });
+      saveCharOverrides(next);
+      state.character = next;
+      renderProfile();
+    };
+  });
+  root.querySelectorAll(".gal-del").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const i = Number(btn.dataset.i) || 0;
+      const g = ((state.character && state.character.gallery) || []).slice();
+      if (!g[i]) return;
+      if (!confirm("Supprimer cette image de la galerie ?")) return;
+      const removed = g.splice(i, 1)[0];
+      if (removed && String(removed).indexOf("gallery:") === 0 && window.LeaAndroid && window.LeaAndroid.deleteGalleryImage) {
+        try { window.LeaAndroid.deleteGalleryImage(removed); } catch (_) {}
+      }
+      const next = Object.assign({}, state.character, { gallery: g });
+      if (next.cover === removed) next.cover = g[0] || "";
+      saveCharOverrides(next);
+      state.character = next;
+      renderProfile();
+    };
   });
   if ($("btn-gen-img")) {
     $("btn-gen-img").onclick = () => generateProfileImage();

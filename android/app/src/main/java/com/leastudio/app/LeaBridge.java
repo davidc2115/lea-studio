@@ -166,16 +166,18 @@ public class LeaBridge {
     @JavascriptInterface
     public String httpPostJson(String url, String jsonBody, String headersJoined) {
         HttpURLConnection conn = null;
+        File tmp = null;
         try {
             if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
             URL u = new URL(url);
             conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(120000);
+            conn.setConnectTimeout(45000);
+            conn.setReadTimeout(180000);
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
+            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("User-Agent", "LeaStudio/3.1 (Android)");
             conn.setRequestProperty("Connection", "close");
             conn.setInstanceFollowRedirects(true);
             if (headersJoined != null) {
@@ -190,27 +192,40 @@ public class LeaBridge {
             conn.setFixedLengthStreamingMode(body.length);
             OutputStream os = conn.getOutputStream();
             os.write(body);
+            os.flush();
             os.close();
             int code = conn.getResponseCode();
             InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-            if (in == null) return "{\"error\":\"http " + code + "\"}";
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) sb.append(line).append('\n');
-            br.close();
-            String resp = sb.toString();
+            if (in == null) return "{\"error\":\"http " + code + " empty\"}";
+            // Lecture binaire vers fichier temp (évite abort sur gros JSON base64)
+            tmp = new File(ctx.getCacheDir(), "http_" + System.currentTimeMillis() + ".bin");
+            FileOutputStream fos = new FileOutputStream(tmp);
+            byte[] buf = new byte[65536];
+            int n;
+            long total = 0;
+            while ((n = in.read(buf)) > 0) {
+                fos.write(buf, 0, n);
+                total += n;
+                if (total > 25L * 1024 * 1024) break; // max 25 Mo
+            }
+            fos.close();
+            in.close();
+            byte[] bytes = new byte[(int) Math.min(tmp.length(), 20L * 1024 * 1024)];
+            FileInputStream fis = new FileInputStream(tmp);
+            int read = fis.read(bytes);
+            fis.close();
+            String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
             if (code >= 400) {
                 return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
             }
             return resp;
         } catch (Exception e) {
-            return "{\"error\":" + JSONObject.quote(String.valueOf(e.getMessage())) + "}";
+            return "{\"error\":" + JSONObject.quote(e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage())) + "}";
         } finally {
+            if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
             if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
         }
     }
-
 
 
     @JavascriptInterface
