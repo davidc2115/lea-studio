@@ -35,7 +35,13 @@ public class MainActivity extends Activity {
         try { s.setAllowFileAccessFromFileURLs(true); } catch (Throwable ignored) {}
         try { s.setAllowUniversalAccessFromFileURLs(true); } catch (Throwable ignored) {}
         web.addJavascriptInterface(new LeaBridge(this), "LeaAndroid");
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                checkPendingChubImport();
+            }
+        });
         web.setWebChromeClient(new WebChromeClient() {
             @Override
             public boolean onShowFileChooser(
@@ -46,15 +52,9 @@ public class MainActivity extends Activity {
                     MainActivity.this.filePathCallback.onReceiveValue(null);
                 }
                 MainActivity.this.filePathCallback = filePathCallback;
-                if (!ensureMediaPermission()) {
-                    // Permission demandée ; on relancera via le callback si besoin
-                    // Pour simplifier: ouvrir le picker quand même (Android peut le gérer)
-                }
                 try {
                     Intent intent = fileChooserParams.createIntent();
-                    // Autoriser plusieurs images
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                    intent.setType("image/*");
                     startActivityForResult(Intent.createChooser(intent, "Choisir une image"), FILE_CHOOSER_REQUEST);
                 } catch (Exception e) {
                     MainActivity.this.filePathCallback = null;
@@ -65,6 +65,20 @@ public class MainActivity extends Activity {
             }
         });
         web.loadUrl("file:///android_asset/www/index.html");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (web != null) web.postDelayed(this::checkPendingChubImport, 700);
+    }
+
+    private void checkPendingChubImport() {
+        if (web != null) {
+            web.evaluateJavascript(
+                    "window.LeaImporter&&window.LeaImporter.checkPendingChub&&window.LeaImporter.checkPendingChub();",
+                    null);
+        }
     }
 
     private boolean ensureMediaPermission() {
