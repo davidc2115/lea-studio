@@ -66,3 +66,15 @@ android {
 dependencies {
     implementation "org.opencv:opencv:4.12.0"
 }
+
+tasks.register("syncWebAssets", Copy) {
+    from("../../public") {
+        include "*.html", "*.js", "*.css"
+        include "images/**"
+    }
+    into("src/main/assets/www")
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("syncWebAssets")
+}
