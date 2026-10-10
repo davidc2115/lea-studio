@@ -462,24 +462,11 @@ function renderProfile() {
       ${edit ? `<label class="hint" style="margin-top:10px">Galerie (une URL / chemin par ligne)</label>
         <textarea class="edit-area" data-field="gallery">${gallery.join("\n")}</textarea>` : ""}
     </div>
-    ${!edit ? `
+    ${!edit && String(c.id) === "lea" ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La pose varie automatiquement à chaque génération. Choisis une tenue ou laisse l’application en sélectionner une au hasard; l’image reste inspirée du scénario du personnage.</p>
-      <label class="hint" for="gen-outfit">Tenue</label>
-      <select class="edit-input" id="gen-outfit" style="margin:4px 0 10px">
-        <option value="random">Tenue surprise — choix aléatoire</option>
-        <option value="scenario">Tenue adaptée au scénario</option>
-        <option value="satin-dress">Robe satinée de soirée</option>
-        <option value="cocktail">Robe cocktail élégante</option>
-        <option value="fitted-blouse">Chemisier ajusté et jupe</option>
-        <option value="knit-skirt">Pull doux et jupe courte opaque</option>
-        <option value="jeans-top">Jean ajusté et haut raffiné</option>
-        <option value="blazer">Blazer chic et robe près du corps</option>
-        <option value="summer-dress">Robe d’été fluide</option>
-        <option value="rain-look">Look de pluie inspiré du scénario</option>
-      </select>
-      <p class="hint">Style mode élégant et sensuel réservé aux personnages dont l’âge adulte (18+) est confirmé. Si l’âge est inconnu ou inférieur à 18 ans, le portrait reste neutre et entièrement vêtu. Le filtre Cloudflare peut encore refuser une image.</p>
+      <p class="hint">La photo étoilée sert de référence du visage. Image verticale plein pied; une seule tentative par clic pour limiter le quota.</p>
+      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
@@ -839,11 +826,12 @@ async function generateProfileImage() {
   }
   const c = state.character;
   if (!c) return;
+  if (String(c.id) !== "lea" || !Number.isFinite(Number(c.age)) || Number(c.age) < 18) {
+    setGenBanner("La génération d’origine est réservée à la fiche adulte de Léa.", "bad");
+    return;
+  }
   const st = loadSettings();
-  const generationOptions = {
-    outfit: ($("gen-outfit") && $("gen-outfit").value) || "random",
-    pose: "random",
-  };
+  const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
@@ -855,21 +843,12 @@ async function generateProfileImage() {
     try {
       const res = await api("/api/image/cloudflare", {
         method: "POST",
-        // L'API image doit recevoir la couverture choisie (photo étoilée) :
-        // promptCharacterPayload ne contient que les champs textuels.
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
             cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
-            species: jobChar.species || jobChar.race ||
-              (jobChar.sourceCard && ((jobChar.sourceCard.data && (jobChar.sourceCard.data.species || jobChar.sourceCard.data.race)) ||
-                jobChar.sourceCard.species || jobChar.sourceCard.race)) || "",
-            Poitrine: jobChar.Poitrine || jobChar.poitrine ||
-              (jobChar.sourceCard && (jobChar.sourceCard.data || jobChar.sourceCard).Poitrine) || "",
-            sourceDescription: jobChar.sourceDescription || "",
-            collection: jobChar.collection || "",
           }),
           settings: st,
-          extra: generationOptions,
+          extra,
         }),
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
