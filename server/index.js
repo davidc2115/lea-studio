@@ -17,20 +17,76 @@ app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(PUBLIC));
 
+async function botbooruFetch(pathname, params = {}) {
+  const url = new URL("https://botbooru.com" + pathname);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value) !== "") {
+      url.searchParams.set(key, String(value));
+    }
+  });
+  const response = await fetch(url, {
+    headers: { Accept: pathname.startsWith("/download/") ? "application/json" : "application/json", Referer: "https://botbooru.com/" },
+    signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok) throw new Error(`Botbooru HTTP ${response.status}`);
+  return response;
+}
+
+app.get("/api/import/botbooru/search", async (req, res) => {
+  try {
+    const q = String(req.query.q || "").slice(0, 180);
+    const params = {
+      sort: "downloaded",
+      q: q || "female",
+      limit: Math.min(Math.max(parseInt(req.query.limit, 10) || 24, 1), 24),
+      offset: Math.max(parseInt(req.query.offset, 10) || 0, 0),
+      sfw_only: "true",
+    };
+    const response = await botbooruFetch("/posts/", params);
+    res.json(await response.json());
+  } catch (error) {
+    res.status(502).json({ error: String(error.message || error) });
+  }
+});
+
+app.get("/api/import/botbooru/card/:id", async (req, res) => {
+  try {
+    if (!/^\d{1,12}$/.test(req.params.id)) return res.status(400).json({ error: "ID Botbooru invalide." });
+    const response = await botbooruFetch(`/download/json/${req.params.id}`);
+    res.json(await response.json());
+  } catch (error) {
+    res.status(502).json({ error: String(error.message || error) });
+  }
+});
+
+app.get("/api/import/botbooru/image/:id", async (req, res) => {
+  try {
+    if (!/^\d{1,12}$/.test(req.params.id)) return res.status(400).json({ error: "ID Botbooru invalide." });
+    const response = await botbooruFetch(`/download/png/${req.params.id}`);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (bytes.length > 10 * 1024 * 1024) return res.status(413).json({ error: "Carte trop volumineuse." });
+    res.json({ dataUrl: `data:image/png;base64,${bytes.toString("base64")}` });
+  } catch (error) {
+    res.status(502).json({ error: String(error.message || error) });
+  }
+});
+
 function buildSystem(char, chat, settings) {
   const mem = buildMemoryBlock(chat || { memories: [], summaries: [], relationship: {} });
   const userName = settings?.personaName || settings?.userName || "toi";
   const userBio = settings?.personaBio || settings?.userBio || "";
   return [
     "Tu incarnes exclusivement le personnage suivant (roleplay immersif, français).",
-    `Nom: ${char.name} · Âge: ${char.age} · ${char.title || ""}`,
+    `Nom: ${char.name} · Âge: ${Number(char.age) >= 18 ? char.age : "non confirmé"} · ${char.title || ""}`,
     `Scénario: ${char.scenario || ""}`,
     `Personnalité: ${char.personality || ""}`,
     `Apparence: ${char.appearance || ""}`,
     char.system_extra || "",
     `Joueur: ${userName}${userBio ? " — " + userBio : ""}`,
     mem,
-    "Format: (pensées) *actions* dialogues sans marqueurs. 2–5 phrases. SFW↔NSFW selon le joueur. Pas d'amour forcé.",
+    Number(char.age) >= 18
+      ? "Format: (pensées) *actions* dialogues sans marqueurs. 2–5 phrases. Intimité éventuelle facultative et réciproque; pas d'amour forcé."
+      : "Âge adulte non confirmé : roleplay strictement non sexuel, ne sexualise pas le personnage. Respecte ses limites et ne force aucun attachement.",
   ]
     .filter(Boolean)
     .join("\n");
