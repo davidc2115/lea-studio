@@ -344,8 +344,10 @@
       "- Actions entre astérisques: *comme ceci*",
       "- Dialogues sans marqueurs",
       "- Réponses naturelles, immersives, 2 à 5 phrases en général",
-      "- Peux passer SFW ↔ NSFW selon le joueur, sans forcer l'amour",
-      "- Reste cohérente avec le lieu (chez le joueur après l'orage) et la tenue tant que le joueur ne change pas la scène",
+      "- Contenu adulte autorisé: scènes SFW et NSFW explicites selon le joueur (personnages majeurs uniquement).",
+      "- Ne refuse pas une scène intime demandée; reste dans le personnage, sans moraliser.",
+      "- Peux passer SFW ↔ NSFW librement, sans forcer l'amour ni l'attachement.",
+      "- Reste cohérente avec le lieu, la tenue et la mémoire de la conversation.",
     ].filter(Boolean).join("\n");
   }
 
@@ -397,14 +399,17 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.9,
-              maxOutputTokens: 1024,
+              temperature: 0.95,
+              maxOutputTokens: 1536,
+              // Pas de filtre de réponse côté client
             },
+            // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
               { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
               { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
               { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
               { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+              { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
             ],
           };
           const r = await httpPostJson(url, body, { "x-goog-api-key": k });
@@ -416,29 +421,39 @@
               "gemini error";
             const full = String(msg);
             lastErr = model + ": " + full.slice(0, 160);
-            // Quota / rate limit → passer IMMÉDIATEMENT à la clé suivante
             if (/429|RESOURCE_EXHAUSTED|quota|rate.?limit|exhausted/i.test(full + " " + (r.error || ""))) {
               keyQuota = true;
               quotaHits++;
-              break; // sort du for model → clé suivante
+              break;
             }
-            // 404 modèle → essayer le modèle suivant sur la même clé
+            // Filtre contenu / policy → essayer un autre modèle puis une autre clé
+            if (/safety|blocked|prohibited|policy|nsfw|sexual/i.test(full)) {
+              lastErr = model + ": filtre contenu — " + full.slice(0, 120);
+              continue;
+            }
             continue;
           }
+          // Blocage safety même avec HTTP 200
+          const pf = data.promptFeedback || {};
+          if (pf.blockReason) {
+            lastErr = model + ": prompt bloqué (" + pf.blockReason + ")";
+            continue;
+          }
+          const cand = data.candidates && data.candidates[0];
           const text =
-            data.candidates &&
-            data.candidates[0] &&
-            data.candidates[0].content &&
-            data.candidates[0].content.parts
-              ? data.candidates[0].content.parts.map((p) => p.text || "").join("")
+            cand && cand.content && cand.content.parts
+              ? cand.content.parts.map((p) => p.text || "").join("")
               : "";
-          if (text) {
-            // Mémoriser cette clé comme point de départ pour le prochain message
+          if (text && text.trim()) {
             try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
             return text.trim();
           }
-          const block = data.candidates && data.candidates[0] && data.candidates[0].finishReason;
-          lastErr = model + ": réponse vide" + (block ? " (" + block + ")" : "");
+          const fr = cand && cand.finishReason;
+          if (fr === "SAFETY" || fr === "PROHIBITED_CONTENT" || fr === "RECITATION") {
+            lastErr = model + ": réponse filtrée (" + fr + ") — modèle suivant";
+            continue; // autre modèle / clé
+          }
+          lastErr = model + ": réponse vide" + (fr ? " (" + fr + ")" : "");
         } catch (e) {
           lastErr = model + ": " + String(e.message || e);
           if (/429|RESOURCE_EXHAUSTED|quota|abort/i.test(String(e.message || e))) {
@@ -558,7 +573,14 @@
         errors.push(eng + ": " + e.message);
       }
     }
-    throw new Error(errors.join(" · ") || "Aucune clé API configurée — ajoute une clé Gemini (aq… ou AIza…) dans Réglages");
+    const joined = errors.join(" · ") || "Aucune clé API configurée — ajoute une clé Gemini (aq… ou AIza…) dans Réglages";
+    if (/SAFETY|filtre|prompt bloqué|PROHIBITED/i.test(joined)) {
+      throw new Error(
+        "Gemini a filtré le contenu NSFW malgré les réglages. " +
+        "Ajoute une clé Groq (console.groq.com) dans Réglages — fallback auto plus permissif. Détail: " + joined
+      );
+    }
+    throw new Error(joined);
   }
 
   window.leaNativeApi = async function (path, opts) {
