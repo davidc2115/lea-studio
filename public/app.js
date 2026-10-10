@@ -476,9 +476,14 @@ function renderProfile() {
     </div>
     ${!edit ? `
     <div class="section">
-      <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La photo de profil sert de référence d’identité. Génération plein pied à partir du descriptif physique; tailles de poitrine et traits non humains enregistrés conservés.</p>
-      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
+      <h2>🖼️ Générer une image</h2>
+      <p class="hint">La photo de profil sert de référence pour le visage. Tenue et pose sensuelles, sans nudité; descriptif et traits du personnage conservés. Horde peut attendre dans une file d’attente.</p>
+      <label class="hint" for="gen-provider">Moteur</label>
+      <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
+        <option value="cloudflare">Cloudflare · FLUX.2 Klein</option>
+        <option value="horde">AI Horde · img2img</option>
+      </select>
+      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
       ${knownMinor
         ? `<p class="hint bad">La génération est désactivée : l’âge renseigné est inférieur à 18 ans.</p>`
         : `${adultCharacter ? "" : `<label class="hint" style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><input id="gen-adult-confirm" type="checkbox" /> Je confirme que ce personnage est majeur.</label>`}
@@ -854,16 +859,17 @@ async function generateProfileImage() {
   }
   const st = loadSettings();
   const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
+  const provider = $("gen-provider")?.value === "horde" ? "horde" : "cloudflare";
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
-  setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
+  setGenBanner(provider === "horde" ? "⏳ Envoi à AI Horde; la file d’attente peut prendre plusieurs minutes…" : "⏳ Génération Cloudflare en arrière-plan…", "");
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);
   (async () => {
     try {
-      const res = await api("/api/image/cloudflare", {
+      const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
@@ -931,6 +937,14 @@ function renderSettings() {
       </div>
     </div>
     <div class="section">
+      <h2>🎨 AI Horde (optionnel)</h2>
+      <div class="settings-block">
+        <label>Clé API AI Horde (facultative)</label>
+        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || "")}" placeholder="Clé de ton compte AI Horde" />
+        <p class="hint">Sans clé : accès anonyme, image 512 × 512 et file d’attente variable. Avec ta clé : cadrage vertical 512 × 768, 24 étapes, selon tes kudos disponibles. La clé reste enregistrée dans les réglages de cet appareil.</p>
+      </div>
+    </div>
+    <div class="section">
       <h2>👤 Toi (biographie joueur)</h2>
       <div class="settings-block">
         <label>Prénom / nom affiché</label>
@@ -994,6 +1008,7 @@ function renderSettings() {
       groqKeys: $("set-groq").value.trim(),
       cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
       cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
+      hordeApiKey: ($("set-horde-key") && $("set-horde-key").value.trim()) || "",
       userName: $("set-username").value.trim(),
       userBio: $("set-bio").value.trim(),
       chatEngine: $("set-model").value,
