@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ConcurrentHashMap;
 import android.system.Os;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -588,6 +589,139 @@ public class LeaBridge {
                 lastErr = lastErr.replace("\"", "'");
                 if (lastErr.length() > 280) lastErr = lastErr.substring(0, 280);
                 HTTP_JOBS.put(id, "error:{\"error\":\"" + lastErr + "\"}");
+            }
+        });
+        return id;
+    }
+
+    private String hordeRequest(String method, String path, String body, String apiKey) throws Exception {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL("https://aihorde.net" + path).openConnection();
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(60000);
+            conn.setRequestMethod(method);
+            conn.setRequestProperty("apikey", apiKey);
+            conn.setRequestProperty("Client-Agent", "LeaStudio:1.0.0:replit");
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Connection", "close");
+            if (body != null) {
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
+                byte[] request = body.getBytes(StandardCharsets.UTF_8);
+                conn.setFixedLengthStreamingMode(request.length);
+                OutputStream out = conn.getOutputStream();
+                out.write(request);
+                out.close();
+            }
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            if (in == null) throw new java.io.IOException("AI Horde HTTP " + code);
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[16384];
+            int n;
+            while ((n = in.read(buffer)) > 0) {
+                if (bytes.size() + n > 24 * 1024 * 1024) throw new java.io.IOException("Réponse AI Horde trop volumineuse");
+                bytes.write(buffer, 0, n);
+            }
+            in.close();
+            String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+            if (code < 200 || code >= 300) throw new java.io.IOException("AI Horde HTTP " + code + ": " + response.substring(0, Math.min(400, response.length())));
+            return response;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private byte[] hordeDownloadImage(String imageUrl) throws Exception {
+        HttpURLConnection conn = null;
+        try {
+            conn = (HttpURLConnection) new URL(imageUrl).openConnection();
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(60000);
+            conn.setRequestProperty("User-Agent", "LeaStudio/1.0.0");
+            InputStream in = conn.getInputStream();
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[16384];
+            int n;
+            while ((n = in.read(buffer)) > 0) {
+                if (bytes.size() + n > 20 * 1024 * 1024) throw new java.io.IOException("Image AI Horde trop volumineuse");
+                bytes.write(buffer, 0, n);
+            }
+            in.close();
+            return bytes.toByteArray();
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    @JavascriptInterface
+    public String hordeImageStart(final String prompt, final String charId, final String referenceImageB64, final String apiKey) {
+        final String id = "horde" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
+        final String rawPrompt = prompt == null ? "" : prompt.trim();
+        final String promptSafe = rawPrompt.substring(0, Math.min(rawPrompt.length(), 2000));
+        final String reference = referenceImageB64 == null ? "" : referenceImageB64.trim();
+        final String hordeKey = apiKey == null || apiKey.trim().isEmpty() ? "0000000000" : apiKey.trim();
+        final boolean registered = !"0000000000".equals(hordeKey);
+        HTTP_POOL.execute(new Runnable() {
+            @Override public void run() {
+                try {
+                    if (promptSafe.length() < 3 || reference.length() < 100) throw new IllegalArgumentException("Prompt ou photo de référence invalide.");
+                    JSONObject params = new JSONObject();
+                    params.put("width", 512);
+                    params.put("height", registered ? 768 : 512);
+                    params.put("steps", registered ? 24 : 12);
+                    params.put("cfg_scale", 6.5);
+                    params.put("sampler_name", "k_euler");
+                    params.put("denoising_strength", 0.42);
+                    params.put("n", 1);
+                    JSONObject payload = new JSONObject();
+                    payload.put("prompt", promptSafe + " ### nude, topless, exposed nipples, exposed genitals, child, underage");
+                    payload.put("params", params);
+                    payload.put("source_image", reference);
+                    payload.put("source_processing", "img2img");
+                    payload.put("nsfw", false);
+                    payload.put("censor_nsfw", true);
+                    JSONObject accepted = new JSONObject(hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey));
+                    String requestId = accepted.optString("id", "");
+                    if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant.");
+                    long deadline = System.currentTimeMillis() + 9 * 60 * 1000;
+                    boolean done = false;
+                    while (System.currentTimeMillis() < deadline) {
+                        Thread.sleep(5000);
+                        JSONObject check = new JSONObject(hordeRequest("GET", "/api/v2/generate/check/" + requestId, null, hordeKey));
+                        if (check.optBoolean("faulted", false)) throw new java.io.IOException("Le worker AI Horde a échoué.");
+                        if (!check.optBoolean("is_possible", true)) throw new java.io.IOException("Aucun worker AI Horde disponible pour cette demande.");
+                        if (check.optBoolean("done", false) || check.optInt("finished", 0) > 0) { done = true; break; }
+                    }
+                    if (!done) throw new java.io.IOException("Délai AI Horde dépassé; la file peut être longue.");
+                    JSONObject status = new JSONObject(hordeRequest("GET", "/api/v2/generate/status/" + requestId, null, hordeKey));
+                    JSONArray generations = status.optJSONArray("generations");
+                    if (generations == null || generations.length() == 0) throw new java.io.IOException("AI Horde a terminé sans image.");
+                    JSONObject generation = generations.getJSONObject(0);
+                    if (generation.optBoolean("censored", false)) throw new java.io.IOException("AI Horde a censuré cette image; vérifie que la référence et la tenue restent non explicites.");
+                    String image = generation.optString("img", "");
+                    byte[] imageBytes;
+                    if (image.startsWith("http://") || image.startsWith("https://")) imageBytes = hordeDownloadImage(image);
+                    else {
+                        int comma = image.indexOf(',');
+                        if (image.startsWith("data:") && comma >= 0) image = image.substring(comma + 1);
+                        imageBytes = android.util.Base64.decode(image, android.util.Base64.DEFAULT);
+                    }
+                    android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    if (bitmap == null) throw new java.io.IOException("Image AI Horde illisible.");
+                    java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
+                    try { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, jpeg); }
+                    finally { bitmap.recycle(); }
+                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP));
+                    if (key == null || !key.startsWith("gallery:")) throw new java.io.IOException("Échec de l’enregistrement dans la galerie.");
+                    HTTP_JOBS.put(id, "done:{\"galleryKey\":" + JSONObject.quote(key) + ",\"success\":true,\"provider\":\"AI Horde\"}");
+                } catch (Exception e) {
+                    String message = String.valueOf(e.getMessage());
+                    HTTP_JOBS.put(id, "error:{\"error\":" + JSONObject.quote(message.length() > 280 ? message.substring(0, 280) : message) + "}");
+                }
             }
         });
         return id;
