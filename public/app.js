@@ -42,6 +42,30 @@ async function api(path, opts = {}) {
   return res.text();
 }
 
+
+function resolveImgSrc(src) {
+  if (!src) return "";
+  if (src.indexOf("gallery:") === 0 && window.LeaAndroid && typeof window.LeaAndroid.loadGalleryImage === "function") {
+    try {
+      const d = window.LeaAndroid.loadGalleryImage(src);
+      if (d && d.length > 32) return d;
+    } catch (_) {}
+  }
+  return src;
+}
+
+function persistGeneratedImage(charId, dataUrl) {
+  if (!dataUrl) return "";
+  if (String(dataUrl).indexOf("gallery:") === 0) return dataUrl;
+  if (window.LeaAndroid && typeof window.LeaAndroid.saveGalleryImage === "function") {
+    try {
+      const key = window.LeaAndroid.saveGalleryImage(charId || "lea", dataUrl);
+      if (key && key.indexOf("gallery:") === 0) return key;
+    } catch (_) {}
+  }
+  return dataUrl;
+}
+
 function loadSettings() {
   try {
     return JSON.parse(localStorage.getItem("lea.settings") || "{}");
@@ -161,7 +185,7 @@ function renderProfile() {
 
   root.innerHTML = `
     <div class="hero-card" style="margin-bottom:12px">
-      <img class="cover" src="${c.cover || gallery[0] || ""}" alt="${c.name}" style="max-height:36vh" />
+      <img class="cover" src="${resolveImgSrc(c.cover || gallery[0] || "")}" alt="${c.name}" style="max-height:36vh" />
       <div class="hero-gradient">
         <h1>💜 ${c.name}</h1>
         <div class="meta">${c.age} ans · ${c.title || ""}</div>
@@ -189,7 +213,7 @@ function renderProfile() {
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
       <div class="gallery">
-        ${gallery.map((src, i) => `<img src="${src}" data-i="${i}" alt="Léa ${i + 1}" />`).join("")}
+        ${gallery.map((src, i) => `<img src="${resolveImgSrc(src)}" data-i="${i}" data-key="${String(src).replace(/"/g, "")}" alt="Léa ${i + 1}" />`).join("")}
       </div>
       ${edit ? `<label class="hint" style="margin-top:10px">Galerie (une URL / chemin par ligne)</label>
         <textarea class="edit-area" data-field="gallery">${gallery.join("\n")}</textarea>` : ""}
@@ -406,8 +430,9 @@ async function generateProfileImage() {
     const dataUrl = res.image;
     // Ajouter en tête de galerie + overrides
     const next = Object.assign({}, c);
-    next.gallery = [dataUrl].concat((c.gallery || []).filter((x) => x !== dataUrl)).slice(0, 12);
-    next.cover = dataUrl;
+    const stored = persistGeneratedImage(c.id || "lea", dataUrl);
+    next.gallery = [stored].concat((c.gallery || []).filter((x) => x !== stored && x !== dataUrl)).slice(0, 200);
+    next.cover = stored;
     saveCharOverrides(next);
     state.character = next;
     if (status) status.innerHTML = '<span class="status-pill ok">✓ Image ajoutée à la galerie</span>';
@@ -501,7 +526,7 @@ function openLightbox(i) {
   state.lbIndex = ((i % g.length) + g.length) % g.length;
   const lb = $("lightbox");
   const img = $("lightbox-img");
-  img.src = g[state.lbIndex];
+  img.src = resolveImgSrc(g[state.lbIndex]);
   lb.classList.remove("hidden");
 }
 function closeLightbox() {

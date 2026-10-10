@@ -154,68 +154,79 @@
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
-    // Identité courte (visage + corps), sans noyer le prompt en détails de peau
-    const identity =
-      age + " year old French woman, oval delicate face, porcelain fair skin, large almond hazel-green eyes with golden flecks, " +
-      "dark brown thick arched eyebrows, fine straight nose, full soft pink lips, " +
-      "very long straight dark brown hair down to lower back, " +
-      "slim hourglass figure, narrow shoulders, tiny waist, generous 95D full bust, rounded hips, long toned legs";
+    // Identité visage FORTE et stable (même femme à chaque génération)
+    const faceLock =
+      "same consistent female face identity always: European French woman, oval delicate face, " +
+      "porcelain fair skin with light natural freckles across nose, " +
+      "large almond hazel-green eyes with warm golden flecks, long dark lashes, " +
+      "thick dark brown arched eyebrows, fine straight nose, full soft rose-pink lips, " +
+      "subtle shy or playful expression,";
+    const bodyLock =
+      age + " years old, slim hourglass body, narrow shoulders, defined tiny waist, " +
+      "generous full 95D breasts, rounded hips, long toned legs, " +
+      "very long straight dark brown hair to the lower back, center or side part, silky texture,";
 
-    const wetOutfits = [
-      "soaked from rain storm: tight wet dark skinny jeans clinging to thighs and hips, short tight white crop top stuck translucent to skin and cleavage, no jacket, wet hair dripping on shoulders and back",
-      "just entered from storm: dripping wet dark skinny jeans, soaked white short crop top clinging to 95D bust, water droplets on collarbones, wet long hair plastered to face and back",
-      "standing in hallway after rain: wet clinging skinny jeans, crop top molded to body, bare midriff wet, hair soaked straight down the back",
+    const outfits = [
+      "sheer black transparent lace crop top revealing bra underneath, tight dark skinny jeans, wet from rain",
+      "sheer white transparent lace camisole, no bra visible outline, wet dark jeans, rain droplets on skin",
+      "red sheer lace bra and matching thong, standing indoors, soft warm light",
+      "burgundy lace babydoll with deep cleavage, thigh-high hem, seductive pose",
+      "emerald green satin slip dress thin straps, short hem, elegant sexy",
+      "black lace bodysuit open neckline, high cut hips, full body",
+      "wet white t-shirt clinging translucent to 95D bust, no bra, dark tight jeans, storm survivor look",
+      "ivory sheer lace bra and high-waist panties on bed, sensual",
+      "hot pink lace bra and micro skirt, playful teasing",
+      "navy blue deep V blouse unbuttoned low, black mini skirt, heels",
+      "champagne silk robe loosely open over lingerie, bedroom",
+      "black mesh top and leather mini skirt, edgy sexy",
+      "wet dark skinny jeans and short soaked white crop top stuck to skin, classic storm arrival",
+      "purple lace lingerie set, kneeling pose, soft lamp light",
+      "only an oversized open white shirt and lace panties, bare legs",
     ];
-    const sexyOutfits = [
-      "sheer red lace lingerie set, matching bra and panties, soft indoor light",
-      "short black mini skirt and deep V white blouse slightly open, strappy heels",
-      "satin champagne babydoll nightie, thin straps, thigh-length hem",
-      "ivory lace bra and high-waist briefs on a bed, sensual lounge pose",
-      "tight white shirt tied under the bust and black mini skirt, doorway pose",
-    ];
-    const isStorm = /orage|tremp|pluie|mouill/i.test(String(c.scenario || "") + " " + String(c.greeting || ""));
-    const outfitPool = isStorm ? wetOutfits.concat(sexyOutfits) : sexyOutfits.concat(wetOutfits);
-    const outfit = outfitPool[Math.floor(Math.random() * outfitPool.length)];
+    const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "FULL BODY wide shot head to toe, standing in doorway leaning on frame, arched back, looking at camera with shy coy smile",
-      "FULL BODY from slightly low angle, leaning forward showing cleavage, hands on thighs, playful teasing look",
-      "FULL BODY three-quarter view, looking over shoulder at camera, weight on one leg, arched lower back, sensual",
-      "FULL BODY kneeling on rug by fireplace, sitting back on heels, wet clothes, looking up with soft smile",
-      "FULL BODY sitting on edge of bed or sofa, legs crossed, torso upright, inviting gaze",
-      "FULL BODY standing near window with rain outside, one hand in wet hair, hip cocked, body fully visible",
-      "FULL BODY on all fours on bed looking back over shoulder, playful expression, entire body in frame",
-      "FULL BODY lying on side on bed propped on elbow, curves visible, looking at camera",
-      "FULL BODY standing mirror pose, hands adjusting wet crop top, body in frame from head to feet",
-      "FULL BODY walking toward camera in hallway, confident hips, complete figure visible",
+      "FULL BODY head-to-toe, leaning in doorway arched back, looking at camera coy smile",
+      "FULL BODY low angle, leaning forward deep cleavage, hands on thighs, teasing look",
+      "FULL BODY looking over shoulder, weight on one leg, arched lower back, sensual",
+      "FULL BODY kneeling on rug by fireplace, sitting on heels, looking up softly",
+      "FULL BODY sitting on bed edge, legs slightly apart, inviting gaze",
+      "FULL BODY by rainy window, one hand in long hair, hip cocked",
+      "FULL BODY on all fours on bed looking back over shoulder",
+      "FULL BODY lying on side on bed propped on elbow, curves visible",
+      "FULL BODY standing mirror, adjusting top, complete figure visible",
+      "FULL BODY walking toward camera in hallway, confident hips",
+      "FULL BODY sitting cross-legged on floor near fireplace, wet hair, soft smile",
+      "FULL BODY standing arms crossed under bust pushing cleavage, wet clothes",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
     const scenes = [
-      "cozy living room with warm lamp light",
-      "apartment hallway with wooden door",
-      "bedroom with white sheets soft bokeh",
-      "near a window with rain streaks",
-      "by a fireplace orange glow",
+      "cozy living room warm lamp",
+      "apartment hallway wooden door",
+      "bedroom white sheets soft bokeh",
+      "window with rain streaks outside",
+      "fireplace orange glow",
+      "modern bathroom doorway",
     ];
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const base = [
-      "photorealistic DSLR photo of a real person, not a painting, not CGI,",
-      identity + ",",
+      "photorealistic DSLR photograph of one real woman, not painting not CGI not anime,",
+      faceLock,
+      bodyLock,
       outfit + ",",
       pose + ",",
-      "environment: " + scene + ",",
-      "camera: 35mm lens, f/2.8, full-length framing, subject fully visible head to toe, generous negative space,",
-      "natural skin pores, realistic fabric wetness when wet, accurate 95D breast size, no exaggeration to cartoon,",
-      "sharp focus, high detail, 8k photo,",
-      "IMPORTANT: full body visible, not a face crop, not a headshot, not a close-up portrait, not upper body only,",
-      "no text, no watermark, no extra limbs, no deformed hands, no anime, no illustration",
+      "location: " + scene + ",",
+      "35mm full-length framing, entire body visible head to feet,",
+      "consistent face matching description above, same person every time,",
+      "natural skin texture, realistic 95D breast size, sharp detail,",
+      "no face close-up only, no headshot, no portrait crop, no extra people,",
+      "no text, no watermark, no deformed hands",
     ].join(" ");
 
     let out = base;
-    if (extra) out += ", " + String(extra).slice(0, 180);
-    // FLUX Schnell ~2048 chars max useful
+    if (extra) out += ", " + String(extra).slice(0, 160);
     return out.slice(0, 2000);
   }
 
@@ -229,44 +240,65 @@
       "@cf/stabilityai/stable-diffusion-xl-base-1.0",
     ];
     let lastErr = "";
-    for (let i = 0; i < creds.length; i++) {
-      const cred = creds[(start + i) % creds.length];
-      for (const model of models) {
-        try {
-          const url = "https://api.cloudflare.com/client/v4/accounts/" +
-            encodeURIComponent(cred.account) + "/ai/run/" + model;
-          const body = model.indexOf("flux") >= 0
-            ? { prompt: String(prompt).slice(0, 2048) }
-            : { prompt: String(prompt).slice(0, 2048), num_steps: 20 };
-          const r = await httpPostJson(url, body, { Authorization: "Bearer " + cred.token });
-          const data = r.json || {};
-          if (!r.ok) {
-            lastErr = r.error || "Cloudflare error";
-            if (/401|unauthorized|Authentication/i.test(lastErr)) {
-              lastErr = "Cloudflare 401 — token ou Account ID incorrect. Workers AI > API token (Workers AI Read) + Account ID (32 car. hex) dans Réglages.";
+    // 2 passes (retry connection abort)
+    for (let attempt = 0; attempt < 2; attempt++) {
+      for (let i = 0; i < creds.length; i++) {
+        const cred = creds[(start + i) % creds.length];
+        for (const model of models) {
+          try {
+            const url = "https://api.cloudflare.com/client/v4/accounts/" +
+              encodeURIComponent(cred.account) + "/ai/run/" + model;
+            const body = model.indexOf("flux") >= 0
+              ? { prompt: String(prompt).slice(0, 2048) }
+              : { prompt: String(prompt).slice(0, 2048), num_steps: 20 };
+            const r = await httpPostJson(url, body, { Authorization: "Bearer " + cred.token });
+            const data = r.json || {};
+            if (!r.ok) {
+              lastErr = r.error || "Cloudflare error";
+              if (/401|unauthorized|Authentication/i.test(lastErr)) {
+                lastErr = "Cloudflare 401 — token ou Account ID incorrect.";
+              }
+              if (/abort|broken pipe|connection/i.test(lastErr) && attempt === 0) {
+                await new Promise((x) => setTimeout(x, 800));
+                continue;
+              }
+              if (/400|401|429|402|quota|unauthorized|forbidden/i.test(String(r.error || ""))) {
+                try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
+              }
+              continue;
             }
-            if (/400|401|429|402|quota|unauthorized|forbidden/i.test(String(r.error || ""))) {
-              try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
+            // Clé disque (gros payload déjà sauvé côté Java)
+            if (data.galleryKey && String(data.galleryKey).indexOf("gallery:") === 0) {
+              try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
+              if (window.LeaAndroid && window.LeaAndroid.loadGalleryImage) {
+                const loaded = window.LeaAndroid.loadGalleryImage(String(data.galleryKey));
+                if (loaded && loaded.length > 32) return loaded;
+              }
+              // renvoyer la clé — persistGeneratedImage la gardera telle quelle
+              return String(data.galleryKey);
             }
-            continue;
+            let b64 = (data.result && (data.result.image || data.result.b64_json)) ||
+              data.image || data.result;
+            if (typeof b64 === "object" && b64 && b64.image) b64 = b64.image;
+            if (typeof b64 !== "string" || b64.length < 100) {
+              lastErr = "Réponse Cloudflare sans image";
+              continue;
+            }
+            b64 = b64.replace(/^data:image\/[^;]+;base64,/, "");
+            try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
+            return "data:image/jpeg;base64," + b64;
+          } catch (e) {
+            lastErr = String(e.message || e);
+            if (/abort|broken pipe|connection/i.test(lastErr) && attempt === 0) {
+              await new Promise((x) => setTimeout(x, 800));
+            }
           }
-          let b64 = (data.result && (data.result.image || data.result.b64_json)) ||
-            data.image || data.result;
-          if (typeof b64 === "object" && b64 && b64.image) b64 = b64.image;
-          if (typeof b64 !== "string" || b64.length < 100) {
-            lastErr = "Réponse Cloudflare sans image";
-            continue;
-          }
-          b64 = b64.replace(/^data:image\/[^;]+;base64,/, "");
-          try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
-          return "data:image/jpeg;base64," + b64;
-        } catch (e) {
-          lastErr = String(e.message || e);
         }
       }
     }
-    throw new Error(lastErr || "Cloudflare image échoué");
+    throw new Error(lastErr || "Cloudflare indisponible");
   }
+
 
   function buildSystemPrompt(char, st) {
     const c = char || LEA;

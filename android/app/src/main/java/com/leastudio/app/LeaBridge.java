@@ -175,7 +175,9 @@ public class LeaBridge {
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
+            conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
+            conn.setRequestProperty("Connection", "close");
+            conn.setInstanceFollowRedirects(true);
             if (headersJoined != null) {
                 for (String line : headersJoined.split("\n")) {
                     int c = line.indexOf(':');
@@ -220,13 +222,42 @@ public class LeaBridge {
             public void run() {
                 try {
                     String result = httpPostJson(url, jsonBody, headersJoined);
-                    if (result != null && result.length() >= 8 && result.startsWith("{\"error\"")) {
+                    if (result == null) result = "";
+                    if (result.length() >= 8 && result.startsWith("{\"error\"")) {
                         HTTP_JOBS.put(id, "error:" + result);
-                    } else {
-                        HTTP_JOBS.put(id, "done:" + (result != null ? result : ""));
+                        return;
                     }
+                    if (url != null && url.contains("api.cloudflare.com") && result.length() > 80000) {
+                        try {
+                            int imgKey = result.indexOf("\"image\"");
+                            if (imgKey >= 0) {
+                                int colon = result.indexOf(':', imgKey);
+                                int q1 = result.indexOf('"', colon + 1);
+                                if (q1 > 0) {
+                                    StringBuilder sb = new StringBuilder();
+                                    for (int pi = q1 + 1; pi < result.length(); pi++) {
+                                        char ch = result.charAt(pi);
+                                        if (ch == '"') break;
+                                        sb.append(ch);
+                                    }
+                                    String b64 = sb.toString();
+                                    if (b64.length() > 1000) {
+                                        String key = saveGalleryImage("lea", "data:image/jpeg;base64," + b64);
+                                        if (key != null && key.startsWith("gallery:")) {
+                                            HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true}");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                    HTTP_JOBS.put(id, "done:" + result);
                 } catch (Exception e) {
-                    HTTP_JOBS.put(id, "error:{\"error\":\"" + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
+                    String msg = String.valueOf(e.getMessage());
+                    if (msg == null) msg = "error";
+                    msg = msg.replace("\"", "'");
+                    HTTP_JOBS.put(id, "error:{\"error\":\"" + msg + "\"}");
                 }
             }
         });
@@ -254,7 +285,9 @@ public class LeaBridge {
             conn.setConnectTimeout(20000);
             conn.setReadTimeout(60000);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
+            conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
+            conn.setRequestProperty("Connection", "close");
+            conn.setInstanceFollowRedirects(true);
             conn.setRequestProperty("Referer", "https://chub.ai/");
             int code = conn.getResponseCode();
             if (code >= 400) return "";
