@@ -813,7 +813,6 @@ async function generateProfileImage() {
     outfit: ($("gen-outfit") && $("gen-outfit").value) || "random",
     pose: "random",
   };
-
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
@@ -825,9 +824,14 @@ async function generateProfileImage() {
     try {
       const res = await api("/api/image/cloudflare", {
         method: "POST",
+        // L'API image doit recevoir la couverture choisie (photo étoilée) :
+        // promptCharacterPayload ne contient que les champs textuels.
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
             cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+            species: jobChar.species || jobChar.race ||
+              (jobChar.sourceCard && ((jobChar.sourceCard.data && (jobChar.sourceCard.data.species || jobChar.sourceCard.data.race)) ||
+                jobChar.sourceCard.species || jobChar.sourceCard.race)) || "",
             Poitrine: jobChar.Poitrine || jobChar.poitrine ||
               (jobChar.sourceCard && (jobChar.sourceCard.data || jobChar.sourceCard).Poitrine) || "",
             sourceDescription: jobChar.sourceDescription || "",

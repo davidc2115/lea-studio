@@ -215,12 +215,45 @@
     return items[next];
   }
 
-  /** Prompt pour une identité faciale référencée et un cadrage vertical plein pied. */
+  function characterSpecies(char) {
+    const c = char || {};
+    const tags = Array.isArray(c.tags)
+      ? c.tags.map((tag) => typeof tag === "string" ? tag : tag && (tag.name || tag.label) || "").join(" ")
+      : "";
+    const identity = [c.id, c.name, c.title, c.species, c.race, c.collection, tags]
+      .map((part) => String(part || "").toLowerCase()).join(" ");
+    if (/\b(angel|angels|angelic|ange|anges|seraph|seraphim|archangel)\b/.test(identity)) {
+      return "ANGEL: clearly preserve the angel as a nonhuman celestial being, with large feathered wings visible behind the shoulders and a subtle halo; never reduce the character to an ordinary human woman.";
+    }
+    if (/\b(mermaid|mermen|merfolk|siren|sir[eè]ne|ondine)\b/.test(identity)) {
+      return "MERFOLK: preserve the aquatic nonhuman anatomy, especially a clearly visible scaled fish tail instead of human legs; never turn the character into an ordinary human.";
+    }
+    if (/\b(elf|elven|elfe|elfique)\b/.test(identity)) {
+      return "ELF: preserve the nonhuman elven identity and clearly pointed ears; retain any other listed elven traits.";
+    }
+    if (/\b(vampire|vampiric|vampirella)\b/.test(identity)) {
+      return "VAMPIRE: preserve the clearly supernatural vampire identity and the physical traits specified in the description; do not render as an ordinary human.";
+    }
+    if (/\b(demon|demonic|d[eé]mon|succubus|incubus|oni)\b/.test(identity)) {
+      return "DEMON: preserve the clearly nonhuman demonic identity and all horns, wings, tail, skin or other traits explicitly listed in the physical description.";
+    }
+    if (/\b(dragon|draconic|dragonkin|dragonborn|drac[eè]ne)\b/.test(identity)) {
+      return "DRAGONKIN: preserve the clearly nonhuman draconic anatomy and all scales, horns, wings, tail or other features explicitly listed in the physical description.";
+    }
+    if (/\b(neko|catgirl|catboy|feline|kemonomimi)\b/.test(identity)) {
+      return "FELINE-HUMANOID: preserve the clearly visible feline ears, tail and other animal traits listed in the physical description; do not render as an ordinary human.";
+    }
+    return "";
+  }
+
+  /** Prompt that prioritizes the complete physical description and nonhuman identity. */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
     const isAdult = Number(age) >= 18;
     const options = extra && typeof extra === "object" ? extra : { note: extra || "" };
+    const species = characterSpecies(c);
+    const physicalDescription = String(c.appearance || c.sourceDescription || "").trim().replace(/\s+/g, " ");
     const scenario = String(c.scenario || c.sourceScenario || "").toLowerCase();
     const scene = /pluie|orage|temp[eê]te|rain/.test(scenario)
       ? "inside a warmly lit home beside a rain-streaked window, a storm visible outdoors"
@@ -232,10 +265,10 @@
             ? "on a quiet summer terrace at sunset"
             : "in a tasteful modern interior with soft cinematic light";
     const faceLock =
-      "Use input_image_0 only as a face and identity reference for the same " + (isAdult ? "adult woman" : "young person") + ". Preserve recognizable facial features, skin tone, hairline and hair color. Do not copy its crop, pose, outfit or background.";
+      "Use input_image_0 only as a facial identity reference. The written physical description and species are authoritative for the whole character; do not copy the reference body's anatomy, pose, outfit or background if they conflict.";
     const bodyLock = isAdult
-      ? age + " years old, natural adult proportions matching the reference, wearing a fully opaque outfit; elegant fashion photography, no exposed breasts, no underwear, no nudity"
-      : age + " years old, age-appropriate modest opaque clothing and neutral non-suggestive styling";
+      ? age + " years old, preserve the anatomy, silhouette and nonhuman features stated in the physical description; fully opaque fashion clothing, no nudity or sexual activity"
+      : age + " years old, age-appropriate modest opaque clothing and neutral non-suggestive styling; preserve the stated species and anatomy";
 
     const outfits = [
       { id: "satin-dress", prompt: "a fitted jewel-tone satin evening dress with an elegant neckline and opaque fabric" },
@@ -282,26 +315,33 @@
     ];
     const pose = chooseVaried(poses, "lea.profile.lastPose." + String(c.id || "default"));
 
-    const base = [
-      "photorealistic fashion-editorial photograph of one " + (isAdult ? "adult woman" : "young person") + ", fully clothed,",
+    const prefix = [
+      "Photorealistic full-length fashion portrait of one " + (isAdult ? "adult character" : "young character") + ".",
+      species,
+      "Physical description — preserve every listed physical detail, color, material, anatomy and accessory; do not omit or humanize any nonhuman trait: ",
+      physicalDescription,
       faceLock,
       bodyLock,
-      outfit + ",",
-      pose + ",",
-      isAdult ? "alluring, playful, confident and sensual expression, tasteful and non-explicit fashion styling," : "natural, age-appropriate fashion pose, fully visible face,",
-      "scenario-inspired setting: " + scene + "; use the scenario only for atmosphere and location, not for intimate actions,",
-      "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
-      "preserve facial identity, front or three-quarter camera angle, face clearly visible,",
-      "opaque tasteful clothing, no nudity, no lingerie, no sexual activity, no extra people, no text or watermark",
+    ].filter(Boolean).join(" ");
+    const suffix = [
+      outfit + ".",
+      pose + ".",
+      isAdult ? "Alluring, confident, sensual adult fashion styling; elegant and non-explicit." : "Age-appropriate, neutral fashion styling.",
+      "Scenario-inspired setting: " + scene + ".",
+      "Vertical 3:4, head to toe, recognizable face, no extra people, no text or watermark.",
     ].join(" ");
-
-    return base.slice(0, 1800);
+    // Keep the complete appearance whenever it fits the model's prompt limit;
+    // if it exceeds that limit, reserve space for metadata and composition.
+    const limit = 2048;
+    const fixedLength = prefix.length - physicalDescription.length + suffix.length + 1;
+    const appearanceBudget = Math.max(0, limit - fixedLength);
+    return (prefix.replace(physicalDescription, physicalDescription.slice(0, appearanceBudget)) + " " + suffix).slice(0, limit);
   }
 
   function readableCloudflareImageError(value) {
     const text = String(value || "");
     if (/3030|flagged|moderation/i.test(text)) {
-      return "Cloudflare a refusé cette combinaison de photo et de prompt (filtre 3030). L’application ne contourne pas ce refus; essaie une référence adulte entièrement habillée ou un détail de prompt différent.";
+      return "Cloudflare a refusé cette photo ou ce prompt (filtre 3030). Le filtre ne peut pas être contourné; utilise une photo de référence entièrement habillée et une demande de mode non explicite.";
     }
     return text.slice(0, 200);
   }
