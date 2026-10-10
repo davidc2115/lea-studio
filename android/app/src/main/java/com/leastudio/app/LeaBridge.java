@@ -6,6 +6,11 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CountDownLatch;
 import android.system.Os;
 import org.json.JSONObject;
 import java.io.BufferedReader;
@@ -155,51 +160,78 @@ public class LeaBridge {
     }
 
 
-    /** POST JSON → réponse texte (ex: Cloudflare Workers AI). */
+    private static final ExecutorService HTTP_EXEC = Executors.newCachedThreadPool();
+
+    /** POST JSON → réponse texte (Gemini / Cloudflare / OpenAI). Réseau hors UI thread. */
     @JavascriptInterface
-    public String httpPostJson(String url, String jsonBody, String headersJoined) {
-        HttpURLConnection conn = null;
-        try {
-            if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
-            URL u = new URL(url);
-            conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(120000);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
-            if (headersJoined != null) {
-                for (String line : headersJoined.split("\n")) {
-                    int c = line.indexOf(':');
-                    if (c > 0) {
-                        conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+    public String httpPostJson(final String url, final String jsonBody, final String headersJoined) {
+        final AtomicReference<String> out = new AtomicReference<>("{\"error\":\"timeout\"}");
+        final CountDownLatch done = new CountDownLatch(1);
+        HTTP_EXEC.execute(new Runnable() {
+            @Override public void run() {
+                HttpURLConnection conn = null;
+                try {
+                    if (url == null || url.isEmpty()) {
+                        out.set("{\"error\":\"empty url\"}");
+                        return;
                     }
+                    URL u = new URL(url);
+                    conn = (HttpURLConnection) u.openConnection();
+                    conn.setConnectTimeout(30000);
+                    conn.setReadTimeout(120000);
+                    conn.setRequestMethod("POST");
+                    conn.setDoOutput(true);
+                    conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
+                    if (headersJoined != null && headersJoined.length() > 0) {
+                        for (String line : headersJoined.split("\n")) {
+                            int c = line.indexOf(':');
+                            if (c > 0) {
+                                conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+                            }
+                        }
+                    }
+                    byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
+                    conn.setFixedLengthStreamingMode(body.length);
+                    OutputStream os = conn.getOutputStream();
+                    os.write(body);
+                    os.flush();
+                    os.close();
+                    int code = conn.getResponseCode();
+                    InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                    if (in == null) {
+                        out.set("{\"error\":\"http " + code + " empty body\"}");
+                        return;
+                    }
+                    BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+                    StringBuilder sb = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) sb.append(line).append('\n');
+                    br.close();
+                    String resp = sb.toString();
+                    if (code >= 400) {
+                        String snippet = resp.length() > 800 ? resp.substring(0, 800) : resp;
+                        out.set("{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(snippet) + "}");
+                    } else {
+                        out.set(resp);
+                    }
+                } catch (Exception e) {
+                    out.set("{\"error\":" + JSONObject.quote(e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage())) + "}");
+                } finally {
+                    if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                    done.countDown();
                 }
             }
-            byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
-            conn.setFixedLengthStreamingMode(body.length);
-            OutputStream os = conn.getOutputStream();
-            os.write(body);
-            os.close();
-            int code = conn.getResponseCode();
-            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-            if (in == null) return "{\"error\":\"http " + code + "\"}";
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) sb.append(line).append('\n');
-            br.close();
-            String resp = sb.toString();
-            if (code >= 400) {
-                return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
+        });
+        try {
+            if (!done.await(125, TimeUnit.SECONDS)) {
+                return "{\"error\":\"timeout 125s\"}";
             }
-            return resp;
-        } catch (Exception e) {
-            return "{\"error\":" + JSONObject.quote(String.valueOf(e.getMessage())) + "}";
-        } finally {
-            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+        } catch (InterruptedException ie) {
+            return "{\"error\":\"interrupted\"}";
         }
+        return out.get();
     }
 
 
@@ -1479,4 +1511,5 @@ public class LeaBridge {
         if (am != null) am.getMemoryInfo(mi);
         return mi.availMem / (1024 * 1024);
     }
+}
 }

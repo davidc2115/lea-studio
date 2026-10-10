@@ -27,23 +27,46 @@
    * sinon fetch navigateur.
    * Retourne { ok, status, json, text, error }
    */
+  function hasNativeBridge() {
+    try {
+      return !!(window.LeaAndroid && typeof window.LeaAndroid.httpPostJson === "function");
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function httpPostJson(url, bodyObj, headerMap) {
     const body = JSON.stringify(bodyObj || {});
     const headerLines = Object.keys(headerMap || {})
       .map((k) => k + ": " + headerMap[k])
       .join("\n");
-    try {
-      if (window.LeaAndroid && typeof window.LeaAndroid.httpPostJson === "function") {
+    const onAndroid = hasNativeBridge() || /Android/i.test(navigator.userAgent || "");
+
+    // 1) Bridge natif (obligatoire sur APK)
+    if (hasNativeBridge()) {
+      try {
         const raw = String(window.LeaAndroid.httpPostJson(url, body, headerLines) || "");
         let json = null;
         try { json = JSON.parse(raw); } catch (_) {}
-        if (json && json.error && !json.candidates && !json.result && !json.choices) {
-          return { ok: false, status: 0, json, text: raw, error: String(json.error) + (json.body ? " " + json.body : "") };
+        if (json && json.error && !json.candidates && !json.result && !json.choices && !json.success) {
+          const extra = json.body ? (" | " + String(json.body).slice(0, 200)) : "";
+          return { ok: false, status: 0, json, text: raw, error: String(json.error) + extra };
         }
-        return { ok: true, status: 200, json, text: raw, error: "" };
+        return { ok: true, status: 200, json: json, text: raw, error: "" };
+      } catch (e) {
+        return { ok: false, status: 0, json: null, text: "", error: "Bridge Android: " + String(e.message || e) };
       }
-    } catch (e) {
-      return { ok: false, status: 0, json: null, text: "", error: String(e.message || e) };
+    }
+
+    // 2) Navigateur (web desktop uniquement)
+    if (onAndroid) {
+      return {
+        ok: false,
+        status: 0,
+        json: null,
+        text: "",
+        error: "Bridge Android absent (LeaAndroid). Réinstalle l'APK du dernier build GitHub.",
+      };
     }
     try {
       const headers = Object.assign({ "Content-Type": "application/json" }, headerMap || {});
@@ -57,7 +80,7 @@
       }
       return { ok: true, status: res.status, json, text, error: "" };
     } catch (e) {
-      return { ok: false, status: 0, json: null, text: "", error: "Failed to fetch: " + String(e.message || e) };
+      return { ok: false, status: 0, json: null, text: "", error: "Fetch web: " + String(e.message || e) };
     }
   }
 

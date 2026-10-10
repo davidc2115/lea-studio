@@ -13,7 +13,6 @@ const state = {
 const $ = (id) => document.getElementById(id);
 
 async function api(path, opts = {}) {
-  // Android / offline offline
   if (typeof window.leaNativeApi === "function") {
     try {
       return await window.leaNativeApi(path, {
@@ -21,8 +20,13 @@ async function api(path, opts = {}) {
         body: opts.body,
       });
     } catch (e) {
-      console.warn("[native]", e);
+      const msg = String(e && e.message ? e.message : e);
+      const bridge = (window.LeaAndroid && typeof window.LeaAndroid.httpPostJson === "function") ? "oui" : "non";
+      throw new Error(msg + " [bridge=" + bridge + "]");
     }
+  }
+  if (String(location.protocol || "").indexOf("file") === 0) {
+    throw new Error("API native absente (file://) — réinstalle l'APK du dernier build");
   }
   const res = await fetch(path, {
     method: opts.method || "GET",
