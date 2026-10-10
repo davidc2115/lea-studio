@@ -757,53 +757,131 @@
     if (!match) throw new Error("Image de référence invalide.");
     const validKeys = (keys || []).map((k) => String(k || "").trim()).filter((k) => k.length >= 10);
     if (!validKeys.length) throw new Error("Configure une clé Gemini dans Réglages pour analyser l'image.");
+
+    // Réduire l'image si trop lourde (quota / timeouts)
+    let mime = match[1];
+    let b64 = match[2].replace(/\s/g, "");
+    if (b64.length > 1_200_000) {
+      b64 = b64.slice(0, 1_200_000);
+    }
+
     let lastErr = "";
     let start = 0;
     try { start = Number(localStorage.getItem("lea.geminiKeyIndex") || 0) || 0; } catch (_) {}
-    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-3.8-flash"];
+    const models = [
+      "gemini-2.5-flash",
+      "gemini-2.0-flash",
+      "gemini-2.0-flash-lite",
+      "gemini-flash-latest",
+      "gemini-3.5-flash",
+      "gemini-3.8-flash",
+    ];
+    const safetySettings = [
+      { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+      { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" },
+    ];
+
+    function extractText(data) {
+      const c0 = data && data.candidates && data.candidates[0];
+      if (!c0) {
+        const pf = data && data.promptFeedback;
+        if (pf && pf.blockReason) return { text: "", err: "prompt bloqué: " + pf.blockReason };
+        return { text: "", err: "aucun candidat" };
+      }
+      if (c0.finishReason && /SAFETY|BLOCK|RECITATION|OTHER/i.test(String(c0.finishReason)) &&
+          !(c0.content && c0.content.parts && c0.content.parts.length)) {
+        return { text: "", err: "finishReason=" + c0.finishReason };
+      }
+      const parts = (c0.content && c0.content.parts) || [];
+      const text = parts.map((p) => p.text || "").join("").trim();
+      return { text: text, err: text ? "" : ("vide finish=" + (c0.finishReason || "?")) };
+    }
+
     for (let i = 0; i < validKeys.length; i++) {
       const idx = (start + i) % validKeys.length;
+      let keyQuota = false;
       for (const model of models) {
+        // 1) avec JSON forcé  2) sans mime JSON (certains modèles refusent)
+        for (const forceJson of [true, false]) {
+          try {
+            const body = {
+              contents: [{
+                role: "user",
+                parts: [
+                  { inlineData: { mimeType: mime, data: b64 } },
+                  { text: String(prompt || "").slice(0, 20000) },
+                ],
+              }],
+              generationConfig: {
+                temperature: 0.3,
+                maxOutputTokens: 8192,
+              },
+              safetySettings: safetySettings,
+            };
+            if (forceJson) body.generationConfig.responseMimeType = "application/json";
+
+            const response = await httpPostJson(
+              "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
+              body,
+              { "x-goog-api-key": validKeys[idx] }
+            );
+            const data = response.json || {};
+            if (!response.ok) {
+              lastErr = model + ": " + ((data.error && data.error.message) || response.error || "erreur");
+              if (/429|quota|RESOURCE_EXHAUSTED/i.test(lastErr)) {
+                keyQuota = true;
+                break;
+              }
+              continue;
+            }
+            const extracted = extractText(data);
+            if (!extracted.text) {
+              lastErr = model + ": " + extracted.err;
+              continue;
+            }
+            try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
+            return extracted.text;
+          } catch (error) {
+            lastErr = model + ": " + String(error.message || error);
+          }
+        }
+        if (keyQuota) break;
+      }
+    }
+
+    // Dernier recours : analyse TEXTE seule (sans image) — permet d'importer quand même
+    const textOnlyPrompt =
+      String(prompt || "").slice(0, 18000) +
+      "\n\nNote: l'image n'a pas pu être analysée. Base-toi uniquement sur les données texte de la fiche. " +
+      "Pour nonHumanTraits et l'apparence, utilise uniquement ce qui est écrit dans la fiche.";
+    for (let i = 0; i < validKeys.length; i++) {
+      const idx = (start + i) % validKeys.length;
+      for (const model of ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-flash-latest"]) {
         try {
           const response = await httpPostJson(
             "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
             {
-              contents: [{
-                role: "user",
-                parts: [
-                  { text: String(prompt || "").slice(0, 24000) },
-                  { inlineData: { mimeType: match[1], data: match[2] } },
-                ],
-              }],
-              generationConfig: {
-                temperature: 0.35,
-                maxOutputTokens: 8192,
-                responseMimeType: "application/json",
-              },
+              contents: [{ role: "user", parts: [{ text: textOnlyPrompt }] }],
+              generationConfig: { temperature: 0.35, maxOutputTokens: 8192, responseMimeType: "application/json" },
+              safetySettings: safetySettings,
             },
             { "x-goog-api-key": validKeys[idx] }
           );
           const data = response.json || {};
-          if (!response.ok) {
-            lastErr = (data.error && data.error.message) || response.error || "Erreur Gemini Vision";
-            if (/429|quota|RESOURCE_EXHAUSTED/i.test(lastErr)) break;
-            continue;
+          if (!response.ok) continue;
+          const extracted = extractText(data);
+          if (extracted.text) {
+            try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
+            return extracted.text;
           }
-          const text = data.candidates && data.candidates[0] && data.candidates[0].content
-            ? data.candidates[0].content.parts.map((part) => part.text || "").join("").trim()
-            : "";
-          if (!text) {
-            lastErr = "Gemini Vision n'a renvoyé aucun texte.";
-            continue;
-          }
-          try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
-          return text;
-        } catch (error) {
-          lastErr = String(error.message || error);
-        }
+        } catch (_) {}
       }
     }
-    throw new Error("Analyse Gemini Vision impossible : " + lastErr.slice(0, 220));
+
+    throw new Error("Analyse Gemini Vision impossible : " + lastErr.slice(0, 240));
   }
 
   window.leaVisionCharacter = async function (card, imageDataUrl) {
