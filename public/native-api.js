@@ -184,159 +184,86 @@
     return dataUrl.slice(comma + 1);
   }
 
-  function profileBustSpecification(character) {
-    const c = character || {};
-    const source = c.sourceCard && c.sourceCard.data && typeof c.sourceCard.data === "object"
-      ? c.sourceCard.data
-      : (c.sourceCard || {});
-    let raw = String(c.Poitrine || c.poitrine || source.Poitrine || source.poitrine || "").trim();
-    if (!raw && c.collection === "LEA_CAST_CUPS") raw = String(c.title || "");
-    const match = raw.match(/\b(\d{2,3})\s*([A-J])\b|\b(?:bonnet|cup)\s*([A-J])\b|\b([A-J])\s*(?:cup|bonnet)\b/i);
-    const standalone = raw.match(/^\s*([A-J])(?:\s*[- ]?\s*(?:cup|bonnet))?\s*$/i);
-    if (!match && !standalone) return "";
-    if (standalone) return standalone[1].toUpperCase() + "-cup";
-    return (match[1] ? match[1] : "") + (match[2] || match[3] || match[4]).toUpperCase() + "-cup";
-  }
-
-  function chooseVaried(items, storageKey) {
-    if (!items.length) return "";
-    let previous = -1;
-    try {
-      const saved = localStorage.getItem(storageKey);
-      previous = saved === null ? -1 : Number(saved);
-    } catch (_) {}
-    let next = Math.floor(Math.random() * items.length);
-    if (items.length > 1 && next === previous) next = (next + 1) % items.length;
-    try { localStorage.setItem(storageKey, String(next)); } catch (_) {}
-    return items[next];
-  }
-
-  // Species comes from identity metadata only; free-text appearance can contain
-  // negations such as "not a mermaid" and must not change the classification.
-  function characterSpecies(char) {
-    const c = char || {};
-    const tags = Array.isArray(c.tags)
-      ? c.tags.map((tag) => typeof tag === "string" ? tag : tag && (tag.name || tag.label) || "").join(" ")
-      : "";
-    const identity = [c.id, c.name, c.title, c.species, c.race, c.collection, tags]
-      .map((part) => String(part || "").toLowerCase()).join(" ");
-    if (/\b(angel|angels|angelic|ange|anges|seraph|seraphim|archangel)\b/.test(identity)) {
-      return "ANGEL: clearly preserve the angel as a nonhuman celestial being, with large feathered wings visible behind the shoulders and a subtle halo; never reduce the character to an ordinary human woman.";
-    }
-    if (/\b(mermaid|mermen|merfolk|siren|sir[eè]ne|ondine)\b/.test(identity)) {
-      return "MERFOLK: preserve the aquatic nonhuman anatomy, especially a clearly visible scaled fish tail instead of human legs; never turn the character into an ordinary human.";
-    }
-    if (/\b(elf|elven|elfe|elfique)\b/.test(identity)) {
-      return "ELF: preserve the nonhuman elven identity and clearly pointed ears; retain any other listed elven traits.";
-    }
-    if (/\b(vampire|vampiric|vampirella)\b/.test(identity)) {
-      return "VAMPIRE: preserve the clearly supernatural vampire identity and the physical traits specified in the description; do not render as an ordinary human.";
-    }
-    if (/\b(demon|demonic|d[eé]mon|succubus|incubus|oni)\b/.test(identity)) {
-      return "DEMON: preserve the clearly nonhuman demonic identity and all horns, wings, tail, skin or other traits explicitly listed in the physical description.";
-    }
-    if (/\b(dragon|draconic|dragonkin|dragonborn|drac[eè]ne)\b/.test(identity)) {
-      return "DRAGONKIN: preserve the clearly nonhuman draconic anatomy and all scales, horns, wings, tail or other features explicitly listed in the physical description.";
-    }
-    if (/\b(neko|catgirl|catboy|feline|kemonomimi)\b/.test(identity)) {
-      return "FELINE-HUMANOID: preserve the clearly visible feline ears, tail and other animal traits listed in the physical description; do not render as an ordinary human.";
-    }
-    return "";
-  }
-
-  /** Prompt that prioritizes the complete physical description and nonhuman identity. */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
-    const numericAge = Number(c.age);
-    const age = Number.isInteger(numericAge) && numericAge >= 1 && numericAge <= 120 ? numericAge : null;
-    const isAdult = age !== null && age >= 18;
-    const options = extra && typeof extra === "object" ? extra : { note: extra || "" };
-    const species = characterSpecies(c);
-    const physicalDescription = String(c.appearance || c.sourceDescription || "").trim().replace(/\s+/g, " ");
-    const bustSpecification = profileBustSpecification(c);
-    const scenario = String(c.scenario || c.sourceScenario || "").toLowerCase();
-    const scene = /pluie|orage|temp[eê]te|rain/.test(scenario)
-      ? "inside a warmly lit home beside a rain-streaked window, a storm visible outdoors"
-      : /bureau|travail|entreprise|office/.test(scenario)
-        ? "in a stylish modern office after work, warm evening light"
-        : /caf[eé]|restaurant|d[iî]ner/.test(scenario)
-          ? "in an intimate, elegant cafe at golden hour"
-          : /plage|vacances|mer|summer/.test(scenario)
-            ? "on a quiet summer terrace at sunset"
-            : "in a tasteful modern interior with soft cinematic light";
+    const age = Number(c.age);
+    if (String(c.id || "lea") !== "lea" || !Number.isInteger(age) || age < 18) {
+      throw new Error("La génération d'origine est disponible uniquement pour la fiche adulte de Léa.");
+    }
     const faceLock =
-      "Use input_image_0 only as a facial identity reference. The written physical description and species are authoritative for the whole character; do not copy the reference body's anatomy, pose, outfit or background if they conflict.";
-    const bodyLock = isAdult
-      ? age + " years old, preserve the anatomy, silhouette and nonhuman features stated in the physical description; fully opaque fashion clothing, no nudity or sexual activity"
-      : age + " years old, age-appropriate modest opaque clothing and neutral non-suggestive styling; preserve the stated species and anatomy";
+      "Use input_image_0 as the identity reference for the same adult woman. Preserve her recognizable face, facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
+      "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
+    const bodyLock =
+      age + " years old, slim hourglass body, narrow shoulders, defined tiny waist, " +
+      "conspicuously full, naturally heavy 95D breasts with clear forward projection and rounded volume, visibly prominent against her narrow shoulders and tiny waist, " +
+      "preserve this generous bust size in every pose and outfit; clothing and lingerie fit properly without flattening, minimizing, or compressing her chest, " +
+      "rounded hips, long toned legs, " +
+      "very long straight dark brown hair to the lower back, center or side part, silky texture,";
 
     const outfits = [
-      { id: "satin-dress", prompt: "a figure-flattering jewel-tone satin evening dress with a tasteful neckline, opaque fabric and refined heels" },
-      { id: "cocktail", prompt: "a polished fitted cocktail dress with a graceful slit, opaque fabric and elegant heels" },
-      { id: "fitted-blouse", prompt: "a softly fitted blouse with a tasteful open collar, tucked into a high-waisted skirt" },
-      { id: "knit-skirt", prompt: "a fine-knit off-shoulder sweater with an opaque skirt and dark tights, chic and fully clothed" },
-      { id: "jeans-top", prompt: "dark fitted jeans with a flattering, opaque wrap blouse and ankle boots" },
-      { id: "blazer", prompt: "a tailored blazer over an opaque fitted dress, confident and polished after-work fashion" },
-      { id: "summer-dress", prompt: "a flowing summer dress with a defined waist and elegant neckline, light but fully opaque" },
-      { id: "rain-look", prompt: "a flattering opaque knit top, dark jeans and a stylish raincoat, slightly rain-damp but never transparent" },
+      "sheer black transparent lace crop top over a correctly sized supportive bra that does not compress her full bust, tight dark skinny jeans, wet from rain",
+      "sheer white transparent lace camisole, no bra visible outline, wet dark jeans, rain droplets on skin",
+      "red sheer lace bra and matching thong, standing indoors, soft warm light",
+      "burgundy lace babydoll with deep cleavage, thigh-high hem, seductive pose",
+      "emerald green satin slip dress thin straps, short hem, elegant sexy",
+      "black lace bodysuit open neckline, high cut hips, full body",
+      "wet white t-shirt clinging translucent to 95D bust, no bra, dark tight jeans, storm survivor look",
+      "ivory sheer lace bra and high-waist panties on bed, sensual",
+      "hot pink lace bra and micro skirt, playful teasing",
+      "navy blue deep V blouse unbuttoned low, black mini skirt, heels",
+      "champagne silk robe loosely open over lingerie, bedroom",
+      "black mesh top and leather mini skirt, edgy sexy",
+      "wet dark skinny jeans and short soaked white crop top stuck to skin, classic storm arrival",
+      "purple lace lingerie set, kneeling pose, soft lamp light",
+      "only an oversized open white shirt and lace panties, bare legs",
     ];
-    const usableOutfits = isAdult
-      ? outfits
-      : [
-      { id: "fitted-blouse", prompt: "a modest opaque blouse with a knee-length skirt" },
-      { id: "summer-dress", prompt: "a simple age-appropriate opaque summer dress below the knee" },
-      { id: "jeans-top", prompt: "a casual opaque top with jeans and sneakers" },
-        ];
-    const outfitId = String(options.outfit || "random");
-    let requestedOutfit = usableOutfits.find((item) => item.id === outfitId);
-    if (outfitId === "scenario") {
-      const scenarioOutfit = /pluie|orage|temp[eê]te|rain/.test(scenario) ? "rain-look"
-        : /bureau|travail|entreprise|office/.test(scenario) ? "blazer"
-          : /caf[eé]|restaurant|d[iî]ner/.test(scenario) ? "cocktail" : "satin-dress";
-      requestedOutfit = usableOutfits.find((item) => item.id === scenarioOutfit);
-    }
-    const outfit = requestedOutfit
-      ? requestedOutfit.prompt
-      : chooseVaried(usableOutfits, "lea.profile.lastOutfit." + String(c.id || "default")).prompt;
+    const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "standing in a relaxed three-quarter pose, one hand lightly touching her hair",
-      "walking naturally toward the camera, caught mid-step, warm confident smile",
-      "sitting sideways on a chair, turning her face toward the camera",
-      "leaning lightly on a table, shoulders relaxed, playful direct gaze",
-      "standing by a window, looking outside and then glancing back toward the camera",
-      "turning around gently with a lively smile, face fully visible",
-      "seated with one ankle crossed over the other, relaxed elegant posture",
-      "adjusting one sleeve while smiling, candid fashion-photo moment",
-      "one hand resting on her hip, the other holding a jacket, confident expression",
-      "mid-laugh with a natural movement of the hair, candid editorial pose",
-      "standing with a slight weight shift and a knowing, teasing smile",
-      "walking past the camera and looking back over her shoulder, face visible",
+      "FULL BODY head-to-toe, leaning in doorway arched back, looking at camera coy smile",
+      "FULL BODY low angle, leaning forward deep cleavage, hands on thighs, teasing look",
+      "FULL BODY three-quarter front view, weight on one leg, shoulders and chest turned toward camera, soft sensual smile",
+      "FULL BODY kneeling on rug by fireplace, sitting on heels, looking up softly",
+      "FULL BODY sitting on bed edge, legs slightly apart, inviting gaze",
+      "FULL BODY by rainy window, one hand in long hair, hip cocked",
+      "FULL BODY standing beside the bed, three-quarter front view, chest clearly visible, relaxed natural pose",
+      "FULL BODY lying on side on bed propped on elbow, curves visible",
+      "FULL BODY facing a mirror at a three-quarter front angle, complete figure and bust visible, one hand lightly touching her hair",
+      "FULL BODY walking toward camera in hallway, confident hips",
+      "FULL BODY sitting cross-legged on floor near fireplace, wet hair, soft smile",
+      "FULL BODY standing with arms relaxed at her sides, wet clothes, unobstructed front three-quarter view",
     ];
-    const pose = chooseVaried(poses, "lea.profile.lastPose." + String(c.id || "default"));
+    const pose = poses[Math.floor(Math.random() * poses.length)];
 
-    const prefix = [
-      "Photorealistic full-length fashion portrait of one " + (isAdult ? age + "-year-old adult character" : age === null ? "character whose adult age is unconfirmed" : age + "-year-old character") + ".",
-      species,
-      "Physical description — preserve every listed physical detail, color, material, anatomy and accessory; do not omit or humanize any nonhuman trait: ",
-      physicalDescription,
-      bustSpecification ? "CANONICAL BUST SIZE — " + bustSpecification + "; preserve this stated size and natural proportions, do not substitute or exaggerate it." : "",
+    const scenes = [
+      "cozy living room warm lamp",
+      "apartment hallway wooden door",
+      "bedroom white sheets soft bokeh",
+      "window with rain streaks outside",
+      "fireplace orange glow",
+      "modern bathroom doorway",
+    ];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+
+    const base = [
+      "photorealistic DSLR photograph of one real woman, not painting not CGI not anime,",
       faceLock,
-      age === null ? "Adult age is unconfirmed; neutral, fully opaque, non-suggestive styling only." : bodyLock,
-    ].filter(Boolean).join(" ");
-    const suffix = [
-      outfit + ".",
-      pose + ".",
-       isAdult ? "Confident, alluring adult fashion-editorial styling with a playful gaze and a tasteful neckline; sensual but fully clothed, opaque and non-explicit." : "Age-appropriate, neutral fashion styling.",
-      "Scenario-inspired setting: " + scene + ".",
-      "Vertical 3:4, head to toe, recognizable face, no extra people, no text or watermark.",
+      bodyLock,
+      outfit + ",",
+      pose + ",",
+      "camera sees her from the front or a front three-quarter angle; keep her chest unobstructed and clearly full, not hidden by a rear view, crossed arms, loose clothing, or a compressive bra,",
+      "location: " + scene + ",",
+      "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
+      "same woman as input_image_0, preserve facial identity, direct visible face,",
+      "natural skin texture, clearly large and full natural 95D bust with visible volume and projection, sharp detail,",
+      "not small breasts, not medium breasts, not flat, minimized, or compressed,",
+      "no close-up, no headshot, no cropped body, no extra people,",
+      "no text, no watermark, no deformed hands",
     ].join(" ");
-    // Keep the complete appearance whenever it fits the model's prompt limit;
-    // if it exceeds that limit, reserve space for metadata and composition.
-    const limit = 2048;
-    const fixedLength = prefix.length - physicalDescription.length + suffix.length + 1;
-    const appearanceBudget = Math.max(0, limit - fixedLength);
-    return (prefix.replace(physicalDescription, physicalDescription.slice(0, appearanceBudget)) + " " + suffix).slice(0, limit);
+
+    let out = base;
+    if (extra) out += ", " + String(extra).slice(0, 160);
+    return out.slice(0, 1800);
   }
 
   function readableCloudflareImageError(value) {
