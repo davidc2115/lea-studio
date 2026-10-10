@@ -692,6 +692,10 @@ async function generateProfileImage() {
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
             cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+            Poitrine: jobChar.Poitrine || jobChar.poitrine ||
+              (jobChar.sourceCard && (jobChar.sourceCard.data || jobChar.sourceCard).Poitrine) || "",
+            sourceDescription: jobChar.sourceDescription || "",
+            collection: jobChar.collection || "",
           }),
           settings: st,
           extra,
