@@ -23,10 +23,136 @@
   }
 
   function splitKeys(raw) {
+    // Accepte AIza…, aq…, gsk_…, sk-… (longueur min 10, pas de filtre de préfixe)
     return String(raw || "")
       .split(/[\n,;]+/)
       .map((s) => s.trim())
-      .filter((s) => s.length > 8);
+      .filter((s) => s.length >= 10 && !s.startsWith("#"));
+  }
+
+  function parseCloudflareCreds(st) {
+    st = st || settings();
+    const defaultAccount = String(st.cfAccount || "").trim();
+    const creds = [];
+    const seen = new Set();
+    function push(acc, tok) {
+      acc = String(acc || "").trim();
+      tok = String(tok || "").trim();
+      if (!acc || !tok || tok.length < 8) return;
+      const k = acc + "|" + tok;
+      if (seen.has(k)) return;
+      seen.add(k);
+      creds.push({ account: acc, token: tok });
+    }
+    String(st.cfKeys || "").split(/[\n;]+/).forEach((line) => {
+      line = String(line || "").trim();
+      if (!line || line.startsWith("#")) return;
+      if (line.indexOf("|") >= 0) {
+        const parts = line.split("|");
+        push(parts[0], parts.slice(1).join("|"));
+      } else if (line.indexOf(":") >= 0 && !/\s/.test(line)) {
+        const parts = line.split(":");
+        push(parts[0], parts.slice(1).join(":"));
+      } else {
+        push(defaultAccount, line);
+      }
+    });
+    if (st.cfToken) push(defaultAccount, st.cfToken);
+    return creds;
+  }
+
+  /** Prompt physique strict à partir de la fiche personnage */
+  function buildPhysicalImagePrompt(char, extra) {
+    const c = char || LEA;
+    const age = c.age || 18;
+    const appearance = String(c.appearance || "")
+      .replace(/[👤🖼️👁️👃👄💇👗💕🍑🦵✨眉毛]/g, " ")
+      .replace(/\n+/g, ", ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 1200);
+    const scenarioHint = /orage|tremp|pluie|mouill/i.test(String(c.scenario || "") + " " + String(c.greeting || ""))
+      ? "soaked wet clothes from rain storm, wet dark skinny jeans clinging to legs, short white crop top stuck to skin, long wet dark brown hair clinging to back,"
+      : "stylish casual outfit matching her role,";
+    const poses = [
+      "standing three-quarter view, shy soft smile looking at camera, full body",
+      "leaning in doorway, arms lightly crossed, timid expression, full body",
+      "sitting on edge of sofa, looking up, wet hair, three-quarter body",
+      "standing near window, rain outside, soft natural light, full body",
+      "slightly turned, looking over shoulder, coy expression, full body",
+      "kneeling by fireplace warming hands, wet clothes, full body",
+    ];
+    const pose = poses[Math.floor(Math.random() * poses.length)];
+    const base = [
+      "photorealistic photograph of a real young woman,",
+      age + " years old,",
+      "named character identity lock,",
+      appearance + ",",
+      scenarioHint,
+      pose + ",",
+      "natural skin texture, realistic proportions, 95D generous bust as described, hourglass figure, porcelain fair skin, hazel-green eyes, long straight dark brown hair to lower back,",
+      "shot on 85mm lens, soft daylight, high detail, 8k, no text, no watermark, no cartoon, no anime, no deformed hands",
+    ].join(" ");
+    if (extra) return (base + ", " + String(extra).slice(0, 200)).slice(0, 2048);
+    return base.slice(0, 2048);
+  }
+
+  async function generateCloudflareImage(prompt, st) {
+    const creds = parseCloudflareCreds(st);
+    if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
+    let start = 0;
+    try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
+    const models = [
+      "@cf/black-forest-labs/flux-1-schnell",
+      "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+    ];
+    let lastErr = "";
+    for (let i = 0; i < creds.length; i++) {
+      const cred = creds[(start + i) % creds.length];
+      for (const model of models) {
+        try {
+          const url = "https://api.cloudflare.com/client/v4/accounts/" +
+            encodeURIComponent(cred.account) + "/ai/run/" + model;
+          const body = model.indexOf("flux") >= 0
+            ? { prompt: String(prompt).slice(0, 2048) }
+            : { prompt: String(prompt).slice(0, 2048), num_steps: 20 };
+          const res = await fetch(url, {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + cred.token,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          });
+          const text = await res.text();
+          let data = {};
+          try { data = JSON.parse(text); } catch (_) {}
+          if (!res.ok) {
+            lastErr = (data.errors && data.errors[0] && data.errors[0].message) ||
+              (data.error) || ("HTTP " + res.status);
+            // rotate on quota/auth
+            if (res.status === 400 || res.status === 401 || res.status === 429 || res.status === 402) {
+              try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
+            }
+            continue;
+          }
+          // FLUX returns result.image base64
+          let b64 = (data.result && (data.result.image || data.result.b64_json)) ||
+            data.image || data.result;
+          if (typeof b64 === "object" && b64 && b64.image) b64 = b64.image;
+          if (typeof b64 !== "string" || b64.length < 100) {
+            lastErr = "Réponse Cloudflare sans image";
+            continue;
+          }
+          b64 = b64.replace(/^data:image\/[^;]+;base64,/, "");
+          try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
+          return "data:image/jpeg;base64," + b64;
+        } catch (e) {
+          lastErr = String(e.message || e);
+        }
+      }
+    }
+    throw new Error(lastErr || "Cloudflare image échoué");
   }
 
   function buildSystemPrompt(char, st) {
@@ -265,7 +391,16 @@
         gemini: splitKeys(st.geminiKeys).length,
         openai: splitKeys(st.openaiKeys).length,
         groq: splitKeys(st.groqKeys).length,
+        cloudflare: parseCloudflareCreds(st).length,
       };
+    }
+
+    if (path === "/api/image/cloudflare" && method === "POST") {
+      const st = body.settings || settings();
+      const char = body.character || LEA;
+      const prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "");
+      const dataUrl = await generateCloudflareImage(prompt, st);
+      return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400) };
     }
 
     return { error: "not_found", path };

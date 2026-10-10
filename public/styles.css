@@ -246,3 +246,6 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
 .empty {
   text-align: center; color: var(--muted); padding: 40px 20px;
 }
+
+#gen-preview img { box-shadow: 0 8px 28px rgba(0,0,0,.4); }
+button:disabled { opacity: .6; cursor: wait; }

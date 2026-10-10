@@ -1,5 +1,5 @@
 /**
- * Léa Studio — app propre, Léa uniquement, sans génération d'images
+ * Léa Studio — Léa uniquement · chat + images Cloudflare profil
  */
 const state = {
   character: null,
@@ -190,6 +190,16 @@ function renderProfile() {
       ${edit ? `<label class="hint" style="margin-top:10px">Galerie (une URL / chemin par ligne)</label>
         <textarea class="edit-area" data-field="gallery">${gallery.join("\n")}</textarea>` : ""}
     </div>
+    ${!edit ? `
+    <div class="section">
+      <h2>☁️ Générer une image (Cloudflare)</h2>
+      <p class="hint">Le prompt utilise tout le descriptif physique + la tenue du scénario (orage / trempée). Pose aléatoire à chaque fois.</p>
+      <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / détail (ex: sourire espiègle, de profil…)" style="margin-bottom:10px" />
+      <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
+      <div id="gen-status" class="hint" style="margin-top:10px"></div>
+      <div id="gen-preview" style="margin-top:12px"></div>
+    </div>
+    ` : ""}
     ${edit ? `
       <div class="edit-actions">
         <button type="button" class="btn btn-primary" id="save-char">💾 Enregistrer</button>
@@ -207,6 +217,7 @@ function renderProfile() {
   root.querySelectorAll(".gallery img").forEach((img) => {
     img.onclick = () => openLightbox(Number(img.dataset.i) || 0);
   });
+  if ($("btn-gen-img")) $("btn-gen-img").onclick = () => generateProfileImage();
   if ($("prof-chat")) $("prof-chat").onclick = () => showView("chat");
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
   if ($("cancel-edit")) $("cancel-edit").onclick = () => { state.editMode = false; renderProfile(); };
@@ -369,6 +380,40 @@ async function sendMessage() {
   paintMessages();
 }
 
+
+async function generateProfileImage() {
+  const c = state.character;
+  if (!c) return;
+  const st = loadSettings();
+  const status = $("gen-status");
+  const preview = $("gen-preview");
+  const btn = $("btn-gen-img");
+  const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
+  if (status) status.textContent = "Envoi à Cloudflare Workers AI (FLUX)…";
+  try {
+    const res = await api("/api/image/cloudflare", {
+      method: "POST",
+      body: JSON.stringify({ character: c, settings: st, extra }),
+    });
+    if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
+    const dataUrl = res.image;
+    // Ajouter en tête de galerie + overrides
+    const next = Object.assign({}, c);
+    next.gallery = [dataUrl].concat((c.gallery || []).filter((x) => x !== dataUrl)).slice(0, 40);
+    next.cover = dataUrl;
+    saveCharOverrides(next);
+    state.character = next;
+    if (status) status.innerHTML = '<span class="status-pill ok">✓ Image ajoutée à la galerie</span>';
+    if (preview) preview.innerHTML = '<img src="' + dataUrl + '" alt="Générée" style="width:100%;border-radius:14px;max-height:60vh;object-fit:contain" />';
+    // refresh gallery grid without full re-render if possible
+    renderProfile();
+  } catch (e) {
+    if (status) status.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 160) + '</span>';
+  }
+  if (btn) { btn.disabled = false; btn.textContent = "✨ Générer (physique fidèle)"; }
+}
+
 function renderSettings() {
   const root = $("view-settings");
   const s = loadSettings();
@@ -377,8 +422,8 @@ function renderSettings() {
       <h2>🔑 Clés API (dialogue)</h2>
       <div class="settings-block">
         <label>Gemini (une clé par ligne)</label>
-        <textarea class="edit-area" id="set-gemini" placeholder="AIza…">${s.geminiKeys || s.GEMINI_API_KEYS || ""}</textarea>
-        <p class="hint">Utilisées en rotation si plusieurs clés. Modèle : gemini-2.0-flash / 2.5-flash.</p>
+        <textarea class="edit-area" id="set-gemini" placeholder="aq… ou AIza…">${s.geminiKeys || s.GEMINI_API_KEYS || ""}</textarea>
+        <p class="hint">Accepte les clés <strong>aq…</strong> et <strong>AIza…</strong>. Plusieurs clés = rotation auto. Modèles : gemini-2.0-flash / 2.5-flash.</p>
       </div>
       <div class="settings-block">
         <label>OpenAI (optionnel, une par ligne)</label>
@@ -387,6 +432,18 @@ function renderSettings() {
       <div class="settings-block">
         <label>Groq (optionnel, une par ligne)</label>
         <textarea class="edit-area" id="set-groq" placeholder="gsk_…">${s.groqKeys || ""}</textarea>
+      </div>
+    </div>
+    <div class="section">
+      <h2>☁️ Cloudflare (génération d'images profil)</h2>
+      <div class="settings-block">
+        <label>Account ID</label>
+        <input class="edit-input" id="set-cf-account" value="${(s.cfAccount || "").replace(/"/g, "&quot;")}" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+      </div>
+      <div class="settings-block">
+        <label>Tokens API (un par ligne, ou accountId|token)</label>
+        <textarea class="edit-area" id="set-cf-keys" placeholder="token…\nou\naccountId|token">${s.cfKeys || s.cfToken || ""}</textarea>
+        <p class="hint">Workers AI · FLUX.1 Schnell. Multi-clés avec rotation auto si quota / erreur 400-429.</p>
       </div>
     </div>
     <div class="section">
@@ -410,7 +467,7 @@ function renderSettings() {
           <option value="groq" ${s.chatEngine === "groq" ? "selected" : ""}>Groq</option>
         </select>
       </div>
-      <p class="hint">Pas de génération d'images dans cette version — uniquement le rôleplay texte + galerie de profil.</p>
+      <p class="hint">Images profil via Cloudflare (réglages ☁️). Dialogue via Gemini / OpenAI / Groq.</p>
     </div>
     <button type="button" class="btn btn-primary" id="save-settings">💾 Enregistrer les réglages</button>
     <div id="set-status"></div>
@@ -420,6 +477,8 @@ function renderSettings() {
       geminiKeys: $("set-gemini").value.trim(),
       openaiKeys: $("set-openai").value.trim(),
       groqKeys: $("set-groq").value.trim(),
+      cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
+      cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
       userName: $("set-username").value.trim(),
       userBio: $("set-bio").value.trim(),
       chatEngine: $("set-model").value,
