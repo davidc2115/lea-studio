@@ -325,22 +325,34 @@
   }
 
   async function callGemini(keys, system, messages) {
-    // Modèles 2026 : les 2.x / 1.5 renvoient souvent 404 sur les nouvelles clés
     const models = [
       "gemini-3.5-flash-lite",
-      "gemini-3.8-flash",
-      "gemini-3.5-flash",
-      "gemini-2.0-flash",
       "gemini-2.0-flash-lite",
+      "gemini-2.0-flash",
+      "gemini-3.5-flash",
+      "gemini-3.8-flash",
       "gemini-flash-latest",
     ];
+    const validKeys = (keys || []).map((k) => String(k || "").trim()).filter((k) => k.length >= 10);
+    if (!validKeys.length) throw new Error("Aucune clé Gemini valide (aq… ou AIza…)");
+
+    // Rotation round-robin : repartir après la dernière clé qui a marché / échoué en 429
+    let start = 0;
+    try { start = Number(localStorage.getItem("lea.geminiKeyIndex") || 0) || 0; } catch (_) {}
+    start = ((start % validKeys.length) + validKeys.length) % validKeys.length;
+
     let lastErr = "";
-    for (const key of keys) {
-      const k = String(key || "").trim();
-      if (k.length < 10) continue;
+    let keysTried = 0;
+    let quotaHits = 0;
+
+    for (let i = 0; i < validKeys.length; i++) {
+      const idx = (start + i) % validKeys.length;
+      const k = validKeys[idx];
+      keysTried++;
+      let keyQuota = false;
+
       for (const model of models) {
         try {
-          // Clé en header (recommandé Google) — pas dans l'URL
           const url =
             "https://generativelanguage.googleapis.com/v1beta/models/" +
             model +
@@ -377,8 +389,15 @@
               (data.error && (data.error.message || data.error.status)) ||
               r.error ||
               "gemini error";
-            lastErr = model + ": " + String(msg).slice(0, 180);
-            // 404 = modèle inaccessible pour cette clé → essayer le suivant
+            const full = String(msg);
+            lastErr = model + ": " + full.slice(0, 160);
+            // Quota / rate limit → passer IMMÉDIATEMENT à la clé suivante
+            if (/429|RESOURCE_EXHAUSTED|quota|rate.?limit|exhausted/i.test(full + " " + (r.error || ""))) {
+              keyQuota = true;
+              quotaHits++;
+              break; // sort du for model → clé suivante
+            }
+            // 404 modèle → essayer le modèle suivant sur la même clé
             continue;
           }
           const text =
@@ -388,15 +407,40 @@
             data.candidates[0].content.parts
               ? data.candidates[0].content.parts.map((p) => p.text || "").join("")
               : "";
-          if (text) return text.trim();
+          if (text) {
+            // Mémoriser cette clé comme point de départ pour le prochain message
+            try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
+            return text.trim();
+          }
           const block = data.candidates && data.candidates[0] && data.candidates[0].finishReason;
           lastErr = model + ": réponse vide" + (block ? " (" + block + ")" : "");
         } catch (e) {
           lastErr = model + ": " + String(e.message || e);
+          if (/429|RESOURCE_EXHAUSTED|quota|abort/i.test(String(e.message || e))) {
+            keyQuota = true;
+            quotaHits++;
+            break;
+          }
         }
       }
+      // Si quota sur cette clé, la suivante sera essayée (boucle i)
+      if (keyQuota) {
+        try { localStorage.setItem("lea.geminiKeyIndex", String((idx + 1) % validKeys.length)); } catch (_) {}
+      }
     }
-    throw new Error(lastErr || "Gemini indisponible — crée une clé sur aistudio.google.com et utilise gemini-3.5-flash-lite");
+
+    if (quotaHits > 0) {
+      throw new Error(
+        "Quota Gemini épuisé sur " + quotaHits + "/" + keysTried + " clé(s) essayée(s) (429). " +
+        (validKeys.length < 2
+          ? "Ajoute d'autres clés (une par ligne) dans Réglages, ou attends le reset du quota."
+          : "Toutes les clés sont en limite — attends ou ajoute de nouvelles clés.") +
+        " Détail: " + lastErr
+      );
+    }
+    throw new Error(
+      "Gemini indisponible (" + keysTried + " clé(s)) — " + (lastErr || "erreur inconnue")
+    );
   }
 
   async function callOpenAI(keys, system, messages) {

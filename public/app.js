@@ -571,7 +571,7 @@ function renderSettings() {
       <div class="settings-block">
         <label>Gemini (une clé par ligne)</label>
         <textarea class="edit-area" id="set-gemini" placeholder="aq… ou AIza…">${s.geminiKeys || s.GEMINI_API_KEYS || ""}</textarea>
-        <p class="hint">Clés Google AI Studio (<strong>AIza…</strong> ou <strong>aq…</strong>). Modèles : <strong>gemini-3.5-flash-lite</strong>, 3.8-flash (les 2.x renvoient souvent 404).</p>
+        <p class="hint">Une clé par ligne (AIza… ou aq…). En cas de <strong>429 quota</strong>, rotation auto vers la clé suivante. Prévoir plusieurs clés gratuites AI Studio.</p>
       </div>
       <div class="settings-block">
         <label>OpenAI (optionnel, une par ligne)</label>
