@@ -97,50 +97,6 @@ public final class ChubBrowserActivity extends Activity {
             }
         });
         if ("chub".equals(provider)) {
-            sessionDir = new File(new File(getFilesDir(), "chub-pending"), String.valueOf(System.currentTimeMillis()));
-            if (!sessionDir.mkdirs() && !sessionDir.isDirectory()) {
-                Toast.makeText(this, "Impossible de préparer l’import interne.", Toast.LENGTH_LONG).show();
-                finish();
-                return;
-            }
-        }
-
-        LinearLayout page = new LinearLayout(this);
-        page.setOrientation(LinearLayout.VERTICAL);
-        TextView note = new TextView(this);
-        note.setText("botbooru".equals(provider)
-                ? "Botbooru · ouvre une fiche puis touche « Importer cette fiche »"
-                : "Chub AI · télécharge la carte et son PNG; l’ajout se fait au retour");
-        note.setPadding(16, 12, 16, 12);
-        page.addView(note, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        browser = new WebView(this);
-        page.addView(browser, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-        Button close = new Button(this);
-        close.setText("botbooru".equals(provider) ? "Importer cette fiche" : "Retour à Léa Studio");
-        close.setOnClickListener(view -> {
-            if ("botbooru".equals(provider)) importCurrentBotbooruPage();
-            else finish();
-        });
-        page.addView(close, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        setContentView(page);
-
-        WebSettings settings = browser.getSettings();
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-        settings.setAllowFileAccess(false);
-        settings.setAllowContentAccess(false);
-        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
-        browser.setWebChromeClient(new WebChromeClient());
-        browser.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return !"https".equalsIgnoreCase(request.getUrl().getScheme());
-            }
-        });
-        if ("chub".equals(provider)) {
             browser.setDownloadListener(new ChubDownloadListener(this, browser, sessionDir));
         } else {
             browser.setDownloadListener((url, userAgent, disposition, mime, length) -> {
