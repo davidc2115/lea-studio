@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
     private void checkPendingChubImport() {
         if (web != null) {
             web.evaluateJavascript(
-                    "window.LeaImporter&&window.LeaImporter.checkPendingChub&&window.LeaImporter.checkPendingChub();",
+                    "window.LeaImporter&&window.LeaImporter.resumePendingImports&&window.LeaImporter.resumePendingImports();",
                     null);
         }
     }
