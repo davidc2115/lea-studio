@@ -137,9 +137,20 @@ public final class ChubBrowserActivity extends Activity {
         }
 
         // Some Botbooru pages use slugs instead of numeric paths. Read the allowed
-        // download links already rendered by the page; do not probe catalogue routes.
+        // download links already rendered by the page, including buttons exposing
+        // their download target in a data attribute; do not probe catalogue routes.
         browser.evaluateJavascript(
-                "(function(){var a=Array.from(document.querySelectorAll('a[href]'));for(var i=0;i<a.length;i++){var m=a[i].href.match(/^https:\\/\\/botbooru\\.com\\/download\\/(?:json|png)\\/(\\d{1,12})(?:[?#].*)?$/i);if(m)return m[1];}return '';})()",
+                "(function(){"
+                        + "var els=Array.from(document.querySelectorAll('a[href],button,[data-download-url],[data-href]'));"
+                        + "for(var i=0;i<els.length;i++){var e=els[i],text=(e.innerText||e.getAttribute('aria-label')||'').toLowerCase();"
+                        + "var vals=[e.href,e.getAttribute('data-download-url'),e.getAttribute('data-href'),e.getAttribute('data-url')];"
+                        + "for(var j=0;j<vals.length;j++){if(!vals[j])continue;try{var u=new URL(vals[j],location.href);"
+                        + "if(u.origin!=='https://botbooru.com')continue;"
+                        + "var m=u.pathname.match(/^\\/download\\/(?:json|png)\\/(\\d{1,12})\\/?$/i);if(m)return m[1];"
+                        + "}catch(x){}}"
+                        + "if(e.tagName==='BUTTON'&&/download\\s*(json|png)/i.test(text)){"
+                        + "var id=e.getAttribute('data-id')||e.getAttribute('data-post-id');if(id&&/^\\d{1,12}$/.test(id))return id;}}"
+                        + "return '';})()",
                 value -> {
                     try {
                         Object parsed = new JSONTokener(value == null ? "\"\"" : value).nextValue();
@@ -280,19 +291,24 @@ public final class ChubBrowserActivity extends Activity {
                 if (comma < 0) throw new IllegalArgumentException("data URI absente");
                 String header = dataUrl.substring(0, comma).toLowerCase();
                 String guessed = URLUtil.guessFileName("https://chub.ai/" + disposition, disposition, mimeType).toLowerCase();
-                boolean json = header.contains("application/json") || guessed.endsWith(".json");
-                boolean png = header.contains("image/png") || guessed.endsWith(".png");
-                if (json == png) throw new IllegalArgumentException("format non reconnu");
                 String base64 = dataUrl.substring(comma + 1);
-                if (base64.length() > (json ? 7_000_000 : 17_000_000)) throw new IllegalArgumentException("fichier trop volumineux");
+                if (base64.length() > 17_000_000) throw new IllegalArgumentException("fichier trop volumineux");
                 byte[] bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT);
+                boolean pngSignature = bytes.length >= 8 && bytes[0] == (byte) 0x89
+                        && bytes[1] == 0x50 && bytes[2] == 0x4e && bytes[3] == 0x47;
+                boolean png = header.contains("image/png") || guessed.endsWith(".png") || pngSignature;
+                boolean json = header.contains("json") || guessed.endsWith(".json");
+                if (!json && !png) {
+                    String text = new String(bytes, java.nio.charset.StandardCharsets.UTF_8).trim();
+                    if (text.startsWith("{")) json = true;
+                }
+                if (json == png) throw new IllegalArgumentException("format non reconnu");
                 if (json) {
                     if (bytes.length == 0 || bytes.length > 5L * 1024 * 1024) throw new IllegalArgumentException("JSON trop volumineux");
                     Object parsed = new JSONTokener(new String(bytes, java.nio.charset.StandardCharsets.UTF_8)).nextValue();
                     if (!(parsed instanceof org.json.JSONObject)) throw new IllegalArgumentException("carte JSON invalide");
                 } else {
-                    if (bytes.length < 8 || bytes.length > 12L * 1024 * 1024
-                            || bytes[0] != (byte) 0x89 || bytes[1] != 0x50 || bytes[2] != 0x4e || bytes[3] != 0x47) {
+                    if (bytes.length > 12L * 1024 * 1024 || !pngSignature) {
                         throw new IllegalArgumentException("PNG invalide");
                     }
                 }
