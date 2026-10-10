@@ -220,85 +220,82 @@
     const c = char || LEA;
     const age = c.age || 18;
     const isAdult = Number(age) >= 18;
-    const bust = isAdult ? profileBustSpecification(c) : "";
     const options = extra && typeof extra === "object" ? extra : { note: extra || "" };
-    // L'identité vient de la photo de profil étoilée; le texte renforce les mêmes traits.
+    const scenario = String(c.scenario || c.sourceScenario || "").toLowerCase();
+    const scene = /pluie|orage|temp[eê]te|rain/.test(scenario)
+      ? "inside a warmly lit home beside a rain-streaked window, a storm visible outdoors"
+      : /bureau|travail|entreprise|office/.test(scenario)
+        ? "in a stylish modern office after work, warm evening light"
+        : /caf[eé]|restaurant|d[iî]ner/.test(scenario)
+          ? "in an intimate, elegant cafe at golden hour"
+          : /plage|vacances|mer|summer/.test(scenario)
+            ? "on a quiet summer terrace at sunset"
+            : "in a tasteful modern interior with soft cinematic light";
     const faceLock =
-      "Use input_image_0 as the identity reference for the same " + (isAdult ? "adult woman" : "young person") + ". Preserve recognizable facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
-      "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
+      "Use input_image_0 only as a face and identity reference for the same " + (isAdult ? "adult woman" : "young person") + ". Preserve recognizable facial features, skin tone, hairline and hair color. Do not copy its crop, pose, outfit or background.";
     const bodyLock = isAdult
-      ? age + " years old, natural hourglass proportions, " +
-      (bust
-        ? "preserve her explicitly specified " + bust + " bust exactly, visibly full and proportionate with clear natural forward projection; do not reduce the recorded size, "
-        : "preserve the bust proportions stated in her appearance and reference; do not invent a cup size or reduce her described proportions, ") +
-      "wear the selected outfit exactly as specified; let the fabric follow her natural silhouette without compressing her chest, " +
-      "rounded hips, long toned legs, " +
-      "very long straight dark brown hair to the lower back, center or side part, silky texture,"
-      : age + " years old, age-appropriate natural proportions; modest opaque age-appropriate clothing, neutral posture, no emphasis on chest or curves,";
+      ? age + " years old, natural adult proportions matching the reference, wearing a fully opaque outfit; elegant fashion photography, no exposed breasts, no underwear, no nudity"
+      : age + " years old, age-appropriate modest opaque clothing and neutral non-suggestive styling";
 
     const outfits = [
-      { id: "rain-lace", prompt: "semi-sheer black lace crop top, rain-wet and clinging tastefully, layered over an opaque underlayer, tight dark wet jeans" },
-      { id: "satin-dress", prompt: "fitted satin evening dress with a deep tasteful neckline and high heels" },
-      { id: "mini-boots", prompt: "fitted mini skirt, elegant top and thigh-high boots" },
-      { id: "nightdress", adultOnly: true, prompt: "short satin nightdress with delicate lace trim, tasteful adult boudoir fashion" },
-      { id: "lingerie-robe", adultOnly: true, prompt: "tasteful lace lingerie set with a flowing open satin robe, adult boudoir fashion, no nudity" },
-      { id: "robe", prompt: "silk dressing gown over a fitted satin dress, elegant and alluring" },
-      { id: "towel", adultOnly: true, prompt: "spa towel wrapped securely around the body, damp hair and relaxed hotel-spa setting" },
+      { id: "satin-dress", prompt: "a fitted jewel-tone satin evening dress with an elegant neckline and opaque fabric" },
+      { id: "cocktail", prompt: "a chic fitted cocktail dress with a modest side slit, opaque fabric and simple heels" },
+      { id: "fitted-blouse", prompt: "a softly fitted blouse tucked into a high-waisted skirt, polished and feminine" },
+      { id: "knit-skirt", prompt: "a fine-knit sweater with a short opaque skirt and dark tights, cozy and stylish" },
+      { id: "jeans-top", prompt: "dark fitted jeans with a refined, opaque blouse and ankle boots" },
+      { id: "blazer", prompt: "a tailored blazer over an opaque fitted dress, confident after-work fashion" },
+      { id: "summer-dress", prompt: "a flowing summer dress with a defined waist, light fabric fully covering the body" },
+      { id: "rain-look", prompt: "a fitted opaque knit top, dark jeans and a stylish open raincoat, slightly rain-damp but not transparent" },
     ];
-    const usableOutfits = outfits.filter((item) => isAdult || !item.adultOnly);
+    const usableOutfits = isAdult
+      ? outfits
+      : [
+          { id: "fitted-blouse", prompt: "a modest opaque blouse with a knee-length skirt" },
+          { id: "summer-dress", prompt: "a simple age-appropriate opaque summer dress below the knee" },
+          { id: "jeans-top", prompt: "a casual opaque top with jeans and sneakers" },
+        ];
     const outfitId = String(options.outfit || "random");
-    const requestedOutfit = usableOutfits.find((item) => item.id === outfitId);
+    let requestedOutfit = usableOutfits.find((item) => item.id === outfitId);
+    if (outfitId === "scenario") {
+      const scenarioOutfit = /pluie|orage|temp[eê]te|rain/.test(scenario) ? "rain-look"
+        : /bureau|travail|entreprise|office/.test(scenario) ? "blazer"
+          : /caf[eé]|restaurant|d[iî]ner/.test(scenario) ? "cocktail" : "satin-dress";
+      requestedOutfit = usableOutfits.find((item) => item.id === scenarioOutfit);
+    }
     const outfit = requestedOutfit
       ? requestedOutfit.prompt
-      : (outfitId === "random"
-        ? chooseVaried(usableOutfits, "lea.profile.lastOutfit." + String(c.id || "default")).prompt
-        : "fitted blouse with a short skirt and high heels");
+      : chooseVaried(usableOutfits, "lea.profile.lastOutfit." + String(c.id || "default")).prompt;
 
     const poses = [
-      { id: "standing", prompt: "standing in a three-quarter pose, one hand in her hair, one knee softly bent" },
-      { id: "seated", prompt: "seated sideways on a chair, legs crossed at the ankles, turning her face toward camera" },
-      { id: "walking", prompt: "mid-step walking toward camera, natural movement and confident posture" },
-      { id: "wall", prompt: "leaning lightly against a wall, looking back over one shoulder while keeping her face visible" },
-      { id: "bed", prompt: "sitting at the edge of a bed, legs angled to one side, relaxed shoulders" },
-      { id: "stretch", prompt: "standing with arms lifted in a natural stretch, elongated posture and visible face" },
-      { id: "window", prompt: "standing beside a rain-streaked window, one hand on the sill, looking directly at camera" },
+      "standing in a relaxed three-quarter pose, one hand lightly touching her hair",
+      "walking naturally toward the camera, caught mid-step, warm confident smile",
+      "sitting sideways on a chair, turning her face toward the camera",
+      "leaning lightly on a table, shoulders relaxed, playful direct gaze",
+      "standing by a window, looking outside and then glancing back toward the camera",
+      "turning around gently with a lively smile, face fully visible",
+      "seated with one ankle crossed over the other, relaxed elegant posture",
+      "adjusting one sleeve while smiling, candid fashion-photo moment",
+      "one hand resting on her hip, the other holding a jacket, confident expression",
+      "mid-laugh with a natural movement of the hair, candid editorial pose",
+      "standing with a slight weight shift and a knowing, teasing smile",
+      "walking past the camera and looking back over her shoulder, face visible",
     ];
-    const poseId = String(options.pose || "random");
-    const requestedPose = poses.find((item) => item.id === poseId);
-    const pose = requestedPose
-      ? requestedPose.prompt
-      : chooseVaried(poses, "lea.profile.lastPose." + String(c.id || "default")).prompt;
-
-    const scenes = [
-      "cozy living room warm lamp",
-      "apartment hallway wooden door",
-      "bedroom white sheets soft bokeh",
-      "window with rain streaks outside",
-      "fireplace orange glow",
-      "modern bathroom doorway",
-    ];
-    const scene = chooseVaried(scenes, "lea.profile.lastScene." + String(c.id || "default"));
+    const pose = chooseVaried(poses, "lea.profile.lastPose." + String(c.id || "default"));
 
     const base = [
-      "photorealistic DSLR photograph of one " + (isAdult ? "adult " : "") + "woman, not painting not CGI not anime,",
+      "photorealistic fashion-editorial photograph of one " + (isAdult ? "adult woman" : "young person") + ", fully clothed,",
       faceLock,
       bodyLock,
       outfit + ",",
       pose + ",",
-      isAdult ? "sensual, confident fashion-editorial expression and body language, fully visible face, tasteful adult styling," : "natural, age-appropriate fashion pose, fully visible face,",
-      "camera sees her from the front or a front three-quarter angle; keep her natural chest proportions visible and do not hide her behind a rear view or crossed arms,",
-      "location: " + scene + ",",
+      isAdult ? "alluring, playful, confident and sensual expression, tasteful and non-explicit fashion styling," : "natural, age-appropriate fashion pose, fully visible face,",
+      "scenario-inspired setting: " + scene + "; use the scenario only for atmosphere and location, not for intimate actions,",
       "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
-      "same woman as input_image_0, preserve facial identity, direct visible face,",
-      bust ? "natural skin texture, clearly visible " + bust + " bust proportions, natural volume and projection, sharp detail," : "natural skin texture, retain the written bust proportions and natural volume, sharp detail,",
-      "no close-up, no headshot, no cropped body, no extra people,",
-      "no text, no watermark, no deformed hands",
+      "preserve facial identity, front or three-quarter camera angle, face clearly visible,",
+      "opaque tasteful clothing, no nudity, no lingerie, no sexual activity, no extra people, no text or watermark",
     ].join(" ");
 
-    let out = base;
-    const note = typeof options === "object" ? options.note : options;
-    if (note) out = out.slice(0, 1600) + ", additional user instruction: " + String(note).slice(0, 160);
-    return out.slice(0, 1800);
+    return base.slice(0, 1800);
   }
 
   function readableCloudflareImageError(value) {

@@ -277,6 +277,11 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
   border-radius: 16px;
   background: rgba(36,16,56,.8);
 }
+.chat-history-picker {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--top-h) - var(--tab-h) - var(--safe-t) - var(--safe-b) - 64px);
+}
 .chat-history-panel h2 {
   display: flex;
   justify-content: space-between;
@@ -294,6 +299,17 @@ main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 12px 14p
   max-height: 150px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+.chat-history-picker .chat-history-list { flex: 1; max-height: none; }
+.chat-back-button {
+  width: fit-content;
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border: 1px solid rgba(167,139,250,.25);
+  border-radius: 12px;
+  background: rgba(36,16,56,.8);
+  color: var(--text);
+  font: inherit;
 }
 .chat-history-item {
   display: flex;

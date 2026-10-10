@@ -10,6 +10,7 @@ const state = {
   sending: false,
   importedCharacters: [],
   leaCharacter: null,
+  chatListMode: true,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -326,6 +327,7 @@ function renderDiscover() {
       const selected = characters.find((item) => String(item.id) === button.dataset.characterId);
       if (!selected) return;
       if (selected.id !== state.character.id) activateCharacter(selected);
+      state.chatListMode = false;
       showView("chat");
     };
   });
@@ -432,31 +434,21 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>☁️ Générer une image (Cloudflare)</h2>
-      <p class="hint">La photo étoilée sert de référence du visage. Choisis une tenue et une pose, ou laisse « Aléatoire » pour alterner. Une seule tentative par clic.</p>
+      <p class="hint">La pose varie automatiquement à chaque génération. Choisis une tenue ou laisse l’application en sélectionner une au hasard; l’image reste inspirée du scénario du personnage.</p>
       <label class="hint" for="gen-outfit">Tenue</label>
       <select class="edit-input" id="gen-outfit" style="margin:4px 0 10px">
-        <option value="random">Aléatoire — styles variés</option>
-        <option value="rain-lace" ${adultCharacter ? "" : "disabled"}>Scénario pluie — crop top dentelle mouillé et jean moulant trempé${adultCharacter ? "" : " (18+)"}</option>
-        <option value="satin-dress">Robe satinée décolletée</option>
-        <option value="mini-boots">Mini-jupe et cuissardes</option>
-        <option value="nightdress" ${adultCharacter ? "" : "disabled"}>Nuisette satinée${adultCharacter ? "" : " (18+)"}</option>
-        <option value="lingerie-robe" ${adultCharacter ? "" : "disabled"}>Lingerie dentelle et peignoir${adultCharacter ? "" : " (18+)"}</option>
-        <option value="robe">Peignoir en satin</option>
-        <option value="towel" ${adultCharacter ? "" : "disabled"}>Serviette de bain, style spa${adultCharacter ? "" : " (18+)"}</option>
+        <option value="random">Tenue surprise — choix aléatoire</option>
+        <option value="scenario">Tenue adaptée au scénario</option>
+        <option value="satin-dress">Robe satinée de soirée</option>
+        <option value="cocktail">Robe cocktail élégante</option>
+        <option value="fitted-blouse">Chemisier ajusté et jupe</option>
+        <option value="knit-skirt">Pull doux et jupe courte opaque</option>
+        <option value="jeans-top">Jean ajusté et haut raffiné</option>
+        <option value="blazer">Blazer chic et robe près du corps</option>
+        <option value="summer-dress">Robe d’été fluide</option>
+        <option value="rain-look">Look de pluie inspiré du scénario</option>
       </select>
-      <label class="hint" for="gen-pose">Pose</label>
-      <select class="edit-input" id="gen-pose" style="margin:4px 0 10px">
-        <option value="random">Aléatoire — éviter la pose précédente</option>
-        <option value="standing">Debout, trois-quarts, main dans les cheveux</option>
-        <option value="seated">Assise de côté sur une chaise</option>
-        <option value="walking">En marche vers l’appareil photo</option>
-        <option value="wall">Appuyée contre un mur, regard par-dessus l’épaule</option>
-        <option value="bed">Assise au bord du lit, jambes de côté</option>
-        <option value="stretch">Debout, bras relevés, étirement naturel</option>
-        <option value="window">Près d’une fenêtre pluvieuse, regard caméra</option>
-      </select>
-      <input class="edit-input" id="gen-extra" placeholder="Détail facultatif : expression, accessoire, ambiance…" style="margin-bottom:10px" />
-      <p class="hint">Les options nuisette, lingerie et serviette sont réservées aux personnages adultes. Cloudflare peut refuser certains prompts de transparence ou de lingerie (filtre 3030).</p>
+      <p class="hint">Mode adulte, suggestive et élégante : vêtements opaques, sans nudité ni scène sexuelle. Cloudflare peut encore refuser certaines photos de référence.</p>
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
@@ -530,7 +522,7 @@ function renderProfile() {
       setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
     }
   }
-  if ($("prof-chat")) $("prof-chat").onclick = () => showView("chat");
+  if ($("prof-chat")) $("prof-chat").onclick = () => { state.chatListMode = false; showView("chat"); };
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
   if ($("cancel-edit")) $("cancel-edit").onclick = () => { state.editMode = false; renderProfile(); };
   if ($("reset-char")) $("reset-char").onclick = () => {
@@ -647,6 +639,7 @@ function renderChatHistory() {
       try { state.chat = JSON.parse(localStorage.getItem("lea.chat." + id) || '{"messages":[]}'); }
       catch (_) { state.chat = { messages: [] }; }
       state.editMode = false;
+      state.chatListMode = false;
       localStorage.setItem("lea.activeCharacterId", id);
       showView("chat");
     };
@@ -657,12 +650,18 @@ function renderChat() {
   const c = state.character;
   const root = $("view-chat");
   if (!c || !root) return;
+  if (state.chatListMode) {
+    root.innerHTML = `
+      <section class="chat-history-panel chat-history-picker">
+        <h2>Conversations <span>plus récente en premier</span></h2>
+        <div class="chat-history-list" id="chat-history-list"></div>
+      </section>`;
+    renderChatHistory();
+    return;
+  }
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
   root.innerHTML = `
-    <section class="chat-history-panel">
-      <h2>Conversations <span>plus récente en premier</span></h2>
-      <div class="chat-history-list" id="chat-history-list"></div>
-    </section>
+    <button type="button" class="chat-back-button" id="chat-back">← Conversations</button>
     <div class="chat-wrap">
       <div class="chat-header">
           <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
@@ -680,7 +679,6 @@ function renderChat() {
       </div>
     </div>
   `;
-  renderChatHistory();
   paintMessages();
   ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); });
 
@@ -690,6 +688,10 @@ function renderChat() {
     input.style.height = Math.min(120, input.scrollHeight) + "px";
   });
   $("chat-send") && ($("chat-send").onclick = sendMessage);
+  $("chat-back") && ($("chat-back").onclick = () => {
+    state.chatListMode = true;
+    renderChat();
+  });
   input && input.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -809,8 +811,7 @@ async function generateProfileImage() {
   const st = loadSettings();
   const generationOptions = {
     outfit: ($("gen-outfit") && $("gen-outfit").value) || "random",
-    pose: ($("gen-pose") && $("gen-pose").value) || "random",
-    note: ($("gen-extra") && $("gen-extra").value.trim()) || "",
+    pose: "random",
   };
 
   const btn = $("btn-gen-img");
@@ -1000,6 +1001,14 @@ function closeLightbox() {
 }
 
 async function initCharacter() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("lea.imported.characters") || "[]");
+    state.importedCharacters = Array.isArray(saved)
+      ? saved.filter((item) => item && item.id != null).map((item) => Object.assign({}, item, { id: String(item.id) }))
+      : [];
+  } catch (_) {
+    state.importedCharacters = [];
+  }
   let base = window.__LEA_DEFAULT__ || null;
   try {
     const list = await Promise.race([
@@ -1008,13 +1017,6 @@ async function initCharacter() {
     ]);
     if (Array.isArray(list) && list[0]) base = list.find((x) => x.id === "lea") || list[0];
   } catch (_) {}
-  if (!base) {
-    try {
-      const res = await fetch("characters.json");
-      // fallback embedded via native
-    } catch (_) {}
-  }
-  if (!base && window.__LEA_DEFAULT__) base = window.__LEA_DEFAULT__;
   if (!base) {
     // last resort minimal
     base = {
@@ -1034,12 +1036,15 @@ async function initCharacter() {
   const lea = mergeChar(base);
   state.leaCharacter = lea;
   const activeId = localStorage.getItem("lea.activeCharacterId");
-  state.character = state.importedCharacters.find((item) => item.id === activeId) || lea;
+  state.character = state.importedCharacters.find((item) => String(item.id) === String(activeId)) || lea;
 }
 
 function bindNav() {
   document.querySelectorAll(".tabbar .nav").forEach((b) => {
-    b.onclick = () => showView(b.dataset.view);
+    b.onclick = () => {
+      if (b.dataset.view === "chat") state.chatListMode = true;
+      showView(b.dataset.view);
+    };
   });
   $("btn-edit-toggle") && ($("btn-edit-toggle").onclick = () => {
     if (state.view !== "profile") showView("profile");
