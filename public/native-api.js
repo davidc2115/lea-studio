@@ -183,51 +183,73 @@
     return dataUrl.slice(comma + 1);
   }
 
+  function profileBustSpecification(character) {
+    const c = character || {};
+    const source = c.sourceCard && c.sourceCard.data && typeof c.sourceCard.data === "object"
+      ? c.sourceCard.data
+      : (c.sourceCard || {});
+    let raw = String(c.Poitrine || c.poitrine || source.Poitrine || source.poitrine || "").trim();
+    if (!raw && c.collection === "LEA_CAST_CUPS") raw = String(c.title || "");
+    if (!raw) {
+      const appearance = [c.appearance, c.sourceDescription].map((part) => String(part || "")).join("\n");
+      const labeled = appearance.match(/(?:Poitrine|Bust size|Breast size)\s*[:：]\s*([^\n.]+)/i);
+      raw = labeled ? labeled[1].trim() : "";
+    }
+    const match = raw.match(/\b(\d{2,3})\s*([A-J])\b|\b(?:bonnet|cup)\s*([A-J])\b|\b([A-J])\s*(?:cup|bonnet)\b/i);
+    const standalone = raw.match(/^\s*([A-J])(?:\s*[- ]?\s*(?:cup|bonnet))?\s*$/i);
+    if (!match && !standalone) return "";
+    if (standalone) return standalone[1].toUpperCase() + "-cup";
+    return (match[1] ? match[1] : "") + (match[2] || match[3] || match[4]).toUpperCase() + "-cup";
+  }
+
   /** Prompt pour une identité faciale référencée et un cadrage vertical plein pied. */
   function buildPhysicalImagePrompt(char, extra) {
     const c = char || LEA;
     const age = c.age || 18;
+    const bust = profileBustSpecification(c);
     // L'identité vient de la photo de profil étoilée; le texte renforce les mêmes traits.
     const faceLock =
       "Use input_image_0 as the identity reference for the same adult woman. Preserve her recognizable face, facial proportions, eye shape and color, eyebrows, nose, lips, skin tone, freckles, hairline and hair color. " +
       "Do not copy the reference crop, pose, outfit or background; do not invent different facial traits.";
     const bodyLock =
-      age + " years old, slim hourglass body, narrow shoulders, defined tiny waist, " +
-      "conspicuously full, naturally heavy 95D breasts with clear forward projection and rounded volume, visibly prominent against her narrow shoulders and tiny waist, " +
-      "preserve this generous bust size in every pose and outfit; clothing and lingerie fit properly without flattening, minimizing, or compressing her chest, " +
+      age + " years old, natural hourglass proportions, " +
+      (bust
+        ? "preserve her explicitly specified " + bust + " bust exactly, visibly full and proportionate with clear natural forward projection; do not reduce the recorded size, "
+        : "preserve the bust proportions stated in her appearance and reference; do not invent a cup size or reduce her described proportions, ") +
+      "choose a fitted, opaque outfit that follows her natural silhouette without compressing her chest, " +
       "rounded hips, long toned legs, " +
       "very long straight dark brown hair to the lower back, center or side part, silky texture,";
 
     const outfits = [
-      "sheer black transparent lace crop top over a correctly sized supportive bra that does not compress her full bust, tight dark skinny jeans, wet from rain",
-      "sheer white transparent lace camisole, no bra visible outline, wet dark jeans, rain droplets on skin",
-      "red sheer lace bra and matching thong, standing indoors, soft warm light",
-      "burgundy lace babydoll with deep cleavage, thigh-high hem, seductive pose",
-      "emerald green satin slip dress thin straps, short hem, elegant sexy",
-      "black lace bodysuit open neckline, high cut hips, full body",
-      "wet white t-shirt clinging translucent to 95D bust, no bra, dark tight jeans, storm survivor look",
-      "ivory sheer lace bra and high-waist panties on bed, sensual",
-      "hot pink lace bra and micro skirt, playful teasing",
-      "navy blue deep V blouse unbuttoned low, black mini skirt, heels",
-      "champagne silk robe loosely open over lingerie, bedroom",
-      "black mesh top and leather mini skirt, edgy sexy",
-      "wet dark skinny jeans and short soaked white crop top stuck to skin, classic storm arrival",
-      "purple lace lingerie set, kneeling pose, soft lamp light",
-      "only an oversized open white shirt and lace panties, bare legs",
+      "fitted opaque black lace top with full lining and dark tailored jeans, rain-damp outer layer",
+      "fitted opaque white wrap blouse and high-waisted dark jeans, soft natural light",
+      "elegant red satin dress with a secure opaque bodice, standing indoors",
+      "burgundy fitted evening dress with a tasteful neckline and knee-length hem",
+      "emerald satin dress with an opaque fitted bodice, elegant styling",
+      "fitted black lined bodysuit with opaque fabric and tailored trousers",
+      "opaque white fitted t-shirt and dark jeans, rain-damp fabric but not transparent",
+      "ivory fitted knit top and high-waisted skirt, warm bedroom light",
+      "hot pink fitted top and short opaque skirt, playful fashion portrait",
+      "navy fitted blouse, black mini skirt with opaque tights, heels",
+      "champagne satin robe closed over an opaque fitted dress",
+      "black fitted top and leather mini skirt with opaque tights, edgy fashion",
+      "dark jeans and fitted opaque white crop top, classic storm arrival",
+      "purple fitted satin dress with opaque fabric, soft lamp light",
+      "oversized white shirt buttoned over fitted shorts, bare legs",
     ];
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "FULL BODY head-to-toe, leaning in doorway arched back, looking at camera coy smile",
-      "FULL BODY low angle, leaning forward deep cleavage, hands on thighs, teasing look",
-      "FULL BODY three-quarter front view, weight on one leg, shoulders and chest turned toward camera, soft sensual smile",
-      "FULL BODY kneeling on rug by fireplace, sitting on heels, looking up softly",
-      "FULL BODY sitting on bed edge, legs slightly apart, inviting gaze",
+      "FULL BODY head-to-toe, standing naturally in a doorway, relaxed posture, looking at camera with a warm smile",
+      "FULL BODY eye-level view, standing with hands relaxed at her sides, friendly expression",
+      "FULL BODY three-quarter front view, weight on one leg, shoulders and chest turned toward camera, confident smile",
+      "FULL BODY standing beside a fireplace, relaxed posture, looking toward the camera",
+      "FULL BODY seated on a chair, upright posture, calm direct gaze",
       "FULL BODY by rainy window, one hand in long hair, hip cocked",
       "FULL BODY standing beside the bed, three-quarter front view, chest clearly visible, relaxed natural pose",
-      "FULL BODY lying on side on bed propped on elbow, curves visible",
+      "FULL BODY standing by a rainy window, natural posture, curves visible through fitted opaque clothes",
       "FULL BODY facing a mirror at a three-quarter front angle, complete figure and bust visible, one hand lightly touching her hair",
-      "FULL BODY walking toward camera in hallway, confident hips",
+      "FULL BODY walking toward camera in hallway, natural posture",
       "FULL BODY sitting cross-legged on floor near fireplace, wet hair, soft smile",
       "FULL BODY standing with arms relaxed at her sides, wet clothes, unobstructed front three-quarter view",
     ];
@@ -249,12 +271,11 @@
       bodyLock,
       outfit + ",",
       pose + ",",
-      "camera sees her from the front or a front three-quarter angle; keep her chest unobstructed and clearly full, not hidden by a rear view, crossed arms, loose clothing, or a compressive bra,",
+      "camera sees her from the front or a front three-quarter angle; keep her natural chest proportions visible through the fitted opaque clothing, not hidden by a rear view, crossed arms, or loose fabric,",
       "location: " + scene + ",",
       "vertical 3:4 full-length framing, subject visible head to toe with space above the head and below the feet, medium-wide camera distance, the face remains recognizable but is not the whole image,",
       "same woman as input_image_0, preserve facial identity, direct visible face,",
-      "natural skin texture, clearly large and full natural 95D bust with visible volume and projection, sharp detail,",
-      "not small breasts, not medium breasts, not flat, minimized, or compressed,",
+      bust ? "natural skin texture, clearly visible " + bust + " bust proportions, natural volume and projection, sharp detail," : "natural skin texture, retain the written bust proportions and natural volume, sharp detail,",
       "no close-up, no headshot, no cropped body, no extra people,",
       "no text, no watermark, no deformed hands",
     ].join(" ");
@@ -262,6 +283,14 @@
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, 160);
     return out.slice(0, 1800);
+  }
+
+  function readableCloudflareImageError(value) {
+    const text = String(value || "");
+    if (/3030|flagged|moderation/i.test(text)) {
+      return "Cloudflare a refusé cette combinaison de photo et de prompt (filtre 3030). L’application ne contourne pas ce refus; essaie une référence adulte entièrement habillée ou un détail de prompt différent.";
+    }
+    return text.slice(0, 200);
   }
 
   async function generateCloudflareImage(prompt, st, character) {
@@ -301,7 +330,7 @@
               raw = stt.slice(6);
               let ej = null;
               try { ej = JSON.parse(raw); } catch (_) {}
-              lastErr = (ej && ej.error) ? String(ej.error) : raw.slice(0, 160);
+              lastErr = readableCloudflareImageError(raw);
               if (/abort|429|401|402/i.test(lastErr)) {
                 try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
               }
