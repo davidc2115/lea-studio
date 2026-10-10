@@ -214,6 +214,7 @@ function showView(name) {
 function persistActiveCharacter(next) {
   if (next.id === "lea") {
     saveCharOverrides(next);
+    state.leaCharacter = next;
   } else {
     const index = state.importedCharacters.findIndex((c) => c.id === next.id);
     if (index >= 0) {
@@ -222,6 +223,34 @@ function persistActiveCharacter(next) {
     }
   }
   state.character = next;
+}
+
+function persistImageToCharacter(charId, stored, fallbackCharacter) {
+  const id = String(charId || "lea");
+  const target = id === "lea"
+    ? ((state.character && String(state.character.id) === id && state.character) || state.leaCharacter || fallbackCharacter)
+    : state.importedCharacters.find((item) => String(item.id) === id);
+  if (!target) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
+
+  const currentGallery = Array.isArray(target.gallery)
+    ? target.gallery
+    : (Array.isArray(fallbackCharacter && fallbackCharacter.gallery) ? fallbackCharacter.gallery : []);
+  const next = Object.assign({}, target, {
+    gallery: [stored].concat(currentGallery.filter((item) => item !== stored)).slice(0, 300),
+    cover: stored,
+  });
+
+  if (id === "lea") {
+    saveCharOverrides(next);
+    state.leaCharacter = next;
+  } else {
+    const index = state.importedCharacters.findIndex((item) => String(item.id) === id);
+    if (index < 0) throw new Error("Le profil cible n’existe plus; l’image n’a pas été ajoutée à une autre fiche.");
+    state.importedCharacters[index] = next;
+    localStorage.setItem("lea.imported.characters", JSON.stringify(state.importedCharacters));
+  }
+  if (state.character && String(state.character.id) === id) state.character = next;
+  return next;
 }
 
 function activateCharacter(next) {
@@ -450,7 +479,7 @@ function renderProfile() {
         <option value="summer-dress">Robe d’été fluide</option>
         <option value="rain-look">Look de pluie inspiré du scénario</option>
       </select>
-      <p class="hint">Mode adulte, suggestive et élégante : vêtements opaques, sans nudité ni scène sexuelle. Cloudflare peut encore refuser certaines photos de référence.</p>
+      <p class="hint">Style mode élégant et sensuel réservé aux personnages dont l’âge adulte (18+) est confirmé. Si l’âge est inconnu ou inférieur à 18 ans, le portrait reste neutre et entièrement vêtu. Le filtre Cloudflare peut encore refuser une image.</p>
       <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
@@ -845,21 +874,12 @@ async function generateProfileImage() {
       });
       if (!res || !res.image) throw new Error((res && res.error) || "Pas d'image renvoyée");
       const dataUrl = res.image;
-      const stored = persistGeneratedImage(jobChar.id || "lea", dataUrl);
-      // Fusionner avec base + générées (ne jamais perdre les images assets)
-      const baseGal = (state.character && state.character.gallery) || jobChar.gallery || [];
-      const next = Object.assign({}, state.character || jobChar);
-      next.gallery = mergeGalleries(
-        baseGal.filter((x) => String(x).indexOf("images/") === 0),
-        [stored].concat(baseGal.filter((x) => String(x).indexOf("images/") !== 0))
-      );
-      // generated first
-      next.gallery = [stored].concat(next.gallery.filter((x) => x !== stored)).slice(0, 300);
-      next.cover = stored;
-       persistActiveCharacter(next);
+      const targetId = String(jobChar.id || "lea");
+      const stored = persistGeneratedImage(targetId, dataUrl);
+      const next = persistImageToCharacter(targetId, stored, jobChar);
       state.genRunning = false;
-      setGenBanner("✓ Image ajoutée à la galerie (" + next.gallery.length + ")", "ok");
-      if (state.view === "profile") {
+      setGenBanner("✓ Image ajoutée au profil de " + String(next.name || "la personne choisie"), "ok");
+      if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
         try { renderProfile(); } catch (_) {}
       }
     } catch (e) {
