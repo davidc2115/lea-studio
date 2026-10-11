@@ -239,12 +239,17 @@
     let engineHint = "";
     if (forCloudflare && "CDEFGH".indexOf(cupKey) >= 0) {
       engineHint =
-        " Emphasize the full " + sizeLabel + " chest volume under the outfit so it reads clearly as " + sizeLabel +
-        ", not a small B-cup; keep fashion-photography realism.";
+        " IMPORTANT: chest must read as full " + sizeLabel + " — clearly larger than a B or C cup, " +
+        "visible volume and cleavage under clothing, match a real " + sizeLabel + " bra on this torso. " +
+        "If a reference image is present, match its breast volume closely. Not flat, not small.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
       engineHint =
         " Keep breasts at true " + sizeLabel + " only — resist any urge to make them bigger; " +
-        "match a real woman wearing a " + sizeLabel + " bra.";
+        "match a real woman wearing a " + sizeLabel + " bra. If reference exists, keep same bust volume.";
+    } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
+      engineHint =
+        " Preserve large " + sizeLabel + " volume from the description/reference; realistic not cartoon; " +
+        "do not shrink to C-cup.";
     }
 
     const lock =
@@ -295,8 +300,8 @@
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Use input_image_0 as the identity reference for " + name + ". Preserve the recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette from the reference and canonical description. " +
-         "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.")
+      ? ("Identity reference input_image_0 for " + name + " ONLY: keep the same face, hair color/length, eye color, skin tone and overall body type including breast volume from the reference. " +
+         "CRITICAL: invent a NEW pose, NEW camera angle, NEW outfit and NEW background — do not replicate the reference composition. Photorealistic photo, not painting.")
       : ("No reference photo: follow the canonical physical description exactly for " + name + " (face, hair, eyes, skin, body, bust). Photorealistic unique adult woman.");
 
     // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
@@ -343,6 +348,12 @@
       "full-length by window soft light, hand in long hair",
       "full-length kneeling on rug near fireplace, soft upward look",
       "full-length standing arms relaxed, fashion magazine pose",
+      "full-body seated on bed edge, leaning forward slightly, eyes on camera",
+      "full-body outdoors golden hour, one hand in pocket, relaxed stance",
+      "full-body mirror selfie angle from above, playful expression",
+      "full-body side profile then face turned to camera, elegant",
+      "full-body sitting cross-legged on floor, intimate soft light",
+      "full-body standing against wall, arms above head stretch pose",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
@@ -365,7 +376,7 @@
 
     const mood = forCloudflare
       ? "adult woman 18+, glamorous fashion photography, photorealistic, natural skin texture, sharp focus, magazine cover quality, seductive elegance without explicit content,"
-      : "adult woman 18+, sensual seductive provocative fashion, photorealistic, natural skin, sharp detailed photo, flirty mood, sexy outfit preferred,";
+      : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different from any reference pose,";
 
     const base = [
       "photorealistic full-body character portrait, one subject, natural proportions, not a close-up,",

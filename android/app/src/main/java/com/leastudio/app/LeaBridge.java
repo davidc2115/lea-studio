@@ -696,21 +696,26 @@ public class LeaBridge {
         HTTP_POOL.execute(new Runnable() {
             @Override public void run() {
                 try {
-                    if (promptSafe.length() < 3 || reference.length() < 100) throw new IllegalArgumentException("Prompt ou photo de référence invalide.");
+                    if (promptSafe.length() < 3) throw new IllegalArgumentException("Prompt invalide.");
+                    final boolean hasRef = reference.length() >= 100;
                     JSONObject params = new JSONObject();
                     params.put("width", registered ? 576 : 512);
                     params.put("height", registered ? 768 : 640);
-                    params.put("steps", registered ? 30 : 16);
-                    params.put("cfg_scale", 7.0);
+                    params.put("steps", registered ? 32 : 18);
+                    params.put("cfg_scale", 6.5);
                     params.put("sampler_name", "k_euler_a");
-                    params.put("denoising_strength", 0.48);
+                    // 0.48 = quasi-copie de la ref ; 0.62–0.68 = même visage, pose/tenue différentes
+                    params.put("denoising_strength", hasRef ? 0.66 : 1.0);
+                    params.put("seed", (int) (Math.random() * 2147483647));
                     params.put("n", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptSafe
-                        + " ### child, underage, loli, young teen, baby, hyper breasts, gigantic breasts, balloon breasts, disproportionate huge chest, breast expansion, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, duplicate pose of reference");
                     payload.put("params", params);
-                    payload.put("source_image", reference);
-                    payload.put("source_processing", "img2img");
+                    if (hasRef) {
+                        payload.put("source_image", reference);
+                        payload.put("source_processing", "img2img");
+                    }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
                     JSONObject accepted = new JSONObject(hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey));
