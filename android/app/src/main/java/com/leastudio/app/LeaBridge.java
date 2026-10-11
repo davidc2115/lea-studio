@@ -485,7 +485,7 @@ public class LeaBridge {
                         conn.setRequestProperty("Authorization", "Bearer " + tok);
                         conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
                         conn.setRequestProperty("Connection", "close");
-                        int seed = (int) (Math.random() * 2147483647);
+                        int seed = (int) ((System.nanoTime() ^ System.currentTimeMillis() ^ (long) (Math.random() * 1e12)) & 0x7fffffff);
                         if (useReferenceModel) {
                             String boundary = "----LeaStudioCF" + id;
                             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);

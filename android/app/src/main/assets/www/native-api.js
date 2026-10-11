@@ -303,10 +303,9 @@
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
-    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + " ONLY: keep the same face, hair color/length, eye color, skin tone and overall body type including breast volume from the reference. " +
-         "CRITICAL: invent a NEW pose, NEW camera angle, NEW outfit and NEW background — do not replicate the reference composition. Photorealistic photo, not painting.")
-      : ("No reference photo: follow the canonical physical description exactly for " + name + " (face, hair, eyes, skin, body, bust). Photorealistic unique adult woman.");
+    const faceLock =
+      "Character " + name + ": follow the physical description for face, hair color and length, eye color, skin tone and body type. " +
+      "Each generation must use a different outfit, pose and background. Photorealistic unique photo, not a copy of a previous frame.";
 
     // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
     // Horde : tenues plus provocantes autorisées
@@ -394,16 +393,15 @@
       mood,
       bustLead,
       bustInfo.label ? ("exact bra size " + bustInfo.label + ",") : "",
-      "photorealistic full-body character portrait, one subject, not a close-up,",
+      // Tenue + pose EN TÊTE pour que chaque génération change vraiment
+      "OUTFIT (must follow exactly): " + outfit + ".",
+      "POSE (must follow exactly, different each time): " + pose + ".",
+      "LOCATION: " + scene + ".",
+      "photorealistic full-body photo, one adult woman, head to toe visible, not a close-up, not a crop of a previous image,",
       faceLock,
-      "Canonical physical description: " + (appearanceClean || appearance || "match the reference image without adding permanent traits.") + ".",
-      nonHumanTraits ? "Preserve these non-human traits exactly: " + nonHumanTraits + "." : "",
-      "avoid: " + bustInfo.neg + ",",
-      outfit + ",",
-      pose + ",",
-      "location: " + scene + ",",
-      "portrait-format full-length framing, entire subject visible head to toe, medium-wide camera, face recognizable,",
-      "match the same character as input_image_0 and preserve its recognizable identity,",
+      "Physical description: " + (appearanceClean || appearance || "adult woman from character sheet.") + ".",
+      nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
+      "avoid: " + bustInfo.neg + ", identical pose to previous generations, same outfit as last image,",
       bustInfo.label ? ("final check: breasts must be " + bustInfo.label + " not smaller,") : "",
       "anatomically correct torso, realistic clothing fit over the stated cup size,",
       "no close-up, no headshot, no extra people, no text, no watermark, no deformed hands",
@@ -439,7 +437,7 @@
       bustInfo.lock + ",",
       "avoid: " + bustInfo.neg + ",",
       outfit + ",",
-      "standing full length, natural pose, soft indoor light,",
+      outfit + ",", pose + ",", "full length, soft light,",
       "fashion safe for work, no explicit content, no nudity,",
       "single person, no text, high quality, realistic proportions",
     ].filter(Boolean).join(" ").slice(0, 1400);
@@ -458,11 +456,11 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    const referenceB64 = await profileReferenceJpegB64(character);
-    // Avec photo → Klein img2img ; sans photo → schnell txt2img
-    const model = referenceB64
-      ? "@cf/black-forest-labs/flux-2-klein-4b"
-      : "@cf/black-forest-labs/flux-1-schnell";
+    // Klein + photo de ref = quasi toujours la même pose/tenue. CF profile = schnell txt2img + description.
+    const model = "@cf/black-forest-labs/flux-1-schnell";
+    // Nonce unique pour forcer une variation même si le prompt se ressemble
+    const variation = " variation-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9);
+    const promptVaried = String(prompt).slice(0, 1900) + variation;
 
     if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
         && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
@@ -471,7 +469,7 @@
       const cred = creds[i];
       try {
         const jobId = String(window.LeaAndroid.cloudflareImageStart(
-          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64 || ""
+          cred.account, cred.token, model, promptVaried.slice(0, 2048), String(character && character.id || "lea"), ""
         ) || "");
         if (!jobId) {
           lastErr = "démarrage Cloudflare impossible";
