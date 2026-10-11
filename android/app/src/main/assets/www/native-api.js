@@ -683,7 +683,7 @@
   }
 
   async function generateHordeImage(prompt, character, st) {
-    const referenceB64 = await profileReferenceJpegB64(character); // peut être null → txt2img
+    const referenceB64 = await profileReferenceWebpB64(character); // peut être null → txt2img
     if (!window.LeaAndroid || typeof window.LeaAndroid.hordeImageStart !== "function" ||
         typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
@@ -697,12 +697,12 @@
     if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde.");
     const started = Date.now();
     let last = "La file AI Horde est toujours en attente.";
-    while (Date.now() - started < 600000) {
+    while (Date.now() - started < 780000) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       let result = "";
       try { result = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); }
       catch (error) { throw new Error("AI Horde : " + String(error.message || error)); }
-      if (result === "pending") continue;
+      if (result === "pending" || result.indexOf("pending:") === 0) continue;
       if (result === "missing") throw new Error("Le travail AI Horde n’est plus disponible.");
       if (result.indexOf("error:") === 0) {
         const raw = result.slice(6);
