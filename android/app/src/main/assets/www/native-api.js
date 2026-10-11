@@ -197,7 +197,8 @@
     let bust = String(bustRaw || "").trim();
     if (!bust && appearanceText) {
       const m = String(appearanceText).match(/\b(\d{2,3})\s*([A-Ka-k])\b/) ||
-        String(appearanceText).match(/bonnet\s*([A-Ka-k])\b/i);
+        String(appearanceText).match(/bonnet\s*([A-Ka-k])\b/i) ||
+        String(appearanceText).match(/\b([A-Ka-k])-cup\b/i);
       if (m) {
         if (m[2]) bust = m[1] + m[2].toUpperCase();
         else bust = m[1].toUpperCase();
@@ -205,9 +206,10 @@
     }
     if (!bust) {
       return {
-        lock: "natural realistic breast size matching the reference photo silhouette, proportional to the torso",
-        neg: "hyper breasts, gigantic breasts, balloon breasts, tiny flat chest, breast expansion",
+        lock: "natural realistic breast size matching the character sheet",
+        neg: "wrong breast size, flat chest, hyper breasts, balloon breasts",
         label: "",
+        lead: "",
       };
     }
     const parsed = bust.match(/(\d{2,3})\s*([A-Ka-k]+)/i) || bust.match(/^([A-Ka-k]+)$/i);
@@ -220,62 +222,63 @@
       cup = bust.toUpperCase().replace(/[^A-Z]/g, "") || "C";
     }
     const cupKey = cup.charAt(0);
-    // Ancres visuelles réalistes (ni trop petit ni hyper)
+    // Band par défaut si seule la lettre est donnée
+    if (!band) {
+      const defBand = { A: "85", B: "85", C: "90", D: "95", E: "95", F: "100", G: "100", H: "105", I: "110", J: "110" };
+      band = defBand[cupKey] || "90";
+    }
+    const sizeLabel = band + cupKey;
+
     const cupGuide = {
-      A: "small natural A-cup, modest chest, light contour under clothing",
-      B: "natural B-cup, light rounded shape, modest but visible under clothing",
-      C: "true C-cup: medium natural breasts, balanced fullness, clear but moderate cleavage when low-cut",
-      D: "true European D-cup: full natural breasts with visible volume and soft cleavage, clearly fuller than C, proportional realistic hang",
-      E: "true E-cup: large full natural breasts, heavy soft volume, larger than D, deep cleavage in a low neckline",
-      F: "very large heavy F-cup breasts filling a tight top, substantial natural volume, wide cleavage",
-      G: "extremely full heavy G-cup breasts, very large natural volume dominating the torso silhouette",
-      H: "massive heavy 105H-style breasts, enormous natural cleavage, very wide full bust that stretches tight clothing, dominant chest volume",
-      I: "extreme I-cup: enormous heavy breasts, maximum human-scale volume",
-      J: "extreme J-cup: colossal heavy natural breasts, maximum human-scale volume",
+      A: "small A-cup, modest chest",
+      B: "natural B-cup, light rounded shape",
+      C: "medium C-cup, balanced fullness, moderate cleavage",
+      D: "full D-cup breasts, clear soft cleavage, fuller than C",
+      E: "large E-cup breasts, heavy soft volume, deep cleavage",
+      F: "very large heavy F-cup breasts, wide cleavage, fills a tight top",
+      G: "extremely full heavy G-cup breasts, very large chest volume",
+      H: "massive heavy H-cup breasts, enormous cleavage, dominant bust",
+      I: "extreme I-cup, enormous heavy breasts",
+      J: "extreme J-cup, colossal heavy breasts",
     };
-    const guide = cupGuide[cupKey] || ("cup " + cup + " realistic proportional breasts");
-    const sizeLabel = band ? (band + cup) : cup;
+    const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
 
-    // CF sous-génère souvent → pousser un peu le volume pour C/D/E
-    // Horde sur-génère → freiner fort
-    let engineHint = "";
-    if (forCloudflare && "AB".indexOf(cupKey) >= 0) {
-      engineHint = " Keep a modest " + sizeLabel + " chest only.";
-    } else if (forCloudflare && "C".indexOf(cupKey) >= 0) {
-      engineHint = " Medium " + sizeLabel + " volume, moderate cleavage.";
-    } else if (forCloudflare && "DE".indexOf(cupKey) >= 0) {
-      engineHint =
-        " FULL " + sizeLabel + " breasts: deep cleavage, obvious volume under clothing, larger than C-cup. Repeat: " + sizeLabel + " bust.";
-    } else if (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0) {
-      engineHint =
-        " HUGE " + sizeLabel + " breasts are a defining trait: massive cleavage, heavy full chest stretching the top, " +
-        "cannot be mistaken for a small or medium bust. " + sizeLabel + " only. Match reference bust volume if present.";
+    // Lead court et brutal en tête de prompt (FLUX lit surtout le début)
+    let lead = "";
+    if (forCloudflare) {
+      if ("AB".indexOf(cupKey) >= 0) {
+        lead = "slim chest " + sizeLabel + " only, modest bust,";
+      } else if (cupKey === "C") {
+        lead = "medium " + sizeLabel + " breasts, moderate cleavage,";
+      } else if ("DE".indexOf(cupKey) >= 0) {
+        lead = "busty woman, full " + sizeLabel + " breasts, deep cleavage, large chest, " + sizeLabel + ",";
+      } else {
+        // F+
+        lead =
+          "extremely busty woman, huge " + sizeLabel + " breasts, massive deep cleavage, " +
+          "heavy full chest stretching her top, very large bust " + sizeLabel + ", voluptuous chest,";
+      }
+    } else {
+      lead = sizeLabel + " breasts, " + guide + ",";
+    }
+
+    let lock = "STRICT bra size " + sizeLabel + ": " + guide + ".";
+    if (forCloudflare && "DEFGHIJ".indexOf(cupKey) >= 0) {
+      lock +=
+        " The bust is a defining trait and must dominate the silhouette. " +
+        "Do not generate a small or athletic chest. Size " + sizeLabel + " only.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
-      engineHint =
-        " Keep breasts at true " + sizeLabel + " only — do not inflate; match a real " + sizeLabel + " bra.";
-    } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
-      engineHint =
-        " Large " + sizeLabel + " volume preserved; realistic not cartoon; do not shrink to C-cup.";
+      lock += " Do not inflate beyond " + sizeLabel + ".";
     }
 
-    const lock =
-      "STRICT breast size " + sizeLabel + ": " + guide + "." + engineHint +
-      " Match band/cup " + sizeLabel + " exactly relative to the torso from the reference image.";
-
-    let neg =
-      "hyper breasts, gigantic breasts, balloon breasts, breast expansion, deformed chest, " +
-      "implants overfilled, cartoon boobs, anime proportions";
-    if ("ABCD".indexOf(cupKey) >= 0) {
-      neg += ", enormous breasts, oversized bust, breasts larger than the head, ultra voluptuous exaggeration, massive cleavage stacks";
-    }
+    let neg = "wrong breast size, deformed chest, cartoon boobs, anime proportions, breast expansion";
     if ("ABC".indexOf(cupKey) >= 0) {
-      neg += ", heavy pendulous breasts";
+      neg += ", huge breasts, enormous cleavage, hyper breasts, gigantic breasts";
     }
-    // Aussi éviter trop petit pour D+
     if ("DEFGHIJ".indexOf(cupKey) >= 0) {
-      neg += ", flat chest, tiny breasts, A-cup, B-cup, C-cup, athletic small chest, underdeveloped bust, modest bust";
+      neg += ", flat chest, tiny breasts, A-cup, B-cup, C-cup, small bust, athletic chest, modest bust, thin chest";
     }
-    return { lock: lock, neg: neg, label: sizeLabel };
+    return { lock: lock, neg: neg, label: sizeLabel, lead: lead };
   }
 
   /** Retire les mots qui poussent les modèles à exagérer la poitrine */
@@ -389,18 +392,15 @@
         ];
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
+    const largeBust = bustInfo.label && /[F-J]|105|100|110/i.test(bustInfo.label);
     const mood = forCloudflare
-      ? "adult woman 18+, glamorous fashion photography, photorealistic, natural skin texture, sharp focus, magazine cover quality, seductive elegance without explicit content,"
-      : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different from any reference pose,";
+      ? (largeBust
+          ? "photorealistic photo of a very busty adult woman 18+, glamorous, sharp focus, detailed chest volume,"
+          : "adult woman 18+, glamorous fashion photography, photorealistic, natural skin texture, sharp focus, magazine cover quality,")
+      : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different pose each time,";
 
-    // CF ignore souvent le milieu du prompt → répéter la poitrine en tête
-    const bustLead = bustInfo.label
-      ? (
-          forCloudflare
-            ? ("breast size " + bustInfo.label + ", " + bustInfo.label + " cup chest, " + bustInfo.lock + ",")
-            : (bustInfo.lock + ",")
-        )
-      : (bustInfo.lock + ",");
+    // CF/FLUX lit surtout le début → lead court + lock
+    const bustLead = (bustInfo.lead || "") + " " + (bustInfo.lock || "") + ",";
     const base = [
       mood,
       bustLead,
