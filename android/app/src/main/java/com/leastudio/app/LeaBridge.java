@@ -397,7 +397,7 @@ public class LeaBridge {
         if (jobId == null || jobId.length() == 0) return "missing";
         String v = HTTP_JOBS.get(jobId);
         if (v == null) return "missing";
-        if (v.equals("pending")) return "pending";
+        if (v.equals("pending") || v.startsWith("pending:")) return v;
         HTTP_JOBS.remove(jobId);
         return v;
     }
@@ -613,49 +613,84 @@ public class LeaBridge {
         "https://stablehorde.net"
     };
 
+    private static final class HordeHttpException extends java.io.IOException {
+        final int statusCode;
+        HordeHttpException(int statusCode, String message) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+    }
+
+    private long hordeRetryDelayMillis(HttpURLConnection conn, int attempt) {
+        String retryAfter = conn == null ? null : conn.getHeaderField("Retry-After");
+        if (retryAfter != null) {
+            try {
+                long seconds = Long.parseLong(retryAfter.trim());
+                return Math.max(1000L, Math.min(120000L, seconds * 1000L));
+            } catch (NumberFormatException ignored) {}
+        }
+        return Math.min(60000L, 5000L * (1L << attempt));
+    }
+
     private String hordeRequest(String method, String path, String body, String apiKey) throws Exception {
         Exception last = null;
         for (String host : HORDE_HOSTS) {
-            HttpURLConnection conn = null;
-            try {
-                conn = (HttpURLConnection) new URL(host + path).openConnection();
-                conn.setConnectTimeout(25000);
-                conn.setReadTimeout(90000);
-                conn.setRequestMethod(method);
-                conn.setRequestProperty("apikey", apiKey);
-                conn.setRequestProperty("Client-Agent", "LeaStudio:1.1.0:android");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Connection", "close");
-                if (body != null) {
-                    conn.setDoOutput(true);
-                    conn.setRequestProperty("Content-Type", "application/json");
-                    byte[] request = body.getBytes(StandardCharsets.UTF_8);
-                    conn.setFixedLengthStreamingMode(request.length);
-                    OutputStream out = conn.getOutputStream();
-                    out.write(request);
-                    out.close();
+            for (int attempt = 0; attempt < 3; attempt++) {
+                HttpURLConnection conn = null;
+                try {
+                    conn = (HttpURLConnection) new URL(host + path).openConnection();
+                    conn.setConnectTimeout(25000);
+                    conn.setReadTimeout(90000);
+                    conn.setRequestMethod(method);
+                    conn.setRequestProperty("apikey", apiKey);
+                    conn.setRequestProperty("Client-Agent", "LeaStudio:1.1.0:android");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("Connection", "close");
+                    if (body != null) {
+                        conn.setDoOutput(true);
+                        conn.setRequestProperty("Content-Type", "application/json");
+                        byte[] request = body.getBytes(StandardCharsets.UTF_8);
+                        conn.setFixedLengthStreamingMode(request.length);
+                        try (OutputStream out = conn.getOutputStream()) {
+                            out.write(request);
+                        }
+                    }
+                    int code = conn.getResponseCode();
+                    InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                    if (in != null) {
+                        try (InputStream responseStream = in) {
+                            byte[] buffer = new byte[16384];
+                            int n;
+                            while ((n = responseStream.read(buffer)) > 0) {
+                                if (bytes.size() + n > 24 * 1024 * 1024) throw new java.io.IOException("Réponse AI Horde trop volumineuse");
+                                bytes.write(buffer, 0, n);
+                            }
+                        }
+                    }
+                    String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+                    if (code == 429) {
+                        if (attempt == 2) throw new HordeHttpException(429, "AI Horde HTTP 429 après 3 tentatives: " + response.substring(0, Math.min(400, response.length())));
+                        long delay = hordeRetryDelayMillis(conn, attempt);
+                        conn.disconnect();
+                        conn = null;
+                        Thread.sleep(delay);
+                        continue;
+                    }
+                    if (code < 200 || code >= 300) {
+                        throw new HordeHttpException(code, "AI Horde HTTP " + code + ": " + response.substring(0, Math.min(400, response.length())));
+                    }
+                    return response;
+                } catch (HordeHttpException e) {
+                    if (e.statusCode == 429 || e.statusCode < 500) throw e;
+                    last = e;
+                    break;
+                } catch (Exception e) {
+                    last = e;
+                    break;
+                } finally {
+                    if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
                 }
-                int code = conn.getResponseCode();
-                InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-                if (in == null) throw new java.io.IOException("AI Horde HTTP " + code + " (" + host + ")");
-                java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
-                byte[] buffer = new byte[16384];
-                int n;
-                while ((n = in.read(buffer)) > 0) {
-                    if (bytes.size() + n > 24 * 1024 * 1024) throw new java.io.IOException("Réponse AI Horde trop volumineuse");
-                    bytes.write(buffer, 0, n);
-                }
-                in.close();
-                String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
-                if (code < 200 || code >= 300) {
-                    throw new java.io.IOException("AI Horde HTTP " + code + ": " + response.substring(0, Math.min(400, response.length())));
-                }
-                return response;
-            } catch (Exception e) {
-                last = e;
-                // DNS / réseau → essayer l'hôte suivant
-            } finally {
-                if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
             }
         }
         throw last != null ? last : new java.io.IOException("AI Horde inaccessible (aihorde.net / stablehorde.net)");
@@ -700,8 +735,7 @@ public class LeaBridge {
                     // Réduire la ref pour éviter "Input payload validation failed" (limite Horde ~source)
                     String refForHorde = reference;
                     if (refForHorde.length() > 350000) {
-                        // trop gros en base64 → on laisse le bridge sans ref plutôt que de planter
-                        refForHorde = "";
+                        throw new IllegalArgumentException("Photo de référence trop volumineuse pour AI Horde.");
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
@@ -736,21 +770,7 @@ public class LeaBridge {
                     payload.put("replacement_filter", true);
                     // Laisser les workers choisir un modèle réaliste dispo
                     payload.put("models", new JSONArray());
-                    String acceptedRaw;
-                    try {
-                        acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
-                    } catch (Exception firstFail) {
-                        // Si img2img refusé → retenter en txt2img seul
-                        if (hasRef) {
-                            payload.remove("source_image");
-                            payload.remove("source_processing");
-                            params.put("denoising_strength", 1.0);
-                            payload.put("params", params);
-                            acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
-                        } else {
-                            throw firstFail;
-                        }
-                    }
+                    String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                     JSONObject accepted = new JSONObject(acceptedRaw);
                     if (accepted.has("message") && !accepted.has("id")) {
                         throw new java.io.IOException("AI Horde: " + accepted.optString("message", "refus"));
@@ -760,7 +780,7 @@ public class LeaBridge {
                     long deadline = System.currentTimeMillis() + 12 * 60 * 1000;
                     boolean done = false;
                     while (System.currentTimeMillis() < deadline) {
-                        Thread.sleep(4000);
+                        Thread.sleep(10000);
                         JSONObject check = new JSONObject(hordeRequest("GET", "/api/v2/generate/check/" + requestId, null, hordeKey));
                         if (check.optBoolean("faulted", false)) throw new java.io.IOException("Le worker AI Horde a échoué.");
                         if (!check.optBoolean("is_possible", true)) throw new java.io.IOException("Aucun worker AI Horde disponible (is_possible=false). Réessaie ou Cloudflare.");
