@@ -197,8 +197,7 @@
     let bust = String(bustRaw || "").trim();
     if (!bust && appearanceText) {
       const m = String(appearanceText).match(/\b(\d{2,3})\s*([A-Ka-k])\b/) ||
-        String(appearanceText).match(/bonnet\s*([A-Ka-k])\b/i) ||
-        String(appearanceText).match(/\b([A-Ka-k])-cup\b/i);
+        String(appearanceText).match(/bonnet\s*([A-Ka-k])\b/i);
       if (m) {
         if (m[2]) bust = m[1] + m[2].toUpperCase();
         else bust = m[1].toUpperCase();
@@ -206,10 +205,9 @@
     }
     if (!bust) {
       return {
-        lock: "natural realistic breast size matching the character sheet",
-        neg: "wrong breast size, flat chest, hyper breasts, balloon breasts",
+        lock: "natural realistic breast size matching the reference photo silhouette, proportional to the torso",
+        neg: "hyper breasts, gigantic breasts, balloon breasts, tiny flat chest, breast expansion",
         label: "",
-        lead: "",
       };
     }
     const parsed = bust.match(/(\d{2,3})\s*([A-Ka-k]+)/i) || bust.match(/^([A-Ka-k]+)$/i);
@@ -222,69 +220,44 @@
       cup = bust.toUpperCase().replace(/[^A-Z]/g, "") || "C";
     }
     const cupKey = cup.charAt(0);
-    // Band par défaut si seule la lettre est donnée
     if (!band) {
       const defBand = { A: "85", B: "85", C: "90", D: "95", E: "95", F: "100", G: "100", H: "105", I: "110", J: "110" };
       band = defBand[cupKey] || "90";
     }
     const sizeLabel = band + cupKey;
-
     const cupGuide = {
-      A: "small A-cup, modest chest",
+      A: "small natural A-cup, modest chest",
       B: "natural B-cup, light rounded shape",
-      C: "medium C-cup, balanced fullness, moderate cleavage",
-      D: "full D-cup breasts, clear soft cleavage, fuller than C",
-      E: "large E-cup breasts, heavy soft volume, deep cleavage",
-      F: "very large heavy F-cup breasts, wide cleavage, fills a tight top",
-      G: "extremely full heavy G-cup breasts, very large chest volume",
-      H: "massive heavy H-cup breasts, enormous cleavage, dominant bust",
-      I: "extreme I-cup, enormous heavy breasts",
-      J: "extreme J-cup, colossal heavy breasts",
+      C: "true C-cup: medium natural breasts, moderate cleavage",
+      D: "true D-cup: full natural breasts, soft cleavage, fuller than C, realistic 95D proportions",
+      E: "true E-cup: large full natural breasts, deeper cleavage than D",
+      F: "very large F-cup: substantial natural volume, full cleavage",
+      G: "full G-cup: very large natural breasts, prominent cleavage",
+      H: "full H-cup: very large natural breasts, prominent full cleavage, wide bust",
+      I: "very large I-cup breasts, full cleavage",
+      J: "very large J-cup breasts, full cleavage",
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
-
-    // Lead court et brutal en tête de prompt (FLUX lit surtout le début)
-    let lead = "";
-    if (forCloudflare) {
-      if ("AB".indexOf(cupKey) >= 0) {
-        lead = "slim chest " + sizeLabel + " only, modest bust,";
-      } else if (cupKey === "C") {
-        lead = "medium " + sizeLabel + " breasts, moderate cleavage,";
-      } else if ("DE".indexOf(cupKey) >= 0) {
-        lead = "busty woman, full " + sizeLabel + " breasts, deep cleavage, large chest, " + sizeLabel + ",";
-      } else {
-        // F+
-        lead =
-          "extremely busty woman, huge " + sizeLabel + " breasts, massive deep cleavage, " +
-          "heavy full chest stretching her top, very large bust " + sizeLabel + ", voluptuous chest,";
-      }
-    } else {
-      lead = sizeLabel + " breasts, " + guide + ",";
-    }
-
-    let lock = "STRICT bra size " + sizeLabel + ": " + guide + ".";
-    if (forCloudflare && "DEFGHIJ".indexOf(cupKey) >= 0) {
-      lock +=
-        " The bust is a defining trait and must dominate the silhouette. " +
-        "Do not generate a small or athletic chest. Size " + sizeLabel + " only.";
+    let engineHint = "";
+    if (forCloudflare && "DEFGH".indexOf(cupKey) >= 0) {
+      engineHint = " Chest volume " + sizeLabel + " clearly visible under clothing, not a small B-cup.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
-      lock += " Do not inflate beyond " + sizeLabel + ".";
+      engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
+    } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
+      engineHint = " Preserve large " + sizeLabel + " volume; realistic not cartoon.";
     }
-
-    let neg = "wrong breast size, deformed chest, cartoon boobs, anime proportions, breast expansion";
-    if ("ABC".indexOf(cupKey) >= 0) {
-      neg += ", huge breasts, enormous cleavage, hyper breasts, gigantic breasts";
-    }
-    if ("DEFGHIJ".indexOf(cupKey) >= 0) {
-      neg += ", flat chest, tiny breasts, A-cup, B-cup, C-cup, small bust, athletic chest, modest bust, thin chest";
-    }
-    return { lock: lock, neg: neg, label: sizeLabel, lead: lead };
+    const lock = "Breast size " + sizeLabel + ": " + guide + "." + engineHint;
+    let neg = "hyper breasts, balloon breasts, breast expansion, deformed chest, cartoon boobs";
+    if ("ABC".indexOf(cupKey) >= 0) neg += ", enormous breasts, oversized bust";
+    if ("DEFGHIJ".indexOf(cupKey) >= 0) neg += ", flat chest, tiny breasts, A-cup, B-cup, underdeveloped bust";
+    return { lock: lock, neg: neg, label: sizeLabel };
   }
 
-  /** Retire les mots qui poussent les modèles à exagérer la poitrine */
   function sanitizeAppearanceForImage(text) {
     return String(text || "")
-      .replace(/d[eé]collet[eé]\s+pro[eé]minent/gi, "décolleté marqué")
+      .replace(/tr[eè]s\s+g[eé]n[eé]reuse/gi, "proportionnée")
+      .replace(/g[eé]n[eé]reuse/gi, "pleine")
+      .replace(/d[eé]collet[eé]\s+pro[eé]minent/gi, "décolleté naturel")
       .replace(/volume\s+marqu[eé]/gi, "volume D-cup réaliste")
       .replace(/énorme|gigantesque|hypertrophi/gi, "proportionné")
       .slice(0, 800);
@@ -306,9 +279,10 @@
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
-    const faceLock =
-      "Character " + name + ": follow the physical description for face, hair color and length, eye color, skin tone and body type. " +
-      "Each generation must use a different outfit, pose and background. Photorealistic unique photo, not a copy of a previous frame.";
+    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
+      ? ("Identity reference input_image_0 for " + name + " ONLY: keep the same face, hair color/length, eye color, skin tone and overall body type including breast volume from the reference. " +
+         "CRITICAL: invent a NEW pose, NEW camera angle, NEW outfit and NEW background — do not replicate the reference composition. Photorealistic photo, not painting.")
+      : ("No reference photo: follow the canonical physical description exactly for " + name + " (face, hair, eyes, skin, body, bust). Photorealistic unique adult woman.");
 
     // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
     // Horde : tenues plus provocantes autorisées
@@ -320,23 +294,11 @@
       "navy wrap dress accentuating waist, soft décolleté, elegant",
       "black off-shoulder top and fitted jeans, casual sexy",
       "burgundy velvet dress low back, sophisticated allure",
-      "champagne silk camisole and tailored trousers, refined sensual",
-      "wet-look white crop top and dark skinny jeans after rain",
-      "lace-detail cream blouse, short black skirt, flirtatious fashion",
-      "leather jacket over short fitted dress, edgy glam",
-      "pastel blue summer dress thin straps, sunny doorway",
-      "olive green utility shirt half open, denim mini skirt",
-      "pink knit crop sweater and high-waist trousers",
-      "gold sequin top and black flared pants, party look",
-      "grey oversized sweater off one shoulder, black leggings",
-      "yellow sundress thin straps, outdoor patio light",
-      "striped boat-neck top and high-waist jeans, casual chic",
-      "navy blazer over lace-detail camisole, tailored pants",
-      "floral midi dress off-shoulder, garden soft light",
-      "lavender slip-style dress, bedroom doorway soft light",
-      "white open-collar shirt tied at waist, denim shorts",
-      "teal satin blouse and black pencil skirt, office evening",
-      "beige trench coat over short dress, city street style",
+      "silk camisole top and tailored trousers, refined sensual",
+      "wet-look white t-shirt style crop and dark jeans after rain, realistic, modest coverage",
+      "lace-detail blouse with modest coverage, short skirt, flirtatious fashion",
+      "leather jacket over fitted dress, edgy glam",
+      "pastel summer dress thin straps, sunny doorway, soft seduction",
     ];
     const outfitsHorde = [
       "sheer black lace crop top semi-transparent, deep cleavage, tight dark skinny jeans, seductive",
@@ -392,29 +354,24 @@
         ];
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
-    const largeBust = bustInfo.label && /[F-J]|105|100|110/i.test(bustInfo.label);
     const mood = forCloudflare
-      ? (largeBust
-          ? "photorealistic photo of a very busty adult woman 18+, glamorous, sharp focus, detailed chest volume,"
-          : "adult woman 18+, glamorous fashion photography, photorealistic, natural skin texture, sharp focus, magazine cover quality,")
-      : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different pose each time,";
+      ? "adult woman 18+, glamorous fashion photography, photorealistic, natural skin texture, sharp focus, magazine cover quality, seductive elegance without explicit content,"
+      : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different from any reference pose,";
 
-    // CF/FLUX lit surtout le début → lead court + lock
-    const bustLead = (bustInfo.lead || "") + " " + (bustInfo.lock || "") + ",";
     const base = [
-      mood,
-      bustLead,
-      bustInfo.label ? ("exact bra size " + bustInfo.label + ",") : "",
-      // Tenue + pose EN TÊTE pour que chaque génération change vraiment
-      "OUTFIT (must follow exactly): " + outfit + ".",
-      "POSE (must follow exactly, different each time): " + pose + ".",
-      "LOCATION: " + scene + ".",
-      "photorealistic full-body photo, one adult woman, head to toe visible, not a close-up, not a crop of a previous image,",
+      "photorealistic full-body character portrait, one subject, not a close-up,",
+      "Outfit: " + outfit + ".",
+      "Pose: " + pose + ".",
+      "Location: " + scene + ".",
       faceLock,
-      "Physical description: " + (appearanceClean || appearance || "adult woman from character sheet.") + ".",
-      nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
-      "avoid: " + bustInfo.neg + ", identical pose to previous generations, same outfit as last image,",
-      bustInfo.label ? ("final check: breasts must be " + bustInfo.label + " not smaller,") : "",
+      "Canonical physical description: " + (appearanceClean || appearance || "match the reference image without adding permanent traits.") + ".",
+      nonHumanTraits ? "Preserve these non-human traits exactly: " + nonHumanTraits + "." : "",
+      bustInfo.lock + ",",
+      "avoid: " + bustInfo.neg + ",",
+      "portrait-format full-length framing, entire subject visible head to toe, medium-wide camera, face recognizable,",
+      "match the same character as input_image_0 and preserve its recognizable identity,",
+      bustInfo.label ? ("breast size exactly " + bustInfo.label + " only,") : "",
+      mood,
       "anatomically correct torso, realistic clothing fit over the stated cup size,",
       "no close-up, no headshot, no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
@@ -449,18 +406,10 @@
       bustInfo.lock + ",",
       "avoid: " + bustInfo.neg + ",",
       outfit + ",",
-      outfit + ",", pose + ",", "full length, soft light,",
+      "standing full length, natural pose, soft indoor light,",
       "fashion safe for work, no explicit content, no nudity,",
       "single person, no text, high quality, realistic proportions",
     ].filter(Boolean).join(" ").slice(0, 1400);
-  }
-
-  function readableCloudflareImageError(value) {
-    const text = String(value || "");
-    if (/3030|content.?polic|nsfw|not.?allowed|unsafe|blocked/i.test(text)) {
-      return "Filtre Cloudflare (contenu). Réessaie une autre pose/tenue, ou utilise AI Horde. " + text.slice(0, 120);
-    }
-    return text.slice(0, 200);
   }
 
   async function generateCloudflareImage(prompt, st, character) {
@@ -468,11 +417,11 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    // Klein + photo de ref = quasi toujours la même pose/tenue. CF profile = schnell txt2img + description.
-    const model = "@cf/black-forest-labs/flux-1-schnell";
-    // Nonce unique pour forcer une variation même si le prompt se ressemble
-    const variation = " variation-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9);
-    const promptVaried = String(prompt).slice(0, 1900) + variation;
+    const referenceB64 = await profileReferenceJpegB64(character);
+    // Avec photo → Klein img2img ; sans photo → schnell txt2img
+    const model = referenceB64
+      ? "@cf/black-forest-labs/flux-2-klein-4b"
+      : "@cf/black-forest-labs/flux-1-schnell";
 
     if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
         && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
@@ -481,7 +430,7 @@
       const cred = creds[i];
       try {
         const jobId = String(window.LeaAndroid.cloudflareImageStart(
-          cred.account, cred.token, model, promptVaried.slice(0, 2048), String(character && character.id || "lea"), ""
+          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64 || ""
         ) || "");
         if (!jobId) {
           lastErr = "démarrage Cloudflare impossible";
