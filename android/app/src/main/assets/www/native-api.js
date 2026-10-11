@@ -152,7 +152,7 @@
   async function profileReferenceImageB64(char, mime) {
     const c = char || LEA;
     const src = String(c.cover || (Array.isArray(c.gallery) && c.gallery[0]) || "").trim();
-    if (!src) throw new Error("Choisis une photo de profil avant de générer.");
+    if (!src) return null; // txt2img sans référence
     let imageSource = src;
     if (src.indexOf("gallery:") === 0) {
       if (!window.LeaAndroid || typeof window.LeaAndroid.loadGalleryImage !== "function") {
@@ -294,9 +294,10 @@
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
-    const faceLock =
-      "Use input_image_0 as the identity reference for " + name + ". Preserve the recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette from the reference and canonical description. " +
-      "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.";
+    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
+      ? ("Use input_image_0 as the identity reference for " + name + ". Preserve the recognizable face, species, distinctive markings, skin/fur/scales, hair, eyes and body silhouette from the reference and canonical description. " +
+         "Do not copy the reference crop, pose, outfit or background; do not invent or remove permanent traits.")
+      : ("No reference photo: follow the canonical physical description exactly for " + name + " (face, hair, eyes, skin, body, bust). Photorealistic unique adult woman.");
 
     // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
     // Horde : tenues plus provocantes autorisées
@@ -433,10 +434,12 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    const model = "@cf/black-forest-labs/flux-2-klein-4b";
     const referenceB64 = await profileReferenceJpegB64(character);
+    // Avec photo → Klein img2img ; sans photo → schnell txt2img
+    const model = referenceB64
+      ? "@cf/black-forest-labs/flux-2-klein-4b"
+      : "@cf/black-forest-labs/flux-1-schnell";
 
-    // Klein 4B reçoit une photo de référence dans le pont Android natif.
     if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
         && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
       let lastErr = "délai d'attente dépassé";
@@ -444,7 +447,7 @@
       const cred = creds[i];
       try {
         const jobId = String(window.LeaAndroid.cloudflareImageStart(
-          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64
+          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64 || ""
         ) || "");
         if (!jobId) {
           lastErr = "démarrage Cloudflare impossible";
@@ -491,15 +494,15 @@
   }
 
   async function generateHordeImage(prompt, character, st) {
-    const referenceB64 = await profileReferenceJpegB64(character);
+    const referenceB64 = await profileReferenceJpegB64(character); // peut être null → txt2img
     if (!window.LeaAndroid || typeof window.LeaAndroid.hordeImageStart !== "function" ||
         typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
-      throw new Error("La génération AI Horde avec référence nécessite l’application Android.");
+      throw new Error("La génération AI Horde nécessite l’application Android.");
     }
     const jobId = String(window.LeaAndroid.hordeImageStart(
       String(prompt).slice(0, 2048),
       String(character && character.id || "lea"),
-      referenceB64,
+      referenceB64 || "",
       String(st && st.hordeApiKey || "")
     ) || "");
     if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde.");

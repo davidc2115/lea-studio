@@ -427,11 +427,18 @@ public class LeaBridge {
         final String acc = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
         final String tok = token == null ? "" : token.trim();
         final String selectedModel = (model != null && model.length() > 5) ? model.trim() : "@cf/black-forest-labs/flux-1-schnell";
-        final boolean useReferenceModel = "@cf/black-forest-labs/flux-2-klein-4b".equals(selectedModel);
-        // Ne jamais dépenser du quota sur un modèle sans référence en cas d'échec du mode identité.
+        final String refRaw = referenceImageB64 == null ? "" : referenceImageB64.replaceFirst("^data:image/[^;]+;base64,", "").trim();
+        final boolean hasReference = refRaw.length() > 80 && refRaw.length() <= 900000;
+        // Klein img2img seulement si une vraie photo de profil est fournie; sinon txt2img (schnell…)
+        final boolean useReferenceModel = hasReference && "@cf/black-forest-labs/flux-2-klein-4b".equals(selectedModel);
         final String[] models = useReferenceModel
             ? new String[] { selectedModel }
-            : new String[] { selectedModel, "@cf/black-forest-labs/flux-1-schnell", "@cf/stabilityai/stable-diffusion-xl-base-1.0", "@cf/bytedance/stable-diffusion-xl-lightning" };
+            : new String[] {
+                hasReference ? selectedModel : "@cf/black-forest-labs/flux-1-schnell",
+                "@cf/black-forest-labs/flux-1-schnell",
+                "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+                "@cf/bytedance/stable-diffusion-xl-lightning"
+              };
         final String ptxt = (prompt == null ? "" : prompt).trim();
         final String promptSafe = ptxt.length() > 2000 ? ptxt.substring(0, 2000) : ptxt;
         HTTP_POOL.execute(new Runnable() {
@@ -448,9 +455,7 @@ public class LeaBridge {
                 byte[] referenceBytes = null;
                 if (useReferenceModel) {
                     try {
-                        String encoded = referenceImageB64 == null ? "" : referenceImageB64.replaceFirst("^data:image/[^;]+;base64,", "").trim();
-                        if (encoded.isEmpty() || encoded.length() > 900000) throw new IllegalArgumentException("photo de profil absente ou trop volumineuse");
-                        referenceBytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+                        referenceBytes = android.util.Base64.decode(refRaw, android.util.Base64.DEFAULT);
                         if (referenceBytes.length == 0) throw new IllegalArgumentException("photo de profil vide");
                     } catch (Exception e) {
                         HTTP_JOBS.put(id, "error:{\"error\":\"Référence visage invalide: " + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
