@@ -230,26 +230,29 @@
       B: "natural B-cup, light rounded shape",
       C: "true C-cup: medium natural breasts, moderate cleavage",
       D: "true D-cup: full natural breasts, soft cleavage, fuller than C, realistic 95D proportions",
-      E: "true E-cup: large full natural breasts, deeper cleavage than D",
-      F: "very large F-cup: substantial natural volume, full cleavage",
-      G: "full G-cup: very large natural breasts, prominent cleavage",
-      H: "full H-cup: very large natural breasts, prominent full cleavage, wide bust",
-      I: "very large I-cup breasts, full cleavage",
-      J: "very large J-cup breasts, full cleavage",
+      E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
+      F: "very large F-cup: substantial natural volume, deep full cleavage, heavy chest",
+      G: "extremely full G-cup: very large natural breasts, deep cleavage, wide bust spanning the torso",
+      H: "maximum full H-cup: extremely large natural breasts, deep heavy cleavage, wide heavy bust, voluptuous chest filling the frame",
+      I: "maximum oversized I-cup: extremely large heavy natural breasts, very deep cleavage, massive but realistic volume",
+      J: "maximum oversized J-cup: extremely large heavy natural breasts, very deep cleavage, massive realistic volume",
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
     let engineHint = "";
-    if (forCloudflare && "DEFGH".indexOf(cupKey) >= 0) {
-      engineHint = " Chest volume " + sizeLabel + " clearly visible under clothing, not a small B-cup.";
+    if (forCloudflare && "DEF".indexOf(cupKey) >= 0) {
+      engineHint = " Chest volume " + sizeLabel + " clearly visible under clothing, fuller than average, not a small B-cup.";
+    } else if (forCloudflare && "GHIJ".indexOf(cupKey) >= 0) {
+      // Cloudflare FLUX tends to under-render large cups — push hard with fashion-safe wording
+      engineHint = " CRITICAL bust: " + sizeLabel + " maximum large voluptuous chest, heavy soft breasts, deep cleavage, wide bust, breast size much larger than average adult woman, clothing stretched over the chest, not medium, not B-cup, not C-cup.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
       engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
     } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
-      engineHint = " Preserve large " + sizeLabel + " volume; realistic not cartoon.";
+      engineHint = " Preserve large " + sizeLabel + " volume; realistic not cartoon; heavy soft breasts, deep cleavage.";
     }
     const lock = "Breast size " + sizeLabel + ": " + guide + "." + engineHint;
-    let neg = "hyper breasts, balloon breasts, breast expansion, deformed chest, cartoon boobs";
-    if ("ABC".indexOf(cupKey) >= 0) neg += ", enormous breasts, oversized bust";
-    if ("DEFGHIJ".indexOf(cupKey) >= 0) neg += ", flat chest, tiny breasts, A-cup, B-cup, underdeveloped bust";
+    let neg = "balloon breasts, breast expansion, deformed chest, cartoon boobs, plastic implants look";
+    if ("ABC".indexOf(cupKey) >= 0) neg += ", enormous breasts, oversized bust, hyper breasts";
+    if ("DEFGHIJ".indexOf(cupKey) >= 0) neg += ", flat chest, tiny breasts, A-cup, B-cup, C-cup, small breasts, underdeveloped bust, medium chest, average bust";
     return { lock: lock, neg: neg, label: sizeLabel };
   }
 
@@ -438,6 +441,8 @@
       faceLock,
       "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
+      // Rappel poitrine en fin de prompt (CF sous-estime souvent les gros bonnets)
+      bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
       "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",

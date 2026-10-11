@@ -607,3 +607,15 @@ button:disabled { opacity: .6; cursor: wait; }
 }
 .discover-card { position: relative; }
 .discover-delete { background: rgba(180,40,60,0.85) !important; }
+
+.chat-history-row { display: flex; align-items: stretch; gap: 6px; }
+.chat-history-row .chat-history-item { flex: 1; min-width: 0; }
+.chat-history-delete {
+  flex: 0 0 40px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px;
+  background: rgba(255,80,120,.12); color: #ffb0c8; font-size: 1rem; cursor: pointer;
+}
+.chat-header-avatar {
+  padding: 0; border: none; background: transparent; border-radius: 50%; overflow: hidden; cursor: pointer;
+}
+.chat-header-avatar img { display: block; width: 42px; height: 42px; object-fit: cover; border-radius: 50%; }
+.chat-header .info { cursor: pointer; }

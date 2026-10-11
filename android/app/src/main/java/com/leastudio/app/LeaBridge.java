@@ -697,40 +697,79 @@ public class LeaBridge {
             @Override public void run() {
                 try {
                     if (promptSafe.length() < 3) throw new IllegalArgumentException("Prompt invalide.");
-                    final boolean hasRef = reference.length() >= 100;
+                    // Réduire la ref pour éviter "Input payload validation failed" (limite Horde ~source)
+                    String refForHorde = reference;
+                    if (refForHorde.length() > 350000) {
+                        // trop gros en base64 → on laisse le bridge sans ref plutôt que de planter
+                        refForHorde = "";
+                    }
+                    final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    params.put("width", registered ? 576 : 512);
-                    params.put("height", registered ? 768 : 640);
-                    params.put("steps", registered ? 32 : 18);
-                    params.put("cfg_scale", 6.5);
+                    // Dimensions plus acceptées par les workers (moins de refus is_possible)
+                    params.put("width", 512);
+                    params.put("height", 768);
+                    params.put("steps", registered ? 28 : 20);
+                    params.put("cfg_scale", 7.0);
                     params.put("sampler_name", "k_euler_a");
-                    // 0.48 = quasi-copie de la ref ; 0.62–0.68 = même visage, pose/tenue différentes
-                    params.put("denoising_strength", hasRef ? 0.66 : 1.0);
+                    params.put("denoising_strength", hasRef ? 0.62 : 1.0);
                     params.put("seed", (int) (Math.random() * 2147483647));
                     params.put("n", 1);
+                    params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptSafe
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, duplicate pose of reference");
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
                     if (hasRef) {
-                        payload.put("source_image", reference);
+                        // source_image = base64 brut (sans préfixe data:)
+                        String src = refForHorde;
+                        int comma = src.indexOf(',');
+                        if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
+                        payload.put("source_image", src);
                         payload.put("source_processing", "img2img");
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
-                    JSONObject accepted = new JSONObject(hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey));
+                    payload.put("trusted_workers", false);
+                    payload.put("slow_workers", true);
+                    payload.put("r2", true);
+                    payload.put("shared", false);
+                    payload.put("replacement_filter", true);
+                    // Laisser les workers choisir un modèle réaliste dispo
+                    payload.put("models", new JSONArray());
+                    String acceptedRaw;
+                    try {
+                        acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
+                    } catch (Exception firstFail) {
+                        // Si img2img refusé → retenter en txt2img seul
+                        if (hasRef) {
+                            payload.remove("source_image");
+                            payload.remove("source_processing");
+                            params.put("denoising_strength", 1.0);
+                            payload.put("params", params);
+                            acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
+                        } else {
+                            throw firstFail;
+                        }
+                    }
+                    JSONObject accepted = new JSONObject(acceptedRaw);
+                    if (accepted.has("message") && !accepted.has("id")) {
+                        throw new java.io.IOException("AI Horde: " + accepted.optString("message", "refus"));
+                    }
                     String requestId = accepted.optString("id", "");
-                    if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant.");
-                    long deadline = System.currentTimeMillis() + 9 * 60 * 1000;
+                    if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));
+                    long deadline = System.currentTimeMillis() + 12 * 60 * 1000;
                     boolean done = false;
                     while (System.currentTimeMillis() < deadline) {
-                        Thread.sleep(5000);
+                        Thread.sleep(4000);
                         JSONObject check = new JSONObject(hordeRequest("GET", "/api/v2/generate/check/" + requestId, null, hordeKey));
                         if (check.optBoolean("faulted", false)) throw new java.io.IOException("Le worker AI Horde a échoué.");
-                        if (!check.optBoolean("is_possible", true)) throw new java.io.IOException("Aucun worker AI Horde disponible pour cette demande.");
+                        if (!check.optBoolean("is_possible", true)) throw new java.io.IOException("Aucun worker AI Horde disponible (is_possible=false). Réessaie ou Cloudflare.");
                         if (check.optBoolean("done", false) || check.optInt("finished", 0) > 0) { done = true; break; }
+                        int wait = check.optInt("wait_time", 0);
+                        int queue = check.optInt("queue_position", 0);
+                        HTTP_JOBS.put(id, "pending:queue=" + queue + ",wait=" + wait + "s");
                     }
-                    if (!done) throw new java.io.IOException("Délai AI Horde dépassé; la file peut être longue.");
+                    if (!done) throw new java.io.IOException("Délai AI Horde dépassé (12 min); la file est saturée.");
                     JSONObject status = new JSONObject(hordeRequest("GET", "/api/v2/generate/status/" + requestId, null, hordeKey));
                     JSONArray generations = status.optJSONArray("generations");
                     if (generations == null || generations.length() == 0) throw new java.io.IOException("AI Horde a terminé sans image.");

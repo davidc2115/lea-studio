@@ -716,16 +716,18 @@ function renderChatHistory() {
     const active = state.character && String(state.character.id) === entry.id;
     const stamp = entry.latest ? new Date(entry.latest).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
     const image = resolveImgSrc(character.cover || (Array.isArray(character.gallery) && character.gallery[0]) || "");
-    return `<button type="button" class="chat-history-item${active ? " is-active" : ""}" data-chat-id="${escapeHtml(entry.id)}">
-      ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="chat-history-avatar">💬</span>'}
-      <span class="chat-history-copy"><strong>${escapeHtml(character.name || entry.id)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
-    </button>`;
+    return `<div class="chat-history-row">
+      <button type="button" class="chat-history-item${active ? " is-active" : ""}" data-chat-id="${escapeHtml(entry.id)}">
+        ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="chat-history-avatar">💬</span>'}
+        <span class="chat-history-copy"><strong>${escapeHtml(character.name || entry.id)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
+      </button>
+      <button type="button" class="chat-history-delete" data-delete-chat="${escapeHtml(entry.id)}" title="Supprimer la conversation">🗑️</button>
+    </div>`;
   }).join("");
   root.querySelectorAll("[data-chat-id]").forEach((button) => {
     button.onclick = () => {
       const id = button.dataset.chatId;
-      const selected = [state.leaCharacter, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
-        .find((item) => item && String(item.id) === id);
+      const selected = findCharacterById(id);
       if (!selected) return;
       state.character = selected;
       try { state.chat = JSON.parse(localStorage.getItem("lea.chat." + id) || '{"messages":[]}'); }
@@ -734,6 +736,21 @@ function renderChatHistory() {
       state.chatListMode = false;
       localStorage.setItem("lea.activeCharacterId", id);
       showView("chat");
+    };
+  });
+  root.querySelectorAll("[data-delete-chat]").forEach((button) => {
+    button.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const id = button.dataset.deleteChat;
+      if (!id) return;
+      if (!confirm("Supprimer cette conversation ?")) return;
+      try { localStorage.removeItem("lea.chat." + id); } catch (_) {}
+      try { localStorage.removeItem("lea.memory." + id); } catch (_) {}
+      if (state.character && String(state.character.id) === String(id)) {
+        state.chat = { messages: [] };
+      }
+      renderChatHistory();
     };
   });
 }
@@ -756,12 +773,15 @@ function renderChat() {
     <button type="button" class="chat-back-button" id="chat-back">← Conversations</button>
     <div class="chat-wrap">
       <div class="chat-header">
-          <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
-        <div class="info">
+          <button type="button" class="chat-header-avatar" id="chat-open-profile" title="Voir le profil">
+            <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
+          </button>
+        <div class="info" id="chat-open-profile-info" role="button" tabindex="0" title="Voir le profil">
            <strong>💜 ${escapeHtml(c.name)}</strong>
            <small>${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</small>
         </div>
         <button type="button" class="icon-btn" id="chat-reset" title="Nouvelle conversation" style="margin-left:auto">🔄</button>
+        <button type="button" class="icon-btn" id="chat-delete" title="Supprimer la conversation">🗑️</button>
       </div>
       <div class="chat-msgs" id="chat-msgs"></div>
       <div class="typing hidden" id="chat-typing">Léa écrit…</div>
@@ -790,6 +810,12 @@ function renderChat() {
       sendMessage();
     }
   });
+  const openProfile = () => {
+    state.editMode = false;
+    showView("profile");
+  };
+  $("chat-open-profile") && ($("chat-open-profile").onclick = openProfile);
+  $("chat-open-profile-info") && ($("chat-open-profile-info").onclick = openProfile);
   $("chat-reset") && ($("chat-reset").onclick = async () => {
        if (!confirm("Recommencer la conversation avec " + c.name + " ?")) return;
     state.chat = { messages: [] };
@@ -800,6 +826,15 @@ function renderChat() {
     await ensureChatStarted();
     paintMessages();
     renderChatHistory();
+  });
+  $("chat-delete") && ($("chat-delete").onclick = async () => {
+    if (!confirm("Supprimer définitivement la conversation avec " + c.name + " ?")) return;
+    state.chat = { messages: [] };
+    try { localStorage.removeItem("lea.chat." + c.id); } catch (_) {}
+    try { localStorage.removeItem("lea.memory." + c.id); } catch (_) {}
+    try { await api(activeChatPath(), { method: "DELETE" }); } catch (_) {}
+    state.chatListMode = true;
+    renderChat();
   });
 }
 
