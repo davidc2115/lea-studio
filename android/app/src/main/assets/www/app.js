@@ -785,8 +785,12 @@ function renderChat() {
       </div>
       <div class="chat-msgs" id="chat-msgs"></div>
       <div class="typing hidden" id="chat-typing">Léa écrit…</div>
+      <div class="chat-scene-row">
+        <button type="button" class="chat-scene-btn" id="chat-gen-scene" title="Générer la scène (Horde, tenue de la conversation)">🖼️ Scène</button>
+        <span class="chat-scene-hint" id="chat-scene-status"></span>
+      </div>
       <div class="chat-input-row">
-        <textarea id="chat-input" rows="1" placeholder="Écris à Léa… (*action*) (pensée)"></textarea>
+        <textarea id="chat-input" rows="1" placeholder="Écris… (*action*) (pensée)"></textarea>
         <button type="button" class="send" id="chat-send">➤</button>
       </div>
     </div>
@@ -800,6 +804,7 @@ function renderChat() {
     input.style.height = Math.min(120, input.scrollHeight) + "px";
   });
   $("chat-send") && ($("chat-send").onclick = sendMessage);
+  $("chat-gen-scene") && ($("chat-gen-scene").onclick = generateConversationScene);
   $("chat-back") && ($("chat-back").onclick = () => {
     state.chatListMode = true;
     renderChat();
@@ -845,7 +850,9 @@ function paintMessages() {
   box.innerHTML = msgs
     .map((m) => {
       const who = m.role === "user" ? "me" : "them";
-      return `<div class="bubble ${who}">${formatMessageHtml(m.content)}</div>`;
+      const img = m.image ? `<div class="bubble-image"><img src="${escapeHtml(resolveImgSrc(m.image))}" alt="scène" loading="lazy" /></div>` : "";
+      const text = m.content ? `<div class="bubble ${who}">${formatMessageHtml(m.content)}</div>` : "";
+      return img + text;
     })
     .join("");
   box.scrollTop = box.scrollHeight;
@@ -901,6 +908,84 @@ async function sendMessage() {
   renderChatHistory();
 }
 
+
+
+async function generateConversationScene() {
+  if (state.genRunning) {
+    setGenBanner("⏳ Une génération est déjà en cours…", "");
+    return;
+  }
+  const c = state.character;
+  if (!c) return;
+  const age = c.age == null || c.age === "" ? null : Number(c.age);
+  if (Number.isInteger(age) && age < 18) {
+    setGenBanner("Génération désactivée : personnage mineur.", "bad");
+    return;
+  }
+  if (!Number.isInteger(age) || age < 18) {
+    setGenBanner("Âge 18+ requis sur la fiche pour générer une scène.", "bad");
+    return;
+  }
+  const btn = $("chat-gen-scene");
+  const status = $("chat-scene-status");
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Horde…"; }
+  if (status) status.textContent = "File Horde — tenue de la conversation…";
+  state.genRunning = true;
+  setGenBanner("⏳ Scène conversation → AI Horde (peut prendre plusieurs minutes)…", "");
+  try {
+    const memory = loadRoleplayMemory();
+    const res = await api("/api/image/scene", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: "conversation",
+        character: promptCharacterPayload(c),
+        memory: memory,
+        messages: (state.chat && state.chat.messages) || [],
+        settings: loadSettings(),
+        extra: "",
+      }),
+    });
+    if (!res || (!res.image && !res.ok)) {
+      throw new Error((res && (res.error || res.message)) || "Pas d'image renvoyée");
+    }
+    const image = res.image || res.galleryKey || res.url;
+    if (!image) throw new Error("Réponse sans image");
+    // Ajouter en bas de conversation
+    state.chat.messages = state.chat.messages || [];
+    state.chat.messages.push({
+      role: "assistant",
+      content: res.fallbackFrom === "horde"
+        ? "*[scène générée — Horde indisponible, fallback Cloudflare (moins explicite)]*"
+        : "*[scène générée d’après la tenue / situation en cours]*",
+      image: image,
+      ts: Date.now(),
+    });
+    try { localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat)); } catch (_) {}
+    // Ajouter aussi à la galerie du personnage (sans forcer photo de profil)
+    try {
+      const g = Array.isArray(c.gallery) ? c.gallery.slice() : [];
+      if (g.indexOf(image) < 0) {
+        g.push(image);
+        c.gallery = g.slice(-80);
+        if (c.id === "lea") {
+          try { localStorage.setItem("lea.char.lea", JSON.stringify(Object.assign({}, loadCharOverrides() || {}, { gallery: c.gallery }))); } catch (_) {}
+        } else {
+          saveCastOverride(Object.assign({}, c));
+        }
+      }
+    } catch (_) {}
+    paintMessages();
+    const via = res.engine === "horde" ? "Horde" : (res.fallbackFrom ? "Cloudflare (fallback)" : "OK");
+    setGenBanner("✅ Scène ajoutée (" + via + ")", "ok");
+    if (status) status.textContent = "✅ " + via;
+  } catch (e) {
+    setGenBanner("Scène : " + String(e.message || e).slice(0, 160), "bad");
+    if (status) status.textContent = "Erreur";
+  } finally {
+    state.genRunning = false;
+    if (btn) { btn.disabled = false; btn.textContent = "🖼️ Scène"; }
+  }
+}
 
 function setGenBanner(msg, kind) {
   state.genStatus = { msg: msg, kind: kind || "", ts: Date.now() };

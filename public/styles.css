@@ -619,3 +619,16 @@ button:disabled { opacity: .6; cursor: wait; }
 }
 .chat-header-avatar img { display: block; width: 42px; height: 42px; object-fit: cover; border-radius: 50%; }
 .chat-header .info { cursor: pointer; }
+
+.chat-scene-row { display: flex; align-items: center; gap: 8px; padding: 4px 10px 0; }
+.chat-scene-btn {
+  border: 1px solid rgba(255,107,203,.35); background: rgba(255,107,203,.12);
+  color: #ffb8e0; border-radius: 14px; padding: 6px 12px; font-size: .78rem; cursor: pointer;
+}
+.chat-scene-btn:disabled { opacity: .5; cursor: wait; }
+.chat-scene-hint { font-size: .68rem; color: var(--muted); }
+.bubble-image { margin: 6px 10px; }
+.bubble-image img {
+  max-width: min(100%, 320px); border-radius: 14px; display: block;
+  border: 1px solid rgba(255,255,255,.08);
+}

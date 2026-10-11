@@ -523,6 +523,101 @@
     ].filter(Boolean).join(" ").slice(0, 1400);
   }
 
+
+  /** Déduit tenue / nudité depuis la mémoire conversation + derniers messages */
+  function inferConversationOutfit(memory, messages) {
+    const mem = memory || {};
+    const parts = [];
+    if (mem.wardrobe) parts.push(String(mem.wardrobe));
+    if (mem.scene) parts.push(String(mem.scene));
+    if (mem.intimacy) parts.push(String(mem.intimacy));
+    const recent = (Array.isArray(messages) ? messages : []).slice(-12)
+      .map((x) => String(x && x.content || "")).join("\n");
+    parts.push(recent.slice(-1800));
+    const blob = parts.join("\n").toLowerCase();
+
+    const isNude = /enti[eè]rement nue|compl[eè]tement nue|\bnue\b|\bnude\b|sans aucun v[eê]tement|plus rien sur elle|toute nue|compl[eè]tement d[eé]shabill/.test(blob)
+      || (/retir[eé].*(culotte|slip|soutien|soutif|v[eê]tements)/.test(blob) && /nue|nu |plus rien|sans rien/.test(blob));
+    const isTopless = !isNude && (/topless|seins nus|poitrine nue|sans soutien|sans soutien-gorge|haut enlev|t-shirt enlev|crop.{0,20}enlev|torse nu/.test(blob));
+    const isLingerie = /lingerie|nuisette|soutien-gorge|soutif|culotte|string|body en dentelle|babydoll|porte-jarretelles/.test(blob);
+    const isWet = /tremp[eé]e?|mouill[eé]e?|wet |coll[eé]e? [aà] la peau/.test(blob);
+
+    let outfitEn = "";
+    if (isNude) {
+      outfitEn = "completely nude adult woman, fully naked, no clothing, natural bare body, explicit nude, uncensored";
+    } else if (isTopless) {
+      outfitEn = "topless adult woman, bare breasts exposed, bottoms still on if mentioned, explicit upper body nude, uncensored";
+    } else if (isLingerie) {
+      outfitEn = "sexy explicit lingerie, lace bra and panties or bodysuit, sheer fabric, deep cleavage, seductive, uncensored adult";
+    } else if (mem.wardrobe) {
+      // garder le texte FR de la mémoire + indices EN
+      outfitEn = "wearing exactly: " + String(mem.wardrobe).slice(0, 280)
+        + (isWet ? ", clothes wet clinging to body" : "");
+    } else {
+      outfitEn = "clothing matching the latest dialogue description, sexy adult fashion";
+    }
+
+    let poseEn = "full body pose matching the scene, natural intimate posture";
+    if (/missionnaire|allong[eé]e sur le dos|sur le lit/.test(blob)) poseEn = "lying on back on bed, intimate pose, looking at partner, full body";
+    else if (/quatre pattes|a genoux|à genoux|doggy/.test(blob)) poseEn = "on all fours on bed, looking back over shoulder, explicit pose";
+    else if (/chevauch|assise sur|cowgirl/.test(blob)) poseEn = "sitting straddling, intimate close pose, looking at camera";
+    else if (/contre le mur|debout contre/.test(blob)) poseEn = "standing against wall, intimate pose";
+    else if (/canap[eé]|sofa/.test(blob)) poseEn = "on the sofa, relaxed seductive pose";
+    else if (/douche|salle de bain/.test(blob)) poseEn = "in bathroom or shower setting, wet skin";
+
+    let sceneEn = mem.scene ? String(mem.scene).slice(0, 200) : "intimate indoor setting from the conversation";
+    if (/chambre|bed/.test(blob)) sceneEn = "bedroom, soft lamps, rumpled sheets, intimate atmosphere";
+    else if (/salon|canap/.test(blob)) sceneEn = "living room sofa, warm evening light";
+    else if (/douche|salle de bain/.test(blob)) sceneEn = "bathroom, steam, tiles, soft light";
+    else if (/cuisine/.test(blob)) sceneEn = "kitchen interior, evening light";
+    else if (/couloir|entr[eé]e/.test(blob)) sceneEn = "apartment hallway or doorway";
+
+    return {
+      outfitEn: outfitEn,
+      poseEn: poseEn,
+      sceneEn: sceneEn,
+      explicit: isNude || isTopless || isLingerie || /nsfw|sexe|baiser|p[eé]n[eé]tr|suce|branl/.test(blob),
+      wardrobeFr: String(mem.wardrobe || "").slice(0, 400),
+      sceneFr: String(mem.scene || "").slice(0, 300),
+    };
+  }
+
+  function buildConversationImagePrompt(char, memory, messages, extra) {
+    const c = char || LEA;
+    const age = c.age == null || c.age === "" ? NaN : Number(c.age);
+    if (Number.isInteger(age) && age < 18) {
+      throw new Error("La génération nécessite un personnage majeur (18+).");
+    }
+    const name = String(c.name || "woman").slice(0, 80);
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 700);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 320);
+    const bustInfo = describeBustLock(String(c.Poitrine || c.poitrine || c.bustEstimate || ""), appearance, "horde");
+    const bodyInfo = describeBodyMorphology(c);
+    const inferred = inferConversationOutfit(memory, messages);
+    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
+      ? ("Identity reference input_image_0 for " + name + ": same face, hair, eyes, skin, body morphology and breast size. NEW pose and clothing state from conversation.")
+      : ("Exact physical match for " + name + " from character sheet.");
+
+    const parts = [
+      "photorealistic explicit adult photo, uncensored NSFW allowed, one adult woman 18+ only,",
+      bodyInfo.lead || "",
+      bodyInfo.lock + ",",
+      bustInfo.lock + ",",
+      looksEn ? ("Technical looks: " + looksEn + ".") : "",
+      faceLock,
+      "Physical description: " + (appearance || "match character sheet.") + ".",
+      "CURRENT OUTFIT / BODY STATE FROM CONVERSATION: " + inferred.outfitEn + ".",
+      inferred.wardrobeFr ? ("Wardrobe memory (FR): " + inferred.wardrobeFr + ".") : "",
+      "Pose: " + inferred.poseEn + ".",
+      "Location: " + inferred.sceneEn + ".",
+      inferred.sceneFr ? ("Scene memory (FR): " + inferred.sceneFr + ".") : "",
+      extra ? ("User request: " + String(extra).slice(0, 200) + ".") : "",
+      "full body visible when possible, realistic proportions, natural skin,",
+      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ", child, underage, loli, text, watermark, extra people, deformed hands",
+    ];
+    return parts.filter(Boolean).join(" ").slice(0, 1800);
+  }
+
   async function generateCloudflareImage(prompt, st, character) {
     const creds = parseCloudflareCreds(st);
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
@@ -1281,17 +1376,31 @@
       };
     }
 
-    if ((path === "/api/image/cloudflare" || path === "/api/image/horde") && method === "POST") {
+    if ((path === "/api/image/cloudflare" || path === "/api/image/horde" || path === "/api/image/scene") && method === "POST") {
       const st = body.settings || settings();
       const char = body.character || LEA;
-      const isHorde = path === "/api/image/horde";
-      let prompt = body.prompt || buildPhysicalImagePrompt(char, body.extra || "", isHorde ? "horde" : "cloudflare");
+      const isScene = path === "/api/image/scene" || body.mode === "conversation";
+      const isHorde = isScene || path === "/api/image/horde";
+      let prompt = body.prompt;
+      if (!prompt && isScene) {
+        prompt = buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
+      }
+      if (!prompt) {
+        prompt = buildPhysicalImagePrompt(char, body.extra || "", isHorde ? "horde" : "cloudflare");
+      }
       if (isHorde) {
         try {
           const dataUrl = await generateHordeImage(prompt, char, st);
-          return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde" };
+          return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde", mode: isScene ? "conversation" : "profile" };
         } catch (hordeErr) {
-          // Fallback Cloudflare avec prompt CF (pas le prompt Horde trop explicite) + même référence
+          // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)
+          if (isScene) {
+            throw new Error(
+              "AI Horde (scène) : " + String(hordeErr.message || hordeErr).slice(0, 180) +
+              " — réessaie plus tard ou vérifie ta clé Horde dans Réglages."
+            );
+          }
+          // Profil : fallback Cloudflare soft
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
           try {
             const dataUrl = await generateCloudflareImage(cfPrompt, st, char);
