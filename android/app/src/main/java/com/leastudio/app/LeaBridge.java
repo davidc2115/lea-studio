@@ -739,13 +739,15 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Dimensions plus acceptées par les workers (moins de refus is_possible)
+                    // ≤ ~617² pixels (sinon HTTP 403 "heavy demand" pendant les pics)
+                    // 512×640 = 327680 < 380689 ; multiples de 64
                     params.put("width", 512);
-                    params.put("height", 768);
-                    params.put("steps", registered ? 28 : 20);
-                    params.put("cfg_scale", 7.0);
+                    params.put("height", 640);
+                    params.put("steps", registered ? 22 : 16);
+                    params.put("cfg_scale", 6.5);
                     params.put("sampler_name", "k_euler_a");
-                    params.put("denoising_strength", hasRef ? 0.62 : 1.0);
+                    // Conversation / tenue différente : denoise plus haut pour ne pas coller à la pose profil
+                    params.put("denoising_strength", hasRef ? 0.72 : 1.0);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
