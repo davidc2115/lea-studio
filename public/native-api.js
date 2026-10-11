@@ -254,14 +254,75 @@
   }
 
   function sanitizeAppearanceForImage(text) {
+    // Ne pas écraser chubby / ronde / volume — seulement le bruit hyper non réaliste
     return String(text || "")
-      .replace(/tr[eè]s\s+g[eé]n[eé]reuse/gi, "proportionnée")
-      .replace(/g[eé]n[eé]reuse/gi, "pleine")
-      .replace(/d[eé]collet[eé]\s+pro[eé]minent/gi, "décolleté naturel")
-      .replace(/volume\s+marqu[eé]/gi, "volume D-cup réaliste")
-      .replace(/énorme|gigantesque|hypertrophi/gi, "proportionné")
-      .slice(0, 800);
+      .replace(/\b(loli|underage|child)\b/gi, "")
+      .slice(0, 900);
   }
+
+  /** Morphologie dominante (chubby, mince, athlétique, sablier…) pour CF + Horde */
+  function describeBodyMorphology(char) {
+    const c = char || {};
+    const blob = [
+      c.appearance, c.body, c.looks_en, c.title,
+      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+    ].join(" ").toLowerCase();
+
+    const isChubby = /chubby|plus-?size|plus size|plantureus|tr[eè]s rond|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|curvy thick|VRAIMENT ronde|plus-size/.test(blob)
+      || (/\bronde\b/.test(blob) && /plantureus|chubby|plus|ventre|cuisses [eé]paisses|hanches tr[eè]s/.test(blob));
+    const isChubbyFinal = isChubby && !/silhouette mince|slim slender|élanc[eé]e fine|narrow frame/.test(blob);
+    const isSlim = /silhouette mince|slim slender|élanc|longiligne|mince et|narrow frame|petite poitrine mince/.test(blob)
+      && !isChubbyFinal;
+    const isAthletic = /athl[eé]tique|athletic|tonique|muscl|sportive/.test(blob) && !isChubbyFinal;
+    const isHourglass = /sablier|hourglass|taille fine.*hanches|voluptueus/.test(blob) && !isChubbyFinal;
+    const isPetite = /petite stature|petite femme|petite taille/.test(blob);
+
+    if (isChubbyFinal) {
+      return {
+        lead:
+          "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, " +
+          "REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
+        lock:
+          "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. " +
+          "Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
+        neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
+      };
+    }
+    if (isAthletic) {
+      return {
+        lead: "athletic toned adult woman, firm figure, defined shoulders,",
+        lock: "Body type: athletic and toned, not chubby, not skinny frail.",
+        neg: "plus-size, chubby, soft belly, obese, skinny frail",
+      };
+    }
+    if (isSlim) {
+      return {
+        lead: "slim slender adult woman, narrow frame, elegant thin waist,",
+        lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
+        neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
+      };
+    }
+    if (isHourglass) {
+      return {
+        lead: "hourglass figure adult woman, defined waist, curved hips, balanced bust and hips,",
+        lock: "Body type: hourglass, cinched waist, rounded hips, not chubby overall, not stick-thin.",
+        neg: "plus-size soft belly, skinny stick figure, no curves",
+      };
+    }
+    if (isPetite) {
+      return {
+        lead: "petite adult woman, smaller stature, proportional,",
+        lock: "Body type: petite adult proportions.",
+        neg: "very tall amazon, plus-size bbw",
+      };
+    }
+    return {
+      lead: "",
+      lock: "Body type matches the character physical description exactly.",
+      neg: "wrong body type, inconsistent morphology",
+    };
+  }
+
 
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
@@ -279,10 +340,13 @@
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
+    const bodyInfo = describeBodyMorphology(c);
+    const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
+    const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + " ONLY: keep the same face, hair color/length, eye color, skin tone and overall body type including breast volume from the reference. " +
-         "CRITICAL: invent a NEW pose, NEW camera angle, NEW outfit and NEW background — do not replicate the reference composition. Photorealistic photo, not painting.")
-      : ("No reference photo: follow the canonical physical description exactly for " + name + " (face, hair, eyes, skin, body, bust). Photorealistic unique adult woman.");
+      ? ("Identity reference input_image_0 for " + name + ": keep face, hair, eyes, skin AND body morphology (chubby/slim/curves) and breast volume from the reference and description. " +
+         "NEW pose, NEW outfit, NEW background. Photorealistic photo, not painting.")
+      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
 
     // Cloudflare FLUX filtre fort → vocabulaire mode / éditorial sexy (évite lingerie/sheer/bra qui trigger 3030)
     // Horde : tenues plus provocantes autorisées
@@ -359,21 +423,24 @@
       : "adult woman 18+, sensual seductive provocative fashion, photorealistic raw photo, natural skin texture, sharp focus, high detail, flirty mood, sexy outfit preferred, different from any reference pose,";
 
     const base = [
-      "photorealistic full-body character portrait, one subject, not a close-up,",
+      mood,
+      // Morphologie + poitrine EN TÊTE (CF et Horde)
+      bodyInfo.lead || "",
+      bodyInfo.lock + ",",
+      bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
+      bustInfo.lock + ",",
+      looksEn ? ("Technical looks: " + looksEn + ".") : "",
+      bodyField ? ("Body notes: " + bodyField + ".") : "",
+      "photorealistic full-body photo, one adult woman, head to toe, not a close-up,",
       "Outfit: " + outfit + ".",
       "Pose: " + pose + ".",
       "Location: " + scene + ".",
       faceLock,
-      "Canonical physical description: " + (appearanceClean || appearance || "match the reference image without adding permanent traits.") + ".",
-      nonHumanTraits ? "Preserve these non-human traits exactly: " + nonHumanTraits + "." : "",
-      bustInfo.lock + ",",
-      "avoid: " + bustInfo.neg + ",",
-      "portrait-format full-length framing, entire subject visible head to toe, medium-wide camera, face recognizable,",
-      "match the same character as input_image_0 and preserve its recognizable identity,",
-      bustInfo.label ? ("breast size exactly " + bustInfo.label + " only,") : "",
-      mood,
-      "anatomically correct torso, realistic clothing fit over the stated cup size,",
-      "no close-up, no headshot, no extra people, no text, no watermark, no deformed hands",
+      "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
+      nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
+      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
+      "realistic clothing fit on this body type and cup size,",
+      "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
     let out = base;
