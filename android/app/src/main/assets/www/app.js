@@ -30,7 +30,12 @@ async function api(path, opts = {}) {
     }
   }
   if (String(location.protocol || "").indexOf("file") === 0) {
-    throw new Error("API native absente (file://) — réinstalle l'APK du dernier build");
+    const hasBridge = !!(window.LeaAndroid);
+    throw new Error(
+      hasBridge
+        ? "Module natif incomplet (leaNativeApi manquant) — réinstalle l'APK du dernier build vert"
+        : "Pont Android absent (LeaAndroid) — ouvre l'app installée (pas Chrome) et réinstalle l'APK du dernier build"
+    );
   }
   const res = await fetch(path, {
     method: opts.method || "GET",
