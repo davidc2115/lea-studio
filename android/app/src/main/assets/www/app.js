@@ -1132,14 +1132,35 @@ function mergeAllCasts() {
       }));
     }
   }
-  // Overrides locaux (modifs utilisateur)
+  // Overrides locaux (modifs utilisateur) — ne pas écraser scénario/accueil packagés par d'anciennes versions génériques
   try {
     const ov = JSON.parse(localStorage.getItem("lea.cast.overrides") || "{}");
     if (ov && typeof ov === "object") {
       for (const id of Object.keys(ov)) {
-        if (byId.has(id) && ov[id] && typeof ov[id] === "object") {
-          byId.set(id, Object.assign({}, byId.get(id), ov[id], { id: id }));
+        if (!byId.has(id) || !ov[id] || typeof ov[id] !== "object") continue;
+        const base = byId.get(id);
+        const o = ov[id];
+        const oSc = String(o.scenario || "");
+        const staleScenario =
+          /orage,\s*dispute|débarque\s*\(|soirée qui dérape|au choix|\(orage/i.test(oSc) ||
+          (oSc.length > 0 && oSc.length < 120 && !oSc.includes("💜") && !oSc.includes("🏠"));
+        const oGr = String(o.greeting || "");
+        const staleGreeting =
+          /je passais|venais voir si t.?étais seul|Je passais\. Enfin non/i.test(oGr);
+        const merged = Object.assign({}, base, o, { id: id });
+        // Toujours préférer le pack APK pour titre / scénario / accueil / personnalité si override obsolète ou générique
+        if (staleScenario || !o.scenario) {
+          merged.scenario = base.scenario;
+          merged.title = base.title || merged.title;
         }
+        if (staleGreeting || !o.greeting) {
+          merged.greeting = base.greeting;
+        }
+        if (!o.personality || String(o.personality).length < 40) {
+          merged.personality = base.personality;
+        }
+        // Conserver galerie / champs édités volontairement
+        byId.set(id, merged);
       }
     }
   } catch (_) {}
