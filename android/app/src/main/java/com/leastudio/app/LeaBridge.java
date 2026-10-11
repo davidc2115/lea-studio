@@ -712,7 +712,7 @@ public class LeaBridge {
                     params.put("cfg_scale", 7.0);
                     params.put("sampler_name", "k_euler_a");
                     params.put("denoising_strength", hasRef ? 0.62 : 1.0);
-                    params.put("seed", (int) (Math.random() * 2147483647));
+                    params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
