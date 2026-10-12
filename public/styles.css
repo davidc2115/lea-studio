@@ -412,6 +412,8 @@ main {
 }
 .bubble .action { color: var(--action); font-style: italic; }
 .bubble .thought { color: var(--thought); opacity: .95; }
+.bubble .speaker { color: #e879f9; font-weight: 700; }
+.bubble .speaker::before { content: none; }
 .bubble .speech { color: var(--speech); }
 .chat-input-row {
   display: flex; gap: 8px; align-items: flex-end;
