@@ -774,7 +774,7 @@ public class LeaBridge {
                     params.put("width", 512);
                     params.put("height", 640);
                     // steps + cfg_scale fixés après calcul du denoise
-                    double denoise = 0.62;
+                    double denoise = 0.52;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -789,9 +789,9 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    // Scène (denoise élevé) : coller au prompt tenue ; profil : un peu plus libre
-                    double cfg = denoise >= 0.68 ? 8.0 : (denoise >= 0.55 ? 7.0 : 6.5);
-                    int steps = registered ? (denoise >= 0.68 ? 28 : 22) : (denoise >= 0.68 ? 20 : 16);
+                    // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
+                    double cfg = denoise >= 0.64 ? 7.5 : 6.5;
+                    int steps = registered ? 22 : 16;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");

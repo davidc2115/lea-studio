@@ -465,8 +465,8 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "input_image_0 is the identity reference. Keep the EXACT same face structure, eyes, nose, lips, jaw, hair color, hair length and skin tone as input_image_0. Do not invent a different woman. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, NEW pose and NEW outfit only,"
-      : "input_image_0 identity lock: identical face, eyes, nose, lips, jawline, hair color, hair length, skin tone. Same person as reference. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, NEW pose and NEW outfit, keep identity,";
+      ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
       mood,
@@ -811,86 +811,91 @@
   };
 
 
-  async function generateCloudflareImage(prompt, st, char) {
-    st = st || settings();
-    const creds = parseCloudflareCreds(st);
-    if (!creds.length) {
-      throw new Error("Ajoute Account ID + token Cloudflare dans Réglages (cfKeys ou cfAccount/cfToken).");
-    }
-    if (!window.LeaAndroid || typeof window.LeaAndroid.cloudflareImageStart !== "function") {
-      throw new Error("La génération Cloudflare nécessite l’application Android (bridge).");
-    }
-    if (!window.LeaAndroid.httpPostJsonPoll) {
-      throw new Error("Bridge Android incomplet (httpPostJsonPoll manquant).");
-    }
-    // Référence visage (JPEG, ≤512 pour FLUX.2 Klein)
-    let referenceB64 = "";
+
+  function readableCloudflareImageError(raw) {
+    const s = String(raw || "");
     try {
-      referenceB64 = (await profileReferenceJpegB64(char)) || "";
-    } catch (refErr) {
-      // CF peut générer sans ref, mais l'identité souffre
-      referenceB64 = "";
+      const j = JSON.parse(s);
+      if (j && j.error) return String(j.error).slice(0, 220);
+    } catch (_) {}
+    if (/3030|flagged|content.?policy|choose another prompt/i.test(s)) {
+      return "Filtre contenu Cloudflare (3030). Adoucis le prompt ou passe sur AI Horde.";
     }
-    const model = String(st.cfModel || "@cf/black-forest-labs/flux-2-klein-4b").trim()
-      || "@cf/black-forest-labs/flux-2-klein-4b";
-    // Préfixe identité si on a une ref
-    let finalPrompt = String(prompt || "").trim();
+    if (/401|403|unauthorized/i.test(s)) return "Token Cloudflare invalide ou sans droit Workers AI.";
+    if (/429|rate.?limit/i.test(s)) return "Quota Cloudflare dépassé (429). Réessaie plus tard.";
+    return s.replace(/\s+/g, " ").slice(0, 220) || "erreur Cloudflare";
+  }
+
+  async function generateCloudflareImage(prompt, st, character) {
+    const creds = parseCloudflareCreds(st);
+    if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
+    let start = 0;
+    try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
+    let referenceB64 = null;
+    try {
+      referenceB64 = await profileReferenceJpegB64(character);
+    } catch (e) {
+      throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
+    }
     if (referenceB64) {
-      finalPrompt = (
-        "The woman in input_image_0 is the exact subject. " +
-        "Keep her identical face, eyes, nose, lips, hair color, hair length and skin tone. " +
-        "Only change pose, outfit and background. " +
-        finalPrompt
-      ).slice(0, 1800);
+      prompt = "The woman in input_image_0 is the exact subject. Keep her identical face, eyes, hair color and skin tone. Only change pose, outfit and background as described. " + String(prompt || "");
     }
-    let lastErr = "";
-    for (let i = 0; i < creds.length; i++) {
-      const { account, token } = creds[i];
-      let jobId = "";
+    // Avec photo → Klein img2img ; sans photo → schnell txt2img
+    const model = referenceB64
+      ? "@cf/black-forest-labs/flux-2-klein-4b"
+      : "@cf/black-forest-labs/flux-1-schnell";
+
+    if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
+        && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
+      let lastErr = "délai d'attente dépassé";
+      const i = start % creds.length;
+      const cred = creds[i];
       try {
-        jobId = String(window.LeaAndroid.cloudflareImageStart(
-          account,
-          token,
-          model,
-          finalPrompt,
-          String(char && char.id || "lea"),
-          referenceB64 || ""
+        const jobId = String(window.LeaAndroid.cloudflareImageStart(
+          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64 || ""
         ) || "");
+        if (!jobId) {
+          lastErr = "démarrage Cloudflare impossible";
+        } else {
+          const t0 = Date.now();
+          while (Date.now() - t0 < 180000) {
+            await new Promise((r) => setTimeout(r, 500));
+            let stt = "";
+            try { stt = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
+              lastErr = "poll: " + e.message;
+              break;
+            }
+            if (stt === "pending") continue;
+            if (stt === "missing") { lastErr = "job missing"; break; }
+            let raw = stt;
+            if (stt.indexOf("done:") === 0) raw = stt.slice(5);
+            else if (stt.indexOf("error:") === 0) {
+              raw = stt.slice(6);
+              let ej = null;
+              try { ej = JSON.parse(raw); } catch (_) {}
+              lastErr = readableCloudflareImageError(raw);
+              if (/abort|429|401|402/i.test(lastErr)) {
+                try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
+              }
+              break;
+            }
+            let data = null;
+            try { data = JSON.parse(raw); } catch (_) {}
+            if (data && data.galleryKey) {
+              try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
+              return String(data.galleryKey);
+            }
+            lastErr = "réponse sans galleryKey";
+            break;
+          }
+        }
       } catch (e) {
         lastErr = String(e.message || e);
-        continue;
       }
-      if (!jobId) {
-        lastErr = "cloudflareImageStart a renvoyé vide";
-        continue;
-      }
-      const started = Date.now();
-      while (Date.now() - started < 180000) {
-        await new Promise((r) => setTimeout(r, 800));
-        let result = "";
-        try { result = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); }
-        catch (e) { lastErr = String(e.message || e); break; }
-        if (result === "pending" || result.indexOf("pending:") === 0) continue;
-        if (result === "missing") { lastErr = "job Cloudflare disparu"; break; }
-        if (result.indexOf("error:") === 0) {
-          const raw = result.slice(6);
-          let detail = raw;
-          try { detail = String(JSON.parse(raw).error || raw); } catch (_) {}
-          lastErr = detail.slice(0, 200);
-          // Token invalide → essayer la clé suivante
-          if (/401|403|unauthorized|invalid|token|auth/i.test(lastErr)) break;
-          throw new Error("Cloudflare : " + lastErr);
-        }
-        const raw = result.indexOf("done:") === 0 ? result.slice(5) : result;
-        let data = null;
-        try { data = JSON.parse(raw); } catch (_) {}
-        if (data && data.galleryKey) return String(data.galleryKey);
-        if (data && data.image) return String(data.image);
-        lastErr = "Réponse Cloudflare sans image";
-        break;
-      }
+      throw new Error(lastErr || "Cloudflare natif indisponible");
     }
-    throw new Error("Cloudflare : " + (lastErr || "échec après toutes les clés"));
+
+    throw new Error("La génération avec photo de référence requiert le pont natif Android.");
   }
 
   function normalizeLongTermMemory(value) {
@@ -1558,7 +1563,7 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.68 : 0.48;
+          const denoise = isScene ? 0.65 : 0.52;
           // Prefixe lu par le bridge Java même si WithStrength absent
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + prompt;
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
