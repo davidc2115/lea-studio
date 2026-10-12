@@ -340,12 +340,14 @@ function formatMessageHtml(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // *actions*  (thoughts)  **[Speaker]:** third-party labels
+  // Style only: no visible () or * markers in bubbles
+  // Order: speakers first, then **bold**, then *actions*, then (thoughts)
   let out = esc
-    .replace(/\(([^)]+)\)/g, '<span class="thought">($1)</span>')
-    .replace(/\*([^*]+)\*/g, '<span class="action">*$1*</span>')
-    .replace(/\*\*\[([^\]]+)\]\*\*:/g, '<span class="speaker">[$1]</span>:')
-    .replace(/(^|\n)\[([^\]]{1,40})\]:/g, '$1<span class="speaker">[$2]</span>:');
+    .replace(/\*\*\[([^\]]+)\]\*\*:/g, '<span class="speaker">$1</span> — ')
+    .replace(/(^|\n)\[([^\]]{1,40})\]:/g, '$1<span class="speaker">$2</span> — ')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
+    .replace(/\(([^)]+)\)/g, '<span class="thought">$1</span>');
   return out;
 }
 

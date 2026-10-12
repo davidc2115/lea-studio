@@ -410,8 +410,8 @@ main {
   border: 1px solid rgba(255,107,203,.25);
   border-bottom-right-radius: 6px;
 }
-.bubble .action { color: var(--action); font-style: italic; }
-.bubble .thought { color: var(--thought); opacity: .95; }
+.bubble .action { color: var(--action); font-style: italic; display: inline; }
+.bubble .thought { color: var(--thought); opacity: .9; font-style: italic; font-weight: 400; }
 .bubble .speaker { color: #e879f9; font-weight: 700; }
 .bubble .speaker::before { content: none; }
 .bubble .speech { color: var(--speech); }
