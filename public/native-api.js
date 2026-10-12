@@ -575,7 +575,7 @@
     const mem = memory || {};
     const recentMsgs = (Array.isArray(messages) ? messages : []).slice(-10);
     const recentText = recentMsgs.map((x) => String(x && x.content || "")).join("\n");
-    const blob = [mem.wardrobe || "", mem.scene || "", mem.intimacy || "", recentText.slice(-2200)].join("\n").toLowerCase();
+    const blob = [mem.wardrobe || "", mem.clothesLocation || "", mem.scene || "", mem.intimacy || "", recentText.slice(-2200)].join("\n").toLowerCase();
     const clothBits = extractDialogueClothing(recentMsgs);
 
     const fullyNude = /enti[eè]rement nue|compl[eè]tement nue|toute nue|sans aucun v[eê]tement|plus rien sur le corps|compl[eè]tement d[eé]shabill/.test(blob);
@@ -802,11 +802,13 @@
 
   const LONG_TERM_MEMORY_KEY = "lea.memory.";
   const LONG_TERM_MEMORY_FIELDS = {
-    scene: 480,
-    wardrobe: 800,
-    relationship: 640,
-    intimacy: 640,
-    facts: 640,
+    scene: 600,
+    wardrobe: 500,
+    clothesLocation: 500,
+    relationship: 800,
+    intimacy: 1200,
+    promises: 500,
+    facts: 800,
   };
 
 
@@ -941,17 +943,26 @@
     return [
       "CONTINUITÉ ET MÉMOIRE LONGUE — règles prioritaires :",
       "Le scénario d'origine du personnage est son point de départ canonique et permanent. Ne le remplace jamais par un événement survenu ensuite.",
-      "Les événements apparus dans la conversation ne deviennent pas le scénario d'origine. Continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
-      "La mémoire de scène décrit le présent; la relation décrit son évolution; les souvenirs intimes ne sont conservés que s'ils ont réellement eu lieu dans le jeu; les faits partagés restent distincts. Ces souvenirs concernent le roleplay, pas des affirmations sur la vraie vie de l'utilisateur.",
-      "Ne contredis pas les derniers messages. En cas de conflit, respecte le scénario canonique pour l'origine et les messages récents pour l'évolution de la scène. N'invente ni actions, paroles, promesses, limites ou événements passés.",
-      "La tenue et l'état des vêtements sont des faits persistants : mémorise la tenue complète portée actuellement, ainsi que chaque vêtement retiré, son état (mouillé, en train de sécher, sec) et son emplacement exact. Dès qu'un vêtement est déplacé, son nouvel emplacement remplace l'ancien; ne le récupère jamais depuis un ancien endroit sans action explicite qui l'y a remis. Un vêtement mis à sécher reste à cet endroit et en train de sécher jusqu'à ce qu'un événement établisse le contraire. Si l'emplacement est incertain, demande plutôt que d'inventer.",
+      "Les événements de la conversation évoluent : continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
+      "Ne contredis pas les derniers messages ni la mémoire ci-dessous. N'invente ni actions, paroles, promesses, limites ou événements passés.",
       "SCÉNARIO D'ORIGINE (lecture seule) : " + (c.scenario || ""),
-      "SCÈNE EN COURS (mémoire persistante) : " + (m.scene || "Pas encore de résumé durable; suis les derniers messages."),
-      "TENUE ACTUELLE ET ÉTAT/EMPLACEMENT DES VÊTEMENTS : " + (m.wardrobe || "Pas encore de tenue durable enregistrée; respecte les derniers messages et n'invente aucun vêtement retiré ou déplacé."),
-      "ÉVOLUTION DE LA RELATION : " + (m.relationship || "Pas encore d'évolution durable enregistrée; ne présume pas d'attachement."),
-      "MOMENTS INTIMES ET LIMITES EXPLICITES : " + (m.intimacy || "Aucun souvenir intime durable enregistré; ne présume pas qu'un événement intime a eu lieu."),
-      "FAITS PARTAGÉS : " + (m.facts || "Aucun fait partagé durable enregistré."),
-      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>. Le JSON est un patch invisible dans le chat : n'y mets que les catégories réellement changées parmi scene, wardrobe, relationship, intimacy, facts. Chaque valeur remplace le résumé de sa catégorie et doit rester cumulative, fidèle aux faits déjà mémorisés et aux messages récents, en 1 à 3 phrases courtes. Mets à jour wardrobe dès qu'une tenue change ou qu'un vêtement est mouillé, retiré, déplacé, mis à sécher, récupéré ou remis; résume l'état actuel sans conserver un ancien emplacement devenu faux. Exemple : si des vêtements passent du sol à l'étendoir de la salle de bain, la mémoire dit qu'ils sont sur l'étendoir, pas au sol. Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch et ne crée pas de souvenir à partir d'une supposition.",
+      "SCÈNE EN COURS (lieu, moment de la journée, ambiance) : " + (m.scene || "Pas encore de résumé; suis les derniers messages."),
+      "TENUE ACTUELLE (uniquement ce qui est porté maintenant) : " + (m.wardrobe || "Pas encore de tenue enregistrée; suis les derniers messages."),
+      "EMPLACEMENT DES VÊTEMENTS (retirés, au sol, étendoir, canapé, etc.) : " + (m.clothesLocation || "Aucun vêtement déplacé enregistré."),
+      "RELATION / ÉVOLUTION (attachement, tension, confiance, statut) : " + (m.relationship || "Pas d'évolution durable enregistrée."),
+      "MOMENTS INTIMES (cumulatif — lieu, position, actes, moment de la journée, ce qui a été accepté ou refusé) : " + (m.intimacy || "Aucun souvenir intime enregistré; ne présume rien."),
+      "PROMESSES ET ENGAGEMENTS (ce qui a été promis ou convenu) : " + (m.promises || "Aucune promesse enregistrée."),
+      "FAITS PARTAGÉS (infos dites et confirmées dans le dialogue) : " + (m.facts || "Aucun fait partagé enregistré."),
+      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>.",
+      "Le JSON est un patch invisible : n'y mets que les clés réellement changées parmi: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
+      "Chaque valeur remplace le résumé de sa catégorie, reste cumulative (ne perds pas les faits anciens pertinents), 1 à 4 phrases courtes.",
+      "wardrobe = UNIQUEMENT ce qui est porté maintenant (pas l'emplacement des vêtements retirés).",
+      "clothesLocation = où sont les vêtements retirés / rangés / qui sèchent (séparé de wardrobe).",
+      "intimacy = cumul des moments intimes réels du jeu: lieu, position (missionnaire, doggy, assise…), actes (oral, anal, pénétration…), moment de la journée, limites acceptées ou refusées. Ne jamais effacer un souvenir intime déjà enregistré sans raison explicite dans le dialogue.",
+      "relationship = évolution du lien (flirt, distance, complicité…).",
+      "promises = promesses ou accords (ex. revenir demain, ne pas le dire à X).",
+      "facts = faits partagés (prénom d'un tiers, métier, préférence…).",
+      "Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch.",
     ].join("\n");
   }
 
@@ -1426,7 +1437,7 @@
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
     const groqKeys = splitKeys(st.groqKeys);
-    const hist = (messages || []).slice(-16);
+    const hist = (messages || []).slice(-40);
 
     const order =
       engine === "openai"
@@ -1563,8 +1574,9 @@
           // === PROFIL et SCÈNE : denoise / prompt isolés ===
           // Profil → buildPhysicalImagePrompt + 0.62 (ne pas modifier)
           // Scène  → buildConversationImagePrompt + 0.65 (système séparé)
-          const PROFILE_HORDE_DENOISE = 0.62;
-          const SCENE_HORDE_DENOISE = 0.65;
+          // 0.62-0.65 = quasi-copie de la ref; 0.75+ force nouvelle tenue/pose
+          const PROFILE_HORDE_DENOISE = 0.75;
+          const SCENE_HORDE_DENOISE = 0.78;
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
           if (isScene) {
             // Force le prompt conversation (jamais le prompt profil)
