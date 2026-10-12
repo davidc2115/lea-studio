@@ -455,8 +455,26 @@ public class LeaBridge {
                 byte[] referenceBytes = null;
                 if (useReferenceModel) {
                     try {
-                        referenceBytes = android.util.Base64.decode(refRaw, android.util.Base64.DEFAULT);
-                        if (referenceBytes.length == 0) throw new IllegalArgumentException("photo de profil vide");
+                        byte[] decoded = android.util.Base64.decode(refRaw, android.util.Base64.DEFAULT);
+                        if (decoded.length == 0) throw new IllegalArgumentException("photo de profil vide");
+                        android.graphics.Bitmap srcBmp = android.graphics.BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                        if (srcBmp == null) throw new IllegalArgumentException("decodage bitmap impossible");
+                        int sw = srcBmp.getWidth();
+                        int sh = srcBmp.getHeight();
+                        int maxSide = Math.max(sw, sh);
+                        android.graphics.Bitmap outBmp = srcBmp;
+                        if (maxSide > 512) {
+                            float sc = 512f / (float) maxSide;
+                            int nw = Math.max(1, Math.round(sw * sc));
+                            int nh = Math.max(1, Math.round(sh * sc));
+                            outBmp = android.graphics.Bitmap.createScaledBitmap(srcBmp, nw, nh, true);
+                            if (outBmp != srcBmp) srcBmp.recycle();
+                        }
+                        java.io.ByteArrayOutputStream jpegRef = new java.io.ByteArrayOutputStream();
+                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpegRef);
+                        outBmp.recycle();
+                        referenceBytes = jpegRef.toByteArray();
+                        if (referenceBytes.length < 100) throw new IllegalArgumentException("reference trop petite apres resize");
                     } catch (Exception e) {
                         HTTP_JOBS.put(id, "error:{\"error\":\"Référence visage invalide: " + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
                         return;
@@ -494,6 +512,7 @@ public class LeaBridge {
                             writeMultipartFile(multipart, boundary, "input_image_0", "profile-reference.jpg", referenceBytes);
                             writeMultipartField(multipart, boundary, "width", "768");
                             writeMultipartField(multipart, boundary, "height", "1024");
+                            writeMultipartField(multipart, boundary, "guidance", "3.5");
                             writeMultipartField(multipart, boundary, "seed", String.valueOf(seed));
                             multipart.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
                             byte[] body = multipart.toByteArray();

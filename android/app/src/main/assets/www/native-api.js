@@ -152,30 +152,34 @@
   async function profileReferenceImageB64(char, mime) {
     const c = char || LEA;
     const src = String(c.cover || (Array.isArray(c.gallery) && c.gallery[0]) || "").trim();
-    if (!src) return null; // txt2img sans référence
+    if (!src) return null;
     let imageSource = src;
     if (src.indexOf("gallery:") === 0) {
       if (!window.LeaAndroid || typeof window.LeaAndroid.loadGalleryImage !== "function") {
         throw new Error("La photo de profil locale n'est pas accessible.");
       }
       imageSource = String(window.LeaAndroid.loadGalleryImage(src) || "");
+      if (!imageSource || imageSource.length < 32) {
+        throw new Error("Impossible de charger la photo de profil (gallery).");
+      }
     }
-    if (!imageSource) throw new Error("La photo de profil n'est pas accessible.");
     const image = await new Promise((resolve, reject) => {
       const element = new Image();
       element.onload = () => resolve(element);
-      element.onerror = () => reject(new Error("Photo de profil illisible."));
+      element.onerror = () => reject(new Error("Photo de profil illisible: " + String(src).slice(0, 60)));
       element.src = imageSource;
     });
     if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
-    const scale = Math.min(384 / image.naturalWidth, 384 / image.naturalHeight, 1);
+    // FLUX.2 Klein exige < 512x512
+    const maxSide = 512;
+    const scale = Math.min(maxSide / image.naturalWidth, maxSide / image.naturalHeight, 1);
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
     canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL(mime, 0.78);
+    const dataUrl = canvas.toDataURL(mime, 0.9);
     if (!dataUrl.startsWith("data:" + mime + ";base64,")) throw new Error("Format de photo de référence non pris en charge.");
     const comma = dataUrl.indexOf(",");
     if (comma < 0 || dataUrl.length < 100) throw new Error("Impossible de préparer la photo de profil.");
@@ -461,8 +465,8 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "RAW photo of adult woman 18+, glamorous fashion photography, photorealistic, detailed skin texture, sharp focus, 8k, magazine cover quality, natural lighting, seductive elegance without explicit content,"
-      : "RAW photo of adult woman 18+, sensual seductive provocative fashion, photorealistic, detailed skin pores, sharp focus, 8k high detail, natural lighting, flirty mood, sexy outfit, different pose from reference,";
+      ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
       mood,
@@ -681,7 +685,7 @@
       "Character: " + name + ", adult woman 18+,",
       appearance ? ("Sheet: " + appearance + ".") : "",
       // Tenue mémoire EN PREMIER (priorité absolue sur la photo de profil)
-      "MUST WEAR THIS OUTFIT NOW: " + inferred.outfitEn + ".",
+      "MUST WEAR THIS OUTFIT NOW (ignore clothes in reference photo): " + inferred.outfitEn + ".",
       inferred.wardrobeFr ? ("French wardrobe note: " + inferred.wardrobeFr.slice(0, 220) + ".") : "",
       "Pose: " + inferred.poseEn + ".",
       "Place: " + inferred.sceneEn + ".",
@@ -700,7 +704,15 @@
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    const referenceB64 = await profileReferenceJpegB64(character);
+    let referenceB64 = null;
+    try {
+      referenceB64 = await profileReferenceJpegB64(character);
+    } catch (e) {
+      throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
+    }
+    if (referenceB64) {
+      prompt = "The woman in input_image_0 is the exact subject. Keep her identical face, eyes, hair color and skin tone. Only change pose, outfit and background as described. " + String(prompt || "");
+    }
     // Avec photo → Klein img2img ; sans photo → schnell txt2img
     const model = referenceB64
       ? "@cf/black-forest-labs/flux-2-klein-4b"
@@ -761,7 +773,16 @@
 
   async function generateHordeImage(prompt, character, st, options) {
     const opts = options || {};
-    const referenceB64 = await profileReferenceJpegB64(character); // JPEG — WebP often dropped by Horde workers
+    let referenceB64 = null;
+    try {
+      referenceB64 = await profileReferenceJpegB64(character);
+    } catch (refErr) {
+      referenceB64 = null;
+      if (opts.requireRef) throw new Error("Photo de profil requise pour garder le visage: " + String(refErr.message || refErr).slice(0, 100));
+    }
+    if (opts.requireRef && !referenceB64) {
+      throw new Error("Photo de profil absente — impossible de conserver le visage.");
+    }
     if (!window.LeaAndroid || typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
     }
@@ -1486,8 +1507,8 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.68 : 0.48;
-          const dataUrl = await generateHordeImage(prompt, char, st, { denoise: denoise });
+          const denoise = isScene ? 0.60 : 0.52;
+          const dataUrl = await generateHordeImage(prompt, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
           return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde", mode: isScene ? "conversation" : "profile", denoise: denoise };
         } catch (hordeErr) {
           // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)
