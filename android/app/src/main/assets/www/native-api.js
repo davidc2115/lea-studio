@@ -663,9 +663,8 @@
       throw new Error("La génération nécessite un personnage majeur (18+).");
     }
     const name = String(c.name || "woman").slice(0, 80);
-    // Court : la tenue doit rester dans le plafond Horde (~2400 car.)
-    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
-    const looksEn = String(c.looks_en || "").trim().slice(0, 200);
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 220);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 220);
     const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
     const bustInfo = describeBustLock(String(c.Poitrine || c.poitrine || c.bustEstimate || ""), appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
@@ -673,42 +672,66 @@
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
     const ward = String(inferred.outfitEn || "").trim();
     const wardFr = String(inferred.wardrobeFr || "").trim();
+    const lowWard = (ward + " " + wardFr).toLowerCase();
 
-    const outfitBlock = [
-      "CRITICAL OUTFIT (must match conversation memory, IGNORE clothes on reference photo):",
-      ward || "outfit as in latest dialogue",
-      wardFr ? ("Memory FR: " + wardFr.slice(0, 240)) : "",
-      "Pose: " + (inferred.poseEn || "natural candid pose"),
-      "Place: " + (inferred.sceneEn || "indoor living room"),
-      inferred.sceneFr ? ("Scene FR: " + inferred.sceneFr.slice(0, 160)) : "",
+    // Poids tenues (Horde / SD style) si mémoire explicite
+    let weightBits = [];
+    if (/dress|robe|baiss|abaiss|pulled down|waist/.test(lowWard)) {
+      weightBits.push("(short dress pulled down to waist:1.35)");
+    }
+    if (/bare breast|topless|poitrine|seins|nude breast|exposed/.test(lowWard)) {
+      weightBits.push("(bare breasts exposed:1.3)", "(topless:1.25)", "(no bra:1.2)");
+    }
+    if (/sofa|canap|salon|living/.test(lowWard + " " + String(inferred.sceneEn || ""))) {
+      weightBits.push("(on living room sofa:1.15)");
+    }
+
+    // 1) Identité visage EN PREMIER (denoise moyen → le modèle doit ancrer le visage)
+    const faceLock = [
+      hasRef ? "img2img reference: keep the EXACT same face as input_image_0," : "",
+      "identical facial features, same eyes, same nose, same lips, same jaw,",
+      "same skin tone, same hair color, same hair length and style,",
+      looksEn ? ("face/hair lock: " + looksEn) : "",
+      ethnicity ? ("ethnicity: " + ethnicity) : "",
+      "do NOT change her face or race,",
     ].filter(Boolean).join(" ");
 
-    const identity = [
-      "SAME adult woman as reference input_image_0,",
-      "identical face, eyes, nose, lips, skin tone, hair color and length,",
-      looksEn ? ("looks: " + looksEn) : "",
-      ethnicity ? ("ethnicity: " + ethnicity) : "",
+    // 2) Corps / poitrine (depuis fiche, pas la ref seule)
+    const bodyLock = [
       bodyInfo.lock,
       bustInfo.lock,
-    ].filter(Boolean).join(", ");
+      "same body proportions as character sheet,",
+    ].filter(Boolean).join(" ");
 
-    const negClothes =
-      "beige strapless bodysuit, beige shapewear, white corset, white lingerie bodysuit, " +
-      "profile photo outfit, hands on hips fashion pose, standing studio seamless backdrop, " +
-      "same outfit as reference, identical pose as reference";
+    // 3) Tenue mémoire (priorité absolue vs vêtements de la photo profil)
+    const outfitBlock = [
+      "OUTFIT CHANGE REQUIRED (ignore clothing on the reference photo):",
+      weightBits.join(", "),
+      ward || "as described in conversation",
+      wardFr ? ("Memory: " + wardFr.slice(0, 200)) : "",
+      "Pose: " + (inferred.poseEn || "natural candid pose, not fashion catalog hands-on-hips"),
+      "Place: " + (inferred.sceneEn || "realistic home interior"),
+    ].filter(Boolean).join(" ");
+
+    const avoid =
+      "beige shapewear, beige bodysuit, beige corset, white corset, white lingerie bodysuit, " +
+      "strapless nude shapewear, hands on hips catalog pose, seamless grey studio backdrop, " +
+      "same clothes as reference, fashion studio pose, different face, different ethnicity, " +
+      "painting, CGI, anime, text, watermark, extra people, deformed hands, child, underage, loli";
 
     const parts = [
-      outfitBlock,
-      "photorealistic RAW photo, sharp natural skin, 8k,",
-      identity,
-      "Character: " + name + ", adult woman 18+,",
+      "photorealistic RAW photo of the same woman, 8k, natural skin,",
+      faceLock,
+      bodyLock,
+      "Character: " + name + ", adult 18+,",
       appearance ? ("Sheet: " + appearance + ".") : "",
-      extra ? ("Extra: " + String(extra).slice(0, 100) + ".") : "",
+      outfitBlock,
+      extra ? ("Extra: " + String(extra).slice(0, 80)) : "",
       hasRef
-        ? "img2img: keep FACE and body identity ONLY; completely replace clothing, pose and background with the CRITICAL OUTFIT above."
+        ? "Denoise allows new clothes and pose only; face must stay identical to reference."
         : "",
-      "face fully visible, three-quarter or full body, not cropped headshot only,",
-      "avoid: " + negClothes + ", different face, different ethnicity, painting, CGI, text, watermark, extra people, deformed hands, child, underage, loli.",
+      "face fully visible, three-quarter body,",
+      "avoid: " + avoid + ".",
     ].filter(Boolean);
 
     let prompt = parts.join(" ").replace(/\s+/g, " ").trim();
@@ -1452,7 +1475,7 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.88 : 0.62;
+          const denoise = isScene ? 0.70 : 0.55;
           // Prefixe lu par le bridge Java même si WithStrength absent
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + prompt;
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
