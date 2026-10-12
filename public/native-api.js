@@ -665,70 +665,57 @@
    * Source unique de la tenue = mémoire roleplay + derniers messages.
    */
   function buildConversationImagePrompt(char, memory, messages, extra) {
+    // Système 100 % séparé du profil. Objectif: tenue = mémoire conversation, visage ≈ référence.
     const c = char || LEA;
-    const age = c.age == null || c.age === "" ? NaN : Number(c.age);
-    if (Number.isInteger(age) && age < 18) {
-      throw new Error("La génération nécessite un personnage majeur (18+).");
-    }
-    const name = String(c.name || "woman").slice(0, 80);
-    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 200);
-    const looksEn = String(c.looks_en || "").trim().slice(0, 200);
-    const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
-    const bustInfo = describeBustLock(String(c.Poitrine || c.poitrine || c.bustEstimate || ""), appearance, "horde");
+    const name = String(c.name || "the woman").slice(0, 80);
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 480);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 280);
+    const ethnicity = String(c.ethnicity || "").trim().slice(0, 80);
+    const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bustInfo = describeBustLock(bust, appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
-    const inferred = inferConversationOutfit(memory, messages);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
+    const inferred = inferConversationOutfit(memory, messages);
     const ward = String(inferred.outfitEn || "").trim();
-    const wardFr = String(inferred.wardrobeFr || "").trim();
-    const poseEn = String(inferred.poseEn || "natural candid full-body pose, face visible").trim();
-    const sceneEn = String(inferred.sceneEn || "realistic home interior").trim();
-    const low = (ward + " " + wardFr + " " + poseEn + " " + sceneEn).toLowerCase();
+    const wardFr = String(inferred.outfitFr || "").trim();
+    const poseEn = String(inferred.poseEn || "natural candid pose matching the scene").trim();
+    const sceneEn = String(inferred.sceneEn || "indoor realistic setting").trim();
+    const nude = !!(inferred.nude || inferred.topless);
 
-    // Poids SD/Horde selon la mémoire (pas les tenues aléatoires du profil)
-    const weights = [];
-    if (/dress|robe|baiss|abaiss|pulled down|waist|bunched/.test(low)) {
-      weights.push("(short dress pulled down to the waist:1.35)");
-    }
-    if (/bare breast|topless|poitrine|seins|exposed|nude breast|no bra/.test(low)) {
-      weights.push("(bare breasts fully exposed:1.35)", "(topless:1.25)");
-    }
-    if (/lingerie|lace|string|bra|panties/.test(low) && !/topless|bare breast/.test(low)) {
-      weights.push("(sexy lingerie as described:1.2)");
-    }
-    if (/sofa|canap|salon|living/.test(low)) weights.push("(on living room sofa:1.2)");
-    if (/bed|lit|chambre|bedroom/.test(low)) weights.push("(in bedroom:1.15)");
-    if (/nude|completely nude|enti.rement nue/.test(low)) weights.push("(completely nude:1.3)");
+    // Tenue prioritaire absolue — ne jamais laisser le shapewear de profil gagner
+    const outfitBlock = nude
+      ? ("COMPLETELY NUDE adult woman, no clothing, no bra, no panties, " + (ward || "bare skin only"))
+      : (ward
+          ? ("WEARING NOW (must match conversation memory exactly, override reference clothes): " + ward)
+          : "WEARING NOW: clothing described in the latest dialogue, not the profile photo outfit");
 
-    // Structure alignée sur le profil qui marche (NEW OUTFIT / NEW POSE en tête),
-    // mais contenu 100 % conversation.
     const parts = [
-      "SAME woman as reference photo — keep ONLY face, hair color, eyes and skin tone.",
-      "MUST change outfit and pose completely from the reference photo.",
-      "RAW photo adult 18+, photorealistic, sharp, 8k,",
-      "NEW OUTFIT (from conversation memory, required, different from reference clothing):",
-      weights.join(", "),
-      ward || "clothing exactly as described in the latest dialogue",
-      wardFr ? ("Memory FR: " + wardFr.slice(0, 220)) : "",
-      "NEW POSE (from conversation, required, different from reference pose): " + poseEn + ".",
+      "CRITICAL RULES FOR THIS IMAGE:",
+      "1) Reference photo is ONLY for face identity (same face, hair, eyes, skin tone).",
+      "2) DO NOT copy the reference outfit, pose, background or studio lighting.",
+      "3) Outfit MUST be the conversation outfit below, not white shapewear, not beige bodysuit, not white corset.",
+      outfitBlock + ".",
+      "Pose: " + poseEn + ".",
       "Location: " + sceneEn + ".",
-      inferred.sceneFr ? ("Scene FR: " + String(inferred.sceneFr).slice(0, 140)) : "",
+      wardFr ? ("Memory FR tenue: " + wardFr.slice(0, 240) + ".") : "",
+      inferred.sceneFr ? ("Memory FR lieu: " + String(inferred.sceneFr).slice(0, 140) + ".") : "",
+      "Subject: adult woman 18+ named " + name + ",",
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
-      bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
+      bustInfo.label ? ("bra cup " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
-      looksEn ? ("Technical looks: " + looksEn + ".") : "",
-      ethnicity ? ("ethnicity: " + ethnicity + ",") : "",
-      "photorealistic full-body or three-quarter photo, one adult woman, face fully visible,",
+      looksEn ? ("looks: " + looksEn + ".") : "",
+      ethnicity ? ("ethnicity " + ethnicity + ",") : "",
+      appearance ? ("physical sheet: " + appearance + ".") : "",
       hasRef
-        ? "img2img: identical face to input_image_0; replace clothing, pose and background only."
-        : "",
-      appearance ? ("Sheet: " + appearance + ".") : "",
-      extra ? ("Extra: " + String(extra).slice(0, 100)) : "",
-      "Character: " + name + ",",
-      "avoid: same outfit as reference, same pose as reference, hands on hips catalog pose,",
-      "white corset, beige shapewear, beige bodysuit, studio seamless grey backdrop only,",
-      "different face, different ethnicity, painting, CGI, anime, text, watermark, extra people,",
-      "deformed hands, child, underage, loli,",
+        ? "img2img: keep face from input_image_0 only; replace clothing pose and background completely."
+        : "text-to-image photorealistic full body.",
+      extra ? ("Extra: " + String(extra).slice(0, 120)) : "",
+      "photorealistic RAW photo, sharp focus, natural light, full body or three-quarter view, face visible,",
+      "avoid: white shapewear, beige body shaper, beige bodysuit, white corset, white bra catalog pose,",
+      "hands on hips studio pose, seamless grey backdrop, same outfit as reference, same pose as reference,",
+      "painting, CGI, anime, cartoon, different face, different ethnicity, text, watermark, extra people,",
+      "deformed hands, child, underage,",
       bustInfo.neg + ",",
       bodyInfo.neg + ",",
     ].filter(Boolean);
@@ -737,6 +724,7 @@
     if (prompt.length > 2300) prompt = prompt.slice(0, 2300);
     return prompt;
   }
+
 
   async function generateHordeImage(prompt, character, st, options) {
     const opts = options || {};
@@ -1584,8 +1572,16 @@
           // Profil → buildPhysicalImagePrompt + 0.62 (ne pas modifier)
           // Scène  → buildConversationImagePrompt + 0.65 (système séparé)
           // 0.62-0.65 = quasi-copie de la ref; 0.75+ force nouvelle tenue/pose
+          // PROFIL: ne pas toucher (0.75). SCÈNE: denoise élevé pour forcer la tenue mémoire.
           const PROFILE_HORDE_DENOISE = 0.75;
-          const SCENE_HORDE_DENOISE = 0.78;
+          let SCENE_HORDE_DENOISE = 0.90;
+          if (isScene) {
+            try {
+              const mem = body.memory || {};
+              const w = String(mem.wardrobe || "").toLowerCase();
+              if (w.length > 12 && !/shapewear|corset|body\s*suit|bodysuit/.test(w)) SCENE_HORDE_DENOISE = 0.93;
+            } catch (_) {}
+          }
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
           if (isScene) {
             // Force le prompt conversation (jamais le prompt profil)

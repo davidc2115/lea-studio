@@ -412,7 +412,7 @@ main {
 }
 .bubble .action { color: var(--action); font-style: italic; display: inline; }
 .bubble .thought { color: var(--thought); opacity: .9; font-style: italic; font-weight: 400; }
-.bubble .speaker { color: #e879f9; font-weight: 700; }
+.bubble .speaker { color: #f0abfc; font-weight: 800; background: rgba(232,121,249,0.18); padding: 1px 6px; border-radius: 6px; }
 .bubble .speaker::before { content: none; }
 .bubble .speech { color: var(--speech); }
 .chat-input-row {
