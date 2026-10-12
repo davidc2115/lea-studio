@@ -691,7 +691,7 @@
       "Place: " + inferred.sceneEn + ".",
       inferred.sceneFr ? ("Scene: " + inferred.sceneFr.slice(0, 180) + ".") : "",
       extra ? ("Extra: " + String(extra).slice(0, 120) + ".") : "",
-      hasRef ? "img2img: keep face and body identity ONLY; replace clothing and pose to match the scene." : "",
+      hasRef ? "img2img: KEEP FACE only. COMPLETELY CHANGE clothing and pose. Do NOT copy the reference outfit or standing studio pose." : "",
       "face fully visible, not cropped, full body or three-quarter,",
       "avoid: " + wardrobeNeg + " different face, different ethnicity, different hair color, grey studio seamless backdrop, headless crop, child, underage, loli, text, watermark, extra people, deformed hands, " +
         bustInfo.neg + ", " + bodyInfo.neg,
@@ -1507,8 +1507,10 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.60 : 0.52;
-          const dataUrl = await generateHordeImage(prompt, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
+          const denoise = isScene ? 0.78 : 0.62;
+          // Prefixe lu par le bridge Java même si WithStrength absent
+          const promptWithDenoise = "[[denoise:" + denoise + "]] " + prompt;
+          const dataUrl = await generateHordeImage(promptWithDenoise, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
           return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde", mode: isScene ? "conversation" : "profile", denoise: denoise };
         } catch (hordeErr) {
           // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)

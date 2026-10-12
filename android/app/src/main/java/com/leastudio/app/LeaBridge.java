@@ -777,16 +777,27 @@ public class LeaBridge {
                     params.put("cfg_scale", 6.5);
                     params.put("sampler_name", "k_euler_a");
                     // Conversation / tenue différente : denoise plus haut pour ne pas coller à la pose profil
-                    double denoise = 0.48;
+                    double denoise = 0.62;
+                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
+                    String promptWork = promptSafe;
+                    try {
+                        java.util.regex.Matcher dm = java.util.regex.Pattern
+                            .compile("\\[\\[denoise:([0-9.]+)\\]\\]")
+                            .matcher(promptWork);
+                        if (dm.find()) {
+                            double d = Double.parseDouble(dm.group(1));
+                            if (d > 0.15 && d <= 1.0) denoise = d;
+                            promptWork = dm.replaceAll("").trim();
+                        }
+                    } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
-                    else if (hasRef) denoise = 0.48;
-                    else denoise = 1.0;
+                    else if (!hasRef) denoise = 1.0;
                     params.put("denoising_strength", denoise);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptSafe
+                    payload.put("prompt", promptWork
                         + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
                     if (hasRef) {
@@ -809,7 +820,22 @@ public class LeaBridge {
                     String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                     JSONObject accepted = new JSONObject(acceptedRaw);
                     if (accepted.has("message") && !accepted.has("id")) {
-                        throw new java.io.IOException("AI Horde: " + accepted.optString("message", "refus"));
+                        String hm = accepted.optString("message", "refus");
+                        if (hm.toLowerCase().contains("heavy demand") || hm.contains("617") || hm.toLowerCase().contains("too many")) {
+                            params.put("width", 448);
+                            params.put("height", 576);
+                            params.put("steps", 14);
+                            payload.put("params", params);
+                            acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
+                            accepted = new JSONObject(acceptedRaw);
+                        }
+                        if (accepted.has("message") && !accepted.has("id")) {
+                            hm = accepted.optString("message", "refus");
+                            if (hm.toLowerCase().contains("anonymous")) {
+                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite dans Réglages. " + hm.substring(0, Math.min(80, hm.length())));
+                            }
+                            throw new java.io.IOException("AI Horde: " + hm);
+                        }
                     }
                     String requestId = accepted.optString("id", "");
                     if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));
