@@ -748,7 +748,7 @@ public class LeaBridge {
         HTTP_JOBS.put(id, "pending");
         final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
         final String rawPrompt = prompt == null ? "" : prompt.trim();
-        final String promptSafe = rawPrompt.substring(0, Math.min(rawPrompt.length(), 2000));
+        final String promptSafe = rawPrompt.substring(0, Math.min(rawPrompt.length(), 2400));
         final String reference = referenceImageB64 == null ? "" : referenceImageB64.trim();
         final String hordeKey = apiKey == null || apiKey.trim().isEmpty() ? "0000000000" : apiKey.trim();
         final boolean registered = !"0000000000".equals(hordeKey);

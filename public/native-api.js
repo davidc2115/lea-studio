@@ -583,11 +583,13 @@
     function translateWardrobeFr(fr) {
       let t = String(fr || "");
       const pairs = [
-        [/robe\s+courte\s+baiss[eé]e\s+au\s+niveau\s+de\s+la\s+taille/gi, "short dress pulled down to the waist"],
+        [/robe\s+courte\s+baiss[eé]e\s+(?:au\s+niveau\s+de\s+)?la\s+taille/gi, "short dress pulled down around the waist"],
+        [/robe\s+(?:toujours\s+)?abaiss[eé]e\s+sur\s+(?:sa\s+)?taille/gi, "dress still pulled down to her waist"],
         [/robe\s+courte/gi, "short dress"],
-        [/poitrine\s*(?:95[DdDd]|[A-Ja-j])?\s*nue|seins?\s*nus|poitrine\s*nue/gi, "bare breasts exposed"],
-        [/talons?\s+pos[eé]s?\s+au\s+sol/gi, "high heels placed on the floor"],
+        [/poitrine\s*(?:95\s*[Dd]|bonnet\s*[A-Ja-j]|[A-Ja-j])?\s*nue|seins?\s*(?:nus|à\s+l['']air)|poitrine\s*(?:nue|lourde\s+à\s+l['']air)/gi, "bare heavy breasts fully exposed"],
+        [/talons?\s+(?:pos[eé]s?|laiss[eé]s?)\s+(?:au\s+sol|près\s+du\s+canap[eé]|par\s+terre)/gi, "high heels left on the floor near the sofa"],
         [/talons?/gi, "high heels"],
+        [/dans\s+le\s+salon/gi, "in the living room"],
         [/canap[eé]/gi, "sofa"],
         [/nuisette/gi, "babydoll slip"],
         [/lingerie/gi, "lingerie"],
@@ -598,7 +600,11 @@
       ];
       let en = t;
       for (let i = 0; i < pairs.length; i++) en = en.replace(pairs[i][0], pairs[i][1]);
-      return en.slice(0, 280);
+      const low = String(fr || "").toLowerCase();
+      if (/baiss|abaiss/.test(low) && /(poitrine|seins?)/.test(low) && /(nue|nus|à l'air|a l'air)/.test(low)) {
+        en = "short dress bunched around her waist, topless, bare breasts fully exposed, no bra, " + en;
+      }
+      return en.slice(0, 320);
     }
 
     let outfitEn = "";
@@ -657,118 +663,57 @@
       throw new Error("La génération nécessite un personnage majeur (18+).");
     }
     const name = String(c.name || "woman").slice(0, 80);
-    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 650);
-    const looksEn = String(c.looks_en || "").trim().slice(0, 360);
-    const ethnicity = String(c.ethnicity || "").trim().slice(0, 80);
+    // Court : la tenue doit rester dans le plafond Horde (~2400 car.)
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 200);
+    const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
     const bustInfo = describeBustLock(String(c.Poitrine || c.poitrine || c.bustEstimate || ""), appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const inferred = inferConversationOutfit(memory, messages);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
+    const ward = String(inferred.outfitEn || "").trim();
+    const wardFr = String(inferred.wardrobeFr || "").trim();
 
-    const identity = [
-      "SAME woman as reference photo input_image_0,",
-      "identical face features, identical eyes, identical nose, identical lips,",
-      "identical skin tone and ethnicity, identical hair color and length,",
-      looksEn ? ("looks: " + looksEn + ",") : "",
-      ethnicity ? ("ethnicity: " + ethnicity + ",") : "",
-      bodyInfo.lock + ",",
-      bustInfo.lock + ",",
-      "do not change race or face identity,",
+    const outfitBlock = [
+      "CRITICAL OUTFIT (must match conversation memory, IGNORE clothes on reference photo):",
+      ward || "outfit as in latest dialogue",
+      wardFr ? ("Memory FR: " + wardFr.slice(0, 240)) : "",
+      "Pose: " + (inferred.poseEn || "natural candid pose"),
+      "Place: " + (inferred.sceneEn || "indoor living room"),
+      inferred.sceneFr ? ("Scene FR: " + inferred.sceneFr.slice(0, 160)) : "",
     ].filter(Boolean).join(" ");
 
-    const wardrobeNeg = inferred.wardrobeFr
-      ? "white corset, white lingerie bodysuit, white shapewear, profile photo outfit, hands on hips studio pose, standing fashion pose,"
-      : "";
+    const identity = [
+      "SAME adult woman as reference input_image_0,",
+      "identical face, eyes, nose, lips, skin tone, hair color and length,",
+      looksEn ? ("looks: " + looksEn) : "",
+      ethnicity ? ("ethnicity: " + ethnicity) : "",
+      bodyInfo.lock,
+      bustInfo.lock,
+    ].filter(Boolean).join(", ");
+
+    const negClothes =
+      "beige strapless bodysuit, beige shapewear, white corset, white lingerie bodysuit, " +
+      "profile photo outfit, hands on hips fashion pose, standing studio seamless backdrop, " +
+      "same outfit as reference, identical pose as reference";
+
     const parts = [
+      outfitBlock,
       "photorealistic RAW photo, sharp natural skin, 8k,",
       identity,
       "Character: " + name + ", adult woman 18+,",
       appearance ? ("Sheet: " + appearance + ".") : "",
-      // Tenue mémoire EN PREMIER (priorité absolue sur la photo de profil)
-      "MUST WEAR THIS OUTFIT NOW (ignore clothes in reference photo): " + inferred.outfitEn + ".",
-      inferred.wardrobeFr ? ("French wardrobe note: " + inferred.wardrobeFr.slice(0, 220) + ".") : "",
-      "Pose: " + inferred.poseEn + ".",
-      "Place: " + inferred.sceneEn + ".",
-      inferred.sceneFr ? ("Scene: " + inferred.sceneFr.slice(0, 180) + ".") : "",
-      extra ? ("Extra: " + String(extra).slice(0, 120) + ".") : "",
-      hasRef ? "img2img: KEEP FACE only. COMPLETELY CHANGE clothing and pose. Do NOT copy the reference outfit or standing studio pose." : "",
-      "face fully visible, not cropped, full body or three-quarter,",
-      "avoid: " + wardrobeNeg + " different face, different ethnicity, different hair color, grey studio seamless backdrop, headless crop, child, underage, loli, text, watermark, extra people, deformed hands, " +
-        bustInfo.neg + ", " + bodyInfo.neg,
-    ];
-    return parts.filter(Boolean).join(" ").slice(0, 1950);
-  }
+      extra ? ("Extra: " + String(extra).slice(0, 100) + ".") : "",
+      hasRef
+        ? "img2img: keep FACE and body identity ONLY; completely replace clothing, pose and background with the CRITICAL OUTFIT above."
+        : "",
+      "face fully visible, three-quarter or full body, not cropped headshot only,",
+      "avoid: " + negClothes + ", different face, different ethnicity, painting, CGI, text, watermark, extra people, deformed hands, child, underage, loli.",
+    ].filter(Boolean);
 
-  async function generateCloudflareImage(prompt, st, character) {
-    const creds = parseCloudflareCreds(st);
-    if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
-    let start = 0;
-    try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
-    let referenceB64 = null;
-    try {
-      referenceB64 = await profileReferenceJpegB64(character);
-    } catch (e) {
-      throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
-    }
-    if (referenceB64) {
-      prompt = "The woman in input_image_0 is the exact subject. Keep her identical face, eyes, hair color and skin tone. Only change pose, outfit and background as described. " + String(prompt || "");
-    }
-    // Avec photo → Klein img2img ; sans photo → schnell txt2img
-    const model = referenceB64
-      ? "@cf/black-forest-labs/flux-2-klein-4b"
-      : "@cf/black-forest-labs/flux-1-schnell";
-
-    if (window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function"
-        && typeof window.LeaAndroid.httpPostJsonPoll === "function") {
-      let lastErr = "délai d'attente dépassé";
-      const i = start % creds.length;
-      const cred = creds[i];
-      try {
-        const jobId = String(window.LeaAndroid.cloudflareImageStart(
-          cred.account, cred.token, model, String(prompt).slice(0, 2048), String(character && character.id || "lea"), referenceB64 || ""
-        ) || "");
-        if (!jobId) {
-          lastErr = "démarrage Cloudflare impossible";
-        } else {
-          const t0 = Date.now();
-          while (Date.now() - t0 < 180000) {
-            await new Promise((r) => setTimeout(r, 500));
-            let stt = "";
-            try { stt = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
-              lastErr = "poll: " + e.message;
-              break;
-            }
-            if (stt === "pending") continue;
-            if (stt === "missing") { lastErr = "job missing"; break; }
-            let raw = stt;
-            if (stt.indexOf("done:") === 0) raw = stt.slice(5);
-            else if (stt.indexOf("error:") === 0) {
-              raw = stt.slice(6);
-              let ej = null;
-              try { ej = JSON.parse(raw); } catch (_) {}
-              lastErr = readableCloudflareImageError(raw);
-              if (/abort|429|401|402/i.test(lastErr)) {
-                try { localStorage.setItem("lea.cfKeyIndex", String((start + i + 1) % creds.length)); } catch (_) {}
-              }
-              break;
-            }
-            let data = null;
-            try { data = JSON.parse(raw); } catch (_) {}
-            if (data && data.galleryKey) {
-              try { localStorage.setItem("lea.cfKeyIndex", String((start + i) % creds.length)); } catch (_) {}
-              return String(data.galleryKey);
-            }
-            lastErr = "réponse sans galleryKey";
-            break;
-          }
-        }
-      } catch (e) {
-        lastErr = String(e.message || e);
-      }
-      throw new Error(lastErr || "Cloudflare natif indisponible");
-    }
-
-    throw new Error("La génération avec photo de référence requiert le pont natif Android.");
+    let prompt = parts.join(" ").replace(/\s+/g, " ").trim();
+    if (prompt.length > 2300) prompt = prompt.slice(0, 2300);
+    return prompt;
   }
 
   async function generateHordeImage(prompt, character, st, options) {
@@ -1507,7 +1452,7 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.78 : 0.62;
+          const denoise = isScene ? 0.88 : 0.62;
           // Prefixe lu par le bridge Java même si WithStrength absent
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + prompt;
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
