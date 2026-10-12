@@ -466,27 +466,30 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
+      : "SAME woman as reference photo — keep ONLY face, hair color, eyes and skin tone. MUST change outfit and pose completely. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k,";
 
     const base = [
       mood,
-      // Morphologie + poitrine EN TÊTE (CF et Horde)
+      // Tenue + pose EN PRIORITÉ (sinon img2img recolle à la photo de profil)
+      "NEW OUTFIT (required, different from reference clothing): " + outfit + ".",
+      "NEW POSE (required, different from reference pose): " + pose + ".",
+      "Location: " + scene + ".",
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
       bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
       looksEn ? ("Technical looks: " + looksEn + ".") : "",
       bodyField ? ("Body notes: " + bodyField + ".") : "",
-      "photorealistic full-body photo, one adult woman, head to toe, not a close-up,",
-      "Outfit: " + outfit + ".",
-      "Pose: " + pose + ".",
-      "Location: " + scene + ".",
+      "photorealistic full-body photo, one adult woman, head to toe, face visible, not a close-up,",
       faceLock,
       "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
-      // Rappel poitrine en fin de prompt (CF sous-estime souvent les gros bonnets)
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
-      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
+      forCloudflare
+        ? ("avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",")
+        : ("avoid: same outfit as reference, same pose as reference, hands on hips catalog pose, "
+           + "white corset, beige shapewear, studio seamless backdrop only, "
+           + bustInfo.neg + ", " + bodyInfo.neg + ","),
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
@@ -1563,7 +1566,7 @@
         try {
           // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
           // Profil : denoise plus bas pour garder identité + variété contrôlée
-          const denoise = isScene ? 0.65 : 0.52;
+          const denoise = isScene ? 0.68 : 0.62;
           // Prefixe lu par le bridge Java même si WithStrength absent
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + prompt;
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, { denoise: denoise, requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))) });
