@@ -576,7 +576,7 @@
     const clothBits = extractDialogueClothing(recentMsgs);
 
     const fullyNude = /enti[eè]rement nue|compl[eè]tement nue|toute nue|sans aucun v[eê]tement|plus rien sur le corps|compl[eè]tement d[eé]shabill/.test(blob);
-    const breastsOut = /seins?\s*(nus|d[eé]couverts|expos[eé]s)|poitrine\s*nue|topless|d[eé]collet[eé]\s*(ouvert|tomb[eé])/.test(blob);
+    const breastsOut = /seins?\s*(nus|d[eé]couverts|expos[eé]s)|poitrine\s*(?:\S+\s+)?nue|poitrine\s+lourde|topless|d[eé]collet[eé]\s*(ouvert|tomb[eé])/.test(blob);
     const isWet = /tremp[eé]e?|mouill[eé]e?|coll[eé]e? [aà] la peau/.test(blob);
 
     // Mémoire tenue = source prioritaire (texte utilisateur / LEA_MEMORY)
