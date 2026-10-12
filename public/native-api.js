@@ -575,16 +575,39 @@
     const breastsOut = /seins?\s*(nus|d[eé]couverts|expos[eé]s)|poitrine\s*nue|topless|d[eé]collet[eé]\s*(ouvert|tomb[eé])/.test(blob);
     const isWet = /tremp[eé]e?|mouill[eé]e?|coll[eé]e? [aà] la peau/.test(blob);
 
+    // Mémoire tenue = source prioritaire (texte utilisateur / LEA_MEMORY)
+    function translateWardrobeFr(fr) {
+      let t = String(fr || "");
+      const pairs = [
+        [/robe\s+courte\s+baiss[eé]e\s+au\s+niveau\s+de\s+la\s+taille/gi, "short dress pulled down to the waist"],
+        [/robe\s+courte/gi, "short dress"],
+        [/poitrine\s*(?:95[DdDd]|[A-Ja-j])?\s*nue|seins?\s*nus|poitrine\s*nue/gi, "bare breasts exposed"],
+        [/talons?\s+pos[eé]s?\s+au\s+sol/gi, "high heels placed on the floor"],
+        [/talons?/gi, "high heels"],
+        [/canap[eé]/gi, "sofa"],
+        [/nuisette/gi, "babydoll slip"],
+        [/lingerie/gi, "lingerie"],
+        [/jean\s+moulant/gi, "tight jeans"],
+        [/top\s+court|crop\s*top/gi, "crop top"],
+        [/tremp[eé]e?/gi, "soaking wet"],
+        [/compl[eè]tement\s+nue|enti[eè]rement\s+nue|toute\s+nue/gi, "completely nude"],
+      ];
+      let en = t;
+      for (let i = 0; i < pairs.length; i++) en = en.replace(pairs[i][0], pairs[i][1]);
+      return en.slice(0, 280);
+    }
+
     let outfitEn = "";
-    if (fullyNude) {
+    const wardFr = mem.wardrobe && String(mem.wardrobe).trim();
+    if (fullyNude && !wardFr) {
       outfitEn = "completely nude, no clothing, bare skin, explicit uncensored";
+    } else if (wardFr) {
+      outfitEn = "EXACT current outfit from memory: " + translateWardrobeFr(wardFr);
+      if (clothBits.length) outfitEn += " (" + clothBits.join(", ") + ")";
     } else if (clothBits.length) {
       outfitEn = "wearing " + clothBits.join(" and ");
       if (breastsOut) outfitEn += ", breasts exposed or neckline pulled down, still partially dressed as in dialogue";
       if (isWet) outfitEn += ", fabric wet clinging to body";
-    } else if (mem.wardrobe && String(mem.wardrobe).trim()) {
-      outfitEn = "current wardrobe: " + String(mem.wardrobe).slice(0, 220);
-      if (breastsOut) outfitEn += ", breasts exposed";
     } else if (breastsOut) {
       outfitEn = "topless, bare breasts, bottoms still on if mentioned";
     } else {
@@ -649,20 +672,24 @@
       "do not change race or face identity,",
     ].filter(Boolean).join(" ");
 
+    const wardrobeNeg = inferred.wardrobeFr
+      ? "white corset, white lingerie bodysuit, white shapewear, profile photo outfit, hands on hips studio pose, standing fashion pose,"
+      : "";
     const parts = [
       "photorealistic RAW photo, sharp natural skin, 8k,",
       identity,
       "Character: " + name + ", adult woman 18+,",
       appearance ? ("Sheet: " + appearance + ".") : "",
-      "CRITICAL OUTFIT FROM DIALOGUE ONLY: " + inferred.outfitEn + ".",
-      inferred.wardrobeFr ? ("Wardrobe memory: " + inferred.wardrobeFr + ".") : "",
+      // Tenue mémoire EN PREMIER (priorité absolue sur la photo de profil)
+      "MUST WEAR THIS OUTFIT NOW: " + inferred.outfitEn + ".",
+      inferred.wardrobeFr ? ("French wardrobe note: " + inferred.wardrobeFr.slice(0, 220) + ".") : "",
       "Pose: " + inferred.poseEn + ".",
       "Place: " + inferred.sceneEn + ".",
-      inferred.sceneFr ? ("Scene: " + inferred.sceneFr + ".") : "",
-      extra ? ("Extra: " + String(extra).slice(0, 140) + ".") : "",
-      hasRef ? "img2img: change clothes and pose only, preserve exact face and body." : "",
+      inferred.sceneFr ? ("Scene: " + inferred.sceneFr.slice(0, 180) + ".") : "",
+      extra ? ("Extra: " + String(extra).slice(0, 120) + ".") : "",
+      hasRef ? "img2img: keep face and body identity ONLY; replace clothing and pose to match the scene." : "",
       "face fully visible, not cropped, full body or three-quarter,",
-      "avoid: different face, different ethnicity, different hair color, grey studio seamless backdrop, headless crop, child, underage, loli, text, watermark, extra people, deformed hands, " +
+      "avoid: " + wardrobeNeg + " different face, different ethnicity, different hair color, grey studio seamless backdrop, headless crop, child, underage, loli, text, watermark, extra people, deformed hands, " +
         bustInfo.neg + ", " + bodyInfo.neg,
     ];
     return parts.filter(Boolean).join(" ").slice(0, 1950);
@@ -732,18 +759,32 @@
     throw new Error("La génération avec photo de référence requiert le pont natif Android.");
   }
 
-  async function generateHordeImage(prompt, character, st) {
+  async function generateHordeImage(prompt, character, st, options) {
+    const opts = options || {};
     const referenceB64 = await profileReferenceJpegB64(character); // JPEG — WebP often dropped by Horde workers
-    if (!window.LeaAndroid || typeof window.LeaAndroid.hordeImageStart !== "function" ||
-        typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
+    if (!window.LeaAndroid || typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
     }
-    const jobId = String(window.LeaAndroid.hordeImageStart(
-      String(prompt).slice(0, 2048),
-      String(character && character.id || "lea"),
-      referenceB64 || "",
-      String(st && st.hordeApiKey || "")
-    ) || "");
+    const strength = (opts.denoise != null && opts.denoise > 0) ? String(opts.denoise) : "";
+    let jobId = "";
+    if (typeof window.LeaAndroid.hordeImageStartWithStrength === "function") {
+      jobId = String(window.LeaAndroid.hordeImageStartWithStrength(
+        String(prompt).slice(0, 2048),
+        String(character && character.id || "lea"),
+        referenceB64 || "",
+        String(st && st.hordeApiKey || ""),
+        strength
+      ) || "");
+    } else if (typeof window.LeaAndroid.hordeImageStart === "function") {
+      jobId = String(window.LeaAndroid.hordeImageStart(
+        String(prompt).slice(0, 2048),
+        String(character && character.id || "lea"),
+        referenceB64 || "",
+        String(st && st.hordeApiKey || "")
+      ) || "");
+    } else {
+      throw new Error("La génération AI Horde nécessite l’application Android.");
+    }
     if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde.");
     const started = Date.now();
     let last = "La file AI Horde est toujours en attente.";
@@ -1443,8 +1484,11 @@
       }
       if (isHorde) {
         try {
-          const dataUrl = await generateHordeImage(prompt, char, st);
-          return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde", mode: isScene ? "conversation" : "profile" };
+          // Scène conversation : denoise plus haut pour changer tenue/pose (mémoire)
+          // Profil : denoise plus bas pour garder identité + variété contrôlée
+          const denoise = isScene ? 0.68 : 0.48;
+          const dataUrl = await generateHordeImage(prompt, char, st, { denoise: denoise });
+          return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), engine: "horde", mode: isScene ? "conversation" : "profile", denoise: denoise };
         } catch (hordeErr) {
           // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)
           if (isScene) {

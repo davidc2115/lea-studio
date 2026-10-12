@@ -720,6 +720,11 @@ public class LeaBridge {
 
     @JavascriptInterface
     public String hordeImageStart(final String prompt, final String charId, final String referenceImageB64, final String apiKey) {
+        return hordeImageStartWithStrength(prompt, charId, referenceImageB64, apiKey, "");
+    }
+
+    @JavascriptInterface
+    public String hordeImageStartWithStrength(final String prompt, final String charId, final String referenceImageB64, final String apiKey, final String strengthRaw) {
         final String id = "horde" + HTTP_SEQ.getAndIncrement();
         HTTP_JOBS.put(id, "pending");
         final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
@@ -728,6 +733,12 @@ public class LeaBridge {
         final String reference = referenceImageB64 == null ? "" : referenceImageB64.trim();
         final String hordeKey = apiKey == null || apiKey.trim().isEmpty() ? "0000000000" : apiKey.trim();
         final boolean registered = !"0000000000".equals(hordeKey);
+        double strengthParsed = -1;
+        try {
+            if (strengthRaw != null && strengthRaw.trim().length() > 0)
+                strengthParsed = Double.parseDouble(strengthRaw.trim().replace(",", "."));
+        } catch (Exception ignored) {}
+        final double strengthOverride = strengthParsed;
         HTTP_POOL.execute(new Runnable() {
             @Override public void run() {
                 try {
@@ -747,7 +758,11 @@ public class LeaBridge {
                     params.put("cfg_scale", 6.5);
                     params.put("sampler_name", "k_euler_a");
                     // Conversation / tenue différente : denoise plus haut pour ne pas coller à la pose profil
-                    params.put("denoising_strength", hasRef ? 0.48 : 1.0); // keep face identity
+                    double denoise = 0.48;
+                    if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
+                    else if (hasRef) denoise = 0.48;
+                    else denoise = 1.0;
+                    params.put("denoising_strength", denoise);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
