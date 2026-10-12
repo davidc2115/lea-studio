@@ -677,17 +677,21 @@
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
     const inferred = inferConversationOutfit(memory, messages);
     const ward = String(inferred.outfitEn || "").trim();
-    const wardFr = String(inferred.outfitFr || "").trim();
+    const wardFr = String(inferred.wardrobeFr || "").trim();
     const poseEn = String(inferred.poseEn || "natural candid pose matching the scene").trim();
     const sceneEn = String(inferred.sceneEn || "indoor realistic setting").trim();
-    const nude = !!(inferred.nude || inferred.topless);
+    const lowW = (ward + " " + wardFr).toLowerCase();
+    const nude = !!(inferred.explicit && /nude|naked|bare skin|compl[eè]tement nue|enti[eè]rement nue|sans aucun/.test(lowW));
+    const topless = /bare breast|topless|poitrine nue|seins nus/.test(lowW);
 
     // Tenue prioritaire absolue — ne jamais laisser le shapewear de profil gagner
     const outfitBlock = nude
       ? ("COMPLETELY NUDE adult woman, no clothing, no bra, no panties, " + (ward || "bare skin only"))
-      : (ward
-          ? ("WEARING NOW (must match conversation memory exactly, override reference clothes): " + ward)
-          : "WEARING NOW: clothing described in the latest dialogue, not the profile photo outfit");
+      : topless
+        ? ("TOPLESS: " + (ward || "bare breasts exposed") + ", no bra")
+        : (ward
+            ? ("WEARING NOW (must match conversation memory exactly, override reference clothes): " + ward)
+            : "WEARING NOW: clothing described in the latest dialogue, not the profile photo outfit");
 
     const parts = [
       "CRITICAL RULES FOR THIS IMAGE:",
