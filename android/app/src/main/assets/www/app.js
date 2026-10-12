@@ -336,16 +336,18 @@ function promptCharacterPayload(char) {
 }
 
 function formatMessageHtml(text) {
-  const esc = String(text || "")
+  let raw = String(text || "");
+  // Normalize messy third-party labels the model may emit
+  raw = raw
+    .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*:\*{0,2}/g, "[$1]:")
+    .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*\*{0,2}\s*:/g, "[$1]:");
+  const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // Style only: no visible () or * markers in bubbles
-  // Order: speakers first, then **bold**, then *actions*, then (thoughts)
+  // Speakers [Name]: first, then *actions*, then (thoughts) — markers hidden
   let out = esc
-    .replace(/\*\*\[([^\]]+)\]\*\*:/g, '<span class="speaker">$1</span> — ')
-    .replace(/(^|\n)\[([^\]]{1,40})\]:/g, '$1<span class="speaker">$2</span> — ')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|\n)\[([^\]]{1,40})\]:\s*/g, '$1<span class="speaker">$2</span> — ')
     .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
     .replace(/\(([^)]+)\)/g, '<span class="thought">$1</span>');
   return out;
