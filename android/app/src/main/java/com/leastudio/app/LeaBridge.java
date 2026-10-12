@@ -747,7 +747,7 @@ public class LeaBridge {
                     params.put("cfg_scale", 6.5);
                     params.put("sampler_name", "k_euler_a");
                     // Conversation / tenue différente : denoise plus haut pour ne pas coller à la pose profil
-                    params.put("denoising_strength", hasRef ? 0.72 : 1.0);
+                    params.put("denoising_strength", hasRef ? 0.48 : 1.0); // keep face identity
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);

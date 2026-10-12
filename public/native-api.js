@@ -525,125 +525,150 @@
 
 
   /** Déduit tenue / nudité depuis la mémoire conversation + derniers messages */
+  function extractDialogueClothing(messages) {
+    const recent = (Array.isArray(messages) ? messages : []).slice(-8);
+    const text = recent.map((x) => String(x && x.content || "")).join("\n");
+    const lower = text.toLowerCase();
+    const bits = [];
+    const rules = [
+      [/robe\s+courte\s*(froiss[eé]e|moulante|noire|rouge|blanche|bleue)?/i, function (m) { return "short tight dress" + (m[1] ? (" " + m[1]) : ""); }],
+      [/robe\s+courte/i, function () { return "short tight dress"; }],
+      [/mini[- ]?robe/i, function () { return "mini dress"; }],
+      [/robe\s+moulante/i, function () { return "bodycon dress"; }],
+      [/jean\s+moulant/i, function () { return "tight jeans"; }],
+      [/\bjeans?\b/i, function () { return "jeans"; }],
+      [/crop\s*top|top\s+court/i, function () { return "crop top"; }],
+      [/d[eé]bardeur|tank\s*top/i, function () { return "white tank top"; }],
+      [/soutien[- ]?gorge|soutif/i, function () { return "bra"; }],
+      [/\bculotte\b|\bstring\b/i, function () { return "panties"; }],
+      [/lingerie/i, function () { return "lingerie"; }],
+      [/nuisette/i, function () { return "babydoll slip"; }],
+      [/serviette/i, function () { return "towel wrap"; }],
+      [/talons?/i, function () { return "high heels"; }],
+      [/bas\s+r[eé]sille|fishnet/i, function () { return "fishnet stockings"; }],
+      [/porte[- ]jarretelles/i, function () { return "garter belt"; }],
+      [/chemisier|chemise/i, function () { return "blouse"; }],
+      [/jupe\s+courte|mini[- ]?jupe/i, function () { return "short mini skirt"; }],
+      [/\bjupe\b/i, function () { return "skirt"; }],
+    ];
+    const seen = {};
+    for (let i = 0; i < rules.length; i++) {
+      const re = rules[i][0];
+      const fn = rules[i][1];
+      const m = lower.match(re) || text.match(re);
+      if (m) {
+        const en = fn(m);
+        if (en && !seen[en]) { seen[en] = true; bits.push(en); }
+      }
+    }
+    return bits;
+  }
+
   function inferConversationOutfit(memory, messages) {
     const mem = memory || {};
     const recentMsgs = (Array.isArray(messages) ? messages : []).slice(-10);
     const recentText = recentMsgs.map((x) => String(x && x.content || "")).join("\n");
     const blob = [mem.wardrobe || "", mem.scene || "", mem.intimacy || "", recentText.slice(-2200)].join("\n").toLowerCase();
+    const clothBits = extractDialogueClothing(recentMsgs);
 
-    // --- Tenue : priorité aux messages récents (pas la mémoire obsolète) ---
-    let outfitEn = "";
     const fullyNude = /enti[eè]rement nue|compl[eè]tement nue|toute nue|sans aucun v[eê]tement|plus rien sur le corps|compl[eè]tement d[eé]shabill/.test(blob);
-    const hasDress = /robe\s*(courte|longue|moulante)?|mini[- ]?robe|dress/.test(blob);
-    const hasSkirt = /jupe|skirt|mini[- ]?jupe/.test(blob);
-    const hasJeans = /jean|pantalon|legging/.test(blob);
-    const hasLingerieOnly = /en lingerie|porte un body|soutien-gorge et culotte|string et soutien/.test(blob)
-      && !hasDress && !hasSkirt && !hasJeans;
-    const breastsOut = /seins?\s*(nus|d[eé]couverts|expos[eé]s)|poitrine\s*nue|topless|d[eé]collet[eé]\s*(ouvert|tomb[eé])|robe.{0,40}seins/.test(blob);
+    const breastsOut = /seins?\s*(nus|d[eé]couverts|expos[eé]s)|poitrine\s*nue|topless|d[eé]collet[eé]\s*(ouvert|tomb[eé])/.test(blob);
     const isWet = /tremp[eé]e?|mouill[eé]e?|coll[eé]e? [aà] la peau/.test(blob);
 
+    let outfitEn = "";
     if (fullyNude) {
-      outfitEn = "completely nude adult woman, no clothing, natural bare body, explicit, uncensored";
-    } else if (hasDress && breastsOut) {
-      outfitEn = "wearing a short tight dress pulled down or open at the chest, breasts exposed from the dress, still wearing the short dress around her waist/hips, heels if mentioned, explicit but not fully nude";
-    } else if (hasDress) {
-      outfitEn = "wearing a short tight dress (robe courte), cleavage, bare legs, same dress state as dialogue, sexy";
-      if (isWet) outfitEn += ", fabric damp clinging to body";
-    } else if (hasSkirt) {
-      outfitEn = "wearing a short skirt and top as described in dialogue, sexy provocative";
-    } else if (hasJeans) {
-      outfitEn = "wearing jeans and top as described in the conversation";
-      if (isWet) outfitEn += ", clothes wet";
-    } else if (hasLingerieOnly || (/lingerie|nuisette|string|porte-jarretelles|body en dentelle/.test(blob) && !hasDress)) {
-      outfitEn = "sexy lace lingerie matching dialogue (bra/panties or bodysuit or garter), explicit adult";
-    } else if (breastsOut) {
-      outfitEn = "topless, bare breasts, still wearing bottoms/skirt/pants from the scene, not fully nude unless said";
+      outfitEn = "completely nude, no clothing, bare skin, explicit uncensored";
+    } else if (clothBits.length) {
+      outfitEn = "wearing " + clothBits.join(" and ");
+      if (breastsOut) outfitEn += ", breasts exposed or neckline pulled down, still partially dressed as in dialogue";
+      if (isWet) outfitEn += ", fabric wet clinging to body";
     } else if (mem.wardrobe && String(mem.wardrobe).trim()) {
-      outfitEn = "wearing exactly the current wardrobe: " + String(mem.wardrobe).slice(0, 260);
+      outfitEn = "current wardrobe: " + String(mem.wardrobe).slice(0, 220);
+      if (breastsOut) outfitEn += ", breasts exposed";
+    } else if (breastsOut) {
+      outfitEn = "topless, bare breasts, bottoms still on if mentioned";
     } else {
-      // Extraire indices depuis les 2 derniers messages assistant
-      const lastAsst = recentMsgs.filter((x) => x && x.role === "assistant").slice(-2)
-        .map((x) => String(x.content || "")).join(" ");
-      const clothHint = lastAsst.match(/(robe[^.,;*]{0,40}|jean[^.,;*]{0,30}|jupe[^.,;*]{0,30}|lingerie[^.,;*]{0,40}|nuisette[^.,;*]{0,30}|top[^.,;*]{0,25})/i);
-      outfitEn = clothHint
-        ? ("clothing from dialogue: " + clothHint[0].slice(0, 120))
-        : "clothing consistent with the latest dialogue, adult sexy fashion";
+      outfitEn = "clothing only as described in the latest dialogue";
     }
 
-    // --- Pose ---
-    let poseEn = "full body including face, natural pose matching the scene";
+    let poseEn = "full body including face, natural pose";
     if (/affal[eé]e|effondr[eé]e|KO|épuis[eé]e|jambe[s]?\s+molles|incapable de se redresser/.test(blob)) {
-      poseEn = "slumped exhausted on the sofa, body limp, head tilted, satisfied exhausted expression, full body with face visible";
+      poseEn = "slumped exhausted on sofa, limp body, face visible, tired expression";
     } else if (/missionnaire|allong[eé]e sur le dos/.test(blob)) {
-      poseEn = "lying on her back on bed, looking at partner, face visible, full body";
+      poseEn = "lying on back on bed, face visible, full body";
     } else if (/quatre pattes|à genoux|a genoux|doggy/.test(blob)) {
-      poseEn = "on all fours, looking back over shoulder, face visible";
-    } else if (/chevauch|cowgirl/.test(blob)) {
-      poseEn = "straddling, intimate pose, face visible";
+      poseEn = "on all fours, looking back, face visible";
     } else if (/canap[eé]|sofa/.test(blob)) {
-      poseEn = "sitting or reclining on the sofa, face visible, full body";
+      poseEn = "on the sofa, face visible, full body or three-quarter";
     } else if (/debout|contre le mur/.test(blob)) {
       poseEn = "standing, face visible, full body";
     }
 
-    // --- Lieu ---
-    let sceneEn = "realistic indoor apartment interior";
-    if (/canap[eé]|sofa|salon/.test(blob)) sceneEn = "living room, sofa or couch, warm home lighting, realistic apartment interior, not a studio backdrop";
-    else if (/chambre|lit|bed/.test(blob)) sceneEn = "bedroom, bed sheets, warm lamp light, realistic home interior";
-    else if (/douche|salle de bain/.test(blob)) sceneEn = "bathroom interior, tiles, soft light";
+    let sceneEn = "realistic home interior";
+    if (/canap[eé]|sofa|salon/.test(blob)) sceneEn = "living room sofa, warm apartment light, realistic home, not studio backdrop";
+    else if (/chambre|lit|bed/.test(blob)) sceneEn = "bedroom, sheets, warm lamp, realistic home interior";
+    else if (/douche|salle de bain/.test(blob)) sceneEn = "bathroom, tiles, soft light";
     else if (/cuisine/.test(blob)) sceneEn = "kitchen interior";
-    else if (/couloir|entr[eé]e|porte/.test(blob)) sceneEn = "apartment hallway or doorway";
-    else if (mem.scene) sceneEn = "setting: " + String(mem.scene).slice(0, 160);
+    else if (/couloir|entr[eé]e|porte/.test(blob)) sceneEn = "apartment doorway or hallway";
+    else if (mem.scene) sceneEn = String(mem.scene).slice(0, 160);
 
     return {
       outfitEn: outfitEn,
       poseEn: poseEn,
       sceneEn: sceneEn,
-      explicit: fullyNude || breastsOut || hasLingerieOnly || /nsfw|sexe|baiser|p[eé]n[eé]tr/.test(blob),
+      clothBits: clothBits,
+      explicit: fullyNude || breastsOut || /lingerie|nsfw|sexe|baiser|p[eé]n[eé]tr/.test(blob),
       wardrobeFr: String(mem.wardrobe || "").slice(0, 400),
       sceneFr: String(mem.scene || "").slice(0, 300),
     };
   }
 
-    function buildConversationImagePrompt(char, memory, messages, extra) {
+  function buildConversationImagePrompt(char, memory, messages, extra) {
     const c = char || LEA;
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     if (Number.isInteger(age) && age < 18) {
       throw new Error("La génération nécessite un personnage majeur (18+).");
     }
     const name = String(c.name || "woman").slice(0, 80);
-    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 700);
-    const looksEn = String(c.looks_en || "").trim().slice(0, 320);
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 650);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 360);
+    const ethnicity = String(c.ethnicity || "").trim().slice(0, 80);
     const bustInfo = describeBustLock(String(c.Poitrine || c.poitrine || c.bustEstimate || ""), appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const inferred = inferConversationOutfit(memory, messages);
-    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + ": same face, hair, eyes, skin, body morphology and breast size. NEW pose and clothing state from conversation.")
-      : ("Exact physical match for " + name + " from character sheet.");
+    const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
 
-    const parts = [
-      "photorealistic candid adult photo, sharp detail, natural skin texture, 8k,",
-      "one adult woman 18+ only, FACE FULLY VISIBLE, head not cropped,",
-      bodyInfo.lead || "",
+    const identity = [
+      "SAME woman as reference photo input_image_0,",
+      "identical face features, identical eyes, identical nose, identical lips,",
+      "identical skin tone and ethnicity, identical hair color and length,",
+      looksEn ? ("looks: " + looksEn + ",") : "",
+      ethnicity ? ("ethnicity: " + ethnicity + ",") : "",
       bodyInfo.lock + ",",
       bustInfo.lock + ",",
-      looksEn ? ("Technical looks: " + looksEn + ".") : "",
-      faceLock,
-      "Physical description: " + (appearance || "match character sheet.") + ".",
-      "OUTFIT MUST MATCH DIALOGUE (priority): " + inferred.outfitEn + ".",
+      "do not change race or face identity,",
+    ].filter(Boolean).join(" ");
+
+    const parts = [
+      "photorealistic RAW photo, sharp natural skin, 8k,",
+      identity,
+      "Character: " + name + ", adult woman 18+,",
+      appearance ? ("Sheet: " + appearance + ".") : "",
+      "CRITICAL OUTFIT FROM DIALOGUE ONLY: " + inferred.outfitEn + ".",
       inferred.wardrobeFr ? ("Wardrobe memory: " + inferred.wardrobeFr + ".") : "",
-      "Pose (match scene): " + inferred.poseEn + ".",
-      "Environment (match scene): " + inferred.sceneEn + ".",
-      inferred.sceneFr ? ("Scene memory: " + inferred.sceneFr + ".") : "",
-      extra ? ("Extra: " + String(extra).slice(0, 160) + ".") : "",
-      "full body or three-quarter view, face visible, realistic proportions,",
-      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg +
-        ", plain grey studio backdrop, seamless paper background, headless crop, face cut off, child, underage, loli, text, watermark, extra people, deformed hands, identical pose to reference photo",
+      "Pose: " + inferred.poseEn + ".",
+      "Place: " + inferred.sceneEn + ".",
+      inferred.sceneFr ? ("Scene: " + inferred.sceneFr + ".") : "",
+      extra ? ("Extra: " + String(extra).slice(0, 140) + ".") : "",
+      hasRef ? "img2img: change clothes and pose only, preserve exact face and body." : "",
+      "face fully visible, not cropped, full body or three-quarter,",
+      "avoid: different face, different ethnicity, different hair color, grey studio seamless backdrop, headless crop, child, underage, loli, text, watermark, extra people, deformed hands, " +
+        bustInfo.neg + ", " + bodyInfo.neg,
     ];
-    return parts.filter(Boolean).join(" ").slice(0, 1900);
+    return parts.filter(Boolean).join(" ").slice(0, 1950);
   }
 
-async function generateCloudflareImage(prompt, st, character) {
+  async function generateCloudflareImage(prompt, st, character) {
     const creds = parseCloudflareCreds(st);
     if (!creds.length) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages");
     let start = 0;
@@ -708,7 +733,7 @@ async function generateCloudflareImage(prompt, st, character) {
   }
 
   async function generateHordeImage(prompt, character, st) {
-    const referenceB64 = await profileReferenceWebpB64(character); // peut être null → txt2img
+    const referenceB64 = await profileReferenceJpegB64(character); // JPEG — WebP often dropped by Horde workers
     if (!window.LeaAndroid || typeof window.LeaAndroid.hordeImageStart !== "function" ||
         typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");

@@ -318,11 +318,18 @@ function promptCharacterPayload(char) {
     scenario: c.scenario,
     personality: c.personality,
     appearance: c.appearance,
+    looks_en: c.looks_en || "",
+    ethnicity: c.ethnicity || "",
+    body: c.body || "",
     Poitrine: c.Poitrine || c.poitrine || "",
+    poitrine: c.Poitrine || c.poitrine || "",
     bustEstimate: c.bustEstimate || "",
     estimatedAge: c.estimatedAge || null,
     nonHumanTraits: c.nonHumanTraits || "",
     system_extra: c.system_extra,
+    // Requis pour img2img (identité visage) en scène conversation + profil
+    cover: c.cover || "",
+    gallery: Array.isArray(c.gallery) ? c.gallery.slice(0, 12) : [],
   };
 }
 
