@@ -729,58 +729,65 @@
     const appRaw = String(c.appearance || "");
     const app = appRaw.toLowerCase();
     const tags = String((c.tags || []).join(" ")).toLowerCase();
-    const blob = app + " " + tags + " " + String(c.title || "").toLowerCase();
+    const blob = app + " " + tags + " " + String(c.title || "").toLowerCase() + " " + String(c.body || "").toLowerCase();
     const bits = [];
-    bits.push((Number(c.age) >= 18 ? c.age : 21) + " year old woman");
-    // Ethnicité / teint (priorité haute — sinon Pollinations génère toujours une européenne pâle)
-    if (/m[eé]tisse|mixed|mulatto|light brown skin|peau m[eé]tiss/.test(blob))
-      bits.push("mixed race woman, light brown warm skin, métisse");
-    else if (/noire|black|african|peau noire|dark skin|ebony/.test(blob))
-      bits.push("Black woman, dark brown skin");
-    else if (/asiatique|asian|east asian|chinoise|japonaise|cor[eé]enne/.test(blob))
-      bits.push("East Asian woman, fair warm skin");
-    else if (/latina|latine|hispanic|br[eé]sil/.test(blob))
-      bits.push("Latina woman, olive tan skin");
-    else if (/maghr[eé]b|arabe|middle.?eastern/.test(blob))
-      bits.push("North African / Middle Eastern woman, olive skin");
-    else if (/porcelaine|tr[eè]s clair|pale|peau claire|european/.test(blob))
-      bits.push("European woman, fair porcelain skin");
-    // Cheveux
-    const hair = appRaw.match(/(?:Cheveux|Hair)\s*[:：]?\s*([^\n]{8,90})/i)
-      || app.match(/cheveux[^\n.]{5,80}/);
-    if (hair) bits.push(String(hair[1] || hair[0]).replace(/cheveux/gi, "hair").slice(0, 80));
-    else if (/brune|brun fonc|dark brown hair|brown hair/.test(blob)) bits.push("dark brown wavy hair");
-    else if (/blonde/.test(blob)) bits.push("blonde hair");
-    else if (/rousse|red hair|redhead/.test(blob)) bits.push("red hair");
-    // Yeux
-    const eyes = appRaw.match(/(?:Yeux|Eyes)\s*[:：]?\s*([^\n]{5,60})/i)
-      || app.match(/yeux[^\n.]{5,50}/);
-    if (eyes) bits.push(String(eyes[1] || eyes[0]).replace(/yeux/gi, "eyes").slice(0, 55));
-    // Poitrine
-    const bust = appRaw.match(/\b([689][0-9]\s*[A-K]|bonnet\s*[A-K]|cup\s*[A-K])\b/i)
-      || app.match(/(poitrine|bust)[^\n.]{0,50}/i);
-    if (bust) bits.push("bust " + String(bust[0]).slice(0, 40));
-    // Morphologie
-    if (/ronde|chubby|pulpeuse|voluptueuse|curvy|sablier|hourglass|forte|thick/.test(blob))
-      bits.push("voluptuous curvy body, soft belly, wide hips, full thighs, large natural breasts, realistic plus-size curves");
+
+    // looks_en prioritaire (même base que Horde profil)
+    if (c.looks_en && String(c.looks_en).trim().length > 20) {
+      bits.push(String(c.looks_en).trim().slice(0, 220));
+    }
+
+    const age = Number(c.age) >= 18 ? Number(c.age) : 21;
+    bits.push(age + " year old woman");
+
+    // Ethnicité / teint — CRITIQUE pour Pollinations
+    const eth = String(c.ethnicity || "").toLowerCase();
+    if (/m[eé]tisse|mixed|mulatto/.test(blob + " " + eth) || eth.indexOf("métisse") >= 0 || eth.indexOf("metisse") >= 0)
+      bits.push("mixed race métisse woman, golden tan olive-brown skin, Latina features");
+    else if (/noire|black|african|ebony/.test(blob + " " + eth))
+      bits.push("Black woman, deep brown skin");
+    else if (/asiatique|asian/.test(blob + " " + eth))
+      bits.push("East Asian woman");
+    else if (/latina|latine|hispanic/.test(blob + " " + eth))
+      bits.push("Latina woman, warm olive skin");
+    else if (/maghr|arabe|middle/.test(blob + " " + eth))
+      bits.push("Middle Eastern woman, olive skin");
+
+    // Poitrine explicite
+    const cup = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
+    if (cup) bits.push("breast size " + cup + ", realistic cleavage");
+    else if (/95d|90d|85e|bonnet d|cup d/i.test(appRaw + " " + cup))
+      bits.push("large 95D full natural breasts");
+    else if (/bonnet b|85b|cup b/i.test(appRaw))
+      bits.push("moderate B-cup breasts");
+
+    // Morphologie — forcer curves (sinon Flux sort toujours mince)
+    if (/voluptueuse|curvy|sablier|hourglass|ronde|pulpeuse|plus-size|chubby|forte|thick|bomb/i.test(blob) || /95d|90d|85e/i.test(appRaw + cup))
+      bits.push("voluptuous hourglass figure, soft rounded belly, wide hips, thick thighs, full butt, curvy realistic body NOT slim");
     else if (/mince|slim|athl|fine/.test(blob))
       bits.push("slim athletic body");
-    else if (/bomb[eé]|thick|forte/.test(blob))
-      bits.push("thick curvy body");
-    // Extrait court de l'apparence structurée (lignes utiles)
-    const lines = appRaw.split(/\n+/).map((l) => l.trim()).filter(Boolean);
-    for (const line of lines) {
-      if (/^(sujet|visage|yeux|cheveux|poitrine|peau|silhouette|corps)/i.test(line)) {
-        const short = line.replace(/[👤✨🪽]/g, "").slice(0, 70);
-        if (short.length > 12 && bits.join(" ").indexOf(short.slice(0, 20)) < 0)
-          bits.push(short);
-      }
-      if (bits.length > 10) break;
-    }
+    else
+      bits.push("feminine realistic body proportions");
+
+    // Cheveux
+    if (/châtain|chatain|brun|brown hair|dark brown/i.test(appRaw + blob))
+      bits.push("shoulder-length wavy chestnut brown hair");
+    else if (/blonde/.test(blob)) bits.push("blonde hair");
+    else if (/rousse|red hair/.test(blob)) bits.push("red hair");
+    else if (/noir|black hair/.test(blob)) bits.push("black hair");
+
+    // Yeux
+    if (/marron|brown eyes|iris marron/i.test(appRaw + blob)) bits.push("dark brown eyes");
+    else if (/vert|green|hazel/i.test(appRaw + blob)) bits.push("hazel green eyes");
+
+    // Peau
+    if (/mate dorée|golden|olive|teint.*m[eé]tiss/i.test(appRaw))
+      bits.push("matte golden skin tone");
+
     return bits.filter(Boolean).join(", ");
   }
 
-  /** Pollinations AI — sans clé. Scènes: plan complet + visage + physique personnage. */
+  /** Pollinations — sans clé. Prompt court, physique en tête (Flux ignore la fin). */
   async function generatePollinationsImage(prompt, character, st) {
     const c = character || LEA;
     let raw = String(prompt || "")
@@ -788,26 +795,29 @@
       .replace(/\s+/g, " ")
       .trim();
     const looks = extractLooksForImage(c);
-    // Forcer visage + corps complet en tête de prompt (Pollinations ignore souvent la fin)
-    // Rendu type Horde/Cloudflare profil: photo réelle, corps généreux si décrit
-    const head =
-      "smartphone photo, ultra realistic photography, natural skin texture and pores, " +
-      "one adult woman full body including face and legs, " +
-      looks + ", " +
-      "exact ethnicity and skin tone, realistic body proportions matching description, " +
-      "soft natural indoor light, high detail, 85mm lens, " +
-      "NOT digital art, NOT painting, NOT CGI, NOT anime, NOT illustration, ";
-    // Extraire tenue / pose utiles du prompt scène
-    let outfit = "";
-    const om = raw.match(/EXACT current outfit[^.]{0,200}|wearing [^.]{0,160}|completely nude[^.]{0,80}/i);
-    if (om) outfit = om[0] + ", ";
-    const pose = raw.match(/full body[^.]{0,80}|standing[^.]{0,60}|on the sofa[^.]{0,60}|lying[^.]{0,60}/i);
-    const poseBit = pose ? pose[0] + ", " : "standing full length, ";
-    let p = head + outfit + poseBit + "single person only, no crop, no headless, no waist-down only, no close-up of jeans only, no text";
-    if (p.length > 950) p = p.slice(0, 950);
-    if (p.length < 20) throw new Error("Prompt Pollinations trop court.");
+
+    let outfit = "fashion clothing";
+    const om = raw.match(/EXACT current outfit[^.]{0,180}|wearing [^.]{0,140}|completely nude[^.]{0,60}|lingerie[^.]{0,80}/i);
+    if (om) outfit = om[0];
+    else if (/lingerie|soutien|culotte|nuisette/i.test(raw)) outfit = "sexy lingerie matching dialogue";
+    else if (/robe|dress/i.test(raw)) outfit = "form-fitting dress";
+    else if (/jean|top|débardeur|short/i.test(raw)) outfit = "casual top and bottoms as in dialogue";
+
+    // Style IDENTIQUE aux profils Horde: photo réelle, pas anime
+    let p = [
+      "RAW photo, photorealistic, DSLR 85mm, natural skin pores, real woman",
+      looks,
+      outfit,
+      "full body standing, face clearly visible, indoor soft light",
+      "same body type as plus-size curvy influencer photo",
+      "NOT anime, NOT illustration, NOT CGI, NOT painting, NOT slim model, NOT skinny",
+    ].join(", ");
+
+    if (p.length > 900) p = p.slice(0, 900);
+    if (p.length < 24) throw new Error("Prompt Pollinations trop court.");
 
     const seed = Math.floor(Math.random() * 1e9);
+    // flux + enhance ; seed aléatoire pour éviter copies
     const q =
       "width=768&height=1024&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
     const url =
@@ -1139,9 +1149,9 @@
       "Nom: " + c.name,
       "Âge: " + (Number(c.age) >= 18 ? c.age : "non confirmé"),
       "Rôle: " + (c.title || ""),
-      "Scénario: " + (c.scenario || ""),
-      "Personnalité: " + String(c.personality || "").slice(0, 350),
-      "Apparence (résumé): " + String(c.appearance || "").slice(0, 420),
+      "Scénario: " + String(c.scenario || "").slice(0, 280),
+      "Personnalité: " + String(c.personality || "").slice(0, 220),
+      "Apparence: " + String(c.appearance || "").slice(0, 280),
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
@@ -1183,9 +1193,9 @@
     let keysTried = 0;
     let quotaHits = 0;
 
-    // 1 clé + 1 modèle d’abord (vitesse) ; élargir seulement si échec
+    // 1 clé + 1 modèle (vitesse max). 2e essai seulement si 429/erreur
     const maxKeys = Math.min(2, validKeys.length);
-    const modelsToTry = models.slice(0, 2);
+    const modelsToTry = models.slice(0, 1);
     for (let i = 0; i < maxKeys; i++) {
       const idx = (start + i) % validKeys.length;
       const k = validKeys[idx];
@@ -1213,8 +1223,8 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.85,
-              maxOutputTokens: 550,
+              temperature: 0.82,
+              maxOutputTokens: 420,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -1605,8 +1615,8 @@
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
     const groqKeys = splitKeys(st.groqKeys);
-    // 40 messages conservés; les plus récents en détail, les anciens condensés
-    const all = (messages || []).slice(-40);
+    // 24 messages récents (mémoire long terme = system LEA_MEMORY, pas tout l’historique)
+    const all = (messages || []).slice(-24);
     const hist = all.map((m, i) => {
       let content = String(m.content || "")
         .replace(/<LEA_MEMORY>[\s\S]*?<\/LEA_MEMORY>/gi, "")
@@ -1617,12 +1627,13 @@
       return { role: m.role, content: content.slice(0, maxLen) };
     });
 
+    // Un seul moteur (réglages) — pas de cascade lente sauf échec total
     const order =
       engine === "openai"
-        ? ["openai", "gemini", "groq"]
+        ? ["openai", "gemini"]
         : engine === "groq"
-        ? ["groq", "gemini", "openai"]
-        : ["gemini", "groq", "openai"];
+        ? ["groq", "gemini"]
+        : ["gemini", "groq"];
 
     const errors = [];
     for (const eng of order) {
@@ -1635,6 +1646,11 @@
           return extractMemoryEnvelope(await callGroq(groqKeys, system, hist));
       } catch (e) {
         errors.push(eng + ": " + e.message);
+        // Ne bascule que si quota / indispo / 404 — pas sur simple filtre
+        const em = String(e.message || e);
+        if (!/429|quota|indisponible|404|timeout|RESOURCE|exhausted| Groq|Gemini/i.test(em) && errors.length >= 1) {
+          break;
+        }
       }
     }
     const joined = errors.join(" · ") || "Aucune clé API configurée — ajoute une clé Gemini (aq… ou AIza…) dans Réglages";
