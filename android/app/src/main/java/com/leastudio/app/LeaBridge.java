@@ -278,71 +278,89 @@ public class LeaBridge {
     /** POST JSON → réponse texte (ex: Cloudflare Workers AI). */
     @JavascriptInterface
     public String httpPostJson(String url, String jsonBody, String headersJoined) {
-        HttpURLConnection conn = null;
-        File tmp = null;
-        try {
-            if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
-            URL u = new URL(url);
-            conn = (HttpURLConnection) u.openConnection();
-            boolean isTextApi = url.contains("generativelanguage.googleapis.com")
-                || url.contains("api.groq.com")
-                || url.contains("api.openai.com");
-            conn.setConnectTimeout(isTextApi ? 12000 : 45000);
-            conn.setReadTimeout(isTextApi ? 35000 : 180000);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("User-Agent", "LeaStudio/3.1 (Android)");
-            conn.setRequestProperty("Connection", "close");
-            conn.setInstanceFollowRedirects(true);
-            if (headersJoined != null) {
-                for (String line : headersJoined.split("\n")) {
-                    int c = line.indexOf(':');
-                    if (c > 0) {
-                        conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+        boolean isTextApi = url != null && (
+            url.contains("generativelanguage.googleapis.com")
+            || url.contains("api.groq.com")
+            || url.contains("api.openai.com"));
+        int attempts = isTextApi ? 3 : 1;
+        String lastErr = "";
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            HttpURLConnection conn = null;
+            File tmp = null;
+            try {
+                if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
+                URL u = new URL(url);
+                conn = (HttpURLConnection) u.openConnection();
+                conn.setConnectTimeout(isTextApi ? 15000 : 45000);
+                conn.setReadTimeout(isTextApi ? 45000 : 180000);
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
+                conn.setRequestProperty("Connection", "close");
+                conn.setInstanceFollowRedirects(true);
+                if (headersJoined != null) {
+                    for (String line : headersJoined.split("\n")) {
+                        int c = line.indexOf(':');
+                        if (c > 0) {
+                            conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+                        }
                     }
                 }
+                byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
+                conn.setFixedLengthStreamingMode(body.length);
+                OutputStream os = conn.getOutputStream();
+                os.write(body);
+                os.flush();
+                os.close();
+                int code = conn.getResponseCode();
+                InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                if (in == null) return "{\"error\":\"http " + code + " empty\"}";
+                tmp = new File(ctx.getCacheDir(), "http_" + System.currentTimeMillis() + ".bin");
+                FileOutputStream fos = new FileOutputStream(tmp);
+                byte[] buf = new byte[65536];
+                int n;
+                long total = 0;
+                while ((n = in.read(buf)) > 0) {
+                    fos.write(buf, 0, n);
+                    total += n;
+                    if (total > 25L * 1024 * 1024) break;
+                }
+                fos.close();
+                in.close();
+                byte[] bytes = new byte[(int) Math.min(tmp.length(), 20L * 1024 * 1024)];
+                FileInputStream fis = new FileInputStream(tmp);
+                int read = fis.read(bytes);
+                fis.close();
+                String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
+                if (code >= 400) {
+                    return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
+                }
+                return resp;
+            } catch (Exception e) {
+                lastErr = e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage());
+                String msg = String.valueOf(e.getMessage());
+                boolean retryable = isTextApi && attempt < attempts && (
+                    e instanceof java.net.SocketException
+                    || e instanceof java.net.SocketTimeoutException
+                    || (msg != null && (msg.contains("connection abort")
+                        || msg.contains("Connection reset")
+                        || msg.contains("Broken pipe")
+                        || msg.contains("timeout")
+                        || msg.contains("failed to connect"))));
+                if (retryable) {
+                    try { Thread.sleep(400L * attempt); } catch (InterruptedException ignored) {}
+                    continue;
+                }
+                return "{\"error\":" + JSONObject.quote(lastErr) + "}";
+            } finally {
+                if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
+                if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
             }
-            byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
-            conn.setFixedLengthStreamingMode(body.length);
-            OutputStream os = conn.getOutputStream();
-            os.write(body);
-            os.flush();
-            os.close();
-            int code = conn.getResponseCode();
-            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-            if (in == null) return "{\"error\":\"http " + code + " empty\"}";
-            // Lecture binaire vers fichier temp (évite abort sur gros JSON base64)
-            tmp = new File(ctx.getCacheDir(), "http_" + System.currentTimeMillis() + ".bin");
-            FileOutputStream fos = new FileOutputStream(tmp);
-            byte[] buf = new byte[65536];
-            int n;
-            long total = 0;
-            while ((n = in.read(buf)) > 0) {
-                fos.write(buf, 0, n);
-                total += n;
-                if (total > 25L * 1024 * 1024) break; // max 25 Mo
-            }
-            fos.close();
-            in.close();
-            byte[] bytes = new byte[(int) Math.min(tmp.length(), 20L * 1024 * 1024)];
-            FileInputStream fis = new FileInputStream(tmp);
-            int read = fis.read(bytes);
-            fis.close();
-            String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
-            if (code >= 400) {
-                return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
-            }
-            return resp;
-        } catch (Exception e) {
-            return "{\"error\":" + JSONObject.quote(e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage())) + "}";
-        } finally {
-            if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
-            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
         }
+        return "{\"error\":" + JSONObject.quote(lastErr.isEmpty() ? "http failed" : lastErr) + "}";
     }
-
 
     @JavascriptInterface
     public String httpPostJsonStart(final String url, final String jsonBody, final String headersJoined) {

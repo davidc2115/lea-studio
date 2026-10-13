@@ -606,12 +606,20 @@
         [/top\s+court|crop\s*top/gi, "crop top"],
         [/tremp[eé]e?/gi, "soaking wet"],
         [/compl[eè]tement\s+nue|enti[eè]rement\s+nue|toute\s+nue/gi, "completely nude"],
+        [/culotte\s+uniquement|seulement\s+(en\s+)?culotte|en\s+culotte\s+seulement|juste\s+(une\s+)?culotte|plus\s+que\s+(la\s+)?culotte/gi, "topless, wearing only panties, bare breasts, no bra, no top, panties only"],
+        [/\bculotte\b/gi, "panties"],
+        [/soutien[- ]?gorge|soutif|\bbra\b/gi, "bra"],
+        [/string/gi, "thong"],
+        [/nu\s+sous|sans\s+soutien|sans\s+culotte/gi, "no underwear"],
       ];
       let en = t;
       for (let i = 0; i < pairs.length; i++) en = en.replace(pairs[i][0], pairs[i][1]);
       const low = String(fr || "").toLowerCase();
       if (/baiss|abaiss/.test(low) && /(poitrine|seins?)/.test(low) && /(nue|nus|à l'air|a l'air)/.test(low)) {
         en = "short dress bunched around her waist, topless, bare breasts fully exposed, no bra, " + en;
+      }
+      if (/culotte\s+uniquement|seulement.*(culotte)|juste.*(culotte)|plus que.*(culotte)/.test(low)) {
+        en = "topless, wearing only panties, bare breasts fully exposed, no bra, no shirt, no top, panties only";
       }
       return en.slice(0, 320);
     }
@@ -797,11 +805,20 @@
     const looks = extractLooksForImage(c);
 
     let outfit = "fashion clothing";
-    const om = raw.match(/EXACT current outfit[^.]{0,180}|wearing [^.]{0,140}|completely nude[^.]{0,60}|lingerie[^.]{0,80}/i);
-    if (om) outfit = om[0];
-    else if (/lingerie|soutien|culotte|nuisette/i.test(raw)) outfit = "sexy lingerie matching dialogue";
-    else if (/robe|dress/i.test(raw)) outfit = "form-fitting dress";
-    else if (/jean|top|débardeur|short/i.test(raw)) outfit = "casual top and bottoms as in dialogue";
+    // Priorité absolue: tenue mémoire (ex. "Culotte uniquement")
+    const wardMatch = raw.match(/EXACT current outfit from memory:\s*([^.]{5,200})/i)
+      || raw.match(/CRITICAL OUTFIT[^:]*:\s*([^\n]{5,200})/i);
+    if (wardMatch) {
+      outfit = wardMatch[1].trim();
+    } else {
+      const om = raw.match(/EXACT current outfit[^.]{0,180}|wearing [^.]{0,140}|completely nude[^.]{0,60}|lingerie[^.]{0,80}|topless[^.]{0,80}|panties only[^.]{0,80}/i);
+      if (om) outfit = om[0];
+      else if (/culotte\s+uniquement|panties only|topless.*panties/i.test(raw))
+        outfit = "topless, wearing only panties, bare breasts, no bra";
+      else if (/lingerie|soutien|culotte|nuisette/i.test(raw)) outfit = "sexy lingerie matching dialogue";
+      else if (/robe|dress/i.test(raw)) outfit = "form-fitting dress";
+      else if (/jean|top|débardeur|short/i.test(raw)) outfit = "casual top and bottoms as in dialogue";
+    }
 
     // Style IDENTIQUE aux profils Horde: photo réelle, pas anime
     let p = [
@@ -1170,11 +1187,10 @@
     // 3.5-flash-lite = le plus rapide (comme sur ton autre app)
     const baseModels = [
       "gemini-3.5-flash-lite",
-      "gemini-3.1-flash-lite",
       "gemini-3.6-flash",
-      "gemini-3.8-flash",
-      "gemini-2.5-flash-lite",
       "gemini-2.5-flash",
+      "gemini-3.8-flash",
+      "gemini-3.1-flash-lite",
     ];
     // Ignorer un preferred mort (2.0-*)
     if (/gemini-2\.0|gemini-flash-latest/i.test(preferred)) preferred = "";
@@ -1194,8 +1210,8 @@
     let quotaHits = 0;
 
     // 1 clé + 1 modèle (vitesse max). 2e essai seulement si 429/erreur
-    const maxKeys = Math.min(2, validKeys.length);
-    const modelsToTry = models.slice(0, 1);
+    const maxKeys = Math.min(3, validKeys.length);
+    const modelsToTry = models.slice(0, 3);
     for (let i = 0; i < maxKeys; i++) {
       const idx = (start + i) % validKeys.length;
       const k = validKeys[idx];
@@ -1252,6 +1268,10 @@
             // 404 / model gone → modèle suivant immédiatement (ne pas brûler la clé)
             if (/404|NOT_FOUND|no longer available|is not found|not supported/i.test(full + " " + (r.error || ""))) {
               lastErr = model + ": indisponible (404) → suivant";
+              continue;
+            }
+            if (/SocketException|connection abort|Connection reset|ECONNRESET|Broken pipe|timeout/i.test(full + " " + (r.error || ""))) {
+              lastErr = model + ": réseau interrompu → nouvel essai";
               continue;
             }
             if (/safety|blocked|prohibited|policy|nsfw|sexual/i.test(full)) {
@@ -1564,7 +1584,13 @@
   async function callGroq(keys, system, messages) {
     let lastErr = "";
     // 8b-instant d’abord (très rapide), 70b en secours qualité
-    const groqModels = ["llama-3.1-8b-instant"];
+    // llama-3.1-8b-instant souvent 404 / enterprise — modèles publics 2026
+    const groqModels = [
+      "llama-3.3-70b-versatile",
+      "openai/gpt-oss-20b",
+      "llama3-8b-8192",
+      "gemma2-9b-it",
+    ];
     for (const key of keys) {
       for (const model of groqModels) {
         try {

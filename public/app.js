@@ -1382,10 +1382,10 @@ function renderSettings() {
       <p class="hint">Images profil via Cloudflare (réglages ☁️). Dialogue via Gemini / OpenAI / Groq.</p>
     </div>
     <div class="section memory-section">
-      <h2>🧠 Mémoire longue — stockée sur cet appareil</h2>
-      <p class="hint">Le scénario de départ reste fixe. Les résumés ci-dessous sont conservés séparément du chat et survivent à « Nouvelle conversation ». Ils ne sont pas synchronisés vers d’autres appareils.</p>
+      <h2>🧠 Mémoire de roleplay</h2>
+      <p class="hint">Souvenirs évolutifs de la conversation active. Enregistrés localement.</p>
       <div class="settings-block">
-        <label>Scénario d’origine (lecture seule)</label>
+        <label>Scénario d'origine (lecture seule)</label>
         <p class="memory-origin">${escapeMemoryMarkup(origin)}</p>
       </div>
       <div class="settings-block">
@@ -1393,33 +1393,33 @@ function renderSettings() {
         <textarea class="edit-area" id="memory-scene" rows="3" placeholder="Lieu, moment, objets, action en cours…">${escapeMemoryMarkup(memory.scene)}</textarea>
       </div>
       <div class="settings-block">
-        <label>Tenue actuelle, état et emplacement des vêtements</label>
-        <textarea class="edit-area" id="memory-wardrobe" rows="3" placeholder="Uniquement ce qui est porté maintenant (robe, lingerie, nu…)">${escapeMemoryMarkup(memory.wardrobe)}</textarea>
+        <label>Tenue actuelle (ce qui est porté maintenant)</label>
+        <textarea class="edit-area" id="memory-wardrobe" rows="3" placeholder="Ex. culotte uniquement, robe baissée, lingerie noire…">${escapeMemoryMarkup(memory.wardrobe)}</textarea>
+      </div>
+      <div class="settings-block">
+        <label>Emplacement des vêtements</label>
+        <textarea class="edit-area" id="memory-clothesLocation" rows="2" placeholder="Vêtements retirés : au sol, sur le canapé, étendoir…">${escapeMemoryMarkup(memory.clothesLocation || "")}</textarea>
       </div>
       <div class="settings-block">
         <label>Évolution de la relation</label>
-        <textarea class="edit-area" 
-        <label class="edit-label">Emplacement des vêtements</label>
-        <textarea class="edit-area" id="memory-clothesLocation" rows="2" placeholder="Vêtements retirés : au sol, sur le canapé, étendoir, salle de bain…">${escapeMemoryMarkup(memory.clothesLocation || "")}</textarea>
-id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et évolution réciproque…">${escapeMemoryMarkup(memory.relationship)}</textarea>
+        <textarea class="edit-area" id="memory-relationship" rows="3" placeholder="Confiance, affection, limites…">${escapeMemoryMarkup(memory.relationship)}</textarea>
       </div>
       <div class="settings-block">
         <label>Moments intimes et limites explicites</label>
-        <textarea class="edit-area" id="memory-intimacy" rows="3" placeholder="Moments intimes cumulés : lieu, position, actes, moment de la journée, limites…">${escapeMemoryMarkup(memory.intimacy)}</textarea>
+        <textarea class="edit-area" id="memory-intimacy" rows="3" placeholder="Lieu, position, actes, limites…">${escapeMemoryMarkup(memory.intimacy)}</textarea>
       </div>
       <div class="settings-block">
-        
-        <label class="edit-label">Promesses et engagements</label>
-        <textarea class="edit-area" id="memory-promises" rows="2" placeholder="Ce qui a été promis ou convenu dans le dialogue…">${escapeMemoryMarkup(memory.promises || "")}</textarea>
-<label>Faits et promesses partagés</label>
-        <textarea class="edit-area" id="memory-facts" rows="3" placeholder="Informations durables à ne pas confondre avec la scène actuelle…">${escapeMemoryMarkup(memory.facts)}</textarea>
+        <label>Promesses et engagements</label>
+        <textarea class="edit-area" id="memory-promises" rows="2" placeholder="Ce qui a été promis…">${escapeMemoryMarkup(memory.promises || "")}</textarea>
+      </div>
+      <div class="settings-block">
+        <label>Faits partagés</label>
+        <textarea class="edit-area" id="memory-facts" rows="3" placeholder="Infos durables…">${escapeMemoryMarkup(memory.facts)}</textarea>
       </div>
       <button type="button" class="btn btn-primary" id="save-memory">💾 Enregistrer la mémoire</button>
       <button type="button" class="btn btn-secondary" id="clear-memory">Effacer les souvenirs évolutifs</button>
       <div id="memory-status"></div>
     </div>
-    <button type="button" class="btn btn-primary" id="save-settings">💾 Enregistrer les réglages</button>
-    <div id="set-status"></div>
   `;
   $("save-settings").onclick = () => {
     const next = Object.assign({}, s, {
@@ -1428,7 +1428,6 @@ id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et 
       groqKeys: $("set-groq").value.trim(),
       cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
       cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
-      // Ne pas écraser la clé si le champ password est vide (comportement WebView fréquent)
       hordeApiKey: (($("set-horde-key") && $("set-horde-key").value.trim()) || s.hordeApiKey || resolveHordeApiKey() || ""),
       userName: $("set-username").value.trim(),
       userBio: $("set-bio").value.trim(),
@@ -1436,7 +1435,7 @@ id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et 
     });
     saveSettings(next);
     const st = $("set-status");
-    st.innerHTML = `<span class="status-pill ok">✓ Enregistré</span>`;
+    st.innerHTML = '<span class="status-pill ok">✓ Enregistré</span>';
   };
   $("save-memory").onclick = () => {
     saveRoleplayMemory({
