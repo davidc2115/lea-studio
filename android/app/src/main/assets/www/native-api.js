@@ -726,22 +726,57 @@
 
   function extractLooksForImage(char) {
     const c = char || LEA;
-    const app = String(c.appearance || "").toLowerCase();
+    const appRaw = String(c.appearance || "");
+    const app = appRaw.toLowerCase();
+    const tags = String((c.tags || []).join(" ")).toLowerCase();
+    const blob = app + " " + tags + " " + String(c.title || "").toLowerCase();
     const bits = [];
     bits.push((Number(c.age) >= 18 ? c.age : 21) + " year old woman");
-    const hair = app.match(/(cheveux|hair)[^\n.]{0,80}/);
-    if (hair) bits.push(hair[0].replace(/cheveux/gi, "hair").slice(0, 70));
-    else if (/brune|brun/.test(app + " " + (c.name || ""))) bits.push("dark brown long hair");
-    else if (/blonde/.test(app)) bits.push("blonde hair");
-    else if (/rousse|redhead/.test(app)) bits.push("red hair");
-    const eyes = app.match(/(yeux|eyes)[^\n.]{0,50}/);
-    if (eyes) bits.push(eyes[0].replace(/yeux/gi, "eyes").slice(0, 50));
-    const bust = app.match(/(bonnet|poitrine|bust|cup)[^\n.]{0,40}/i)
-      || String(c.appearance || "").match(/\b[689][0-9][A-K]\b/i)
-      || String(c.appearance || "").match(/bonnet\s*[A-K]/i);
-    if (bust) bits.push(String(bust[0]).slice(0, 40));
-    if (/ronde|chubby|curvy|voluptueuse|sablier/.test(app)) bits.push("curvy hourglass body");
-    if (/mince|slim|athl/.test(app)) bits.push("slim athletic body");
+    // Ethnicité / teint (priorité haute — sinon Pollinations génère toujours une européenne pâle)
+    if (/m[eé]tisse|mixed|mulatto|light brown skin|peau m[eé]tiss/.test(blob))
+      bits.push("mixed race woman, light brown warm skin, métisse");
+    else if (/noire|black|african|peau noire|dark skin|ebony/.test(blob))
+      bits.push("Black woman, dark brown skin");
+    else if (/asiatique|asian|east asian|chinoise|japonaise|cor[eé]enne/.test(blob))
+      bits.push("East Asian woman, fair warm skin");
+    else if (/latina|latine|hispanic|br[eé]sil/.test(blob))
+      bits.push("Latina woman, olive tan skin");
+    else if (/maghr[eé]b|arabe|middle.?eastern/.test(blob))
+      bits.push("North African / Middle Eastern woman, olive skin");
+    else if (/porcelaine|tr[eè]s clair|pale|peau claire|european/.test(blob))
+      bits.push("European woman, fair porcelain skin");
+    // Cheveux
+    const hair = appRaw.match(/(?:Cheveux|Hair)\s*[:：]?\s*([^\n]{8,90})/i)
+      || app.match(/cheveux[^\n.]{5,80}/);
+    if (hair) bits.push(String(hair[1] || hair[0]).replace(/cheveux/gi, "hair").slice(0, 80));
+    else if (/brune|brun fonc|dark brown hair|brown hair/.test(blob)) bits.push("dark brown wavy hair");
+    else if (/blonde/.test(blob)) bits.push("blonde hair");
+    else if (/rousse|red hair|redhead/.test(blob)) bits.push("red hair");
+    // Yeux
+    const eyes = appRaw.match(/(?:Yeux|Eyes)\s*[:：]?\s*([^\n]{5,60})/i)
+      || app.match(/yeux[^\n.]{5,50}/);
+    if (eyes) bits.push(String(eyes[1] || eyes[0]).replace(/yeux/gi, "eyes").slice(0, 55));
+    // Poitrine
+    const bust = appRaw.match(/\b([689][0-9]\s*[A-K]|bonnet\s*[A-K]|cup\s*[A-K])\b/i)
+      || app.match(/(poitrine|bust)[^\n.]{0,50}/i);
+    if (bust) bits.push("bust " + String(bust[0]).slice(0, 40));
+    // Morphologie
+    if (/ronde|chubby|pulpeuse|voluptueuse|curvy|sablier|hourglass/.test(blob))
+      bits.push("curvy hourglass body, soft full figure");
+    else if (/mince|slim|athl|fine/.test(blob))
+      bits.push("slim athletic body");
+    else if (/bomb[eé]|thick|forte/.test(blob))
+      bits.push("thick curvy body");
+    // Extrait court de l'apparence structurée (lignes utiles)
+    const lines = appRaw.split(/\n+/).map((l) => l.trim()).filter(Boolean);
+    for (const line of lines) {
+      if (/^(sujet|visage|yeux|cheveux|poitrine|peau|silhouette|corps)/i.test(line)) {
+        const short = line.replace(/[👤✨🪽]/g, "").slice(0, 70);
+        if (short.length > 12 && bits.join(" ").indexOf(short.slice(0, 20)) < 0)
+          bits.push(short);
+      }
+      if (bits.length > 10) break;
+    }
     return bits.filter(Boolean).join(", ");
   }
 
@@ -755,9 +790,10 @@
     const looks = extractLooksForImage(c);
     // Forcer visage + corps complet en tête de prompt (Pollinations ignore souvent la fin)
     const head =
-      "photorealistic full body portrait from head to toe of one adult woman, face clearly visible looking toward camera, " +
+      "photorealistic RAW photo of one adult woman, full body head to toe, face clearly visible, " +
       looks + ", " +
-      "natural skin texture, sharp focus, realistic proportions, indoor soft light, ";
+      "exact ethnicity and skin tone as described, natural skin pores, sharp focus, realistic proportions, " +
+      "not a painting, not CGI, not anime, indoor soft light, ";
     // Extraire tenue / pose utiles du prompt scène
     let outfit = "";
     const om = raw.match(/EXACT current outfit[^.]{0,200}|wearing [^.]{0,160}|completely nude[^.]{0,80}/i);
@@ -1131,9 +1167,20 @@
 
   async function callGemini(keys, system, messages) {
     // Dernier modèle qui a marché en premier (évite les retries inutiles)
+    // Modèles 2026 valides (2.0-flash-lite = 404 → très lent si on les essaie)
     let preferred = "";
     try { preferred = String(localStorage.getItem("lea.geminiLastModel") || ""); } catch (_) {}
-    const baseModels = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"];
+    // 3.5-flash-lite = le plus rapide (comme sur ton autre app)
+    const baseModels = [
+      "gemini-3.5-flash-lite",
+      "gemini-3.1-flash-lite",
+      "gemini-3.6-flash",
+      "gemini-3.8-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash",
+    ];
+    // Ignorer un preferred mort (2.0-*)
+    if (/gemini-2\.0|gemini-flash-latest/i.test(preferred)) preferred = "";
     const models = preferred
       ? [preferred].concat(baseModels.filter((m) => m !== preferred))
       : baseModels;
@@ -1202,7 +1249,11 @@
               quotaHits++;
               break;
             }
-            // Filtre contenu / policy → essayer un autre modèle puis une autre clé
+            // 404 / model gone → modèle suivant immédiatement (ne pas brûler la clé)
+            if (/404|NOT_FOUND|no longer available|is not found|not supported/i.test(full + " " + (r.error || ""))) {
+              lastErr = model + ": indisponible (404) → suivant";
+              continue;
+            }
             if (/safety|blocked|prohibited|policy|nsfw|sexual/i.test(full)) {
               lastErr = model + ": filtre contenu — " + full.slice(0, 120);
               continue;
@@ -1282,12 +1333,10 @@
     let start = 0;
     try { start = Number(localStorage.getItem("lea.geminiKeyIndex") || 0) || 0; } catch (_) {}
     const models = [
-      "gemini-2.5-flash",
-      "gemini-2.0-flash",
-      "gemini-2.0-flash-lite",
-      "gemini-flash-latest",
-      "gemini-3.5-flash",
+      "gemini-3.5-flash-lite",
+      "gemini-3.6-flash",
       "gemini-3.8-flash",
+      "gemini-2.5-flash",
     ];
     const safetySettings = [
       { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -1372,7 +1421,7 @@
       "Pour nonHumanTraits et l'apparence, utilise uniquement ce qui est écrit dans la fiche.";
     for (let i = 0; i < validKeys.length; i++) {
       const idx = (start + i) % validKeys.length;
-      for (const model of ["gemini-2.0-flash", "gemini-2.5-flash", "gemini-flash-latest"]) {
+      for (const model of ["gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-2.5-flash"]) {
         try {
           const response = await httpPostJson(
             "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent",
@@ -1553,6 +1602,14 @@
   }
 
   async function generateReply(char, messages, st, charId) {
+    try {
+      if (!localStorage.getItem("lea.geminiModelMigrate2026")) {
+        const lm = String(localStorage.getItem("lea.geminiLastModel") || "");
+        if (/gemini-2\.0|flash-latest/i.test(lm)) localStorage.removeItem("lea.geminiLastModel");
+        localStorage.setItem("lea.geminiModelMigrate2026", "1");
+      }
+    } catch (_) {}
+
     const system = buildSystemPrompt(char, st, loadLongTermMemory(charId));
     const engine = (st && st.chatEngine) || "gemini";
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
