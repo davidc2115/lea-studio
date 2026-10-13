@@ -284,8 +284,11 @@ public class LeaBridge {
             if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
             URL u = new URL(url);
             conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(45000);
-            conn.setReadTimeout(180000);
+            boolean isTextApi = url.contains("generativelanguage.googleapis.com")
+                || url.contains("api.groq.com")
+                || url.contains("api.openai.com");
+            conn.setConnectTimeout(isTextApi ? 12000 : 45000);
+            conn.setReadTimeout(isTextApi ? 35000 : 180000);
             conn.setRequestMethod("POST");
             conn.setDoOutput(true);
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");

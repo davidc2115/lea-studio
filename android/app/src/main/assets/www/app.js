@@ -455,7 +455,11 @@ function renderDiscover() {
     return true;
   });
   root.innerHTML = `
-    <div class="discover-grid">
+    <div class="discover-search-wrap">
+      <input type="search" id="discover-search" class="discover-search" placeholder="🔍 Nom ou tag (brune, secrétaire, métisse…)" autocomplete="off" />
+      <div class="discover-search-meta" id="discover-search-meta">${characters.length} personnage(s)</div>
+    </div>
+    <div class="discover-grid" id="discover-grid">
       ${characters.map((item) => {
         const cover = item.cover || (Array.isArray(item.gallery) && item.gallery[0]) || "";
         const src = resolveImgSrc(cover);
@@ -519,6 +523,32 @@ function renderDiscover() {
     };
   });
 }
+
+
+  const searchInput = $("discover-search");
+  const grid = $("discover-grid");
+  const meta = $("discover-search-meta");
+  function applyDiscoverFilter() {
+    const q = String(searchInput && searchInput.value || "").trim().toLowerCase();
+    const tokens = q.split(/\s+/).filter(Boolean);
+    let visible = 0;
+    if (!grid) return;
+    grid.querySelectorAll(".discover-card").forEach((card) => {
+      const name = String(card.querySelector(".discover-name") && card.querySelector(".discover-name").textContent || "").toLowerCase();
+      const tags = String(card.querySelector(".discover-tags") && card.querySelector(".discover-tags").textContent || "").toLowerCase();
+      const scenario = String(card.querySelector(".discover-scenario") && card.querySelector(".discover-scenario").textContent || "").toLowerCase();
+      const hay = name + " " + tags + " " + scenario;
+      const ok = !tokens.length || tokens.every((t) => hay.indexOf(t) >= 0);
+      card.style.display = ok ? "" : "none";
+      if (ok) visible++;
+    });
+    if (meta) meta.textContent = (tokens.length ? visible + " résultat(s)" : characters.length + " personnage(s)");
+  }
+  if (searchInput) {
+    searchInput.oninput = applyDiscoverFilter;
+    searchInput.onsearch = applyDiscoverFilter;
+  }
+
 
 function renderProfile() {
   const c = state.character;
@@ -874,7 +904,7 @@ function renderChat() {
         <button type="button" class="icon-btn" id="chat-delete" title="Supprimer la conversation">🗑️</button>
       </div>
       <div class="chat-msgs" id="chat-msgs"></div>
-      <div class="typing hidden" id="chat-typing">Léa écrit…</div>
+      <div class="typing hidden" id="chat-typing"></div>
       <div class="chat-scene-row">
         <button type="button" class="chat-scene-btn" id="chat-gen-scene" title="Générer la scène">🖼️ Scène</button>
         <button type="button" class="chat-bg-btn" id="chat-bg-toggle" title="Fond de conversation">🎨 Fond</button>
@@ -971,7 +1001,11 @@ async function sendMessage() {
   paintMessages();
   state.sending = true;
   const typing = $("chat-typing");
-  if (typing) typing.classList.remove("hidden");
+  if (typing) {
+    const who = (state.character && state.character.name) ? state.character.name : "Personnage";
+    typing.textContent = who + " écrit…";
+    typing.classList.remove("hidden");
+  }
   try {
     const res = await api(activeChatPath(), {
       method: "POST",

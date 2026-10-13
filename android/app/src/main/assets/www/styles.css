@@ -707,3 +707,27 @@ button:disabled { opacity: .6; cursor: wait; }
   background: rgba(167,139,250,.18); color: #e8dffc;
   font-weight: 700; font-size: .82rem; cursor: pointer;
 }
+
+
+.discover-search-wrap {
+  margin: 0 0 12px;
+  display: grid;
+  gap: 6px;
+}
+.discover-search {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 1px solid rgba(167,139,250,.35);
+  background: rgba(26,10,46,.9);
+  color: var(--text);
+  padding: 12px 14px;
+  font: inherit;
+  font-size: .92rem;
+}
+.discover-search::placeholder { color: var(--muted); }
+.discover-search-meta {
+  font-size: .75rem;
+  color: var(--muted);
+  padding: 0 4px;
+}

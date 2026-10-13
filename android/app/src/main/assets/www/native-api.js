@@ -1196,13 +1196,16 @@
     let keysTried = 0;
     let quotaHits = 0;
 
-    for (let i = 0; i < validKeys.length; i++) {
+    // Max 3 clés × 3 modèles pour éviter 9×6 = 54 appels lents
+    const maxKeys = Math.min(3, validKeys.length);
+    const modelsToTry = models.slice(0, 3);
+    for (let i = 0; i < maxKeys; i++) {
       const idx = (start + i) % validKeys.length;
       const k = validKeys[idx];
       keysTried++;
       let keyQuota = false;
 
-      for (const model of models) {
+      for (const model of modelsToTry) {
         try {
           const url =
             "https://generativelanguage.googleapis.com/v1beta/models/" +
