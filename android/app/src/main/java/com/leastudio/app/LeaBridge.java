@@ -796,11 +796,15 @@ public class LeaBridge {
                     JSONObject params = new JSONObject();
                     // ≤ ~617² pixels (sinon HTTP 403 "heavy demand" pendant les pics)
                     // 512×640 = 327680 < 380689 ; multiples de 64
-                    params.put("width", 512);
-                    params.put("height", 640);
-                    // steps + cfg_scale fixés après calcul du denoise
-                    double denoise = 0.75;
-                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
+                    // Qualité: 576×768 si clé enregistrée, sinon 512×640 (limite file anonyme)
+                    if (registered) {
+                        params.put("width", 576);
+                        params.put("height", 768);
+                    } else {
+                        params.put("width", 512);
+                        params.put("height", 640);
+                    }
+                    double denoise = 0.72;
                     String promptWork = promptSafe;
                     try {
                         java.util.regex.Matcher dm = java.util.regex.Pattern
@@ -814,9 +818,9 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    // Denoise >= 0.60 (profil/scène) : plus de cfg pour suivre tenue/pose du prompt
-                    double cfg = denoise >= 0.70 ? 8.0 : (denoise >= 0.60 ? 7.5 : 6.5);
-                    int steps = registered ? 26 : 18;
+                    // cfg modéré: trop haut = artefacts; trop bas = ignore le prompt
+                    double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
+                    int steps = registered ? 30 : 20;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -826,10 +830,10 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
+                        + ", photorealistic, sharp focus, natural skin texture, 8k uhd"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, wax figure");
                     payload.put("params", params);
                     if (hasRef) {
-                        // source_image = base64 brut (sans préfixe data:)
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
@@ -838,22 +842,30 @@ public class LeaBridge {
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
-                    payload.put("trusted_workers", false);
+                    payload.put("trusted_workers", registered);
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
                     payload.put("shared", false);
                     payload.put("replacement_filter", true);
-                    // Laisser les workers choisir un modèle réaliste dispo
-                    payload.put("models", new JSONArray());
+                    // Modèles réalistes préférés (Horde ignore ceux offline)
+                    JSONArray models = new JSONArray();
+                    models.put("ICBINP - I Can't Believe It's Not Photography");
+                    models.put("RealVisXL V5.0");
+                    models.put("Juggernaut XL");
+                    models.put("DreamShaper XL");
+                    models.put("AlbedoBase XL (SDXL)");
+                    models.put("SDXL 1.0");
+                    payload.put("models", models);
                     String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                     JSONObject accepted = new JSONObject(acceptedRaw);
                     if (accepted.has("message") && !accepted.has("id")) {
                         String hm = accepted.optString("message", "refus");
                         if (hm.toLowerCase().contains("heavy demand") || hm.contains("617") || hm.toLowerCase().contains("too many")) {
-                            params.put("width", 448);
-                            params.put("height", 576);
-                            params.put("steps", 14);
+                            params.put("width", 512);
+                            params.put("height", 640);
+                            params.put("steps", Math.max(16, steps - 6));
                             payload.put("params", params);
+                            payload.put("models", new JSONArray()); // any available worker
                             acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                             accepted = new JSONObject(acceptedRaw);
                         }

@@ -314,9 +314,9 @@
     }
     if (isHourglass) {
       return {
-        lead: "hourglass figure adult woman, defined waist, curved hips, balanced bust and hips,",
-        lock: "Body type: hourglass, cinched waist, rounded hips, not chubby overall, not stick-thin.",
-        neg: "plus-size soft belly, skinny stick figure, no curves",
+        lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
+        lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
+        neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
       };
     }
     if (isPetite) {
@@ -354,10 +354,10 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + ": keep ONLY the same face, hair, eyes and skin tone. " +
-         "Do NOT copy clothing, pose or background from the reference. Body shape and breast size follow the text description. " +
-         "REQUIRED: brand-new outfit and pose. RAW photo, photorealistic, sharp focus.")
-      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
+      ? ("Identity reference input_image_0 for " + name + ": MUST keep the EXACT same face, same age look, same hair color/style, same eye color, same skin tone. " +
+         "Change ONLY clothing, pose and background. Keep the same body proportions from the reference (do not turn slim into plus-size or vice versa). " +
+         "Breast size from text description. Brand-new sexy outfit and pose. RAW photo, photorealistic, sharp focus, high detail.")
+      : ("Follow the physical description exactly for " + name + " including ethnicity, body morphology and bust. Photorealistic adult woman, sharp focus.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
@@ -1832,15 +1832,15 @@
           // === PROFIL vs SCÈNE isolés (ne pas mélanger) ===
           // Profil : denoise 0.85 + buildPhysicalImagePrompt — INCHANGÉ
           // Scène  : Horde uniquement + buildConversationImagePrompt (tenue mémoire)
-          const PROFILE_HORDE_DENOISE = 0.85;
-          let SCENE_HORDE_DENOISE = 0.88;
+          const PROFILE_HORDE_DENOISE = 0.72;
+          let SCENE_HORDE_DENOISE = 0.82;
           if (isScene) {
             try {
               const mem = body.memory || {};
               const w = String(mem.wardrobe || "").toLowerCase();
               // Tenue clairement différente du profil → un peu plus de denoise
-              if (w.length > 8) SCENE_HORDE_DENOISE = 0.90;
-              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.91;
+              if (w.length > 8) SCENE_HORDE_DENOISE = 0.84;
+              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.86;
             } catch (_) {}
           }
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
