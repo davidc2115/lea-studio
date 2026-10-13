@@ -968,14 +968,12 @@ async function generateConversationScene() {
   setGenBanner("⏳ Scène conversation → AI Horde (peut prendre plusieurs minutes)…", "");
   try {
     const memory = loadRoleplayMemory();
+    // Scènes conversation : mode anonyme autorisé (pas de clé obligatoire)
     const st = Object.assign({}, loadSettings() || {});
     const hordeKey = resolveHordeApiKey();
     if (hordeKey) st.hordeApiKey = hordeKey;
-    if (!hordeKey) {
-      throw new Error(
-        "Clé AI Horde introuvable. Va dans ⚙️ Réglages → AI Horde, colle ta clé (aihorde.net), appuie sur Enregistrer, puis réessaie Scène."
-      );
-    }
+    else st.hordeApiKey = "0000000000"; // anonyme AI Horde
+    st.hordeAnonymous = !hordeKey;
     const res = await api("/api/image/scene", {
       method: "POST",
       body: JSON.stringify({
@@ -985,6 +983,7 @@ async function generateConversationScene() {
         messages: (state.chat && state.chat.messages) || [],
         settings: st,
         extra: "",
+        allowAnonymous: true,
       }),
     });
     if (!res || (!res.image && !res.ok)) {
@@ -1158,9 +1157,9 @@ function renderSettings() {
     <div class="section">
       <h2>🎨 AI Horde (optionnel)</h2>
       <div class="settings-block">
-        <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée" : "⚠️ manquante (requise pour Scène)"}</label>
-        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Colle ta clé AI Horde ici"}" />
-        <p class="hint">Obligatoire pour le bouton 🖼️ Scène en conversation (évite l’erreur 429 anonyme). Compte gratuit : aihorde.net. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
+        <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée (prioritaire)" : "(optionnelle — Scène en anonyme)"}</label>
+        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Optionnel — sinon mode anonyme"}" />
+        <p class="hint">Les scènes conversation fonctionnent en anonyme sans clé. Une clé (aihorde.net) réduit les 429 et accélère la file. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
       </div>
     </div>
     <div class="section">

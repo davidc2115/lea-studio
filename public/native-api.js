@@ -743,13 +743,13 @@
     ).trim();
     if (!hordeKey || hordeKey === "0000000000") {
       try {
-        hordeKey = String(localStorage.getItem("lea.hordeApiKey") || "").trim();
+        const backup = String(localStorage.getItem("lea.hordeApiKey") || "").trim();
+        if (backup && backup !== "0000000000") hordeKey = backup;
       } catch (_) {}
     }
+    // Mode anonyme autorisé (scènes conversation) : clé officielle anonyme Horde
     if (!hordeKey || hordeKey === "0000000000") {
-      throw new Error(
-        "Clé AI Horde absente. Va dans ⚙️ Réglages → AI Horde, colle ta clé (aihorde.net), enregistre, puis réessaie Scène."
-      );
+      hordeKey = "0000000000";
     }
     const strength = (opts.denoise != null && opts.denoise > 0) ? String(opts.denoise) : "";
     let jobId = "";
@@ -1621,8 +1621,8 @@
             const is429 = /429|anonymous|Too many/i.test(em);
             throw new Error(
               is429
-                ? "AI Horde 429 : requêtes anonymes refusées. Ouvre ⚙️ Réglages, vérifie que ta clé AI Horde est bien enregistrée, puis réessaie."
-                : ("AI Horde (scène) : " + em.slice(0, 180) + " — réessaie ou vérifie ta clé dans Réglages.")
+                ? "AI Horde 429 (quota anonyme saturé). Réessaie dans quelques minutes, ou ajoute une clé gratuite dans Réglages pour plus de marge."
+                : ("AI Horde (scène) : " + em.slice(0, 180))
             );
           }
           // Profil : fallback Cloudflare soft (inchangé)
