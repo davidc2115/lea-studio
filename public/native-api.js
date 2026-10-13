@@ -718,8 +718,8 @@
       ethnicity ? ethnicity + "," : "",
       appearance ? appearance + "." : "",
       hasRef
-        ? "img2img: same FACE as input_image_0 only; replace clothes pose background fully."
-        : "photorealistic full-body photo.",
+        ? "img2img: KEEP exact same face identity as input_image_0, same skin tone and body type; CHANGE outfit pose and background completely to match OUTFIT and PLACE above."
+        : "photorealistic full-body photo matching physical description.",
       extra ? String(extra).slice(0, 80) : "",
       "RAW photo, sharp, natural light, face visible,",
       "avoid: white shapewear, beige bodysuit, white corset, reference outfit, same pose as reference,",
@@ -1828,16 +1828,18 @@
       }
       if (isHorde) {
         try {
-          // === PROFIL et SCÈNE : denoise / prompt isolés ===
-          // Profil → buildPhysicalImagePrompt (Horde/Cloudflare) — inchangé
-          // Scène  → Pollinations d’abord (sans clé), puis Horde en secours
+          // === PROFIL vs SCÈNE isolés (ne pas mélanger) ===
+          // Profil : denoise 0.85 + buildPhysicalImagePrompt — INCHANGÉ
+          // Scène  : Horde uniquement + buildConversationImagePrompt (tenue mémoire)
           const PROFILE_HORDE_DENOISE = 0.85;
-          let SCENE_HORDE_DENOISE = 0.92;
+          let SCENE_HORDE_DENOISE = 0.88;
           if (isScene) {
             try {
               const mem = body.memory || {};
               const w = String(mem.wardrobe || "").toLowerCase();
-              if (w.length > 8) SCENE_HORDE_DENOISE = 0.94;
+              // Tenue clairement différente du profil → un peu plus de denoise
+              if (w.length > 8) SCENE_HORDE_DENOISE = 0.90;
+              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.91;
             } catch (_) {}
           }
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
@@ -1847,59 +1849,27 @@
             } catch (pe) {
               throw new Error("Prompt scène: " + String(pe && pe.message || pe).slice(0, 160));
             }
-            // 1) Pollinations (anonyme, sans clé)
-            try {
-              const dataUrl = await generatePollinationsImage(prompt, char, st);
-              return {
-                ok: true,
-                image: dataUrl,
-                prompt: String(prompt).slice(0, 400),
-                engine: "pollinations",
-                mode: "conversation",
-              };
-            } catch (pollFirstErr) {
-              // 2) Horde anonyme en secours
-              console.warn("Pollinations scène:", pollFirstErr);
-            }
           }
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
+            // Profil: ref obligatoire si cover. Scène: ref si dispo (visage) mais pas bloquant
             requireRef: isScene ? false : !!(char && (char.cover || (char.gallery && char.gallery[0]))),
           });
           return {
             ok: true,
             image: dataUrl,
-            prompt: prompt.slice(0, 400),
+            prompt: String(prompt).slice(0, 400),
             engine: "horde",
             mode: isScene ? "conversation" : "profile",
             denoise: denoise,
           };
         } catch (hordeErr) {
-          // Scènes : fallback Pollinations (sans clé) si Horde 429 / erreur
+          // Scène : pas de Pollinations — erreur Horde claire
           if (isScene) {
-            try {
-              const scenePrompt =
-                (typeof prompt === "string" && prompt.length > 20)
-                  ? prompt
-                  : buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
-              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
-              return {
-                ok: true,
-                image: dataUrl,
-                prompt: String(scenePrompt).slice(0, 400),
-                engine: "pollinations",
-                mode: "conversation",
-                fallbackFrom: "horde",
-                hordeError: String(hordeErr.message || hordeErr).slice(0, 120),
-              };
-            } catch (pollErr) {
-              const em = String(hordeErr.message || hordeErr);
-              const pe = String(pollErr.message || pollErr);
-              throw new Error(
-                "Scène indisponible — Horde: " + em.slice(0, 100) + " · Pollinations: " + pe.slice(0, 100)
-              );
-            }
+            throw new Error(
+              "Scène Horde: " + String(hordeErr.message || hordeErr).slice(0, 180)
+            );
           }
           // Profil : fallback Cloudflare soft (inchangé)
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
