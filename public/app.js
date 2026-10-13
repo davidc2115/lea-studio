@@ -422,13 +422,16 @@ function formatMessageHtml(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // *actions* first, then (thoughts). Long () or physical narrative → action (model often confuses).
+  // *actions* → cyan. (pensées) → jaune. Reclasser () en action SEULEMENT si narration pure longue.
   function isReallyAction(inner) {
     const s = String(inner || "").trim();
-    if (s.length > 85) return true;
-    if (/^(je pense|je me dis|dans ma t[eê]te|il\/?elle se dit)/i.test(s)) return false;
-    return /\b(je|elle|il)\s+(me |se |m['’]|s['’])?(cambre|approche|pose|retire|enl[eè]ve|glisse|caresse|tremble|rougit|sourit|embrasse|g[eé]mit|crie|ouvre|ferme|tire|baisse|rel[eè]ve|touche|frappe|s['’]assoit|se l[eè]ve)/i.test(s)
-      || /\b(doigts?|mains?|l[eè]vres?|bouche|genoux|cuisses?|seins?|corps|culotte|robe|peau)\b/i.test(s) && s.length > 35;
+    // Pensées / ressenti → toujours jaune
+    if (/\b(je (me )?dis|je pense|dans ma t[eê]te|j['’]ai peur|j['’]ose pas|s['’]il me|pourquoi|est-ce que|mon c[oe]ur|troubl[eé]e?|honte|envie|d[eé]sir)\b/i.test(s))
+      return false;
+    // Narration physique longue sans marqueur de pensée → action
+    if (s.length > 140 && /\b(je|elle)\s+(me |se )?(cambre|approche|glisse|caresse|tremble|embrasse|g[eé]mit)/i.test(s))
+      return true;
+    return false;
   }
   let out = esc
     .replace(/(^|\n)\[([^\]]{1,40})\]:\s*/g, '$1<span class="speaker">$2</span> — ')
