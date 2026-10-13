@@ -794,16 +794,9 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // ≤ ~617² pixels (sinon HTTP 403 "heavy demand" pendant les pics)
-                    // 512×640 = 327680 < 380689 ; multiples de 64
-                    // Qualité: 576×768 si clé enregistrée, sinon 512×640 (limite file anonyme)
-                    if (registered) {
-                        params.put("width", 576);
-                        params.put("height", 768);
-                    } else {
-                        params.put("width", 512);
-                        params.put("height", 640);
-                    }
+                    // Toujours sous la limite "heavy demand" (~380k px). Multiples de 64.
+                    params.put("width", 512);
+                    params.put("height", 640);
                     double denoise = 0.72;
                     String promptWork = promptSafe;
                     try {
@@ -818,9 +811,8 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    // cfg modéré: trop haut = artefacts; trop bas = ignore le prompt
                     double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
-                    int steps = registered ? 30 : 20;
+                    int steps = registered ? 22 : 16;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -830,52 +822,73 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture, 8k uhd"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, wax figure");
+                        + ", photorealistic, sharp focus, natural skin texture"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin");
                     payload.put("params", params);
                     if (hasRef) {
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
+                        // Limiter la taille base64 ref (~200k chars) pour payload OK
+                        if (src.length() > 220000) {
+                            src = src.substring(0, 220000);
+                        }
                         payload.put("source_image", src);
                         payload.put("source_processing", "img2img");
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
-                    payload.put("trusted_workers", registered);
+                    payload.put("trusted_workers", false);
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
                     payload.put("shared", false);
                     payload.put("replacement_filter", true);
-                    // Modèles réalistes préférés (Horde ignore ceux offline)
-                    JSONArray models = new JSONArray();
-                    models.put("ICBINP - I Can't Believe It's Not Photography");
-                    models.put("RealVisXL V5.0");
-                    models.put("Juggernaut XL");
-                    models.put("DreamShaper XL");
-                    models.put("AlbedoBase XL (SDXL)");
-                    models.put("SDXL 1.0");
-                    payload.put("models", models);
-                    String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
-                    JSONObject accepted = new JSONObject(acceptedRaw);
-                    if (accepted.has("message") && !accepted.has("id")) {
-                        String hm = accepted.optString("message", "refus");
-                        if (hm.toLowerCase().contains("heavy demand") || hm.contains("617") || hm.toLowerCase().contains("too many")) {
-                            params.put("width", 512);
-                            params.put("height", 640);
-                            params.put("steps", Math.max(16, steps - 6));
-                            payload.put("params", params);
-                            payload.put("models", new JSONArray()); // any available worker
+                    // Pas de liste de modèles stricte (évite 403 si offline) — workers réalistes dispo
+                    payload.put("models", new JSONArray());
+
+                    String acceptedRaw = null;
+                    JSONObject accepted = null;
+                    Exception lastSubmit = null;
+                    for (int attemptSubmit = 0; attemptSubmit < 3; attemptSubmit++) {
+                        try {
+                            if (attemptSubmit == 1) {
+                                // Retry léger: moins de steps
+                                params.put("steps", 14);
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                payload.put("params", params);
+                            } else if (attemptSubmit == 2) {
+                                // Dernier recours: très léger, sans img2img si toujours 403
+                                params.put("steps", 12);
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                payload.put("params", params);
+                                payload.remove("source_image");
+                                payload.remove("source_processing");
+                            }
                             acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                             accepted = new JSONObject(acceptedRaw);
-                        }
-                        if (accepted.has("message") && !accepted.has("id")) {
-                            hm = accepted.optString("message", "refus");
-                            if (hm.toLowerCase().contains("anonymous")) {
-                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite dans Réglages. " + hm.substring(0, Math.min(80, hm.length())));
+                            if (accepted.has("id") && accepted.optString("id", "").length() > 0) break;
+                            String hm = accepted.optString("message", "refus");
+                            lastSubmit = new java.io.IOException("AI Horde: " + hm);
+                            if (hm.toLowerCase().contains("anonymous") && !registered) {
+                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
                             }
-                            throw new java.io.IOException("AI Horde: " + hm);
+                            // continuer les tentatives
+                        } catch (HordeHttpException he) {
+                            lastSubmit = he;
+                            String msg = String.valueOf(he.getMessage()).toLowerCase();
+                            boolean heavy = he.statusCode == 403 || msg.contains("heavy demand") || msg.contains("1024") || msg.contains("kudos");
+                            if (!heavy && he.statusCode != 429) throw he;
+                            // 403/429 heavy demand → retry plus petit
+                            continue;
                         }
+                    }
+                    if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
+                        String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec submit";
+                        throw new java.io.IOException(
+                            "AI Horde file saturée (403 heavy demand). Réessaie dans 1–2 min, ou ajoute une clé Horde gratuite dans Réglages. " + em.substring(0, Math.min(120, em.length()))
+                        );
                     }
                     String requestId = accepted.optString("id", "");
                     if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));
