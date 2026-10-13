@@ -742,9 +742,13 @@
       stMerged.hordeApiKey || stMerged.horde_key || stMerged.hordeKey || ""
     ).trim();
     if (!hordeKey || hordeKey === "0000000000") {
+      try {
+        hordeKey = String(localStorage.getItem("lea.hordeApiKey") || "").trim();
+      } catch (_) {}
+    }
+    if (!hordeKey || hordeKey === "0000000000") {
       throw new Error(
-        "Clé AI Horde absente ou anonyme. Va dans Réglages, colle ta clé AI Horde (compte sur aihorde.net), enregistre, puis réessaie. " +
-        "Sans clé, Horde bloque avec HTTP 429 (trop de requêtes anonymes)."
+        "Clé AI Horde absente. Va dans ⚙️ Réglages → AI Horde, colle ta clé (aihorde.net), enregistre, puis réessaie Scène."
       );
     }
     const strength = (opts.denoise != null && opts.denoise > 0) ? String(opts.denoise) : "";

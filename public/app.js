@@ -106,14 +106,34 @@ function renderTagChip(tag) {
 }
 
 function loadSettings() {
+  let s = {};
   try {
-    return JSON.parse(localStorage.getItem("lea.settings") || "{}");
+    s = JSON.parse(localStorage.getItem("lea.settings") || "{}") || {};
   } catch {
-    return {};
+    s = {};
   }
+  // Backup dédié (évite perte si le champ password est vide au save)
+  try {
+    const backup = String(localStorage.getItem("lea.hordeApiKey") || "").trim();
+    if (backup && !String(s.hordeApiKey || "").trim()) s.hordeApiKey = backup;
+  } catch (_) {}
+  return s;
 }
 function saveSettings(s) {
-  localStorage.setItem("lea.settings", JSON.stringify(s));
+  localStorage.setItem("lea.settings", JSON.stringify(s || {}));
+  try {
+    const k = String((s && s.hordeApiKey) || "").trim();
+    if (k) localStorage.setItem("lea.hordeApiKey", k);
+  } catch (_) {}
+}
+function resolveHordeApiKey() {
+  const st = loadSettings() || {};
+  let k = String(st.hordeApiKey || st.horde_key || st.hordeKey || "").trim();
+  if (!k) {
+    try { k = String(localStorage.getItem("lea.hordeApiKey") || "").trim(); } catch (_) {}
+  }
+  if (!k || k === "0000000000") return "";
+  return k;
 }
 
 function roleplayMemoryKey() {
@@ -948,9 +968,13 @@ async function generateConversationScene() {
   setGenBanner("⏳ Scène conversation → AI Horde (peut prendre plusieurs minutes)…", "");
   try {
     const memory = loadRoleplayMemory();
-    const st = loadSettings() || {};
-    if (!String(st.hordeApiKey || "").trim()) {
-      throw new Error("Clé AI Horde manquante dans Réglages — obligatoire pour les scènes conversation.");
+    const st = Object.assign({}, loadSettings() || {});
+    const hordeKey = resolveHordeApiKey();
+    if (hordeKey) st.hordeApiKey = hordeKey;
+    if (!hordeKey) {
+      throw new Error(
+        "Clé AI Horde introuvable. Va dans ⚙️ Réglages → AI Horde, colle ta clé (aihorde.net), appuie sur Enregistrer, puis réessaie Scène."
+      );
     }
     const res = await api("/api/image/scene", {
       method: "POST",
@@ -1134,9 +1158,9 @@ function renderSettings() {
     <div class="section">
       <h2>🎨 AI Horde (optionnel)</h2>
       <div class="settings-block">
-        <label>Clé API AI Horde (facultative)</label>
-        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || "")}" placeholder="Clé de ton compte AI Horde" />
-        <p class="hint">Sans clé : accès anonyme, image 512 × 512 et file d’attente variable. Avec ta clé : cadrage vertical 512 × 768, 24 étapes, selon tes kudos disponibles. La clé reste enregistrée dans les réglages de cet appareil.</p>
+        <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée" : "⚠️ manquante (requise pour Scène)"}</label>
+        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Colle ta clé AI Horde ici"}" />
+        <p class="hint">Obligatoire pour le bouton 🖼️ Scène en conversation (évite l’erreur 429 anonyme). Compte gratuit : aihorde.net. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
       </div>
     </div>
     <div class="section">
@@ -1209,7 +1233,8 @@ id="memory-relationship" rows="3" placeholder="Confiance, affection, limites et 
       groqKeys: $("set-groq").value.trim(),
       cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
       cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
-      hordeApiKey: ($("set-horde-key") && $("set-horde-key").value.trim()) || "",
+      // Ne pas écraser la clé si le champ password est vide (comportement WebView fréquent)
+      hordeApiKey: (($("set-horde-key") && $("set-horde-key").value.trim()) || s.hordeApiKey || resolveHordeApiKey() || ""),
       userName: $("set-username").value.trim(),
       userBio: $("set-bio").value.trim(),
       chatEngine: $("set-model").value,
