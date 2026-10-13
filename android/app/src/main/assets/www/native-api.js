@@ -1003,7 +1003,7 @@
       "MOMENTS INTIMES (cumulatif — lieu, position, actes, moment de la journée, ce qui a été accepté ou refusé) : " + (m.intimacy || "Aucun souvenir intime enregistré; ne présume rien."),
       "PROMESSES ET ENGAGEMENTS (ce qui a été promis ou convenu) : " + (m.promises || "Aucune promesse enregistrée."),
       "FAITS PARTAGÉS (infos dites et confirmées dans le dialogue) : " + (m.facts || "Aucun fait partagé enregistré."),
-      "Après la réponse de roleplay, ajoute exactement un bloc technique <LEA_MEMORY>{JSON}</LEA_MEMORY>.",
+      "Après la réponse de roleplay UNIQUEMENT, ajoute un bloc technique invisible <LEA_MEMORY>{JSON}</LEA_MEMORY> (jamais dans le dialogue visible, toujours à la toute fin).",
       "Le JSON est un patch invisible : n'y mets que les clés réellement changées parmi: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
       "Chaque valeur remplace le résumé de sa catégorie, reste cumulative (ne perds pas les faits anciens pertinents), 1 à 4 phrases courtes.",
       "wardrobe = UNIQUEMENT ce qui est porté maintenant (pas l'emplacement des vêtements retirés).",
@@ -1017,26 +1017,47 @@
   }
 
   function extractMemoryEnvelope(output) {
-    const text = String(output || "");
-    const marker = /(?:\r?\n)?<LEA_MEMORY>([\s\S]*?)<\/LEA_MEMORY>\s*$/i;
-    const match = text.match(marker);
-    if (!match) return { reply: text.trim(), memoryUpdate: null };
+    let text = String(output || "");
     let memoryUpdate = null;
-    try {
-      const parsed = JSON.parse(match[1].trim());
-      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        memoryUpdate = {};
-        Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
-          if (typeof parsed[key] === "string") {
-            memoryUpdate[key] = parsed[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+    // Accepte balise fermée, non fermée, ou JSON collé n'importe où
+    const closed = /<?\s*LEA_MEMORY\s*>?\s*([\s\S]*?)\s*<\/?\s*LEA_MEMORY\s*>/i;
+    const openOnly = /<?\s*LEA_MEMORY\s*>\s*(\{[\s\S]*)/i;
+    let match = text.match(closed);
+    if (!match) match = text.match(openOnly);
+    if (match) {
+      let raw = String(match[1] || "").trim();
+      // Couper si du texte RP a fuité après le JSON
+      const brace = raw.indexOf("{");
+      if (brace >= 0) {
+        let depth = 0, end = -1;
+        for (let i = brace; i < raw.length; i++) {
+          if (raw[i] === "{") depth++;
+          else if (raw[i] === "}") {
+            depth--;
+            if (depth === 0) { end = i + 1; break; }
           }
-        });
+        }
+        if (end > 0) raw = raw.slice(brace, end);
       }
-    } catch (_) {}
-    return {
-      reply: text.replace(marker, "").trim(),
-      memoryUpdate,
-    };
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          memoryUpdate = {};
+          Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
+            if (typeof parsed[key] === "string") {
+              memoryUpdate[key] = parsed[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+            }
+          });
+        }
+      } catch (_) {}
+      text = text.replace(closed, "").replace(openOnly, "");
+    }
+    // Nettoyage final de tout résidu visible
+    text = text
+      .replace(/<?\s*\/?\s*LEA_MEMORY\s*>?/gi, "")
+      .replace(/\{\s*"wardrobe"[\s\S]{0,800}$/g, "")
+      .trim();
+    return { reply: text, memoryUpdate };
   }
 
   function buildSystemPrompt(char, st, memory) {
@@ -1049,8 +1070,8 @@
       "Âge: " + (Number(c.age) >= 18 ? c.age : "non confirmé"),
       "Rôle: " + (c.title || ""),
       "Scénario: " + (c.scenario || ""),
-      "Personnalité: " + (c.personality || ""),
-      "Apparence: " + (c.appearance || ""),
+      "Personnalité: " + String(c.personality || "").slice(0, 500),
+      "Apparence (résumé): " + String(c.appearance || "").slice(0, 700),
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
@@ -1078,11 +1099,10 @@
   }
 
   async function callGemini(keys, system, messages) {
-    // Modèles rapides d’abord (évite d’attendre des modèles lents / 404 en série)
+    // Un seul modèle rapide en priorité (moins de retries = réponses plus rapides)
     const models = [
-      "gemini-2.0-flash-lite",
       "gemini-2.0-flash",
-      "gemini-3.5-flash-lite",
+      "gemini-2.0-flash-lite",
       "gemini-flash-latest",
     ];
     const validKeys = (keys || []).map((k) => String(k || "").trim()).filter((k) => k.length >= 10);
@@ -1468,7 +1488,7 @@
           const msgs = [{ role: "system", content: system }].concat(
             messages.filter((m) => m.role !== "system").map((m) => ({
               role: m.role === "assistant" ? "assistant" : "user",
-              content: String(m.content || "").slice(0, 1200),
+              content: String(m.content || "").replace(/<LEA_MEMORY>[\s\S]*?<\/LEA_MEMORY>/gi, "").slice(0, 1500),
             }))
           );
           const r = await httpPostJson(
@@ -1504,9 +1524,14 @@
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
     const groqKeys = splitKeys(st.groqKeys);
-    const hist = (messages || []).slice(-18).map((m) => ({
+    // 40 derniers messages (comme avant) ; strip LEA_MEMORY des anciens pour alléger
+    const hist = (messages || []).slice(-40).map((m) => ({
       role: m.role,
-      content: String(m.content || "").slice(0, 1200),
+      content: String(m.content || "")
+        .replace(/<LEA_MEMORY>[\s\S]*?<\/LEA_MEMORY>/gi, "")
+        .replace(/<LEA_MEMORY>[\s\S]*$/gi, "")
+        .trim()
+        .slice(0, 1500),
     }));
 
     const order =

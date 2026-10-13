@@ -403,8 +403,16 @@ function promptCharacterPayload(char) {
   };
 }
 
+function stripLeaMemory(text) {
+  return String(text || "")
+    .replace(/<\s*LEA_MEMORY\s*>[\s\S]*?<\s*\/\s*LEA_MEMORY\s*>/gi, "")
+    .replace(/<\s*LEA_MEMORY\s*>[\s\S]*$/gi, "")
+    .replace(/\{\s*"wardrobe"\s*:[\s\S]{0,900}$/g, "")
+    .trim();
+}
+
 function formatMessageHtml(text) {
-  let raw = String(text || "");
+  let raw = stripLeaMemory(text);
   // Normalize messy third-party labels the model may emit
   raw = raw
     .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*:\*{0,2}/g, "[$1]:")
@@ -974,11 +982,14 @@ async function sendMessage() {
         settings: loadSettings(),
       }),
     });
-    const reply = (res && (res.reply || res.content || res.message)) || (res && res.messages && res.messages.slice(-1)[0]?.content);
+    let reply = (res && (res.reply || res.content || res.message)) || (res && res.messages && res.messages.slice(-1)[0]?.content);
     if (reply) {
+      reply = stripLeaMemory(reply);
       state.chat.messages.push({ role: "assistant", content: reply, ts: Date.now() });
     } else if (res && Array.isArray(res.messages)) {
-      state.chat.messages = res.messages;
+      state.chat.messages = res.messages.map((m) =>
+        m && m.role === "assistant" ? Object.assign({}, m, { content: stripLeaMemory(m.content) }) : m
+      );
     } else {
       state.chat.messages.push({
         role: "assistant",
