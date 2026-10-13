@@ -928,7 +928,26 @@ function renderChat() {
   paintMessages();
   applyChatAppearance();
   setupChatBackgroundUi();
-  ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); applyChatAppearance(); });
+  (function hideTyping() {
+    const t = $("chat-typing");
+    if (t && !state.sending) {
+      t.classList.remove("is-on");
+      t.classList.add("hidden");
+      t.style.display = "none";
+      t.textContent = "";
+    }
+  })();
+  ensureChatStarted().then(() => {
+    paintMessages();
+    renderChatHistory();
+    applyChatAppearance();
+    const t = $("chat-typing");
+    if (t && !state.sending) {
+      t.classList.remove("is-on");
+      t.classList.add("hidden");
+      t.style.display = "none";
+    }
+  });
 
   const input = $("chat-input");
   input && input.addEventListener("input", () => {
@@ -1005,7 +1024,9 @@ async function sendMessage() {
   if (typing) {
     const who = (state.character && state.character.name) ? state.character.name : "Personnage";
     typing.textContent = who + " écrit…";
+    typing.classList.add("is-on");
     typing.classList.remove("hidden");
+    typing.style.display = "block";
   }
   try {
     const res = await api(activeChatPath(), {
@@ -1042,7 +1063,12 @@ async function sendMessage() {
   }
   try { localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat)); } catch (_) {}
   state.sending = false;
-  if (typing) typing.classList.add("hidden");
+  if (typing) {
+    typing.classList.remove("is-on");
+    typing.classList.add("hidden");
+    typing.style.display = "none";
+    typing.textContent = "";
+  }
   paintMessages();
   renderChatHistory();
 }

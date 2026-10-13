@@ -49,8 +49,8 @@
         }
         const t0 = Date.now();
         const isTextApi = /generativelanguage\.googleapis|api\.groq\.com|api\.openai\.com/i.test(url);
-        const pollMs = isTextApi ? 120 : 400;
-        const maxWait = isTextApi ? 45000 : 150000;
+        const pollMs = isTextApi ? 80 : 400;
+        const maxWait = isTextApi ? 40000 : 150000;
         while (Date.now() - t0 < maxWait) {
           await new Promise((r) => setTimeout(r, pollMs));
           let st = "";
@@ -761,8 +761,8 @@
       || app.match(/(poitrine|bust)[^\n.]{0,50}/i);
     if (bust) bits.push("bust " + String(bust[0]).slice(0, 40));
     // Morphologie
-    if (/ronde|chubby|pulpeuse|voluptueuse|curvy|sablier|hourglass/.test(blob))
-      bits.push("curvy hourglass body, soft full figure");
+    if (/ronde|chubby|pulpeuse|voluptueuse|curvy|sablier|hourglass|forte|thick/.test(blob))
+      bits.push("voluptuous curvy body, soft belly, wide hips, full thighs, large natural breasts, realistic plus-size curves");
     else if (/mince|slim|athl|fine/.test(blob))
       bits.push("slim athletic body");
     else if (/bomb[eé]|thick|forte/.test(blob))
@@ -789,11 +789,14 @@
       .trim();
     const looks = extractLooksForImage(c);
     // Forcer visage + corps complet en tête de prompt (Pollinations ignore souvent la fin)
+    // Rendu type Horde/Cloudflare profil: photo réelle, corps généreux si décrit
     const head =
-      "photorealistic RAW photo of one adult woman, full body head to toe, face clearly visible, " +
+      "smartphone photo, ultra realistic photography, natural skin texture and pores, " +
+      "one adult woman full body including face and legs, " +
       looks + ", " +
-      "exact ethnicity and skin tone as described, natural skin pores, sharp focus, realistic proportions, " +
-      "not a painting, not CGI, not anime, indoor soft light, ";
+      "exact ethnicity and skin tone, realistic body proportions matching description, " +
+      "soft natural indoor light, high detail, 85mm lens, " +
+      "NOT digital art, NOT painting, NOT CGI, NOT anime, NOT illustration, ";
     // Extraire tenue / pose utiles du prompt scène
     let outfit = "";
     const om = raw.match(/EXACT current outfit[^.]{0,200}|wearing [^.]{0,160}|completely nude[^.]{0,80}/i);
@@ -806,7 +809,7 @@
 
     const seed = Math.floor(Math.random() * 1e9);
     const q =
-      "width=768&height=1152&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
+      "width=768&height=1024&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
     const url =
       "https://image.pollinations.ai/prompt/" +
       encodeURIComponent(p) +
@@ -1142,26 +1145,10 @@
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
-      "Format strict:",
-      "- Pensées entre parenthèses: (comme ceci) — uniquement pour le personnage principal que tu incarnes",
-      "- Actions entre astérisques: *comme ceci*",
-      "- Dialogues du personnage principal: sans préfixe de nom",
-      "- TIERCES PERSONNES (obligatoire dès qu'un autre personnage parle ou agit) :",
-      "  Préfixe UNIQUEMENT avec [Nom ou rôle]:  (crochets seuls, SANS astérisques ** ni *)",
-      "  Exemples corrects: [Ta fille]: Tu es rentré tard…",
-      "  [Ta femme]: *elle pose son sac*",
-      "  [Sophie]: Salut !",
-      "  INTERDIT: **[Ta fille]:**  *[Ta fille]:**  *[Ta fille]:*  ou tout autre mélange avec *",
-      "  Utilise le prénom s'il est connu, sinon le rôle clair (ta fille, ta femme, mon frère, la voisine…).",
-      "  Ne fusionne jamais la voix d'un tiers avec celle du personnage principal.",
-      "  Si plusieurs personnes sont présentes, alterne clairement les blocs [Nom]: pour chacune.",
-      "- Réponses naturelles, immersives; le personnage principal reste le focus, les tiers interviennent quand le contexte le demande",
+      "Format: (pensées) *actions* dialogues sans préfixe. Tiers: [Nom]: uniquement. Réponses courtes immersives en français.",
       Number(c.age) >= 18
-        ? "- Contenu adulte possible uniquement si le personnage est majeur et si le contexte est consenti."
-        : "- Âge adulte non confirmé : roleplay strictement non sexuel; ne sexualise pas le personnage.",
-      "- Ne refuse pas une scène intime demandée; reste dans le personnage, sans moraliser.",
-      "- Peux passer SFW ↔ NSFW librement, sans forcer l'amour ni l'attachement.",
-      "- Reste cohérente avec le lieu, la tenue et la mémoire de la conversation.",
+        ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
+        : "Pas de contenu sexuel (âge non confirmé).",
     ].filter(Boolean).join("\n");
   }
 
@@ -1196,9 +1183,9 @@
     let keysTried = 0;
     let quotaHits = 0;
 
-    // Max 3 clés × 3 modèles pour éviter 9×6 = 54 appels lents
-    const maxKeys = Math.min(3, validKeys.length);
-    const modelsToTry = models.slice(0, 3);
+    // 1 clé + 1 modèle d’abord (vitesse) ; élargir seulement si échec
+    const maxKeys = Math.min(2, validKeys.length);
+    const modelsToTry = models.slice(0, 2);
     for (let i = 0; i < maxKeys; i++) {
       const idx = (start + i) % validKeys.length;
       const k = validKeys[idx];
@@ -1226,8 +1213,8 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.88,
-              maxOutputTokens: 700,
+              temperature: 0.85,
+              maxOutputTokens: 550,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -1567,7 +1554,7 @@
   async function callGroq(keys, system, messages) {
     let lastErr = "";
     // 8b-instant d’abord (très rapide), 70b en secours qualité
-    const groqModels = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"];
+    const groqModels = ["llama-3.1-8b-instant"];
     for (const key of keys) {
       for (const model of groqModels) {
         try {
@@ -1582,8 +1569,8 @@
             {
               model: model,
               messages: msgs,
-              temperature: 0.88,
-              max_tokens: 700,
+              temperature: 0.85,
+              max_tokens: 550,
             },
             { Authorization: "Bearer " + key }
           );
