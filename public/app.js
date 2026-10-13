@@ -522,7 +522,6 @@ function renderDiscover() {
       renderDiscover();
     };
   });
-}
 
 
   const searchInput = $("discover-search");
@@ -548,6 +547,8 @@ function renderDiscover() {
     searchInput.oninput = applyDiscoverFilter;
     searchInput.onsearch = applyDiscoverFilter;
   }
+
+}
 
 
 function renderProfile() {
