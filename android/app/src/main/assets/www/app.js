@@ -422,15 +422,17 @@ function formatMessageHtml(text) {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // *actions* → cyan. (pensées) → jaune. Reclasser () en action SEULEMENT si narration pure longue.
+  // *actions* → cyan. (pensées) → jaune. Narration physique dans () → action.
   function isReallyAction(inner) {
     const s = String(inner || "").trim();
-    // Pensées / ressenti → toujours jaune
-    if (/\b(je (me )?dis|je pense|dans ma t[eê]te|j['’]ai peur|j['’]ose pas|s['’]il me|pourquoi|est-ce que|mon c[oe]ur|troubl[eé]e?|honte|envie|d[eé]sir)\b/i.test(s))
-      return false;
-    // Narration physique longue sans marqueur de pensée → action
-    if (s.length > 140 && /\b(je|elle)\s+(me |se )?(cambre|approche|glisse|caresse|tremble|embrasse|g[eé]mit)/i.test(s))
+    if (!s) return false;
+    // Vraie pensée courte / ressenti interne → jaune
+    const thoughty = /\b(je (me )?dis|je pense|dans ma t[eê]te|j['’]ai peur|j['’]ose pas|pourquoi|est-ce que|mon c[oe]ur|c['’]est irr[eé]el|je ne (veux|serai|peux)|prisonni[eè]re|honte|troubl[eé]e?)\b/i.test(s);
+    if (thoughty && s.length < 120) return false;
+    // Narration physique / sexuelle → action (même si le modèle a mis des parenthèses)
+    if (/\b(pousse|enfonce|jouis|hurle|spasme|tremble|effondre|g[eé]mit|cambre|caresse|embrasse|glisse|l[eè]vres?|doigts?|verge|sexe|clito|seins?|culotte|hanches?|cuisses?|baiser|orgue|contraction)\b/i.test(s))
       return true;
+    if (s.length > 90) return true; // long bloc = narration, pas une pensée
     return false;
   }
   let out = esc
@@ -1175,7 +1177,7 @@ async function generateConversationScene() {
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Scène…"; }
   if (status) status.textContent = "File Horde — tenue de la conversation…";
   state.genRunning = true;
-  setGenBanner("⏳ Scène → Pollinations (sans clé), secours Horde si besoin…", "");
+  setGenBanner("⏳ Scène → AI Horde (tenue de la conversation)…", "");
   try {
     const memory = loadRoleplayMemory();
     // Scènes conversation : mode anonyme autorisé (pas de clé obligatoire)
@@ -1226,7 +1228,7 @@ async function generateConversationScene() {
       }
     } catch (_) {}
     paintMessages();
-    const via = res.engine === "pollinations" ? "Pollinations" : (res.engine === "horde" ? "Horde" : (res.fallbackFrom ? "fallback" : "OK"));
+    const via = res.engine === "horde" ? "Horde" : (res.engine || (res.fallbackFrom ? "fallback" : "OK"));
     setGenBanner("✅ Scène ajoutée (" + via + ")", "ok");
     if (status) status.textContent = "✅ " + via;
   } catch (e) {
