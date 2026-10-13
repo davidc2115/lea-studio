@@ -927,15 +927,18 @@ public class LeaBridge {
             if (url == null || url.isEmpty()) return "";
             URL u = new URL(url);
             conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(20000);
-            conn.setReadTimeout(60000);
+            boolean isPolli = url.contains("pollinations.ai");
+            conn.setConnectTimeout(isPolli ? 45000 : 20000);
+            conn.setReadTimeout(isPolli ? 180000 : 60000);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "LeaStudio/3.0 (Android)");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36 LeaStudio/3.0");
             conn.setRequestProperty("Connection", "close");
             conn.setInstanceFollowRedirects(true);
-            conn.setRequestProperty("Referer", url.contains("botbooru.com")
-                ? "https://botbooru.com/"
-                : "https://chub.ai/");
+            String referer = "https://chub.ai/";
+            if (url.contains("botbooru.com")) referer = "https://botbooru.com/";
+            else if (url.contains("pollinations.ai")) referer = "https://pollinations.ai/";
+            conn.setRequestProperty("Referer", referer);
+            conn.setRequestProperty("Accept", "image/*,*/*");
             int code = conn.getResponseCode();
             if (code >= 400) return "";
             InputStream in = conn.getInputStream();

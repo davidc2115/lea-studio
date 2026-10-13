@@ -721,6 +721,53 @@
   }
 
 
+  /** Pollinations AI — sans clé (URL legacy image.pollinations.ai). Scènes conversation. */
+  async function generatePollinationsImage(prompt, character, st) {
+    const c = character || LEA;
+    let p = String(prompt || "")
+      .replace(/\[\[denoise:[^\]]+\]\]/gi, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    // Priorité physique + tenue (URL limitée)
+    if (p.length > 900) p = p.slice(0, 900);
+    if (p.length < 12) throw new Error("Prompt Pollinations trop court.");
+
+    const seed = Math.floor(Math.random() * 1e9);
+    const q =
+      "width=512&height=768&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
+    const url =
+      "https://image.pollinations.ai/prompt/" +
+      encodeURIComponent(p) +
+      "?" +
+      q;
+
+    if (!window.LeaAndroid || typeof window.LeaAndroid.httpGetDataUrl !== "function") {
+      throw new Error("Pollinations nécessite l’application Android (httpGetDataUrl).");
+    }
+    let dataUrl = "";
+    try {
+      dataUrl = String(window.LeaAndroid.httpGetDataUrl(url) || "");
+    } catch (e) {
+      throw new Error("Pollinations: " + String(e.message || e).slice(0, 120));
+    }
+    if (!dataUrl || dataUrl.indexOf("data:image") !== 0 || dataUrl.length < 200) {
+      throw new Error(
+        "Pollinations n’a renvoyé aucune image (limite temporaire ou filtre). Réessaie dans ~30 s."
+      );
+    }
+    // Enregistrer en galerie si possible
+    try {
+      if (typeof window.LeaAndroid.saveGalleryImage === "function") {
+        const key = window.LeaAndroid.saveGalleryImage(
+          String(c.id || "lea"),
+          dataUrl
+        );
+        if (key && String(key).indexOf("gallery:") === 0) return String(key);
+      }
+    } catch (_) {}
+    return dataUrl;
+  }
+
   async function generateHordeImage(prompt, character, st, options) {
     const opts = options || {};
     let referenceB64 = null;
@@ -1580,10 +1627,8 @@
       if (isHorde) {
         try {
           // === PROFIL et SCÈNE : denoise / prompt isolés ===
-          // Profil → buildPhysicalImagePrompt + 0.62 (ne pas modifier)
-          // Scène  → buildConversationImagePrompt + 0.65 (système séparé)
-          // 0.62-0.65 = quasi-copie de la ref; 0.75+ force nouvelle tenue/pose
-          // Profil 0.85: change tenue/pose en gardant le visage. Scène 0.92+: tenue mémoire.
+          // Profil → buildPhysicalImagePrompt (Horde/Cloudflare) — inchangé
+          // Scène  → Pollinations d’abord (sans clé), puis Horde en secours
           const PROFILE_HORDE_DENOISE = 0.85;
           let SCENE_HORDE_DENOISE = 0.92;
           if (isScene) {
@@ -1600,6 +1645,20 @@
             } catch (pe) {
               throw new Error("Prompt scène: " + String(pe && pe.message || pe).slice(0, 160));
             }
+            // 1) Pollinations (anonyme, sans clé)
+            try {
+              const dataUrl = await generatePollinationsImage(prompt, char, st);
+              return {
+                ok: true,
+                image: dataUrl,
+                prompt: String(prompt).slice(0, 400),
+                engine: "pollinations",
+                mode: "conversation",
+              };
+            } catch (pollFirstErr) {
+              // 2) Horde anonyme en secours
+              console.warn("Pollinations scène:", pollFirstErr);
+            }
           }
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
@@ -1615,15 +1674,30 @@
             denoise: denoise,
           };
         } catch (hordeErr) {
-          // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)
+          // Scènes : fallback Pollinations (sans clé) si Horde 429 / erreur
           if (isScene) {
-            const em = String(hordeErr.message || hordeErr);
-            const is429 = /429|anonymous|Too many/i.test(em);
-            throw new Error(
-              is429
-                ? "AI Horde 429 (quota anonyme saturé). Réessaie dans quelques minutes, ou ajoute une clé gratuite dans Réglages pour plus de marge."
-                : ("AI Horde (scène) : " + em.slice(0, 180))
-            );
+            try {
+              const scenePrompt =
+                (typeof prompt === "string" && prompt.length > 20)
+                  ? prompt
+                  : buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
+              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
+              return {
+                ok: true,
+                image: dataUrl,
+                prompt: String(scenePrompt).slice(0, 400),
+                engine: "pollinations",
+                mode: "conversation",
+                fallbackFrom: "horde",
+                hordeError: String(hordeErr.message || hordeErr).slice(0, 120),
+              };
+            } catch (pollErr) {
+              const em = String(hordeErr.message || hordeErr);
+              const pe = String(pollErr.message || pollErr);
+              throw new Error(
+                "Scène indisponible — Horde: " + em.slice(0, 100) + " · Pollinations: " + pe.slice(0, 100)
+              );
+            }
           }
           // Profil : fallback Cloudflare soft (inchangé)
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");

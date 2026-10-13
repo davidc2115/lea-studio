@@ -962,10 +962,10 @@ async function generateConversationScene() {
   }
   const btn = $("chat-gen-scene");
   const status = $("chat-scene-status");
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ Horde…"; }
+  if (btn) { btn.disabled = true; btn.textContent = "⏳ Scène…"; }
   if (status) status.textContent = "File Horde — tenue de la conversation…";
   state.genRunning = true;
-  setGenBanner("⏳ Scène conversation → AI Horde (peut prendre plusieurs minutes)…", "");
+  setGenBanner("⏳ Scène → Pollinations (sans clé), secours Horde si besoin…", "");
   try {
     const memory = loadRoleplayMemory();
     // Scènes conversation : mode anonyme autorisé (pas de clé obligatoire)
@@ -1016,7 +1016,7 @@ async function generateConversationScene() {
       }
     } catch (_) {}
     paintMessages();
-    const via = res.engine === "horde" ? "Horde" : (res.fallbackFrom ? "Cloudflare (fallback)" : "OK");
+    const via = res.engine === "pollinations" ? "Pollinations" : (res.engine === "horde" ? "Horde" : (res.fallbackFrom ? "fallback" : "OK"));
     setGenBanner("✅ Scène ajoutée (" + via + ")", "ok");
     if (status) status.textContent = "✅ " + via;
   } catch (e) {
