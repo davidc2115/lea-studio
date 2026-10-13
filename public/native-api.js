@@ -728,13 +728,18 @@
       .replace(/\[\[denoise:[^\]]+\]\]/gi, "")
       .replace(/\s+/g, " ")
       .trim();
-    // Priorité physique + tenue (URL limitée)
-    if (p.length > 900) p = p.slice(0, 900);
+    // Qualité photo : préfixe fort + résolution plus haute
+    const qualityPrefix =
+      "photorealistic RAW photo, ultra detailed skin, natural lighting, sharp focus, 8k, " +
+      "realistic proportions, single adult woman 18+, ";
+    if (p.toLowerCase().indexOf("photorealistic") < 0) p = qualityPrefix + p;
+    if (p.length > 1100) p = p.slice(0, 1100);
     if (p.length < 12) throw new Error("Prompt Pollinations trop court.");
 
     const seed = Math.floor(Math.random() * 1e9);
+    // 768×1024 + flux + enhance pour un meilleur rendu
     const q =
-      "width=512&height=768&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
+      "width=768&height=1024&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
     const url =
       "https://image.pollinations.ai/prompt/" +
       encodeURIComponent(p) +
@@ -1073,12 +1078,11 @@
   }
 
   async function callGemini(keys, system, messages) {
+    // Modèles rapides d’abord (évite d’attendre des modèles lents / 404 en série)
     const models = [
-      "gemini-3.5-flash-lite",
       "gemini-2.0-flash-lite",
       "gemini-2.0-flash",
-      "gemini-3.5-flash",
-      "gemini-3.8-flash",
+      "gemini-3.5-flash-lite",
       "gemini-flash-latest",
     ];
     const validKeys = (keys || []).map((k) => String(k || "").trim()).filter((k) => k.length >= 10);
@@ -1120,9 +1124,9 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.95,
-              maxOutputTokens: 1536,
-              // Pas de filtre de réponse côté client
+              temperature: 0.9,
+              maxOutputTokens: 900,
+              // Réponses plus courtes = plus rapides
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -1456,30 +1460,39 @@
 
   async function callGroq(keys, system, messages) {
     let lastErr = "";
+    // 8b-instant d’abord (très rapide), 70b en secours qualité
+    const groqModels = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"];
     for (const key of keys) {
-      try {
-        const msgs = [{ role: "system", content: system }].concat(
-          messages.filter((m) => m.role !== "system").map((m) => ({
-            role: m.role === "assistant" ? "assistant" : "user",
-            content: m.content,
-          }))
-        );
-        const r = await httpPostJson(
-          "https://api.groq.com/openai/v1/chat/completions",
-          { model: "llama-3.3-70b-versatile", messages: msgs, temperature: 0.9 },
-          { Authorization: "Bearer " + key }
-        );
-        const data = r.json || {};
-        if (!r.ok) {
-          lastErr = r.error || (data.error && data.error.message) || "groq error";
-          continue;
+      for (const model of groqModels) {
+        try {
+          const msgs = [{ role: "system", content: system }].concat(
+            messages.filter((m) => m.role !== "system").map((m) => ({
+              role: m.role === "assistant" ? "assistant" : "user",
+              content: String(m.content || "").slice(0, 1200),
+            }))
+          );
+          const r = await httpPostJson(
+            "https://api.groq.com/openai/v1/chat/completions",
+            {
+              model: model,
+              messages: msgs,
+              temperature: 0.9,
+              max_tokens: 900,
+            },
+            { Authorization: "Bearer " + key }
+          );
+          const data = r.json || {};
+          if (!r.ok) {
+            lastErr = model + ": " + (r.error || (data.error && data.error.message) || "groq error");
+            continue;
+          }
+          const text = data.choices && data.choices[0] && data.choices[0].message
+            ? data.choices[0].message.content
+            : "";
+          if (text) return text.trim();
+        } catch (e) {
+          lastErr = String(e.message || e);
         }
-        const text = data.choices && data.choices[0] && data.choices[0].message
-          ? data.choices[0].message.content
-          : "";
-        if (text) return text.trim();
-      } catch (e) {
-        lastErr = String(e.message || e);
       }
     }
     throw new Error(lastErr || "Groq indisponible");
@@ -1491,7 +1504,10 @@
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
     const groqKeys = splitKeys(st.groqKeys);
-    const hist = (messages || []).slice(-40);
+    const hist = (messages || []).slice(-18).map((m) => ({
+      role: m.role,
+      content: String(m.content || "").slice(0, 1200),
+    }));
 
     const order =
       engine === "openai"

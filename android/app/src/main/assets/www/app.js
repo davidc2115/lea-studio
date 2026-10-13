@@ -126,6 +126,54 @@ function saveSettings(s) {
     if (k) localStorage.setItem("lea.hordeApiKey", k);
   } catch (_) {}
 }
+
+function chatBgKey(charId) {
+  return "lea.chatBg." + String(charId || "lea");
+}
+function loadChatBg(charId) {
+  try {
+    return JSON.parse(localStorage.getItem(chatBgKey(charId)) || "null");
+  } catch (_) {
+    return null;
+  }
+}
+function saveChatBg(charId, data) {
+  try {
+    localStorage.setItem(chatBgKey(charId), JSON.stringify(data || {}));
+  } catch (_) {}
+}
+function loadChatUiPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem("lea.chatUi") || "{}");
+    return {
+      bubbleOpacity: Math.min(1, Math.max(0.25, Number(p.bubbleOpacity) || 0.88)),
+      bgOpacity: Math.min(1, Math.max(0.05, Number(p.bgOpacity) || 0.35)),
+    };
+  } catch (_) {
+    return { bubbleOpacity: 0.88, bgOpacity: 0.35 };
+  }
+}
+function saveChatUiPrefs(p) {
+  try {
+    localStorage.setItem("lea.chatUi", JSON.stringify(p || loadChatUiPrefs()));
+  } catch (_) {}
+}
+function applyChatAppearance() {
+  const wrap = document.querySelector(".chat-wrap");
+  if (!wrap) return;
+  const prefs = loadChatUiPrefs();
+  const c = state.character;
+  const bg = c ? loadChatBg(c.id) : null;
+  wrap.style.setProperty("--bubble-opacity", String(prefs.bubbleOpacity));
+  wrap.style.setProperty("--chat-bg-opacity", String(prefs.bgOpacity));
+  if (bg && bg.src) {
+    const src = resolveImgSrc(bg.src);
+    wrap.style.setProperty("--chat-bg-image", src ? 'url("' + src.replace(/"/g, '\"') + '")' : "none");
+  } else {
+    wrap.style.setProperty("--chat-bg-image", "none");
+  }
+}
+
 function resolveHordeApiKey() {
   const st = loadSettings() || {};
   let k = String(st.hordeApiKey || st.horde_key || st.hordeKey || "").trim();
@@ -820,8 +868,17 @@ function renderChat() {
       <div class="chat-msgs" id="chat-msgs"></div>
       <div class="typing hidden" id="chat-typing">Léa écrit…</div>
       <div class="chat-scene-row">
-        <button type="button" class="chat-scene-btn" id="chat-gen-scene" title="Générer la scène (Horde, tenue de la conversation)">🖼️ Scène</button>
+        <button type="button" class="chat-scene-btn" id="chat-gen-scene" title="Générer la scène">🖼️ Scène</button>
+        <button type="button" class="chat-bg-btn" id="chat-bg-toggle" title="Fond de conversation">🎨 Fond</button>
         <span class="chat-scene-hint" id="chat-scene-status"></span>
+      </div>
+      <div class="chat-bg-panel" id="chat-bg-panel">
+        <div class="chat-bg-sliders">
+          <label>Transparence bulles <input type="range" id="chat-bubble-opacity" min="25" max="100" value="88" /></label>
+          <label>Visibilité fond <input type="range" id="chat-bg-opacity" min="5" max="90" value="35" /></label>
+        </div>
+        <div class="chat-bg-grid" id="chat-bg-grid"></div>
+        <button type="button" class="chat-bg-btn" id="chat-bg-clear">Aucun fond</button>
       </div>
       <div class="chat-input-row">
         <textarea id="chat-input" rows="1" placeholder="Écris… (*action*) (pensée)"></textarea>
@@ -830,7 +887,9 @@ function renderChat() {
     </div>
   `;
   paintMessages();
-  ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); });
+  applyChatAppearance();
+  setupChatBackgroundUi();
+  ensureChatStarted().then(() => { paintMessages(); renderChatHistory(); applyChatAppearance(); });
 
   const input = $("chat-input");
   input && input.addEventListener("input", () => {
@@ -943,6 +1002,71 @@ async function sendMessage() {
 }
 
 
+
+
+function setupChatBackgroundUi() {
+  const c = state.character;
+  if (!c) return;
+  const panel = $("chat-bg-panel");
+  const grid = $("chat-bg-grid");
+  const toggle = $("chat-bg-toggle");
+  const clearBtn = $("chat-bg-clear");
+  const bubbleRange = $("chat-bubble-opacity");
+  const bgRange = $("chat-bg-opacity");
+  const prefs = loadChatUiPrefs();
+  const current = loadChatBg(c.id) || {};
+
+  if (bubbleRange) bubbleRange.value = String(Math.round(prefs.bubbleOpacity * 100));
+  if (bgRange) bgRange.value = String(Math.round(prefs.bgOpacity * 100));
+
+  if (grid) {
+    const imgs = [];
+    if (c.cover) imgs.push(c.cover);
+    (Array.isArray(c.gallery) ? c.gallery : []).forEach((g) => {
+      if (g && imgs.indexOf(g) < 0) imgs.push(g);
+    });
+    grid.innerHTML = imgs.slice(0, 24).map((src, i) => {
+      const resolved = resolveImgSrc(src);
+      const active = current.src && (current.src === src || current.src === resolved);
+      return `<button type="button" class="${active ? "is-active" : ""}" data-bg-src="${escapeHtml(src)}" title="Fond ${i + 1}">
+        ${resolved ? `<img src="${escapeHtml(resolved)}" alt="" loading="lazy" />` : "🖼️"}
+      </button>`;
+    }).join("") || "<span class='hint'>Aucune image dans la galerie</span>";
+
+    grid.querySelectorAll("button[data-bg-src]").forEach((btn) => {
+      btn.onclick = () => {
+        const src = btn.getAttribute("data-bg-src");
+        saveChatBg(c.id, { src: src });
+        grid.querySelectorAll("button").forEach((b) => b.classList.remove("is-active"));
+        btn.classList.add("is-active");
+        applyChatAppearance();
+      };
+    });
+  }
+
+  if (toggle) {
+    toggle.onclick = () => {
+      if (panel) panel.classList.toggle("open");
+    };
+  }
+  if (clearBtn) {
+    clearBtn.onclick = () => {
+      saveChatBg(c.id, {});
+      if (grid) grid.querySelectorAll("button").forEach((b) => b.classList.remove("is-active"));
+      applyChatAppearance();
+    };
+  }
+  const onSlide = () => {
+    const next = {
+      bubbleOpacity: bubbleRange ? Number(bubbleRange.value) / 100 : 0.88,
+      bgOpacity: bgRange ? Number(bgRange.value) / 100 : 0.35,
+    };
+    saveChatUiPrefs(next);
+    applyChatAppearance();
+  };
+  if (bubbleRange) bubbleRange.oninput = onSlide;
+  if (bgRange) bgRange.oninput = onSlide;
+}
 
 async function generateConversationScene() {
   if (state.genRunning) {
