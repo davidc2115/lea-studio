@@ -1172,7 +1172,7 @@
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
-      "Format: (pensées) *actions* dialogues sans préfixe. Tiers: [Nom]: uniquement. Réponses courtes immersives en français.",
+      "Format: (pensées) *actions* dialogues sans préfixe. Tiers: [Nom]: uniquement. Réponses immersives en français, 2 à 4 paragraphes (actions + dialogue + une pensée), ni télégraphique ni roman.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
         : "Pas de contenu sexuel (âge non confirmé).",
@@ -1239,8 +1239,8 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.82,
-              maxOutputTokens: 420,
+              temperature: 0.88,
+              maxOutputTokens: 1100,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -1605,8 +1605,8 @@
             {
               model: model,
               messages: msgs,
-              temperature: 0.85,
-              max_tokens: 550,
+              temperature: 0.88,
+              max_tokens: 1100,
             },
             { Authorization: "Bearer " + key }
           );

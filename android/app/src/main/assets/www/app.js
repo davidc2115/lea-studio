@@ -891,17 +891,17 @@ function renderChat() {
   }
   const cover = c.cover || (c.gallery && c.gallery[0]) || "";
   root.innerHTML = `
-    <button type="button" class="chat-back-button" id="chat-back">← Conversations</button>
     <div class="chat-wrap">
-      <div class="chat-header">
-          <button type="button" class="chat-header-avatar" id="chat-open-profile" title="Voir le profil">
-            <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
-          </button>
+      <div class="chat-header chat-header--compact">
+        <button type="button" class="chat-back-icon" id="chat-back" title="Conversations">←</button>
+        <button type="button" class="chat-header-avatar" id="chat-open-profile" title="Voir le profil">
+          <img src="${escapeHtml(resolveImgSrc(cover))}" alt="" />
+        </button>
         <div class="info" id="chat-open-profile-info" role="button" tabindex="0" title="Voir le profil">
-           <strong>💜 ${escapeHtml(c.name)}</strong>
-           <small>${c.age ? escapeHtml(c.age) + " ans" : "âge non précisé"} · ${escapeHtml(c.title || "")}</small>
+           <strong>${escapeHtml(c.name)}</strong>
+           <small>${c.age ? escapeHtml(String(c.age)) + " ans" : ""} · ${escapeHtml(c.title || "")}</small>
         </div>
-        <button type="button" class="icon-btn" id="chat-reset" title="Nouvelle conversation" style="margin-left:auto">🔄</button>
+        <button type="button" class="icon-btn" id="chat-reset" title="Nouvelle conversation">🔄</button>
         <button type="button" class="icon-btn" id="chat-delete" title="Supprimer la conversation">🗑️</button>
       </div>
       <div class="chat-msgs" id="chat-msgs"></div>

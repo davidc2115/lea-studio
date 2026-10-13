@@ -326,17 +326,7 @@ main {
   -webkit-overflow-scrolling: touch;
 }
 .chat-history-picker .chat-history-list { flex: 1; min-height: 0; max-height: none; overflow-y: auto; }
-.chat-back-button {
-  flex: 0 0 auto;
-  width: fit-content;
-  margin: 0 0 8px;
-  padding: 8px 12px;
-  border: 1px solid rgba(167,139,250,.25);
-  border-radius: 12px;
-  background: rgba(36,16,56,.8);
-  color: var(--text);
-  font: inherit;
-}
+.chat-back-button { display: none; }
 #view-chat:not(.hidden) {
   display: flex;
   flex-direction: column;
@@ -385,12 +375,12 @@ main {
   overflow: hidden;
 }
 .chat-header {
-  display: flex; align-items: center; gap: 12px; padding: 4px 0 12px;
-  border-bottom: 1px solid rgba(167,139,250,.15); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px; padding: 2px 0 6px;
+  border-bottom: 1px solid rgba(167,139,250,.15); margin-bottom: 4px;
 }
 .chat-header img {
-  width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
-  border: 2px solid var(--pink);
+  width: 34px; height: 34px; border-radius: 50%; object-fit: cover;
+  border: 1.5px solid var(--pink);
 }
 .chat-header .info strong { display: block; }
 .chat-header .info small { color: var(--muted); }
@@ -734,4 +724,44 @@ button:disabled { opacity: .6; cursor: wait; }
   font-size: .75rem;
   color: var(--muted);
   padding: 0 4px;
+}
+
+
+/* Chat header compact */
+.chat-header--compact {
+  gap: 8px !important;
+  padding: 2px 0 6px !important;
+  margin-bottom: 4px !important;
+  min-height: 40px;
+}
+.chat-back-icon {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(36,16,56,.75);
+  color: var(--text);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.chat-header--compact .chat-header-avatar,
+.chat-header--compact .chat-header-avatar img {
+  width: 34px !important;
+  height: 34px !important;
+}
+.chat-header--compact .info strong { font-size: .88rem; line-height: 1.15; }
+.chat-header--compact .info small {
+  font-size: .68rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.chat-header--compact .icon-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: .95rem;
 }
