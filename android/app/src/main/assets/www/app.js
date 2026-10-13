@@ -948,6 +948,10 @@ async function generateConversationScene() {
   setGenBanner("⏳ Scène conversation → AI Horde (peut prendre plusieurs minutes)…", "");
   try {
     const memory = loadRoleplayMemory();
+    const st = loadSettings() || {};
+    if (!String(st.hordeApiKey || "").trim()) {
+      throw new Error("Clé AI Horde manquante dans Réglages — obligatoire pour les scènes conversation.");
+    }
     const res = await api("/api/image/scene", {
       method: "POST",
       body: JSON.stringify({
@@ -955,7 +959,7 @@ async function generateConversationScene() {
         character: promptCharacterPayload(c),
         memory: memory,
         messages: (state.chat && state.chat.messages) || [],
-        settings: loadSettings(),
+        settings: st,
         extra: "",
       }),
     });

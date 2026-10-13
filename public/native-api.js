@@ -736,6 +736,17 @@
     if (!window.LeaAndroid || typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
     }
+    // Clé Horde: body.settings en priorité, sinon lea.settings (évite le mode anonyme 429)
+    const stMerged = Object.assign({}, settings(), st || {});
+    let hordeKey = String(
+      stMerged.hordeApiKey || stMerged.horde_key || stMerged.hordeKey || ""
+    ).trim();
+    if (!hordeKey || hordeKey === "0000000000") {
+      throw new Error(
+        "Clé AI Horde absente ou anonyme. Va dans Réglages, colle ta clé AI Horde (compte sur aihorde.net), enregistre, puis réessaie. " +
+        "Sans clé, Horde bloque avec HTTP 429 (trop de requêtes anonymes)."
+      );
+    }
     const strength = (opts.denoise != null && opts.denoise > 0) ? String(opts.denoise) : "";
     let jobId = "";
     if (typeof window.LeaAndroid.hordeImageStartWithStrength === "function") {
@@ -743,7 +754,7 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        String(st && st.hordeApiKey || ""),
+        hordeKey,
         strength
       ) || "");
     } else if (typeof window.LeaAndroid.hordeImageStart === "function") {
@@ -751,7 +762,7 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        String(st && st.hordeApiKey || "")
+        hordeKey
       ) || "");
     } else {
       throw new Error("La génération AI Horde nécessite l’application Android.");
@@ -1550,7 +1561,8 @@
     }
 
     if ((path === "/api/image/cloudflare" || path === "/api/image/horde" || path === "/api/image/scene") && method === "POST") {
-      const st = body.settings || settings();
+      // Fusion réglages sauvegardés + body (clé Horde toujours disponible)
+      const st = Object.assign({}, settings(), body.settings || {});
       const char = body.character || LEA;
       const isScene = path === "/api/image/scene" || body.mode === "conversation";
       const isHorde = isScene || path === "/api/image/horde";
@@ -1601,9 +1613,12 @@
         } catch (hordeErr) {
           // Scènes conversation (souvent NSFW / nude) : pas de fallback Cloudflare (filtre strict)
           if (isScene) {
+            const em = String(hordeErr.message || hordeErr);
+            const is429 = /429|anonymous|Too many/i.test(em);
             throw new Error(
-              "AI Horde (scène) : " + String(hordeErr.message || hordeErr).slice(0, 180) +
-              " — réessaie plus tard ou vérifie ta clé Horde dans Réglages."
+              is429
+                ? "AI Horde 429 : requêtes anonymes refusées. Ouvre ⚙️ Réglages, vérifie que ta clé AI Horde est bien enregistrée, puis réessaie."
+                : ("AI Horde (scène) : " + em.slice(0, 180) + " — réessaie ou vérifie ta clé dans Réglages.")
             );
           }
           // Profil : fallback Cloudflare soft (inchangé)
