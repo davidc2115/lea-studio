@@ -48,8 +48,11 @@
           return { ok: false, status: 0, json: null, text: "", error: "httpPostJsonStart failed" };
         }
         const t0 = Date.now();
-        while (Date.now() - t0 < 150000) {
-          await new Promise((r) => setTimeout(r, 400));
+        const isTextApi = /generativelanguage\.googleapis|api\.groq\.com|api\.openai\.com/i.test(url);
+        const pollMs = isTextApi ? 120 : 400;
+        const maxWait = isTextApi ? 45000 : 150000;
+        while (Date.now() - t0 < maxWait) {
+          await new Promise((r) => setTimeout(r, pollMs));
           let st = "";
           try { st = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); } catch (e) {
             return { ok: false, status: 0, json: null, text: "", error: "poll: " + e.message };
@@ -67,7 +70,7 @@
           }
           return { ok: true, status: 200, json: json, text: raw, error: "" };
         }
-        return { ok: false, status: 0, json: null, text: "", error: "timeout 150s" };
+        return { ok: false, status: 0, json: null, text: "", error: isTextApi ? "timeout 45s (texte)" : "timeout 150s" };
       } catch (e) {
         return { ok: false, status: 0, json: null, text: "", error: "async bridge: " + String(e.message || e) };
       }
@@ -721,25 +724,53 @@
   }
 
 
-  /** Pollinations AI — sans clé (URL legacy image.pollinations.ai). Scènes conversation. */
+  function extractLooksForImage(char) {
+    const c = char || LEA;
+    const app = String(c.appearance || "").toLowerCase();
+    const bits = [];
+    bits.push((Number(c.age) >= 18 ? c.age : 21) + " year old woman");
+    const hair = app.match(/(cheveux|hair)[^\n.]{0,80}/);
+    if (hair) bits.push(hair[0].replace(/cheveux/gi, "hair").slice(0, 70));
+    else if (/brune|brun/.test(app + " " + (c.name || ""))) bits.push("dark brown long hair");
+    else if (/blonde/.test(app)) bits.push("blonde hair");
+    else if (/rousse|redhead/.test(app)) bits.push("red hair");
+    const eyes = app.match(/(yeux|eyes)[^\n.]{0,50}/);
+    if (eyes) bits.push(eyes[0].replace(/yeux/gi, "eyes").slice(0, 50));
+    const bust = app.match(/(bonnet|poitrine|bust|cup)[^\n.]{0,40}/i)
+      || String(c.appearance || "").match(/\b[689][0-9][A-K]\b/i)
+      || String(c.appearance || "").match(/bonnet\s*[A-K]/i);
+    if (bust) bits.push(String(bust[0]).slice(0, 40));
+    if (/ronde|chubby|curvy|voluptueuse|sablier/.test(app)) bits.push("curvy hourglass body");
+    if (/mince|slim|athl/.test(app)) bits.push("slim athletic body");
+    return bits.filter(Boolean).join(", ");
+  }
+
+  /** Pollinations AI — sans clé. Scènes: plan complet + visage + physique personnage. */
   async function generatePollinationsImage(prompt, character, st) {
     const c = character || LEA;
-    let p = String(prompt || "")
+    let raw = String(prompt || "")
       .replace(/\[\[denoise:[^\]]+\]\]/gi, "")
       .replace(/\s+/g, " ")
       .trim();
-    // Qualité photo : préfixe fort + résolution plus haute
-    const qualityPrefix =
-      "photorealistic RAW photo, ultra detailed skin, natural lighting, sharp focus, 8k, " +
-      "realistic proportions, single adult woman 18+, ";
-    if (p.toLowerCase().indexOf("photorealistic") < 0) p = qualityPrefix + p;
-    if (p.length > 1100) p = p.slice(0, 1100);
-    if (p.length < 12) throw new Error("Prompt Pollinations trop court.");
+    const looks = extractLooksForImage(c);
+    // Forcer visage + corps complet en tête de prompt (Pollinations ignore souvent la fin)
+    const head =
+      "photorealistic full body portrait from head to toe of one adult woman, face clearly visible looking toward camera, " +
+      looks + ", " +
+      "natural skin texture, sharp focus, realistic proportions, indoor soft light, ";
+    // Extraire tenue / pose utiles du prompt scène
+    let outfit = "";
+    const om = raw.match(/EXACT current outfit[^.]{0,200}|wearing [^.]{0,160}|completely nude[^.]{0,80}/i);
+    if (om) outfit = om[0] + ", ";
+    const pose = raw.match(/full body[^.]{0,80}|standing[^.]{0,60}|on the sofa[^.]{0,60}|lying[^.]{0,60}/i);
+    const poseBit = pose ? pose[0] + ", " : "standing full length, ";
+    let p = head + outfit + poseBit + "single person only, no crop, no headless, no waist-down only, no close-up of jeans only, no text";
+    if (p.length > 950) p = p.slice(0, 950);
+    if (p.length < 20) throw new Error("Prompt Pollinations trop court.");
 
     const seed = Math.floor(Math.random() * 1e9);
-    // 768×1024 + flux + enhance pour un meilleur rendu
     const q =
-      "width=768&height=1024&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
+      "width=768&height=1152&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
     const url =
       "https://image.pollinations.ai/prompt/" +
       encodeURIComponent(p) +
@@ -995,14 +1026,14 @@
       "Le scénario d'origine du personnage est son point de départ canonique et permanent. Ne le remplace jamais par un événement survenu ensuite.",
       "Les événements de la conversation évoluent : continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
       "Ne contredis pas les derniers messages ni la mémoire ci-dessous. N'invente ni actions, paroles, promesses, limites ou événements passés.",
-      "SCÉNARIO D'ORIGINE (lecture seule) : " + (c.scenario || ""),
-      "SCÈNE EN COURS (lieu, moment de la journée, ambiance) : " + (m.scene || "Pas encore de résumé; suis les derniers messages."),
-      "TENUE ACTUELLE (uniquement ce qui est porté maintenant) : " + (m.wardrobe || "Pas encore de tenue enregistrée; suis les derniers messages."),
-      "EMPLACEMENT DES VÊTEMENTS (retirés, au sol, étendoir, canapé, etc.) : " + (m.clothesLocation || "Aucun vêtement déplacé enregistré."),
-      "RELATION / ÉVOLUTION (attachement, tension, confiance, statut) : " + (m.relationship || "Pas d'évolution durable enregistrée."),
-      "MOMENTS INTIMES (cumulatif — lieu, position, actes, moment de la journée, ce qui a été accepté ou refusé) : " + (m.intimacy || "Aucun souvenir intime enregistré; ne présume rien."),
-      "PROMESSES ET ENGAGEMENTS (ce qui a été promis ou convenu) : " + (m.promises || "Aucune promesse enregistrée."),
-      "FAITS PARTAGÉS (infos dites et confirmées dans le dialogue) : " + (m.facts || "Aucun fait partagé enregistré."),
+      "SCÉNARIO (lecture seule): " + String(c.scenario || "").slice(0, 450),
+      "SCÈNE: " + (m.scene || "suivre derniers messages"),
+      "TENUE: " + (m.wardrobe || "suivre dialogue"),
+      "VÊTEMENTS DÉPOSÉS: " + (m.clothesLocation || "—"),
+      "RELATION: " + (m.relationship || "—"),
+      "INTIME: " + (m.intimacy || "—"),
+      "PROMESSES: " + (m.promises || "—"),
+      "FAITS: " + (m.facts || "—"),
       "Après la réponse de roleplay UNIQUEMENT, ajoute un bloc technique invisible <LEA_MEMORY>{JSON}</LEA_MEMORY> (jamais dans le dialogue visible, toujours à la toute fin).",
       "Le JSON est un patch invisible : n'y mets que les clés réellement changées parmi: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
       "Chaque valeur remplace le résumé de sa catégorie, reste cumulative (ne perds pas les faits anciens pertinents), 1 à 4 phrases courtes.",
@@ -1070,8 +1101,8 @@
       "Âge: " + (Number(c.age) >= 18 ? c.age : "non confirmé"),
       "Rôle: " + (c.title || ""),
       "Scénario: " + (c.scenario || ""),
-      "Personnalité: " + String(c.personality || "").slice(0, 500),
-      "Apparence (résumé): " + String(c.appearance || "").slice(0, 700),
+      "Personnalité: " + String(c.personality || "").slice(0, 350),
+      "Apparence (résumé): " + String(c.appearance || "").slice(0, 420),
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
@@ -1099,12 +1130,13 @@
   }
 
   async function callGemini(keys, system, messages) {
-    // Un seul modèle rapide en priorité (moins de retries = réponses plus rapides)
-    const models = [
-      "gemini-2.0-flash",
-      "gemini-2.0-flash-lite",
-      "gemini-flash-latest",
-    ];
+    // Dernier modèle qui a marché en premier (évite les retries inutiles)
+    let preferred = "";
+    try { preferred = String(localStorage.getItem("lea.geminiLastModel") || ""); } catch (_) {}
+    const baseModels = ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-flash-latest"];
+    const models = preferred
+      ? [preferred].concat(baseModels.filter((m) => m !== preferred))
+      : baseModels;
     const validKeys = (keys || []).map((k) => String(k || "").trim()).filter((k) => k.length >= 10);
     if (!validKeys.length) throw new Error("Aucune clé Gemini valide (aq… ou AIza…)");
 
@@ -1144,9 +1176,8 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.9,
-              maxOutputTokens: 900,
-              // Réponses plus courtes = plus rapides
+              temperature: 0.88,
+              maxOutputTokens: 700,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -1190,7 +1221,10 @@
               ? cand.content.parts.map((p) => p.text || "").join("")
               : "";
           if (text && text.trim()) {
-            try { localStorage.setItem("lea.geminiKeyIndex", String(idx)); } catch (_) {}
+            try {
+              localStorage.setItem("lea.geminiKeyIndex", String(idx));
+              localStorage.setItem("lea.geminiLastModel", model);
+            } catch (_) {}
             return text.trim();
           }
           const fr = cand && cand.finishReason;
@@ -1496,8 +1530,8 @@
             {
               model: model,
               messages: msgs,
-              temperature: 0.9,
-              max_tokens: 900,
+              temperature: 0.88,
+              max_tokens: 700,
             },
             { Authorization: "Bearer " + key }
           );
@@ -1524,15 +1558,17 @@
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
     const groqKeys = splitKeys(st.groqKeys);
-    // 40 derniers messages (comme avant) ; strip LEA_MEMORY des anciens pour alléger
-    const hist = (messages || []).slice(-40).map((m) => ({
-      role: m.role,
-      content: String(m.content || "")
+    // 40 messages conservés; les plus récents en détail, les anciens condensés
+    const all = (messages || []).slice(-40);
+    const hist = all.map((m, i) => {
+      let content = String(m.content || "")
         .replace(/<LEA_MEMORY>[\s\S]*?<\/LEA_MEMORY>/gi, "")
         .replace(/<LEA_MEMORY>[\s\S]*$/gi, "")
-        .trim()
-        .slice(0, 1500),
-    }));
+        .trim();
+      const fromEnd = all.length - 1 - i;
+      const maxLen = fromEnd < 12 ? 1200 : fromEnd < 24 ? 500 : 220;
+      return { role: m.role, content: content.slice(0, maxLen) };
+    });
 
     const order =
       engine === "openai"
