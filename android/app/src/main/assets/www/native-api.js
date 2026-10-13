@@ -733,64 +733,94 @@
 
 
   function extractLooksForImage(char) {
-    const c = char || LEA;
+    const c = char || {};
     const appRaw = String(c.appearance || "");
-    const app = appRaw.toLowerCase();
-    const tags = String((c.tags || []).join(" ")).toLowerCase();
-    const blob = app + " " + tags + " " + String(c.title || "").toLowerCase() + " " + String(c.body || "").toLowerCase();
+    const looksEn = String(c.looks_en || "");
+    const ethField = String(c.ethnicity || "");
+    const blob = (appRaw + " " + looksEn + " " + ethField + " " + String(c.title || "") + " " + String(c.tags || "")).toLowerCase();
+    const age = Math.max(18, parseInt(c.age, 10) || 21);
     const bits = [];
 
-    // looks_en prioritaire (même base que Horde profil)
-    if (c.looks_en && String(c.looks_en).trim().length > 20) {
-      bits.push(String(c.looks_en).trim().slice(0, 220));
+    bits.push(age + " year old adult woman");
+
+    // --- Ethnicité / teint EN PREMIER (Flux lit surtout le début) ---
+    let ethLock = "";
+    if (/m[eé]tiss|mixed|mulatt|creole|cr[eé]ole/.test(blob) || /m[eé]tiss/.test(ethField.toLowerCase())) {
+      ethLock = "mixed-race métisse woman, warm golden-tan olive-brown skin, soft mixed features, NOT pale, NOT East Asian, NOT porcelain skin";
+    } else if (/noire|black|african|ebony|afro/.test(blob + " " + ethField.toLowerCase())) {
+      ethLock = "Black woman, deep rich brown skin, African features";
+    } else if (/asiatique|asian|japanese|korean|chinese/.test(blob + " " + ethField.toLowerCase())) {
+      ethLock = "East Asian woman, fair to light skin";
+    } else if (/latina|latine|hispanic|br[eé]sil|brazil/.test(blob + " " + ethField.toLowerCase())) {
+      ethLock = "Latina woman, warm olive tan skin";
+    } else if (/maghr|arabe|middle.?east|turque|persane/.test(blob + " " + ethField.toLowerCase())) {
+      ethLock = "Middle Eastern woman, olive skin";
+    } else if (/mate dor[eé]e|golden tan|olive/.test(blob)) {
+      ethLock = "warm golden-tan matte skin, Mediterranean mixed features, NOT pale European";
+    } else if (/claire|porcelaine|pale|fair|porcelain|europe/.test(blob)) {
+      ethLock = "fair light skin, European features";
+    } else {
+      ethLock = "realistic skin tone matching description";
     }
+    bits.push(ethLock);
 
-    const age = Number(c.age) >= 18 ? Number(c.age) : 21;
-    bits.push(age + " year old woman");
+    // --- Cheveux ---
+    if (/ch[aâ]tain|chestnut|honey.?brown|brun clair/.test(blob))
+      bits.push("shoulder-length wavy chestnut brown hair with soft volume");
+    else if (/cheveux?\s*(bruns?|brun fonc[eé]|dark brown)|brown hair/.test(blob) && !/blond/.test(blob))
+      bits.push("long wavy dark brown hair");
+    else if (/blonde|blond/.test(blob))
+      bits.push("blonde hair");
+    else if (/rousse|red hair|ginger|auburn/.test(blob))
+      bits.push("auburn red hair");
+    else if (/noir|black hair|jet black/.test(blob))
+      bits.push("long black hair");
+    else if (/argent|silver|white hair|gris/.test(blob))
+      bits.push("silver white hair");
+    else
+      bits.push("natural realistic hair");
 
-    // Ethnicité / teint — CRITIQUE pour Pollinations
-    const eth = String(c.ethnicity || "").toLowerCase();
-    if (/m[eé]tisse|mixed|mulatto/.test(blob + " " + eth) || eth.indexOf("métisse") >= 0 || eth.indexOf("metisse") >= 0)
-      bits.push("mixed race métisse woman, golden tan olive-brown skin, Latina features");
-    else if (/noire|black|african|ebony/.test(blob + " " + eth))
-      bits.push("Black woman, deep brown skin");
-    else if (/asiatique|asian/.test(blob + " " + eth))
-      bits.push("East Asian woman");
-    else if (/latina|latine|hispanic/.test(blob + " " + eth))
-      bits.push("Latina woman, warm olive skin");
-    else if (/maghr|arabe|middle/.test(blob + " " + eth))
-      bits.push("Middle Eastern woman, olive skin");
+    // --- Yeux ---
+    if (/marron|brown eyes|iris marron|yeux bruns/.test(blob))
+      bits.push("dark brown expressive eyes");
+    else if (/vert|green eyes|hazel|noisette/.test(blob))
+      bits.push("hazel-green eyes");
+    else if (/bleu|blue eyes/.test(blob))
+      bits.push("blue eyes");
+    else if (/noir|black eyes/.test(blob))
+      bits.push("dark nearly black eyes");
 
-    // Poitrine explicite
+    // --- Poitrine ---
     const cup = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
-    if (cup) bits.push("breast size " + cup + ", realistic cleavage");
-    else if (/95d|90d|85e|bonnet d|cup d/i.test(appRaw + " " + cup))
-      bits.push("large 95D full natural breasts");
-    else if (/bonnet b|85b|cup b/i.test(appRaw))
-      bits.push("moderate B-cup breasts");
+    const cupBlob = (cup + " " + appRaw).toLowerCase();
+    if (/95\s*d|90\s*d|85\s*e|bonnet\s*d\b|cup\s*d\b/.test(cupBlob) || cup.toUpperCase().indexOf("D") >= 0 && /9[05]/.test(cup))
+      bits.push("large full natural 95D breasts, heavy cleavage, soft realistic breast shape");
+    else if (/bonnet\s*[hij]|cup\s*[hij]|bonnet\s*g|100\s*[ef]|bonnet\s*e/.test(cupBlob))
+      bits.push("very large heavy breasts matching cup " + (cup || "H") + ", extreme cleavage");
+    else if (/bonnet\s*c|85\s*c|cup\s*c/.test(cupBlob))
+      bits.push("full C-cup breasts");
+    else if (/bonnet\s*b|85\s*b|cup\s*b|petite poitrine/.test(cupBlob))
+      bits.push("modest B-cup breasts, proportional");
+    else if (cup)
+      bits.push("breast size " + cup + ", realistic cleavage");
+    else if (/voluptueuse|poitrine.*marqu|d[eé]collet[eé]\s+visible|gros seins/.test(blob))
+      bits.push("large full natural breasts, marked cleavage");
 
-    // Morphologie — forcer curves (sinon Flux sort toujours mince)
-    if (/voluptueuse|curvy|sablier|hourglass|ronde|pulpeuse|plus-size|chubby|forte|thick|bomb/i.test(blob) || /95d|90d|85e/i.test(appRaw + cup))
-      bits.push("voluptuous hourglass figure, soft rounded belly, wide hips, thick thighs, full butt, curvy realistic body NOT slim");
-    else if (/mince|slim|athl|fine/.test(blob))
-      bits.push("slim athletic body");
+    // --- Morphologie ---
+    if (/voluptueuse|curvy|sablier|hourglass|pulpeuse|bomb[eé]e|thick|curves/.test(blob) || /95d|90d/.test(cupBlob))
+      bits.push("voluptuous hourglass body, narrow waist, wide hips, thick soft thighs, full round butt, soft belly, curvy realistic NOT slim NOT skinny NOT model-thin");
+    else if (/chubby|plus.?size|ronde|forte|embonpoint|gros/.test(blob))
+      bits.push("plus-size chubby soft body, full figure, soft stomach, thick arms and legs");
+    else if (/athl|sportive|muscl/.test(blob))
+      bits.push("athletic toned body");
+    else if (/mince|slim|fine|skinny/.test(blob))
+      bits.push("slim slender body");
     else
       bits.push("feminine realistic body proportions");
 
-    // Cheveux
-    if (/châtain|chatain|brun|brown hair|dark brown/i.test(appRaw + blob))
-      bits.push("shoulder-length wavy chestnut brown hair");
-    else if (/blonde/.test(blob)) bits.push("blonde hair");
-    else if (/rousse|red hair/.test(blob)) bits.push("red hair");
-    else if (/noir|black hair/.test(blob)) bits.push("black hair");
-
-    // Yeux
-    if (/marron|brown eyes|iris marron/i.test(appRaw + blob)) bits.push("dark brown eyes");
-    else if (/vert|green|hazel/i.test(appRaw + blob)) bits.push("hazel green eyes");
-
-    // Peau
-    if (/mate dorée|golden|olive|teint.*m[eé]tiss/i.test(appRaw))
-      bits.push("matte golden skin tone");
+    // looks_en free text if present (English identity lock)
+    if (looksEn && looksEn.length > 12)
+      bits.push(looksEn.slice(0, 180));
 
     return bits.filter(Boolean).join(", ");
   }
@@ -820,21 +850,22 @@
       else if (/jean|top|débardeur|short/i.test(raw)) outfit = "casual top and bottoms as in dialogue";
     }
 
-    // Style IDENTIQUE aux profils Horde: photo réelle, pas anime
+    // Physique EN TÊTE (Flux ignore souvent la fin). Tenue ensuite.
+    const ageN = Math.max(18, parseInt(c.age, 10) || 21);
     let p = [
-      "RAW photo, photorealistic, DSLR 85mm, natural skin pores, real woman",
+      "photorealistic RAW photograph of one " + ageN + " year old woman,",
       looks,
-      outfit,
-      "full body standing, face clearly visible, indoor soft light",
-      "same body type as plus-size curvy influencer photo",
-      "NOT anime, NOT illustration, NOT CGI, NOT painting, NOT slim model, NOT skinny",
-    ].join(", ");
+      "wearing: " + outfit,
+      "full body view, face clearly visible, natural pose, indoor ambient light,",
+      "DSLR photo, natural skin texture pores, realistic proportions,",
+      "NOT East Asian face, NOT anime, NOT illustration, NOT CGI, NOT painting, NOT slim fashion model, NOT pale porcelain skin unless described",
+    ].join(" ");
 
-    if (p.length > 900) p = p.slice(0, 900);
+    if (p.length > 1100) p = p.slice(0, 1100);
     if (p.length < 24) throw new Error("Prompt Pollinations trop court.");
 
     const seed = Math.floor(Math.random() * 1e9);
-    // flux + enhance ; seed aléatoire pour éviter copies
+    // flux-realism si dispo, sinon flux ; safe=false pour NSFW
     const q =
       "width=768&height=1024&nologo=true&model=flux&enhance=true&safe=false&seed=" + seed;
     const url =
