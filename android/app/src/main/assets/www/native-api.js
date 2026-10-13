@@ -1203,7 +1203,12 @@
       c.system_extra || "",
       "Joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
-      "Format: (pensées) *actions* dialogues sans préfixe. Tiers: [Nom]: uniquement. Réponses immersives en français, 2 à 4 paragraphes (actions + dialogue + une pensée), ni télégraphique ni roman.",
+      "Format STRICT (couleurs UI):",
+      "- Pensées: UNIQUEMENT monologue interne court entre ( ) — max 1 phrase, jamais d'action physique. Ex: (Il me regarde trop fort…)",
+      "- Actions/narration: UNIQUEMENT entre * * — gestes, corps, regards. Ex: *je me cambre et un gémissement m'échappe*",
+      "- Dialogue: texte normal, SANS * ni ( ). Ex: Oh mon dieu… David…",
+      "Interdit: mettre une action dans ( ). Interdit: mettre une pensée dans * *. Tiers: [Nom]: uniquement.",
+      "Réponses immersives en français, 2 à 4 blocs (action *…* puis dialogue puis une pensée courte).",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
         : "Pas de contenu sexuel (âge non confirmé).",

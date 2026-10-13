@@ -413,19 +413,30 @@ function stripLeaMemory(text) {
 
 function formatMessageHtml(text) {
   let raw = stripLeaMemory(text);
-  // Normalize messy third-party labels the model may emit
   raw = raw
     .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*:\*{0,2}/g, "[$1]:")
     .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*\*{0,2}\s*:/g, "[$1]:");
+  // Normalize **action** → *action*
+  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
   const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // Speakers [Name]: first, then *actions*, then (thoughts) — markers hidden
+  // *actions* first, then (thoughts). Long () or physical narrative → action (model often confuses).
+  function isReallyAction(inner) {
+    const s = String(inner || "").trim();
+    if (s.length > 85) return true;
+    if (/^(je pense|je me dis|dans ma t[eê]te|il\/?elle se dit)/i.test(s)) return false;
+    return /\b(je|elle|il)\s+(me |se |m['’]|s['’])?(cambre|approche|pose|retire|enl[eè]ve|glisse|caresse|tremble|rougit|sourit|embrasse|g[eé]mit|crie|ouvre|ferme|tire|baisse|rel[eè]ve|touche|frappe|s['’]assoit|se l[eè]ve)/i.test(s)
+      || /\b(doigts?|mains?|l[eè]vres?|bouche|genoux|cuisses?|seins?|corps|culotte|robe|peau)\b/i.test(s) && s.length > 35;
+  }
   let out = esc
     .replace(/(^|\n)\[([^\]]{1,40})\]:\s*/g, '$1<span class="speaker">$2</span> — ')
     .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
-    .replace(/\(([^)]+)\)/g, '<span class="thought">$1</span>');
+    .replace(/\(([^)]+)\)/g, function (_, inner) {
+      if (isReallyAction(inner)) return '<span class="action">' + inner + '</span>';
+      return '<span class="thought">' + inner + '</span>';
+    });
   return out;
 }
 
