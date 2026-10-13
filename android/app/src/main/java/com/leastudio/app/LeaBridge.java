@@ -750,8 +750,13 @@ public class LeaBridge {
         final String rawPrompt = prompt == null ? "" : prompt.trim();
         final String promptSafe = rawPrompt.substring(0, Math.min(rawPrompt.length(), 2400));
         final String reference = referenceImageB64 == null ? "" : referenceImageB64.trim();
-        final String hordeKey = apiKey == null || apiKey.trim().isEmpty() ? "0000000000" : apiKey.trim();
-        final boolean registered = !"0000000000".equals(hordeKey);
+        // Ne plus forcer la clé anonyme 0000000000 (HTTP 429 "Too many anonymous requests")
+        final String hordeKey = apiKey == null ? "" : apiKey.trim();
+        if (hordeKey.isEmpty() || "0000000000".equals(hordeKey)) {
+            HTTP_JOBS.put(id, "error:{\"error\":\"Clé AI Horde manquante. Ajoute-la dans Réglages (compte aihorde.net) pour éviter le quota anonyme 429.\"}");
+            return id;
+        }
+        final boolean registered = true;
         double strengthParsed = -1;
         try {
             if (strengthRaw != null && strengthRaw.trim().length() > 0)
