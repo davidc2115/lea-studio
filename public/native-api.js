@@ -415,7 +415,7 @@
       "tight wet jeans and nothing else on top, bare breasts, rain look",
       "black corset lingerie with stockings, sitting legs apart on chaise",
     ];
-    const outfits = forCloudflareconst outfits = forCloudflare ? outfitsCf : outfitsHorde;
+    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
