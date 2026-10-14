@@ -173,16 +173,17 @@
       element.src = imageSource;
     });
     if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
-    // FLUX.2 Klein exige < 512x512
-    const maxSide = 512;
+    // Horde img2img: ref compacte mais nette (éviter payload trop lourd / 403)
+    const maxSide = mime && String(mime).indexOf("webp") >= 0 ? 512 : 448;
     const scale = Math.min(maxSide / image.naturalWidth, maxSide / image.naturalHeight, 1);
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    canvas.width = Math.max(64, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(64, Math.round(image.naturalHeight * scale));
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL(mime, 0.9);
+    const quality = mime && String(mime).indexOf("jpeg") >= 0 ? 0.85 : 0.9;
+    const dataUrl = canvas.toDataURL(mime, quality);
     if (!dataUrl.startsWith("data:" + mime + ";base64,")) throw new Error("Format de photo de référence non pris en charge.");
     const comma = dataUrl.indexOf(",");
     if (comma < 0 || dataUrl.length < 100) throw new Error("Impossible de préparer la photo de profil.");
@@ -354,9 +355,10 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + ": MUST keep the EXACT same face, same age look, same hair color/style, same eye color, same skin tone. " +
-         "Change ONLY clothing, pose and background. Keep the same body proportions from the reference (do not turn slim into plus-size or vice versa). " +
-         "Breast size from text description. Brand-new sexy outfit and pose. RAW photo, photorealistic, sharp focus, high detail.")
+      ? ("CRITICAL img2img identity: input_image_0 is the face reference for " + name + ". " +
+         "Preserve EXACT face structure, eyes, nose, mouth, hair color, skin tone and age. " +
+         "Do NOT generate a different woman. Do NOT make her plus-size/BBW unless the reference is. " +
+         "Change ONLY outfit, pose and background. Breast size from description. Sexy new outfit. Photorealistic RAW photo.")
       : ("Follow the physical description exactly for " + name + " including ethnicity, body morphology and bust. Photorealistic adult woman, sharp focus.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
@@ -1832,15 +1834,15 @@
           // === PROFIL vs SCÈNE isolés (ne pas mélanger) ===
           // Profil : denoise 0.85 + buildPhysicalImagePrompt — INCHANGÉ
           // Scène  : Horde uniquement + buildConversationImagePrompt (tenue mémoire)
-          const PROFILE_HORDE_DENOISE = 0.72;
-          let SCENE_HORDE_DENOISE = 0.82;
+          const PROFILE_HORDE_DENOISE = 0.68;
+          let SCENE_HORDE_DENOISE = 0.80;
           if (isScene) {
             try {
               const mem = body.memory || {};
               const w = String(mem.wardrobe || "").toLowerCase();
               // Tenue clairement différente du profil → un peu plus de denoise
-              if (w.length > 8) SCENE_HORDE_DENOISE = 0.84;
-              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.86;
+              if (w.length > 8) SCENE_HORDE_DENOISE = 0.82;
+              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.84;
             } catch (_) {}
           }
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
@@ -1866,11 +1868,29 @@
             denoise: denoise,
           };
         } catch (hordeErr) {
-          // Scène : pas de Pollinations — erreur Horde claire
+          // Scène : si Horde saturé (403/429) → Pollinations secours (sans clé)
           if (isScene) {
-            throw new Error(
-              "Scène Horde: " + String(hordeErr.message || hordeErr).slice(0, 180)
-            );
+            try {
+              const scenePrompt =
+                (typeof prompt === "string" && prompt.length > 20)
+                  ? prompt
+                  : buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
+              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
+              return {
+                ok: true,
+                image: dataUrl,
+                prompt: String(scenePrompt).slice(0, 400),
+                engine: "pollinations",
+                mode: "conversation",
+                fallbackFrom: "horde",
+                hordeError: String(hordeErr.message || hordeErr).slice(0, 120),
+              };
+            } catch (pollErr) {
+              throw new Error(
+                "Scène indisponible — Horde: " + String(hordeErr.message || hordeErr).slice(0, 100) +
+                " · Pollinations: " + String(pollErr.message || pollErr).slice(0, 80)
+              );
+            }
           }
           // Profil : fallback Cloudflare soft (inchangé)
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");

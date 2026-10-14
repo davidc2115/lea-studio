@@ -1177,7 +1177,7 @@ async function generateConversationScene() {
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Scène…"; }
   if (status) status.textContent = "File Horde — tenue de la conversation…";
   state.genRunning = true;
-  setGenBanner("⏳ Scène → AI Horde (tenue de la conversation)…", "");
+  setGenBanner("⏳ Scène → Horde (secours Pollinations si file saturée)…", "");
   try {
     const memory = loadRoleplayMemory();
     // Scènes conversation : mode anonyme autorisé (pas de clé obligatoire)

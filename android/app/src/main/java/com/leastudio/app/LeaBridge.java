@@ -789,8 +789,8 @@ public class LeaBridge {
                     if (promptSafe.length() < 3) throw new IllegalArgumentException("Prompt invalide.");
                     // Réduire la ref pour éviter "Input payload validation failed" (limite Horde ~source)
                     String refForHorde = reference;
-                    if (refForHorde.length() > 350000) {
-                        throw new IllegalArgumentException("Photo de référence trop volumineuse pour AI Horde.");
+                    if (refForHorde.length() > 900000) {
+                        throw new IllegalArgumentException("Photo de référence trop volumineuse pour AI Horde. Choisis une autre photo de profil.");
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
@@ -825,16 +825,17 @@ public class LeaBridge {
                         + ", photorealistic, sharp focus, natural skin texture"
                         + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin");
                     payload.put("params", params);
+                    // Toujours garder la ref img2img si fournie (NE PAS tronquer le base64 = image cassée)
+                    final String sourceB64;
                     if (hasRef) {
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
-                        // Limiter la taille base64 ref (~200k chars) pour payload OK
-                        if (src.length() > 220000) {
-                            src = src.substring(0, 220000);
-                        }
-                        payload.put("source_image", src);
+                        sourceB64 = src;
+                        payload.put("source_image", sourceB64);
                         payload.put("source_processing", "img2img");
+                    } else {
+                        sourceB64 = null;
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
@@ -843,28 +844,37 @@ public class LeaBridge {
                     payload.put("r2", true);
                     payload.put("shared", false);
                     payload.put("replacement_filter", true);
-                    // Pas de liste de modèles stricte (évite 403 si offline) — workers réalistes dispo
                     payload.put("models", new JSONArray());
 
                     String acceptedRaw = null;
                     JSONObject accepted = null;
                     Exception lastSubmit = null;
-                    for (int attemptSubmit = 0; attemptSubmit < 3; attemptSubmit++) {
+                    for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
                         try {
                             if (attemptSubmit == 1) {
-                                // Retry léger: moins de steps
+                                params.put("steps", 16);
+                                params.put("width", 512);
+                                params.put("height", 640);
+                                payload.put("params", params);
+                                Thread.sleep(2500);
+                            } else if (attemptSubmit == 2) {
                                 params.put("steps", 14);
                                 params.put("width", 448);
                                 params.put("height", 576);
                                 payload.put("params", params);
-                            } else if (attemptSubmit == 2) {
-                                // Dernier recours: très léger, sans img2img si toujours 403
+                                Thread.sleep(4000);
+                            } else if (attemptSubmit == 3) {
+                                // Dernier essai: encore plus léger MAIS garde toujours img2img si on a une ref
                                 params.put("steps", 12);
                                 params.put("width", 448);
                                 params.put("height", 576);
                                 payload.put("params", params);
-                                payload.remove("source_image");
-                                payload.remove("source_processing");
+                                Thread.sleep(5000);
+                            }
+                            // Réinjecter la ref à chaque essai (au cas où)
+                            if (sourceB64 != null && sourceB64.length() >= 100) {
+                                payload.put("source_image", sourceB64);
+                                payload.put("source_processing", "img2img");
                             }
                             acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                             accepted = new JSONObject(acceptedRaw);
@@ -874,20 +884,20 @@ public class LeaBridge {
                             if (hm.toLowerCase().contains("anonymous") && !registered) {
                                 throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
                             }
-                            // continuer les tentatives
                         } catch (HordeHttpException he) {
                             lastSubmit = he;
                             String msg = String.valueOf(he.getMessage()).toLowerCase();
-                            boolean heavy = he.statusCode == 403 || msg.contains("heavy demand") || msg.contains("1024") || msg.contains("kudos");
+                            boolean heavy = he.statusCode == 403 || he.statusCode == 429
+                                || msg.contains("heavy demand") || msg.contains("1024")
+                                || msg.contains("kudos") || msg.contains("too many");
                             if (!heavy && he.statusCode != 429) throw he;
-                            // 403/429 heavy demand → retry plus petit
                             continue;
                         }
                     }
                     if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
                         String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec submit";
                         throw new java.io.IOException(
-                            "AI Horde file saturée (403 heavy demand). Réessaie dans 1–2 min, ou ajoute une clé Horde gratuite dans Réglages. " + em.substring(0, Math.min(120, em.length()))
+                            "AI Horde file saturée. Réessaie dans 1–2 min ou ajoute une clé Horde gratuite (aihorde.net) dans Réglages. " + em.substring(0, Math.min(120, em.length()))
                         );
                     }
                     String requestId = accepted.optString("id", "");
