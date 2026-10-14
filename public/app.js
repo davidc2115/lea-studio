@@ -1307,13 +1307,20 @@ async function generateProfileImage() {
     setGenBanner("Confirme que le personnage est majeur; une estimation visuelle ne prouve pas son âge.", "bad");
     return;
   }
-  const st = loadSettings();
+  const st = Object.assign({}, loadSettings() || {});
+  const hordeKey = resolveHordeApiKey();
+  if (hordeKey) st.hordeApiKey = hordeKey;
+  // Ne pas forcer 0000000000 ici : generateHordeImage gère anonyme + message clair
   const extra = ($("gen-extra") && $("gen-extra").value.trim()) || "";
   const provider = $("gen-provider")?.value === "horde" ? "horde" : "cloudflare";
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
-  setGenBanner(provider === "horde" ? "⏳ Envoi à AI Horde; la file d’attente peut prendre plusieurs minutes…" : "⏳ Génération Cloudflare en arrière-plan…", "");
+  if (provider === "horde" && !hordeKey) {
+    setGenBanner("⚠️ Horde sans clé : file anonyme souvent saturée. Ajoute une clé gratuite aihorde.net dans Réglages.", "bad");
+  } else {
+    setGenBanner(provider === "horde" ? "⏳ Envoi à AI Horde (clé OK) — file possible quelques minutes…" : "⏳ Génération Cloudflare en arrière-plan…", "");
+  }
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);

@@ -942,17 +942,33 @@
     return dataUrl;
   }
 
+  function resolveHordeKeyFromSt(st) {
+    let k = String((st && (st.hordeApiKey || st.horde_key || st.hordeKey)) || "").trim();
+    if (!k || k === "0000000000") {
+      try {
+        const s = load("lea.settings", {}) || {};
+        k = String(s.hordeApiKey || s.horde_key || "").trim();
+      } catch (_) {}
+    }
+    if (!k || k === "0000000000") {
+      try { k = String(localStorage.getItem("lea.hordeApiKey") || "").trim(); } catch (_) {}
+    }
+    if (!k || k === "0000000000") return "0000000000";
+    return k;
+  }
+
   async function generateHordeImage(prompt, character, st, options) {
     const opts = options || {};
+    const hordeKey = resolveHordeKeyFromSt(st);
     let referenceB64 = null;
     try {
       referenceB64 = await profileReferenceJpegB64(character);
     } catch (refErr) {
       referenceB64 = null;
-      if (opts.requireRef) throw new Error("Photo de profil requise pour garder le visage: " + String(refErr.message || refErr).slice(0, 100));
-    }
-    if (opts.requireRef && !referenceB64) {
-      throw new Error("Photo de profil absente — impossible de conserver le visage.");
+      // Ne plus bloquer tout Horde si la ref est illisible — txt2img possible
+      if (opts.requireRef) {
+        console.warn("Horde ref skip:", refErr);
+      }
     }
     if (!window.LeaAndroid || typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
@@ -964,7 +980,7 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        String(st && st.hordeApiKey || ""),
+        hordeKey,
         strength
       ) || "");
     } else if (typeof window.LeaAndroid.hordeImageStart === "function") {
@@ -972,12 +988,12 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        String(st && st.hordeApiKey || "")
+        hordeKey
       ) || "");
     } else {
       throw new Error("La génération AI Horde nécessite l’application Android.");
     }
-    if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde.");
+    if (!jobId) throw new Error("Impossible de démarrer la génération AI Horde (jobId vide).");
     const started = Date.now();
     let last = "La file AI Horde est toujours en attente.";
     while (Date.now() - started < 780000) {
@@ -991,6 +1007,10 @@
         const raw = result.slice(6);
         let detail = raw;
         try { detail = String(JSON.parse(raw).error || raw); } catch (_) {}
+        detail = String(detail);
+        if (/TooManyPrompts|anonymous|516|500/i.test(detail)) {
+          throw new Error("Horde anonyme saturé. Crée une clé gratuite sur aihorde.net/register et colle-la dans Réglages.");
+        }
         throw new Error("AI Horde : " + detail.slice(0, 180));
       }
       const raw = result.indexOf("done:") === 0 ? result.slice(5) : result;
@@ -1908,7 +1928,7 @@
             const promptWithDenoise = "[[denoise:" + d + "]] " + String(p || "");
             return await generateHordeImage(promptWithDenoise, char, st, {
               denoise: d,
-              requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))),
+              requireRef: false,
             });
           }
           let dataUrl;

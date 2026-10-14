@@ -869,7 +869,7 @@ public class LeaBridge {
                             String hm = accepted.optString("message", "refus");
                             lastSubmit = new java.io.IOException("AI Horde: " + hm);
                             if (hm.toLowerCase().contains("anonymous") && !registered) {
-                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
+                                throw new java.io.IOException("Horde anonyme saturé (TooManyPrompts). Clé gratuite: aihorde.net/register → Réglages.");
                             }
                         } catch (HordeHttpException he) {
                             lastSubmit = he;
