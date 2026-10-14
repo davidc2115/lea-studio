@@ -389,32 +389,33 @@
       "black leather mini skirt with white fitted blouse unbuttoned low, pumps",
     ];
     const outfitsHorde = [
-      "emerald green long-sleeve bodycon mini dress deep V neckline, black sheer tights, black stiletto ankle boots, seductive",
-      "olive green spaghetti-strap mini dress deep plunge cleavage, black fishnet stockings, black pointed heels",
-      "burgundy satin wrap mini dress deep V, high slit, black stilettos on bed edge",
-      "navy deep V crop top with transparent mesh midriff, tight dark jeans, seductive hallway walk",
-      "black long-sleeve deep V dress with side waist cutout, open back detail, glamorous stairs",
-      "black sheer lace bodysuit, deep cleavage, hands on hips, full body provocative",
-      "sheer white blouse unbuttoned low deep cleavage, black micro skirt, lace-up heels to the knees",
-      "black crop top and leather mini skirt, fishnet stockings, garter straps visible, stilettos on marble stairs",
-      "black lace open robe over matching lingerie, seated on velvet bench in dark bedroom",
-      "burgundy satin short robe black lace cuffs, legs bare, hotel bed soft light",
-      "black deep plunge evening gown with side cutouts, clutch, chandelier lobby",
-      "black backless long dress, looking over shoulder, grand staircase",
-      "plus-size friendly olive bodycon mini dress deep cleavage, curves emphasized, seductive lean on console",
-      "wet white crop top clinging to chest, dark skinny jeans, after-rain look",
-      "ivory lace lingerie set, thin straps, soft bedroom teasing",
-      "hot pink lace babydoll micro hem, playful provocative",
-      "red lace bra under open white shirt, black mini skirt, heels",
-      "black mesh top and leather mini, edgy sexy full body",
-      "champagne silk robe falling open over lace lingerie, doorway",
-      "purple lace set kneeling by fireplace",
-      "oversized open white shirt over black lace, bare legs",
-      "emerald satin slip plunging neckline high thigh slit",
-      "black one-shoulder crop and mini skirt, fishnets, garters, stilettos",
-      "forest green mini skirt, black deep V top, thigh-high boots, staircase",
+      "sheer black lace teddy lingerie, deep cleavage, high-cut sides, provocative boudoir pose",
+      "red lace bra and matching thong, garter belt, fishnet stockings, stilettos, full body",
+      "ivory sheer babydoll nightie almost transparent, hard nipples visible through fabric, bedroom",
+      "black open satin robe nothing underneath, bare breasts, standing in doorway",
+      "only black lace panties, topless, bare breasts, hands covering partially, teasing",
+      "completely nude adult woman, artistic nude, natural pose, tasteful but explicit, face visible",
+      "wet white t-shirt completely see-through clinging to bare breasts, no bra, tight shorts",
+      "micro bikini string, almost nude beach indoor studio, explicit curves",
+      "hot pink micro lingerie set, on all fours on bed looking at camera, seductive",
+      "black mesh bodysuit crotchless style implied, deep cleavage, hands on hips",
+      "silk sheets covering only hips, bare breasts, lying on bed looking at camera",
+      "unbuttoned oversized shirt only, bare breasts visible, no panties implied, doorway",
+      "sheer white blouse no bra wet fabric, nipples visible, black mini skirt hiked up",
+      "purple lace bra and garter, stockings, bent forward showing cleavage and curves",
+      "emerald satin slip pulled down to waist, bare breasts, sensual bedroom",
+      "black leather micro skirt, no top, pasties optional, club lights",
+      "red bodycon dress unzipped in front, lingerie underneath visible, teasing",
+      "nude under open trench coat, flash of body, apartment hallway",
+      "strappy black bondage-style lingerie, high heels, full body provocative",
+      "kneeled on bed in only a thong, bare breasts, looking over shoulder",
+      "lace bodysuit partially unhooked, one breast exposed, mirror pose",
+      "see-through nightgown, silhouette of body, bedroom lamp",
+      "schoolgirl-style adult costume short skirt unbuttoned blouse no bra, 18+ only",
+      "tight wet jeans and nothing else on top, bare breasts, rain look",
+      "black corset lingerie with stockings, sitting legs apart on chaise",
     ];
-    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
+    const outfits = forCloudflareconst outfits = forCloudflare ? outfitsCf : outfitsHorde;
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
@@ -470,7 +471,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, uncensored NSFW allowed, explicit lingerie or nude ok, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
       mood,
@@ -1860,7 +1861,7 @@
       if (isHorde) {
         try {
           // Profil denoise 0.52 (version stable) ; scène 0.65 pour changer tenue
-          const denoise = isScene ? 0.65 : 0.52;
+          const denoise = isScene ? 0.72 : 0.58;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
@@ -1876,10 +1877,25 @@
           };
         } catch (hordeErr) {
           if (isScene) {
-            throw new Error(
-              "AI Horde (scène) : " + String(hordeErr.message || hordeErr).slice(0, 180) +
-              " — réessaie plus tard ou vérifie ta clé Horde dans Réglages."
-            );
+            // 429 / file saturée → secours Pollinations (sans clé)
+            try {
+              const scenePrompt = String(prompt || buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || ""));
+              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
+              return {
+                ok: true,
+                image: dataUrl,
+                prompt: scenePrompt.slice(0, 400),
+                engine: "pollinations",
+                mode: "conversation",
+                fallbackFrom: "horde",
+                hordeError: String(hordeErr.message || hordeErr).slice(0, 120),
+              };
+            } catch (pollErr) {
+              throw new Error(
+                "Scène: Horde " + String(hordeErr.message || hordeErr).slice(0, 100) +
+                " · Pollinations " + String(pollErr.message || pollErr).slice(0, 80)
+              );
+            }
           }
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
           try {

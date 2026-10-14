@@ -675,7 +675,7 @@ public class LeaBridge {
     private String hordeRequest(String method, String path, String body, String apiKey) throws Exception {
         Exception last = null;
         for (String host : HORDE_HOSTS) {
-            for (int attempt = 0; attempt < 3; attempt++) {
+            for (int attempt = 0; attempt < 5; attempt++) {
                 HttpURLConnection conn = null;
                 try {
                     conn = (HttpURLConnection) new URL(host + path).openConnection();
@@ -710,8 +710,8 @@ public class LeaBridge {
                     }
                     String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
                     if (code == 429) {
-                        if (attempt == 2) throw new HordeHttpException(429, "AI Horde HTTP 429 après 3 tentatives: " + response.substring(0, Math.min(400, response.length())));
-                        long delay = hordeRetryDelayMillis(conn, attempt);
+                        if (attempt >= 4) throw new HordeHttpException(429, "AI Horde file saturée (429). Réessaie dans 1–2 min ou ajoute une clé gratuite aihorde.net dans Réglages.");
+                        long delay = Math.max(hordeRetryDelayMillis(conn, attempt), 8000L * (attempt + 1));
                         conn.disconnect();
                         conn = null;
                         Thread.sleep(delay);
@@ -842,28 +842,46 @@ public class LeaBridge {
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
                     payload.put("shared", false);
-                    payload.put("replacement_filter", true);
+                    payload.put("replacement_filter", false);
                     // Laisser les workers choisir un modèle réaliste dispo
                     payload.put("models", new JSONArray());
-                    String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
-                    JSONObject accepted = new JSONObject(acceptedRaw);
-                    if (accepted.has("message") && !accepted.has("id")) {
-                        String hm = accepted.optString("message", "refus");
-                        if (hm.toLowerCase().contains("heavy demand") || hm.contains("617") || hm.toLowerCase().contains("too many")) {
-                            params.put("width", 448);
-                            params.put("height", 576);
-                            params.put("steps", 14);
-                            payload.put("params", params);
+                    String acceptedRaw = null;
+                    JSONObject accepted = null;
+                    Exception lastSubmit = null;
+                    for (int sub = 0; sub < 3; sub++) {
+                        try {
+                            if (sub == 1) {
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                params.put("steps", 14);
+                                payload.put("params", params);
+                                Thread.sleep(5000);
+                            } else if (sub == 2) {
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                params.put("steps", 12);
+                                payload.put("params", params);
+                                Thread.sleep(8000);
+                            }
                             acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                             accepted = new JSONObject(acceptedRaw);
-                        }
-                        if (accepted.has("message") && !accepted.has("id")) {
-                            hm = accepted.optString("message", "refus");
-                            if (hm.toLowerCase().contains("anonymous")) {
-                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite dans Réglages. " + hm.substring(0, Math.min(80, hm.length())));
+                            if (accepted.has("id") && accepted.optString("id", "").length() > 0) break;
+                            String hm = accepted.optString("message", "refus");
+                            lastSubmit = new java.io.IOException("AI Horde: " + hm);
+                            if (hm.toLowerCase().contains("anonymous") && !registered) {
+                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
                             }
-                            throw new java.io.IOException("AI Horde: " + hm);
+                        } catch (HordeHttpException he) {
+                            lastSubmit = he;
+                            if (he.statusCode != 429 && he.statusCode != 403) throw he;
+                            // 429/403 → retry plus petit
                         }
+                    }
+                    if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
+                        String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec";
+                        throw new java.io.IOException(
+                            "AI Horde file saturée (429). Réessaie dans 1–2 min ou clé gratuite aihorde.net. " + em.substring(0, Math.min(100, em.length()))
+                        );
                     }
                     String requestId = accepted.optString("id", "");
                     if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));
