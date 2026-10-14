@@ -163,10 +163,14 @@ function loadSettings() {
   return s;
 }
 function saveSettings(s) {
-  localStorage.setItem("lea.settings", JSON.stringify(s || {}));
+  try {
+    localStorage.setItem("lea.settings", JSON.stringify(s || {}));
+  } catch (e) {
+    throw new Error("Impossible d'enregistrer (stockage plein ?): " + String(e.message || e).slice(0, 80));
+  }
   try {
     const k = String((s && s.hordeApiKey) || "").trim();
-    if (k) localStorage.setItem("lea.hordeApiKey", k);
+    if (k && k !== "0000000000") localStorage.setItem("lea.hordeApiKey", k);
   } catch (_) {}
 }
 
@@ -731,8 +735,8 @@ function renderProfile() {
       <p class="hint">La photo de profil sert de référence pour le visage. Tenues sexy / dentelle / transparent / décolleté, poses provocantes. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
-        <option value="horde" selected>AI Horde · img2img</option>
-        <option value="cloudflare">Cloudflare · FLUX.2 Klein</option>
+        <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX.2 Klein</option>
+        <option value="horde" ${resolveHordeApiKey() ? "selected" : ""}>AI Horde · img2img${resolveHordeApiKey() ? "" : " (clé recommandée)"}</option>
       </select>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
       ${knownMinor
@@ -1355,7 +1359,7 @@ function renderSettings() {
       <h2>🎨 AI Horde (optionnel)</h2>
       <div class="settings-block">
         <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée (prioritaire)" : "(optionnelle — anonyme possible)"}</label>
-        <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Optionnel — sinon mode anonyme"}" />
+        <input class="edit-input" id="set-horde-key" type="text" autocomplete="off" spellcheck="false" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Optionnel — sinon mode anonyme"}" />
         <p class="hint">Profil Horde fonctionne en anonyme. Une clé gratuite (aihorde.net) accélère la file et réduit les refus. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
       </div>
     </div>
@@ -1381,6 +1385,11 @@ function renderSettings() {
         </select>
       </div>
       <p class="hint">Images profil via Cloudflare (réglages ☁️). Dialogue via Gemini / OpenAI / Groq.</p>
+    </div>
+    <div class="section">
+      <button type="button" class="btn btn-primary" id="save-settings" style="width:100%">💾 Enregistrer les clés et réglages</button>
+      <div id="set-status" class="hint" style="margin-top:10px"></div>
+      <p class="hint">Les clés Gemini, Cloudflare et AI Horde sont stockées uniquement sur cet appareil.</p>
     </div>
     <div class="section memory-section">
       <h2>🧠 Mémoire de roleplay</h2>
@@ -1422,21 +1431,42 @@ function renderSettings() {
       <div id="memory-status"></div>
     </div>
   `;
-  $("save-settings").onclick = () => {
-    const next = Object.assign({}, s, {
-      geminiKeys: $("set-gemini").value.trim(),
-      openaiKeys: $("set-openai").value.trim(),
-      groqKeys: $("set-groq").value.trim(),
-      cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
-      cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
-      hordeApiKey: (($("set-horde-key") && $("set-horde-key").value.trim()) || s.hordeApiKey || resolveHordeApiKey() || ""),
-      userName: $("set-username").value.trim(),
-      userBio: $("set-bio").value.trim(),
-      chatEngine: $("set-model").value,
-    });
-    saveSettings(next);
-    const st = $("set-status");
-    st.innerHTML = '<span class="status-pill ok">✓ Enregistré</span>';
+  const saveBtn = $("save-settings");
+  if (saveBtn) saveBtn.onclick = () => {
+    try {
+      const prevKey = resolveHordeApiKey();
+      const typedHorde = ($("set-horde-key") && $("set-horde-key").value.trim()) || "";
+      // Champ vide = conserver l'ancienne clé (évite d'effacer en mode password)
+      const hordeApiKey = typedHorde || prevKey || s.hordeApiKey || "";
+      const next = Object.assign({}, s, {
+        geminiKeys: ($("set-gemini") && $("set-gemini").value.trim()) || "",
+        openaiKeys: ($("set-openai") && $("set-openai").value.trim()) || "",
+        groqKeys: ($("set-groq") && $("set-groq").value.trim()) || "",
+        cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
+        cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
+        hordeApiKey: hordeApiKey,
+        userName: ($("set-username") && $("set-username").value.trim()) || "",
+        userBio: ($("set-bio") && $("set-bio").value.trim()) || "",
+        chatEngine: ($("set-model") && $("set-model").value) || "gemini",
+      });
+      saveSettings(next);
+      // Double sauvegarde clé Horde (backup dédié)
+      if (hordeApiKey && hordeApiKey !== "0000000000") {
+        try { localStorage.setItem("lea.hordeApiKey", hordeApiKey); } catch (_) {}
+      }
+      const st = $("set-status");
+      if (st) {
+        const bits = [];
+        if (next.geminiKeys) bits.push("Gemini");
+        if (next.cfKeys || next.cfAccount) bits.push("Cloudflare");
+        if (hordeApiKey) bits.push("Horde ✓");
+        else bits.push("Horde anonyme");
+        st.innerHTML = '<span class="status-pill ok">✓ Enregistré (' + bits.join(", ") + ')</span>';
+      }
+    } catch (e) {
+      const st = $("set-status");
+      if (st) st.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 120) + "</span>";
+    }
   };
   $("save-memory").onclick = () => {
     saveRoleplayMemory({
