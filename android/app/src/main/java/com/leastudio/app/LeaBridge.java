@@ -794,10 +794,13 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Toujours sous la limite "heavy demand" (~380k px). Multiples de 64.
+                    // ≤ ~617² pixels (sinon HTTP 403 "heavy demand" pendant les pics)
+                    // 512×640 = 327680 < 380689 ; multiples de 64
                     params.put("width", 512);
                     params.put("height", 640);
-                    double denoise = 0.72;
+                    // steps + cfg_scale fixés après calcul du denoise
+                    double denoise = 0.52;
+                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
                         java.util.regex.Matcher dm = java.util.regex.Pattern
@@ -811,7 +814,8 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
+                    // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
+                    double cfg = denoise >= 0.64 ? 7.5 : 6.5;
                     int steps = registered ? 22 : 16;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
@@ -822,20 +826,15 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin");
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
-                    // Toujours garder la ref img2img si fournie (NE PAS tronquer le base64 = image cassée)
-                    final String sourceB64;
                     if (hasRef) {
+                        // source_image = base64 brut (sans préfixe data:)
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
-                        sourceB64 = src;
-                        payload.put("source_image", sourceB64);
+                        payload.put("source_image", src);
                         payload.put("source_processing", "img2img");
-                    } else {
-                        sourceB64 = null;
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
@@ -844,61 +843,27 @@ public class LeaBridge {
                     payload.put("r2", true);
                     payload.put("shared", false);
                     payload.put("replacement_filter", true);
+                    // Laisser les workers choisir un modèle réaliste dispo
                     payload.put("models", new JSONArray());
-
-                    String acceptedRaw = null;
-                    JSONObject accepted = null;
-                    Exception lastSubmit = null;
-                    for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
-                        try {
-                            if (attemptSubmit == 1) {
-                                params.put("steps", 16);
-                                params.put("width", 512);
-                                params.put("height", 640);
-                                payload.put("params", params);
-                                Thread.sleep(2500);
-                            } else if (attemptSubmit == 2) {
-                                params.put("steps", 14);
-                                params.put("width", 448);
-                                params.put("height", 576);
-                                payload.put("params", params);
-                                Thread.sleep(4000);
-                            } else if (attemptSubmit == 3) {
-                                // Dernier essai: encore plus léger MAIS garde toujours img2img si on a une ref
-                                params.put("steps", 12);
-                                params.put("width", 448);
-                                params.put("height", 576);
-                                payload.put("params", params);
-                                Thread.sleep(5000);
-                            }
-                            // Réinjecter la ref à chaque essai (au cas où)
-                            if (sourceB64 != null && sourceB64.length() >= 100) {
-                                payload.put("source_image", sourceB64);
-                                payload.put("source_processing", "img2img");
-                            }
+                    String acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
+                    JSONObject accepted = new JSONObject(acceptedRaw);
+                    if (accepted.has("message") && !accepted.has("id")) {
+                        String hm = accepted.optString("message", "refus");
+                        if (hm.toLowerCase().contains("heavy demand") || hm.contains("617") || hm.toLowerCase().contains("too many")) {
+                            params.put("width", 448);
+                            params.put("height", 576);
+                            params.put("steps", 14);
+                            payload.put("params", params);
                             acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
                             accepted = new JSONObject(acceptedRaw);
-                            if (accepted.has("id") && accepted.optString("id", "").length() > 0) break;
-                            String hm = accepted.optString("message", "refus");
-                            lastSubmit = new java.io.IOException("AI Horde: " + hm);
-                            if (hm.toLowerCase().contains("anonymous") && !registered) {
-                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
-                            }
-                        } catch (HordeHttpException he) {
-                            lastSubmit = he;
-                            String msg = String.valueOf(he.getMessage()).toLowerCase();
-                            boolean heavy = he.statusCode == 403 || he.statusCode == 429
-                                || msg.contains("heavy demand") || msg.contains("1024")
-                                || msg.contains("kudos") || msg.contains("too many");
-                            if (!heavy && he.statusCode != 429) throw he;
-                            continue;
                         }
-                    }
-                    if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
-                        String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec submit";
-                        throw new java.io.IOException(
-                            "AI Horde file saturée. Réessaie dans 1–2 min ou ajoute une clé Horde gratuite (aihorde.net) dans Réglages. " + em.substring(0, Math.min(120, em.length()))
-                        );
+                        if (accepted.has("message") && !accepted.has("id")) {
+                            hm = accepted.optString("message", "refus");
+                            if (hm.toLowerCase().contains("anonymous")) {
+                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite dans Réglages. " + hm.substring(0, Math.min(80, hm.length())));
+                            }
+                            throw new java.io.IOException("AI Horde: " + hm);
+                        }
                     }
                     String requestId = accepted.optString("id", "");
                     if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));

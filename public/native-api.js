@@ -355,11 +355,9 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("CRITICAL img2img identity: input_image_0 is the face reference for " + name + ". " +
-         "Preserve EXACT face structure, eyes, nose, mouth, hair color, skin tone and age. " +
-         "Do NOT generate a different woman. Do NOT make her plus-size/BBW unless the reference is. " +
-         "Change ONLY outfit, pose and background. Breast size from description. Sexy new outfit. Photorealistic RAW photo.")
-      : ("Follow the physical description exactly for " + name + " including ethnicity, body morphology and bust. Photorealistic adult woman, sharp focus.");
+      ? ("Identity reference input_image_0 for " + name + ": keep face, hair, eyes, skin AND body morphology (chubby/slim/curves) and breast volume from the reference and description. " +
+         "NEW pose, NEW outfit, NEW background. RAW photo, photorealistic, detailed skin pores, natural lighting, sharp focus, not painting, not CGI.")
+      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
@@ -472,32 +470,27 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo — keep ONLY face, hair color, eyes and skin tone. MUST change outfit and pose completely. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k,";
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
-      "PRIORITY: change outfit and pose completely from any reference photo.",
-      "FORBIDDEN: white shapewear, beige bodysuit, white corset, or the exact reference clothing.",
       mood,
-      // Tenue + pose EN PRIORITÉ (sinon img2img recolle à la photo de profil)
-      "NEW OUTFIT (mandatory, different from reference): " + outfit + ".",
-      "NEW POSE (mandatory, different from reference): " + pose + ".",
-      "Location: " + scene + ".",
+      // Morphologie + poitrine EN TÊTE (CF et Horde)
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
       bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
       looksEn ? ("Technical looks: " + looksEn + ".") : "",
       bodyField ? ("Body notes: " + bodyField + ".") : "",
-      "photorealistic full-body photo, one adult woman, head to toe, face visible, not a close-up,",
+      "photorealistic full-body photo, one adult woman, head to toe, not a close-up,",
+      "Outfit: " + outfit + ".",
+      "Pose: " + pose + ".",
+      "Location: " + scene + ".",
       faceLock,
       "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
+      // Rappel poitrine en fin de prompt (CF sous-estime souvent les gros bonnets)
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
-      forCloudflare
-        ? ("avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",")
-        : ("avoid: same outfit as reference, same pose as reference, hands on hips catalog pose, "
-           + "white corset, beige shapewear, studio seamless backdrop only, "
-           + bustInfo.neg + ", " + bodyInfo.neg + ","),
+      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
@@ -968,21 +961,6 @@
     if (!window.LeaAndroid || typeof window.LeaAndroid.httpPostJsonPoll !== "function") {
       throw new Error("La génération AI Horde nécessite l’application Android.");
     }
-    // Clé Horde: body.settings en priorité, sinon lea.settings (évite le mode anonyme 429)
-    const stMerged = Object.assign({}, settings(), st || {});
-    let hordeKey = String(
-      stMerged.hordeApiKey || stMerged.horde_key || stMerged.hordeKey || ""
-    ).trim();
-    if (!hordeKey || hordeKey === "0000000000") {
-      try {
-        const backup = String(localStorage.getItem("lea.hordeApiKey") || "").trim();
-        if (backup && backup !== "0000000000") hordeKey = backup;
-      } catch (_) {}
-    }
-    // Mode anonyme autorisé (scènes conversation) : clé officielle anonyme Horde
-    if (!hordeKey || hordeKey === "0000000000") {
-      hordeKey = "0000000000";
-    }
     const strength = (opts.denoise != null && opts.denoise > 0) ? String(opts.denoise) : "";
     let jobId = "";
     if (typeof window.LeaAndroid.hordeImageStartWithStrength === "function") {
@@ -990,7 +968,7 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        hordeKey,
+        String(st && st.hordeApiKey || ""),
         strength
       ) || "");
     } else if (typeof window.LeaAndroid.hordeImageStart === "function") {
@@ -998,7 +976,7 @@
         String(prompt).slice(0, 2048),
         String(character && character.id || "lea"),
         referenceB64 || "",
-        hordeKey
+        String(st && st.hordeApiKey || "")
       ) || "");
     } else {
       throw new Error("La génération AI Horde nécessite l’application Android.");
@@ -1881,33 +1859,12 @@
       }
       if (isHorde) {
         try {
-          // === PROFIL vs SCÈNE isolés (ne pas mélanger) ===
-          // Profil : denoise 0.85 + buildPhysicalImagePrompt — INCHANGÉ
-          // Scène  : Horde uniquement + buildConversationImagePrompt (tenue mémoire)
-          const PROFILE_HORDE_DENOISE = 0.68;
-          let SCENE_HORDE_DENOISE = 0.83;
-          if (isScene) {
-            try {
-              const mem = body.memory || {};
-              const w = String(mem.wardrobe || "").toLowerCase();
-              // Tenue clairement différente du profil → un peu plus de denoise
-              if (w.length > 8) SCENE_HORDE_DENOISE = 0.85;
-              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.87;
-            } catch (_) {}
-          }
-          const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
-          if (isScene) {
-            try {
-              prompt = buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
-            } catch (pe) {
-              throw new Error("Prompt scène: " + String(pe && pe.message || pe).slice(0, 160));
-            }
-          }
+          // Profil denoise 0.52 (version stable) ; scène 0.65 pour changer tenue
+          const denoise = isScene ? 0.65 : 0.52;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
-            // Profil: ref obligatoire si cover. Scène: ref si dispo (visage) mais pas bloquant
-            requireRef: isScene ? false : !!(char && (char.cover || (char.gallery && char.gallery[0]))),
+            requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))),
           });
           return {
             ok: true,
@@ -1918,31 +1875,12 @@
             denoise: denoise,
           };
         } catch (hordeErr) {
-          // Scène : si Horde saturé (403/429) → Pollinations secours (sans clé)
           if (isScene) {
-            try {
-              const scenePrompt =
-                (typeof prompt === "string" && prompt.length > 20)
-                  ? prompt
-                  : buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
-              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
-              return {
-                ok: true,
-                image: dataUrl,
-                prompt: String(scenePrompt).slice(0, 400),
-                engine: "pollinations",
-                mode: "conversation",
-                fallbackFrom: "horde",
-                hordeError: String(hordeErr.message || hordeErr).slice(0, 120),
-              };
-            } catch (pollErr) {
-              throw new Error(
-                "Scène indisponible — Horde: " + String(hordeErr.message || hordeErr).slice(0, 100) +
-                " · Pollinations: " + String(pollErr.message || pollErr).slice(0, 80)
-              );
-            }
+            throw new Error(
+              "AI Horde (scène) : " + String(hordeErr.message || hordeErr).slice(0, 180) +
+              " — réessaie plus tard ou vérifie ta clé Horde dans Réglages."
+            );
           }
-          // Profil : fallback Cloudflare soft (inchangé)
           const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
           try {
             const dataUrl = await generateCloudflareImage(cfPrompt, st, char);
