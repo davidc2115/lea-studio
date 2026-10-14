@@ -459,10 +459,12 @@ function stripLeaMemory(text) {
 function formatMessageHtml(text) {
   let raw = stripLeaMemory(text);
   raw = raw
-    .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*:\*{0,2}/g, "[$1]:")
-    .replace(/\*{1,2}\s*\[([^\]]{1,40})\]\s*\*{0,2}\s*:/g, "[$1]:");
+    .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*:\*{0,2}/g, "[$1]:")
+    .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:");
   // Normalize **action** → *action*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+  // Hide model format labels; the styling already communicates action/thought.
+  raw = raw.replace(/(^|\n)[ \t]*(?:action|dialogue)[ \t]*:[ \t]*/gi, "$1");
   const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -481,7 +483,7 @@ function formatMessageHtml(text) {
     return false;
   }
   let out = esc
-    .replace(/(^|\n)\[([^\]]{1,40})\]:\s*/g, '$1<span class="speaker">$2</span> — ')
+    .replace(/(^|\n)\[([^\]]{1,80})\]:[ \t]*/g, '$1<span class="speaker">$2</span><br>')
     .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
     .replace(/\(([^)]+)\)/g, function (_, inner) {
       if (isReallyAction(inner)) return '<span class="action">' + inner + '</span>';
