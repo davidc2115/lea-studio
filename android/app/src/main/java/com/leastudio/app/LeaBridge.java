@@ -799,9 +799,14 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Toujours sous la limite "heavy demand" (~380k px). Multiples de 64.
-                    params.put("width", 512);
-                    params.put("height", 640);
+                    // Qualité type photo (multiples de 64). Avec clé: un peu plus grand.
+                    if (registered) {
+                        params.put("width", 576);
+                        params.put("height", 768);
+                    } else {
+                        params.put("width", 512);
+                        params.put("height", 640);
+                    }
                     double denoise = 0.72;
                     String promptWork = promptSafe;
                     try {
@@ -816,19 +821,20 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
-                    int steps = registered ? 22 : 16;
+                    // cfg modéré = moins de "plastique" / seins exagérés
+                    double cfg = denoise >= 0.85 ? 6.5 : (denoise >= 0.70 ? 6.0 : 5.5);
+                    int steps = registered ? 28 : 18;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
-                    params.put("sampler_name", "k_euler_a");
+                    params.put("sampler_name", "k_dpmpp_2m");
                     params.put("denoising_strength", denoise);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin");
+                        + ", RAW photo, photorealistic, natural skin pores, soft realistic lighting, true-to-life proportions, sharp focus, 35mm"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, anime, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, doll-like, over-smoothed skin, exaggerated breasts, balloon breasts, unnatural cleavage, wax figure, oversaturated");
                     payload.put("params", params);
                     // Toujours garder la ref img2img si fournie (NE PAS tronquer le base64 = image cassée)
                     final String sourceB64;
@@ -849,7 +855,14 @@ public class LeaBridge {
                     payload.put("r2", true);
                     payload.put("shared", false);
                     payload.put("replacement_filter", true);
-                    payload.put("models", new JSONArray());
+                    // Préférer des checkpoints photo-réalistes (fallback: n'importe quel worker si indispo)
+                    JSONArray modelPref = new JSONArray();
+                    modelPref.put("ICBINP - I Can't Believe It's Not Photography");
+                    modelPref.put("RealVisXL V5.0");
+                    modelPref.put("Juggernaut XL");
+                    modelPref.put("realisticVisionV60B1_v51VAE");
+                    modelPref.put("DreamShaper XL");
+                    payload.put("models", modelPref);
 
                     String acceptedRaw = null;
                     JSONObject accepted = null;

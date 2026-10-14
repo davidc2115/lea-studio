@@ -396,17 +396,17 @@
       "burgundy satin wrap mini dress deep V, high slit, black stilettos on bed edge",
       "navy deep V crop top with transparent mesh midriff, tight dark jeans, seductive hallway walk",
       "black long-sleeve deep V dress with side waist cutout, open back detail, glamorous stairs",
-      "black sheer lace bodysuit, deep cleavage, hands on hips, full body provocative",
+      "black fitted knit dress moderate V neckline, elegant full body, realistic fabric,",
       "sheer white blouse unbuttoned low deep cleavage, black micro skirt, lace-up heels to the knees",
       "black crop top and leather mini skirt, fishnet stockings, garter straps visible, stilettos on marble stairs",
       "black lace open robe over matching lingerie, seated on velvet bench in dark bedroom",
       "burgundy satin short robe black lace cuffs, legs bare, hotel bed soft light",
       "black deep plunge evening gown with side cutouts, clutch, chandelier lobby",
       "black backless long dress, looking over shoulder, grand staircase",
-      "plus-size friendly olive bodycon mini dress deep cleavage, curves emphasized, seductive lean on console",
+      "olive satin mini dress thin straps, natural fit on her body, soft hotel lighting,",
       "wet white crop top clinging to chest, dark skinny jeans, after-rain look",
       "ivory lace lingerie set, thin straps, soft bedroom teasing",
-      "hot pink lace babydoll micro hem, playful provocative",
+      "dusty rose satin camisole and tailored trousers, refined evening look,",
       "red lace bra under open white shirt, black mini skirt, heels",
       "black mesh top and leather mini, edgy sexy full body",
       "champagne silk robe falling open over lace lingerie, doorway",
@@ -472,7 +472,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo — keep ONLY face, hair color, eyes and skin tone. MUST change outfit and pose completely. RAW photo adult 18+, sensual fashion, photorealistic, sharp, 8k,";
+      : "SAME woman as reference photo — keep exact face structure, eye color, hair color and skin tone. MUST change outfit and pose. RAW photo adult 18+, natural photorealistic fashion editorial like a real camera, not CGI, sharp, soft natural light,";
 
     const base = [
       "PRIORITY: change outfit and pose completely from any reference photo.",
@@ -2007,7 +2007,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.52;
+          const denoise = 0.48;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
