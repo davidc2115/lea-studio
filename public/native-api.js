@@ -410,7 +410,7 @@
       "red lace bra under open shirt, black mini skirt, heels",
       "black corset lingerie with stockings, seated on chaise, sensual",
     ];
-    const outfits = forCloudflareconst outfits = forCloudflare ? outfitsCf : outfitsHorde;
+    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
