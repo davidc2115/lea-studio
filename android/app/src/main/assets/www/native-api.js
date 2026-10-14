@@ -494,7 +494,7 @@
 
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
-    return out.slice(0, forCloudflare ? 1600 : 1800);
+    return out.slice(0, forCloudflare ? 1600 : 1400);
   }
 
   /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
@@ -1129,7 +1129,7 @@
     const started = Date.now();
     let last = "La file AI Horde est toujours en attente.";
     while (Date.now() - started < 780000) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 2500));
       let result = "";
       try { result = String(window.LeaAndroid.httpPostJsonPoll(jobId) || ""); }
       catch (error) { throw new Error("AI Horde : " + String(error.message || error)); }
@@ -1393,14 +1393,18 @@
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "TIERCES PERSONNES — RÈGLE ABSOLUE:",
       "Si le joueur parle À une autre personne (ma femme, Claire, ma fille, mon frère…), ou la décrit dans *…*, tu DOIS faire répondre cette personne dans TA réponse.",
-      "Format OBLIGATOIRE sur une ligne séparée: [Prénom]: ou [Rôle]: puis sa réplique.",
-      "Exemple si le joueur parle à Claire (sa femme):",
-      "*je reste sur le pas de la porte*",
-      "[Claire]: Tu as bien dormi mon amour ?",
-      "Oui… (réplique de " + charName + " SANS préfixe [Nom] — le dialogue normal est toujours " + charName + ")",
-      "INTERDIT: mettre [" + charName + "]: devant les paroles de " + charName + " (c'est redondant).",
-      "OBLIGATOIRE: au moins une ligne [NomTiers]: quand le joueur s'adresse explicitement à quelqu'un d'autre ou l'implique dans l'action.",
-      "Les gestes d'une tierce: *elle…* juste avant/après [Nom]:. Ne confonds jamais qui parle.",
+      "Format OBLIGATOIRE — chaque type sur sa ligne:",
+      "  *action de " + charName + "*",
+      "  [PrénomTiers]: uniquement ses paroles (dialogue court, rien d'autre sur cette ligne)",
+      "  (pensée courte de " + charName + ")",
+      "  dialogue normal de " + charName + " sans préfixe",
+      "Exemple correct:",
+      "*J'entends le grincement du lit derrière la cloison.*",
+      "[Claire]: Oh… mon dieu, oui…",
+      "(Il ne perd vraiment pas de temps.)",
+      "INTERDIT: coller pensées/actions de " + charName + " sur la même ligne que [Claire]:.",
+      "INTERDIT: mettre [" + charName + "]: devant les paroles de " + charName + ".",
+      "OBLIGATOIRE: au moins une ligne [NomTiers]: quand le joueur s'adresse à quelqu'un d'autre.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."

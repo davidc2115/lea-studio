@@ -821,17 +821,19 @@ button:disabled { opacity: .6; cursor: wait; }
 
 
 .bubble .third-party {
-  margin: 10px 0 6px;
-  padding: 8px 10px 10px;
-  border-radius: 12px;
-  background: rgba(255, 126, 185, 0.08);
-  border-left: 3px solid rgba(255, 126, 185, 0.55);
+  margin: 10px 0 8px;
+  padding: 8px 12px 10px;
+  border-radius: 14px;
+  background: rgba(255, 126, 185, 0.12);
+  border-left: 3px solid #ff7eb9;
+  box-shadow: inset 0 0 0 1px rgba(255, 126, 185, 0.15);
 }
 .bubble .third-party-line {
-  color: #f3e8ff;
+  color: #ffb3d9;
   font-style: italic;
+  font-weight: 500;
   line-height: 1.45;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 .bubble .third-party .action { color: #9ae6ff; font-style: normal; }
 .bubble .third-party .thought { color: #f6e05e; }

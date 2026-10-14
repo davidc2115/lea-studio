@@ -892,12 +892,44 @@ public class LeaBridge {
                             if (accepted.has("id") && accepted.optString("id", "").length() > 0) break;
                             String hm = accepted.optString("message", "refus");
                             lastSubmit = new java.io.IOException("AI Horde: " + hm);
-                            if (hm.toLowerCase().contains("anonymous") && !registered) {
+                            String hml = hm.toLowerCase();
+                            if (hml.contains("abuse") || hml.contains("timeout") || hml.contains("ip address")) {
+                                throw new java.io.IOException(
+                                    "Horde IP en pause (trop de requêtes). Attends sans relancer, ou passe sur Cloudflare. " + hm
+                                );
+                            }
+                            if (hml.contains("anonymous") && !registered) {
                                 throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
                             }
                         } catch (HordeHttpException he) {
                             lastSubmit = he;
                             String msg = String.valueOf(he.getMessage()).toLowerCase();
+                            // Ban IP / abuse : ne pas réessayer (aggrave le timeout)
+                            if (msg.contains("abuse") || msg.contains("timeout") || msg.contains("ip address")) {
+                                String em = String.valueOf(he.getMessage());
+                                try {
+                                    int jb = em.indexOf("{");
+                                    if (jb >= 0) {
+                                        org.json.JSONObject ej = new org.json.JSONObject(em.substring(jb));
+                                        String mj = ej.optString("message", "");
+                                        if (mj.length() > 0) em = mj;
+                                    }
+                                } catch (Exception ignoredParse) {}
+                                // Extraire secondes si présentes
+                                String waitHint = "quelques minutes";
+                                java.util.regex.Matcher wm = java.util.regex.Pattern
+                                    .compile("(\d+)\s*more\s*seconds", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(em);
+                                if (wm.find()) {
+                                    int sec = Integer.parseInt(wm.group(1));
+                                    waitHint = (sec / 60 + 1) + " min";
+                                }
+                                throw new java.io.IOException(
+                                    "Horde a mis ton IP en pause (~" + waitHint + ") après trop de tentatives. " +
+                                    "Attends sans relancer, ou utilise Cloudflare en attendant. " +
+                                    em.substring(0, Math.min(120, em.length()))
+                                );
+                            }
                             boolean heavy = he.statusCode == 403 || he.statusCode == 429
                                 || msg.contains("heavy demand") || msg.contains("1024")
                                 || msg.contains("kudos") || msg.contains("too many");

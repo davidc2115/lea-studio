@@ -470,7 +470,7 @@ function formatMessageHtml(text) {
   raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "$1");
   raw = raw.replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
   raw = raw.replace(/\*\s*\*/g, "");
-  // Séparer les blocs [Nom]: pour une carte propre
+  // Marqueurs de locuteurs
   raw = raw.replace(/\[([^\]]{1,80})\]:\s*/g, "\n@@@SPEAKER:$1@@@\n");
   raw = raw.replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
     function (_m, pre, name) {
@@ -479,36 +479,66 @@ function formatMessageHtml(text) {
       return pre + "\n@@@SPEAKER:" + name + "@@@\n";
     });
 
-  function formatChunk(chunk) {
+  function formatMain(chunk) {
     let esc = String(chunk || "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-    esc = esc
-      .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
-      .replace(/\(([^)]{1,120})\)/g, '<span class="thought">$1</span>');
+    // Actions *...* → cyan
+    esc = esc.replace(/\*([^*]+)\*/g, '<span class="action">$1</span>');
+    // Pensées (...) → jaune
+    esc = esc.replace(/\(([^)]{1,200})\)/g, '<span class="thought">$1</span>');
     return esc.trim();
+  }
+
+  /** Dialogue tierce uniquement ; le reste (actions/pensées du perso principal) revient au flux principal */
+  function splitSpeakerBody(body) {
+    let text = String(body || "").replace(/^\s+/, "");
+    if (!text) return { dialogue: "", rest: "" };
+    // Couper dès une action *...* ou une pensée (...)
+    const stopRe = /(?:^|\n)\s*\*|^\s*\(|(?:^|\n)\s*\(/;
+    let stop = -1;
+    // Cherche * ou ( qui démarre une section du personnage principal
+    const star = text.search(/(?:^|[\s.])\*[^*\n]/);
+    const paren = text.search(/(?:^|[\s.])\([^)\n]{3,}/);
+    const candidates = [star, paren].filter(function (i) { return i >= 0; });
+    if (candidates.length) stop = Math.min.apply(null, candidates);
+    // Ou phrase suivante qui bascule en POV "Je / Il / Elle" (pensée/action du perso principal sans marqueur)
+    if (stop < 0) {
+      const pov = text.match(/^([\s\S]{8,220}?(?:[.!?…]|\.\.\.)(?:\s+|$))([\s\S]*)$/);
+      if (pov && /^\s*(Je |J['’]|Il |Elle |Mon |Ma |Mes |En |Puis )/.test(pov[2])) {
+        return { dialogue: pov[1].trim(), rest: pov[2] };
+      }
+    }
+    if (stop >= 0) {
+      return { dialogue: text.slice(0, stop).trim(), rest: text.slice(stop).trim() };
+    }
+    // Tout le bloc est du dialogue tierce (court)
+    if (text.length < 280) return { dialogue: text, rest: "" };
+    // Long sans marqueur : première phrase = dialogue, reste = principal
+    const first = text.match(/^([\s\S]{5,200}?(?:[.!?…]|\.\.\.)(?:\s+|$))/);
+    if (first) return { dialogue: first[1].trim(), rest: text.slice(first[1].length).trim() };
+    return { dialogue: text, rest: "" };
   }
 
   const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
   let html = "";
-  // parts: [before, name1, text1, name2, text2, ...]
-  if (parts[0] && parts[0].trim()) html += formatChunk(parts[0]);
+  if (parts[0] && parts[0].trim()) html += formatMain(parts[0]);
   for (let i = 1; i < parts.length; i += 2) {
     const name = String(parts[i] || "").trim();
-    let body = String(parts[i + 1] || "");
-    // Corps jusqu'au prochain * action majeure : garder tout le dialogue du tiers
-    body = body.replace(/^\s+/, "");
-    const bodyHtml = formatChunk(body);
-    if (!name) {
-      html += bodyHtml;
-      continue;
+    const split = splitSpeakerBody(parts[i + 1] || "");
+    if (name && split.dialogue) {
+      const dlg = String(split.dialogue)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      html +=
+        '<div class="third-party">' +
+        '<div class="speaker">' + name.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
+        '<div class="third-party-line">' + dlg + "</div>" +
+        "</div>";
     }
-    html +=
-      '<div class="third-party">' +
-      '<div class="speaker">' + name.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
-      '<div class="third-party-line">' + bodyHtml + "</div>" +
-      "</div>";
+    if (split.rest && split.rest.trim()) html += formatMain(split.rest);
   }
   return html;
 }
