@@ -774,12 +774,12 @@ button:disabled { opacity: .6; cursor: wait; }
   top: calc(12px + env(safe-area-inset-top, 0px));
   bottom: auto;
   z-index: 9999;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(30, 20, 50, 0.94);
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(30, 20, 50, 0.92);
   color: #f3e8ff;
-  font-size: 0.88rem;
-  line-height: 1.35;
+  font-size: 0.75rem;
+  line-height: 1.25;
   box-shadow: 0 8px 28px rgba(0,0,0,.35);
   opacity: 0;
   transform: translateY(-10px);

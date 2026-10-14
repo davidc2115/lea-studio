@@ -649,8 +649,7 @@ public class LeaBridge {
     }
 
     private static final String[] HORDE_HOSTS = new String[] {
-        "https://aihorde.net",
-        "https://stablehorde.net"
+        "https://aihorde.net"
     };
 
     private static final class HordeHttpException extends java.io.IOException {
@@ -728,15 +727,18 @@ public class LeaBridge {
                     if (e.statusCode == 429 || e.statusCode < 500) throw e;
                     last = e;
                     break;
+                } catch (java.net.UnknownHostException e) {
+                    last = new java.io.IOException("DNS: impossible de joindre aihorde.net. Vérifie Wi‑Fi / données mobiles.");
+                    // essayer hôte suivant si présent
                 } catch (Exception e) {
                     last = e;
-                    break;
+                    // ne pas abandonner toute la boucle d'hôtes sur une erreur réseau ponctuelle
                 } finally {
                     if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
                 }
             }
         }
-        throw last != null ? last : new java.io.IOException("AI Horde inaccessible (aihorde.net / stablehorde.net)");
+        throw last != null ? last : new java.io.IOException("AI Horde inaccessible (aihorde.net). Vérifie la connexion réseau.");
     }
 
     private byte[] hordeDownloadImage(String imageUrl) throws Exception {

@@ -463,27 +463,33 @@ function formatMessageHtml(text) {
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:");
   // Normalize **action** → *action*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // Hide model format labels; the styling already communicates action/thought.
-  raw = raw.replace(/(^|\n)[ \t]*(?:action|dialogue)[ \t]*:[ \t]*/gi, "$1");
+  // Retirer les libellés visibles du modèle (action / dialogue / pensée)
+  raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)[ \t]*[:：][ \t]*/gi, "$1");
+  raw = raw.replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
   const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
-  // *actions* → cyan. (pensées) → jaune. Narration physique dans () → action.
   function isReallyAction(inner) {
     const s = String(inner || "").trim();
     if (!s) return false;
-    // Vraie pensée courte / ressenti interne → jaune
     const thoughty = /\b(je (me )?dis|je pense|dans ma t[eê]te|j['’]ai peur|j['’]ose pas|pourquoi|est-ce que|mon c[oe]ur|c['’]est irr[eé]el|je ne (veux|serai|peux)|prisonni[eè]re|honte|troubl[eé]e?)\b/i.test(s);
     if (thoughty && s.length < 120) return false;
-    // Narration physique / sexuelle → action (même si le modèle a mis des parenthèses)
     if (/\b(pousse|enfonce|jouis|hurle|spasme|tremble|effondre|g[eé]mit|cambre|caresse|embrasse|glisse|l[eè]vres?|doigts?|verge|sexe|clito|seins?|culotte|hanches?|cuisses?|baiser|orgue|contraction)\b/i.test(s))
       return true;
-    if (s.length > 90) return true; // long bloc = narration, pas une pensée
+    if (s.length > 90) return true;
     return false;
   }
   let out = esc
+    // [Nom]: ou [rôle]: → nom en rose
     .replace(/(^|\n)\[([^\]]{1,80})\]:[ \t]*/g, '$1<span class="speaker">$2</span><br>')
+    // Nom propre / rôle en début de ligne: "La fille:", "Ma femme:", "Dylan:"
+    .replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son )?[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28}(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
+      function (m, pre, name) {
+        const low = name.toLowerCase();
+        if (/^(action|dialogue|pens[eé]e|thought|parole)s?$/.test(low)) return pre;
+        return pre + '<span class="speaker">' + name + "</span><br>";
+      })
     .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
     .replace(/\(([^)]+)\)/g, function (_, inner) {
       if (isReallyAction(inner)) return '<span class="action">' + inner + '</span>';
@@ -798,10 +804,10 @@ function renderProfile() {
     $("btn-gen-img").onclick = () => generateProfileImage();
     if (state.genRunning) {
       $("btn-gen-img").disabled = true;
-      $("btn-gen-img").textContent = "⏳ Génération en arrière-plan…";
+      $("btn-gen-img").textContent = "⏳ Génération…";
       const bmsg = (state.genBanner && state.genBanner.msg)
         ? state.genBanner.msg
-        : "⏳ Génération d'image en arrière-plan… tu peux changer d'écran.";
+        : "⏳ Génération…";
       setGenBanner(bmsg, (state.genBanner && state.genBanner.kind) || "");
     } else if (state.genBanner && state.genBanner.msg) {
       setGenBanner(state.genBanner.msg, state.genBanner.kind || "");
@@ -1259,9 +1265,9 @@ async function generateProfileImage() {
   state.genRunning = true;
   const startMsg = provider === "horde"
     ? (hordeKey
-        ? "⏳ Génération AI Horde en arrière-plan (clé) — file possible plusieurs minutes. Tu peux changer d'écran."
-        : "⏳ Génération AI Horde anonyme en arrière-plan — file possible. Tu peux changer d'écran.")
-    : "⏳ Génération Cloudflare en arrière-plan… Tu peux changer d'écran.";
+        ? "⏳ Horde… file en cours"
+        : "⏳ Horde anonyme… file en cours")
+    : "⏳ Cloudflare…";
   setGenBanner(startMsg, "");
   const statusEl = $("gen-status");
   if (statusEl) {
