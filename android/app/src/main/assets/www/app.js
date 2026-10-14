@@ -808,11 +808,23 @@ async function ensureChatStarted() {
   }
 }
 
+function resolveCharacterForChat(id) {
+  const sid = String(id || "");
+  if (!sid) return null;
+  // Recherche complète : cast + importés + Léa + personnage actif
+  const found = (typeof findCharacterById === "function" ? findCharacterById(sid) : null)
+    || (state.character && String(state.character.id) === sid ? state.character : null)
+    || (state.leaCharacter && String(state.leaCharacter.id) === sid ? state.leaCharacter : null);
+  if (found) return found;
+  // Dernier recours : parcourir cast + importés
+  const pools = [
+    ...(Array.isArray(state.castCharacters) ? state.castCharacters : []),
+    ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : []),
+  ];
+  return pools.find((x) => x && String(x.id) === sid) || null;
+}
+
 function readSavedChats() {
-  const characterMap = new Map();
-  [state.leaCharacter, state.character, ...(Array.isArray(state.importedCharacters) ? state.importedCharacters : [])]
-    .filter((item) => item && item.id)
-    .forEach((item) => characterMap.set(String(item.id), item));
   const entries = [];
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -825,7 +837,8 @@ function readSavedChats() {
           const ts = Number(message && message.ts) || Date.parse(message && message.ts) || 0;
           return Math.max(max, ts);
         }, 0);
-        entries.push({ id, character: characterMap.get(id) || { id, name: id }, messages: chat.messages, latest });
+        const character = resolveCharacterForChat(id) || { id, name: id };
+        entries.push({ id, character, messages: chat.messages, latest });
       }
     } catch (_) {}
   }
@@ -847,16 +860,22 @@ function renderChatHistory() {
     return;
   }
   root.innerHTML = entries.map((entry) => {
-    const character = entry.character || {};
+    const character = entry.character || resolveCharacterForChat(entry.id) || {};
+    const displayName = String(character.name || character.title || entry.id || "?").trim();
     const last = entry.messages[entry.messages.length - 1] || {};
     const preview = String(last.content || "").replace(/\s+/g, " ").trim().slice(0, 90);
     const active = state.character && String(state.character.id) === entry.id;
     const stamp = entry.latest ? new Date(entry.latest).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "";
-    const image = resolveImgSrc(character.cover || (Array.isArray(character.gallery) && character.gallery[0]) || "");
+    const coverRaw = character.cover || (Array.isArray(character.gallery) && character.gallery[0]) || "";
+    const image = resolveImgSrc(coverRaw);
+    const avatarHtml = image
+      ? `<img class="chat-history-photo" src="${escapeHtml(image)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='grid')" />`
+        + `<span class="chat-history-avatar" style="display:none">💬</span>`
+      : '<span class="chat-history-avatar">💬</span>';
     return `<div class="chat-history-row">
       <button type="button" class="chat-history-item${active ? " is-active" : ""}" data-chat-id="${escapeHtml(entry.id)}">
-        ${image ? `<img src="${escapeHtml(image)}" alt="" />` : '<span class="chat-history-avatar">💬</span>'}
-        <span class="chat-history-copy"><strong>${escapeHtml(character.name || entry.id)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
+        ${avatarHtml}
+        <span class="chat-history-copy"><strong>${escapeHtml(displayName)}</strong><small>${escapeHtml(stamp)}</small><span>${escapeHtml(preview)}</span></span>
       </button>
       <button type="button" class="chat-history-delete" data-delete-chat="${escapeHtml(entry.id)}" title="Supprimer la conversation">🗑️</button>
     </div>`;
@@ -864,9 +883,13 @@ function renderChatHistory() {
   root.querySelectorAll("[data-chat-id]").forEach((button) => {
     button.onclick = () => {
       const id = button.dataset.chatId;
-      const selected = findCharacterById(id);
-      if (!selected) return;
-      state.character = selected;
+      const selected = resolveCharacterForChat(id) || findCharacterById(id);
+      if (!selected) {
+        // Conversation orpheline (perso retiré) : ouvrir quand même avec un stub
+        state.character = { id: id, name: id, age: 18, title: "", appearance: "", gallery: [], cover: "" };
+      } else {
+        state.character = selected;
+      }
       try { state.chat = JSON.parse(localStorage.getItem("lea.chat." + id) || '{"messages":[]}'); }
       catch (_) { state.chat = { messages: [] }; }
       state.editMode = false;
