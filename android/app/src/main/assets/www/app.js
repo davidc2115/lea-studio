@@ -1231,7 +1231,7 @@ async function generateConversationScene() {
     state.chat.messages.push({
       role: "assistant",
       content: res.fallbackFrom === "horde"
-        ? "*[scène générée — Horde indisponible, fallback Cloudflare (moins explicite)]*"
+        ? "*[scène — Horde saturé, secours Pollinations/CF]*"
         : "*[scène générée d’après la tenue / situation en cours]*",
       image: image,
       ts: Date.now(),
@@ -1337,7 +1337,7 @@ async function generateProfileImage() {
       const next = persistImageToCharacter(targetId, stored, jobChar);
       state.genRunning = false;
       const via = res.fallbackFrom === "horde"
-        ? " (Horde indisponible → Cloudflare)"
+        ? " (Horde saturé → Cloudflare, moins NSFW — réessaie plus tard)"
         : (res.engine === "horde" ? " via Horde" : "");
       setGenBanner("✓ Image ajoutée au profil de " + String(next.name || "la personne choisie") + via, "ok");
       if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
