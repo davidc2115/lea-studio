@@ -12,9 +12,52 @@ const state = {
   castCharacters: [],
   leaCharacter: null,
   chatListMode: true,
+  genRunning: false,
+  genBanner: null,
 };
 
 const $ = (id) => document.getElementById(id);
+
+/** Bannière de génération (profil + toast global) */
+function setGenBanner(msg, kind) {
+  const text = String(msg || "").trim();
+  const k = kind === "ok" || kind === "bad" ? kind : "";
+  state.genBanner = text ? { msg: text, kind: k } : null;
+
+  const status = $("gen-status");
+  if (status) {
+    if (!text) {
+      status.innerHTML = "";
+    } else {
+      const cls = k === "ok" ? "ok" : k === "bad" ? "bad" : "busy";
+      status.innerHTML = '<span class="status-pill ' + cls + '">' + escapeHtml(text) + "</span>";
+    }
+  }
+
+  let toast = $("gen-banner-toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "gen-banner-toast";
+    toast.setAttribute("role", "status");
+    document.body.appendChild(toast);
+  }
+  if (!text) {
+    toast.className = "gen-banner-toast";
+    toast.textContent = "";
+    return;
+  }
+  toast.textContent = text;
+  toast.className = "gen-banner-toast show" + (k ? " " + k : " busy");
+  if (k === "ok" || k === "bad") {
+    try { clearTimeout(setGenBanner._hideTimer); } catch (_) {}
+    setGenBanner._hideTimer = setTimeout(() => {
+      if (toast && state.genBanner && state.genBanner.kind === k) {
+        toast.classList.remove("show");
+      }
+    }, k === "ok" ? 5500 : 9000);
+  }
+}
+
 
 async function api(path, opts = {}) {
   if (typeof window.leaNativeApi === "function") {
@@ -586,7 +629,9 @@ function renderProfile() {
     const val = c[key] || "";
     if (!edit) {
       return `<div class="section"><h2>${emoji} ${label}</h2><div class="body-text">${
-        key === "greeting" ? formatMessageHtml(val) : escapeHtml(val)
+        key === "greeting"
+          ? (typeof formatMessageHtml === "function" ? formatMessageHtml(val) : escapeHtml(val))
+          : escapeHtml(val)
       }</div></div>`;
     }
     return `<div class="section"><h2>${emoji} ${label}</h2>${
@@ -614,7 +659,7 @@ function renderProfile() {
         <label class="hint" style="margin-top:8px">Titre</label>
         <input class="edit-input" data-field="title" value="${escapeHtml(c.title || "")}" />
         <label class="hint" style="margin-top:8px">Tags (virgules)</label>
-        <input class="edit-input" data-field="tags" value="${tags.map((tag) => typeof tag === "string" ? tag : (tag && tag.name) || "").join(", ")}" />
+        <input class="edit-input" data-field="tags" value="${escapeHtml(tags.map((tag) => typeof tag === "string" ? tag : (tag && (tag.name || tag.label)) || "").filter(Boolean).join(", "))}" />
         <label class="hint" style="margin-top:8px">Image de couverture (chemin)</label>
         <input class="edit-input" data-field="cover" value="${escapeHtml(c.cover || "")}" />
       </div>
@@ -647,12 +692,14 @@ function renderProfile() {
       <h2>🖼️ Galerie (${gallery.length})</h2>
       <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
       <div class="gallery-grid">
-        ${gallery.map((src, i) => {
+        ${gallery.filter(Boolean).map((src, i) => {
           const isCover = (c.cover === src) || (!c.cover && i === 0);
-          const safe = String(src).replace(/"/g, "&quot;");
+          const resolved = resolveImgSrc(src) || "";
           return `<div class="gal-card">
             <button type="button" class="gal-img-btn" data-i="${i}">
-              <img src="${escapeHtml(resolveImgSrc(src))}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" />
+              ${resolved
+                ? `<img src="${escapeHtml(resolved)}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" onerror="this.style.opacity=0.3" />`
+                : `<div class="cover-placeholder" style="height:120px;display:grid;place-items:center">🖼️</div>`}
               ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
             </button>
             <div class="gal-actions">
@@ -671,8 +718,8 @@ function renderProfile() {
       <p class="hint">La photo de profil sert de référence pour le visage. Tenues sexy / dentelle / transparent / décolleté, poses provocantes. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
+        <option value="horde" selected>AI Horde · img2img</option>
         <option value="cloudflare">Cloudflare · FLUX.2 Klein</option>
-        <option value="horde">AI Horde · img2img</option>
       </select>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
       ${knownMinor
@@ -747,8 +794,13 @@ function renderProfile() {
     $("btn-gen-img").onclick = () => generateProfileImage();
     if (state.genRunning) {
       $("btn-gen-img").disabled = true;
-      $("btn-gen-img").textContent = "⏳ Génération…";
-      setGenBanner("⏳ Génération Cloudflare en arrière-plan…", "");
+      $("btn-gen-img").textContent = "⏳ Génération en arrière-plan…";
+      const bmsg = (state.genBanner && state.genBanner.msg)
+        ? state.genBanner.msg
+        : "⏳ Génération d'image en arrière-plan… tu peux changer d'écran.";
+      setGenBanner(bmsg, (state.genBanner && state.genBanner.kind) || "");
+    } else if (state.genBanner && state.genBanner.msg) {
+      setGenBanner(state.genBanner.msg, state.genBanner.kind || "");
     }
   }
   if ($("prof-chat")) $("prof-chat").onclick = () => { state.chatListMode = false; showView("chat"); };
@@ -1201,12 +1253,16 @@ async function generateProfileImage() {
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
-  setGenBanner(
-    provider === "horde"
-      ? (hordeKey ? "⏳ AI Horde (clé) — file possible quelques minutes…" : "⏳ AI Horde anonyme — file possible…")
-      : "⏳ Génération Cloudflare…",
-    ""
-  );
+  const startMsg = provider === "horde"
+    ? (hordeKey
+        ? "⏳ Génération AI Horde en arrière-plan (clé) — file possible plusieurs minutes. Tu peux changer d'écran."
+        : "⏳ Génération AI Horde anonyme en arrière-plan — file possible. Tu peux changer d'écran.")
+    : "⏳ Génération Cloudflare en arrière-plan… Tu peux changer d'écran.";
+  setGenBanner(startMsg, "");
+  const statusEl = $("gen-status");
+  if (statusEl) {
+    statusEl.innerHTML = '<span class="status-pill busy">' + escapeHtml(startMsg) + "</span>";
+  }
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);

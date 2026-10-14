@@ -765,3 +765,33 @@ button:disabled { opacity: .6; cursor: wait; }
   padding: 0;
   font-size: .95rem;
 }
+
+
+/* Bannière génération image (arrière-plan) */
+.gen-banner-toast {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  z-index: 9999;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(30, 20, 50, 0.94);
+  color: #f3e8ff;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  box-shadow: 0 8px 28px rgba(0,0,0,.35);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.gen-banner-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.gen-banner-toast.busy { border: 1px solid rgba(196, 150, 255, 0.45); }
+.gen-banner-toast.ok { border: 1px solid rgba(74, 222, 128, 0.5); color: #bbf7d0; }
+.gen-banner-toast.bad { border: 1px solid rgba(251, 113, 133, 0.55); color: #fecdd3; }
+.status-pill.busy { background: rgba(167, 139, 250, 0.18); color: #e9d5ff; }
