@@ -675,7 +675,7 @@ public class LeaBridge {
     private String hordeRequest(String method, String path, String body, String apiKey) throws Exception {
         Exception last = null;
         for (String host : HORDE_HOSTS) {
-            for (int attempt = 0; attempt < 5; attempt++) {
+            for (int attempt = 0; attempt < 3; attempt++) {
                 HttpURLConnection conn = null;
                 try {
                     conn = (HttpURLConnection) new URL(host + path).openConnection();
@@ -710,7 +710,10 @@ public class LeaBridge {
                     }
                     String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
                     if (code == 429) {
-                        if (attempt >= 4) throw new HordeHttpException(429, "AI Horde file saturée (429). Réessaie dans 1–2 min ou ajoute une clé gratuite aihorde.net dans Réglages.");
+                        if (attempt >= 2) {
+                            throw new HordeHttpException(429, "AI Horde HTTP 429 après 3 tentatives: "
+                                + response.substring(0, Math.min(300, response.length())));
+                        }
                         long delay = Math.max(hordeRetryDelayMillis(conn, attempt), 8000L * (attempt + 1));
                         conn.disconnect();
                         conn = null;
@@ -873,14 +876,14 @@ public class LeaBridge {
                             }
                         } catch (HordeHttpException he) {
                             lastSubmit = he;
-                            if (he.statusCode != 429 && he.statusCode != 403) throw he;
-                            // 429/403 → retry plus petit
+                            if (he.statusCode != 403) throw he;
+                            // Seul un 403 lié à la charge peut bénéficier d'un payload plus petit.
                         }
                     }
                     if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
                         String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec";
                         throw new java.io.IOException(
-                            "AI Horde file saturée (429). Réessaie dans 1–2 min ou clé gratuite aihorde.net. " + em.substring(0, Math.min(100, em.length()))
+                            "AI Horde n'a pas accepté la génération: " + em.substring(0, Math.min(180, em.length()))
                         );
                     }
                     String requestId = accepted.optString("id", "");
