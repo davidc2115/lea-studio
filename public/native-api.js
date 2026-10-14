@@ -1390,7 +1390,7 @@
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "Si une tierce personne parle: commence par [Prénom] ou [rôle] puis : (ex: [Ta fille]: … / [Ma femme]: …).",
+      "Si une tierce personne (fille, femme, amie, mari…) parle ou intervient: OBLIGATOIRE de commencer sa réplique par [Son prénom] ou [Son rôle]: sur une nouvelle ligne. Exemples: [Ta fille]: Maman ?\n[Ma femme]: Tu viens ?\n[Léa]: …  Sans ça le joueur ne voit pas qui parle.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * *.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
@@ -2023,6 +2023,27 @@
           };
         } catch (hordeErr) {
           const he = String(hordeErr.message || hordeErr);
+          // Anonyme saturé / 429 → Cloudflare pour que la génération marche quand même
+          if (/429|Too many|anonymous|satur|kudos|file satur/i.test(he)) {
+            try {
+              const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
+              const dataUrl = await generateCloudflareImage(cfPrompt, st, char);
+              return {
+                ok: true,
+                image: dataUrl,
+                prompt: cfPrompt.slice(0, 400),
+                engine: "cloudflare",
+                fallbackFrom: "horde",
+                hordeError: he.slice(0, 120),
+                note: "Horde anonyme saturé → Cloudflare. Clé gratuite aihorde.net = prioritaire.",
+              };
+            } catch (cfErr) {
+              throw new Error(
+                "Horde saturé (anonyme). Ajoute une clé gratuite aihorde.net dans Réglages. " +
+                "CF: " + String(cfErr.message || cfErr).slice(0, 80)
+              );
+            }
+          }
           throw new Error("AI Horde: " + he.slice(0, 200));
         }
       }

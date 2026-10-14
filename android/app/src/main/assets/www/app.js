@@ -458,14 +458,18 @@ function stripLeaMemory(text) {
 
 function formatMessageHtml(text) {
   let raw = stripLeaMemory(text);
+  // Normaliser **…** → *…*
+  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
+  // Tiers déjà au format [Nom]:
   raw = raw
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*:\*{0,2}/g, "[$1]:")
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:");
-  // Normalize **action** → *action*
-  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // Retirer les libellés visibles du modèle (action / dialogue / pensée)
-  raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)[ \t]*[:：][ \t]*/gi, "$1");
+  // Retirer TOUS les libellés action/dialogue/pensée (début de ligne, dans *, n'importe où)
+  raw = raw.replace(/\*+\s*(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "*");
+  raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "$1");
   raw = raw.replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
+  // Nettoyer * * vides
+  raw = raw.replace(/\*\s*\*/g, "");
   const esc = raw
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -473,21 +477,20 @@ function formatMessageHtml(text) {
   function isReallyAction(inner) {
     const s = String(inner || "").trim();
     if (!s) return false;
-    const thoughty = /\b(je (me )?dis|je pense|dans ma t[eê]te|j['’]ai peur|j['’]ose pas|pourquoi|est-ce que|mon c[oe]ur|c['’]est irr[eé]el|je ne (veux|serai|peux)|prisonni[eè]re|honte|troubl[eé]e?)\b/i.test(s);
-    if (thoughty && s.length < 120) return false;
-    if (/\b(pousse|enfonce|jouis|hurle|spasme|tremble|effondre|g[eé]mit|cambre|caresse|embrasse|glisse|l[eè]vres?|doigts?|verge|sexe|clito|seins?|culotte|hanches?|cuisses?|baiser|orgue|contraction)\b/i.test(s))
+    // Pensée interne → jaune
+    if (/\b(je (me )?dis|je pense|je me demande|dans ma t[eê]te|j['’]ai peur|j['’]ose|pourquoi|est-ce que|mon c[oe]ur|si (elle|il) savait|quel cingl|honte|troubl)/i.test(s) && s.length < 160)
+      return false;
+    if (/\b(pousse|enfonce|jouis|hurle|spasme|tremble|effondre|g[eé]mit|cambre|caresse|embrasse|glisse|tourne|main sur|matelas|l[eè]vres?|doigts?)\b/i.test(s))
       return true;
-    if (s.length > 90) return true;
+    if (s.length > 100) return true;
     return false;
   }
   let out = esc
-    // [Nom]: ou [rôle]: → nom en rose
-    .replace(/(^|\n)\[([^\]]{1,80})\]:[ \t]*/g, '$1<span class="speaker">$2</span><br>')
-    // Nom propre / rôle en début de ligne: "La fille:", "Ma femme:", "Dylan:"
-    .replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son )?[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28}(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
-      function (m, pre, name) {
-        const low = name.toLowerCase();
-        if (/^(action|dialogue|pens[eé]e|thought|parole)s?$/.test(low)) return pre;
+    .replace(/(^|\n)\[([^\]]{1,80})\]:\s*/g, '$1<span class="speaker">$2</span><br>')
+    .replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
+      function (_m, pre, name) {
+        const low = String(name).toLowerCase().trim();
+        if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/.test(low)) return pre;
         return pre + '<span class="speaker">' + name + "</span><br>";
       })
     .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
@@ -1016,7 +1019,7 @@ function renderChat() {
         <button type="button" class="chat-bg-btn" id="chat-bg-clear">Aucun fond</button>
       </div>
       <div class="chat-input-row">
-        <textarea id="chat-input" rows="1" placeholder="Écris… (*action*) (pensée)"></textarea>
+        <textarea id="chat-input" rows="1" placeholder="Écris…  *geste*  (ressenti)"></textarea>
         <button type="button" class="send" id="chat-send">➤</button>
       </div>
     </div>
