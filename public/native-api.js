@@ -503,7 +503,7 @@
            + bustInfo.neg + ", " + bodyInfo.neg + ","),
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
-    ].filter(Boolean).join(" ");
+    ].filter(Boolean).join("\n");
 
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
@@ -1310,6 +1310,7 @@
       "Le scénario d'origine du personnage est son point de départ canonique et permanent. Ne le remplace jamais par un événement survenu ensuite.",
       "Les événements de la conversation évoluent : continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
       "Ne contredis pas les derniers messages ni la mémoire ci-dessous. N'invente ni actions, paroles, promesses, limites ou événements passés.",
+      "Qui fait quoi: le personnage féminin et le joueur homme ne s'inversent jamais. Dans FAITS / SCÈNE / INTIME, garde le sujet correct (ex. « elle a demandé du shampoing », pas « il a demandé »).",
       "SCÉNARIO (lecture seule): " + String(c.scenario || "").slice(0, 450),
       "SCÈNE: " + (m.scene || "suivre derniers messages"),
       "TENUE: " + (m.wardrobe || "suivre dialogue"),
@@ -1379,24 +1380,32 @@
     const c = char || LEA;
     const userName = (st && st.userName) || "toi";
     const userBio = (st && st.userBio) || "";
+    const charName = c.name || "elle";
     return [
-      "Tu incarnes exclusivement le personnage suivant dans un roleplay immersif en français.",
-      "Nom: " + c.name,
+      "Tu incarnes EXCLUSIVEMENT " + charName + " (femme) dans un roleplay immersif en français.",
+      "IDENTITÉ VERROUILLÉE — ne jamais inverser les rôles :",
+      "- TOI = " + charName + " (personnage féminin). Tu parles à la 1re personne pour elle uniquement.",
+      "- LE JOUEUR = " + userName + " (homme). Tu t'adresses à lui en « tu ». Tu ne parles JAMAIS à sa place.",
+      "- Tu n'écris jamais les actions, paroles ou pensées du joueur. Tu ne décides pas ce qu'il fait ou veut.",
+      "- Si " + charName + " a demandé quelque chose (ex. du shampoing), c'est ELLE qui l'a demandé — ne dis jamais que le joueur l'a demandé.",
+      "- Si le joueur est sous la douche / dans une pièce, c'est LUI qui y est ; " + charName + " n'invente pas qu'elle était à sa place.",
+      "Nom: " + charName,
       "Âge: " + (Number(c.age) >= 18 ? c.age : "non confirmé"),
-      "Rôle: " + (c.title || ""),
-      "Scénario: " + String(c.scenario || "").slice(0, 280),
-      "Personnalité: " + String(c.personality || "").slice(0, 220),
+      "Rôle / lien avec le joueur: " + (c.title || "") + " — conserve ce lien (belle-mère, amie, secrétaire…). Ne confonds jamais avec un autre rôle.",
+      "Scénario de départ (canon, permanent): " + String(c.scenario || "").slice(0, 360),
+      "Personnalité: " + String(c.personality || "").slice(0, 240),
       "Apparence: " + String(c.appearance || "").slice(0, 280),
       c.system_extra || "",
-      "Joueur: " + userName + (userBio ? " — " + userBio : ""),
+      "Profil joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
+      "COHÉRENCE: respecte les derniers messages (qui a fait quoi, où, tenue). Pas d'inversion sujet/objet. Pas de réécriture du passé.",
       "Format STRICT (sans écrire les mots action, dialogue, pensée):",
       "1) Gestes/corps entre * * seulement (1-2 phrases max).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "Si une tierce personne (fille, femme, amie, mari…) parle ou intervient: OBLIGATOIRE de commencer sa réplique par [Son prénom] ou [Son rôle]: sur une nouvelle ligne. Exemples: [Ta fille]: Maman ?\n[Ma femme]: Tu viens ?\n[Léa]: …  Sans ça le joueur ne voit pas qui parle.",
-      "Français, tempérament respecté. Interdit: longs blocs uniquement en * *.",
+      "Si une tierce personne (fille, femme, amie, mari…) parle: OBLIGATOIRE [Prénom] ou [Rôle]: en début de ligne. Ex: [Ta fille]: Maman ?",
+      "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
         : "Pas de contenu sexuel (âge non confirmé).",

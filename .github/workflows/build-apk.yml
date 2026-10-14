@@ -137,9 +137,15 @@ jobs:
       - name: Finaliser et vérifier l'APK
         run: |
           set -e
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          test -n "$APK"
+          APK=$(find android/app/build/outputs/apk -name "*release*.apk" -o -name "*.apk" 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERREUR: aucun APK trouvé sous android/app/build/outputs/apk"
+            find android/app/build/outputs -type f 2>/dev/null | head -50
+            exit 1
+          fi
           echo "APK source: $APK ($(du -h "$APK" | cut -f1))"
+          # Copie immédiate à la racine pour l'artifact (évite un fail plus bas)
+          cp -f "$APK" "$GITHUB_WORKSPACE/lea-studio.apk"
           # Interdire le monstre assets/native/sd-arm64
           if unzip -l "$APK" | grep -q "assets/native/sd-arm64"; then
             echo "Retrait sd-arm64 trop volumineux de l'APK..."
@@ -166,18 +172,38 @@ jobs:
           fi
           VERSION="${{ github.event.inputs.version || '1.0.0' }}"
           CODE="${{ github.run_number }}"
-          OUT="lea-studio-v${VERSION}-b${CODE}.apk"
-          cp "$APK" "$OUT"
-          cp "$APK" lea-studio.apk
-          ls -lh "$OUT" lea-studio.apk
+          OUT="$GITHUB_WORKSPACE/lea-studio-v${VERSION}-b${CODE}.apk"
+          cp -f "$APK" "$OUT"
+          cp -f "$APK" "$GITHUB_WORKSPACE/lea-studio.apk"
+          ls -lh "$OUT" "$GITHUB_WORKSPACE/lea-studio.apk"
+          test -f "$GITHUB_WORKSPACE/lea-studio.apk"
           unzip -l lea-studio.apk | grep -E "sd-arm64|libsd|classes.dex" || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
           name: lea-studio-apk
-          path: lea-studio.apk
+          path: |
+            lea-studio.apk
+            lea-studio-v*.apk
+          if-no-files-found: error
           retention-days: 90
           compression-level: 0
+
+      - name: Publish APK release (visible dans Releases)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Léa Studio APK (dernière build)
+          body: |
+            APK signé généré automatiquement depuis main.
+            Télécharge **lea-studio.apk** ci-dessous.
+          files: |
+            lea-studio.apk
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload sd-arm64 binary
         if: env.SD_BIN_OK == '1'
