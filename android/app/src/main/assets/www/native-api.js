@@ -1127,11 +1127,42 @@
     const source = value && typeof value === "object" ? value : {};
     const memory = { version: 1, updatedAt: Number(source.updatedAt) || 0 };
     Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
-      memory[key] = typeof source[key] === "string"
-        ? source[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key])
-        : "";
+      memory[key] = typeof source[key] === "string" ? source[key].trim() : "";
     });
     return memory;
+  }
+
+  const CUMULATIVE_MEMORY_FIELDS = new Set(["relationship", "intimacy", "promises", "facts"]);
+
+  function memoryEntryKey(value) {
+    return String(value || "")
+      .normalize("NFKC")
+      .toLocaleLowerCase("fr")
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .trim();
+  }
+
+  function memoryEntries(value) {
+    return String(value || "")
+      .split(/\r?\n+/)
+      .flatMap((line) => line.match(/[^.!?]+[.!?]?/g) || [])
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+  }
+
+  function appendMemoryHistory(existing, incoming) {
+    const oldText = String(existing || "").trim();
+    const newText = String(incoming || "").trim();
+    if (!newText) return oldText;
+    if (!oldText) return newText;
+    const seen = new Set(memoryEntries(oldText).map(memoryEntryKey).filter(Boolean));
+    const additions = memoryEntries(newText).filter((entry) => {
+      const key = memoryEntryKey(entry);
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    return additions.length ? oldText + "\n" + additions.join("\n") : oldText;
   }
 
   function memoryKey(charId) {
@@ -1152,7 +1183,10 @@
     if (patch && typeof patch === "object") {
       Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
         if (typeof patch[key] === "string") {
-          next[key] = patch[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+          const value = patch[key].trim();
+          next[key] = CUMULATIVE_MEMORY_FIELDS.has(key)
+            ? appendMemoryHistory(next[key], value)
+            : value.slice(0, LONG_TERM_MEMORY_FIELDS[key]);
         }
       });
     }
@@ -1179,7 +1213,8 @@
       "FAITS: " + (m.facts || "—"),
       "Après la réponse de roleplay UNIQUEMENT, ajoute un bloc technique invisible <LEA_MEMORY>{JSON}</LEA_MEMORY> (jamais dans le dialogue visible, toujours à la toute fin).",
       "Le JSON est un patch invisible : n'y mets que les clés réellement changées parmi: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
-      "Chaque valeur remplace le résumé de sa catégorie, reste cumulative (ne perds pas les faits anciens pertinents), 1 à 4 phrases courtes.",
+      "Pour relationship, intimacy, promises et facts, donne uniquement les nouveaux faits établis dans cette réponse, en phrases courtes. L'application les ajoute à l'historique existant et dédoublonne; ne réécris pas les anciens éléments. Omet une clé si rien de nouveau n'est établi.",
+      "Pour scene, wardrobe et clothesLocation, donne l'état actuel complet : ces champs remplacent l'ancien état.",
       "wardrobe = UNIQUEMENT ce qui est porté maintenant (pas l'emplacement des vêtements retirés).",
       "clothesLocation = où sont les vêtements retirés / rangés / qui sèchent (séparé de wardrobe).",
       "intimacy = cumul des moments intimes réels du jeu: lieu, position (missionnaire, doggy, assise…), actes (oral, anal, pénétration…), moment de la journée, limites acceptées ou refusées. Ne jamais effacer un souvenir intime déjà enregistré sans raison explicite dans le dialogue.",
