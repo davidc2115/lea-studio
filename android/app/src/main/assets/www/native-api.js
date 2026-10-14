@@ -389,33 +389,28 @@
       "black leather mini skirt with white fitted blouse unbuttoned low, pumps",
     ];
     const outfitsHorde = [
-      "sheer black lace teddy lingerie, deep cleavage, high-cut sides, provocative boudoir pose",
-      "red lace bra and matching thong, garter belt, fishnet stockings, stilettos, full body",
-      "ivory sheer babydoll nightie almost transparent, hard nipples visible through fabric, bedroom",
-      "black open satin robe nothing underneath, bare breasts, standing in doorway",
-      "only black lace panties, topless, bare breasts, hands covering partially, teasing",
-      "completely nude adult woman, artistic nude, natural pose, tasteful but explicit, face visible",
-      "wet white t-shirt completely see-through clinging to bare breasts, no bra, tight shorts",
-      "micro bikini string, almost nude beach indoor studio, explicit curves",
-      "hot pink micro lingerie set, on all fours on bed looking at camera, seductive",
-      "black mesh bodysuit crotchless style implied, deep cleavage, hands on hips",
-      "silk sheets covering only hips, bare breasts, lying on bed looking at camera",
-      "unbuttoned oversized shirt only, bare breasts visible, no panties implied, doorway",
-      "sheer white blouse no bra wet fabric, nipples visible, black mini skirt hiked up",
-      "purple lace bra and garter, stockings, bent forward showing cleavage and curves",
-      "emerald satin slip pulled down to waist, bare breasts, sensual bedroom",
-      "black leather micro skirt, no top, pasties optional, club lights",
-      "red bodycon dress unzipped in front, lingerie underneath visible, teasing",
-      "nude under open trench coat, flash of body, apartment hallway",
-      "strappy black bondage-style lingerie, high heels, full body provocative",
-      "kneeled on bed in only a thong, bare breasts, looking over shoulder",
-      "lace bodysuit partially unhooked, one breast exposed, mirror pose",
-      "see-through nightgown, silhouette of body, bedroom lamp",
-      "schoolgirl-style adult costume short skirt unbuttoned blouse no bra, 18+ only",
-      "tight wet jeans and nothing else on top, bare breasts, rain look",
-      "black corset lingerie with stockings, sitting legs apart on chaise",
+      "emerald green bodycon mini dress deep V neckline, sheer black tights, stilettos, seductive",
+      "black sheer lace lingerie set, thin straps, boudoir pose, soft bedroom light",
+      "burgundy satin mini dress deep plunge, high slit, black heels on bed edge",
+      "ivory lace babydoll nightie semi-sheer, teasing bedroom look",
+      "black lace open robe over matching bra and panties, velvet bench",
+      "wet white crop top clinging to chest, dark skinny jeans, after rain",
+      "hot pink lace lingerie, fishnet stockings, garter straps, stilettos",
+      "red satin slip dress thin straps, soft décolleté, doorway",
+      "black mesh top and leather micro skirt, fishnets, glamorous stairs",
+      "champagne silk robe slightly open over lace lingerie",
+      "navy deep V crop top, tight dark jeans, seductive hallway",
+      "purple lace bra and panties, stockings, kneeling near fireplace",
+      "black bodycon dress with side cutout, open back, lobby chandelier",
+      "sheer white blouse unbuttoned low, black mini skirt, lace-up heels",
+      "olive spaghetti-strap mini dress deep cleavage, pointed heels",
+      "black lace teddy, deep cleavage, hands on hips, full body",
+      "oversized open white shirt over black lingerie, bare legs",
+      "emerald satin slip plunging neckline, high thigh slit",
+      "red lace bra under open shirt, black mini skirt, heels",
+      "black corset lingerie with stockings, seated on chaise, sensual",
     ];
-    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
+    const outfits = forCloudflareconst outfits = forCloudflare ? outfitsCf : outfitsHorde;
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
@@ -471,7 +466,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, uncensored NSFW allowed, explicit lingerie or nude ok, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual lingerie or sexy dress allowed, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
       mood,
@@ -1907,13 +1902,29 @@
       }
       if (isHorde) {
         try {
-          // Profil denoise 0.52 (version stable) ; scène 0.65 pour changer tenue
-          const denoise = isScene ? 0.72 : 0.58;
-          const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
-          const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
-            denoise: denoise,
-            requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))),
-          });
+          // Profil denoise 0.52 (stable workers) ; scène 0.65
+          const denoise = isScene ? 0.65 : 0.52;
+          async function runHorde(p, d) {
+            const promptWithDenoise = "[[denoise:" + d + "]] " + String(p || "");
+            return await generateHordeImage(promptWithDenoise, char, st, {
+              denoise: d,
+              requireRef: !!(char && (char.cover || (char.gallery && char.gallery[0]))),
+            });
+          }
+          let dataUrl;
+          try {
+            dataUrl = await runHorde(prompt, denoise);
+          } catch (firstErr) {
+            const fe = String(firstErr.message || firstErr);
+            // Censure worker / payload → un essai plus soft (lingerie mode éditorial)
+            if (!isScene && /censur|censor|refus|rejected|invalid|payload|400/i.test(fe)) {
+              const soft = buildPhysicalImagePrompt(char, "elegant sensual fashion lingerie, tasteful", "horde");
+              dataUrl = await runHorde(soft, 0.52);
+              prompt = soft;
+            } else {
+              throw firstErr;
+            }
+          }
           return {
             ok: true,
             image: dataUrl,

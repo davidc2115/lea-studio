@@ -902,7 +902,7 @@ public class LeaBridge {
                     JSONArray generations = status.optJSONArray("generations");
                     if (generations == null || generations.length() == 0) throw new java.io.IOException("AI Horde a terminé sans image.");
                     JSONObject generation = generations.getJSONObject(0);
-                    if (generation.optBoolean("censored", false)) throw new java.io.IOException("AI Horde a encore censuré (worker strict). Réessaie, change de clé Horde, ou utilise Cloudflare.");
+                    if (generation.optBoolean("censored", false)) throw new java.io.IOException("AI Horde censuré (worker strict). Réessaie.");
                     String image = generation.optString("img", "");
                     byte[] imageBytes;
                     if (image.startsWith("http://") || image.startsWith("https://")) imageBytes = hordeDownloadImage(image);
