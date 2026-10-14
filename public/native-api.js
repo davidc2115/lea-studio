@@ -1907,78 +1907,36 @@
       };
     }
 
-    if ((path === "/api/image/cloudflare" || path === "/api/image/horde" || path === "/api/image/scene") && method === "POST") {
+    if ((path === "/api/image/cloudflare" || path === "/api/image/horde") && method === "POST") {
       // Fusion réglages sauvegardés + body (clé Horde toujours disponible)
       const st = Object.assign({}, settings(), body.settings || {});
       const char = body.character || LEA;
-      const isScene = path === "/api/image/scene" || body.mode === "conversation";
-      const isHorde = isScene || path === "/api/image/horde";
+      const isHorde = path === "/api/image/horde";
       let prompt = body.prompt;
-      if (!prompt && isScene) {
-        prompt = buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || "");
-      }
       if (!prompt) {
         prompt = buildPhysicalImagePrompt(char, body.extra || "", isHorde ? "horde" : "cloudflare");
       }
       if (isHorde) {
         try {
-          // Profil denoise 0.52 (stable workers) ; scène 0.65
-          const denoise = isScene ? 0.65 : 0.52;
-          async function runHorde(p, d) {
-            const promptWithDenoise = "[[denoise:" + d + "]] " + String(p || "");
-            return await generateHordeImage(promptWithDenoise, char, st, {
-              denoise: d,
-              requireRef: false,
-            });
-          }
-          let dataUrl;
-          try {
-            dataUrl = await runHorde(prompt, denoise);
-          } catch (firstErr) {
-            const fe = String(firstErr.message || firstErr);
-            // Censure worker / payload → un essai plus soft (lingerie mode éditorial)
-            if (!isScene && /censur|censor|refus|rejected|invalid|payload|400/i.test(fe)) {
-              const soft = buildPhysicalImagePrompt(char, "elegant sensual fashion lingerie, tasteful", "horde");
-              dataUrl = await runHorde(soft, 0.52);
-              prompt = soft;
-            } else {
-              throw firstErr;
-            }
-          }
+          // Profil uniquement — denoise stable, anonyme OK
+          const denoise = 0.52;
+          const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
+          const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
+            denoise: denoise,
+            requireRef: false,
+          });
           return {
             ok: true,
             image: dataUrl,
             prompt: String(prompt).slice(0, 400),
             engine: "horde",
-            mode: isScene ? "conversation" : "profile",
+            mode: "profile",
             denoise: denoise,
           };
         } catch (hordeErr) {
           const he = String(hordeErr.message || hordeErr);
-          if (isScene) {
-            try {
-              const scenePrompt = String(prompt || buildConversationImagePrompt(char, body.memory || {}, body.messages || [], body.extra || ""));
-              const dataUrl = await generatePollinationsImage(scenePrompt, char, st);
-              return {
-                ok: true,
-                image: dataUrl,
-                prompt: scenePrompt.slice(0, 400),
-                engine: "pollinations",
-                mode: "conversation",
-                fallbackFrom: "horde",
-                hordeError: he.slice(0, 120),
-              };
-            } catch (pollErr) {
-              throw new Error(
-                "Scène Horde: " + he.slice(0, 120) +
-                " · Pollinations: " + String(pollErr.message || pollErr).slice(0, 80)
-              );
-            }
-          }
-          // Profil: ne pas basculer silencieusement sur Cloudflare (filtre soft, pas NSFW).
-          // Un seul essai CF seulement si Horde 429/file ET cloudflareKeys présentes — sinon erreur claire.
-          const isQueue = /429|satur|heavy demand|file|kudos|anonymous/i.test(he);
-          if (isQueue) {
+          // Un seul secours Cloudflare si file saturée
+          if (/429|satur|TooMany|anonymous|heavy demand|kudos|file/i.test(he)) {
             try {
               const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
               const dataUrl = await generateCloudflareImage(cfPrompt, st, char);
@@ -1988,18 +1946,14 @@
                 prompt: cfPrompt.slice(0, 400),
                 engine: "cloudflare",
                 fallbackFrom: "horde",
-                hordeError: he.slice(0, 120),
-                note: "Horde saturé — Cloudflare (moins NSFW). Réessaie Horde plus tard ou ajoute une clé aihorde.net.",
+                hordeError: he.slice(0, 140),
+                note: "Horde saturé → Cloudflare. Réessaie plus tard ou ajoute une clé aihorde.net.",
               };
             } catch (cfErr) {
-              throw new Error(
-                "AI Horde saturé: " + he.slice(0, 100) +
-                " · CF: " + String(cfErr.message || cfErr).slice(0, 80) +
-                " — Ajoute une clé Horde gratuite (aihorde.net) dans Réglages."
-              );
+              throw new Error("Horde: " + he.slice(0, 120) + " · CF: " + String(cfErr.message || cfErr).slice(0, 80));
             }
           }
-          throw new Error("AI Horde: " + he.slice(0, 180));
+          throw new Error("AI Horde: " + he.slice(0, 200));
         }
       }
       // Cloudflare: jusqu'à 3 essais si « output flagged »

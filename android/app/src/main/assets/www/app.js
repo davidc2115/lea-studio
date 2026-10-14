@@ -945,11 +945,6 @@ function renderChat() {
       </div>
       <div class="chat-msgs" id="chat-msgs"></div>
       <div class="typing hidden" id="chat-typing"></div>
-      <div class="chat-scene-row">
-        <button type="button" class="chat-scene-btn" id="chat-gen-scene" title="Générer la scène">🖼️ Scène</button>
-        <button type="button" class="chat-bg-btn" id="chat-bg-toggle" title="Fond de conversation">🎨 Fond</button>
-        <span class="chat-scene-hint" id="chat-scene-status"></span>
-      </div>
       <div class="chat-bg-panel" id="chat-bg-panel">
         <div class="chat-bg-sliders">
           <label>Transparence bulles <input type="range" id="chat-bubble-opacity" min="25" max="100" value="88" /></label>
@@ -994,8 +989,7 @@ function renderChat() {
     input.style.height = Math.min(120, input.scrollHeight) + "px";
   });
   $("chat-send") && ($("chat-send").onclick = sendMessage);
-  $("chat-gen-scene") && ($("chat-gen-scene").onclick = generateConversationScene);
-  $("chat-back") && ($("chat-back").onclick = () => {
+    $("chat-back") && ($("chat-back").onclick = () => {
     state.chatListMode = true;
     renderChat();
   });
@@ -1179,115 +1173,6 @@ function setupChatBackgroundUi() {
   if (bgRange) bgRange.oninput = onSlide;
 }
 
-async function generateConversationScene() {
-  if (state.genRunning) {
-    setGenBanner("⏳ Une génération est déjà en cours…", "");
-    return;
-  }
-  const c = state.character;
-  if (!c) return;
-  const age = c.age == null || c.age === "" ? null : Number(c.age);
-  if (Number.isInteger(age) && age < 18) {
-    setGenBanner("Génération désactivée : personnage mineur.", "bad");
-    return;
-  }
-  if (!Number.isInteger(age) || age < 18) {
-    setGenBanner("Âge 18+ requis sur la fiche pour générer une scène.", "bad");
-    return;
-  }
-  const btn = $("chat-gen-scene");
-  const status = $("chat-scene-status");
-  if (btn) { btn.disabled = true; btn.textContent = "⏳ Scène…"; }
-  if (status) status.textContent = "File Horde — tenue de la conversation…";
-  state.genRunning = true;
-  setGenBanner("⏳ Scène → Horde (secours Pollinations si file saturée)…", "");
-  try {
-    const memory = loadRoleplayMemory();
-    // Scènes conversation : mode anonyme autorisé (pas de clé obligatoire)
-    const st = Object.assign({}, loadSettings() || {});
-    const hordeKey = resolveHordeApiKey();
-    if (hordeKey) st.hordeApiKey = hordeKey;
-    else st.hordeApiKey = "0000000000"; // anonyme AI Horde
-    st.hordeAnonymous = !hordeKey;
-    const res = await api("/api/image/scene", {
-      method: "POST",
-      body: JSON.stringify({
-        mode: "conversation",
-        character: promptCharacterPayload(c),
-        memory: memory,
-        messages: (state.chat && state.chat.messages) || [],
-        settings: st,
-        extra: "",
-        allowAnonymous: true,
-      }),
-    });
-    if (!res || (!res.image && !res.ok)) {
-      throw new Error((res && (res.error || res.message)) || "Pas d'image renvoyée");
-    }
-    const image = res.image || res.galleryKey || res.url;
-    if (!image) throw new Error("Réponse sans image");
-    // Ajouter en bas de conversation
-    state.chat.messages = state.chat.messages || [];
-    state.chat.messages.push({
-      role: "assistant",
-      content: res.fallbackFrom === "horde"
-        ? "*[scène — Horde saturé, secours Pollinations/CF]*"
-        : "*[scène générée d’après la tenue / situation en cours]*",
-      image: image,
-      ts: Date.now(),
-    });
-    try { localStorage.setItem("lea.chat." + c.id, JSON.stringify(state.chat)); } catch (_) {}
-    // Ajouter aussi à la galerie du personnage (sans forcer photo de profil)
-    try {
-      const g = Array.isArray(c.gallery) ? c.gallery.slice() : [];
-      if (g.indexOf(image) < 0) {
-        g.push(image);
-        c.gallery = g.slice(-80);
-        if (c.id === "lea") {
-          try { localStorage.setItem("lea.char.lea", JSON.stringify(Object.assign({}, loadCharOverrides() || {}, { gallery: c.gallery }))); } catch (_) {}
-        } else {
-          saveCastOverride(Object.assign({}, c));
-        }
-      }
-    } catch (_) {}
-    paintMessages();
-    const via = res.engine === "horde" ? "Horde" : (res.engine || (res.fallbackFrom ? "fallback" : "OK"));
-    setGenBanner("✅ Scène ajoutée (" + via + ")", "ok");
-    if (status) status.textContent = "✅ " + via;
-  } catch (e) {
-    setGenBanner("Scène : " + String(e.message || e).slice(0, 160), "bad");
-    if (status) status.textContent = "Erreur";
-  } finally {
-    state.genRunning = false;
-    if (btn) { btn.disabled = false; btn.textContent = "🖼️ Scène"; }
-  }
-}
-
-function setGenBanner(msg, kind) {
-  state.genStatus = { msg: msg, kind: kind || "", ts: Date.now() };
-  const status = $("gen-status");
-  if (status) {
-    const cls = kind === "ok" ? "ok" : kind === "bad" ? "bad" : "";
-    status.innerHTML = '<span class="status-pill ' + cls + '">' + msg + "</span>";
-  }
-  // Bandeau global discret
-  let bar = $("gen-banner");
-  if (!bar) {
-    bar = document.createElement("div");
-    bar.id = "gen-banner";
-    bar.style.cssText = "position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9999;max-width:90%;padding:8px 14px;border-radius:20px;font-size:13px;background:rgba(40,20,60,0.92);color:#fff;box-shadow:0 4px 20px rgba(0,0,0,0.35);display:none";
-    document.body.appendChild(bar);
-  }
-  if (msg && (state.genRunning || kind === "ok" || kind === "bad")) {
-    bar.style.display = "block";
-    bar.textContent = msg.replace(/<[^>]+>/g, "");
-    if (kind === "ok" || kind === "bad") {
-      setTimeout(() => { if (bar && !state.genRunning) bar.style.display = "none"; }, 5000);
-    }
-  } else if (!state.genRunning) {
-    bar.style.display = "none";
-  }
-}
 
 async function generateProfileImage() {
   if (state.genRunning) {
@@ -1316,11 +1201,12 @@ async function generateProfileImage() {
   const btn = $("btn-gen-img");
   if (btn) { btn.disabled = true; btn.textContent = "⏳ Génération…"; }
   state.genRunning = true;
-  if (provider === "horde" && !hordeKey) {
-    setGenBanner("⚠️ Horde sans clé : file anonyme souvent saturée. Ajoute une clé gratuite aihorde.net dans Réglages.", "bad");
-  } else {
-    setGenBanner(provider === "horde" ? "⏳ Envoi à AI Horde (clé OK) — file possible quelques minutes…" : "⏳ Génération Cloudflare en arrière-plan…", "");
-  }
+  setGenBanner(
+    provider === "horde"
+      ? (hordeKey ? "⏳ AI Horde (clé) — file possible quelques minutes…" : "⏳ AI Horde anonyme — file possible…")
+      : "⏳ Génération Cloudflare…",
+    ""
+  );
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);
@@ -1399,9 +1285,9 @@ function renderSettings() {
     <div class="section">
       <h2>🎨 AI Horde (optionnel)</h2>
       <div class="settings-block">
-        <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée (prioritaire)" : "(optionnelle — Scène en anonyme)"}</label>
+        <label>Clé API AI Horde ${resolveHordeApiKey() ? "✅ enregistrée (prioritaire)" : "(optionnelle — anonyme possible)"}</label>
         <input class="edit-input" id="set-horde-key" type="password" autocomplete="off" value="${escapeHtml(s.hordeApiKey || resolveHordeApiKey() || "")}" placeholder="${resolveHordeApiKey() ? "Laisser vide pour conserver la clé actuelle" : "Optionnel — sinon mode anonyme"}" />
-        <p class="hint">Les scènes conversation fonctionnent en anonyme sans clé. Une clé (aihorde.net) réduit les 429 et accélère la file. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
+        <p class="hint">Profil Horde fonctionne en anonyme. Une clé gratuite (aihorde.net) accélère la file et réduit les refus. Si le champ reste vide à l’enregistrement, l’ancienne clé est conservée.</p>
       </div>
     </div>
     <div class="section">
