@@ -250,9 +250,11 @@ function loadRoleplayMemory() {
 function saveRoleplayMemory(memory) {
   const current = loadRoleplayMemory();
   const next = { updatedAt: Date.now() };
+  const cumulative = new Set(["relationship", "intimacy", "promises", "facts"]);
   Object.keys(current).filter((key) => key !== "updatedAt").forEach((key) => {
     const limit = key === "intimacy" ? 1200 : key === "wardrobe" || key === "clothesLocation" ? 500 : key === "scene" ? 600 : 800;
-    next[key] = String(memory[key] || "").trim().slice(0, limit);
+    const value = String(memory[key] || "").trim();
+    next[key] = cumulative.has(key) ? value : value.slice(0, limit);
   });
   localStorage.setItem(roleplayMemoryKey(), JSON.stringify(next));
 }
