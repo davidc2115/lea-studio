@@ -664,6 +664,20 @@
     else if (/couloir|entr[eé]e|porte/.test(blob)) sceneEn = "apartment doorway or hallway";
     else if (mem.scene) sceneEn = String(mem.scene).slice(0, 160);
 
+    // Si mémoire FR présente mais outfitEn vide, traduire
+    if ((!outfitEn || outfitEn === "clothing from the latest dialogue only") && wardFr) {
+      let s = String(wardFr);
+      s = s.replace(/compl[eè]tement nue|enti[eè]rement nue|toute nue/gi, "completely nude");
+      s = s.replace(/culotte uniquement|seulement (en )?culotte/gi, "topless, only panties, bare breasts");
+      s = s.replace(/robe courte/gi, "short dress");
+      s = s.replace(/d[eé]bardeur/gi, "tank top");
+      s = s.replace(/seins? nus|poitrine nue/gi, "bare breasts");
+      outfitEn = s.slice(0, 220);
+    }
+    if (fullyNude) outfitEn = "completely nude, no clothes";
+    else if (breastsOut && outfitEn && !/topless|bare breast|nude/i.test(outfitEn))
+      outfitEn = "topless, bare breasts, " + outfitEn;
+
     return {
       outfitEn: outfitEn,
       poseEn: poseEn,
@@ -681,58 +695,93 @@
    * Source unique de la tenue = mémoire roleplay + derniers messages.
    */
   function buildConversationImagePrompt(char, memory, messages, extra) {
-    // Prompt SCÈNE uniquement (séparé du profil). Court pour le bridge 2048.
     const c = char || LEA;
     const name = String(c.name || "the woman").slice(0, 60);
-    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 320);
-    const looksEn = String(c.looks_en || "").trim().slice(0, 200);
+    const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
+    const looksEn = String(c.looks_en || "").trim().slice(0, 180);
     const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
     const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const bustInfo = describeBustLock(bust, appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
     const inferred = inferConversationOutfit(memory, messages);
-    const ward = String(inferred.outfitEn || "").trim() || "clothing from the latest dialogue only";
-    const wardFr = String(inferred.wardrobeFr || "").trim();
+    let ward = String(inferred.outfitEn || "").trim();
+    const wardFr = String(inferred.wardrobeFr || (memory && memory.wardrobe) || "").trim();
     const poseEn = String(inferred.poseEn || "natural pose, face visible").trim();
     const sceneEn = String(inferred.sceneEn || "realistic indoor setting").trim();
-    const lowW = (ward + " " + wardFr).toLowerCase();
-    const nude = /completely nude|bare skin only|enti[eè]rement nue|compl[eè]tement nue|toute nue|sans aucun/.test(lowW);
-    const topless = /bare breast|topless|poitrine nue|seins nus|breasts fully exposed/.test(lowW);
+    const intimacy = String((memory && memory.intimacy) || "").toLowerCase();
+    const lowW = (ward + " " + wardFr + " " + intimacy).toLowerCase();
 
-    const outfitBlock = nude
-      ? "OUTFIT: completely nude, no clothes, no bra, no panties"
-      : topless
-        ? ("OUTFIT: topless, bare breasts, " + ward)
-        : ("OUTFIT (from conversation memory, NOT profile photo): " + ward);
+    function frOutfitToEn(fr) {
+      let s = String(fr || "");
+      const pairs = [
+        [/compl[eè]tement nue|enti[eè]rement nue|toute nue/gi, "completely nude"],
+        [/culotte uniquement|seulement (en )?culotte|juste (une )?culotte/gi, "topless, only panties, bare breasts"],
+        [/robe courte baiss[eé]e[^,.]*/gi, "short dress pulled down to the waist, bare breasts"],
+        [/robe courte/gi, "short tight dress"],
+        [/d[eé]bardeur/gi, "tank top"],
+        [/short/gi, "shorts"],
+        [/jean moulant/gi, "tight jeans"],
+        [/top court|crop top/gi, "crop top"],
+        [/nuisette/gi, "sheer babydoll"],
+        [/lingerie/gi, "sexy lingerie"],
+        [/soutien[- ]?gorge/gi, "bra"],
+        [/\bculotte\b/gi, "panties"],
+        [/\bstring\b/gi, "thong"],
+        [/seins? nus|poitrine nue|topless/gi, "bare breasts, topless"],
+        [/talons?/gi, "high heels"],
+      ];
+      for (let i = 0; i < pairs.length; i++) s = s.replace(pairs[i][0], pairs[i][1]);
+      return s.slice(0, 200);
+    }
+
+    if (!ward && wardFr) ward = frOutfitToEn(wardFr);
+    // Intimité explicite sans tenue → souvent nue
+    if (!ward && /p[eé]n[eé]tr|missionnaire|doggy|baise|orgasme|nue/.test(intimacy))
+      ward = "completely nude";
+
+    const nude = /completely nude|bare skin only|enti[eè]rement nue|compl[eè]tement nue|toute nue|fully naked/.test(lowW + " " + ward);
+    const topless = !nude && /bare breast|topless|poitrine nue|seins nus|panties only|culotte uniquement/.test(lowW + " " + ward);
+
+    let outfitLine;
+    if (nude) {
+      outfitLine = "CRITICAL OUTFIT: completely nude, fully naked, no clothes, no bra, no panties";
+    } else if (topless) {
+      outfitLine = "CRITICAL OUTFIT: topless, bare breasts, wearing only " + (ward || "panties") + ", no top";
+    } else {
+      outfitLine = "CRITICAL OUTFIT (from dialogue memory, NOT profile photo): wearing " + (ward || "clothes from the latest messages");
+    }
+
+    const looksBits = [
+      looksEn,
+      ethnicity,
+      bodyInfo.lead,
+      bodyInfo.lock,
+      bustInfo.label ? ("breast cup " + bustInfo.label) : "",
+      bustInfo.lock,
+      appearance,
+    ].filter(Boolean).join(", ");
 
     const parts = [
-      outfitBlock + ".",
+      outfitLine + ".",
+      "Must wear: " + outfitLine.replace(/^CRITICAL OUTFIT[^:]*:\s*/i, "") + ".",
       "POSE: " + poseEn + ".",
       "PLACE: " + sceneEn + ".",
-      wardFr ? ("FR tenue: " + wardFr.slice(0, 180) + ".") : "",
-      "Adult woman 18+ " + name + ",",
-      bodyInfo.lead || "",
-      bodyInfo.lock || "",
-      bustInfo.label ? ("cup " + bustInfo.label + ",") : "",
-      bustInfo.lock || "",
-      looksEn ? looksEn + "." : "",
-      ethnicity ? ethnicity + "," : "",
-      appearance ? appearance + "." : "",
+      wardFr ? ("Wardrobe FR: " + wardFr.slice(0, 180) + ".") : "",
+      "Same adult woman 18+ " + name + ",",
+      looksBits + ".",
       hasRef
-        ? "img2img: KEEP exact same face identity as input_image_0, same skin tone and body type; CHANGE outfit pose and background completely to match OUTFIT and PLACE above."
-        : "photorealistic full-body photo matching physical description.",
-      extra ? String(extra).slice(0, 80) : "",
-      "RAW photo, sharp, natural light, face visible,",
-      "avoid: white shapewear, beige bodysuit, white corset, reference outfit, same pose as reference,",
-      "painting, anime, different face, text, watermark, child, underage,",
+        ? "img2img: same FACE hair eyes skin as input_image_0; CHANGE clothes to CRITICAL OUTFIT; new pose; same body type."
+        : "photorealistic full-body matching physical description.",
+      extra ? String(extra).slice(0, 100) : "",
+      "RAW photo, sharp, face visible,",
+      "avoid: cover-photo clothing, reference outfit, white shapewear, painting, anime, different face, text, watermark, child, underage,",
       bustInfo.neg || "",
       bodyInfo.neg || "",
     ].filter(Boolean);
 
     return parts.join(" ").replace(/\s+/g, " ").trim().slice(0, 1900);
   }
-
 
   function extractLooksForImage(char) {
     const c = char || {};
@@ -852,16 +901,17 @@
       else if (/jean|top|débardeur|short/i.test(raw)) outfit = "casual top and bottoms as in dialogue";
     }
 
-    // Physique EN TÊTE (Flux ignore souvent la fin). Tenue ensuite.
+    // OUTFIT d'abord pour coller à la mémoire conversation (Flux)
     const ageN = Math.max(18, parseInt(c.age, 10) || 21);
     let p = [
-      "photorealistic RAW photograph of one " + ageN + " year old woman,",
+      "photorealistic RAW photo of one " + ageN + " year old woman",
+      "WEARING EXACTLY: " + outfit,
       looks,
-      "wearing: " + outfit,
-      "full body view, face clearly visible, natural pose, indoor ambient light,",
-      "DSLR photo, natural skin texture pores, realistic proportions,",
-      "NOT East Asian face, NOT anime, NOT illustration, NOT CGI, NOT painting, NOT slim fashion model, NOT pale porcelain skin unless described",
-    ].join(" ");
+      "must wear: " + outfit,
+      "full body, face visible, indoor light",
+      "DSLR, natural skin, realistic body",
+      "NOT anime, NOT CGI, NOT wrong outfit",
+    ].join(", ");
 
     if (p.length > 1100) p = p.slice(0, 1100);
     if (p.length < 24) throw new Error("Prompt Pollinations trop court.");
@@ -1835,14 +1885,14 @@
           // Profil : denoise 0.85 + buildPhysicalImagePrompt — INCHANGÉ
           // Scène  : Horde uniquement + buildConversationImagePrompt (tenue mémoire)
           const PROFILE_HORDE_DENOISE = 0.68;
-          let SCENE_HORDE_DENOISE = 0.80;
+          let SCENE_HORDE_DENOISE = 0.83;
           if (isScene) {
             try {
               const mem = body.memory || {};
               const w = String(mem.wardrobe || "").toLowerCase();
               // Tenue clairement différente du profil → un peu plus de denoise
-              if (w.length > 8) SCENE_HORDE_DENOISE = 0.82;
-              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.84;
+              if (w.length > 8) SCENE_HORDE_DENOISE = 0.85;
+              if (/nue|topless|culotte|lingerie|nuisette|seins/.test(w)) SCENE_HORDE_DENOISE = 0.87;
             } catch (_) {}
           }
           const denoise = isScene ? SCENE_HORDE_DENOISE : PROFILE_HORDE_DENOISE;
