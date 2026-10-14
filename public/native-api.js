@@ -423,26 +423,21 @@
     const outfit = outfits[Math.floor(Math.random() * outfits.length)];
 
     const poses = [
-      "full-length leaning against marble staircase railing, one leg bent, looking at camera",
-      "full-length standing on stairs, hand on banister, slight hip tilt, soft smile",
-      "full-length walking toward camera in a hotel hallway, confident stride",
-      "full-length seated on edge of bed, legs crossed, leaning slightly forward",
-      "full-length three-quarter turn looking over shoulder, backless dress angle",
-      "full-length standing with arms crossed, towel or robe, window light",
-      "full-length hands on hips, weight on one leg, teasing gaze",
-      "full-length sitting on sofa among plants, hands on cushions, deep eye contact",
-      "full-length leaning on wooden console table, one hand in hair",
-      "full-length standing in doorway, one hand on door handle, inviting look",
-      "full-length seated in armchair, legs angled, soft smile",
-      "full-length mirror fashion pose, slight arch of the back",
-      "full-length kneeling on rug near fireplace, soft upward look",
-      "full-length side profile then face turned to camera, elegant",
-      "full-length standing against wall, one knee bent, arms relaxed",
-      "full-length sitting on velvet bench, robe slightly open, legs together then crossed",
-      "full-length from low angle looking down at camera, powerful stance",
-      "full-length bent slightly forward emphasizing décolleté, hands on thighs, playful",
-      "full-length lying on side on bed propped on elbow, seductive",
-      "full-length climbing stairs looking back over shoulder",
+      "full-body standing facing camera, head fully in frame, clear face, soft smile, one hip tilted",
+      "full-body leaning against wall facing camera, face visible, one knee bent, arms relaxed",
+      "full-body standing in doorway facing camera, face clear, inviting look, hand on door frame",
+      "full-body seated on bed edge facing camera, face visible, legs crossed, slight lean forward",
+      "full-body hands on hips facing camera, face clear, weight on one leg, teasing gaze",
+      "full-body sitting on sofa facing camera, face visible, deep eye contact, hands on cushions",
+      "full-body standing on stairs facing camera, face clear, hand on banister, soft smile",
+      "full-body three-quarter view with face turned fully to camera, head in frame, elegant",
+      "full-body seated in armchair facing camera, face visible, legs angled, soft smile",
+      "full-body leaning on console table facing camera, face clear, one hand in hair",
+      "full-body mirror pose facing camera, face visible in shot, slight arch of back",
+      "full-body standing hotel hallway facing camera, face clear, confident stance",
+      "full-body bent slightly forward facing camera, face visible, hands on thighs, playful",
+      "full-body lying on side on bed facing camera, face clear, propped on elbow",
+      "full-body kneeling on rug facing camera, face visible, soft upward look",
     ];
     const pose = poses[Math.floor(Math.random() * poses.length)];
 
@@ -475,7 +470,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo — keep exact face structure, eye color, hair color and skin tone. MUST change outfit and pose. RAW photo adult 18+, natural photorealistic fashion editorial like a real camera, not CGI, sharp, soft natural light,";
+      : "SAME woman as reference photo — keep exact face structure, eye color, hair color and skin tone. MUST change outfit and pose. RAW photo from a real camera, adult 18+, highly detailed skin pores, natural lighting, sharp focus, 85mm lens, professional fashion photography, NOT CGI, NOT illustration,";
 
     const base = [
       "PRIORITY: change outfit and pose completely from any reference photo.",
@@ -491,7 +486,7 @@
       bustInfo.lock + ",",
       looksEn ? ("Technical looks: " + looksEn + ".") : "",
       bodyField ? ("Body notes: " + bodyField + ".") : "",
-      "photorealistic full-body photo, one adult woman, head to toe, face visible, not a close-up,",
+      "photorealistic full-body photo head to toe, face clearly visible and sharp, head fully in frame, NOT headless, NOT cropped at neck, NOT back-only, one adult woman,",
       faceLock,
       "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
@@ -502,7 +497,7 @@
            + "white corset, beige shapewear, studio seamless backdrop only, "
            + bustInfo.neg + ", " + bodyInfo.neg + ","),
       "realistic clothing fit on this body type and cup size,",
-      "no extra people, no text, no watermark, no deformed hands",
+      "no extra people, no text, no watermark, no deformed hands, no headless body, no faceless crop, no legs-only shot, no blurry face",
     ].filter(Boolean).join("\n");
 
     let out = base;

@@ -799,9 +799,14 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Config stable qui marchait (évite heavy demand + workers introuvables)
-                    params.put("width", 512);
-                    params.put("height", 640);
+                    // Portrait full-body (multiples de 64). Avec clé un peu plus haut.
+                    if (registered) {
+                        params.put("width", 512);
+                        params.put("height", 768);
+                    } else {
+                        params.put("width", 512);
+                        params.put("height", 640);
+                    }
                     double denoise = 0.72;
                     String promptWork = promptSafe;
                     try {
@@ -816,19 +821,20 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
-                    int steps = registered ? 22 : 16;
+                    double cfg = registered ? 7.0 : 6.5;
+                    int steps = registered ? 28 : 18;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
-                    params.put("sampler_name", "k_euler_a");
+                    // k_dpmpp_2m = plus net ; fallback Euler si worker refuse (tentatives suivantes)
+                    params.put("sampler_name", registered ? "k_dpmpp_2m" : "k_euler_a");
                     params.put("denoising_strength", denoise);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin");
+                        + ", masterpiece, best quality, photorealistic, sharp facial details, natural skin texture, detailed fabric"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, anime, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, headless, no face, faceless, cropped head, legs only, torso only, blurry face, jpeg artifacts");
                     payload.put("params", params);
                     // Toujours garder la ref img2img si fournie (NE PAS tronquer le base64 = image cassée)
                     final String sourceB64;
@@ -858,9 +864,10 @@ public class LeaBridge {
                     for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
                         try {
                             if (attemptSubmit == 1) {
-                                params.put("steps", 16);
+                                params.put("steps", 20);
                                 params.put("width", 512);
                                 params.put("height", 640);
+                                params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
                                 Thread.sleep(2500);
                             } else if (attemptSubmit == 2) {
