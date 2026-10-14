@@ -1327,6 +1327,10 @@ function renderSettings() {
   const origin = (state.character && state.character.scenario) ||
     "Léa est surprise par un orage, vient frapper à la porte et est la meilleure amie de ta fille.";
   root.innerHTML = `
+    <div class="settings-save-bar" id="settings-save-bar">
+      <button type="button" class="btn btn-primary" id="save-settings-top">💾 Enregistrer clés & réglages</button>
+      <div id="set-status-top" class="hint"></div>
+    </div>
     <div class="section">
       <h2>🔑 Clés API (dialogue)</h2>
       <div class="settings-block">
@@ -1426,17 +1430,17 @@ function renderSettings() {
         <label>Faits partagés</label>
         <textarea class="edit-area" id="memory-facts" rows="3" placeholder="Infos durables…">${escapeMemoryMarkup(memory.facts)}</textarea>
       </div>
+      <button type="button" class="btn btn-primary" id="save-settings-bottom" style="width:100%;margin-bottom:12px">💾 Enregistrer clés & réglages</button>
+      <div id="set-status-bottom" class="hint" style="margin-bottom:12px"></div>
       <button type="button" class="btn btn-primary" id="save-memory">💾 Enregistrer la mémoire</button>
       <button type="button" class="btn btn-secondary" id="clear-memory">Effacer les souvenirs évolutifs</button>
       <div id="memory-status"></div>
     </div>
   `;
-  const saveBtn = $("save-settings");
-  if (saveBtn) saveBtn.onclick = () => {
+  function doSaveSettings() {
     try {
       const prevKey = resolveHordeApiKey();
       const typedHorde = ($("set-horde-key") && $("set-horde-key").value.trim()) || "";
-      // Champ vide = conserver l'ancienne clé (évite d'effacer en mode password)
       const hordeApiKey = typedHorde || prevKey || s.hordeApiKey || "";
       const next = Object.assign({}, s, {
         geminiKeys: ($("set-gemini") && $("set-gemini").value.trim()) || "",
@@ -1450,24 +1454,42 @@ function renderSettings() {
         chatEngine: ($("set-model") && $("set-model").value) || "gemini",
       });
       saveSettings(next);
-      // Double sauvegarde clé Horde (backup dédié)
       if (hordeApiKey && hordeApiKey !== "0000000000") {
         try { localStorage.setItem("lea.hordeApiKey", hordeApiKey); } catch (_) {}
       }
-      const st = $("set-status");
-      if (st) {
-        const bits = [];
-        if (next.geminiKeys) bits.push("Gemini");
-        if (next.cfKeys || next.cfAccount) bits.push("Cloudflare");
-        if (hordeApiKey) bits.push("Horde ✓");
-        else bits.push("Horde anonyme");
-        st.innerHTML = '<span class="status-pill ok">✓ Enregistré (' + bits.join(", ") + ')</span>';
-      }
+      const bits = [];
+      if (next.geminiKeys) bits.push("Gemini");
+      if (next.cfKeys || next.cfAccount) bits.push("Cloudflare");
+      if (hordeApiKey) bits.push("Horde ✓");
+      else bits.push("Horde anonyme");
+      const okHtml = '<span class="status-pill ok">✓ Clés enregistrées (' + bits.join(", ") + ")</span>";
+      ["set-status", "set-status-top", "set-status-bottom"].forEach((id) => {
+        const el = $(id);
+        if (el) el.innerHTML = okHtml;
+      });
+      return true;
     } catch (e) {
-      const st = $("set-status");
-      if (st) st.innerHTML = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 120) + "</span>";
+      const bad = '<span class="status-pill bad">✗ ' + String(e.message || e).slice(0, 120) + "</span>";
+      ["set-status", "set-status-top", "set-status-bottom"].forEach((id) => {
+        const el = $(id);
+        if (el) el.innerHTML = bad;
+      });
+      return false;
     }
-  };
+  }
+  ["save-settings", "save-settings-top", "save-settings-bottom"].forEach((id) => {
+    const btn = $(id);
+    if (btn) btn.onclick = doSaveSettings;
+  });
+  // placeholder to replace start of old handler
+  // save handlers bound via doSaveSettings
+  // Sauvegarde auto des clés quand on quitte un champ
+  ["set-gemini", "set-openai", "set-groq", "set-cf-account", "set-cf-keys", "set-horde-key", "set-username", "set-bio", "set-model"].forEach((id) => {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("change", () => { doSaveSettings(); });
+  });
+
   $("save-memory").onclick = () => {
     saveRoleplayMemory({
       scene: $("memory-scene").value,

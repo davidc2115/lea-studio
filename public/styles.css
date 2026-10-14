@@ -798,3 +798,14 @@ button:disabled { opacity: .6; cursor: wait; }
 .gen-banner-toast.ok { border: 1px solid rgba(74, 222, 128, 0.5); color: #bbf7d0; }
 .gen-banner-toast.bad { border: 1px solid rgba(251, 113, 133, 0.55); color: #fecdd3; }
 .status-pill.busy { background: rgba(167, 139, 250, 0.18); color: #e9d5ff; }
+
+
+.settings-save-bar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 10px 0 12px;
+  margin: 0 0 8px;
+  background: linear-gradient(180deg, rgba(20,12,36,.98) 70%, rgba(20,12,36,0));
+}
+.settings-save-bar .btn { width: 100%; }
