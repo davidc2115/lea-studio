@@ -799,15 +799,13 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Portrait full-body (multiples de 64). Avec clé un peu plus haut.
-                    if (registered) {
-                        params.put("width", 512);
-                        params.put("height", 768);
-                    } else {
-                        params.put("width", 512);
-                        params.put("height", 640);
-                    }
-                    double denoise = 0.72;
+                    // ≤ ~617² pixels (sinon HTTP 403 "heavy demand" pendant les pics)
+                    // 512×640 = 327680 < 380689 ; multiples de 64
+                    params.put("width", 512);
+                    params.put("height", 640);
+                    // steps + cfg_scale fixés après calcul du denoise
+                    double denoise = 0.52;
+                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
                         java.util.regex.Matcher dm = java.util.regex.Pattern
@@ -821,32 +819,27 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    double cfg = registered ? 7.0 : 6.5;
-                    int steps = registered ? 28 : 18;
+                    // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
+                    double cfg = denoise >= 0.64 ? 7.5 : 6.5;
+                    int steps = registered ? 22 : 16;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
-                    // k_dpmpp_2m = plus net ; fallback Euler si worker refuse (tentatives suivantes)
-                    params.put("sampler_name", registered ? "k_dpmpp_2m" : "k_euler_a");
+                    params.put("sampler_name", "k_euler_a");
                     params.put("denoising_strength", denoise);
                     params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", masterpiece, best quality, photorealistic, sharp facial details, natural skin texture, detailed fabric"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, anime, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, headless, no face, faceless, cropped head, legs only, torso only, blurry face, jpeg artifacts");
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
-                    // Toujours garder la ref img2img si fournie (NE PAS tronquer le base64 = image cassée)
-                    final String sourceB64;
                     if (hasRef) {
+                        // source_image = base64 brut (sans préfixe data:)
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
-                        sourceB64 = src;
-                        payload.put("source_image", sourceB64);
+                        payload.put("source_image", src);
                         payload.put("source_processing", "img2img");
-                    } else {
-                        sourceB64 = null;
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);
@@ -854,8 +847,8 @@ public class LeaBridge {
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
                     payload.put("shared", false);
-                    payload.put("replacement_filter", true);
-                    // Liste vide = n'importe quel worker disponible (plus fiable qu'une liste fixe)
+                    payload.put("replacement_filter", false);
+                    // Laisser les workers choisir un modèle réaliste dispo
                     payload.put("models", new JSONArray());
 
                     String acceptedRaw = null;

@@ -358,11 +358,9 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("CRITICAL img2img identity: input_image_0 is the face reference for " + name + ". " +
-         "Preserve EXACT face structure, eyes, nose, mouth, hair color, skin tone and age. " +
-         "Do NOT generate a different woman. Do NOT make her plus-size/BBW unless the reference is. " +
-         "Change ONLY outfit, pose and background. Breast size from description. Sexy new outfit. Photorealistic RAW photo.")
-      : ("Follow the physical description exactly for " + name + " including ethnicity, body morphology and bust. Photorealistic adult woman, sharp focus.");
+      ? ("Identity reference input_image_0 for " + name + ": keep face, hair, eyes, skin AND body morphology (chubby/slim/curves) and breast volume from the reference and description. " +
+         "NEW pose, NEW outfit, NEW background. RAW photo, photorealistic, detailed skin pores, natural lighting, sharp focus, not painting, not CGI.")
+      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
@@ -470,35 +468,28 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo — keep exact face structure, eye color, hair color and skin tone. MUST change outfit and pose. RAW photo from a real camera, adult 18+, highly detailed skin pores, natural lighting, sharp focus, 85mm lens, professional fashion photography, NOT CGI, NOT illustration,";
+      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual lingerie or sexy dress allowed, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
 
     const base = [
-      "PRIORITY: change outfit and pose completely from any reference photo.",
-      "FORBIDDEN: white shapewear, beige bodysuit, white corset, or the exact reference clothing.",
       mood,
-      // Tenue + pose EN PRIORITÉ (sinon img2img recolle à la photo de profil)
-      "NEW OUTFIT (mandatory, different from reference): " + outfit + ".",
-      "NEW POSE (mandatory, different from reference): " + pose + ".",
-      "Location: " + scene + ".",
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
       bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
       looksEn ? ("Technical looks: " + looksEn + ".") : "",
       bodyField ? ("Body notes: " + bodyField + ".") : "",
-      "photorealistic full-body photo head to toe, face clearly visible and sharp, head fully in frame, NOT headless, NOT cropped at neck, NOT back-only, one adult woman,",
+      "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
+      "Outfit: " + outfit + ".",
+      "Pose: " + pose + ".",
+      "Location: " + scene + ".",
       faceLock,
       "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
-      forCloudflare
-        ? ("avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",")
-        : ("avoid: same outfit as reference, same pose as reference, hands on hips catalog pose, "
-           + "white corset, beige shapewear, studio seamless backdrop only, "
-           + bustInfo.neg + ", " + bodyInfo.neg + ","),
+      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
-      "no extra people, no text, no watermark, no deformed hands, no headless body, no faceless crop, no legs-only shot, no blurry face",
-    ].filter(Boolean).join("\n");
+      "no extra people, no text, no watermark, no deformed hands",
+    ].filter(Boolean).join(" ");
 
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
