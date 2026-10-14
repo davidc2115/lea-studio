@@ -1286,11 +1286,10 @@
       memoryPromptBlock(c, memory),
       "Format STRICT (Gemini + Groq):",
       "Structure courte obligatoire:",
-      "1) *action* : 1-2 phrases MAX entre * * (corps/gestes). Tout ce qui est physique va ici.",
-      "2) Dialogue : 1-2 phrases à voix haute, SANS * ni ( ).",
-      "3) (pensée) : UNE seule phrase courte (max 12 mots) — ressenti interne seulement. Ex: (Je ne serai plus jamais la même…)",
+      "Actions physiques: 1-2 phrases entre * *; dialogue à voix haute en texte normal; pensée éventuelle: une phrase courte entre parenthèses.",
+      "N'écris jamais les étiquettes « action », « Dialogue » ou « pensée » dans le texte visible.",
       "Interdit: narration physique dans ( ). Interdit: plus d'une pensée. Interdit: longs paragraphes jaunes. Interdit: tout le message en * *.",
-      "Tiers: [Nom]:. Français, tempérament respecté.",
+      "Tu incarnes le personnage nommé ci-dessus. Si une tierce personne parle ou agit dans ta réponse, identifie-la au début de sa propre ligne sous la forme [Prénom — rôle] : (exemple: [Claire — ma femme] : ...). Si son prénom n'est pas connu, indique son rôle précis. Ne présente jamais ses paroles comme celles du personnage incarné. Français naturel, tempérament respecté.",
       Number(c.age) >= 18
         ? [
             "Cadre adulte 18+ UNIQUEMENT. Roleplay érotique / NSFW EXPLICITE autorisé et attendu si le joueur le mène.",
