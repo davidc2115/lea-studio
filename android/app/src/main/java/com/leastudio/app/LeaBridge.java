@@ -484,15 +484,15 @@ public class LeaBridge {
                         int sh = srcBmp.getHeight();
                         int maxSide = Math.max(sw, sh);
                         android.graphics.Bitmap outBmp = srcBmp;
-                        if (maxSide > 512) {
-                            float sc = 512f / (float) maxSide;
+                        if (maxSide > 384) {
+                            float sc = 384f / (float) maxSide;
                             int nw = Math.max(1, Math.round(sw * sc));
                             int nh = Math.max(1, Math.round(sh * sc));
                             outBmp = android.graphics.Bitmap.createScaledBitmap(srcBmp, nw, nh, true);
                             if (outBmp != srcBmp) srcBmp.recycle();
                         }
                         java.io.ByteArrayOutputStream jpegRef = new java.io.ByteArrayOutputStream();
-                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpegRef);
+                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 72, jpegRef);
                         outBmp.recycle();
                         referenceBytes = jpegRef.toByteArray();
                         if (referenceBytes.length < 100) throw new IllegalArgumentException("reference trop petite apres resize");
@@ -861,12 +861,13 @@ public class LeaBridge {
                     for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
                         try {
                             if (attemptSubmit == 1) {
-                                params.put("steps", 20);
-                                params.put("width", 512);
-                                params.put("height", 640);
+                                params.put("steps", 18);
+                                params.put("width", 448);
+                                params.put("height", 576);
                                 params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
-                                Thread.sleep(2500);
+                                payload.put("shared", false);
+                                Thread.sleep(3000);
                             } else if (attemptSubmit == 2) {
                                 params.put("steps", 14);
                                 params.put("width", 448);
@@ -906,9 +907,27 @@ public class LeaBridge {
                     }
                     if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
                         String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec submit";
-                        throw new java.io.IOException(
-                            "AI Horde file saturée. Réessaie dans 1–2 min ou ajoute une clé Horde gratuite (aihorde.net) dans Réglages. " + em.substring(0, Math.min(120, em.length()))
-                        );
+                        // Extraire message JSON si présent
+                        try {
+                            int jb = em.indexOf('{');
+                            if (jb >= 0) {
+                                org.json.JSONObject ej = new org.json.JSONObject(em.substring(jb));
+                                String mj = ej.optString("message", "");
+                                if (mj.length() > 0) em = mj;
+                            }
+                        } catch (Exception ignoredMsg) {}
+                        String low = em.toLowerCase();
+                        if (low.contains("heavy") || low.contains("demand") || low.contains("403")) {
+                            throw new java.io.IOException(
+                                "Horde refuse la requête (charge serveur / image trop lourde). Réessaie dans 1–2 min. Si ça continue: Réglages → vérifie ta clé Horde. " + em.substring(0, Math.min(100, em.length()))
+                            );
+                        }
+                        if (low.contains("kudos") || low.contains("anonymous")) {
+                            throw new java.io.IOException(
+                                "Horde: kudos insuffisants ou mode anonyme limité. Ajoute/vérifie ta clé gratuite sur aihorde.net dans Réglages. " + em.substring(0, Math.min(80, em.length()))
+                            );
+                        }
+                        throw new java.io.IOException("AI Horde: " + em.substring(0, Math.min(160, em.length())));
                     }
                     String requestId = accepted.optString("id", "");
                     if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));

@@ -462,50 +462,55 @@ function stripLeaMemory(text) {
 
 function formatMessageHtml(text) {
   let raw = stripLeaMemory(text);
-  // Normaliser **…** → *…*
   raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
-  // Tiers déjà au format [Nom]:
   raw = raw
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*:\*{0,2}/g, "[$1]:")
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:");
-  // Retirer TOUS les libellés action/dialogue/pensée (début de ligne, dans *, n'importe où)
   raw = raw.replace(/\*+\s*(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "*");
   raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "$1");
   raw = raw.replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
-  // Nettoyer * * vides
   raw = raw.replace(/\*\s*\*/g, "");
-  const esc = raw
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-  function isReallyAction(inner) {
-    const s = String(inner || "").trim();
-    if (!s) return false;
-    // Pensée interne → jaune
-    if (/\b(je (me )?dis|je pense|je me demande|dans ma t[eê]te|j['’]ai peur|j['’]ose|pourquoi|est-ce que|mon c[oe]ur|si (elle|il) savait|quel cingl|honte|troubl)/i.test(s) && s.length < 160)
-      return false;
-    if (/\b(pousse|enfonce|jouis|hurle|spasme|tremble|effondre|g[eé]mit|cambre|caresse|embrasse|glisse|tourne|main sur|matelas|l[eè]vres?|doigts?)\b/i.test(s))
-      return true;
-    if (s.length > 100) return true;
-    return false;
-  }
-  let out = esc
-    // [Nom]: n'importe où (même collé après une phrase)
-    .replace(/\[([^\]]{1,80})\]:\s*/g, function (_m, name) {
-      return '<br><span class="speaker">' + name + "</span> ";
-    })
-    .replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
-      function (_m, pre, name) {
-        const low = String(name).toLowerCase().trim();
-        if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/.test(low)) return pre;
-        return pre + '<span class="speaker">' + name + "</span> ";
-      })
-    .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
-    .replace(/\(([^)]+)\)/g, function (_, inner) {
-      if (isReallyAction(inner)) return '<span class="action">' + inner + '</span>';
-      return '<span class="thought">' + inner + '</span>';
+  // Séparer les blocs [Nom]: pour une carte propre
+  raw = raw.replace(/\[([^\]]{1,80})\]:\s*/g, "\n@@@SPEAKER:$1@@@\n");
+  raw = raw.replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
+    function (_m, pre, name) {
+      const low = String(name).toLowerCase().trim();
+      if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/.test(low)) return pre;
+      return pre + "\n@@@SPEAKER:" + name + "@@@\n";
     });
-  return out;
+
+  function formatChunk(chunk) {
+    let esc = String(chunk || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    esc = esc
+      .replace(/\*([^*]+)\*/g, '<span class="action">$1</span>')
+      .replace(/\(([^)]{1,120})\)/g, '<span class="thought">$1</span>');
+    return esc.trim();
+  }
+
+  const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
+  let html = "";
+  // parts: [before, name1, text1, name2, text2, ...]
+  if (parts[0] && parts[0].trim()) html += formatChunk(parts[0]);
+  for (let i = 1; i < parts.length; i += 2) {
+    const name = String(parts[i] || "").trim();
+    let body = String(parts[i + 1] || "");
+    // Corps jusqu'au prochain * action majeure : garder tout le dialogue du tiers
+    body = body.replace(/^\s+/, "");
+    const bodyHtml = formatChunk(body);
+    if (!name) {
+      html += bodyHtml;
+      continue;
+    }
+    html +=
+      '<div class="third-party">' +
+      '<div class="speaker">' + name.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
+      '<div class="third-party-line">' + bodyHtml + "</div>" +
+      "</div>";
+  }
+  return html;
 }
 
 function renderDiscover() {

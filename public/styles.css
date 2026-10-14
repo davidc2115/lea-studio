@@ -408,14 +408,17 @@ main {
 .bubble .thought { color: var(--thought); opacity: .9; font-style: italic; font-weight: 400; }
 .bubble .speech { color: var(--speech); }
 .bubble .speaker {
-  display: inline-block;
-  color: #ff7eb9;
+  display: inline-flex;
+  align-items: center;
+  color: #ffb3d9;
   font-weight: 700;
-  font-size: 0.92em;
-  margin: 6px 0 2px;
-  padding: 2px 8px;
-  border-radius: 8px;
-  background: rgba(255, 126, 185, 0.12);
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255,126,185,.22), rgba(167,139,250,.18));
+  border: 1px solid rgba(255,126,185,.35);
 }
 .bubble .speaker::before { content: none; }
 .chat-input-row {
@@ -815,3 +818,20 @@ button:disabled { opacity: .6; cursor: wait; }
   background: linear-gradient(180deg, rgba(20,12,36,.98) 70%, rgba(20,12,36,0));
 }
 .settings-save-bar .btn { width: 100%; }
+
+
+.bubble .third-party {
+  margin: 10px 0 6px;
+  padding: 8px 10px 10px;
+  border-radius: 12px;
+  background: rgba(255, 126, 185, 0.08);
+  border-left: 3px solid rgba(255, 126, 185, 0.55);
+}
+.bubble .third-party-line {
+  color: #f3e8ff;
+  font-style: italic;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.bubble .third-party .action { color: #9ae6ff; font-style: normal; }
+.bubble .third-party .thought { color: #f6e05e; }
