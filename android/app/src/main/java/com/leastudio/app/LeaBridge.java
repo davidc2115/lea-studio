@@ -833,13 +833,17 @@ public class LeaBridge {
                     payload.put("prompt", promptWork
                         + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
+                    final String sourceB64;
                     if (hasRef) {
                         // source_image = base64 brut (sans préfixe data:)
                         String src = refForHorde;
                         int comma = src.indexOf(',');
                         if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
-                        payload.put("source_image", src);
+                        sourceB64 = src;
+                        payload.put("source_image", sourceB64);
                         payload.put("source_processing", "img2img");
+                    } else {
+                        sourceB64 = null;
                     }
                     payload.put("nsfw", true);
                     payload.put("censor_nsfw", false);

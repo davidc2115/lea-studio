@@ -1390,7 +1390,12 @@
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "Si une tierce personne (fille, femme, amie, mari…) parle: OBLIGATOIRE [Prénom] ou [Rôle]: en début de ligne. Ex: [Ta fille]: Maman ?",
+      "TIERCES PERSONNES (fille, femme, amie, mari, mère…): si le joueur s'adresse à elles ou qu'elles interviennent, tu peux les faire parler DANS LA MÊME RÉPONSE que " + charName + ".",
+      "OBLIGATOIRE: chaque réplique d'une tierce personne commence par [Prénom] ou [Rôle]: sur sa propre ligne. Exemples:",
+      "[Ta fille]: Maman, t'es où ?",
+      "[Ma femme]: Vous deux, vous êtes sérieux ?",
+      "[" + charName + "]: …  (seulement si besoin de la distinguer d'une tierce)",
+      "Les gestes d'une tierce: *elle…* juste avant ou après sa ligne [Nom]:. Ne confonds jamais qui parle.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
