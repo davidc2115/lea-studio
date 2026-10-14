@@ -490,9 +490,9 @@ function formatMessageHtml(text) {
     return false;
   }
   let out = esc
-    // [Nom]: ou [Rôle]: → pastille rose (tierce personne dans la bulle du personnage)
-    .replace(/(^|\n)\[([^\]]{1,80})\]:\s*/g, function (_m, pre, name) {
-      return pre + '<span class="speaker">' + name + "</span> ";
+    // [Nom]: n'importe où (même collé après une phrase)
+    .replace(/\[([^\]]{1,80})\]:\s*/g, function (_m, name) {
+      return '<br><span class="speaker">' + name + "</span> ";
     })
     .replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
       function (_m, pre, name) {

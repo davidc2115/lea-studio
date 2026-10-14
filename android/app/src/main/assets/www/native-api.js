@@ -358,8 +358,9 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("Identity reference input_image_0 for " + name + ": keep face, hair, eyes, skin AND body morphology (chubby/slim/curves) and breast volume from the reference and description. " +
-         "NEW pose, NEW outfit, NEW background. RAW photo, photorealistic, detailed skin pores, natural lighting, sharp focus, not painting, not CGI.")
+      ? ("FACE LOCK input_image_0: the generated woman MUST be the SAME person as the reference photo — identical face shape, eyes, nose, lips, hair color and style, skin tone, age. " +
+         "Do not invent a different model face. Keep body morphology and breast size from description. " +
+         "Only change outfit, pose and background. Photorealistic RAW photo, natural skin, sharp focus.")
       : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
@@ -468,7 +469,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual lingerie or sexy dress allowed, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
+      : "CRITICAL: same face as reference photo (identical features). RAW photo adult 18+, photorealistic, sharp, natural skin, new outfit and pose only, keep identity, sensual fashion allowed,";
 
     const base = [
       mood,
@@ -1390,12 +1391,16 @@
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "TIERCES PERSONNES (fille, femme, amie, mari, mère…): si le joueur s'adresse à elles ou qu'elles interviennent, tu peux les faire parler DANS LA MÊME RÉPONSE que " + charName + ".",
-      "OBLIGATOIRE: chaque réplique d'une tierce personne commence par [Prénom] ou [Rôle]: sur sa propre ligne. Exemples:",
-      "[Ta fille]: Maman, t'es où ?",
-      "[Ma femme]: Vous deux, vous êtes sérieux ?",
-      "[" + charName + "]: …  (seulement si besoin de la distinguer d'une tierce)",
-      "Les gestes d'une tierce: *elle…* juste avant ou après sa ligne [Nom]:. Ne confonds jamais qui parle.",
+      "TIERCES PERSONNES — RÈGLE ABSOLUE:",
+      "Si le joueur parle À une autre personne (ma femme, Claire, ma fille, mon frère…), ou la décrit dans *…*, tu DOIS faire répondre cette personne dans TA réponse.",
+      "Format OBLIGATOIRE sur une ligne séparée: [Prénom]: ou [Rôle]: puis sa réplique.",
+      "Exemple si le joueur parle à Claire (sa femme):",
+      "*je reste sur le pas de la porte*",
+      "[Claire]: Tu as bien dormi mon amour ?",
+      "Oui… (réplique de " + charName + " SANS préfixe [Nom] — le dialogue normal est toujours " + charName + ")",
+      "INTERDIT: mettre [" + charName + "]: devant les paroles de " + charName + " (c'est redondant).",
+      "OBLIGATOIRE: au moins une ligne [NomTiers]: quand le joueur s'adresse explicitement à quelqu'un d'autre ou l'implique dans l'action.",
+      "Les gestes d'une tierce: *elle…* juste avant/après [Nom]:. Ne confonds jamais qui parle.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
@@ -1860,7 +1865,31 @@
       }
     } catch (_) {}
 
-    const system = buildSystemPrompt(char, st, loadLongTermMemory(charId));
+    let system = buildSystemPrompt(char, st, loadLongTermMemory(charId));
+    // Détecter si le joueur s'adresse à une tierce → forcer sa réplique
+    try {
+      const lastUser = [...(messages || [])].reverse().find((m) => m && m.role === "user");
+      const u = String(lastUser && lastUser.content || "");
+      const thirdHints = [];
+      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b/i.test(u)) thirdHints.push("[Claire]: ou [Ma femme]:");
+      if (/\b(ma|ta|sa)\s+fille\b/i.test(u)) thirdHints.push("[Ta fille]:");
+      if (/\b(mon|ton|son)\s+fils\b/i.test(u)) thirdHints.push("[Ton fils]:");
+      if (/\b(ma|ta|sa)\s+s[oe]ur\b/i.test(u)) thirdHints.push("[Ta sœur]:");
+      if (/\b(mon|ton|son)\s+fr[eè]re\b/i.test(u)) thirdHints.push("[Ton frère]:");
+      if (/\b(ma|ta|sa)\s+m[eè]re\b|\bbelle-?m[eè]re\b/i.test(u)) thirdHints.push("[Ta mère]: ou [Belle-mère]:");
+      // Prénom capitalisé hors personnage
+      const charLow = String((char && char.name) || "").toLowerCase();
+      const names = u.match(/\b([A-ZÀ-Ü][a-zà-ü'’-]{2,20})\b/g) || [];
+      for (const n of names) {
+        if (charLow && n.toLowerCase() === charLow.split(/\s+/)[0]) continue;
+        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non)$/i.test(n)) continue;
+        thirdHints.push("[" + n + "]:");
+      }
+      if (thirdHints.length) {
+        const uniq = [...new Set(thirdHints)].slice(0, 4);
+        system += "\n\nRAPPEL TOUR ACTUEL: le joueur implique une tierce personne. Ta réponse DOIT contenir au moins une ligne de dialogue de cette personne au format " + uniq.join(" ou ") + " sur sa propre ligne. Sans ça la réponse est invalide.";
+      }
+    } catch (_) {}
     const engine = (st && st.chatEngine) || "gemini";
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
@@ -2012,7 +2041,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.52;
+          const denoise = 0.42;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,

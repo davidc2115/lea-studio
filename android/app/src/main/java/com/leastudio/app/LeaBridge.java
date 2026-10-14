@@ -804,7 +804,7 @@ public class LeaBridge {
                     params.put("width", 512);
                     params.put("height", 640);
                     // steps + cfg_scale fixés après calcul du denoise
-                    double denoise = 0.52;
+                    double denoise = 0.42;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
