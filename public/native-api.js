@@ -241,13 +241,16 @@
       E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
       F: "very large F-cup: substantial natural volume, deep full cleavage, heavy chest",
       G: "extremely full G-cup: very large natural breasts, deep cleavage, wide bust spanning the torso",
-      H: "maximum full H-cup: extremely large natural breasts, deep heavy cleavage, wide heavy bust, voluptuous chest filling the frame",
-      I: "maximum oversized I-cup: extremely large heavy natural breasts, very deep cleavage, massive but realistic volume",
-      J: "maximum oversized J-cup: extremely large heavy natural breasts, very deep cleavage, massive realistic volume",
+      // H/I/J: max volume accepté côté CF (vocabulaire mode, pas « balloon »)
+      H: "105H: very large full bust, heavy soft volume, very deep décolleté, wide chest, hourglass top-heavy silhouette, filled cups, prominent cleavage",
+      I: "110I: extremely large full bust, very heavy soft volume, very deep décolleté, wide chest spanning the torso, top-heavy hourglass, maximum fashion-magazine bust volume",
+      J: "110J: extremely large full bust, very heavy soft volume, very deep décolleté, wide heavy chest, top-heavy hourglass, maximum allowed large natural bust for editorial photo",
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
     let engineHint = "";
-    if (forCloudflare && "DEF".indexOf(cupKey) >= 0) {
+    if (forCloudflare && "GHIJ".indexOf(cupKey) >= 0) {
+      engineHint = " CRITICAL BUST: " + sizeLabel + " — largest full natural bust volume allowed in fashion editorial, very deep neckline, heavy soft cleavage, clothing stretched over full chest, NOT small, NOT B-cup, NOT average.";
+    } else if (forCloudflare && "DEF".indexOf(cupKey) >= 0) {
       engineHint = " Chest volume " + sizeLabel + " clearly visible under clothing, fuller than average, not a small B-cup.";
     } else if (forCloudflare && "GHIJ".indexOf(cupKey) >= 0) {
       // Cloudflare FLUX tends to under-render large cups — push hard with fashion-safe wording
@@ -961,8 +964,10 @@
     const cupBlob = (cup + " " + appRaw).toLowerCase();
     if (/95\s*d|90\s*d|85\s*e|bonnet\s*d\b|cup\s*d\b/.test(cupBlob) || cup.toUpperCase().indexOf("D") >= 0 && /9[05]/.test(cup))
       bits.push("large full natural 95D breasts, heavy cleavage, soft realistic breast shape");
-    else if (/bonnet\s*[hij]|cup\s*[hij]|bonnet\s*g|100\s*[ef]|bonnet\s*e/.test(cupBlob))
-      bits.push("very large heavy breasts matching cup " + (cup || "H") + ", extreme cleavage");
+    else if (/105\s*h|110\s*[ij]|bonnet\s*[hij]|cup\s*[hij]|\b[hij]\s*cup\b/i.test(cupBlob))
+      bits.push("extremely large full " + (cup || "105H") + " breasts, very deep cleavage, heavy soft volume, wide bust, top-heavy hourglass");
+    else if (/bonnet\s*g|100\s*[ef]|bonnet\s*e|cup\s*[efg]/i.test(cupBlob))
+      bits.push("very large heavy breasts matching cup " + (cup || "E") + ", deep cleavage");
     else if (/bonnet\s*c|85\s*c|cup\s*c/.test(cupBlob))
       bits.push("full C-cup breasts");
     else if (/bonnet\s*b|85\s*b|cup\s*b|petite poitrine/.test(cupBlob))
@@ -2007,7 +2012,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.48;
+          const denoise = 0.52;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
@@ -2023,8 +2028,10 @@
           };
         } catch (hordeErr) {
           const he = String(hordeErr.message || hordeErr);
-          // Anonyme saturé / 429 → Cloudflare pour que la génération marche quand même
-          if (/429|Too many|anonymous|satur|kudos|file satur/i.test(he)) {
+          const hasKey = !!(st && String(st.hordeApiKey || "").trim() && String(st.hordeApiKey).trim() !== "0000000000");
+          // Fallback CF seulement si file anonyme / 429 explicite — pas pour les autres erreurs (sinon on masque le vrai problème)
+          const queueFail = /429|TooManyPrompts|Too many anonymous|file saturée|anonyme satur/i.test(he);
+          if (queueFail && !hasKey) {
             try {
               const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
               const dataUrl = await generateCloudflareImage(cfPrompt, st, char);
@@ -2035,16 +2042,13 @@
                 engine: "cloudflare",
                 fallbackFrom: "horde",
                 hordeError: he.slice(0, 120),
-                note: "Horde anonyme saturé → Cloudflare. Clé gratuite aihorde.net = prioritaire.",
+                note: "Horde anonyme saturé → Cloudflare. Ajoute une clé aihorde.net.",
               };
             } catch (cfErr) {
-              throw new Error(
-                "Horde saturé (anonyme). Ajoute une clé gratuite aihorde.net dans Réglages. " +
-                "CF: " + String(cfErr.message || cfErr).slice(0, 80)
-              );
+              throw new Error("Horde anonyme saturé. CF: " + String(cfErr.message || cfErr).slice(0, 80));
             }
           }
-          throw new Error("AI Horde: " + he.slice(0, 200));
+          throw new Error("AI Horde: " + he.slice(0, 220));
         }
       }
       // Cloudflare: jusqu'à 3 essais si « output flagged »
