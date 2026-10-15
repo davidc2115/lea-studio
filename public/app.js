@@ -1561,6 +1561,17 @@ function closeLightbox() {
 }
 
 
+function cupSizeFromCollectionTitle(title) {
+  const text = String(title || "").trim();
+  const bandCup = text.match(/\b(\d{2,3})\s*([A-K])\b/i);
+  if (bandCup) return bandCup[1] + bandCup[2].toUpperCase();
+  const namedCup = text.match(/\b(?:cup|bonnet)\s*[-:]?\s*([A-K])\b/i)
+    || text.match(/\b([A-K])\s*[- ]?(?:cup|bonnet)\b/i)
+    || text.match(/^(?:bonnet\s*)?([A-K])$/i);
+  return namedCup ? (namedCup[1] || namedCup[2]).toUpperCase() : "";
+}
+
+
 function mergeAllCasts() {
   const lists = [
     window.CAST,
@@ -1581,8 +1592,10 @@ function mergeAllCasts() {
       if (byId.has(id)) continue;
       const age = c.age == null || c.age === "" ? null : Number(c.age);
       if (Number.isInteger(age) && age < 18) continue;
+      const titleCup = list === window.LEA_CAST_CUPS ? cupSizeFromCollectionTitle(c.title) : "";
       byId.set(id, Object.assign({}, c, {
         id: id,
+        ...(titleCup ? { canonicalCupSize: titleCup } : {}),
         adultConfirmed: Number.isInteger(age) && age >= 18 ? true : c.adultConfirmed,
       }));
     }

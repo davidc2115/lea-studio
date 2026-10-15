@@ -239,28 +239,33 @@
       C: "true C-cup: medium natural breasts, moderate cleavage",
       D: "true D-cup: full natural breasts, soft cleavage, fuller than C, realistic 95D proportions",
       E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
-      F: "very large F-cup: substantial natural volume, deep full cleavage, heavy chest",
-      G: "extremely full G-cup: very large natural breasts, deep cleavage, wide bust spanning the torso",
-      // H/I/J: max volume accepté côté CF (vocabulaire mode, pas « balloon »)
-      H: "large full natural H-cup breasts, soft realistic cleavage, slim waist hourglass, photorealistic proportions not exaggerated",
-      I: "110I: very large full natural breasts, soft realistic volume, deep cleavage, proportional hourglass, photorealistic not exaggerated",
-      J: "110J: very large full natural breasts, soft heavy realistic volume, deep cleavage, photorealistic editorial body, not balloon, not cartoon",
+      F: "very large, visibly full F-cup with heavy natural volume, strong forward projection, and deep cleavage",
+      G: "extremely full G-cup with very large heavy natural volume, broad bust, strong projection, and deep cleavage",
+      H: "exceptionally large H-cup with heavy soft volume, broad full chest, pronounced projection, and deep cleavage",
+      I: "extremely prominent I-cup with very heavy natural volume, broad chest, pronounced projection, and deep cleavage",
+      J: "maximum physically plausible J-cup volume: exceptionally large, heavy, broad, and strongly projected natural breasts",
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
     let engineHint = "";
-    if (forCloudflare && "GHIJ".indexOf(cupKey) >= 0) {
-      engineHint = " CRITICAL BUST: " + sizeLabel + " — largest full natural bust volume allowed in fashion editorial, very deep neckline, heavy soft cleavage, clothing stretched over full chest, NOT small, NOT B-cup, NOT average.";
-    } else if (forCloudflare && "DEF".indexOf(cupKey) >= 0) {
-      engineHint = " Chest volume " + sizeLabel + " clearly visible under clothing, fuller than average, not a small B-cup.";
-    } else if (forCloudflare && "GHIJ".indexOf(cupKey) >= 0) {
-      // Cloudflare FLUX tends to under-render large cups — push hard with fashion-safe wording
-      engineHint = " CRITICAL bust: " + sizeLabel + " maximum large voluptuous chest, heavy soft breasts, deep cleavage, wide bust, breast size much larger than average adult woman, clothing stretched over the chest, not medium, not B-cup, not C-cup.";
+    if (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0) {
+      const cloudflareScale = {
+        F: "clearly large and much fuller than average",
+        G: "very large and prominent across the upper torso",
+        H: "exceptionally large, broad, heavy, and strongly projected",
+        I: "extremely large, broad, heavy, and strongly projected",
+        J: "the largest physically plausible natural cup volume, broad, heavy, and strongly projected",
+      };
+      engineHint = " HIGH PRIORITY PROFILE CUP " + sizeLabel + ": " + cloudflareScale[cupKey] +
+        ". Make the bust visibly large even under clothing, with a full wide silhouette and strong forward projection; do not render a medium or average chest.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
       engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
     } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
       engineHint = " Preserve large " + sizeLabel + " volume; realistic not cartoon; heavy soft breasts, deep cleavage.";
     }
-    const lock = "Breast size " + sizeLabel + ": " + guide + "." + engineHint;
+    const lock = "Breast size " + sizeLabel + ": " + guide + "." + engineHint +
+      (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0
+        ? " The explicit profile cup size overrides any smaller bust shown in the reference image or other appearance text."
+        : "");
     let neg = "balloon breasts, breast expansion, deformed chest, cartoon boobs, plastic implants look";
     if ("ABC".indexOf(cupKey) >= 0) neg += ", enormous breasts, oversized bust, hyper breasts";
     if ("DEFGHIJ".indexOf(cupKey) >= 0) neg += ", flat chest, tiny breasts, A-cup, B-cup, C-cup, small breasts, underdeveloped bust, medium chest, average bust";
@@ -347,7 +352,7 @@
       const ageH = Math.max(18, parseInt(c.age, 10) || 22);
       const looksH = String(c.looks_en || "").trim().slice(0, 180);
       const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
-      const bustH = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
+      const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
       const sfwOutfits = [
         "elegant beige mini dress, modest heels, hotel hallway",
         "olive green satin cocktail dress, classic interior",
@@ -390,7 +395,7 @@
     const name = String(c.name || "le personnage").slice(0, 100);
     const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
-    const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
     const bodyInfo = describeBodyMorphology(c);
@@ -398,7 +403,7 @@
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
       ? ("FACE LOCK input_image_0: SAME person as reference — identical face, eyes, nose, lips, hair color/style, skin, age. " +
-         "Keep body type and breast size from description. " +
+         "Follow the profile body description and prioritize its explicit cup size even if the reference chest appears smaller. " +
          "CRITICAL: completely NEW outfit, NEW pose, NEW camera angle — do NOT copy the reference pose, stance, hand position or clothing. " +
          "Photorealistic RAW photo, natural skin texture, sharp facial detail, full body in frame, head visible.")
       : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman, full body, head visible.");
@@ -551,7 +556,7 @@
     ];
     const outfit = softOutfits[Math.min(attempt, softOutfits.length - 1)];
     const bustInfo = describeBustLock(
-      String(c.Poitrine || c.poitrine || c.bustEstimate || ""),
+      String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || ""),
       appearance,
       "cloudflare"
     );
@@ -845,7 +850,7 @@
     const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
     const looksEn = String(c.looks_en || "").trim().slice(0, 180);
     const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
-    const bust = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const bustInfo = describeBustLock(bust, appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
@@ -987,7 +992,7 @@
       bits.push("dark nearly black eyes");
 
     // --- Poitrine ---
-    const cup = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
+    const cup = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
     const cupBlob = (cup + " " + appRaw).toLowerCase();
     if (/95\s*d|90\s*d|85\s*e|bonnet\s*d\b|cup\s*d\b/.test(cupBlob) || cup.toUpperCase().indexOf("D") >= 0 && /9[05]/.test(cup))
       bits.push("large full natural 95D breasts, heavy cleavage, soft realistic breast shape");
