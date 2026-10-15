@@ -173,8 +173,8 @@
       element.src = imageSource;
     });
     if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
-    // Horde img2img: ref légère (403 heavy demand si trop lourde)
-    const maxSide = mime && String(mime).indexOf("webp") >= 0 ? 384 : 384;
+    // Keep the higher-detail face reference for better identity consistency.
+    const maxSide = 512;
     const scale = Math.min(maxSide / image.naturalWidth, maxSide / image.naturalHeight, 1);
     const canvas = document.createElement("canvas");
     canvas.width = Math.max(64, Math.round(image.naturalWidth * scale));
@@ -182,7 +182,7 @@
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
-    const quality = mime && String(mime).indexOf("jpeg") >= 0 ? 0.72 : 0.75;
+    const quality = 0.9;
     const dataUrl = canvas.toDataURL(mime, quality);
     if (!dataUrl.startsWith("data:" + mime + ";base64,")) throw new Error("Format de photo de référence non pris en charge.");
     const comma = dataUrl.indexOf(",");

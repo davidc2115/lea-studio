@@ -484,15 +484,15 @@ public class LeaBridge {
                         int sh = srcBmp.getHeight();
                         int maxSide = Math.max(sw, sh);
                         android.graphics.Bitmap outBmp = srcBmp;
-                        if (maxSide > 384) {
-                            float sc = 384f / (float) maxSide;
+                        if (maxSide > 512) {
+                            float sc = 512f / (float) maxSide;
                             int nw = Math.max(1, Math.round(sw * sc));
                             int nh = Math.max(1, Math.round(sh * sc));
                             outBmp = android.graphics.Bitmap.createScaledBitmap(srcBmp, nw, nh, true);
                             if (outBmp != srcBmp) srcBmp.recycle();
                         }
                         java.io.ByteArrayOutputStream jpegRef = new java.io.ByteArrayOutputStream();
-                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 72, jpegRef);
+                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpegRef);
                         outBmp.recycle();
                         referenceBytes = jpegRef.toByteArray();
                         if (referenceBytes.length < 100) throw new IllegalArgumentException("reference trop petite apres resize");

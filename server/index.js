@@ -84,8 +84,10 @@ function buildSystem(char, chat, settings) {
     char.system_extra || "",
     `Joueur: ${userName}${userBio ? " — " + userBio : ""}`,
     mem,
+    "Réponds toujours en français. Format: dialogue sans marqueur; action physique entre *...*; pensée/ressenti intérieur entre (...). Ne mélange pas action, pensée et dialogue dans un même marqueur.",
+    "Quand un autre personnage intervient, commence son tour sur une nouvelle ligne [Nom]:; applique les mêmes marqueurs à ses actions et pensées, et laisse son dialogue sans marqueur. Si tu reprends le point de vue du personnage incarné, commence un nouveau tour [Nom du personnage]:. N'écris pas les étiquettes Action:, Pensée: ou Dialogue:.",
     Number(char.age) >= 18
-      ? "Format: (pensées) *actions* dialogues sans marqueurs. 2–5 phrases. Intimité éventuelle facultative et réciproque; pas d'amour forcé."
+      ? "Écris 2–5 phrases. Intimité éventuelle facultative et réciproque; pas d'amour forcé."
       : "Âge adulte non confirmé : roleplay strictement non sexuel, ne sexualise pas le personnage. Respecte ses limites et ne force aucun attachement.",
   ]
     .filter(Boolean)

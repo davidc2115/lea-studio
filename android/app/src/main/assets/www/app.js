@@ -462,83 +462,69 @@ function stripLeaMemory(text) {
 
 function formatMessageHtml(text) {
   let raw = stripLeaMemory(text);
-  raw = raw.replace(/\*\*([^*]+)\*\*/g, "*$1*");
   raw = raw
+    .replace(/\*\*([^*]+)\*\*/g, "*$1*")
+    .replace(/(^|\n)[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "$1")
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*:\*{0,2}/g, "[$1]:")
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:");
-  raw = raw.replace(/\*+\s*(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "*");
-  raw = raw.replace(/(^|[\n\r])[ \t]*(?:\*{0,2})(?:actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)\s*[:：]\s*/gi, "$1");
-  raw = raw.replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
-  raw = raw.replace(/\*\s*\*/g, "");
-  // Marqueurs de locuteurs
-  raw = raw.replace(/\[([^\]]{1,80})\]:\s*/g, "\n@@@SPEAKER:$1@@@\n");
-  raw = raw.replace(/(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
-    function (_m, pre, name) {
-      const low = String(name).toLowerCase().trim();
-      if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/.test(low)) return pre;
-      return pre + "\n@@@SPEAKER:" + name + "@@@\n";
-    });
 
-  function formatMain(chunk) {
-    let esc = String(chunk || "")
+  // Turn explicit speaker labels into boundaries, without treating ordinary
+  // dialogue containing a colon as a new speaker.
+  raw = raw.replace(/(^|\n)[ \t]*\[([^\]]{1,80})\]:[ \t]*/g, "$1\n@@@SPEAKER:$2@@@\n");
+  raw = raw.replace(
+    /(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
+    function (_match, prefix, name) {
+      if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/i.test(String(name).trim())) return prefix;
+      return prefix + "\n@@@SPEAKER:" + name + "@@@\n";
+    }
+  );
+
+  function escapeText(value) {
+    return String(value || "")
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;");
-    // Actions *...* → cyan
-    esc = esc.replace(/\*([^*]+)\*/g, '<span class="action">$1</span>');
-    // Pensées (...) → jaune
-    esc = esc.replace(/\(([^)]{1,200})\)/g, '<span class="thought">$1</span>');
-    return esc.trim();
   }
 
-  /** Dialogue tierce uniquement ; le reste (actions/pensées du perso principal) revient au flux principal */
-  function splitSpeakerBody(body) {
-    let text = String(body || "").replace(/^\s+/, "");
-    if (!text) return { dialogue: "", rest: "" };
-    // Couper dès une action *...* ou une pensée (...)
-    const stopRe = /(?:^|\n)\s*\*|^\s*\(|(?:^|\n)\s*\(/;
-    let stop = -1;
-    // Cherche * ou ( qui démarre une section du personnage principal
-    const star = text.search(/(?:^|[\s.])\*[^*\n]/);
-    const paren = text.search(/(?:^|[\s.])\([^)\n]{3,}/);
-    const candidates = [star, paren].filter(function (i) { return i >= 0; });
-    if (candidates.length) stop = Math.min.apply(null, candidates);
-    // Ou phrase suivante qui bascule en POV "Je / Il / Elle" (pensée/action du perso principal sans marqueur)
-    if (stop < 0) {
-      const pov = text.match(/^([\s\S]{8,220}?(?:[.!?…]|\.\.\.)(?:\s+|$))([\s\S]*)$/);
-      if (pov && /^\s*(Je |J['’]|Il |Elle |Mon |Ma |Mes |En |Puis )/.test(pov[2])) {
-        return { dialogue: pov[1].trim(), rest: pov[2] };
+  function formatSegments(value) {
+    const source = String(value || "");
+    const markers = /(\*[^*\n]+\*|\*[^*\n]+(?=\n|$)|\([^)\n]{1,200}\))/g;
+    let html = "";
+    let cursor = 0;
+    let match;
+    function speech(text) {
+      if (!text) return;
+      html += '<span class="speech">' + escapeText(text).replace(/\n/g, "<br>") + "</span>";
+    }
+    while ((match = markers.exec(source))) {
+      speech(source.slice(cursor, match.index));
+      const token = match[0];
+      if (token.charAt(0) === "*") {
+        const action = token.replace(/^\*/, "").replace(/\*$/, "");
+        html += '<span class="action">' + escapeText(action) + "</span>";
+      } else {
+        html += '<span class="thought">' + escapeText(token.slice(1, -1)) + "</span>";
       }
+      cursor = match.index + token.length;
     }
-    if (stop >= 0) {
-      return { dialogue: text.slice(0, stop).trim(), rest: text.slice(stop).trim() };
-    }
-    // Tout le bloc est du dialogue tierce (court)
-    if (text.length < 280) return { dialogue: text, rest: "" };
-    // Long sans marqueur : première phrase = dialogue, reste = principal
-    const first = text.match(/^([\s\S]{5,200}?(?:[.!?…]|\.\.\.)(?:\s+|$))/);
-    if (first) return { dialogue: first[1].trim(), rest: text.slice(first[1].length).trim() };
-    return { dialogue: text, rest: "" };
+    speech(source.slice(cursor));
+    return html;
   }
 
   const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
-  let html = "";
-  if (parts[0] && parts[0].trim()) html += formatMain(parts[0]);
+  let html = formatSegments(parts[0] || "");
   for (let i = 1; i < parts.length; i += 2) {
     const name = String(parts[i] || "").trim();
-    const split = splitSpeakerBody(parts[i + 1] || "");
-    if (name && split.dialogue) {
-      const dlg = String(split.dialogue)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-      html +=
-        '<div class="third-party">' +
-        '<div class="speaker">' + name.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</div>" +
-        '<div class="third-party-line">' + dlg + "</div>" +
-        "</div>";
+    const body = String(parts[i + 1] || "").trim();
+    if (!body) continue;
+    const activeName = typeof state !== "undefined" && state.character ? String(state.character.name || "") : "";
+    const isMainCharacter = name.localeCompare(activeName, undefined, { sensitivity: "accent" }) === 0;
+    if (isMainCharacter) {
+      html += formatSegments(body);
+      continue;
     }
-    if (split.rest && split.rest.trim()) html += formatMain(split.rest);
+    html += '<div class="third-party"><div class="speaker">' + escapeText(name) +
+      '</div><div class="third-party-body">' + formatSegments(body) + "</div></div>";
   }
   return html;
 }
