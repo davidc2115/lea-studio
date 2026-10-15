@@ -603,11 +603,9 @@
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        "const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
         ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
         "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
         "Do not copy bust volume from the reference. The reference controls facial identity only; the explicit profile cup size controls bust volume.";
-      const maxLength = 1600;
       const maxLength = 1600;
       return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
     }
@@ -656,10 +654,8 @@
     ].filter(Boolean).join(" ");
     if (largeBust) {
       const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        "const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
         ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; broad rounded base, substantial lower fullness, distinct forward projection, obvious silhouette relative to shoulders and waist. " +
         "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
-      return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
       return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
     }
     return retryParts.slice(0, 1400);
