@@ -460,7 +460,7 @@ function stripLeaMemory(text) {
     .trim();
 }
 
-function formatMessageHtml(text) {
+function formatMessageHtml(text, options) {
   let raw = stripLeaMemory(text);
   raw = raw
     .replace(/\*\*([^*]+)\*\*/g, "*$1*")
@@ -468,8 +468,9 @@ function formatMessageHtml(text) {
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*:\*{0,2}/g, "[$1]:")
     .replace(/\*{1,2}\s*\[([^\]]{1,80})\]\s*\*{0,2}\s*:/g, "[$1]:")
     .replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
-  // [Nom]: n'importe où (pas seulement début de ligne)
-  raw = raw.replace(/\[([^\]]{1,80})\]:\s*/g, "\n@@@SPEAKER:$1@@@\n");
+
+  // Speaker labels may appear mid-line or at the beginning of a line.
+  raw = raw.replace(/\[([^\]]{1,80})\]\s*:\s*/g, "\n@@@SPEAKER:$1@@@\n");
   raw = raw.replace(
     /(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
     function (_match, prefix, name) {
@@ -510,49 +511,29 @@ function formatMessageHtml(text) {
     return html;
   }
 
-  /** Corps tierce = dialogue seulement ; actions/pensées du perso principal sortent du bloc */
-  function splitThirdBody(body) {
-    let text = String(body || "").replace(/^\s+/, "");
-    if (!text) return { dialogue: "", rest: "" };
-    const star = text.search(/(?:^|[\s.])\*[^*\n]/);
-    const paren = text.search(/(?:^|[\s.])\([^)\n]{3,}/);
-    const candidates = [star, paren].filter(function (i) { return i >= 0; });
-    if (candidates.length) {
-      const stop = Math.min.apply(null, candidates);
-      return { dialogue: text.slice(0, stop).trim(), rest: text.slice(stop).trim() };
-    }
-    const pov = text.match(/^([\s\S]{8,220}?(?:[.!?…]|\.\.\.)(?:\s+|$))([\s\S]*)$/);
-    if (pov && /^\s*(Je |J['’]|Il |Elle |Mon |Ma |Mes |En |Puis )/.test(pov[2])) {
-      return { dialogue: pov[1].trim(), rest: pov[2] };
-    }
-    if (text.length < 280) return { dialogue: text, rest: "" };
-    const first = text.match(/^([\s\S]{5,200}?(?:[.!?…]|\.\.\.)(?:\s+|$))/);
-    if (first) return { dialogue: first[1].trim(), rest: text.slice(first[1].length).trim() };
-    return { dialogue: text, rest: "" };
-  }
-
   const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
-  let html = formatSegments(parts[0] || "");
+  const activeName = typeof state !== "undefined" && state.character ? String(state.character.name || "") : "";
+  const bubbleTurns = !!(options && options.bubbleTurns);
+  function renderTurn(name, body) {
+    const isMain = !name || name.localeCompare(activeName, undefined, { sensitivity: "accent" }) === 0;
+    const formatted = formatSegments(body);
+    if (!bubbleTurns) {
+      if (isMain) return formatted;
+      return '<div class="third-party"><div class="speaker">' + escapeText(name) +
+        '</div><div class="third-party-body">' + formatted + "</div></div>";
+    }
+    const speaker = escapeText(name || activeName || "Personnage");
+    const bubbleClass = isMain ? "bubble them speaker-turn speaker-main" : "bubble them speaker-turn third-party-turn";
+    const bodyClass = isMain ? "speaker-turn-body" : "third-party-body";
+    return '<div class="' + bubbleClass + '"><div class="speaker">' + speaker +
+      '</div><div class="' + bodyClass + '">' + formatted + "</div></div>";
+  }
+  let html = parts[0] && parts[0].trim() ? renderTurn(activeName, parts[0].trim()) : "";
   for (let i = 1; i < parts.length; i += 2) {
     const name = String(parts[i] || "").trim();
     const body = String(parts[i + 1] || "").trim();
     if (!body) continue;
-    const activeName = typeof state !== "undefined" && state.character ? String(state.character.name || "") : "";
-    const isMainCharacter = activeName && name.localeCompare(activeName, undefined, { sensitivity: "accent" }) === 0;
-    if (isMainCharacter) {
-      html += formatSegments(body);
-      continue;
-    }
-    const split = splitThirdBody(body);
-    if (split.dialogue) {
-      html +=
-        '<div class="third-party">' +
-        '<div class="speaker">' + escapeText(name) + "</div>" +
-        '<div class="third-party-body"><span class="third-party-line">' +
-        escapeText(split.dialogue).replace(/\n/g, "<br>") +
-        "</span></div></div>";
-    }
-    if (split.rest) html += formatSegments(split.rest);
+    html += renderTurn(name, body);
   }
   return html;
 }
@@ -1156,7 +1137,11 @@ function paintMessages() {
     .map((m) => {
       const who = m.role === "user" ? "me" : "them";
       const img = m.image ? `<div class="bubble-image"><img src="${escapeHtml(resolveImgSrc(m.image))}" alt="scène" loading="lazy" /></div>` : "";
-      const text = m.content ? `<div class="bubble ${who}">${formatMessageHtml(m.content)}</div>` : "";
+      const text = !m.content
+        ? ""
+        : who === "them"
+          ? formatMessageHtml(m.content, { bubbleTurns: true })
+          : `<div class="bubble ${who}">${formatMessageHtml(m.content)}</div>`;
       return img + text;
     })
     .join("");

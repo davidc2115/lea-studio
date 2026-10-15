@@ -985,51 +985,47 @@ public class LeaBridge {
                     if (generations == null || generations.length() == 0) throw new java.io.IOException("AI Horde a terminé sans image.");
                     JSONObject generation = generations.getJSONObject(0);
                     if (generation.optBoolean("censored", false)) {
-                        // Retry SFW strict en txt2img (sans référence) — les workers stricts censurent souvent l'img2img sexy
-                        android.util.Log.w("LeaBridge", "Horde censored — retry SFW txt2img without source");
-                        try {
-                            JSONObject retryPayload = new JSONObject(payload.toString());
-                            retryPayload.remove("source_image");
-                            retryPayload.remove("source_processing");
-                            JSONObject rp = retryPayload.optJSONObject("params");
-                            if (rp != null) {
-                                rp.put("denoising_strength", 1.0);
-                                rp.put("steps", Math.min(rp.optInt("steps", 20), 20));
-                                rp.put("width", 512);
-                                rp.put("height", 768);
-                            }
-                            String sfwPrompt = "photorealistic full body photo of adult woman 21 years old, fully clothed elegant beige dress, modest fashion, hotel hallway, natural lighting, sharp focus, realistic skin, standing natural pose, face visible ### nsfw, nude, lingerie, cleavage, explicit, painting, anime, cartoon, deformed";
-                            retryPayload.put("prompt", sfwPrompt);
-                            retryPayload.put("nsfw", false);
-                            retryPayload.put("censor_nsfw", true);
-                            String retryRaw = hordeRequest("POST", "/api/v2/generate/async", retryPayload.toString(), hordeKey);
-                            JSONObject retryAcc = new JSONObject(retryRaw);
-                            String retryId = retryAcc.optString("id", "");
-                            if (retryId.length() > 0) {
-                                boolean rDone = false;
-                                for (int rw = 0; rw < 90; rw++) {
-                                    Thread.sleep(4000);
-                                    JSONObject rchk = new JSONObject(hordeRequest("GET", "/api/v2/generate/check/" + retryId, null, hordeKey));
-                                    if (rchk.optBoolean("done", false) || rchk.optInt("finished", 0) > 0) { rDone = true; break; }
-                                    if (rchk.optBoolean("faulted", false)) break;
-                                }
-                                if (rDone) {
-                                    JSONObject rstatus = new JSONObject(hordeRequest("GET", "/api/v2/generate/status/" + retryId, null, hordeKey));
-                                    JSONArray rg = rstatus.optJSONArray("generations");
-                                    if (rg != null && rg.length() > 0) {
-                                        JSONObject rg0 = rg.getJSONObject(0);
-                                        if (!rg0.optBoolean("censored", false)) {
-                                            generation = rg0;
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (Exception retryEx) {
-                            android.util.Log.w("LeaBridge", "Horde SFW retry failed: " + retryEx.getMessage());
+                        // One strictly SFW retry, retaining the face reference and img2img path.
+                        JSONObject retryPayload = new JSONObject(payload.toString());
+                        retryPayload.put("prompt",
+                            "photorealistic portrait of the same adult woman in the reference image, fully clothed in a modest everyday outfit, face clearly visible, natural expression, soft daylight, realistic skin, editorial photography");
+                        retryPayload.put("nsfw", false);
+                        retryPayload.put("censor_nsfw", true);
+                        String retryRaw = hordeRequest("POST", "/api/v2/generate/async", retryPayload.toString(), hordeKey);
+                        JSONObject retryAccepted = new JSONObject(retryRaw);
+                        String retryId = retryAccepted.optString("id", "");
+                        if (retryId.isEmpty()) {
+                            throw new java.io.IOException("AI Horde n’a pas accepté la nouvelle tentative SFW.");
                         }
-                        if (generation.optBoolean("censored", false)) {
-                            throw new java.io.IOException("AI Horde a encore censuré (worker strict). Réessaie, change de clé Horde, ou utilise Cloudflare.");
+                        boolean retryDone = false;
+                        for (int retryPoll = 0; retryPoll < 48; retryPoll++) {
+                            Thread.sleep(10000);
+                            JSONObject retryCheck = new JSONObject(
+                                hordeRequest("GET", "/api/v2/generate/check/" + retryId, null, hordeKey)
+                            );
+                            if (retryCheck.optBoolean("faulted", false)) {
+                                throw new java.io.IOException("Le worker AI Horde a échoué pendant la tentative SFW.");
+                            }
+                            if (retryCheck.optBoolean("done", false) || retryCheck.optInt("finished", 0) > 0) {
+                                retryDone = true;
+                                break;
+                            }
                         }
+                        if (!retryDone) {
+                            throw new java.io.IOException("Délai dépassé pour la nouvelle tentative AI Horde.");
+                        }
+                        JSONObject retryStatus = new JSONObject(
+                            hordeRequest("GET", "/api/v2/generate/status/" + retryId, null, hordeKey)
+                        );
+                        JSONArray safeGenerations = retryStatus.optJSONArray("generations");
+                        if (safeGenerations == null || safeGenerations.length() == 0
+                                || safeGenerations.getJSONObject(0).optBoolean("censored", false)) {
+                            throw new java.io.IOException(
+                                "AI Horde a censuré l’image de référence ou le prompt, même en mode SFW. " +
+                                "Essaie avec une photo de référence entièrement habillée, ou choisis Cloudflare."
+                            );
+                        }
+                        generation = safeGenerations.getJSONObject(0);
                     }
                     String image = generation.optString("img", "");
                     byte[] imageBytes;

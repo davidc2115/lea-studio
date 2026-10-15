@@ -820,6 +820,20 @@ button:disabled { opacity: .6; cursor: wait; }
 .settings-save-bar .btn { width: 100%; }
 
 
+.bubble.speaker-turn { margin: 0 0 8px; }
+.bubble.speaker-main {
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .14);
+}
+.bubble.third-party-turn {
+  background: rgba(255, 126, 185, .12);
+  border: 1px solid rgba(255, 126, 185, .28);
+  border-left: 3px solid #ff7eb9;
+  box-shadow: inset 0 0 0 1px rgba(255, 126, 185, .08);
+}
+.bubble .speaker-turn-body,
+.bubble .third-party-body { line-height: 1.45; }
+.bubble.third-party-turn .action { color: #9ae6ff; }
+.bubble.third-party-turn .thought { color: #f6e05e; }
 .bubble .third-party {
   margin: 10px 0 8px;
   padding: 8px 12px 10px;

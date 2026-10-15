@@ -1522,7 +1522,7 @@
       "[Claire]: Oh mon dieu… si fort…",
       "(C'est excitant d'écouter.)",
       "INTERDIT: ignorer la tierce; coller tout sur une seule ligne; préfixer " + charName + " avec [Nom].",
-      "Si le joueur agit avec sa femme/Claire: au minimum une ligne [Claire]: ou [Ma femme]:.",
+      "Chaque changement de locuteur commence sur une nouvelle ligne [Nom]:; utilise le nom du personnage principal pour ses gestes, pensées et paroles, et [Prénom — rôle]: pour une tierce personne. Dans chaque bloc, actions = *...*, pensées = (...), paroles sans marqueur. Après l’intervention d’un tiers, ouvre un nouveau bloc [Nom]: pour reprendre le rôle principal.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
