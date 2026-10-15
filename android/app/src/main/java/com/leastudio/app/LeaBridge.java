@@ -918,7 +918,7 @@ public class LeaBridge {
                                 // Extraire secondes si présentes
                                 String waitHint = "quelques minutes";
                                 java.util.regex.Matcher wm = java.util.regex.Pattern
-                                    .compile("(\d+)\s*more\s*seconds", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .compile("(\\d+)\\s*more\\s*seconds", java.util.regex.Pattern.CASE_INSENSITIVE)
                                     .matcher(em);
                                 if (wm.find()) {
                                     int sec = Integer.parseInt(wm.group(1));
