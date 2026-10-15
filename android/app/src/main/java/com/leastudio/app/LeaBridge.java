@@ -804,7 +804,7 @@ public class LeaBridge {
                     params.put("width", 512);
                     params.put("height", 640);
                     // steps + cfg_scale fixés après calcul du denoise
-                    double denoise = 0.58;
+                    double denoise = 0.52;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -821,7 +821,7 @@ public class LeaBridge {
                     else if (!hasRef) denoise = 1.0;
                     // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
                     double cfg = denoise >= 0.70 ? 7.0 : (denoise >= 0.55 ? 6.5 : 6.0);
-                    int steps = registered ? 24 : 18;
+                    int steps = registered ? 26 : 20;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -831,8 +831,8 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture, detailed face, full body composition, head in frame"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, copy of reference pose, same outfit as reference, cropped head, headless");
+                        + ", photorealistic RAW photo, DSLR, natural skin texture pores, realistic body proportions, detailed eyes, sharp face, full body head to toe in frame, soft natural light"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, anime, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, wax figure, overprocessed, balloon breasts, copy of reference pose, same outfit as reference, cropped head, headless, mannequin");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
@@ -854,7 +854,12 @@ public class LeaBridge {
                     payload.put("shared", false);
                     payload.put("replacement_filter", false);
                     // Laisser les workers choisir un modèle réaliste dispo
-                    payload.put("models", new JSONArray());
+                    JSONArray preferredModels = new JSONArray();
+                    preferredModels.put("ICBINP - I Can't Believe It's Not Photography");
+                    preferredModels.put("Realistic Vision");
+                    preferredModels.put("DreamShaper");
+                    preferredModels.put("stable_diffusion");
+                    payload.put("models", preferredModels);
 
                     String acceptedRaw = null;
                     JSONObject accepted = null;
@@ -862,11 +867,12 @@ public class LeaBridge {
                     for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
                         try {
                             if (attemptSubmit == 1) {
-                                params.put("steps", 18);
-                                params.put("width", 448);
-                                params.put("height", 576);
+                                params.put("steps", 20);
+                                params.put("width", 512);
+                                params.put("height", 640);
                                 params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
+                                payload.put("models", new JSONArray()); // any available worker
                                 payload.put("shared", false);
                                 Thread.sleep(3000);
                             } else if (attemptSubmit == 2) {

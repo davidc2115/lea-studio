@@ -242,9 +242,9 @@
       F: "very large F-cup: substantial natural volume, deep full cleavage, heavy chest",
       G: "extremely full G-cup: very large natural breasts, deep cleavage, wide bust spanning the torso",
       // H/I/J: max volume accepté côté CF (vocabulaire mode, pas « balloon »)
-      H: "105H: very large full bust, heavy soft volume, very deep décolleté, wide chest, hourglass top-heavy silhouette, filled cups, prominent cleavage",
-      I: "110I: extremely large full bust, very heavy soft volume, very deep décolleté, wide chest spanning the torso, top-heavy hourglass, maximum fashion-magazine bust volume",
-      J: "110J: extremely large full bust, very heavy soft volume, very deep décolleté, wide heavy chest, top-heavy hourglass, maximum allowed large natural bust for editorial photo",
+      H: "105H: large full natural breasts, soft realistic volume, deep cleavage, proportional hourglass, photorealistic chest not cartoon",
+      I: "110I: very large full natural breasts, soft realistic volume, deep cleavage, proportional hourglass, photorealistic not exaggerated",
+      J: "110J: very large full natural breasts, soft heavy realistic volume, deep cleavage, photorealistic editorial body, not balloon, not cartoon",
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
     let engineHint = "";
@@ -470,7 +470,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "CRITICAL: same face as reference. Completely NEW outfit and NEW full-body pose different from the reference photo. RAW photo adult 18+, photorealistic DSLR, sharp natural skin, sexy fashion, identity locked,";
+      : "CRITICAL: same face as reference photo. Completely NEW outfit and NEW pose. Photorealistic DSLR photo adult 18+, natural skin pores, realistic proportions, sharp eyes, no plastic skin, sexy fashion clothing, identity locked,";
 
     const base = [
       mood,
@@ -1392,20 +1392,19 @@
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "TIERCES PERSONNES — RÈGLE ABSOLUE:",
-      "Si le joueur parle À une autre personne (ma femme, Claire, ma fille, mon frère…), ou la décrit dans *…*, tu DOIS faire répondre cette personne dans TA réponse.",
-      "Format OBLIGATOIRE — chaque type sur sa ligne:",
-      "  *action de " + charName + "*",
-      "  [PrénomTiers]: uniquement ses paroles (dialogue court, rien d'autre sur cette ligne)",
-      "  (pensée courte de " + charName + ")",
-      "  dialogue normal de " + charName + " sans préfixe",
-      "Exemple correct:",
-      "*J'entends le grincement du lit derrière la cloison.*",
-      "[Claire]: Oh… mon dieu, oui…",
-      "(Il ne perd vraiment pas de temps.)",
-      "INTERDIT: coller pensées/actions de " + charName + " sur la même ligne que [Claire]:.",
-      "INTERDIT: mettre [" + charName + "]: devant les paroles de " + charName + ".",
-      "OBLIGATOIRE: au moins une ligne [NomTiers]: quand le joueur s'adresse à quelqu'un d'autre.",
+      "TIERCES PERSONNES — TOUJOURS ACTIF:",
+      "Dès que le joueur mentionne, touche, embrasse, parle à, ou décrit une autre personne (ma femme, Claire, ma fille, mon frère, un ami…), cette personne DOIT parler dans ta réponse.",
+      "Format strict, une idée par ligne:",
+      "*action de " + charName + "*",
+      "[Prénom]: uniquement les paroles de la tierce (ex: [Claire]: Oh… oui…)",
+      "(pensée courte de " + charName + ")",
+      "paroles de " + charName + " sans crochets",
+      "Exemple:",
+      "*J'entends le grincement du lit.*",
+      "[Claire]: Oh mon dieu… si fort…",
+      "(C'est excitant d'écouter.)",
+      "INTERDIT: ignorer la tierce; coller tout sur une seule ligne; préfixer " + charName + " avec [Nom].",
+      "Si le joueur agit avec sa femme/Claire: au minimum une ligne [Claire]: ou [Ma femme]:.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
@@ -1876,7 +1875,7 @@
       const lastUser = [...(messages || [])].reverse().find((m) => m && m.role === "user");
       const u = String(lastUser && lastUser.content || "");
       const thirdHints = [];
-      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b/i.test(u)) thirdHints.push("[Claire]: ou [Ma femme]:");
+      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b|embrasse\s+(ma\s+)?femme|caresse\s+(ma\s+)?femme|baiser\s+(ma\s+)?femme|avec\s+(ma\s+)?femme/i.test(u)) thirdHints.push("[Claire]: ou [Ma femme]:");
       if (/\b(ma|ta|sa)\s+fille\b/i.test(u)) thirdHints.push("[Ta fille]:");
       if (/\b(mon|ton|son)\s+fils\b/i.test(u)) thirdHints.push("[Ton fils]:");
       if (/\b(ma|ta|sa)\s+s[oe]ur\b/i.test(u)) thirdHints.push("[Ta sœur]:");
@@ -2046,7 +2045,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.58;
+          const denoise = 0.52;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
