@@ -514,8 +514,22 @@ function formatMessageHtml(text, options) {
   const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
   const activeName = typeof state !== "undefined" && state.character ? String(state.character.name || "") : "";
   const bubbleTurns = !!(options && options.bubbleTurns);
+    function isMainSpeaker(name) {
+    if (!name) return true;
+    const normalize = (value) => String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase()
+      .replace(/\bpersonnage principal\b/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    const candidate = normalize(name);
+    const active = normalize(activeName);
+    if (!candidate || candidate === active) return true;
+    return candidate === active.split(/\s+/)[0];
+  }
   function renderTurn(name, body) {
-    const isMain = !name || name.localeCompare(activeName, undefined, { sensitivity: "accent" }) === 0;
+    const isMain = isMainSpeaker(name);
     const formatted = formatSegments(body);
     if (!bubbleTurns) {
       if (isMain) return formatted;

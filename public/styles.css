@@ -404,23 +404,43 @@ main {
   border: 1px solid rgba(255,107,203,.25);
   border-bottom-right-radius: 6px;
 }
-.bubble .action { color: var(--action); font-style: italic; display: inline; }
-.bubble .thought { color: var(--thought); opacity: .9; font-style: italic; font-weight: 400; }
+.bubble .action { color: var(--action); font-style: italic; }
+.bubble .thought { color: var(--thought); opacity: .95; font-style: italic; font-weight: 400; }
 .bubble .speech { color: var(--speech); }
 .bubble .speaker {
   display: inline-flex;
   align-items: center;
-  color: #ffb3d9;
+  color: var(--muted);
   font-weight: 700;
   font-size: 0.82em;
   letter-spacing: 0.02em;
   margin: 0 0 4px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255,126,185,.22), rgba(167,139,250,.18));
-  border: 1px solid rgba(255,126,185,.35);
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border: 0;
 }
 .bubble .speaker::before { content: none; }
+.bubble.speaker-turn { margin: 0 0 8px; }
+.bubble.speaker-main {
+  box-shadow: 0 3px 14px rgba(0, 0, 0, .14);
+}
+.bubble.third-party-turn {
+  border: 0;
+  border-left: 3px solid #ff7eb9;
+  box-shadow: none;
+}
+.bubble .speaker-turn-body,
+.bubble .third-party-body { line-height: 1.45; }
+.bubble .third-party {
+  margin: 10px 0 8px;
+  padding: 8px 12px 10px;
+  border-radius: 0;
+  background: none;
+  border-left: 3px solid #ff7eb9;
+  box-shadow: none;
+}
+.bubble .third-party-body { line-height: 1.45; }
 .chat-input-row {
   display: flex; gap: 8px; align-items: flex-end;
   padding-top: 8px; border-top: 1px solid rgba(167,139,250,.15);
