@@ -804,7 +804,7 @@ public class LeaBridge {
                     params.put("width", 512);
                     params.put("height", 640);
                     // steps + cfg_scale fixés après calcul du denoise
-                    double denoise = 0.42;
+                    double denoise = 0.58;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -820,8 +820,8 @@ public class LeaBridge {
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
                     // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
-                    double cfg = denoise >= 0.64 ? 7.5 : 6.5;
-                    int steps = registered ? 22 : 16;
+                    double cfg = denoise >= 0.70 ? 7.0 : (denoise >= 0.55 ? 6.5 : 6.0);
+                    int steps = registered ? 24 : 18;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -831,7 +831,8 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
+                        + ", photorealistic, sharp focus, natural skin texture, detailed face, full body composition, head in frame"
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, copy of reference pose, same outfit as reference, cropped head, headless");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {

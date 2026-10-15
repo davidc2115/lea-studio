@@ -358,10 +358,11 @@
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
-      ? ("FACE LOCK input_image_0: the generated woman MUST be the SAME person as the reference photo — identical face shape, eyes, nose, lips, hair color and style, skin tone, age. " +
-         "Do not invent a different model face. Keep body morphology and breast size from description. " +
-         "Only change outfit, pose and background. Photorealistic RAW photo, natural skin, sharp focus.")
-      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman.");
+      ? ("FACE LOCK input_image_0: SAME person as reference — identical face, eyes, nose, lips, hair color/style, skin, age. " +
+         "Keep body type and breast size from description. " +
+         "CRITICAL: completely NEW outfit, NEW pose, NEW camera angle — do NOT copy the reference pose, stance, hand position or clothing. " +
+         "Photorealistic RAW photo, natural skin texture, sharp facial detail, full body in frame, head visible.")
+      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman, full body, head visible.");
 
     // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
@@ -469,7 +470,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "CRITICAL: same face as reference photo (identical features). RAW photo adult 18+, photorealistic, sharp, natural skin, new outfit and pose only, keep identity, sensual fashion allowed,";
+      : "CRITICAL: same face as reference. Completely NEW outfit and NEW full-body pose different from the reference photo. RAW photo adult 18+, photorealistic DSLR, sharp natural skin, sexy fashion, identity locked,";
 
     const base = [
       mood,
@@ -2045,7 +2046,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.42;
+          const denoise = 0.58;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
