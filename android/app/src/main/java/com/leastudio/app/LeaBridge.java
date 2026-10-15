@@ -801,14 +801,9 @@ public class LeaBridge {
                     JSONObject params = new JSONObject();
                     // Qualité type "scène" (e307da2): 576×768 + denoise 0.72 si clé
                     // Anonyme: 512×640 pour éviter heavy demand
-                    if (registered) {
-                        params.put("width", 576);
-                        params.put("height", 768);
-                    } else {
-                        params.put("width", 512);
-                        params.put("height", 640);
-                    }
-                    double denoise = 0.72;
+                    params.put("width", 512);
+                    params.put("height", 768);
+                    double denoise = 0.55;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -824,8 +819,8 @@ public class LeaBridge {
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
                     // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
-                    double cfg = denoise >= 0.85 ? 7.0 : (denoise >= 0.70 ? 6.5 : 6.0);
-                    int steps = registered ? 30 : 20;
+                    double cfg = 7.0;
+                    int steps = registered ? 28 : 20;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -834,9 +829,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork
-                        + ", photorealistic, sharp focus, natural skin texture, 8k uhd, detailed face, full body"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, wax skin, balloon breasts");
+                    payload.put("prompt", promptWork + ", photorealistic photograph, natural lighting, sharp focus, realistic skin ### painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
@@ -850,8 +843,8 @@ public class LeaBridge {
                     } else {
                         sourceB64 = null;
                     }
-                    payload.put("nsfw", true);
-                    payload.put("censor_nsfw", false);
+                    payload.put("nsfw", false);
+                    payload.put("censor_nsfw", true);
                     payload.put("trusted_workers", false);
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
@@ -861,7 +854,7 @@ public class LeaBridge {
                     JSONArray models = new JSONArray();
                     models.put("ICBINP - I Can't Believe It's Not Photography");
                     models.put("Realistic Vision");
-                    models.put("DreamShaper");
+                    models.put("AbsoluteReality");
                     payload.put("models", models);
 
                     String acceptedRaw = null;
