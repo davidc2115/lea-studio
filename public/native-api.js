@@ -374,7 +374,7 @@
         poseH,
         hasRefH ? "same face as reference image, keep identity, change outfit and pose" : "",
         "natural skin, sharp eyes, realistic body, DSLR photo",
-        "one person, no text, no watermark",
+        "one person, fully clothed, modest fashion, no text, no watermark, SFW,",
       ].filter(Boolean).join(", ");
       if (extra) ph += ", " + String(extra).slice(0, 80);
       return ph.slice(0, 900);
@@ -1989,27 +1989,43 @@
 
     let system = buildSystemPrompt(char, st, loadLongTermMemory(charId));
     // Détecter si le joueur s'adresse à une tierce → forcer sa réplique
+    let requiredThirdTags = [];
     try {
       const lastUser = [...(messages || [])].reverse().find((m) => m && m.role === "user");
       const u = String(lastUser && lastUser.content || "");
       const thirdHints = [];
-      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b|embrasse\s+(ma\s+)?femme|caresse\s+(ma\s+)?femme|baiser\s+(ma\s+)?femme|avec\s+(ma\s+)?femme/i.test(u)) thirdHints.push("[Claire]: ou [Ma femme]:");
+      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b|embrasse\s+(ma\s+)?femme|caresse\s+(ma\s+)?femme|baiser\s+(ma\s+)?femme|avec\s+(ma\s+)?femme|parle\s+[àa]\s+(ma\s+)?femme/i.test(u)) {
+        thirdHints.push("[Claire]:");
+        thirdHints.push("[Ma femme]:");
+      }
       if (/\b(ma|ta|sa)\s+fille\b/i.test(u)) thirdHints.push("[Ta fille]:");
       if (/\b(mon|ton|son)\s+fils\b/i.test(u)) thirdHints.push("[Ton fils]:");
       if (/\b(ma|ta|sa)\s+s[oe]ur\b/i.test(u)) thirdHints.push("[Ta sœur]:");
       if (/\b(mon|ton|son)\s+fr[eè]re\b/i.test(u)) thirdHints.push("[Ton frère]:");
-      if (/\b(ma|ta|sa)\s+m[eè]re\b|\bbelle-?m[eè]re\b/i.test(u)) thirdHints.push("[Ta mère]: ou [Belle-mère]:");
+      if (/\b(ma|ta|sa)\s+m[eè]re\b|\bbelle-?m[eè]re\b/i.test(u)) {
+        thirdHints.push("[Ta mère]:");
+        thirdHints.push("[Belle-mère]:");
+      }
+      if (/\b(mon|ton|son)\s+ami\b|\b(ma|ta|sa)\s+amie\b/i.test(u)) thirdHints.push("[Ami]:");
       // Prénom capitalisé hors personnage
       const charLow = String((char && char.name) || "").toLowerCase();
       const names = u.match(/\b([A-ZÀ-Ü][a-zà-ü'’-]{2,20})\b/g) || [];
       for (const n of names) {
         if (charLow && n.toLowerCase() === charLow.split(/\s+/)[0]) continue;
-        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non)$/i.test(n)) continue;
+        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci)$/i.test(n)) continue;
         thirdHints.push("[" + n + "]:");
       }
+      // Verbes d'adresse génériques
+      if (/\b(parle|dis|demande|réponds|appelle|appelle|embrasse|caresse|touche|baise|regarde)\b.{0,40}\b(lui|elle|eux|elles)\b/i.test(u) && thirdHints.length === 0) {
+        thirdHints.push("[Elle]:");
+      }
       if (thirdHints.length) {
-        const uniq = [...new Set(thirdHints)].slice(0, 4);
-        system += "\n\nRAPPEL TOUR ACTUEL: le joueur implique une tierce personne. Ta réponse DOIT contenir au moins une ligne de dialogue de cette personne au format " + uniq.join(" ou ") + " sur sa propre ligne. Sans ça la réponse est invalide.";
+        requiredThirdTags = [...new Set(thirdHints)].slice(0, 6);
+        system += "\n\nRAPPEL TOUR ACTUEL — TIERCE PERSONNE OBLIGATOIRE:\n" +
+          "Le joueur implique une autre personne. Ta réponse DOIT contenir AU MOINS une ligne exactement au format:\n" +
+          requiredThirdTags.join("  ou  ") + "\n" +
+          "Exemple strict:\n*je regarde vers elle*\n[Claire]: Oui… continue…\n(mon cœur s'emballe)\nTu es sûr ?\n" +
+          "INTERDIT d'ignorer la tierce. Sans ligne [Nom]: la réponse est invalide.";
       }
     } catch (_) {}
     const engine = (st && st.chatEngine) || "gemini";
@@ -2036,18 +2052,44 @@
         ? ["groq", "gemini"]
         : ["gemini", "groq"];
 
+    function replyHasThirdParty(text, tags) {
+      if (!tags || !tags.length) return true;
+      const s = String(text || "");
+      // Accepte [Nom]: ou Nom: en début de ligne
+      if (/\[[^\]]{1,40}\]\s*:/.test(s)) return true;
+      if (/(^|\n)\s*(?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?m[eè]re|Claire|Ami)[^\n]{0,20}:/i.test(s)) return true;
+      for (const tag of tags) {
+        const name = String(tag).replace(/[\[\]:]/g, "").trim();
+        if (name && new RegExp("\\[" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\]\\s*:", "i").test(s)) return true;
+      }
+      return false;
+    }
+
+    async function callOne(eng, sys) {
+      if (eng === "gemini" && geminiKeys.length) return extractMemoryEnvelope(await callGemini(geminiKeys, sys, hist));
+      if (eng === "openai" && openaiKeys.length) return extractMemoryEnvelope(await callOpenAI(openaiKeys, sys, hist));
+      if (eng === "groq" && groqKeys.length) return extractMemoryEnvelope(await callGroq(groqKeys, sys, hist));
+      return null;
+    }
+
     const errors = [];
     for (const eng of order) {
       try {
-        if (eng === "gemini" && geminiKeys.length)
-          return extractMemoryEnvelope(await callGemini(geminiKeys, system, hist));
-        if (eng === "openai" && openaiKeys.length)
-          return extractMemoryEnvelope(await callOpenAI(openaiKeys, system, hist));
-        if (eng === "groq" && groqKeys.length)
-          return extractMemoryEnvelope(await callGroq(groqKeys, system, hist));
+        let result = await callOne(eng, system);
+        if (!result) continue;
+        // Si tierce exigée mais absente → un seul retry avec rappel ultra-court
+        if (requiredThirdTags.length && !replyHasThirdParty(result.reply, requiredThirdTags)) {
+          const forceSys = system + "\n\nCORRECTION IMMÉDIATE: ta réponse précédente n'avait AUCUNE ligne [Nom]:. " +
+            "Réécris TOUT le message en incluant obligatoirement une ligne " + requiredThirdTags[0] + " avec les paroles de la tierce personne.";
+          try {
+            const retry = await callOne(eng, forceSys);
+            if (retry && replyHasThirdParty(retry.reply, requiredThirdTags)) result = retry;
+            else if (retry) result = retry; // on garde quand même
+          } catch (_) {}
+        }
+        return result;
       } catch (e) {
         errors.push(eng + ": " + e.message);
-        // Ne bascule que si quota / indispo / 404 — pas sur simple filtre
         const em = String(e.message || e);
         if (!/429|quota|indisponible|404|timeout|RESOURCE|exhausted| Groq|Gemini/i.test(em) && errors.length >= 1) {
           break;
