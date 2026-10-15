@@ -256,7 +256,7 @@
         J: "the largest physically plausible natural cup volume, broad, heavy, and strongly projected",
       };
       engineHint = " HIGH PRIORITY PROFILE CUP " + sizeLabel + ": " + cloudflareScale[cupKey] +
-        ". Make the bust visibly large even under clothing, with a full wide silhouette and strong forward projection; do not render a medium or average chest.";
+        ". Show a clearly full, broad chest silhouette with strong natural forward projection, visible beneath fitted clothing.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
       engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
     } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
@@ -264,7 +264,7 @@
     }
     const lock = "Breast size " + sizeLabel + ": " + guide + "." + engineHint +
       (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0
-        ? " The explicit profile cup size overrides any smaller bust shown in the reference image or other appearance text."
+        ? " The explicit profile cup size defines bust volume independently of the reference image."
         : "");
     let neg = "balloon breasts, breast expansion, deformed chest, cartoon boobs, plastic implants look";
     if ("ABC".indexOf(cupKey) >= 0) neg += ", enormous breasts, oversized bust, hyper breasts";
@@ -350,9 +350,12 @@
     if (eng.indexOf("horde") >= 0) {
       const nameH = String(c.name || "woman").slice(0, 60);
       const ageH = Math.max(18, parseInt(c.age, 10) || 22);
-      const looksH = String(c.looks_en || "").trim().slice(0, 180);
-      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
+      const looksH = String(c.looks_en || "").trim().slice(0, 220);
+      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 360);
       const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
+      const bustInfoH = describeBustLock(bustH, appH, "horde");
+      const bodyInfoH = describeBodyMorphology(c);
+      const largeBustH = /[FGHIJ]$/.test(bustInfoH.label);
       const sfwOutfits = [
         "cream long-sleeve knit dress with opaque tights, bright apartment",
         "cobalt blazer over an ivory blouse and tailored trousers, modern hallway",
@@ -375,7 +378,14 @@
         "soft gray knit top with a deep-blue skirt, library interior",
         "black long-sleeve dress with a gold belt, warm hotel hallway"
       ];
-      const outfitH = sfwOutfits[Math.floor(Math.random() * sfwOutfits.length)];
+      const fittedBustOutfits = [
+        "well-fitted structured dress with visible natural bust volume, bright apartment",
+        "tailored wrap dress fitted across a full bust, modern hallway",
+        "fitted square-neck dress that shows the natural bust silhouette, hotel lobby",
+        "close-fitting satin dress with a moderate neckline and full natural bust volume"
+      ];
+      const outfitPool = largeBustH ? fittedBustOutfits : sfwOutfits;
+      const outfitH = outfitPool[Math.floor(Math.random() * outfitPool.length)];
       const posesH = [
         "walking in profile across the room, head turned toward camera",
         "seated upright on a wooden chair, feet on the floor, hands relaxed in lap",
@@ -386,22 +396,42 @@
         "walking down stairs while looking back, full body",
         "standing beside a table, hands loosely resting on it, side-angle camera"
       ];
-      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
+      const bustPosesH = [
+        "full-length three-quarter front view, shoulders open, arms relaxed away from the chest",
+        "full-length standing with one hand at the hip and the other relaxed by her side, chest unobstructed",
+        "full-length seated upright, shoulders open, hands below the bust, front three-quarter view",
+        "full-length standing naturally, arms relaxed at her sides, clear body silhouette"
+      ];
+      const posePoolH = largeBustH ? bustPosesH : posesH;
+      const poseH = posePoolH[Math.floor(Math.random() * posePoolH.length)];
       const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-      let ph = [
-        "photorealistic full-body photo of adult " + ageH + " year old woman",
+      const idLockH = hasRefH
+        ? "IDENTITY LOCK: same exact adult woman as the reference; preserve her facial geometry, eyes, nose, lips, hair color and style, skin tone, ethnicity, and apparent age. Do not substitute or reinterpret her identity."
+        : "Follow the profile identity and physical description exactly.";
+      const ph = [
+        "Photorealistic full-body SFW fashion photo of an adult woman, head and face clearly visible",
         nameH,
-        "Appearance is identity and body description only; do not copy clothing or pose details: " + (looksH || appH),
-        bustH ? ("bra size " + bustH + ", realistic proportions") : "",
-        "wearing " + outfitH,
-        poseH,
-        hasRefH ? "Use reference only for recognizable face, hair, eyes and skin; do not copy its pose, stance, outfit, camera angle, crop, lighting or background" : "",
-        "New composition, new full-body pose, different outfit, natural anatomy, realistic hands and proportions",
-        "photorealistic skin, sharp eyes, anatomically coherent body, natural joints and realistic hands",
-        "one person, fully clothed, modest fashion, no text, no watermark, SFW,",
-      ].filter(Boolean).join(", ");
-      if (extra) ph += ", " + String(extra).slice(0, 80);
-      return ph.slice(0, 900);
+        idLockH,
+        looksH ? "Appearance traits: " + looksH : "",
+        appH ? "Detailed profile description: " + appH : "",
+        bodyInfoH.lead || "",
+        bodyInfoH.lock || "",
+        bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
+        "NEW outfit, distinct from the reference: " + outfitH,
+        "NEW full-body pose: " + poseH,
+        "Use the reference only to preserve identity; do not copy its clothes, posture, arm position, framing, lighting, or background.",
+        "Natural anatomy, realistic hands and proportions, sharp facial details, single person, no text or watermark"
+      ].filter(Boolean).join(". ");
+      if (extra) ph += ". " + String(extra).slice(0, 80);
+      const finalIdentityH = hasRefH
+        ? "Same recognizable face, hair and skin as the reference; preserve the character's described features and apparent age."
+        : "Match the profile's described face and appearance exactly.";
+      const finalBustH = largeBustH
+        ? "Canonical profile size " + bustInfoH.label + ": visibly full broad natural bust with forward projection, shown through fitted clothing; the profile description controls body shape."
+        : "";
+      const suffixH = [finalIdentityH, finalBustH].filter(Boolean).join(" ");
+      const maxPromptLength = 1800;
+      return ph.slice(0, maxPromptLength - suffixH.length - 2).trimEnd() + ". " + suffixH;
     }
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
@@ -417,9 +447,20 @@
     const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
+    const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
     const bodyInfo = describeBodyMorphology(c);
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
+    const promptDescription = (value) => hasLargeCloudflareBust
+      ? String(value || "")
+          .replace(/\b(?:small|tiny|flat|modest|average|medium)\s+(?:natural\s+)?(?:breasts?|bust|chest)\b/gi, "")
+          .replace(/\b(?:breasts?|bust|chest)\s+(?:is|are|stays?)?\s*(?:small|tiny|flat|modest|average|medium)\b/gi, "")
+          .replace(/\b(?:petite|petits|petit|menue|discr[eè]te)\s+(?:poitrine|seins|buste|bonnet)\b/gi, "")
+          .replace(/\b(?:poitrine|seins|buste)\s+(?:petite|petits|menue|discr[eè]te|moyenne)\b/gi, "")
+      : String(value || "");
+    const appearancePrompt = promptDescription(appearanceClean || appearance || "match character sheet.");
+    const looksPrompt = promptDescription(looksEn);
+    const bodyPrompt = promptDescription(bodyField);
     const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
       ? ("FACE LOCK input_image_0: SAME person as reference — identical face, eyes, nose, lips, hair color/style, skin, age. " +
          "Follow the profile body description and prioritize its explicit cup size even if the reference chest appears smaller. " +
@@ -541,23 +582,33 @@
       bodyInfo.lock + ",",
       bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
-      looksEn ? ("Technical looks: " + looksEn + ".") : "",
-      bodyField ? ("Body notes: " + bodyField + ".") : "",
+      looksPrompt ? ("Technical looks: " + looksPrompt + ".") : "",
+      bodyPrompt ? ("Body notes: " + bodyPrompt + ".") : "",
       "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
       "Outfit: " + outfit + ".",
       "Pose: " + pose + ".",
       "Location: " + scene + ".",
       faceLock,
-      "Physical description: " + (appearanceClean || appearance || "match character sheet.") + ".",
+      "Physical description: " + appearancePrompt + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
-      "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
+      forCloudflare
+        ? "natural anatomically plausible proportions, realistic body and clothing fit,"
+        : "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
+    if (hasLargeCloudflareBust) {
+      const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+        ": clearly full, broad natural bust with strong forward projection and heavy soft volume; " +
+        "show its complete silhouette through well-fitted clothing, with shoulders open and arms away from the chest. " +
+        "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
+      const maxLength = 1600;
+      return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
+    }
     return out.slice(0, forCloudflare ? 1600 : 1800);
   }
 
@@ -573,23 +624,41 @@
       "cozy sweater and skirt, lifestyle photography",
       "smart casual outfit, portrait full body",
     ];
-    const outfit = softOutfits[Math.min(attempt, softOutfits.length - 1)];
     const bustInfo = describeBustLock(
       String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || ""),
       appearance,
       "cloudflare"
     );
-    return [
+    const largeBust = /[FGHIJ]$/.test(bustInfo.label);
+    const retryAppearance = largeBust
+      ? appearance
+          .replace(/\b(?:small|tiny|flat|modest|average|medium)\s+(?:natural\s+)?(?:breasts?|bust|chest)\b/gi, "")
+          .replace(/\b(?:breasts?|bust|chest)\s+(?:is|are|stays?)?\s*(?:small|tiny|flat|modest|average|medium)\b/gi, "")
+          .replace(/\b(?:petite|petits|petit|menue|discr[eè]te)\s+(?:poitrine|seins|buste|bonnet)\b/gi, "")
+          .replace(/\b(?:poitrine|seins|buste)\s+(?:petite|petits|menue|discr[eè]te|moyenne)\b/gi, "")
+      : appearance;
+    const outfit = largeBust
+      ? "well-fitted structured fashion dress with visible natural bust volume, not loose or compressive"
+      : softOutfits[Math.min(attempt, softOutfits.length - 1)];
+    const retryParts = [
       "photorealistic full body photo of adult woman 18+,",
       "identity match reference input_image_0 for " + name + ",",
-      appearance ? appearance.slice(0, 280) + "," : "",
+      retryAppearance ? retryAppearance.slice(0, 280) + "," : "",
       bustInfo.lock + ",",
-      "avoid: " + bustInfo.neg + ",",
       outfit + ",",
-      "standing full length, natural pose, soft indoor light,",
+      largeBust
+        ? "standing full length in a three-quarter front view, shoulders open, arms away from the chest, natural fabric drape,"
+        : "standing full length, natural pose, soft indoor light,",
       "fashion safe for work, no explicit content, no nudity,",
       "single person, no text, high quality, realistic proportions",
-    ].filter(Boolean).join(" ").slice(0, 1400);
+    ].filter(Boolean).join(" ");
+    if (largeBust) {
+      const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+        ": visibly full broad natural bust with forward projection and soft weight; show its complete silhouette through fitted clothing, shoulders open and arms away from the chest. " +
+        "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
+      return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
+    }
+    return retryParts.slice(0, 1400);
   }
 
 
@@ -2237,7 +2306,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.72;
+          const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
