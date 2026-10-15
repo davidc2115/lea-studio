@@ -820,8 +820,8 @@ public class LeaBridge {
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
                     // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
-                    double cfg = denoise >= 0.70 ? 7.0 : (denoise >= 0.55 ? 6.5 : 6.0);
-                    int steps = registered ? 26 : 20;
+                    double cfg = denoise >= 0.64 ? 7.5 : 6.5;
+                    int steps = registered ? 22 : 16;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -831,8 +831,7 @@ public class LeaBridge {
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
                     payload.put("prompt", promptWork
-                        + ", photorealistic RAW photo, DSLR, natural skin texture pores, realistic body proportions, detailed eyes, sharp face, full body head to toe in frame, soft natural light"
-                        + " ### child, underage, loli, young teen, baby, painting, illustration, anime, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality, plastic skin, wax figure, overprocessed, balloon breasts, copy of reference pose, same outfit as reference, cropped head, headless, mannequin");
+                        + " ### child, underage, loli, young teen, baby, painting, illustration, cgi, 3d render, low quality, blurry, deformed, extra limbs, bad anatomy, worst quality");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
@@ -854,12 +853,7 @@ public class LeaBridge {
                     payload.put("shared", false);
                     payload.put("replacement_filter", false);
                     // Laisser les workers choisir un modèle réaliste dispo
-                    JSONArray preferredModels = new JSONArray();
-                    preferredModels.put("ICBINP - I Can't Believe It's Not Photography");
-                    preferredModels.put("Realistic Vision");
-                    preferredModels.put("DreamShaper");
-                    preferredModels.put("stable_diffusion");
-                    payload.put("models", preferredModels);
+                    payload.put("models", new JSONArray());
 
                     String acceptedRaw = null;
                     JSONObject accepted = null;
