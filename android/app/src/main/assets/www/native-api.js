@@ -354,31 +354,50 @@
       const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
       const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
       const sfwOutfits = [
-        "elegant beige mini dress, modest heels, hotel hallway",
-        "olive green satin cocktail dress, classic interior",
-        "black long-sleeve bodycon dress, soft indoor light",
-        "navy blouse and fitted skirt, living room daylight",
-        "cream sweater dress, apartment doorway",
-        "burgundy wrap dress, marble staircase",
+        "cream long-sleeve knit dress with opaque tights, bright apartment",
+        "cobalt blazer over an ivory blouse and tailored trousers, modern hallway",
+        "burgundy satin midi dress with short sleeves, hotel lobby",
+        "navy fitted blouse and charcoal pleated skirt, daylight studio",
+        "red wrap dress with a waist belt and black pumps, city interior",
+        "white button-up shirt and dark straight-leg jeans, casual doorway",
+        "plum long-sleeve evening dress, hotel staircase",
+        "mustard sweater and black midi skirt, cozy library",
+        "black tailored jumpsuit with a square neckline, warm lounge",
+        "soft blue cardigan over a simple dress, bright living room",
+        "cream blouse and wine-red trousers, contemporary apartment",
+        "teal knee-length dress with cap sleeves, marble corridor",
+        "charcoal blazer and tailored trousers over a white top, office lounge",
+        "rose-colored midi dress with a modest V neckline, softly lit room",
+        "lavender sweater dress with opaque tights, wooden staircase",
+        "forest-green blouse with a beige A-line skirt, classic interior",
+        "coral short-sleeve dress with a simple neckline, sunny doorway",
+        "white blazer over a navy dress, elegant lobby",
+        "soft gray knit top with a deep-blue skirt, library interior",
+        "black long-sleeve dress with a gold belt, warm hotel hallway"
       ];
       const outfitH = sfwOutfits[Math.floor(Math.random() * sfwOutfits.length)];
       const posesH = [
-        "standing full body facing camera, natural pose",
-        "leaning on wall, one leg bent, full body",
-        "walking toward camera, full body, face clear",
-        "sitting on sofa edge, full body, face visible",
+        "walking in profile across the room, head turned toward camera",
+        "seated upright on a wooden chair, feet on the floor, hands relaxed in lap",
+        "standing in three-quarter profile beside a window, looking outside",
+        "mid-step through a doorway, photographed from the side",
+        "leaning lightly against a bookshelf, arms relaxed, camera at eye level",
+        "seated sideways on a bench, shoulders turned toward camera",
+        "walking down stairs while looking back, full body",
+        "standing beside a table, hands loosely resting on it, side-angle camera"
       ];
       const poseH = posesH[Math.floor(Math.random() * posesH.length)];
       const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
       let ph = [
         "photorealistic full-body photo of adult " + ageH + " year old woman",
         nameH,
-        looksH || appH,
+        "Appearance is identity and body description only; do not copy clothing or pose details: " + (looksH || appH),
         bustH ? ("bra size " + bustH + ", realistic proportions") : "",
         "wearing " + outfitH,
         poseH,
-        hasRefH ? "same face as reference image, keep identity, change outfit and pose" : "",
-        "natural skin, sharp eyes, realistic body, DSLR photo",
+        hasRefH ? "Use reference only for recognizable face, hair, eyes and skin; do not copy its pose, stance, outfit, camera angle, crop, lighting or background" : "",
+        "New composition, new full-body pose, different outfit, natural anatomy, realistic hands and proportions",
+        "photorealistic skin, sharp eyes, anatomically coherent body, natural joints and realistic hands",
         "one person, fully clothed, modest fashion, no text, no watermark, SFW,",
       ].filter(Boolean).join(", ");
       if (extra) ph += ", " + String(extra).slice(0, 80);
@@ -2218,7 +2237,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.55;
+          const denoise = 0.72;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
