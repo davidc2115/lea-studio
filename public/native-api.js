@@ -242,7 +242,7 @@
       F: "very large F-cup: substantial natural volume, deep full cleavage, heavy chest",
       G: "extremely full G-cup: very large natural breasts, deep cleavage, wide bust spanning the torso",
       // H/I/J: max volume accepté côté CF (vocabulaire mode, pas « balloon »)
-      H: "105H large full natural breasts, soft realistic cleavage, hourglass, photorealistic proportions",
+      H: "large full natural H-cup breasts, soft realistic cleavage, slim waist hourglass, photorealistic proportions not exaggerated",
       I: "110I: very large full natural breasts, soft realistic volume, deep cleavage, proportional hourglass, photorealistic not exaggerated",
       J: "110J: very large full natural breasts, soft heavy realistic volume, deep cleavage, photorealistic editorial body, not balloon, not cartoon",
     };
@@ -470,7 +470,7 @@
 
     const mood = forCloudflare
       ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference photo, identical face hair eyes skin. RAW photo adult 18+, sensual lingerie or sexy dress allowed, photorealistic, sharp, 8k, new pose and outfit, keep identity,";
+      : "SAME woman as reference, identical face. NEW outfit NEW pose NEW angle. RAW photo adult 18+, photorealistic 8k, natural skin, sexy clothing, keep identity,";
 
     const base = [
       mood,
@@ -2045,7 +2045,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.52;
+          const denoise = 0.72;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
