@@ -1194,14 +1194,16 @@
 
   const LONG_TERM_MEMORY_KEY = "lea.memory.";
   const LONG_TERM_MEMORY_FIELDS = {
-    scene: 600,
-    wardrobe: 500,
-    clothesLocation: 500,
-    relationship: 800,
-    intimacy: 1200,
-    promises: 500,
-    facts: 800,
+    scene: 900,
+    wardrobe: 700,
+    clothesLocation: 600,
+    relationship: 1200,
+    intimacy: 4500,
+    promises: 2500,
+    facts: 3000,
   };
+  // Champs qui s'ACCUMULENT (jamais écrasés par un résumé trop court)
+  const LONG_TERM_MEMORY_ACCUMULATE = ["intimacy", "promises", "facts"];
 
 
 
@@ -1314,18 +1316,66 @@
     }
   }
 
+  function splitMemoryChunks(text) {
+    return String(text || "")
+      .replace(/\s+/g, " ")
+      .split(/(?:\s*[;|•]\s*|\s*(?:\d+[.)]\s+)|\n+|(?<=[.!?])\s+(?=[A-ZÀ-Ü\(]))/)
+      .map((s) => s.trim())
+      .filter((s) => s.length > 8);
+  }
+
+  function mergeMemoryText(oldText, newText, maxLen) {
+    const oldT = String(oldText || "").trim();
+    const newT = String(newText || "").trim();
+    if (!newT) return oldT.slice(0, maxLen);
+    if (!oldT) return newT.slice(0, maxLen);
+    // Si le modèle renvoie déjà un cumul long qui contient l'ancien, on le garde
+    if (newT.length >= oldT.length * 0.7 && newT.toLowerCase().indexOf(oldT.slice(0, Math.min(40, oldT.length)).toLowerCase()) >= 0) {
+      return newT.slice(0, maxLen);
+    }
+    const seen = new Set();
+    const out = [];
+    function add(chunk) {
+      const n = chunk.toLowerCase().replace(/[^a-z0-9àâäéèêëïîôùûüç\s]/gi, " ").replace(/\s+/g, " ").trim();
+      if (n.length < 8) return;
+      // anti-doublon approximatif
+      for (const s of seen) {
+        if (s.indexOf(n) >= 0 || n.indexOf(s) >= 0) return;
+        if (s.slice(0, 48) === n.slice(0, 48)) return;
+      }
+      seen.add(n);
+      out.push(chunk);
+    }
+    splitMemoryChunks(oldT).forEach(add);
+    splitMemoryChunks(newT).forEach(add);
+    let joined = out.join(" · ");
+    if (joined.length > maxLen) {
+      // Garder la fin (plus récente) + début (plus ancien)
+      const keep = Math.floor(maxLen * 0.35);
+      joined = joined.slice(0, keep) + " … " + joined.slice(-(maxLen - keep - 3));
+    }
+    return joined.slice(0, maxLen);
+  }
+
   function updateLongTermMemory(patch, charId) {
-    const key = memoryKey(charId);
+    const storageKey = memoryKey(charId);
     const next = loadLongTermMemory(charId);
     if (patch && typeof patch === "object") {
-      Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((key) => {
-        if (typeof patch[key] === "string") {
-          next[key] = patch[key].trim().slice(0, LONG_TERM_MEMORY_FIELDS[key]);
+      Object.keys(LONG_TERM_MEMORY_FIELDS).forEach((field) => {
+        if (typeof patch[field] !== "string") return;
+        const incoming = patch[field].trim();
+        if (!incoming) return;
+        const maxLen = LONG_TERM_MEMORY_FIELDS[field];
+        if (LONG_TERM_MEMORY_ACCUMULATE.indexOf(field) >= 0) {
+          next[field] = mergeMemoryText(next[field], incoming, maxLen);
+        } else {
+          // scene / wardrobe / relationship : on accepte le remplacement si plus précis
+          next[field] = incoming.slice(0, maxLen);
         }
       });
     }
     next.updatedAt = Date.now();
-    localStorage.setItem(key, JSON.stringify(next));
+    localStorage.setItem(storageKey, JSON.stringify(next));
     return next;
   }
 
@@ -1333,7 +1383,8 @@
     const c = char || LEA;
     const m = normalizeLongTermMemory(memory);
     return [
-      "CONTINUITÉ ET MÉMOIRE LONGUE — règles prioritaires :",
+      "CONTINUITÉ ET MÉMOIRE LONGUE — règles prioritaires (priorité absolue sur le style) :",
+      "La mémoire INTIME, PROMESSES et FAITS est quasi illimitée et permanente pour cette conversation. Tu dois t'y conformer à chaque message.",
       "Le scénario d'origine du personnage est son point de départ canonique et permanent. Ne le remplace jamais par un événement survenu ensuite.",
       "Les événements de la conversation évoluent : continue depuis la scène la plus récente sans inventer une nouvelle arrivée.",
       "Ne contredis pas les derniers messages ni la mémoire ci-dessous. N'invente ni actions, paroles, promesses, limites ou événements passés.",
@@ -1347,14 +1398,16 @@
       "PROMESSES: " + (m.promises || "—"),
       "FAITS: " + (m.facts || "—"),
       "Après la réponse de roleplay UNIQUEMENT, ajoute un bloc technique invisible <LEA_MEMORY>{JSON}</LEA_MEMORY> (jamais dans le dialogue visible, toujours à la toute fin).",
-      "Le JSON est un patch invisible : n'y mets que les clés réellement changées parmi: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
-      "Chaque valeur remplace le résumé de sa catégorie, reste cumulative (ne perds pas les faits anciens pertinents), 1 à 4 phrases courtes.",
+      "Le JSON est un patch invisible à la fin. Clés possibles: scene, wardrobe, clothesLocation, relationship, intimacy, promises, facts.",
+      "OBLIGATOIRE si un moment intime, une promesse ou un fait nouveau apparaît dans CE tour : mets-le dans intimacy / promises / facts.",
+      "INTIME, PROMESSES et FAITS sont CUMULATIFS et PERMANENTS : toujours réécrire la catégorie EN GARDANT tout l'historique déjà listé dans INTIME/PROMESSES/FAITS ci-dessus, puis AJOUTER le nouveau. Interdit de résumer en oubliant le passé.",
+      "Pour scene/wardrobe/clothesLocation/relationship : 1 à 3 phrases à jour. Pour intimacy/promises/facts : liste cumulative (anciens + nouveaux), phrases courtes séparées par « · ».",
       "wardrobe = UNIQUEMENT ce qui est porté maintenant (pas l'emplacement des vêtements retirés).",
       "clothesLocation = où sont les vêtements retirés / rangés / qui sèchent (séparé de wardrobe).",
-      "intimacy = cumul des moments intimes réels du jeu: lieu, position (missionnaire, doggy, assise…), actes (oral, anal, pénétration…), moment de la journée, limites acceptées ou refusées. Ne jamais effacer un souvenir intime déjà enregistré sans raison explicite dans le dialogue.",
+      "intimacy = TOUS les moments intimes depuis le début (chronologique): lieu, position (missionnaire, doggy, assise…), actes (caresses, oral, anal, pénétration, orgasme…), moment de la journée, qui a initié, limites acceptées OU refusées. JAMAIS effacer un souvenir intime passé.",
       "relationship = évolution du lien (flirt, distance, complicité…).",
-      "promises = promesses ou accords (ex. revenir demain, ne pas le dire à X).",
-      "facts = faits partagés (prénom d'un tiers, métier, préférence…).",
+      "promises = TOUTES les promesses, accords, engagements pris depuis le début (ex. revenir demain, ne pas le dire à X, rester discret). Ne jamais oublier une promesse non annulée explicitement.",
+      "facts = TOUS les faits partagés depuis le début (prénom d'un tiers, métier, préférences, secrets, détails biographiques évoqués). Cumul permanent.",
       "Utilise {} si rien de durable n'a changé. N'ajoute jamais le scénario d'origine au patch.",
     ].join("\n");
   }
@@ -1401,6 +1454,32 @@
       .replace(/\{\s*"wardrobe"[\s\S]{0,800}$/g, "")
       .trim();
     return { reply: text, memoryUpdate };
+  }
+
+  /** Filet de sécurité: extrait intime / promesses / faits du tour si le modèle omet LEA_MEMORY */
+  function extractMemoryHintsFromTurn(userText, replyText) {
+    const blob = (String(userText || "") + "\n" + String(replyText || "")).replace(/\s+/g, " ").trim();
+    if (blob.length < 20) return null;
+    const patch = {};
+    const intimateRe = /\b(suce|fellation|branle|p[ée]n[ée]tr|baise|baiser|orgasme|jouissance|missionnaire|doggy|levrette|cowgirl|anal|chatte|cul|fesses|seins|caresse|doigte|l[eè]che|nude|nue|culotte|lingerie|mouill)/i;
+    if (intimateRe.test(blob)) {
+      let note = blob.slice(0, 280);
+      // Prefer last user explicit bit
+      const u = String(userText || "").replace(/\s+/g, " ").trim();
+      if (intimateRe.test(u) && u.length > 15) note = u.slice(0, 280);
+      patch.intimacy = note;
+    }
+    const promRe = /\b(je (te )?promet|promis|on se revoit|ne (le )?dis (pas|à)|je (ne )?dirai pas|engagement|d'?accord pour|je reviendrai|on garde (ça )?secret)/i;
+    if (promRe.test(blob)) {
+      patch.promises = blob.match(/.{0,60}(?:promet|promis|revoit|dirai|engagement|d'?accord|reviendrai|secret).{0,80}/i);
+      patch.promises = patch.promises ? patch.promises[0].trim().slice(0, 200) : blob.slice(0, 160);
+    }
+    const factRe = /\b(je m'?appelle|mon prénom|j'?ai \d{2} ans|je travaille|mon métier|je suis (mariée|divorcée|veuve|célibataire)|j'?habite|ma fille|mon mari|mon frère)/i;
+    if (factRe.test(blob)) {
+      const m = blob.match(/.{0,40}(?:je m'?appelle|prénom|travaille|métier|mariée|divorcée|veuve|célibataire|j'?habite|ma fille|mon mari).{0,60}/i);
+      patch.facts = m ? m[0].trim().slice(0, 180) : "";
+    }
+    return Object.keys(patch).length ? patch : null;
   }
 
   function buildSystemPrompt(char, st, memory) {
@@ -2056,7 +2135,15 @@
       const st = body.settings || settings();
       const generated = await generateReply(char, messages, st, charId);
       const reply = generated.reply;
-      if (generated.memoryUpdate) updateLongTermMemory(generated.memoryUpdate, charId);
+      let memPatch = generated.memoryUpdate || null;
+      try {
+        const lastUser = [...messages].reverse().find((m) => m && m.role === "user");
+        const hints = extractMemoryHintsFromTurn(lastUser && lastUser.content, reply);
+        if (hints) {
+          memPatch = Object.assign({}, hints, memPatch || {});
+        }
+      } catch (_) {}
+      if (memPatch) updateLongTermMemory(memPatch, charId);
       messages.push({ role: "assistant", content: reply, ts: Date.now() });
       save(key, { messages });
       return { reply, messages };
