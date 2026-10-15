@@ -201,6 +201,7 @@
 
   /** Traduit une taille (ex. 95D) en consignes réalistes pour le modèle */
   function describeBustLock(bustRaw, appearanceText, engine) {
+    const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
     let bust = String(bustRaw || "").trim();
     if (!bust && appearanceText) {
       const m = String(appearanceText).match(/\b(\d{2,3})\s*([A-Ka-k])\b/) ||
