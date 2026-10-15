@@ -543,17 +543,30 @@ function formatMessageHtml(text, options) {
     return '<div class="' + bubbleClass + '"><div class="speaker">' + speaker +
       '</div><div class="' + bodyClass + '">' + formatted + "</div></div>";
   }
-  let html = parts[0] && parts[0].trim() ? renderTurn(activeName, parts[0].trim()) : "";
-  for (let i = 1; i < parts.length; i += 2) {
-    const name = String(parts[i] || "").trim();
-    const body = String(parts[i + 1] || "").trim();
-    if (!body) continue;
-    html += renderTurn(name, body);
-  }
-  return html;
-}
+  const groups = [];
+      const bySpeaker = new Map();
+      function addTurn(name, body) {
+        const content = String(body || "").trim();
+        if (!content) return;
+        const main = isMainSpeaker(name);
+        const label = main ? (activeName || String(name || "Personnage").trim()) : String(name || "Tierce personne").trim();
+        const key = main ? "__main__" : label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        let group = bySpeaker.get(key);
+        if (!group) {
+          group = { name: label, bodies: [] };
+          bySpeaker.set(key, group);
+          groups.push(group);
+        }
+        group.bodies.push(content);
+      }
+      addTurn(activeName, parts[0]);
+      for (let i = 1; i < parts.length; i += 2) {
+        addTurn(String(parts[i] || "").trim(), parts[i + 1]);
+      }
+      return groups.map((group) => renderTurn(group.name, group.bodies.join("\n"))).join("");
+    }
 
-function renderDiscover() {
+    function renderDiscover() {
   const c = state.character;
   const root = $("view-discover");
   if (!root) return;
