@@ -201,46 +201,6 @@
 
   /** Traduit une taille (ex. 95D) en consignes réalistes pour le modèle */
   function describeBustLock(bustRaw, appearanceText, engine) {
-    const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
-    // Horde: prompt COURT + tenues SFW (test qualité)
-    if (!forCloudflare) {
-      const nameH = String(c.name || "woman").slice(0, 60);
-      const ageH = Math.max(18, parseInt(c.age, 10) || 22);
-      const looksH = String(c.looks_en || "").trim().slice(0, 180);
-      const appH = String(c.appearance || "").replace(/[\u{1F300}-\u{1FAFF}]/gu, " ").replace(/\s+/g, " ").trim().slice(0, 280);
-      const bustH = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
-      const sfwOutfits = [
-        "elegant beige mini dress, modest heels, hotel hallway",
-        "olive green satin cocktail dress, classic interior",
-        "black long-sleeve bodycon dress, soft indoor light",
-        "navy blouse and fitted skirt, living room daylight",
-        "cream sweater dress, apartment doorway",
-        "burgundy wrap dress, marble staircase",
-      ];
-      const outfitH = sfwOutfits[Math.floor(Math.random() * sfwOutfits.length)];
-      const posesH = [
-        "standing full body facing camera, natural pose",
-        "leaning on wall, one leg bent, full body",
-        "walking toward camera, full body, face clear",
-        "sitting on sofa edge, full body, face visible",
-      ];
-      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
-      const hasRefH = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
-      let ph = [
-        "photorealistic full-body photo of adult " + ageH + " year old woman",
-        nameH,
-        looksH || appH,
-        bustH ? ("bra size " + bustH + ", realistic proportions") : "",
-        "wearing " + outfitH,
-        poseH,
-        hasRefH ? "same face as reference image, keep identity, change outfit and pose" : "",
-        "natural skin, sharp eyes, realistic body, DSLR photo",
-        "one person, no text, no watermark",
-      ].filter(Boolean).join(", ");
-      if (extra) ph += ", " + String(extra).slice(0, 80);
-      return ph.slice(0, 900);
-    }
-
     let bust = String(bustRaw || "").trim();
     if (!bust && appearanceText) {
       const m = String(appearanceText).match(/\b(\d{2,3})\s*([A-Ka-k])\b/) ||
@@ -379,6 +339,45 @@
 
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
+    const eng = String(engine || "").toLowerCase();
+    // Horde: prompt COURT + tenues SFW (test qualité) — c = character OK ici
+    if (eng.indexOf("horde") >= 0) {
+      const nameH = String(c.name || "woman").slice(0, 60);
+      const ageH = Math.max(18, parseInt(c.age, 10) || 22);
+      const looksH = String(c.looks_en || "").trim().slice(0, 180);
+      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
+      const bustH = String(c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
+      const sfwOutfits = [
+        "elegant beige mini dress, modest heels, hotel hallway",
+        "olive green satin cocktail dress, classic interior",
+        "black long-sleeve bodycon dress, soft indoor light",
+        "navy blouse and fitted skirt, living room daylight",
+        "cream sweater dress, apartment doorway",
+        "burgundy wrap dress, marble staircase",
+      ];
+      const outfitH = sfwOutfits[Math.floor(Math.random() * sfwOutfits.length)];
+      const posesH = [
+        "standing full body facing camera, natural pose",
+        "leaning on wall, one leg bent, full body",
+        "walking toward camera, full body, face clear",
+        "sitting on sofa edge, full body, face visible",
+      ];
+      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
+      const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
+      let ph = [
+        "photorealistic full-body photo of adult " + ageH + " year old woman",
+        nameH,
+        looksH || appH,
+        bustH ? ("bra size " + bustH + ", realistic proportions") : "",
+        "wearing " + outfitH,
+        poseH,
+        hasRefH ? "same face as reference image, keep identity, change outfit and pose" : "",
+        "natural skin, sharp eyes, realistic body, DSLR photo",
+        "one person, no text, no watermark",
+      ].filter(Boolean).join(", ");
+      if (extra) ph += ", " + String(extra).slice(0, 80);
+      return ph.slice(0, 900);
+    }
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
     const visuallyAdultAndConfirmed = c.adultConfirmed === true &&
