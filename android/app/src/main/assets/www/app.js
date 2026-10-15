@@ -433,6 +433,7 @@ function promptCharacterPayload(char) {
     name: c.name,
     age: c.age,
     title: c.title,
+    canonicalCupSize: c.canonicalCupSize || "",
     tags: c.tags,
     scenario: c.scenario,
     personality: c.personality,

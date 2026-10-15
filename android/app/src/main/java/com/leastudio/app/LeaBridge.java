@@ -37,6 +37,8 @@ public class LeaBridge {
     private static final ExecutorService HTTP_POOL = Executors.newCachedThreadPool();
     private static final ConcurrentHashMap<String, String> HTTP_JOBS = new ConcurrentHashMap<>();
     private static final AtomicLong HTTP_SEQ = new AtomicLong(1);
+    private static volatile long HORDE_PHOTO_MODELS_CACHED_AT = 0;
+    private static volatile String HORDE_PHOTO_MODELS_CACHE = "";
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
@@ -741,6 +743,48 @@ public class LeaBridge {
         throw last != null ? last : new java.io.IOException("AI Horde inaccessible (aihorde.net). Vérifie la connexion réseau.");
     }
 
+    private JSONArray hordePhotoModels(String apiKey) throws Exception {
+        long now = System.currentTimeMillis();
+        String cached = HORDE_PHOTO_MODELS_CACHE;
+        if (!cached.isEmpty() && now - HORDE_PHOTO_MODELS_CACHED_AT < 5 * 60 * 1000L) {
+            return new JSONArray(cached);
+        }
+        synchronized (LeaBridge.class) {
+            now = System.currentTimeMillis();
+            cached = HORDE_PHOTO_MODELS_CACHE;
+            if (!cached.isEmpty() && now - HORDE_PHOTO_MODELS_CACHED_AT < 5 * 60 * 1000L) {
+                return new JSONArray(cached);
+            }
+            JSONArray available = new JSONArray(hordeRequest("GET", "/api/v2/status/models", null, apiKey));
+            String[] preferred = new String[] {
+                "Realistic Vision", "Dreamshaper", "Deliberate",
+                "PerfectDeliberate", "Photon", "Juggernaut XL"
+            };
+            JSONArray selected = new JSONArray();
+            for (String wanted : preferred) {
+                for (int i = 0; i < available.length(); i++) {
+                    JSONObject model = available.optJSONObject(i);
+                    if (model == null || model.optInt("count", 0) <= 0) continue;
+                    if (!"image".equalsIgnoreCase(model.optString("type", ""))) continue;
+                    String name = model.optString("name", "").trim();
+                    if (wanted.equalsIgnoreCase(name) && !name.toLowerCase().contains("inpainting")) {
+                        selected.put(name);
+                        break;
+                    }
+                }
+                if (selected.length() >= 4) break;
+            }
+            if (selected.length() == 0) {
+                throw new java.io.IOException(
+                    "Aucun modèle photo AI Horde recommandé n’a de worker actif. Réessaie plus tard."
+                );
+            }
+            HORDE_PHOTO_MODELS_CACHE = selected.toString();
+            HORDE_PHOTO_MODELS_CACHED_AT = now;
+            return new JSONArray(HORDE_PHOTO_MODELS_CACHE);
+        }
+    }
+
     private byte[] hordeDownloadImage(String imageUrl) throws Exception {
         HttpURLConnection conn = null;
         try {
@@ -801,8 +845,8 @@ public class LeaBridge {
                     JSONObject params = new JSONObject();
                     // Qualité type "scène" (e307da2): 576×768 + denoise 0.72 si clé
                     // Anonyme: 512×640 pour éviter heavy demand
-                    params.put("width", 512);
-                    params.put("height", 768);
+                    params.put("width", 576);
+                    params.put("height", 640);
                     double denoise = 0.55;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
@@ -820,7 +864,7 @@ public class LeaBridge {
                     else if (!hasRef) denoise = 1.0;
                     // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
                     double cfg = 7.0;
-                    int steps = registered ? 28 : 20;
+                    int steps = registered ? 30 : 26;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");
@@ -851,11 +895,7 @@ public class LeaBridge {
                     payload.put("shared", false);
                     payload.put("replacement_filter", false);
                     // Laisser les workers choisir un modèle réaliste dispo
-                    JSONArray models = new JSONArray();
-                    models.put("ICBINP - I Can't Believe It's Not Photography");
-                    models.put("Realistic Vision");
-                    models.put("AbsoluteReality");
-                    payload.put("models", models);
+                    payload.put("models", hordePhotoModels(hordeKey));
 
                     String acceptedRaw = null;
                     JSONObject accepted = null;
@@ -863,24 +903,23 @@ public class LeaBridge {
                     for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
                         try {
                             if (attemptSubmit == 1) {
-                                params.put("steps", 22);
+                                params.put("steps", registered ? 26 : 22);
                                 params.put("width", 512);
                                 params.put("height", 640);
                                 params.put("denoising_strength", Math.min(denoise, 0.72));
                                 params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
-                                payload.put("models", new JSONArray()); // any worker
                                 payload.put("shared", false);
                                 Thread.sleep(3000);
                             } else if (attemptSubmit == 2) {
-                                params.put("steps", 14);
+                                params.put("steps", registered ? 24 : 20);
                                 params.put("width", 448);
                                 params.put("height", 576);
                                 payload.put("params", params);
                                 Thread.sleep(4000);
                             } else if (attemptSubmit == 3) {
                                 // Dernier essai: encore plus léger MAIS garde toujours img2img si on a une ref
-                                params.put("steps", 12);
+                                params.put("steps", registered ? 22 : 18);
                                 params.put("width", 448);
                                 params.put("height", 576);
                                 payload.put("params", params);

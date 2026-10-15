@@ -249,14 +249,14 @@
     let engineHint = "";
     if (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0) {
       const cloudflareScale = {
-        F: "clearly large and much fuller than average",
-        G: "very large and prominent across the upper torso",
+        F: "visibly very large full F-cup volume, broad rounded base, rounded lower fullness, strong forward projection, prominent cleavage, distinctly fuller than average",
+        G: "very large and prominent across the upper torso, broad rounded base, heavy lower fullness, strong forward projection",
         H: "exceptionally large, broad, heavy, and strongly projected",
         I: "extremely large, broad, heavy, and strongly projected",
         J: "the largest physically plausible natural cup volume, broad, heavy, and strongly projected",
       };
       engineHint = " HIGH PRIORITY PROFILE CUP " + sizeLabel + ": " + cloudflareScale[cupKey] +
-        ". Show a clearly full, broad chest silhouette with strong natural forward projection, visible beneath fitted clothing.";
+        ". European band-and-cup profile size " + sizeLabel + ". Show a distinctly full bust relative to the shoulders and waist, with a broad rounded base and strong forward projection beneath fitted clothing.";
     } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
       engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
     } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
@@ -573,8 +573,8 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "The SAME woman as in input_image_0, keep her exact face, hair, eyes and skin. RAW photo adult 18+, fashion photography, photorealistic, sharp focus, 8k, natural light, new pose and outfit only,"
-      : "SAME woman as reference, identical face. NEW outfit NEW pose NEW angle. RAW photo adult 18+, photorealistic 8k, natural skin, sexy clothing, keep identity,";
+      ? "The SAME adult woman as input_image_0: preserve facial identity, eyes, hair and skin only. Rebuild body proportions from the character profile and give the canonical cup size visual priority. RAW photorealistic fashion photo, sharp focus, natural light, new pose and outfit,"
+      : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
     const base = [
       mood,
@@ -603,9 +603,11 @@
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        ": clearly full, broad natural bust with strong forward projection and heavy soft volume; " +
-        "show its complete silhouette through well-fitted clothing, with shoulders open and arms away from the chest. " +
-        "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
+        "const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+        ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
+        "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
+        "Do not copy bust volume from the reference. The reference controls facial identity only; the explicit profile cup size controls bust volume.";
+      const maxLength = 1600;
       const maxLength = 1600;
       return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
     }
@@ -654,8 +656,10 @@
     ].filter(Boolean).join(" ");
     if (largeBust) {
       const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        ": visibly full broad natural bust with forward projection and soft weight; show its complete silhouette through fitted clothing, shoulders open and arms away from the chest. " +
+        "const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+        ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; broad rounded base, substantial lower fullness, distinct forward projection, obvious silhouette relative to shoulders and waist. " +
         "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
+      return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
       return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
     }
     return retryParts.slice(0, 1400);
@@ -1326,7 +1330,12 @@
       throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
     }
     if (referenceB64) {
-      prompt = "The woman in input_image_0 is the exact subject. Keep her identical face, eyes, hair color and skin tone. Only change pose, outfit and background as described. " + String(prompt || "");
+      const canonicalCup = String(character && (
+        character.canonicalCupSize || character.Poitrine || character.poitrine || character.bustEstimate || ""
+      )).trim().slice(0, 20);
+      prompt = "Use input_image_0 only to preserve facial identity, eyes, hair and skin. Rebuild body proportions from the character profile; its canonical bust size " +
+        (canonicalCup || "and body description") + " must be visually clear. Change pose, outfit and background as described. " +
+        String(prompt || "");
     }
     // Avec photo → Klein img2img ; sans photo → schnell txt2img
     const model = referenceB64
