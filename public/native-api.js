@@ -182,7 +182,8 @@
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     if (faceOnly) {
-      const cropHeight = Math.max(64, Math.round(image.naturalHeight * 0.46));
+      // Crop to head/face only; keep the source outfit and chest out of Klein's image conditioning.
+    const cropHeight = Math.max(64, Math.round(image.naturalHeight * 0.34));
       const cropWidth = Math.min(image.naturalWidth, cropHeight);
       const cropX = Math.round((image.naturalWidth - cropWidth) / 2);
       context.drawImage(image, cropX, 0, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
@@ -206,6 +207,15 @@
   }
 
 
+  /** Explicit Poitrine is canonical for solo profiles; cup cards may use a size in the title. */
+  function profileImageBustRaw(character) {
+    const c = character || {};
+    if (/^cup[_-]/i.test(String(c.id || ""))) {
+      const titleSize = String(c.title || "").match(/\b(\d{2,3})\s*([A-K])\b/i);
+      if (titleSize) return (titleSize[1] + titleSize[2]).toUpperCase();
+    }
+    return String(c.Poitrine || c.poitrine || c.canonicalCupSize || c.bustEstimate || "").trim();
+  }
   /** Traduit une taille (ex. 95D) en consignes réalistes pour le modèle */
   function describeBustLock(bustRaw, appearanceText, engine) {
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
@@ -359,7 +369,7 @@
       const ageH = Math.max(18, parseInt(c.age, 10) || 22);
       const looksH = String(c.looks_en || "").trim().slice(0, 320);
       const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 560);
-      const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
+      const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
       const bustInfoH = describeBustLock(bustH, appH, "horde");
       const bodyInfoH = describeBodyMorphology(c);
       const largeBustH = /[FGHIJ]$/.test(bustInfoH.label);
@@ -451,7 +461,7 @@
     const name = String(c.name || "le personnage").slice(0, 100);
     const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
-    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
     const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
@@ -531,7 +541,17 @@
       "forest green mini skirt, black deep V top, thigh-high boots, staircase",
     ];
     const outfits = forCloudflare ? outfitsCf : outfitsHorde;
-    const outfit = outfits[Math.floor(Math.random() * outfits.length)];
+    const outfitHistoryKey = "lea.profileImage.outfitHistory." + String(c.id || "lea");
+    let recentOutfits = [];
+    try {
+      const savedOutfits = JSON.parse(localStorage.getItem(outfitHistoryKey) || "[]");
+      if (Array.isArray(savedOutfits)) recentOutfits = savedOutfits;
+    } catch (_) {}
+    const availableOutfits = outfits.filter((item) => recentOutfits.indexOf(item) < 0);
+    const outfitPool = availableOutfits.length ? availableOutfits : outfits;
+    const outfit = outfitPool[Math.floor(Math.random() * outfitPool.length)];
+    recentOutfits = [outfit].concat(recentOutfits.filter((item) => item !== outfit)).slice(0, 4);
+    try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
       "full-body standing facing camera, head fully in frame, clear face, soft smile, one hip tilted",
@@ -632,7 +652,7 @@
       "smart casual outfit, portrait full body",
     ];
     const bustInfo = describeBustLock(
-      String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || ""),
+      String(profileImageBustRaw(c)),
       appearance,
       "cloudflare"
     );
@@ -945,7 +965,7 @@
     const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
     const looksEn = String(c.looks_en || "").trim().slice(0, 180);
     const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
-    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const bustInfo = describeBustLock(bust, appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
@@ -1087,7 +1107,7 @@
       bits.push("dark nearly black eyes");
 
     // --- Poitrine ---
-    const cup = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
+    const cup = String(profileImageBustRaw(c)).trim();
     const cupBlob = (cup + " " + appRaw).toLowerCase();
     if (/95\s*d|90\s*d|85\s*e|bonnet\s*d\b|cup\s*d\b/.test(cupBlob) || cup.toUpperCase().indexOf("D") >= 0 && /9[05]/.test(cup))
       bits.push("large full natural 95D breasts, heavy cleavage, soft realistic breast shape");
@@ -1333,9 +1353,7 @@
       throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
     }
     if (referenceB64) {
-      const canonicalCup = String(character && (
-        character.canonicalCupSize || character.Poitrine || character.poitrine || character.bustEstimate || ""
-      )).trim().slice(0, 20);
+      const canonicalCup = profileImageBustRaw(character).slice(0, 20);
       prompt = "Use input_image_0 only to preserve facial identity, eyes, hair and skin. Rebuild body proportions from the character profile; its canonical bust size " +
         (canonicalCup || "and body description") + " must be visually clear. Change pose, outfit and background as described. " +
         String(prompt || "");
