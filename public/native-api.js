@@ -152,7 +152,7 @@
     return creds;
   }
 
-  async function profileReferenceImageB64(char, mime, faceOnly) {
+  async function profileReferenceImageB64(char, mime, faceOnly, strictFaceOnly) {
     const c = char || LEA;
     const src = String(c.cover || (Array.isArray(c.gallery) && c.gallery[0]) || "").trim();
     if (!src) return null;
@@ -185,7 +185,9 @@
       // Crop to head/face only; keep the source outfit and chest out of Klein's image conditioning.
     const aspectRatio = image.naturalHeight / image.naturalWidth;
     // Square/landscape portraits place the chin lower in frame; include the whole face without the full torso.
-    const cropRatio = aspectRatio < 1.3 ? 0.52 : 0.38;
+    const cropRatio = strictFaceOnly
+        ? (aspectRatio < 1.3 ? 0.42 : 0.32)
+        : (aspectRatio < 1.3 ? 0.52 : 0.38);
     const cropHeight = Math.max(64, Math.round(image.naturalHeight * cropRatio));
       const cropWidth = Math.min(image.naturalWidth, cropHeight);
       const cropX = Math.round((image.naturalWidth - cropWidth) / 2);
@@ -201,8 +203,8 @@
     return dataUrl.slice(comma + 1);
   }
 
-  async function profileReferenceJpegB64(char, faceOnly) {
-    return profileReferenceImageB64(char, "image/jpeg", !!faceOnly);
+  async function profileReferenceJpegB64(char, faceOnly, strictFaceOnly) {
+    return profileReferenceImageB64(char, "image/jpeg", !!faceOnly, !!strictFaceOnly);
   }
 
   async function profileReferenceWebpB64(char) {
@@ -496,30 +498,30 @@
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
     // Horde : encore plus provocant (lingerie, sheer, lace)
     const outfitsCf = [
-      "emerald green long-sleeve bodycon mini dress deep V neckline, black sheer tights, black stiletto ankle boots",
-      "olive green spaghetti-strap mini dress deep plunge, black fishnet stockings, black pointed heels",
-      "burgundy satin wrap mini dress deep V, bare legs, black ankle-strap stilettos, bedroom glam",
-      "navy blue long-sleeve crop top deep V with sheer mesh midriff panel, tight dark skinny jeans, loafers",
-      "black long-sleeve deep V maxi dress with side cutout at the waist, black stilettos, glamorous evening",
-      "fitted olive satin mini dress thin straps deep cleavage, fashion portrait",
-      "black long-sleeve wrap top deep V with sheer mesh waist, light blue skinny jeans, hallway casual sexy",
-      "sheer white long-sleeve blouse deep plunging neckline, black micro mini skirt, black lace-up gladiator heels",
-      "black one-shoulder crop top and black mini skirt, black fishnet thigh-high stockings with lace tops, black stilettos",
-      "black knit crop sweater and black leather mini skirt, fishnet tights, black pumps, elegant staircase",
-      "black deep plunge evening gown side cutouts, small clutch, chandelier lobby",
-      "black long-sleeve backless floor-length dress, looking over shoulder on grand staircase",
-      "emerald green satin wrap dress, cream off-shoulder cardigan draped, sitting in armchair",
-      "black deep V long-sleeve top tucked into forest-green mini skirt, black opaque tights, black thigh-high boots",
-      "burgundy satin short robe with black lace trim, sitting on hotel bed, soft smile",
-      "red satin cocktail dress high thigh slit, strappy heels, night out",
-      "white fashion towel wrap deep cleavage style (spa editorial), glasses optional, soft window light",
-      "burgundy bodycon dress with black lace cups at the bust, seated on sofa among plants",
-      "champagne silk camisole and tailored high-waist trousers, refined sensual office evening",
-      "black off-shoulder bodycon mini dress, gold heels, city night",
-      "wet-look white fitted crop top and dark skinny jeans after rain, realistic fabric cling",
-      "pastel pink satin slip dress thin straps, soft décolleté, sunny doorway",
-      "royal blue velvet mini dress low back, strappy heels",
-      "black leather mini skirt with white fitted blouse unbuttoned low, pumps",
+      "teal wrap midi dress with a soft V neckline, tan heels, bright apartment",
+      "ivory blouse tucked into cobalt blue tailored trousers, modern hallway",
+      "raspberry blazer dress with a slim belt, hotel lobby",
+      "sky-blue cardigan over a cream pleated midi skirt, daylight studio",
+      "forest-green tailored jumpsuit with a defined waist, elegant corridor",
+      "coral short-sleeve sheath dress with nude pumps, sunny doorway",
+      "mustard knit sweater with a dark denim midi skirt, cozy library",
+      "lilac blouse with charcoal wide-leg trousers, contemporary apartment",
+      "white button-up blouse with a burgundy pencil skirt, marble lobby",
+      "red wrap dress with a waist belt and black pumps, city interior",
+      "silver satin midi skirt with a navy knit top, softly lit room",
+      "camel trench coat over a plum dress, elegant staircase",
+      "turquoise satin blouse with ivory wide-leg trousers, bright living room",
+      "yellow floral midi dress with short sleeves, garden conservatory",
+      "terracotta blouse with dark straight-leg jeans, casual doorway",
+      "emerald velvet skirt with a cream fitted knit top, warm lounge",
+      "rose tweed jacket with tailored black trousers, classic interior",
+      "navy belted shirt dress with ankle boots, hotel hallway",
+      "lavender satin midi dress with a modest neckline, sunlit room",
+      "champagne blouse with olive tailored trousers, fashion editorial",
+      "white blazer over a berry-colored midi dress, upscale lobby",
+      "blue-and-white striped blouse with a beige A-line skirt, tall-window lounge",
+      "mint-green linen jumpsuit with a narrow waist, modern apartment",
+      "royal-blue fit-and-flare dress with short sleeves, softly lit interior"
     ];
     const outfitsHorde = [
       "emerald green long-sleeve bodycon mini dress deep V neckline, black sheer tights, black stiletto ankle boots, seductive",
@@ -557,27 +559,37 @@
     const availableOutfits = outfits.filter((item) => recentOutfits.indexOf(item) < 0);
     const outfitPool = availableOutfits.length ? availableOutfits : outfits;
     const outfit = outfitPool[Math.floor(Math.random() * outfitPool.length)];
-    recentOutfits = [outfit].concat(recentOutfits.filter((item) => item !== outfit)).slice(0, 4);
+    recentOutfits = [outfit].concat(recentOutfits.filter((item) => item !== outfit)).slice(0, 6);
     try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
-      "full-body standing facing camera, head fully in frame, clear face, soft smile, one hip tilted",
-      "full-body leaning against wall facing camera, face visible, one knee bent, arms relaxed",
-      "full-body standing in doorway facing camera, face clear, inviting look, hand on door frame",
-      "full-body seated on bed edge facing camera, face visible, legs crossed, slight lean forward",
-      "full-body hands on hips facing camera, face clear, weight on one leg, teasing gaze",
-      "full-body sitting on sofa facing camera, face visible, deep eye contact, hands on cushions",
-      "full-body standing on stairs facing camera, face clear, hand on banister, soft smile",
-      "full-body three-quarter view with face turned fully to camera, head in frame, elegant",
-      "full-body seated in armchair facing camera, face visible, legs angled, soft smile",
-      "full-body leaning on console table facing camera, face clear, one hand in hair",
-      "full-body mirror pose facing camera, face visible in shot, slight arch of back",
-      "full-body standing hotel hallway facing camera, face clear, confident stance",
-      "full-body bent slightly forward facing camera, face visible, hands on thighs, playful",
-      "full-body lying on side on bed facing camera, face clear, propped on elbow",
-      "full-body kneeling on rug facing camera, face visible, soft upward look",
+      "walking in profile down a hallway, head turned back toward the camera, full body",
+      "seated sideways on a wooden chair, feet on the floor, hands resting in lap",
+      "standing in three-quarter profile beside a window, one hand on the sill",
+      "mid-step through a doorway, photographed from the side, face turned toward camera",
+      "leaning lightly against a bookshelf, shoulders angled, arms relaxed",
+      "seated sideways on a bench, shoulders turned toward camera, hands below the waist",
+      "walking down stairs while looking back, one hand lightly on the railing",
+      "standing beside a table, one hand resting on a closed book, side-angle view",
+      "walking across a courtyard holding a light coat, candid full-body fashion photo",
+      "standing with her back near a mirror, head turned so her face is clearly visible",
+      "seated on the edge of a sofa, legs angled to one side, one hand on the armrest",
+      "standing in a relaxed three-quarter view while adjusting one sleeve",
+      "leaning lightly on a balcony rail, city background, face turned toward camera",
+      "walking through a bright lobby, looking to the side, arms naturally relaxed",
+      "seated upright in an armchair, ankles crossed, hands relaxed on the armrests"
     ];
-    const pose = poses[Math.floor(Math.random() * poses.length)];
+    const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
+    let recentPoses = [];
+    try {
+      const savedPoses = JSON.parse(localStorage.getItem(poseHistoryKey) || "[]");
+      if (Array.isArray(savedPoses)) recentPoses = savedPoses;
+    } catch (_) {}
+    const availablePoses = poses.filter((item) => recentPoses.indexOf(item) < 0);
+    const posePool = availablePoses.length ? availablePoses : poses;
+    const pose = posePool[Math.floor(Math.random() * posePool.length)];
+    recentPoses = [pose].concat(recentPoses.filter((item) => item !== pose)).slice(0, 5);
+    try { localStorage.setItem(poseHistoryKey, JSON.stringify(recentPoses)); } catch (_) {}
 
     const scenes = forCloudflare
       ? [
@@ -607,7 +619,7 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "The SAME adult woman as input_image_0: preserve facial identity, eyes, hair and skin only. Rebuild body proportions from the character profile and give the canonical cup size visual priority. RAW photorealistic fashion photo, sharp focus, natural light, new pose and outfit,"
+      ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
     const base = [
@@ -618,6 +630,7 @@
       bustInfo.lock + ",",
       looksPrompt ? ("Technical looks: " + looksPrompt + ".") : "",
       bodyPrompt ? ("Body notes: " + bodyPrompt + ".") : "",
+      forCloudflare ? "Appearance text describes identity and body only; ignore any clothing, pose, arm position or framing mentioned there. The selected outfit and pose below take priority." : "",
       "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
       "Outfit: " + outfit + ".",
       "Pose: " + pose + ".",
@@ -1355,7 +1368,7 @@
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
     let referenceB64 = null;
     try {
-      referenceB64 = await profileReferenceJpegB64(character, !!(options && options.faceOnlyRef));
+      referenceB64 = await profileReferenceJpegB64(character, !!(options && options.faceOnlyRef), true);
     } catch (e) {
       throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
     }
