@@ -183,7 +183,10 @@
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     if (faceOnly) {
       // Crop to head/face only; keep the source outfit and chest out of Klein's image conditioning.
-    const cropHeight = Math.max(64, Math.round(image.naturalHeight * 0.34));
+    const aspectRatio = image.naturalHeight / image.naturalWidth;
+    // Square/landscape portraits place the chin lower in frame; include the whole face without the full torso.
+    const cropRatio = aspectRatio < 1.3 ? 0.52 : 0.38;
+    const cropHeight = Math.max(64, Math.round(image.naturalHeight * cropRatio));
       const cropWidth = Math.min(image.naturalWidth, cropHeight);
       const cropX = Math.round((image.naturalWidth - cropWidth) / 2);
       context.drawImage(image, cropX, 0, cropWidth, cropHeight, 0, 0, canvas.width, canvas.height);
@@ -366,7 +369,8 @@
     // Horde: prompt COURT + tenues SFW (test qualité) — c = character OK ici
     if (eng.indexOf("horde") >= 0) {
       const nameH = String(c.name || "woman").slice(0, 60);
-      const ageH = Math.max(18, parseInt(c.age, 10) || 22);
+      const parsedAgeH = parseInt(c.age, 10);
+      const ageH = Number.isFinite(parsedAgeH) ? Math.max(18, parsedAgeH) : null;
       const looksH = String(c.looks_en || "").trim().slice(0, 320);
       const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 560);
       const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
@@ -427,6 +431,9 @@
         : "Follow the profile identity and physical description exactly.";
       const ph = [
         "Photorealistic full-body SFW fashion photo of an adult woman, head and face clearly visible",
+        ageH
+          ? "AGE LOCK: approximately " + ageH + " years old, with facial features appropriate to this age; do not de-age her."
+          : "AGE LOCK: preserve the same apparent age as the reference; do not de-age her.",
         nameH,
         idLockH,
         looksH ? "Appearance traits: " + looksH : "",
@@ -2338,7 +2345,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.52;
+          const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
