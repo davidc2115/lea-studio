@@ -2152,7 +2152,7 @@
       const names = u.match(/\b([A-ZÀ-Ü][a-zà-ü'’-]{2,20})\b/g) || [];
       for (const n of names) {
         if (charLow && n.toLowerCase() === charLow.split(/\s+/)[0]) continue;
-        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci)$/i.test(n)) continue;
+        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci|Euh|Eh|Hé|Hum|Hmm|Oh|Ah|Bah|Ben|Bon|Alors|Voilà)$/i.test(n)) continue;
         thirdHints.push("[" + n + "]:");
       }
       // Verbes d'adresse génériques

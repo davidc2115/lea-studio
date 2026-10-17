@@ -515,11 +515,15 @@ function formatMessageHtml(text, options) {
     .replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
 
   // Speaker labels may appear mid-line or at the beginning of a line.
-  raw = raw.replace(/\[([^\]]{1,80})\]\s*:\s*/g, "\n@@@SPEAKER:$1@@@\n");
+  const nonSpeakerLabels = /^(?:euh|eh|hé|hum|hmm|oh|ah|bah|ben|bon|alors|voilà|oui|non)$/i;
+      raw = raw.replace(/\[([^\]]{1,80})\]\s*:\s*/g, function (_match, name) {
+        return nonSpeakerLabels.test(String(name).trim()) ? String(name).trim() + ": " : "\n@@@SPEAKER:" + name + "@@@\n";
+      });
   raw = raw.replace(
     /(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
     function (_match, prefix, name) {
       if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/i.test(String(name).trim())) return prefix;
+      if (nonSpeakerLabels.test(String(name).trim())) return prefix + String(name).trim() + ": ";
       return prefix + "\n@@@SPEAKER:" + name + "@@@\n";
     }
   );
