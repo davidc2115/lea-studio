@@ -110,6 +110,37 @@ function resolveImgSrc(src) {
   return src;
 }
 
+function characterImageDataUrl(src) {
+  const source = String(src || "");
+  if (!source) return Promise.resolve("");
+  const resolved = resolveImgSrc(source);
+  if (!resolved) return Promise.reject(new Error("La photo de référence du personnage n’est pas accessible sur cet appareil."));
+  if (/^data:image\//i.test(resolved)) return Promise.resolve(resolved);
+
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => {
+      try {
+        const maxEdge = 768;
+        const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Conversion de la photo de référence indisponible.");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
+        if (dataUrl.length < 500) throw new Error("La photo de référence n’a pas pu être convertie.");
+        resolve(dataUrl);
+      } catch (error) {
+        reject(new Error("Impossible de préparer la photo de référence : " + String(error.message || error)));
+      }
+    };
+    image.onerror = () => reject(new Error("La photo de référence du personnage n’a pas pu être chargée."));
+    image.src = resolved;
+  });
+}
+
 function persistGeneratedImage(charId, dataUrl) {
   if (!dataUrl) return "";
   if (String(dataUrl).indexOf("gallery:") === 0) return dataUrl;
@@ -1308,13 +1339,82 @@ function setupChatBackgroundUi() {
 }
 
 
+function profileImageCharacterFromCatalog(selectedCharacter) {
+  const selected = selectedCharacter || {};
+  const characterId = String(selected.id || "");
+  if (!characterId) return Object.assign({}, selected);
+
+  const catalogLists = [
+    window.CAST,
+    window.EXTRA_CAST,
+    window.LEA_CAST_NEW,
+    window.LEA_CAST_SPECIAL,
+    window.LEA_CAST_DIRECT,
+    window.LEA_CAST_CUPS,
+    window.LEA_CAST_COLLEGUES,
+    window.LEA_CAST_TAQUIN,
+  ];
+  let bundled = null;
+  let isCupCollection = false;
+  for (const list of catalogLists) {
+    if (!Array.isArray(list)) continue;
+    const match = list.find((item) => item && String(item.id || "") === characterId);
+    if (match) {
+      bundled = match;
+      isCupCollection = list === window.LEA_CAST_CUPS;
+      break;
+    }
+  }
+  if (!bundled) return Object.assign({}, selected);
+
+  const result = Object.assign({}, selected);
+  [
+    "name",
+    "age",
+    "title",
+    "appearance",
+    "looks_en",
+    "body",
+    "ethnicity",
+    "Poitrine",
+    "tags",
+    "outfits",
+    "places",
+    "nonHumanTraits",
+    "adultConfirmed",
+  ].forEach((key) => {
+    if (bundled[key] != null && bundled[key] !== "") result[key] = bundled[key];
+  });
+
+  if (isCupCollection) {
+    const canonicalCup = cupSizeFromCollectionTitle(bundled.title);
+    if (canonicalCup) result.canonicalCupSize = canonicalCup;
+  } else if (bundled.canonicalCupSize) {
+    result.canonicalCupSize = bundled.canonicalCupSize;
+  }
+
+  const localCover = String(selected.cover || "");
+  const isLocalImage = /^data:image\//i.test(localCover) || /^gallery:/i.test(localCover);
+  result.cover = isLocalImage
+    ? localCover
+    : String(bundled.cover || (Array.isArray(bundled.gallery) && bundled.gallery[0]) || selected.cover || "");
+
+  const hasLocalGalleryImage = Array.isArray(selected.gallery) &&
+    selected.gallery.some((item) => /^data:image\//i.test(String(item || "")) || /^gallery:/i.test(String(item || "")));
+  result.gallery = hasLocalGalleryImage
+    ? selected.gallery.slice(0, 12)
+    : (Array.isArray(bundled.gallery) ? bundled.gallery.slice(0, 12) : []);
+  return formatCatalogCharacterText(result);
+}
+
 async function generateProfileImage() {
   if (state.genRunning) {
     setGenBanner("⏳ Une génération est déjà en cours…", "");
     return;
   }
-  const c = state.character;
-  if (!c) return;
+  const selectedCharacter = state.character;
+  if (!selectedCharacter) return;
+  const c = profileImageCharacterFromCatalog(selectedCharacter);
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   if (Number.isInteger(declaredAge) && declaredAge < 18) {
     setGenBanner("La génération est désactivée pour un personnage dont l’âge renseigné est inférieur à 18 ans.", "bad");
@@ -1350,11 +1450,13 @@ async function generateProfileImage() {
   const jobChar = Object.assign({}, c);
   (async () => {
     try {
+      const referencePath = jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "";
+      const referenceDataUrl = await characterImageDataUrl(referencePath);
       const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
-            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+            cover: referenceDataUrl,
             adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
@@ -1599,6 +1701,112 @@ function cupSizeFromCollectionTitle(title) {
   return namedCup ? (namedCup[1] || namedCup[2]).toUpperCase() : "";
 }
 
+function formatCatalogCharacterText(character) {
+  const c = Object.assign({}, character || {});
+  const name = String(c.name || "Personnage").trim();
+  const age = c.age != null && c.age !== "" && Number.isInteger(Number(c.age)) ? Number(c.age) : null;
+  const appearanceValue = String(c.appearance || "").trim();
+  const scenarioValue = String(c.scenario || "").trim();
+  const personalityValue = String(c.personality || "").trim();
+  const rawAppearance = appearanceValue.match(/📚 (?:Détails physiques de la fiche source|Descriptions individuelles ordonnées de la fiche source) : ([\s\S]*)$/)?.[1]?.trim() || appearanceValue;
+  const rawScenario = scenarioValue.match(/🏠 Contexte et déroulement : ([\s\S]*?)(?=\n\n🎭 Point de départ :|\n\n💫 Évolution :|$)/)?.[1]?.trim() || scenarioValue;
+  const rawPersonality = personalityValue.match(/🌸 Nature et tempérament : ([\s\S]*?)(?=\n\n🤝 Relations :|\n\n🛑 Limites|$)/)?.[1]?.trim() || personalityValue;
+  const isDuo = /^duo[_-]/i.test(String(c.id || "")) ||
+    /\b(?:LEFT|RIGHT)\b|Femme\s*[12]\s*[—:-]/i.test(rawAppearance + " " + String(c.looks_en || ""));
+  const field = (text, labels) => {
+    for (const label of labels) {
+      const match = String(text || "").match(new RegExp("(?:^|[\\n.])\\s*(?:" + label + ")\\s*[:：]\\s*([^\\n.]+)", "i"));
+      if (match && match[1]) return match[1].trim();
+    }
+    return "";
+  };
+  const ethnicity = String(c.ethnicity || field(rawAppearance, ["Origines?", "Origine / type", "type"]) || "Non précisées").trim();
+  const bust = String(c.Poitrine || c.poitrine || c.canonicalCupSize || field(rawAppearance, ["Poitrine", "Bonnet"]) || "").trim();
+  const body = String(c.body || field(rawAppearance, ["Silhouette globale", "Silhouette", "Morphologie"]) || "").trim();
+  const face = field(rawAppearance, ["Visage", "Face", "Tête et visage", "Tête"]) || "Non précisé dans les données existantes.";
+  const hair = field(rawAppearance, ["Cheveux", "Hair"]) || "Non précisés dans les données existantes.";
+  const skin = field(rawAppearance, ["Peau", "Teint", "Skin"]) || "Non précisée dans les données existantes.";
+  const outfitList = Array.isArray(c.outfits) ? c.outfits.filter(Boolean).join(" ; ") : "";
+  const personalityWithoutIdentity = rawPersonality.replace(
+    new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*,?\\s*" + (age == null ? "(?!)" : age + "\\s*ans") + "[.\\s]*", "i"),
+    ""
+  );
+  const presence = personalityWithoutIdentity.split(/[.!?\n]/).map((part) => part.trim()).find(Boolean) || "Présence définie par le scénario et les échanges.";
+  const appearanceWithoutIdentity = rawAppearance.replace(/^Sujet\s*:\s*[^.]*\.\s*/i, "");
+  const general = body || appearanceWithoutIdentity.split(/[.!?\n]/).map((part) => part.trim()).find(Boolean) || "Description physique détaillée conservée dans la fiche source.";
+
+  if (isDuo) {
+    const duoRelation = field(rawAppearance, ["Relation"]) || String(c.title || "Deux personnages distincts");
+    c.appearance = [
+      "🌹 " + name.toLocaleUpperCase("fr-FR") + " — PROFILS PHYSIQUES EN DUO",
+      "👥 LEFT / personne 1 : conserver uniquement les traits explicitement attribués à LEFT ou à la première personne dans la source.",
+      "👥 RIGHT / personne 2 : conserver uniquement les traits explicitement attribués à RIGHT ou à la deuxième personne dans la source.",
+      "🔗 Relation : " + duoRelation,
+      rawAppearance ? "📚 Descriptions individuelles ordonnées de la fiche source : " + rawAppearance : "",
+    ].filter(Boolean).join("\n\n");
+  } else {
+    c.appearance = [
+      "🌹 " + name.toLocaleUpperCase("fr-FR") + " — PROFIL PHYSIQUE",
+      age == null ? "" : "👤 Âge : " + age + " ans",
+      "🌍 Origines : " + ethnicity,
+      "💎 Apparence générale : " + general,
+      "👁️ Visage : " + face,
+      "🖤 Cheveux : " + hair,
+      "🤎 Peau : " + skin,
+      "✨ Silhouette : " + (body || "Voir la description détaillée de la fiche source."),
+      bust ? "💕 Poitrine : " + bust + "." : "",
+      "👗 Style vestimentaire : " + (outfitList || "Tenues adaptées au scénario et aux choix du personnage."),
+      "🌙 Présence : " + presence,
+      "💫 En résumé : " + general,
+      rawAppearance ? "📚 Détails physiques de la fiche source : " + rawAppearance : "",
+    ].filter(Boolean).join("\n\n");
+  }
+
+  const greeting = String(c.greeting || "").trim();
+  c.scenario = [
+    "🎬 SCÉNARIO — " + String(c.title || name).trim(),
+    rawScenario ? "🏠 Contexte et déroulement : " + rawScenario : "",
+    greeting ? "🎭 Point de départ : " + greeting : "",
+    "💫 Évolution : La scène évolue selon les paroles, les choix et les limites exprimées; aucune relation ni réaction n’est imposée.",
+  ].filter(Boolean).join("\n\n");
+
+  const familyRole = /belle[- ]?(?:m[eè]re|s[œo]ur|fille)|tante|maman|m[eè]re|s[œo]ur/i.test(String(c.title || ""));
+  const allowedStep = /belle[- ]?(?:m[eè]re|s[œo]ur)/i.test(String(c.title || ""));
+  c.personality = [
+    "💎 PERSONNALITÉ — " + name,
+    rawPersonality ? "🌸 Nature et tempérament : " + rawPersonality : "🌸 Nature et tempérament : Réagit de façon cohérente avec son rôle et le contexte.",
+    "🤝 Relations : La confiance et la complicité se construisent progressivement; aucun sentiment n’est forcé.",
+    familyRole && !allowedStep
+      ? "🛑 Limites : Le rôle familial reste non séducteur; respecter immédiatement tout refus ou hésitation."
+      : "🛑 Limites et consentement : Le personnage peut accepter, refuser, hésiter ou changer d’avis; tout refus est respecté immédiatement.",
+    "🎭 Règle fondamentale : Rester crédible, varier les réactions et tenir compte des événements précédents.",
+  ].join("\n\n");
+
+  const exactAgePrompt = isDuo || age == null ? "" : "adult character, exactly " + age + " years old";
+  let cleanLooks = String(c.looks_en || "")
+    .replace(/\([^)]*(?:tunisienne|française|peau|cheveux|sourcils|poitrine|silhouette|allure de mannequin)[^)]*\)/gi, " ")
+    .replace(/\s+/g, " ").trim();
+  if (!isDuo) {
+    cleanLooks = cleanLooks
+      .replace(/\b(?:looks?\s+)?exactly\s+\d{1,2}\b/gi, " ")
+      .replace(/\b\d{1,2}\s*(?:years?|yrs?)\s*old\b/gi, " ")
+      .replace(/\b\d{1,2}\s*[- ]\s*year[- ]old\b/gi, " ")
+      .replace(/\bnot older(?:\s+not younger)?\b/gi, " ")
+      .replace(/\s+/g, " ").trim();
+  }
+  const hasReference = !!(c.cover || (Array.isArray(c.gallery) && c.gallery.length));
+  c.looks_en = [
+    exactAgePrompt,
+    cleanLooks,
+    hasReference
+      ? (isDuo
+          ? "same two distinct adult characters as the profile reference; keep LEFT and RIGHT identities fixed and preserve each person's features"
+          : "same identifiable adult character as the profile reference; preserve face, hair, eyes, skin tone and body proportions")
+      : "",
+  ].filter(Boolean).join(", ");
+  return c;
+}
+
 
 function mergeAllCasts() {
   const lists = [
@@ -1660,7 +1868,7 @@ function mergeAllCasts() {
       }
     }
   } catch (_) {}
-  return Array.from(byId.values());
+  return Array.from(byId.values()).map(formatCatalogCharacterText);
 }
 
 function findCharacterById(id) {

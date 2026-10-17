@@ -2259,18 +2259,29 @@
       const char = body.character || body.char || {};
       const st = Object.assign({}, settings(), body.settings || {});
       const extra = String(body.extra || "").trim();
-      const name = String(char.name || "woman").slice(0, 80);
-      const age = Math.max(18, parseInt(char.age, 10) || 22);
-      const looks = String(char.looks_en || char.appearance || "").replace(/\s+/g, " ").trim().slice(0, 500);
-      const bodyField = String(char.body || "").slice(0, 120);
+      const name = String(char.name || "character").slice(0, 80);
+      const rawLooks = String(char.looks_en || char.appearance || "");
+      const isDuo = /^duo[_-]/i.test(String(char.id || "")) || /\b(?:LEFT|RIGHT)\b|Femme\s*[12]\s*[—:-]/i.test(rawLooks);
+      const declaredAge = parseInt(char.age, 10);
+      if (!isDuo && (!Number.isInteger(declaredAge) || declaredAge < 18)) {
+        throw new Error("La génération exige l’âge adulte exact indiqué dans la fiche.");
+      }
+      const looks = rawLooks.replace(/\s+/g, " ").trim().slice(0, isDuo ? 1300 : 750);
+      const bodyField = String(char.body || "").slice(0, 240);
+      const identityRule = isDuo
+        ? "exactly two distinct adult women, side by side; keep LEFT and RIGHT identities fixed; do not merge or clone them"
+        : "one adult woman, exactly " + declaredAge + " years old; preserve her profile identity";
       let prompt = [
-        "photorealistic full-body photo of one adult woman, " + age + " years old",
-        name ? ("named " + name) : "",
+        isDuo
+          ? "photorealistic full-body image of exactly two distinct adult women side by side"
+          : "photorealistic full-body photo of one adult woman, exactly " + declaredAge + " years old",
+        name,
         looks,
         bodyField,
         extra,
-        "sharp focus, natural lighting, detailed face, realistic skin, single person"
-      ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
+        identityRule,
+        "sharp focus, natural lighting, detailed faces, realistic skin"
+      ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1500);
 
       // Source image (cover / gallery) for img2img if data URL
       let sourceImage = "";
@@ -2318,7 +2329,7 @@
           n: 1,
           sampler_name: "k_euler_a",
           cfg_scale: 7,
-          denoising_strength: srcB64 ? 0.72 : 1
+          denoising_strength: srcB64 ? 0.58 : 1
         },
         nsfw: true,
         censor_nsfw: false,
