@@ -447,7 +447,7 @@ function findBundledCharacterForPrompt(id) {
       return null;
     }
 
-    function promptCharacterPayload(char) {
+    function promptCharacterPayload(char, imageProvider) {
       const c = char || {};
       const bundled = findBundledCharacterForPrompt(c.id);
       // Local overrides remain saved and visible in the profile, but bundled identities
@@ -487,12 +487,16 @@ function findBundledCharacterForPrompt(id) {
         nonHumanTraits: source.nonHumanTraits || "",
         system_extra: source.system_extra,
         // Requis pour img2img (identité visage) en scène conversation + profil
-        // Keep Hortense's img2img reference aligned with the current bundled portrait.
+        // Keep Cloudflare's validated reference; use the current catalog portrait for Horde.
         cover: bundled && String(bundled.id) === "aya"
-          ? (bundled.cover || "images/cast/aya.jpg")
+          ? (String(imageProvider || "").toLowerCase() === "horde"
+              ? (bundled.cover || "images/cast/aya.jpg")
+              : "images/cast/hortense-build1106-reference.jpg")
           : (source.cover || ""),
         gallery: bundled && String(bundled.id) === "aya"
-          ? (Array.isArray(bundled.gallery) ? bundled.gallery.slice(0, 12) : [])
+          ? (String(imageProvider || "").toLowerCase() === "horde" && Array.isArray(bundled.gallery)
+              ? bundled.gallery.slice(0, 12)
+              : [])
           : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : []),
       };
     }
@@ -1401,7 +1405,7 @@ async function generateProfileImage() {
       const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
         body: JSON.stringify({
-          character: Object.assign(promptCharacterPayload(jobChar), {
+          character: Object.assign(promptCharacterPayload(jobChar, provider), {
             adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
