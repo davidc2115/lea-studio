@@ -14,15 +14,9 @@ const state = {
   chatListMode: true,
   genRunning: false,
   genBanner: null,
-  githubConnecting: false,
-  githubDeviceFlow: null,
-  githubSyncRunning: false,
-  githubSyncPending: false,
-  githubSyncMessage: "",
 };
 
 const $ = (id) => document.getElementById(id);
-const GITHUB_APP_CLIENT_ID = "Iv23liv6fK66QaRyS1LN";
 
 /** Bannière de génération (profil + toast global) */
 function setGenBanner(msg, kind) {
@@ -114,227 +108,6 @@ function resolveImgSrc(src) {
     return "";
   }
   return src;
-}
-
-function characterImageDataUrl(src) {
-  const source = String(src || "");
-  if (!source) return Promise.resolve("");
-  const resolved = resolveImgSrc(source);
-  if (!resolved) return Promise.reject(new Error("La photo de référence du personnage n’est pas accessible sur cet appareil."));
-  if (/^data:image\//i.test(resolved)) return Promise.resolve(resolved);
-
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => {
-      try {
-        const maxEdge = 768;
-        const scale = Math.min(1, maxEdge / Math.max(image.naturalWidth, image.naturalHeight));
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-        const context = canvas.getContext("2d");
-        if (!context) throw new Error("Conversion de la photo de référence indisponible.");
-        context.drawImage(image, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-        if (dataUrl.length < 500) throw new Error("La photo de référence n’a pas pu être convertie.");
-        resolve(dataUrl);
-      } catch (error) {
-        reject(new Error("Impossible de préparer la photo de référence : " + String(error.message || error)));
-      }
-    };
-    image.onerror = () => reject(new Error("La photo de référence du personnage n’a pas pu être chargée."));
-    image.src = resolved;
-  });
-}
-
-function hasGitHubBridge() {
-  return !!(window.LeaAndroid &&
-    typeof window.LeaAndroid.githubDeviceFlowStart === "function" &&
-    typeof window.LeaAndroid.githubDeviceFlowPoll === "function" &&
-    typeof window.LeaAndroid.startGitHubCoversSync === "function");
-}
-
-function parseGitHubBridgeResult(raw) {
-  try {
-    return JSON.parse(String(raw || "{}"));
-  } catch (_) {
-    throw new Error("Réponse invalide du pont Android pour GitHub.");
-  }
-}
-
-function waitForGitHubPoll(seconds) {
-  return new Promise((resolve) => setTimeout(resolve, Math.max(1, seconds) * 1000));
-}
-
-function refreshGitHubSyncView() {
-  if (state.view === "settings") renderSettings();
-  else if (state.view === "profile") renderProfile();
-}
-
-function updateGitHubSyncStatus() {
-  if (state.view !== "settings") return;
-  const connected = !!(window.LeaAndroid &&
-    typeof window.LeaAndroid.hasGitHubAuthorization === "function" &&
-    window.LeaAndroid.hasGitHubAuthorization());
-  if (connected !== !!$("btn-github-sync")) {
-    refreshGitHubSyncView();
-    return;
-  }
-  const status = $("github-sync-status");
-  if (!status) {
-    if (state.view === "profile") renderProfile();
-    return;
-  }
-  status.textContent = state.githubSyncMessage || "";
-  const button = $("btn-github-sync");
-  if (button) {
-    button.disabled = state.githubSyncRunning;
-    button.textContent = state.githubSyncRunning
-      ? "⏳ Synchronisation globale…"
-      : "🔄 Synchroniser tous les personnages";
-  }
-}
-
-function githubSyncSectionHtml() {
-  const available = hasGitHubBridge() &&
-    typeof window.LeaAndroid.hasGitHubAuthorization === "function";
-  const connected = available && window.LeaAndroid.hasGitHubAuthorization();
-  return `<div class="section">
-    <h2>🔄 Synchronisation globale</h2>
-    <p class="hint">Une seule action regroupe la dernière image de tous les personnages enregistrés sur cet appareil, puis met à jour le pack du prochain APK. Les images restent aussi dans les galeries locales.</p>
-    <div id="github-sync-status" class="hint" role="status" aria-live="polite">${escapeHtml(state.githubSyncMessage || (connected ? "GitHub est connecté." : "GitHub n’est pas connecté."))}</div>
-    ${state.githubDeviceFlow ? `
-      <label class="hint" for="github-device-code">Code à saisir sur GitHub</label>
-      <input id="github-device-code" class="edit-input" readonly value="${escapeHtml(state.githubDeviceFlow.userCode)}" />
-      <p class="hint">${escapeHtml(state.githubDeviceFlow.verificationUrl)}</p>
-      <button type="button" class="btn btn-secondary" id="btn-github-open-device">🌐 Ouvrir la page de vérification</button>
-    ` : ""}
-    ${available
-      ? `<div class="btn-row" style="margin-top:8px">
-          ${connected
-            ? `<button type="button" class="btn btn-secondary" id="btn-github-sync" ${state.githubSyncRunning ? "disabled" : ""}>${state.githubSyncRunning ? "⏳ Synchronisation globale…" : "🔄 Synchroniser tous les personnages"}</button>`
-            : `<button type="button" class="btn btn-secondary" id="btn-github-connect" ${state.githubConnecting ? "disabled" : ""}>${state.githubConnecting ? "⏳ Connexion…" : "🔐 Connecter GitHub"}</button>`}
-        </div>`
-      : `<p class="hint">La synchronisation globale est disponible dans l’application Android.</p>`}
-  </div>`;
-}
-
-function bindGitHubSyncControls() {
-  if ($("btn-github-connect")) $("btn-github-connect").onclick = () => connectGitHubGallery();
-  if ($("btn-github-open-device")) {
-    $("btn-github-open-device").onclick = () => {
-      if (window.LeaAndroid && window.LeaAndroid.openGitHubDeviceVerification) {
-        window.LeaAndroid.openGitHubDeviceVerification();
-      }
-    };
-  }
-  if ($("btn-github-sync")) $("btn-github-sync").onclick = () => startGitHubCoversSync(false);
-}
-
-async function connectGitHubGallery() {
-  if (state.githubConnecting || !hasGitHubBridge()) return;
-  state.githubConnecting = true;
-  state.githubSyncMessage = "Préparation de la connexion GitHub…";
-  refreshGitHubSyncView();
-  try {
-    const started = parseGitHubBridgeResult(
-      window.LeaAndroid.githubDeviceFlowStart(GITHUB_APP_CLIENT_ID)
-    );
-    if (started.status === "error" || started.error) {
-      throw new Error(started.error_description || started.error || "La connexion GitHub n’a pas démarré.");
-    }
-    if (!started.device_code || !started.user_code) {
-      throw new Error("GitHub n’a pas fourni le code d’autorisation.");
-    }
-    const interval = Math.max(5, Number(started.interval) || 5);
-    const expiresAt = Date.now() + Math.max(60, Number(started.expires_in) || 900) * 1000;
-    state.githubDeviceFlow = {
-      deviceCode: started.device_code,
-      userCode: started.user_code,
-      verificationUrl: started.verification_uri || "https://github.com/login/device",
-      interval,
-      expiresAt,
-    };
-    state.githubSyncMessage = "Saisis ce code sur GitHub pour autoriser Léa Studio.";
-    refreshGitHubSyncView();
-    if (window.LeaAndroid.openGitHubDeviceVerification) {
-      window.LeaAndroid.openGitHubDeviceVerification();
-    }
-    let pollInterval = interval;
-    while (Date.now() < expiresAt) {
-      await waitForGitHubPoll(pollInterval);
-      const result = parseGitHubBridgeResult(
-        window.LeaAndroid.githubDeviceFlowPoll(GITHUB_APP_CLIENT_ID, started.device_code)
-      );
-      if (result.status === "authorized") {
-        state.githubDeviceFlow = null;
-        state.githubSyncMessage = "GitHub est connecté; synchronisation automatique activée.";
-        state.githubConnecting = false;
-        refreshGitHubSyncView();
-        startGitHubCoversSync(true);
-        return;
-      }
-      if (result.status === "slow_down") {
-        pollInterval += 5;
-        continue;
-      }
-      if (result.status === "error" || result.error) {
-        throw new Error(result.error_description || result.error || "GitHub a refusé l’autorisation.");
-      }
-    }
-    throw new Error("Le code GitHub a expiré. Relance la connexion.");
-  } catch (error) {
-    state.githubDeviceFlow = null;
-    state.githubSyncMessage = String(error.message || error);
-    refreshGitHubSyncView();
-  } finally {
-    state.githubConnecting = false;
-    refreshGitHubSyncView();
-  }
-}
-
-async function startGitHubCoversSync(silent) {
-  if (!hasGitHubBridge()) return;
-  if (state.githubSyncRunning) {
-    state.githubSyncPending = true;
-    return;
-  }
-  if (!window.LeaAndroid.hasGitHubAuthorization ||
-      !window.LeaAndroid.hasGitHubAuthorization()) {
-    state.githubSyncMessage = "Connecte GitHub pour activer la synchronisation automatique.";
-    if (!silent) updateGitHubSyncStatus();
-    return;
-  }
-  state.githubSyncRunning = true;
-  state.githubSyncMessage = "Préparation du pack d’images…";
-  updateGitHubSyncStatus();
-  try {
-    const started = parseGitHubBridgeResult(
-      window.LeaAndroid.startGitHubCoversSync(GITHUB_APP_CLIENT_ID)
-    );
-    if (!started.jobId) throw new Error(started.error_description || "Impossible de démarrer la synchronisation.");
-    while (true) {
-      await waitForGitHubPoll(1);
-      const current = parseGitHubBridgeResult(
-        window.LeaAndroid.getGitHubCoversSyncStatus(started.jobId)
-      );
-      state.githubSyncMessage = current.message || "Synchronisation GitHub…";
-      if (current.status === "done") {
-        state.githubSyncMessage = "Pack GitHub mis à jour (" + Number(current.count || 0) + " personnage(s)).";
-        break;
-      }
-      if (current.status === "error") throw new Error(current.message || "La synchronisation GitHub a échoué.");
-      updateGitHubSyncStatus();
-    }
-  } catch (error) {
-    state.githubSyncMessage = String(error.message || error);
-  } finally {
-    state.githubSyncRunning = false;
-    const rerun = state.githubSyncPending;
-    state.githubSyncPending = false;
-    updateGitHubSyncStatus();
-    if (rerun) setTimeout(() => startGitHubCoversSync(true), 100);
-  }
 }
 
 function persistGeneratedImage(charId, dataUrl) {
@@ -925,7 +698,6 @@ function renderProfile() {
   }
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
-  const canSaveToPhone = !!(window.LeaAndroid && typeof window.LeaAndroid.saveBase64ToDownloads === "function");
   const tags = Array.isArray(c.tags) ? c.tags : [];
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
@@ -996,27 +768,20 @@ function renderProfile() {
     ` : ""}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
-       <p class="hint">★ = photo de profil · ◎ = référence visage pour Horde et Cloudflare</p>
+      <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
       <div class="gallery-grid">
         ${gallery.filter(Boolean).map((src, i) => {
           const isCover = (c.cover === src) || (!c.cover && i === 0);
-           const isReference = c.referenceImage ? c.referenceImage === src : i === 0;
           const resolved = resolveImgSrc(src) || "";
           return `<div class="gal-card">
             <button type="button" class="gal-img-btn" data-i="${i}">
               ${resolved
                 ? `<img src="${escapeHtml(resolved)}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" onerror="this.style.opacity=0.3" />`
                 : `<div class="cover-placeholder" style="height:120px;display:grid;place-items:center">🖼️</div>`}
-              ${isCover && isReference
-                ? '<span class="gal-badge">★ Profil · ◎ Référence</span>'
-                : isCover
-                  ? '<span class="gal-badge">★ Profil</span>'
-                  : (isReference ? '<span class="gal-badge">◎ Référence</span>' : '')}
+              ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
             </button>
             <div class="gal-actions">
               <button type="button" class="gal-btn gal-cover" data-i="${i}" title="Photo de profil">★</button>
-               <button type="button" class="gal-btn gal-reference" data-i="${i}" title="Référence visage">◎</button>
-              ${canSaveToPhone ? `<button type="button" class="gal-btn gal-save" data-i="${i}" title="Enregistrer dans Téléchargements">⬇️</button>` : ""}
               <button type="button" class="gal-btn gal-del" data-i="${i}" title="Supprimer">🗑️</button>
             </div>
           </div>`;
@@ -1028,10 +793,10 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>🖼️ Générer une image</h2>
-      <p class="hint">La photo marquée ◎ sert de référence visage pour Horde. Cloudflare génère sans photo de référence; Horde reste en mode SFW (tenues modestes, pas de lingerie) et peut attendre en file.</p>
+      <p class="hint">La photo de profil sert de référence pour le visage. Mode SFW Horde (tenues modestes, pas de lingerie) pour éviter la censure worker. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
-        <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX Schnell (sans référence)</option>
+        <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX.2 Klein</option>
         <option value="horde" ${resolveHordeApiKey() ? "selected" : ""}>AI Horde · img2img${resolveHordeApiKey() ? "" : " (clé recommandée)"}</option>
       </select>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
@@ -1086,41 +851,6 @@ function renderProfile() {
       renderProfile();
     };
   });
-  root.querySelectorAll(".gal-reference").forEach((btn) => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      const i = Number(btn.dataset.i) || 0;
-      const g = (state.character && state.character.gallery) || [];
-      if (!g[i]) return;
-      persistActiveCharacter(Object.assign({}, state.character, { referenceImage: g[i] }));
-      renderProfile();
-    };
-  });
-  root.querySelectorAll(".gal-save").forEach((btn) => {
-    btn.onclick = async (e) => {
-      e.stopPropagation();
-      const i = Number(btn.dataset.i) || 0;
-      const src = (state.character && state.character.gallery && state.character.gallery[i]) || "";
-      if (!src || !window.LeaAndroid || typeof window.LeaAndroid.saveBase64ToDownloads !== "function") return;
-      btn.disabled = true;
-      try {
-        const imageData = await characterImageDataUrl(src);
-        const safeName = String(state.character.name || "personnage")
-          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-          .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "personnage";
-        const saved = window.LeaAndroid.saveBase64ToDownloads(
-          imageData,
-          "lea-" + safeName + "-" + (i + 1) + ".jpg"
-        );
-        if (!saved) throw new Error("Android n’a pas pu enregistrer l’image.");
-        setGenBanner("✓ Image enregistrée dans Téléchargements", "ok");
-      } catch (error) {
-        setGenBanner(String(error.message || error), "bad");
-      } finally {
-        btn.disabled = false;
-      }
-    };
-  });
   root.querySelectorAll(".gal-del").forEach((btn) => {
     btn.onclick = (e) => {
       e.stopPropagation();
@@ -1134,16 +864,12 @@ function renderProfile() {
       }
       const next = Object.assign({}, state.character, { gallery: g });
       if (next.cover === removed) next.cover = g[0] || "";
-      if (next.referenceImage === removed) next.referenceImage = g[0] || "";
        persistActiveCharacter(next);
       renderProfile();
     };
   });
   if ($("btn-gen-img")) {
     $("btn-gen-img").onclick = () => generateProfileImage();
-    $("gen-provider")?.addEventListener("change", () => {
-      if (!state.genRunning) setGenBanner("", "");
-    });
     if (state.genRunning) {
       $("btn-gen-img").disabled = true;
       $("btn-gen-img").textContent = "⏳ Génération…";
@@ -1582,82 +1308,13 @@ function setupChatBackgroundUi() {
 }
 
 
-function profileImageCharacterFromCatalog(selectedCharacter) {
-  const selected = selectedCharacter || {};
-  const characterId = String(selected.id || "");
-  if (!characterId) return Object.assign({}, selected);
-
-  const catalogLists = [
-    window.CAST,
-    window.EXTRA_CAST,
-    window.LEA_CAST_NEW,
-    window.LEA_CAST_SPECIAL,
-    window.LEA_CAST_DIRECT,
-    window.LEA_CAST_CUPS,
-    window.LEA_CAST_COLLEGUES,
-    window.LEA_CAST_TAQUIN,
-  ];
-  let bundled = null;
-  let isCupCollection = false;
-  for (const list of catalogLists) {
-    if (!Array.isArray(list)) continue;
-    const match = list.find((item) => item && String(item.id || "") === characterId);
-    if (match) {
-      bundled = match;
-      isCupCollection = list === window.LEA_CAST_CUPS;
-      break;
-    }
-  }
-  if (!bundled) return Object.assign({}, selected);
-
-  const result = Object.assign({}, selected);
-  [
-    "name",
-    "age",
-    "title",
-    "appearance",
-    "looks_en",
-    "body",
-    "ethnicity",
-    "Poitrine",
-    "tags",
-    "outfits",
-    "places",
-    "nonHumanTraits",
-    "adultConfirmed",
-  ].forEach((key) => {
-    if (bundled[key] != null && bundled[key] !== "") result[key] = bundled[key];
-  });
-
-  if (isCupCollection) {
-    const canonicalCup = cupSizeFromCollectionTitle(bundled.title);
-    if (canonicalCup) result.canonicalCupSize = canonicalCup;
-  } else if (bundled.canonicalCupSize) {
-    result.canonicalCupSize = bundled.canonicalCupSize;
-  }
-
-  const localCover = String(selected.cover || "");
-  const isLocalImage = /^data:image\//i.test(localCover) || /^gallery:/i.test(localCover);
-  result.cover = isLocalImage
-    ? localCover
-    : String(bundled.cover || (Array.isArray(bundled.gallery) && bundled.gallery[0]) || selected.cover || "");
-
-  const hasLocalGalleryImage = Array.isArray(selected.gallery) &&
-    selected.gallery.some((item) => /^data:image\//i.test(String(item || "")) || /^gallery:/i.test(String(item || "")));
-  result.gallery = hasLocalGalleryImage
-    ? selected.gallery.slice(0, 12)
-    : (Array.isArray(bundled.gallery) ? bundled.gallery.slice(0, 12) : []);
-  return formatCatalogCharacterText(result);
-}
-
 async function generateProfileImage() {
   if (state.genRunning) {
     setGenBanner("⏳ Une génération est déjà en cours…", "");
     return;
   }
-  const selectedCharacter = state.character;
-  if (!selectedCharacter) return;
-  const c = profileImageCharacterFromCatalog(selectedCharacter);
+  const c = state.character;
+  if (!c) return;
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   if (Number.isInteger(declaredAge) && declaredAge < 18) {
     setGenBanner("La génération est désactivée pour un personnage dont l’âge renseigné est inférieur à 18 ans.", "bad");
@@ -1691,21 +1348,13 @@ async function generateProfileImage() {
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);
-  const referencePath = jobChar.referenceImage ||
-    (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) ||
-    jobChar.cover || "";
-  if (referencePath && !jobChar.referenceImage) {
-    jobChar.referenceImage = referencePath;
-    persistActiveCharacter(Object.assign({}, selectedCharacter, { referenceImage: referencePath }));
-  }
   (async () => {
     try {
-      const referenceDataUrl = await characterImageDataUrl(referencePath);
       const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
-            cover: referenceDataUrl,
+            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
             adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
@@ -1725,11 +1374,6 @@ async function generateProfileImage() {
       if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
         try { renderProfile(); } catch (_) {}
       }
-      if (window.LeaAndroid && typeof window.LeaAndroid.hasGitHubAuthorization === "function" &&
-          window.LeaAndroid.hasGitHubAuthorization()) {
-        startGitHubCoversSync(true);
-      }
-
     } catch (e) {
       state.genRunning = false;
       setGenBanner("✗ " + String(e.message || e).slice(0, 160), "bad");
@@ -1752,7 +1396,6 @@ function renderSettings() {
       <button type="button" class="btn btn-primary" id="save-settings-top">💾 Enregistrer clés & réglages</button>
       <div id="set-status-top" class="hint"></div>
     </div>
-    ${githubSyncSectionHtml()}
     <div class="section">
       <h2>🔑 Clés API (dialogue)</h2>
       <div class="settings-block">
@@ -1859,7 +1502,6 @@ function renderSettings() {
       <div id="memory-status"></div>
     </div>
   `;
-  bindGitHubSyncControls();
   function doSaveSettings() {
     try {
       const prevKey = resolveHordeApiKey();
@@ -1870,9 +1512,7 @@ function renderSettings() {
         openaiKeys: ($("set-openai") && $("set-openai").value.trim()) || "",
         groqKeys: ($("set-groq") && $("set-groq").value.trim()) || "",
         cfAccount: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
-        cfAccountId: ($("set-cf-account") && $("set-cf-account").value.trim()) || "",
         cfKeys: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
-        cfToken: ($("set-cf-keys") && $("set-cf-keys").value.trim()) || "",
         hordeApiKey: hordeApiKey,
         userName: ($("set-username") && $("set-username").value.trim()) || "",
         userBio: ($("set-bio") && $("set-bio").value.trim()) || "",
@@ -1959,112 +1599,6 @@ function cupSizeFromCollectionTitle(title) {
   return namedCup ? (namedCup[1] || namedCup[2]).toUpperCase() : "";
 }
 
-function formatCatalogCharacterText(character) {
-  const c = Object.assign({}, character || {});
-  const name = String(c.name || "Personnage").trim();
-  const age = c.age != null && c.age !== "" && Number.isInteger(Number(c.age)) ? Number(c.age) : null;
-  const appearanceValue = String(c.appearance || "").trim();
-  const scenarioValue = String(c.scenario || "").trim();
-  const personalityValue = String(c.personality || "").trim();
-  const rawAppearance = appearanceValue.match(/📚 (?:Détails physiques de la fiche source|Descriptions individuelles ordonnées de la fiche source) : ([\s\S]*)$/)?.[1]?.trim() || appearanceValue;
-  const rawScenario = scenarioValue.match(/🏠 Contexte et déroulement : ([\s\S]*?)(?=\n\n🎭 Point de départ :|\n\n💫 Évolution :|$)/)?.[1]?.trim() || scenarioValue;
-  const rawPersonality = personalityValue.match(/🌸 Nature et tempérament : ([\s\S]*?)(?=\n\n🤝 Relations :|\n\n🛑 Limites|$)/)?.[1]?.trim() || personalityValue;
-  const isDuo = /^duo[_-]/i.test(String(c.id || "")) ||
-    /\b(?:LEFT|RIGHT)\b|Femme\s*[12]\s*[—:-]/i.test(rawAppearance + " " + String(c.looks_en || ""));
-  const field = (text, labels) => {
-    for (const label of labels) {
-      const match = String(text || "").match(new RegExp("(?:^|[\\n.])\\s*(?:" + label + ")\\s*[:：]\\s*([^\\n.]+)", "i"));
-      if (match && match[1]) return match[1].trim();
-    }
-    return "";
-  };
-  const ethnicity = String(c.ethnicity || field(rawAppearance, ["Origines?", "Origine / type", "type"]) || "Non précisées").trim();
-  const bust = String(c.Poitrine || c.poitrine || c.canonicalCupSize || field(rawAppearance, ["Poitrine", "Bonnet"]) || "").trim();
-  const body = String(c.body || field(rawAppearance, ["Silhouette globale", "Silhouette", "Morphologie"]) || "").trim();
-  const face = field(rawAppearance, ["Visage", "Face", "Tête et visage", "Tête"]) || "Non précisé dans les données existantes.";
-  const hair = field(rawAppearance, ["Cheveux", "Hair"]) || "Non précisés dans les données existantes.";
-  const skin = field(rawAppearance, ["Peau", "Teint", "Skin"]) || "Non précisée dans les données existantes.";
-  const outfitList = Array.isArray(c.outfits) ? c.outfits.filter(Boolean).join(" ; ") : "";
-  const personalityWithoutIdentity = rawPersonality.replace(
-    new RegExp("^" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*,?\\s*" + (age == null ? "(?!)" : age + "\\s*ans") + "[.\\s]*", "i"),
-    ""
-  );
-  const presence = personalityWithoutIdentity.split(/[.!?\n]/).map((part) => part.trim()).find(Boolean) || "Présence définie par le scénario et les échanges.";
-  const appearanceWithoutIdentity = rawAppearance.replace(/^Sujet\s*:\s*[^.]*\.\s*/i, "");
-  const general = body || appearanceWithoutIdentity.split(/[.!?\n]/).map((part) => part.trim()).find(Boolean) || "Description physique détaillée conservée dans la fiche source.";
-
-  if (isDuo) {
-    const duoRelation = field(rawAppearance, ["Relation"]) || String(c.title || "Deux personnages distincts");
-    c.appearance = [
-      "🌹 " + name.toLocaleUpperCase("fr-FR") + " — PROFILS PHYSIQUES EN DUO",
-      "👥 LEFT / personne 1 : conserver uniquement les traits explicitement attribués à LEFT ou à la première personne dans la source.",
-      "👥 RIGHT / personne 2 : conserver uniquement les traits explicitement attribués à RIGHT ou à la deuxième personne dans la source.",
-      "🔗 Relation : " + duoRelation,
-      rawAppearance ? "📚 Descriptions individuelles ordonnées de la fiche source : " + rawAppearance : "",
-    ].filter(Boolean).join("\n\n");
-  } else {
-    c.appearance = [
-      "🌹 " + name.toLocaleUpperCase("fr-FR") + " — PROFIL PHYSIQUE",
-      age == null ? "" : "👤 Âge : " + age + " ans",
-      "🌍 Origines : " + ethnicity,
-      "💎 Apparence générale : " + general,
-      "👁️ Visage : " + face,
-      "🖤 Cheveux : " + hair,
-      "🤎 Peau : " + skin,
-      "✨ Silhouette : " + (body || "Voir la description détaillée de la fiche source."),
-      bust ? "💕 Poitrine : " + bust + "." : "",
-      "👗 Style vestimentaire : " + (outfitList || "Tenues adaptées au scénario et aux choix du personnage."),
-      "🌙 Présence : " + presence,
-      "💫 En résumé : " + general,
-      rawAppearance ? "📚 Détails physiques de la fiche source : " + rawAppearance : "",
-    ].filter(Boolean).join("\n\n");
-  }
-
-  const greeting = String(c.greeting || "").trim();
-  c.scenario = [
-    "🎬 SCÉNARIO — " + String(c.title || name).trim(),
-    rawScenario ? "🏠 Contexte et déroulement : " + rawScenario : "",
-    greeting ? "🎭 Point de départ : " + greeting : "",
-    "💫 Évolution : La scène évolue selon les paroles, les choix et les limites exprimées; aucune relation ni réaction n’est imposée.",
-  ].filter(Boolean).join("\n\n");
-
-  const familyRole = /belle[- ]?(?:m[eè]re|s[œo]ur|fille)|tante|maman|m[eè]re|s[œo]ur/i.test(String(c.title || ""));
-  const allowedStep = /belle[- ]?(?:m[eè]re|s[œo]ur)/i.test(String(c.title || ""));
-  c.personality = [
-    "💎 PERSONNALITÉ — " + name,
-    rawPersonality ? "🌸 Nature et tempérament : " + rawPersonality : "🌸 Nature et tempérament : Réagit de façon cohérente avec son rôle et le contexte.",
-    "🤝 Relations : La confiance et la complicité se construisent progressivement; aucun sentiment n’est forcé.",
-    familyRole && !allowedStep
-      ? "🛑 Limites : Le rôle familial reste non séducteur; respecter immédiatement tout refus ou hésitation."
-      : "🛑 Limites et consentement : Le personnage peut accepter, refuser, hésiter ou changer d’avis; tout refus est respecté immédiatement.",
-    "🎭 Règle fondamentale : Rester crédible, varier les réactions et tenir compte des événements précédents.",
-  ].join("\n\n");
-
-  const exactAgePrompt = isDuo || age == null ? "" : "adult character, exactly " + age + " years old";
-  let cleanLooks = String(c.looks_en || "")
-    .replace(/\([^)]*(?:tunisienne|française|peau|cheveux|sourcils|poitrine|silhouette|allure de mannequin)[^)]*\)/gi, " ")
-    .replace(/\s+/g, " ").trim();
-  if (!isDuo) {
-    cleanLooks = cleanLooks
-      .replace(/\b(?:looks?\s+)?exactly\s+\d{1,2}\b/gi, " ")
-      .replace(/\b\d{1,2}\s*(?:years?|yrs?)\s*old\b/gi, " ")
-      .replace(/\b\d{1,2}\s*[- ]\s*year[- ]old\b/gi, " ")
-      .replace(/\bnot older(?:\s+not younger)?\b/gi, " ")
-      .replace(/\s+/g, " ").trim();
-  }
-  const hasReference = !!(c.cover || (Array.isArray(c.gallery) && c.gallery.length));
-  c.looks_en = [
-    exactAgePrompt,
-    cleanLooks,
-    hasReference
-      ? (isDuo
-          ? "same two distinct adult characters as the profile reference; keep LEFT and RIGHT identities fixed and preserve each person's features"
-          : "same identifiable adult character as the profile reference; preserve face, hair, eyes, skin tone and body proportions")
-      : "",
-  ].filter(Boolean).join(", ");
-  return c;
-}
-
 
 function mergeAllCasts() {
   const lists = [
@@ -2094,19 +1628,6 @@ function mergeAllCasts() {
       }));
     }
   }
-  try {
-    const generatedCovers = window.LEA_GENERATED_COVERS || {};
-    for (const [id, filename] of Object.entries(generatedCovers)) {
-      if (!byId.has(id) || !/^[A-Za-z0-9_-]{1,80}\.jpg$/i.test(String(filename || ""))) continue;
-      const character = byId.get(id);
-      const cover = "images/cast/" + filename;
-      const gallery = Array.isArray(character.gallery) ? character.gallery : [];
-      byId.set(id, Object.assign({}, character, {
-        cover,
-        gallery: [cover].concat(gallery.filter((image) => image !== cover)),
-      }));
-    }
-  } catch (_) {}
   // Overrides locaux (modifs utilisateur) — ne pas écraser scénario/accueil packagés par d'anciennes versions génériques
   try {
     const ov = JSON.parse(localStorage.getItem("lea.cast.overrides") || "{}");
@@ -2139,7 +1660,7 @@ function mergeAllCasts() {
       }
     }
   } catch (_) {}
-  return Array.from(byId.values()).map(formatCatalogCharacterText);
+  return Array.from(byId.values());
 }
 
 function findCharacterById(id) {

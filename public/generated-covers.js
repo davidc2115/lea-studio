@@ -1,1 +1,0 @@
-window.LEA_GENERATED_COVERS = {};

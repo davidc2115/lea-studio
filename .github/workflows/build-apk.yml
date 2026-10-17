@@ -6,7 +6,7 @@ on:
       version:
         description: "Nom de version affiché (ex: 1.0.1)"
         required: true
-        default: "2.0.0"
+        default: "1.0.1"
   push:
     branches: [main]
     paths:
@@ -99,27 +99,8 @@ jobs:
           curl -sSL -o /tmp/cast-covers.zip             "https://github.com/davidc2115/lea-studio/releases/download/covers-v1/cast-covers.zip" || true
           if [ -f /tmp/cast-covers.zip ]; then
             unzip -qo /tmp/cast-covers.zip -d /tmp/cast_unpack
-            cp -f /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
-            cp -f /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
-            if [ -f /tmp/cast_unpack/cast_covers/manifest.json ]; then
-              python3 - <<'PY'
-          import json
-          from pathlib import Path
-          manifest = json.loads(Path("/tmp/cast_unpack/cast_covers/manifest.json").read_text())
-          safe = {
-              str(key): str(value)
-              for key, value in manifest.items()
-              if str(key).replace("_", "").replace("-", "").isalnum()
-              and str(value).replace("_", "").replace("-", "").replace(".", "").isalnum()
-              and str(value).lower().endswith(".jpg")
-          }
-          Path("public/generated-covers.js").write_text(
-              "window.LEA_GENERATED_COVERS = " + json.dumps(safe, ensure_ascii=False) + ";\n",
-              encoding="utf-8",
-          )
-          print(f"generated cover manifest: {len(safe)}")
-          PY
-            fi
+            cp -n /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
+            cp -n /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
             echo "covers: $(ls public/images/cast 2>/dev/null | wc -l)"
           else
             echo "WARN: pas de pack covers"
@@ -146,7 +127,7 @@ jobs:
       - name: Assemble APK signé
         working-directory: android
         run: |
-          VERSION="${{ github.event.inputs.version || '2.0.0' }}"
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
           CODE="${{ github.run_number }}"
           gradle assembleRelease --no-daemon --stacktrace \
             -PversionName="$VERSION" \
@@ -156,9 +137,15 @@ jobs:
       - name: Finaliser et vérifier l'APK
         run: |
           set -e
-          APK=$(find android/app/build/outputs/apk -name "*.apk" | head -1)
-          test -n "$APK"
+          APK=$(find android/app/build/outputs/apk -name "*release*.apk" -o -name "*.apk" 2>/dev/null | head -1)
+          if [ -z "$APK" ]; then
+            echo "ERREUR: aucun APK trouvé sous android/app/build/outputs/apk"
+            find android/app/build/outputs -type f 2>/dev/null | head -50
+            exit 1
+          fi
           echo "APK source: $APK ($(du -h "$APK" | cut -f1))"
+          # Copie immédiate à la racine pour l'artifact (évite un fail plus bas)
+          cp -f "$APK" "$GITHUB_WORKSPACE/lea-studio.apk"
           # Interdire le monstre assets/native/sd-arm64
           if unzip -l "$APK" | grep -q "assets/native/sd-arm64"; then
             echo "Retrait sd-arm64 trop volumineux de l'APK..."
@@ -183,20 +170,40 @@ jobs:
             echo "WARN: APK encore très gros ($SIZE)"
             unzip -l "$APK" | sort -n -k1 | tail -20
           fi
-          VERSION="${{ github.event.inputs.version || '2.0.0' }}"
+          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
           CODE="${{ github.run_number }}"
-          OUT="lea-studio-v${VERSION}-b${CODE}.apk"
-          cp "$APK" "$OUT"
-          cp "$APK" lea-studio.apk
-          ls -lh "$OUT" lea-studio.apk
+          OUT="$GITHUB_WORKSPACE/lea-studio-v${VERSION}-b${CODE}.apk"
+          cp -f "$APK" "$OUT"
+          cp -f "$APK" "$GITHUB_WORKSPACE/lea-studio.apk"
+          ls -lh "$OUT" "$GITHUB_WORKSPACE/lea-studio.apk"
+          test -f "$GITHUB_WORKSPACE/lea-studio.apk"
           unzip -l lea-studio.apk | grep -E "sd-arm64|libsd|classes.dex" || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
         with:
           name: lea-studio-apk
-          path: lea-studio.apk
+          path: |
+            lea-studio.apk
+            lea-studio-v*.apk
+          if-no-files-found: error
           retention-days: 90
           compression-level: 0
+
+      - name: Publish APK release (visible dans Releases)
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Léa Studio APK (dernière build)
+          body: |
+            APK signé généré automatiquement depuis main.
+            Télécharge **lea-studio.apk** ci-dessous.
+          files: |
+            lea-studio.apk
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload sd-arm64 binary
         if: env.SD_BIN_OK == '1'

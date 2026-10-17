@@ -2,7 +2,7 @@ plugins {
     id "com.android.application"
 }
 
-def versionMajor = (project.findProperty("versionName") ?: "2.0.0")
+def versionMajor = (project.findProperty("versionName") ?: "1.0.0")
 def versionInt = (project.findProperty("versionCode") ?: "1").toInteger()
 
 android {
@@ -22,6 +22,11 @@ android {
     }
     sourceSets {
         main { jniLibs.srcDirs = ["src/main/jni/prebuilt"] }
+    }
+    packaging {
+        jniLibs {
+            pickFirsts += ["**/libc++_shared.so"]
+        }
     }
     externalNativeBuild {
         cmake { path "src/main/jni/CMakeLists.txt" }
@@ -59,4 +64,17 @@ android {
 
 
 dependencies {
+    implementation "org.opencv:opencv:4.12.0"
+}
+
+tasks.register("syncWebAssets", Copy) {
+    from("../../public") {
+        include "*.html", "*.js", "*.css"
+        include "images/**"
+    }
+    into("src/main/assets/www")
+}
+
+tasks.named("preBuild").configure {
+    dependsOn("syncWebAssets")
 }

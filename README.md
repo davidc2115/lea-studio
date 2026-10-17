@@ -1,31 +1,22 @@
-# Léa Studio
+# 💜 Léa Studio
 
-Chatbot roleplay **SFW / NSFW 18+** dans l’esprit RosyTalk / SpicyChat.
+Chatbot roleplay **SFW / NSFW 18+** — version propre, **Léa Moreau uniquement**.
 
-- Personnage de départ : **Léa Moreau** (18 ans, meilleure amie timide, scène de l’orage)
-- **Gemini** + **OpenAI**, **plusieurs clés** avec rotation auto
-- Mémoire long terme : faits, souvenirs épinglés, résumés, jauges
-- App web + **APK Android**
+## Contenu
+- 🌟 Découvrir + 👤 Profil (galerie, scénario, physique ultra détaillé)
+- 💌 Message d'accueil affiché et utilisé en chat
+- 💬 Chat immersif (`*actions*` `(pensées)`)
+- ✏️ Tout modifiable (profil + réglages)
+- 🔑 Clés Gemini / OpenAI / Groq
+- ❌ Pas de génération d'images
 
 ## Web
-
 ```bash
-cp .env.example .env
+cp .env.example .env   # GEMINI_API_KEYS=...
 npm install
 npm start
 ```
+→ http://localhost:3000
 
-http://localhost:3000
-
-## Application Android
-
-WebView qui embarque l’UI. Les clés se saisissent dans **Clés & réglages** (mode natif, sans serveur).
-
-Workflow GitHub : **Actions → Build APK Android → Run workflow**  
-Artifact : `lea-studio-apk`
-
-Repo : https://github.com/davidc2115/lea-studio
-
-## Mémoire
-
-Toutes les ~6 répliques : extraits de faits, résumés, proximité / confiance / tension.
+## Android
+Push sur `main` → workflow **Build APK Android**.

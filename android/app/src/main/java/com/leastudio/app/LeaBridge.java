@@ -6,9 +6,15 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.app.ActivityManager;
 import android.webkit.JavascriptInterface;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentHashMap;
 import android.system.Os;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -27,17 +33,192 @@ import java.nio.charset.StandardCharsets;
  */
 public class LeaBridge {
     private final Context ctx;
-    private final GitHubGallerySync githubGallerySync;
     private boolean nativeOk;
+    private static final ExecutorService HTTP_POOL = Executors.newCachedThreadPool();
+    private static final ConcurrentHashMap<String, String> HTTP_JOBS = new ConcurrentHashMap<>();
+    private static final AtomicLong HTTP_SEQ = new AtomicLong(1);
+    private static volatile long HORDE_PHOTO_MODELS_CACHED_AT = 0;
+    private static volatile String HORDE_PHOTO_MODELS_CACHE = "";
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
-        this.githubGallerySync = new GitHubGallerySync(this.ctx);
         // Ne pas charger MNN au démarrage : évite un crash au lancement si .so absente / incompatible.
         nativeOk = false;
     }
 
+    /** Ouvre Chub AI dans un WebView isolé, sans pont JS exposé au site. */
+    @JavascriptInterface
+    public boolean openChubCharacter(String rawUrl) {
+        try {
+            Uri uri = Uri.parse(rawUrl);
+            if (!"https".equalsIgnoreCase(uri.getScheme())
+                    || !"chub.ai".equalsIgnoreCase(uri.getHost())
+                    || uri.getUserInfo() != null) {
+                return false;
+            }
+            Intent intent = new Intent(ctx, ChubBrowserActivity.class);
+            intent.putExtra(ChubBrowserActivity.EXTRA_URL, uri.toString());
+            intent.putExtra(ChubBrowserActivity.EXTRA_PROVIDER, "chub");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public boolean openBotbooru() {
+        try {
+            Intent intent = new Intent(ctx, ChubBrowserActivity.class);
+            intent.putExtra(ChubBrowserActivity.EXTRA_URL, "https://botbooru.com/");
+            intent.putExtra(ChubBrowserActivity.EXTRA_PROVIDER, "botbooru");
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(intent);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @JavascriptInterface
+    public String consumePendingBotbooruId() {
+        android.content.SharedPreferences prefs = ctx.getSharedPreferences("lea_catalog_import", Context.MODE_PRIVATE);
+        String id = prefs.getString("lea_catalog_pending_id", "");
+        prefs.edit().remove("lea_catalog_pending_id").apply();
+        return id != null && id.matches("\\d{1,12}") ? id : "";
+    }
+
+    /** Renvoie la dernière paire JSON/PNG téléchargée depuis le navigateur Chub intégré. */
+    @JavascriptInterface
+    public String getPendingChubCard() {
+        File root = new File(ctx.getFilesDir(), "chub-pending");
+        File[] sessions = root.listFiles(File::isDirectory);
+        if (sessions == null) return "";
+        java.util.Arrays.sort(sessions, (a, b) -> b.getName().compareTo(a.getName()));
+        long nowMs = System.currentTimeMillis();
+        for (File session : sessions) {
+            if (!session.getName().matches("\\d{12,17}")) continue;
+            try {
+                long ts = Long.parseLong(session.getName());
+                if (nowMs - ts > 5L * 60L * 1000L) {
+                    deleteChubPendingTree(session);
+                    continue;
+                }
+            } catch (Exception ignoredAge) {}
+
+            File jsonFile = new File(session, "card.json");
+            File pngFile = new File(session, "card.png");
+            try {
+                if (!jsonFile.isFile() || !pngFile.isFile()
+                        || jsonFile.length() > 5L * 1024 * 1024
+                        || pngFile.length() > 12L * 1024 * 1024) continue;
+                byte[] jsonBytes = readChubPendingFile(jsonFile, 5L * 1024 * 1024);
+                byte[] pngBytes = readChubPendingFile(pngFile, 12L * 1024 * 1024);
+                JSONObject payload = new JSONObject();
+                payload.put("sessionId", session.getName());
+                payload.put("cardText", new String(jsonBytes, StandardCharsets.UTF_8));
+                payload.put("imageDataUrl", "data:image/png;base64,"
+                        + android.util.Base64.encodeToString(pngBytes, android.util.Base64.NO_WRAP));
+                return payload.toString();
+            } catch (Exception ignored) {}
+        }
+        return "";
+    }
+
+    @JavascriptInterface
+    public boolean clearPendingChubCard(String sessionId) {
+        if (sessionId == null || !sessionId.matches("\\d{12,17}")) return false;
+        File root = new File(ctx.getFilesDir(), "chub-pending");
+        File session = new File(root, sessionId);
+        if (!session.getParentFile().equals(root) || !session.isDirectory()) return false;
+        deleteChubPendingTree(session);
+        return !session.exists();
+    }
+
+    private byte[] readChubPendingFile(File file, long maxBytes) throws Exception {
+        try (FileInputStream input = new FileInputStream(file);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int count;
+            long total = 0;
+            while ((count = input.read(buffer)) != -1) {
+                total += count;
+                if (total > maxBytes) throw new IllegalStateException("Chub card file too large");
+                output.write(buffer, 0, count);
+            }
+            return output.toByteArray();
+        }
+    }
+
+    private void deleteChubPendingTree(File file) {
+        File[] children = file.listFiles();
+        if (children != null) for (File child : children) deleteChubPendingTree(child);
+        file.delete();
+    }
+
+    /** Locate one frontal face without uploading the reference to another service. */
+    @JavascriptInterface
+    public String detectProfileFace(String encoded) {
+        android.graphics.Bitmap decoded = null;
+        android.graphics.Bitmap rgb = null;
+        try {
+            if (encoded == null || encoded.length() > 3000000) {
+                return "{\"ok\":false,\"error\":\"Référence trop volumineuse.\"}";
+            }
+            int comma = encoded.indexOf(',');
+            if (encoded.startsWith("data:") && comma >= 0) encoded = encoded.substring(comma + 1);
+            byte[] bytes = android.util.Base64.decode(encoded, android.util.Base64.DEFAULT);
+            android.graphics.BitmapFactory.Options opts = new android.graphics.BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
+            int originalWidth = opts.outWidth, originalHeight = opts.outHeight;
+            if (originalWidth < 40 || originalHeight < 40) {
+                return "{\"ok\":false,\"error\":\"Référence illisible ou trop petite.\"}";
+            }
+            opts.inSampleSize = 1;
+            while (Math.max(originalWidth, originalHeight) / opts.inSampleSize > 1024) opts.inSampleSize *= 2;
+            opts.inJustDecodeBounds = false;
+            opts.inPreferredConfig = android.graphics.Bitmap.Config.RGB_565;
+            decoded = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.length, opts);
+            if (decoded == null) return "{\"ok\":false,\"error\":\"Image non décodable.\"}";
+            int width = decoded.getWidth() & ~1, height = decoded.getHeight();
+            rgb = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.RGB_565);
+            new android.graphics.Canvas(rgb).drawBitmap(decoded, 0, 0, null);
+            android.media.FaceDetector.Face[] faces = new android.media.FaceDetector.Face[2];
+            int count = new android.media.FaceDetector(width, height, 2).findFaces(rgb, faces);
+            if (count != 1 || faces[0] == null || faces[0].confidence() < .35f) {
+                return "{\"ok\":false,\"error\":\"Choisis une photo avec un seul visage bien visible de face.\"}";
+            }
+            android.graphics.PointF eyes = new android.graphics.PointF();
+            faces[0].getMidPoint(eyes);
+            float distance = faces[0].eyesDistance();
+            double sx = (double) originalWidth / decoded.getWidth();
+            double sy = (double) originalHeight / decoded.getHeight();
+            double x = Math.max(0, (eyes.x - distance * 1.6) * sx);
+            double y = Math.max(0, (eyes.y - distance * 2.4) * sy);
+            JSONObject face = new JSONObject();
+            face.put("x", x); face.put("y", y);
+            face.put("width", Math.min(distance * 3.2 * sx, originalWidth - x));
+            face.put("height", Math.min(distance * 4.3 * sy, originalHeight - y));
+            JSONObject result = new JSONObject();
+            result.put("ok", true); result.put("face", face);
+            return result.toString();
+        } catch (Throwable error) {
+            return "{\"ok\":false,\"error\":\"Détection du visage indisponible.\"}";
+        } finally {
+            if (rgb != null) rgb.recycle();
+            if (decoded != null) decoded.recycle();
+        }
+    }
+
     public native String nativeSd(String prompt, String modelDir, String outPath);
+
+    /** Local-only preparation for the visually validated segmented profile flow. */
+    @JavascriptInterface
+    public String prepareSegmentedProfileHead(String encoded) {
+        return ProfileHeadProcessor.prepare(ctx, encoded);
+    }
 
     private synchronized boolean ensureNative() {
         if (nativeOk) return true;
@@ -99,120 +280,848 @@ public class LeaBridge {
     /** POST JSON → réponse texte (ex: Cloudflare Workers AI). */
     @JavascriptInterface
     public String httpPostJson(String url, String jsonBody, String headersJoined) {
-        HttpURLConnection conn = null;
-        try {
-            if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
-            URL u = new URL(url);
-            conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(120000);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
-            if (headersJoined != null) {
-                for (String line : headersJoined.split("\n")) {
-                    int c = line.indexOf(':');
-                    if (c > 0) {
-                        conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+        boolean isTextApi = url != null && (
+            url.contains("generativelanguage.googleapis.com")
+            || url.contains("api.groq.com")
+            || url.contains("api.openai.com"));
+        int attempts = isTextApi ? 3 : 1;
+        String lastErr = "";
+        for (int attempt = 1; attempt <= attempts; attempt++) {
+            HttpURLConnection conn = null;
+            File tmp = null;
+            try {
+                if (url == null || url.isEmpty()) return "{\"error\":\"empty url\"}";
+                URL u = new URL(url);
+                conn = (HttpURLConnection) u.openConnection();
+                conn.setConnectTimeout(isTextApi ? 15000 : 45000);
+                conn.setReadTimeout(isTextApi ? 45000 : 180000);
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
+                conn.setRequestProperty("Connection", "close");
+                conn.setInstanceFollowRedirects(true);
+                if (headersJoined != null) {
+                    for (String line : headersJoined.split("\n")) {
+                        int c = line.indexOf(':');
+                        if (c > 0) {
+                            conn.setRequestProperty(line.substring(0, c).trim(), line.substring(c + 1).trim());
+                        }
                     }
                 }
+                byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
+                conn.setFixedLengthStreamingMode(body.length);
+                OutputStream os = conn.getOutputStream();
+                os.write(body);
+                os.flush();
+                os.close();
+                int code = conn.getResponseCode();
+                InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                if (in == null) return "{\"error\":\"http " + code + " empty\"}";
+                tmp = new File(ctx.getCacheDir(), "http_" + System.currentTimeMillis() + ".bin");
+                FileOutputStream fos = new FileOutputStream(tmp);
+                byte[] buf = new byte[65536];
+                int n;
+                long total = 0;
+                while ((n = in.read(buf)) > 0) {
+                    fos.write(buf, 0, n);
+                    total += n;
+                    if (total > 25L * 1024 * 1024) break;
+                }
+                fos.close();
+                in.close();
+                byte[] bytes = new byte[(int) Math.min(tmp.length(), 20L * 1024 * 1024)];
+                FileInputStream fis = new FileInputStream(tmp);
+                int read = fis.read(bytes);
+                fis.close();
+                String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
+                if (code >= 400) {
+                    return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
+                }
+                return resp;
+            } catch (Exception e) {
+                lastErr = e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage());
+                String msg = String.valueOf(e.getMessage());
+                boolean retryable = isTextApi && attempt < attempts && (
+                    e instanceof java.net.SocketException
+                    || e instanceof java.net.SocketTimeoutException
+                    || (msg != null && (msg.contains("connection abort")
+                        || msg.contains("Connection reset")
+                        || msg.contains("Broken pipe")
+                        || msg.contains("timeout")
+                        || msg.contains("failed to connect"))));
+                if (retryable) {
+                    try { Thread.sleep(400L * attempt); } catch (InterruptedException ignored) {}
+                    continue;
+                }
+                return "{\"error\":" + JSONObject.quote(lastErr) + "}";
+            } finally {
+                if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
+                if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
             }
-            byte[] body = (jsonBody != null ? jsonBody : "{}").getBytes(StandardCharsets.UTF_8);
-            conn.setFixedLengthStreamingMode(body.length);
-            OutputStream os = conn.getOutputStream();
-            os.write(body);
-            os.close();
-            int code = conn.getResponseCode();
-            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-            if (in == null) return "{\"error\":\"http " + code + "\"}";
-            BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) sb.append(line).append('\n');
-            br.close();
-            String resp = sb.toString();
-            if (code >= 400) {
-                return "{\"error\":\"http " + code + "\",\"body\":" + JSONObject.quote(resp.substring(0, Math.min(800, resp.length()))) + "}";
-            }
-            return resp;
-        } catch (Exception e) {
-            return "{\"error\":" + JSONObject.quote(String.valueOf(e.getMessage())) + "}";
-        } finally {
-            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
         }
+        return "{\"error\":" + JSONObject.quote(lastErr.isEmpty() ? "http failed" : lastErr) + "}";
+    }
+
+    @JavascriptInterface
+    public String httpPostJsonStart(final String url, final String jsonBody, final String headersJoined) {
+        final String id = "j" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        HTTP_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String result = httpPostJson(url, jsonBody, headersJoined);
+                    if (result == null) result = "";
+                    if (result.length() >= 8 && result.startsWith("{\"error\"")) {
+                        HTTP_JOBS.put(id, "error:" + result);
+                        return;
+                    }
+                    if (url != null && url.contains("api.cloudflare.com") && result.length() > 80000) {
+                        try {
+                            int imgKey = result.indexOf("\"image\"");
+                            if (imgKey >= 0) {
+                                int colon = result.indexOf(':', imgKey);
+                                int q1 = result.indexOf('"', colon + 1);
+                                if (q1 > 0) {
+                                    StringBuilder sb = new StringBuilder();
+                                    for (int pi = q1 + 1; pi < result.length(); pi++) {
+                                        char ch = result.charAt(pi);
+                                        if (ch == '"') break;
+                                        sb.append(ch);
+                                    }
+                                    String b64 = sb.toString();
+                                    if (b64.length() > 1000) {
+                                        String key = saveGalleryImage("lea", "data:image/jpeg;base64," + b64);
+                                        if (key != null && key.startsWith("gallery:")) {
+                                            HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true}");
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (Exception ignored) {}
+                    }
+                    HTTP_JOBS.put(id, "done:" + result);
+                } catch (Exception e) {
+                    String msg = String.valueOf(e.getMessage());
+                    if (msg == null) msg = "error";
+                    msg = msg.replace("\"", "'");
+                    HTTP_JOBS.put(id, "error:{\"error\":\"" + msg + "\"}");
+                }
+            }
+        });
+        return id;
+    }
+
+    @JavascriptInterface
+    public String httpPostJsonPoll(String jobId) {
+        if (jobId == null || jobId.length() == 0) return "missing";
+        String v = HTTP_JOBS.get(jobId);
+        if (v == null) return "missing";
+        if (v.equals("pending") || v.startsWith("pending:")) return v;
+        HTTP_JOBS.remove(jobId);
+        return v;
     }
 
 
-    /** Génère une image Cloudflare en mode texte et l'enregistre dans la galerie du personnage. */
+    private static void writeMultipartField(OutputStream out, String boundary, String name, String value) throws Exception {
+        out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(value.getBytes(StandardCharsets.UTF_8));
+        out.write("\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void writeMultipartFile(OutputStream out, String boundary, String name, String filename, byte[] data) throws Exception {
+        out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(("Content-Disposition: form-data; name=\"" + name + "\"; filename=\"" + filename + "\"\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write("Content-Type: image/jpeg\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+        out.write(data);
+        out.write("\r\n".getBytes(StandardCharsets.UTF_8));
+    }
+
+    /** Génère une image CF et l'enregistre sur disque. Résultat = done:gallery:… */
     @JavascriptInterface
-    public String cloudflareImageGenerate(String accountId, String token, String model, String prompt, String charId) {
+    public String cloudflareImageStart(final String accountId, final String token, final String model, final String prompt, final String charId, final String referenceImageB64) {
+        final String id = "cf" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
+        final String acc = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
+        final String tok = token == null ? "" : token.trim();
+        final String selectedModel = (model != null && model.length() > 5) ? model.trim() : "@cf/black-forest-labs/flux-1-schnell";
+        final String refRaw = referenceImageB64 == null ? "" : referenceImageB64.replaceFirst("^data:image/[^;]+;base64,", "").trim();
+        final boolean hasReference = refRaw.length() > 80 && refRaw.length() <= 900000;
+        // Klein img2img seulement si une vraie photo de profil est fournie; sinon txt2img (schnell…)
+        final boolean useReferenceModel = hasReference && "@cf/black-forest-labs/flux-2-klein-4b".equals(selectedModel);
+        final String[] models = useReferenceModel
+            ? new String[] { selectedModel }
+            : new String[] {
+                hasReference ? selectedModel : "@cf/black-forest-labs/flux-1-schnell",
+                "@cf/black-forest-labs/flux-1-schnell",
+                "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+                "@cf/bytedance/stable-diffusion-xl-lightning"
+              };
+        final String ptxt = (prompt == null ? "" : prompt).trim();
+        final String promptSafe = ptxt.length() > 2000 ? ptxt.substring(0, 2000) : ptxt;
+        HTTP_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                if (acc.isEmpty() || tok.isEmpty()) {
+                    HTTP_JOBS.put(id, "error:{\"error\":\"Account ID ou token Cloudflare manquant\"}");
+                    return;
+                }
+                if (promptSafe.length() < 3) {
+                    HTTP_JOBS.put(id, "error:{\"error\":\"prompt vide\"}");
+                    return;
+                }
+                byte[] referenceBytes = null;
+                if (useReferenceModel) {
+                    try {
+                        byte[] decoded = android.util.Base64.decode(refRaw, android.util.Base64.DEFAULT);
+                        if (decoded.length == 0) throw new IllegalArgumentException("photo de profil vide");
+                        android.graphics.Bitmap srcBmp = android.graphics.BitmapFactory.decodeByteArray(decoded, 0, decoded.length);
+                        if (srcBmp == null) throw new IllegalArgumentException("decodage bitmap impossible");
+                        int sw = srcBmp.getWidth();
+                        int sh = srcBmp.getHeight();
+                        int maxSide = Math.max(sw, sh);
+                        android.graphics.Bitmap outBmp = srcBmp;
+                        if (maxSide > 512) {
+                            float sc = 512f / (float) maxSide;
+                            int nw = Math.max(1, Math.round(sw * sc));
+                            int nh = Math.max(1, Math.round(sh * sc));
+                            outBmp = android.graphics.Bitmap.createScaledBitmap(srcBmp, nw, nh, true);
+                            if (outBmp != srcBmp) srcBmp.recycle();
+                        }
+                        java.io.ByteArrayOutputStream jpegRef = new java.io.ByteArrayOutputStream();
+                        outBmp.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpegRef);
+                        outBmp.recycle();
+                        referenceBytes = jpegRef.toByteArray();
+                        if (referenceBytes.length < 100) throw new IllegalArgumentException("reference trop petite apres resize");
+                    } catch (Exception e) {
+                        HTTP_JOBS.put(id, "error:{\"error\":\"Référence visage invalide: " + String.valueOf(e.getMessage()).replace("\"", "'") + "\"}");
+                        return;
+                    }
+                }
+                String lastErr = "http 400";
+                for (int mi = 0; mi < models.length; mi++) {
+                    String mdl = models[mi];
+                    if (mdl == null || mdl.isEmpty()) continue;
+                    // Éviter doublons dans la liste
+                    boolean dup = false;
+                    for (int j = 0; j < mi; j++) if (mdl.equals(models[j])) { dup = true; break; }
+                    if (dup) continue;
+                    HttpURLConnection conn = null;
+                    File tmp = null;
+                    try {
+                        // @ doit être %40 dans le path, les / restent
+                        String mdlPath = mdl.replace("@", "%40");
+                        String urlStr = "https://api.cloudflare.com/client/v4/accounts/" + acc + "/ai/run/" + mdlPath;
+                        URL u = new URL(urlStr);
+                        conn = (HttpURLConnection) u.openConnection();
+                        conn.setConnectTimeout(45000);
+                        conn.setReadTimeout(180000);
+                        conn.setRequestMethod("POST");
+                        conn.setDoOutput(true);
+                        conn.setRequestProperty("Authorization", "Bearer " + tok);
+                        conn.setRequestProperty("User-Agent", "LeaStudio/3.2 (Android)");
+                        conn.setRequestProperty("Connection", "close");
+                        int seed = (int) ((System.nanoTime() ^ System.currentTimeMillis() ^ (long) (Math.random() * 1e12)) & 0x7fffffff);
+                        if (useReferenceModel) {
+                            String boundary = "----LeaStudioCF" + id;
+                            conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+                            ByteArrayOutputStream multipart = new ByteArrayOutputStream();
+                            writeMultipartField(multipart, boundary, "prompt", promptSafe);
+                            writeMultipartFile(multipart, boundary, "input_image_0", "profile-reference.jpg", referenceBytes);
+                            writeMultipartField(multipart, boundary, "width", "768");
+                            writeMultipartField(multipart, boundary, "height", "1024");
+                            writeMultipartField(multipart, boundary, "guidance", "3.5");
+                            writeMultipartField(multipart, boundary, "seed", String.valueOf(seed));
+                            multipart.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+                            byte[] body = multipart.toByteArray();
+                            conn.setFixedLengthStreamingMode(body.length);
+                            OutputStream os = conn.getOutputStream();
+                            os.write(body);
+                            os.flush();
+                            os.close();
+                        } else {
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            String json = "{\"prompt\":" + JSONObject.quote(promptSafe)
+                                + ",\"steps\":4"
+                                + ",\"seed\":" + seed
+                                + "}";
+                            byte[] body = json.getBytes(StandardCharsets.UTF_8);
+                            conn.setFixedLengthStreamingMode(body.length);
+                            OutputStream os = conn.getOutputStream();
+                            os.write(body);
+                            os.flush();
+                            os.close();
+                        }
+                        int code = conn.getResponseCode();
+                        String contentType = conn.getContentType();
+                        InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                        if (in == null) {
+                            lastErr = "http " + code + " empty (" + mdl + ")";
+                            continue;
+                        }
+                        tmp = new File(ctx.getCacheDir(), "cf_" + System.currentTimeMillis() + ".json");
+                        FileOutputStream fos = new FileOutputStream(tmp);
+                        byte[] buf = new byte[65536];
+                        int n;
+                        while ((n = in.read(buf)) > 0) fos.write(buf, 0, n);
+                        fos.close();
+                        in.close();
+                        byte[] bytes = new byte[(int) Math.min(tmp.length(), 22L * 1024 * 1024)];
+                        FileInputStream fis = new FileInputStream(tmp);
+                        int read = 0;
+                        while (read < bytes.length) {
+                            int count = fis.read(bytes, read, bytes.length - read);
+                            if (count < 0) break;
+                            read += count;
+                        }
+                        fis.close();
+                        if (code < 400 && contentType != null
+                                && contentType.toLowerCase(java.util.Locale.ROOT).startsWith("image/")) {
+                            // Cloudflare Workers AI renvoie le PNG directement, pas un objet JSON/base64.
+                            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(bytes, 0, read);
+                            if (bitmap != null) {
+                                java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
+                                boolean compressed;
+                                try {
+                                    compressed = bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, jpeg);
+                                } finally {
+                                    bitmap.recycle();
+                                }
+                                if (compressed && jpeg.size() > 100) {
+                                    String imageB64 = android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP);
+                                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + imageB64);
+                                    if (key != null && key.startsWith("gallery:")) {
+                                        HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true,\"model\":\"" + mdl.replace("\"", "") + "\"}");
+                                        return;
+                                    }
+                                    lastErr = "échec sauvegarde galerie [" + mdl + "]";
+                                } else {
+                                    lastErr = "échec conversion de l'image [" + mdl + "]";
+                                }
+                            } else {
+                                lastErr = "image binaire illisible [" + mdl + "]";
+                            }
+                            continue;
+                        }
+                        String resp = new String(bytes, 0, Math.max(0, read), StandardCharsets.UTF_8);
+                        if (code >= 400) {
+                            // Extraire message Cloudflare
+                            String detail = resp.length() > 300 ? resp.substring(0, 300) : resp;
+                            detail = detail.replace("\"", "'").replace("\n", " ");
+                            lastErr = "http " + code + " " + detail + " [" + mdl + "]";
+                            // 401/403 → pas la peine d'essayer d'autres modèles avec le même token
+                            if (code == 401 || code == 403) {
+                                HTTP_JOBS.put(id, "error:{\"error\":\"" + lastErr.replace("\\", "/") + "\"}");
+                                return;
+                            }
+                            continue;
+                        }
+                        // Chercher base64 image dans result.image ou image
+                        String b64 = extractImageB64(resp);
+                        if (b64 == null || b64.length() < 500) {
+                            lastErr = "pas d'image dans réponse [" + mdl + "]";
+                            continue;
+                        }
+                        String key = saveGalleryImage(cid, "data:image/jpeg;base64," + b64);
+                        if (key == null || !key.startsWith("gallery:")) {
+                            lastErr = "échec sauvegarde galerie";
+                            continue;
+                        }
+                        HTTP_JOBS.put(id, "done:{\"galleryKey\":\"" + key + "\",\"success\":true,\"model\":\"" + mdl.replace("\"", "") + "\"}");
+                        return;
+                    } catch (Exception e) {
+                        lastErr = e.getClass().getSimpleName() + ": " + String.valueOf(e.getMessage());
+                        if (lastErr.length() > 180) lastErr = lastErr.substring(0, 180);
+                    } finally {
+                        if (tmp != null) try { tmp.delete(); } catch (Exception ignored) {}
+                        if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                    }
+                }
+                lastErr = lastErr.replace("\"", "'");
+                if (lastErr.length() > 280) lastErr = lastErr.substring(0, 280);
+                HTTP_JOBS.put(id, "error:{\"error\":\"" + lastErr + "\"}");
+            }
+        });
+        return id;
+    }
+
+    private static final String[] HORDE_HOSTS = new String[] {
+        "https://aihorde.net",
+        "https://stablehorde.net"
+    };
+
+    private static final class HordeHttpException extends java.io.IOException {
+        final int statusCode;
+        HordeHttpException(int statusCode, String message) {
+            super(message);
+            this.statusCode = statusCode;
+        }
+    }
+
+    private long hordeRetryDelayMillis(HttpURLConnection conn, int attempt) {
+        String retryAfter = conn == null ? null : conn.getHeaderField("Retry-After");
+        if (retryAfter != null) {
+            try {
+                long seconds = Long.parseLong(retryAfter.trim());
+                return Math.max(1000L, Math.min(120000L, seconds * 1000L));
+            } catch (NumberFormatException ignored) {}
+        }
+        return Math.min(60000L, 5000L * (1L << attempt));
+    }
+
+    private String hordeRequest(String method, String path, String body, String apiKey) throws Exception {
+        Exception last = null;
+        for (String host : HORDE_HOSTS) {
+            for (int attempt = 0; attempt < 3; attempt++) {
+                HttpURLConnection conn = null;
+                try {
+                    conn = (HttpURLConnection) new URL(host + path).openConnection();
+                    conn.setConnectTimeout(25000);
+                    conn.setReadTimeout(90000);
+                    conn.setRequestMethod(method);
+                    conn.setRequestProperty("apikey", apiKey);
+                    conn.setRequestProperty("Client-Agent", "LeaStudio:1.1.0:android");
+                    conn.setRequestProperty("Accept", "application/json");
+                    conn.setRequestProperty("Connection", "close");
+                    if (body != null) {
+                        conn.setDoOutput(true);
+                        conn.setRequestProperty("Content-Type", "application/json");
+                        byte[] request = body.getBytes(StandardCharsets.UTF_8);
+                        conn.setFixedLengthStreamingMode(request.length);
+                        try (OutputStream out = conn.getOutputStream()) {
+                            out.write(request);
+                        }
+                    }
+                    int code = conn.getResponseCode();
+                    InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+                    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                    if (in != null) {
+                        try (InputStream responseStream = in) {
+                            byte[] buffer = new byte[16384];
+                            int n;
+                            while ((n = responseStream.read(buffer)) > 0) {
+                                if (bytes.size() + n > 24 * 1024 * 1024) throw new java.io.IOException("Réponse AI Horde trop volumineuse");
+                                bytes.write(buffer, 0, n);
+                            }
+                        }
+                    }
+                    String response = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+                    if (code == 429) {
+                        if (attempt >= 2) {
+                            throw new HordeHttpException(429, "AI Horde HTTP 429 après 3 tentatives: "
+                                + response.substring(0, Math.min(300, response.length())));
+                        }
+                        long delay = Math.max(hordeRetryDelayMillis(conn, attempt), 8000L * (attempt + 1));
+                        conn.disconnect();
+                        conn = null;
+                        Thread.sleep(delay);
+                        continue;
+                    }
+                    if (code < 200 || code >= 300) {
+                        throw new HordeHttpException(code, "AI Horde HTTP " + code + ": " + response.substring(0, Math.min(400, response.length())));
+                    }
+                    return response;
+                } catch (HordeHttpException e) {
+                    if (e.statusCode == 429 || e.statusCode < 500) throw e;
+                    last = e;
+                    break;
+                } catch (java.net.UnknownHostException e) {
+                    String failedHost = host.substring(host.indexOf("://") + 3);
+                    last = new java.io.IOException("DNS: impossible de joindre " + failedHost + ". Vérifie Wi‑Fi / données mobiles ou le DNS privé.");
+                    break; // aucun POST n'a atteint le serveur; passe directement à l'hôte de secours
+                } catch (Exception e) {
+                    last = e;
+                    // ne pas abandonner toute la boucle d'hôtes sur une erreur réseau ponctuelle
+                } finally {
+                    if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+                }
+            }
+        }
+        throw last != null ? last : new java.io.IOException("AI Horde inaccessible (aihorde.net). Vérifie la connexion réseau.");
+    }
+
+    private JSONArray hordePhotoModels(String apiKey) throws Exception {
+        long now = System.currentTimeMillis();
+        String cached = HORDE_PHOTO_MODELS_CACHE;
+        if (!cached.isEmpty() && now - HORDE_PHOTO_MODELS_CACHED_AT < 5 * 60 * 1000L) {
+            return new JSONArray(cached);
+        }
+        synchronized (LeaBridge.class) {
+            now = System.currentTimeMillis();
+            cached = HORDE_PHOTO_MODELS_CACHE;
+            if (!cached.isEmpty() && now - HORDE_PHOTO_MODELS_CACHED_AT < 5 * 60 * 1000L) {
+                return new JSONArray(cached);
+            }
+            JSONArray available = new JSONArray(hordeRequest("GET", "/api/v2/status/models", null, apiKey));
+            String[] preferred = new String[] {
+                "Realistic Vision", "Dreamshaper", "Deliberate",
+                "PerfectDeliberate", "Photon", "Juggernaut XL"
+            };
+            JSONArray selected = new JSONArray();
+            for (String wanted : preferred) {
+                for (int i = 0; i < available.length(); i++) {
+                    JSONObject model = available.optJSONObject(i);
+                    if (model == null || model.optInt("count", 0) <= 0) continue;
+                    if (!"image".equalsIgnoreCase(model.optString("type", ""))) continue;
+                    String name = model.optString("name", "").trim();
+                    if (wanted.equalsIgnoreCase(name) && !name.toLowerCase().contains("inpainting")) {
+                        selected.put(name);
+                        break;
+                    }
+                }
+                if (selected.length() >= 4) break;
+            }
+            if (selected.length() == 0) {
+                throw new java.io.IOException(
+                    "Aucun modèle photo AI Horde recommandé n’a de worker actif. Réessaie plus tard."
+                );
+            }
+            HORDE_PHOTO_MODELS_CACHE = selected.toString();
+            HORDE_PHOTO_MODELS_CACHED_AT = now;
+            return new JSONArray(HORDE_PHOTO_MODELS_CACHE);
+        }
+    }
+
+    private byte[] hordeDownloadImage(String imageUrl) throws Exception {
         HttpURLConnection conn = null;
         try {
-            String account = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
-            String bearer = token == null ? "" : token.trim();
-            String p = prompt == null ? "" : prompt.trim();
-            if (account.isEmpty() || bearer.isEmpty()) return "{\"error\":\"Account ID ou token Cloudflare manquant\"}";
-            if (p.length() < 3) return "{\"error\":\"prompt Cloudflare vide\"}";
-            String modelPath = (model == null || model.trim().isEmpty()) ? "@cf/black-forest-labs/flux-1-schnell" : model.trim();
-            modelPath = modelPath.replace("@", "%40");
-            String endpoint = "https://api.cloudflare.com/client/v4/accounts/" + account + "/ai/run/" + modelPath;
-            conn = (HttpURLConnection) new URL(endpoint).openConnection();
-            conn.setConnectTimeout(45000);
-            conn.setReadTimeout(180000);
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Authorization", "Bearer " + bearer);
-            conn.setRequestProperty("Content-Type", "application/json");
-            JSONObject request = new JSONObject();
-            request.put("prompt", p.substring(0, Math.min(p.length(), 1500)));
-            request.put("steps", 4);
-            request.put("seed", (int) (System.currentTimeMillis() & 0x7fffffff));
-            byte[] body = request.toString().getBytes(StandardCharsets.UTF_8);
-            conn.setFixedLengthStreamingMode(body.length);
-            OutputStream out = conn.getOutputStream();
-            out.write(body);
-            out.flush();
-            out.close();
-            int code = conn.getResponseCode();
-            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
-            if (in == null) return "{\"error\":\"Cloudflare HTTP " + code + "\"}";
-            java.io.ByteArrayOutputStream bytesOut = new java.io.ByteArrayOutputStream();
+            conn = (HttpURLConnection) new URL(imageUrl).openConnection();
+            conn.setConnectTimeout(30000);
+            conn.setReadTimeout(60000);
+            conn.setRequestProperty("User-Agent", "LeaStudio/1.0.0");
+            InputStream in = conn.getInputStream();
+            java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
             byte[] buffer = new byte[16384];
             int n;
-            while ((n = in.read(buffer)) != -1) {
-                if (bytesOut.size() + n > 20 * 1024 * 1024) throw new java.io.IOException("Réponse image Cloudflare trop volumineuse.");
-                bytesOut.write(buffer, 0, n);
+            while ((n = in.read(buffer)) > 0) {
+                if (bytes.size() + n > 20 * 1024 * 1024) throw new java.io.IOException("Image AI Horde trop volumineuse");
+                bytes.write(buffer, 0, n);
             }
             in.close();
-            byte[] imageBytes = bytesOut.toByteArray();
-            if (code >= 400) {
-                String detail = new String(imageBytes, StandardCharsets.UTF_8).replaceAll("\\s+", " ");
-                return "{\"error\":" + JSONObject.quote("Cloudflare HTTP " + code + ": " + detail.substring(0, Math.min(300, detail.length()))) + "}";
-            }
-            String contentType = conn.getContentType();
-            if (contentType == null || !contentType.toLowerCase(java.util.Locale.ROOT).startsWith("image/")) {
-                return "{\"error\":\"Cloudflare n'a pas renvoyé une image. Vérifie le modèle et le token.\"}";
-            }
-            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-            if (bitmap == null) return "{\"error\":\"Image Cloudflare illisible.\"}";
-            java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
-            boolean compressed;
-            try { compressed = bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpeg); }
-            finally { bitmap.recycle(); }
-            if (!compressed || jpeg.size() < 100) return "{\"error\":\"Conversion JPEG Cloudflare impossible.\"}";
-            String b64 = android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP);
-            String id = charId == null ? "lea" : charId.replaceAll("[^a-zA-Z0-9_-]", "");
-            if (id.isEmpty()) id = "lea";
-            String key = saveGalleryImage(id, "data:image/jpeg;base64," + b64);
-            if (key == null || !key.startsWith("gallery:")) return "{\"error\":\"Impossible d'enregistrer l'image Cloudflare.\"}";
-            return key;
-        } catch (Exception e) {
-            return "{\"error\":" + JSONObject.quote("Cloudflare: " + String.valueOf(e.getMessage())) + "}";
+            return bytes.toByteArray();
         } finally {
-            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+            if (conn != null) conn.disconnect();
         }
     }
+
+    @JavascriptInterface
+    public String hordeImageStart(final String prompt, final String charId, final String referenceImageB64, final String apiKey) {
+        return hordeImageStartWithStrength(prompt, charId, referenceImageB64, apiKey, "");
+    }
+
+    @JavascriptInterface
+    public String hordeImageStartWithStrength(final String prompt, final String charId, final String referenceImageB64, final String apiKey, final String strengthRaw) {
+        final String id = "horde" + HTTP_SEQ.getAndIncrement();
+        HTTP_JOBS.put(id, "pending");
+        final String cid = (charId == null || charId.isEmpty()) ? "lea" : charId;
+        final String rawPrompt = prompt == null ? "" : prompt.trim();
+        final String promptSafe = rawPrompt.substring(0, Math.min(rawPrompt.length(), 2400));
+        final String reference = referenceImageB64 == null ? "" : referenceImageB64.trim();
+        // Mode anonyme autorisé (clé vide → 0000000000). Une vraie clé reste prioritaire si fournie.
+        final String hordeKeyRaw = apiKey == null ? "" : apiKey.trim();
+        final String hordeKey = (hordeKeyRaw.isEmpty() || "0000000000".equals(hordeKeyRaw))
+            ? "0000000000"
+            : hordeKeyRaw;
+        final boolean registered = !"0000000000".equals(hordeKey);
+        double strengthParsed = -1;
+        try {
+            if (strengthRaw != null && strengthRaw.trim().length() > 0)
+                strengthParsed = Double.parseDouble(strengthRaw.trim().replace(",", "."));
+        } catch (Exception ignored) {}
+        final double strengthOverride = strengthParsed;
+        HTTP_POOL.execute(new Runnable() {
+            @Override public void run() {
+                try {
+                    if (promptSafe.length() < 3) throw new IllegalArgumentException("Prompt invalide.");
+                    // Réduire la ref pour éviter "Input payload validation failed" (limite Horde ~source)
+                    String refForHorde = reference;
+                    if (refForHorde.length() > 900000) {
+                        throw new IllegalArgumentException("Photo de référence trop volumineuse pour AI Horde. Choisis une autre photo de profil.");
+                    }
+                    final boolean hasRef = refForHorde.length() >= 100;
+                    JSONObject params = new JSONObject();
+                    // Qualité type "scène" (e307da2): 576×768 + denoise 0.72 si clé
+                    // Anonyme: 512×640 pour éviter heavy demand
+                    params.put("width", 576);
+                    params.put("height", 640);
+                    double denoise = 0.55;
+                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
+                    String promptWork = promptSafe;
+                    try {
+                        java.util.regex.Matcher dm = java.util.regex.Pattern
+                            .compile("\\[\\[denoise:([0-9.]+)\\]\\]")
+                            .matcher(promptWork);
+                        if (dm.find()) {
+                            double d = Double.parseDouble(dm.group(1));
+                            if (d > 0.15 && d <= 1.0) denoise = d;
+                            promptWork = dm.replaceAll("").trim();
+                        }
+                    } catch (Exception ignored) {}
+                    if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
+                    else if (!hasRef) denoise = 1.0;
+                    // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
+                    double cfg = 7.0;
+                    int steps = registered ? 30 : 26;
+                    params.put("cfg_scale", cfg);
+                    params.put("steps", steps);
+                    params.put("sampler_name", "k_euler_a");
+                    params.put("denoising_strength", denoise);
+                    params.put("seed", String.valueOf((int) (Math.random() * 2147483647)));
+                    params.put("n", 1);
+                    params.put("clip_skip", 1);
+                    JSONObject payload = new JSONObject();
+                    payload.put("prompt", promptWork + ", photorealistic photograph, fully clothed, modest fashion, natural lighting, sharp focus, realistic skin ### nsfw, nude, lingerie, explicit, painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin, same pose as reference, same outfit as reference, duplicate of reference, copied composition, distorted face, malformed hands, warped body");
+                    payload.put("params", params);
+                    final String sourceB64;
+                    if (hasRef) {
+                        // source_image = base64 brut (sans préfixe data:)
+                        String src = refForHorde;
+                        int comma = src.indexOf(',');
+                        if (src.startsWith("data:") && comma >= 0) src = src.substring(comma + 1);
+                        sourceB64 = src;
+                        payload.put("source_image", sourceB64);
+                        payload.put("source_processing", "img2img");
+                    } else {
+                        sourceB64 = null;
+                    }
+                    payload.put("nsfw", false);
+                    payload.put("censor_nsfw", true);
+                    payload.put("trusted_workers", false);
+                    payload.put("slow_workers", true);
+                    payload.put("r2", true);
+                    payload.put("shared", false);
+                    payload.put("replacement_filter", false);
+                    // Laisser les workers choisir un modèle réaliste dispo
+                    payload.put("models", hordePhotoModels(hordeKey));
+
+                    String acceptedRaw = null;
+                    JSONObject accepted = null;
+                    Exception lastSubmit = null;
+                    for (int attemptSubmit = 0; attemptSubmit < 4; attemptSubmit++) {
+                        try {
+                            if (attemptSubmit == 1) {
+                                params.put("steps", registered ? 26 : 22);
+                                params.put("width", 512);
+                                params.put("height", 640);
+                                params.put("denoising_strength", Math.min(denoise, 0.72));
+                                params.put("sampler_name", "k_euler_a");
+                                payload.put("params", params);
+                                payload.put("shared", false);
+                                Thread.sleep(3000);
+                            } else if (attemptSubmit == 2) {
+                                params.put("steps", registered ? 24 : 20);
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                payload.put("params", params);
+                                Thread.sleep(4000);
+                            } else if (attemptSubmit == 3) {
+                                // Dernier essai: encore plus léger MAIS garde toujours img2img si on a une ref
+                                params.put("steps", registered ? 22 : 18);
+                                params.put("width", 448);
+                                params.put("height", 576);
+                                payload.put("params", params);
+                                Thread.sleep(5000);
+                            }
+                            // Réinjecter la ref à chaque essai (au cas où)
+                            if (sourceB64 != null && sourceB64.length() >= 100) {
+                                payload.put("source_image", sourceB64);
+                                payload.put("source_processing", "img2img");
+                            }
+                            acceptedRaw = hordeRequest("POST", "/api/v2/generate/async", payload.toString(), hordeKey);
+                            accepted = new JSONObject(acceptedRaw);
+                            if (accepted.has("id") && accepted.optString("id", "").length() > 0) break;
+                            String hm = accepted.optString("message", "refus");
+                            lastSubmit = new java.io.IOException("AI Horde: " + hm);
+                            String hml = hm.toLowerCase();
+                            if (hml.contains("abuse") || hml.contains("timeout") || hml.contains("ip address")) {
+                                throw new java.io.IOException(
+                                    "Horde IP en pause (trop de requêtes). Attends sans relancer, ou passe sur Cloudflare. " + hm
+                                );
+                            }
+                            if (hml.contains("anonymous") && !registered) {
+                                throw new java.io.IOException("AI Horde saturé sans clé. Ajoute une clé gratuite (aihorde.net) dans Réglages.");
+                            }
+                        } catch (HordeHttpException he) {
+                            lastSubmit = he;
+                            String msg = String.valueOf(he.getMessage()).toLowerCase();
+                            // Ban IP / abuse : ne pas réessayer (aggrave le timeout)
+                            if (msg.contains("abuse") || msg.contains("timeout") || msg.contains("ip address")) {
+                                String em = String.valueOf(he.getMessage());
+                                try {
+                                    int jb = em.indexOf("{");
+                                    if (jb >= 0) {
+                                        org.json.JSONObject ej = new org.json.JSONObject(em.substring(jb));
+                                        String mj = ej.optString("message", "");
+                                        if (mj.length() > 0) em = mj;
+                                    }
+                                } catch (Exception ignoredParse) {}
+                                // Extraire secondes si présentes
+                                String waitHint = "quelques minutes";
+                                java.util.regex.Matcher wm = java.util.regex.Pattern
+                                    .compile("(\\d+)\\s*more\\s*seconds", java.util.regex.Pattern.CASE_INSENSITIVE)
+                                    .matcher(em);
+                                if (wm.find()) {
+                                    int sec = Integer.parseInt(wm.group(1));
+                                    waitHint = (sec / 60 + 1) + " min";
+                                }
+                                throw new java.io.IOException(
+                                    "Horde a mis ton IP en pause (~" + waitHint + ") après trop de tentatives. " +
+                                    "Attends sans relancer, ou utilise Cloudflare en attendant. " +
+                                    em.substring(0, Math.min(120, em.length()))
+                                );
+                            }
+                            boolean heavy = he.statusCode == 403 || he.statusCode == 429
+                                || msg.contains("heavy demand") || msg.contains("1024")
+                                || msg.contains("kudos") || msg.contains("too many");
+                            if (!heavy && he.statusCode != 429) throw he;
+                            continue;
+                        }
+                    }
+                    if (accepted == null || !accepted.has("id") || accepted.optString("id", "").isEmpty()) {
+                        String em = lastSubmit != null ? String.valueOf(lastSubmit.getMessage()) : "échec submit";
+                        // Extraire message JSON si présent
+                        try {
+                            int jb = em.indexOf('{');
+                            if (jb >= 0) {
+                                org.json.JSONObject ej = new org.json.JSONObject(em.substring(jb));
+                                String mj = ej.optString("message", "");
+                                if (mj.length() > 0) em = mj;
+                            }
+                        } catch (Exception ignoredMsg) {}
+                        String low = em.toLowerCase();
+                        if (low.contains("heavy") || low.contains("demand") || low.contains("403")) {
+                            throw new java.io.IOException(
+                                "Horde refuse la requête (charge serveur / image trop lourde). Réessaie dans 1–2 min. Si ça continue: Réglages → vérifie ta clé Horde. " + em.substring(0, Math.min(100, em.length()))
+                            );
+                        }
+                        if (low.contains("kudos") || low.contains("anonymous")) {
+                            throw new java.io.IOException(
+                                "Horde: kudos insuffisants ou mode anonyme limité. Ajoute/vérifie ta clé gratuite sur aihorde.net dans Réglages. " + em.substring(0, Math.min(80, em.length()))
+                            );
+                        }
+                        throw new java.io.IOException("AI Horde: " + em.substring(0, Math.min(160, em.length())));
+                    }
+                    String requestId = accepted.optString("id", "");
+                    if (requestId.isEmpty()) throw new java.io.IOException("AI Horde n’a pas retourné d’identifiant: " + acceptedRaw.substring(0, Math.min(200, acceptedRaw.length())));
+                    long deadline = System.currentTimeMillis() + 12 * 60 * 1000;
+                    boolean done = false;
+                    while (System.currentTimeMillis() < deadline) {
+                        Thread.sleep(10000);
+                        JSONObject check = new JSONObject(hordeRequest("GET", "/api/v2/generate/check/" + requestId, null, hordeKey));
+                        if (check.optBoolean("faulted", false)) throw new java.io.IOException("Le worker AI Horde a échoué.");
+                        if (!check.optBoolean("is_possible", true)) throw new java.io.IOException("Aucun worker AI Horde disponible (is_possible=false). Réessaie ou Cloudflare.");
+                        if (check.optBoolean("done", false) || check.optInt("finished", 0) > 0) { done = true; break; }
+                        int wait = check.optInt("wait_time", 0);
+                        int queue = check.optInt("queue_position", 0);
+                        HTTP_JOBS.put(id, "pending:queue=" + queue + ",wait=" + wait + "s");
+                    }
+                    if (!done) throw new java.io.IOException("Délai AI Horde dépassé (12 min); la file est saturée.");
+                    JSONObject status = new JSONObject(hordeRequest("GET", "/api/v2/generate/status/" + requestId, null, hordeKey));
+                    JSONArray generations = status.optJSONArray("generations");
+                    if (generations == null || generations.length() == 0) throw new java.io.IOException("AI Horde a terminé sans image.");
+                    JSONObject generation = generations.getJSONObject(0);
+                    if (generation.optBoolean("censored", false)) {
+                        // One strictly SFW retry, retaining the face reference and img2img path.
+                        JSONObject retryPayload = new JSONObject(payload.toString());
+                        retryPayload.put("prompt",
+                            "photorealistic portrait of the same adult woman in the reference image, fully clothed in a modest everyday outfit, face clearly visible, natural expression, soft daylight, realistic skin, editorial photography");
+                        retryPayload.put("nsfw", false);
+                        retryPayload.put("censor_nsfw", true);
+                        String retryRaw = hordeRequest("POST", "/api/v2/generate/async", retryPayload.toString(), hordeKey);
+                        JSONObject retryAccepted = new JSONObject(retryRaw);
+                        String retryId = retryAccepted.optString("id", "");
+                        if (retryId.isEmpty()) {
+                            throw new java.io.IOException("AI Horde n’a pas accepté la nouvelle tentative SFW.");
+                        }
+                        boolean retryDone = false;
+                        for (int retryPoll = 0; retryPoll < 48; retryPoll++) {
+                            Thread.sleep(10000);
+                            JSONObject retryCheck = new JSONObject(
+                                hordeRequest("GET", "/api/v2/generate/check/" + retryId, null, hordeKey)
+                            );
+                            if (retryCheck.optBoolean("faulted", false)) {
+                                throw new java.io.IOException("Le worker AI Horde a échoué pendant la tentative SFW.");
+                            }
+                            if (retryCheck.optBoolean("done", false) || retryCheck.optInt("finished", 0) > 0) {
+                                retryDone = true;
+                                break;
+                            }
+                        }
+                        if (!retryDone) {
+                            throw new java.io.IOException("Délai dépassé pour la nouvelle tentative AI Horde.");
+                        }
+                        JSONObject retryStatus = new JSONObject(
+                            hordeRequest("GET", "/api/v2/generate/status/" + retryId, null, hordeKey)
+                        );
+                        JSONArray safeGenerations = retryStatus.optJSONArray("generations");
+                        if (safeGenerations == null || safeGenerations.length() == 0
+                                || safeGenerations.getJSONObject(0).optBoolean("censored", false)) {
+                            throw new java.io.IOException(
+                                "AI Horde a censuré l’image de référence ou le prompt, même en mode SFW. " +
+                                "Essaie avec une photo de référence entièrement habillée, ou choisis Cloudflare."
+                            );
+                        }
+                        generation = safeGenerations.getJSONObject(0);
+                    }
+                    String image = generation.optString("img", "");
+                    byte[] imageBytes;
+                    if (image.startsWith("http://") || image.startsWith("https://")) imageBytes = hordeDownloadImage(image);
+                    else {
+                        int comma = image.indexOf(',');
+                        if (image.startsWith("data:") && comma >= 0) image = image.substring(comma + 1);
+                        imageBytes = android.util.Base64.decode(image, android.util.Base64.DEFAULT);
+                    }
+                    android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    if (bitmap == null) throw new java.io.IOException("Image AI Horde illisible.");
+                    java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
+                    try { bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, jpeg); }
+                    finally { bitmap.recycle(); }
+                    String key = saveGalleryImage(cid, "data:image/jpeg;base64," + android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP));
+                    if (key == null || !key.startsWith("gallery:")) throw new java.io.IOException("Échec de l’enregistrement dans la galerie.");
+                    HTTP_JOBS.put(id, "done:{\"galleryKey\":" + JSONObject.quote(key) + ",\"success\":true,\"provider\":\"AI Horde\"}");
+                } catch (Exception e) {
+                    String message = String.valueOf(e.getMessage());
+                    HTTP_JOBS.put(id, "error:{\"error\":" + JSONObject.quote(message.length() > 280 ? message.substring(0, 280) : message) + "}");
+                }
+            }
+        });
+        return id;
+    }
+
+    /** Extrait le champ image base64 d'une réponse Workers AI. */
+    private String extractImageB64(String resp) {
+        if (resp == null) return null;
+        String[] keys = new String[] { "\"image\"", "\"b64_json\"", "\"image_b64\"" };
+        for (String key : keys) {
+            int imgKey = resp.indexOf(key);
+            if (imgKey < 0) continue;
+            int colon = resp.indexOf(':', imgKey);
+            if (colon < 0) continue;
+            int q1 = resp.indexOf('"', colon + 1);
+            if (q1 < 0) continue;
+            StringBuilder sb = new StringBuilder();
+            for (int pi = q1 + 1; pi < resp.length(); pi++) {
+                char ch = resp.charAt(pi);
+                if (ch == '"') break;
+                if (ch == '\\' && pi + 1 < resp.length()) {
+                    // ignorer échappements simples
+                    pi++;
+                    sb.append(resp.charAt(pi));
+                    continue;
+                }
+                sb.append(ch);
+            }
+            String b64 = sb.toString().trim();
+            if (b64.length() > 500) return b64;
+        }
+        return null;
+    }
+
 
     /** GET binaire → data URL base64 (ex: carte PNG Chub). */
     @JavascriptInterface
@@ -222,11 +1131,18 @@ public class LeaBridge {
             if (url == null || url.isEmpty()) return "";
             URL u = new URL(url);
             conn = (HttpURLConnection) u.openConnection();
-            conn.setConnectTimeout(20000);
-            conn.setReadTimeout(60000);
+            boolean isPolli = url.contains("pollinations.ai");
+            conn.setConnectTimeout(isPolli ? 45000 : 20000);
+            conn.setReadTimeout(isPolli ? 180000 : 60000);
             conn.setRequestMethod("GET");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36");
-            conn.setRequestProperty("Referer", "https://chub.ai/");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120.0.0.0 Mobile Safari/537.36 LeaStudio/3.0");
+            conn.setRequestProperty("Connection", "close");
+            conn.setInstanceFollowRedirects(true);
+            String referer = "https://chub.ai/";
+            if (url.contains("botbooru.com")) referer = "https://botbooru.com/";
+            else if (url.contains("pollinations.ai")) referer = "https://pollinations.ai/";
+            conn.setRequestProperty("Referer", referer);
+            conn.setRequestProperty("Accept", "image/*,*/*");
             int code = conn.getResponseCode();
             if (code >= 400) return "";
             InputStream in = conn.getInputStream();
@@ -328,24 +1244,6 @@ public class LeaBridge {
             return false;
         }
     }
-
-    @JavascriptInterface
-    public String githubDeviceFlowStart(String clientId) { return githubGallerySync.startDeviceFlow(clientId); }
-
-    @JavascriptInterface
-    public String githubDeviceFlowPoll(String clientId, String deviceCode) { return githubGallerySync.pollDeviceFlow(clientId, deviceCode); }
-
-    @JavascriptInterface
-    public boolean hasGitHubAuthorization() { return githubGallerySync.hasAuthorization(); }
-
-    @JavascriptInterface
-    public boolean openGitHubDeviceVerification() { return githubGallerySync.openVerificationPage(); }
-
-    @JavascriptInterface
-    public String startGitHubCoversSync(String clientId) { return githubGallerySync.startSync(clientId); }
-
-    @JavascriptInterface
-    public String getGitHubCoversSyncStatus(String jobId) { return githubGallerySync.syncStatus(jobId); }
 
 @JavascriptInterface
     public String loadGalleryImage(String key) {
