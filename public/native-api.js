@@ -303,67 +303,70 @@
 
   /** Morphologie dominante (chubby, mince, athlétique, sablier…) pour CF + Horde */
   function describeBodyMorphology(char) {
-    const c = char || {};
-    const blob = [
-      c.appearance, c.body, c.looks_en, c.title,
-      Array.isArray(c.tags) ? c.tags.join(" ") : "",
-    ].join(" ").toLowerCase();
+        const c = char || {};
+        // Structured image-prompt fields are the morphology source of truth. Do not let
+        // incidental words in face/leg descriptions or category tags override them.
+        const classify = (value) => {
+          const text = String(value || "").toLowerCase().replace(
+            /\b(?:sans être|sans|not|no|non|pas|never|do not)\b[^,.;!?\n]{0,48}\b(?:plus[- ]?size|chubby|bbw|obese|ronde?|ventre souple|wide hips|thick thighs|slim|skinny|athletic|hourglass)\b/gi,
+            ""
+          );
+          if (/chubby|plus[- ]?size|plantureus|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|vraiment ronde|round belly/.test(text)) return "chubby";
+          if (/hourglass|sablier/.test(text)) return "hourglass";
+          if (/(?:athletic|athl[eé]tique)(?:\s+(?:toned|and toned|figure|build|body|woman|et tonique))?|toned (?:figure|body|build)/.test(text)) return "athletic";
+          if (/slim slender|slender (?:figure|body)|narrow frame|silhouette mince|longiligne|mince et|slim figure/.test(text)) return "slim";
+          if (/petite stature|petite adult|petite proportions/.test(text)) return "petite";
+          return "";
+        };
+        const bodyType = classify(c.body);
+        const looksType = classify(c.looks_en);
+        const silhouetteLine = String(c.appearance || "").match(/(?:👗\s*)?Silhouette\s*:\s*([^\n]+)/i);
+        const silhouetteType = classify(silhouetteLine ? silhouetteLine[1] : "");
+        const type = bodyType && looksType && bodyType !== looksType
+          ? ""
+          : (bodyType || looksType || silhouetteType);
 
-    const isChubby = /chubby|plus-?size|plus size|plantureus|tr[eè]s rond|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|curvy thick|VRAIMENT ronde|plus-size/.test(blob)
-      || (/\bronde\b/.test(blob) && /plantureus|chubby|plus|ventre|cuisses [eé]paisses|hanches tr[eè]s/.test(blob));
-    const isChubbyFinal = isChubby && !/silhouette mince|slim slender|élanc[eé]e fine|narrow frame/.test(blob);
-    const isSlim = /silhouette mince|slim slender|élanc|longiligne|mince et|narrow frame|petite poitrine mince/.test(blob)
-      && !isChubbyFinal;
-    const isAthletic = /athl[eé]tique|athletic|tonique|muscl|sportive/.test(blob) && !isChubbyFinal;
-    const isHourglass = /sablier|hourglass|taille fine.*hanches|voluptueus/.test(blob) && !isChubbyFinal;
-    const isPetite = /petite stature|petite femme|petite taille/.test(blob);
-
-    if (isChubbyFinal) {
-      return {
-        lead:
-          "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, " +
-          "REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
-        lock:
-          "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. " +
-          "Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
-        neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
-      };
-    }
-    if (isAthletic) {
-      return {
-        lead: "athletic toned adult woman, firm figure, defined shoulders,",
-        lock: "Body type: athletic and toned, not chubby, not skinny frail.",
-        neg: "plus-size, chubby, soft belly, obese, skinny frail",
-      };
-    }
-    if (isSlim) {
-      return {
-        lead: "slim slender adult woman, narrow frame, elegant thin waist,",
-        lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
-        neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
-      };
-    }
-    if (isHourglass) {
-      return {
-        lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
-        lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
-        neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
-      };
-    }
-    if (isPetite) {
-      return {
-        lead: "petite adult woman, smaller stature, proportional,",
-        lock: "Body type: petite adult proportions.",
-        neg: "very tall amazon, plus-size bbw",
-      };
-    }
-    return {
-      lead: "",
-      lock: "Body type matches the character physical description exactly.",
-      neg: "wrong body type, inconsistent morphology",
-    };
-  }
-
+        if (type === "chubby") {
+          return {
+            lead: "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
+            lock: "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
+            neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
+          };
+        }
+        if (type === "athletic") {
+          return {
+            lead: "athletic toned adult woman, firm figure, defined shoulders,",
+            lock: "Body type: athletic and toned, not chubby, not skinny frail.",
+            neg: "plus-size, chubby, soft belly, obese, skinny frail",
+          };
+        }
+        if (type === "slim") {
+          return {
+            lead: "slim slender adult woman, narrow frame, elegant thin waist,",
+            lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
+            neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
+          };
+        }
+        if (type === "hourglass") {
+          return {
+            lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
+            lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
+            neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
+          };
+        }
+        if (type === "petite") {
+          return {
+            lead: "petite adult woman, smaller stature, proportional,",
+            lock: "Body type: petite adult proportions.",
+            neg: "very tall amazon, plus-size bbw",
+          };
+        }
+        return {
+          lead: "",
+          lock: "Body type matches the character physical description exactly.",
+          neg: "wrong body type, inconsistent morphology",
+        };
+      }
 
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
