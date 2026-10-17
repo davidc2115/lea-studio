@@ -1028,10 +1028,10 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>🖼️ Générer une image</h2>
-      <p class="hint">La photo marquée ◎ sert de référence visage pour Horde et Cloudflare; choisis-la avec le bouton ◎ de la galerie. Mode SFW Horde (tenues modestes, pas de lingerie). Horde peut attendre en file.</p>
+      <p class="hint">La photo marquée ◎ sert de référence visage pour Horde. Cloudflare génère sans photo de référence; Horde reste en mode SFW (tenues modestes, pas de lingerie) et peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
-        <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX.2 Klein</option>
+        <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX Schnell (sans référence)</option>
         <option value="horde" ${resolveHordeApiKey() ? "selected" : ""}>AI Horde · img2img${resolveHordeApiKey() ? "" : " (clé recommandée)"}</option>
       </select>
       <input class="edit-input" id="gen-extra" placeholder="Optionnel : pose / tenue / ambiance (ex. regard espiègle, robe satinée…)" style="margin-bottom:10px" />
@@ -1141,6 +1141,9 @@ function renderProfile() {
   });
   if ($("btn-gen-img")) {
     $("btn-gen-img").onclick = () => generateProfileImage();
+    $("gen-provider")?.addEventListener("change", () => {
+      if (!state.genRunning) setGenBanner("", "");
+    });
     if (state.genRunning) {
       $("btn-gen-img").disabled = true;
       $("btn-gen-img").textContent = "⏳ Génération…";
