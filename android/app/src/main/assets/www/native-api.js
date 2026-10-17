@@ -2210,6 +2210,160 @@
       return { rows, count: keys.length };
     }
 
+
+    // ——— Routes UI (app.js 16 oct) : /api/image/horde | /api/image/cloudflare ———
+    if ((path === "/api/image/horde" || path === "/api/image/cloudflare") && method === "POST") {
+      const wantCf = path.indexOf("cloudflare") >= 0;
+      const char = body.character || body.char || {};
+      const st = Object.assign({}, settings(), body.settings || {});
+      const extra = String(body.extra || "").trim();
+      const name = String(char.name || "woman").slice(0, 80);
+      const age = Math.max(18, parseInt(char.age, 10) || 22);
+      const looks = String(char.looks_en || char.appearance || "").replace(/\s+/g, " ").trim().slice(0, 500);
+      const bodyField = String(char.body || "").slice(0, 120);
+      let prompt = [
+        "photorealistic full-body photo of one adult woman, " + age + " years old",
+        name ? ("named " + name) : "",
+        looks,
+        bodyField,
+        extra,
+        "sharp focus, natural lighting, detailed face, realistic skin, single person"
+      ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
+
+      // Source image (cover / gallery) for img2img if data URL
+      let sourceImage = "";
+      const cover = String(char.cover || (Array.isArray(char.gallery) && char.gallery[0]) || "");
+      if (/^data:image\//i.test(cover)) sourceImage = cover;
+
+      // Cloudflare via bridge Android si dispo
+      if (wantCf && window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function") {
+        try {
+          const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
+          const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
+          if (account && token) {
+            const model = "https://api.cloudflare.com/client/v4/accounts/" + account + "/ai/run/@cf/black-forest-labs/flux-2-klein-4b";
+            // Some bridges expect (account, token, model, prompt, charId, ref)
+            const job = window.LeaAndroid.cloudflareImageStart(account, token, model, prompt, String(char.id || "lea"), sourceImage || "");
+            // If bridge returns data URL directly
+            if (job && String(job).indexOf("data:image") === 0) {
+              return { ok: true, image: String(job), engine: "cloudflare", prompt: prompt.slice(0, 200) };
+            }
+          }
+        } catch (e) {
+          console.warn("[cf-bridge]", e.message || e);
+        }
+      }
+
+      // Horde (ou secours Cloudflare) : soumission + poll jusqu'à image
+      const hordeKey = String(st.hordeApiKey || st.horde_key || st.hordeKey || "0000000000").trim() || "0000000000";
+      const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
+      const clientAgent = "lea-studio:2.0:android";
+      const negative = "blurry, lowres, cartoon, anime, deformed, extra limbs, child, underage, watermark, text";
+      let srcB64 = null;
+      if (sourceImage) {
+        let raw = sourceImage;
+        const comma = raw.indexOf(",");
+        if (/^data:/i.test(raw) && comma >= 0) raw = raw.slice(comma + 1);
+        raw = raw.replace(/\s+/g, "");
+        if (raw.length > 800 && raw.length < 900000) srcB64 = raw;
+      }
+      const payload = {
+        prompt: prompt + " ### " + negative,
+        params: {
+          width: 512,
+          height: 768,
+          steps: 28,
+          n: 1,
+          sampler_name: "k_euler_a",
+          cfg_scale: 7,
+          denoising_strength: srcB64 ? 0.72 : 1
+        },
+        nsfw: true,
+        censor_nsfw: false,
+        r2: true,
+        slow_workers: true,
+        models: ["Realistic Vision", "Dreamshaper", "Deliberate"]
+      };
+      if (srcB64) {
+        payload.source_image = srcB64;
+        payload.source_processing = "img2img";
+      }
+
+      let lastErr = "";
+      let jobId = "";
+      let hostUsed = hosts[0];
+      for (const host of hosts) {
+        try {
+          const res = await fetch(host + "/generate/async", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": hordeKey,
+              "Client-Agent": clientAgent
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json().catch(function () { return {}; });
+          if (data.id) {
+            jobId = data.id;
+            hostUsed = host;
+            break;
+          }
+          lastErr = data.message || data.error || ("HTTP " + res.status);
+        } catch (e) {
+          lastErr = String(e.message || e);
+        }
+      }
+      if (!jobId) {
+        throw new Error(lastErr || (wantCf
+          ? "Cloudflare indisponible (pas de bridge) et Horde a refusé. Configure les clés CF ou Horde."
+          : "Horde indisponible"));
+      }
+
+      const started = Date.now();
+      while (Date.now() - started < 600000) {
+        await new Promise(function (r) { setTimeout(r, 2500); });
+        try {
+          const chk = await fetch(hostUsed + "/generate/check/" + jobId, {
+            headers: { "Client-Agent": clientAgent }
+          });
+          const c = await chk.json();
+          if (c.faulted) throw new Error("Worker Horde en échec");
+          if (!c.done) continue;
+          const stRes = await fetch(hostUsed + "/generate/status/" + jobId, {
+            headers: { "Client-Agent": clientAgent }
+          });
+          const data = await stRes.json();
+          const g = data.generations && data.generations[0];
+          if (!g || !g.img) throw new Error("Pas d'image renvoyée");
+          let image = String(g.img);
+          if (image.indexOf("http") === 0) {
+            // fetch as data URL if possible
+            try {
+              if (window.LeaAndroid && typeof window.LeaAndroid.httpGetDataUrl === "function") {
+                image = String(window.LeaAndroid.httpGetDataUrl(image) || image);
+              }
+            } catch (_) {}
+          } else if (image.indexOf("data:") !== 0) {
+            image = "data:image/webp;base64," + image;
+          }
+          return {
+            ok: true,
+            image: image,
+            engine: wantCf ? "horde" : "horde",
+            fallbackFrom: wantCf ? "cloudflare" : undefined,
+            prompt: prompt.slice(0, 200),
+            note: wantCf ? "Cloudflare bridge absent → Horde" : undefined
+          };
+        } catch (e) {
+          lastErr = String(e.message || e);
+          if (/échec|Pas d'image/i.test(lastErr)) throw e;
+        }
+      }
+      throw new Error(lastErr || "Timeout file Horde");
+    }
+
+
     throw new Error("route inconnue " + path);
   };
 })();
