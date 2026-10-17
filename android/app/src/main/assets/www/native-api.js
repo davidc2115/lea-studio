@@ -1310,7 +1310,16 @@
       return LEA;
     }
     const who = (path.match(/^\/api\/chat\/([^/]+)/) || [])[1] || "lea";
-    const PERSONA = findChar(who);
+    let PERSONA = findChar(who);
+    // UI (app.js) envoie souvent character dans le body — fusionne pour fiche complète
+    try {
+      if (body && body.character && typeof body.character === "object") {
+        PERSONA = Object.assign({}, PERSONA, body.character, {
+          id: who,
+          name: body.character.name || PERSONA.name,
+        });
+      }
+    } catch (_) {}
     const chatKey = "lea.chat." + who;
     const chat = load(chatKey, emptyChat());
 
@@ -1337,7 +1346,8 @@
     }
     if (path === "/api/characters") return allChars();
     if (path === "/api/chat/" + who && method === "GET") return chat;
-    if (path === "/api/chat/" + who + "/reset" && method === "POST") {
+    if ((path === "/api/chat/" + who + "/reset" && method === "POST")
+        || (path === "/api/chat/" + who && method === "DELETE")) {
       const empty = emptyChat();
       save(chatKey, empty);
       return empty;
@@ -1368,10 +1378,30 @@
       save(chatKey, chat);
       return chat;
     }
-    if (path === "/api/chat/" + who + "/message" && method === "POST") {
+    if ((path === "/api/chat/" + who + "/message" || path === "/api/chat/" + who) && method === "POST") {
+      // Init conversation (greeting injecté côté app)
+      if (body.init && Array.isArray(body.messages)) {
+        chat.messages = body.messages.slice(-40).map(function (m) {
+          return {
+            role: m.role === "assistant" ? "assistant" : "user",
+            content: String(m.content || "").slice(0, 4000),
+            ts: m.ts || Date.now()
+          };
+        });
+        save(chatKey, chat);
+        return { ok: true, messages: chat.messages, reply: "" };
+      }
       const s = settings();
       const rawMode = body.mode || "auto";
-      const txt = String(body.text || "");
+      let txt = String(body.text || body.message || "").trim();
+      if (!txt && Array.isArray(body.messages) && body.messages.length) {
+        for (let i = body.messages.length - 1; i >= 0; i--) {
+          if (body.messages[i] && body.messages[i].role === "user" && body.messages[i].content) {
+            txt = String(body.messages[i].content).trim();
+            break;
+          }
+        }
+      }
       // Ne jamais traiter un prompt studio comme un message de chat
       if (/^\[STUDIO_PROMPT\]/i.test(txt) || body._studioPrompt) {
         return json({ error: "Utilise la section Générer, pas le chat." }, 400);
