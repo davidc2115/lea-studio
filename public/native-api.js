@@ -312,7 +312,8 @@
             ""
           );
           if (/chubby|plus[- ]?size|plantureus|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|vraiment ronde|round belly/.test(text)) return "chubby";
-          if (/hourglass|sablier/.test(text)) return "hourglass";
+          if (/curvy rounded|full[- ]?figured|rounded torso|silhouette ronde|corps plein|rounded figure/.test(text)) return "roundCurvy";
+      if (/hourglass|sablier/.test(text)) return "hourglass";
           if (/(?:athletic|athl[eé]tique)(?:\s+(?:toned|and toned|figure|build|body|woman|et tonique))?|toned (?:figure|body|build)/.test(text)) return "athletic";
           if (/slim slender|slender (?:figure|body)|narrow frame|silhouette mince|longiligne|mince et|slim figure/.test(text)) return "slim";
           if (/petite stature|petite adult|petite proportions/.test(text)) return "petite";
@@ -331,6 +332,13 @@
             lead: "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
             lock: "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
             neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
+          };
+        }
+        if (type === "roundCurvy") {
+          return {
+            lead: "curvy rounded adult woman, full-figured softly rounded body, gently rounded abdomen, full hips and thighs, softly full arms, generous natural curves,",
+            lock: "Body type: softly rounded and full-figured, with natural fullness through the torso, hips, thighs, and arms. Preserve her rounded body; do not make her slim, slender, or athletic.",
+            neg: "slim model, skinny, slender frame, narrow thin body, flat straight figure, athletic lean body, no curves",
           };
         }
         if (type === "athletic") {
