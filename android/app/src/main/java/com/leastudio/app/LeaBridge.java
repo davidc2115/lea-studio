@@ -144,6 +144,76 @@ public class LeaBridge {
     }
 
 
+    /** Génère une image Cloudflare en mode texte et l'enregistre dans la galerie du personnage. */
+    @JavascriptInterface
+    public String cloudflareImageGenerate(String accountId, String token, String model, String prompt, String charId) {
+        HttpURLConnection conn = null;
+        try {
+            String account = accountId == null ? "" : accountId.trim().replaceAll("\\s+", "");
+            String bearer = token == null ? "" : token.trim();
+            String p = prompt == null ? "" : prompt.trim();
+            if (account.isEmpty() || bearer.isEmpty()) return "{\"error\":\"Account ID ou token Cloudflare manquant\"}";
+            if (p.length() < 3) return "{\"error\":\"prompt Cloudflare vide\"}";
+            String modelPath = (model == null || model.trim().isEmpty()) ? "@cf/black-forest-labs/flux-1-schnell" : model.trim();
+            modelPath = modelPath.replace("@", "%40");
+            String endpoint = "https://api.cloudflare.com/client/v4/accounts/" + account + "/ai/run/" + modelPath;
+            conn = (HttpURLConnection) new URL(endpoint).openConnection();
+            conn.setConnectTimeout(45000);
+            conn.setReadTimeout(180000);
+            conn.setRequestMethod("POST");
+            conn.setDoOutput(true);
+            conn.setRequestProperty("Authorization", "Bearer " + bearer);
+            conn.setRequestProperty("Content-Type", "application/json");
+            JSONObject request = new JSONObject();
+            request.put("prompt", p.substring(0, Math.min(p.length(), 1500)));
+            request.put("steps", 4);
+            request.put("seed", (int) (System.currentTimeMillis() & 0x7fffffff));
+            byte[] body = request.toString().getBytes(StandardCharsets.UTF_8);
+            conn.setFixedLengthStreamingMode(body.length);
+            OutputStream out = conn.getOutputStream();
+            out.write(body);
+            out.flush();
+            out.close();
+            int code = conn.getResponseCode();
+            InputStream in = code >= 400 ? conn.getErrorStream() : conn.getInputStream();
+            if (in == null) return "{\"error\":\"Cloudflare HTTP " + code + "\"}";
+            java.io.ByteArrayOutputStream bytesOut = new java.io.ByteArrayOutputStream();
+            byte[] buffer = new byte[16384];
+            int n;
+            while ((n = in.read(buffer)) != -1) {
+                if (bytesOut.size() + n > 20 * 1024 * 1024) throw new java.io.IOException("Réponse image Cloudflare trop volumineuse.");
+                bytesOut.write(buffer, 0, n);
+            }
+            in.close();
+            byte[] imageBytes = bytesOut.toByteArray();
+            if (code >= 400) {
+                String detail = new String(imageBytes, StandardCharsets.UTF_8).replaceAll("\\s+", " ");
+                return "{\"error\":" + JSONObject.quote("Cloudflare HTTP " + code + ": " + detail.substring(0, Math.min(300, detail.length()))) + "}";
+            }
+            String contentType = conn.getContentType();
+            if (contentType == null || !contentType.toLowerCase(java.util.Locale.ROOT).startsWith("image/")) {
+                return "{\"error\":\"Cloudflare n'a pas renvoyé une image. Vérifie le modèle et le token.\"}";
+            }
+            android.graphics.Bitmap bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            if (bitmap == null) return "{\"error\":\"Image Cloudflare illisible.\"}";
+            java.io.ByteArrayOutputStream jpeg = new java.io.ByteArrayOutputStream();
+            boolean compressed;
+            try { compressed = bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, jpeg); }
+            finally { bitmap.recycle(); }
+            if (!compressed || jpeg.size() < 100) return "{\"error\":\"Conversion JPEG Cloudflare impossible.\"}";
+            String b64 = android.util.Base64.encodeToString(jpeg.toByteArray(), android.util.Base64.NO_WRAP);
+            String id = charId == null ? "lea" : charId.replaceAll("[^a-zA-Z0-9_-]", "");
+            if (id.isEmpty()) id = "lea";
+            String key = saveGalleryImage(id, "data:image/jpeg;base64," + b64);
+            if (key == null || !key.startsWith("gallery:")) return "{\"error\":\"Impossible d'enregistrer l'image Cloudflare.\"}";
+            return key;
+        } catch (Exception e) {
+            return "{\"error\":" + JSONObject.quote("Cloudflare: " + String.valueOf(e.getMessage())) + "}";
+        } finally {
+            if (conn != null) try { conn.disconnect(); } catch (Exception ignored) {}
+        }
+    }
+
     /** GET binaire → data URL base64 (ex: carte PNG Chub). */
     @JavascriptInterface
     public String httpGetDataUrl(String url) {
