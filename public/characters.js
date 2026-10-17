@@ -12,7 +12,7 @@ window.CAST = [
     "romance",
     "nsfw",
     "orage",
-    "bonnet D"
+    "bonnet d"
   ],
   "cover": "images/lea-orage-dentelle.jpg",
   "gallery": [
@@ -224,7 +224,7 @@ window.CAST = [
   "tags": [
     "amie",
     "nsfw",
-    "mince",
+    "voluptueuse",
     "bonnet d",
     "gros seins",
     "cheveux noirs",
@@ -1333,7 +1333,7 @@ window.CAST = [
   "tags": [
     "belle-mère",
     "nsfw",
-    "mince",
+    "voluptueuse",
     "bonnet h",
     "gros seins",
     "cheveux noirs",
@@ -2090,8 +2090,7 @@ window.CAST = [
   "tags": [
     "belle-mère",
     "nsfw",
-    "très ronde",
-    "chubby",
+    "voluptueuse",
     "bonnet d",
     "gros seins",
     "cheveux noirs",
