@@ -426,32 +426,71 @@ function activeChatPath() {
   return "/api/chat/" + encodeURIComponent((state.character && state.character.id) || "lea");
 }
 
-function promptCharacterPayload(char) {
-  const c = char || {};
-  return {
-    id: c.id,
-    name: c.name,
-    age: c.age,
-    title: c.title,
-    canonicalCupSize: c.canonicalCupSize || "",
-    tags: c.tags,
-    scenario: c.scenario,
-    personality: c.personality,
-    appearance: c.appearance,
-    looks_en: c.looks_en || "",
-    ethnicity: c.ethnicity || "",
-    body: c.body || "",
-    Poitrine: c.Poitrine || c.poitrine || "",
-    poitrine: c.Poitrine || c.poitrine || "",
-    bustEstimate: c.bustEstimate || "",
-    estimatedAge: c.estimatedAge || null,
-    nonHumanTraits: c.nonHumanTraits || "",
-    system_extra: c.system_extra,
-    // Requis pour img2img (identité visage) en scène conversation + profil
-    cover: c.cover || "",
-    gallery: Array.isArray(c.gallery) ? c.gallery.slice(0, 12) : [],
-  };
-}
+function findBundledCharacterForPrompt(id) {
+      const targetId = String(id || "");
+      if (!targetId || typeof window === "undefined") return null;
+      const lists = [
+        window.CAST,
+        window.EXTRA_CAST,
+        window.LEA_CAST_NEW,
+        window.LEA_CAST_SPECIAL,
+        window.LEA_CAST_DIRECT,
+        window.LEA_CAST_CUPS,
+        window.LEA_CAST_COLLEGUES,
+        window.LEA_CAST_TAQUIN,
+      ];
+      for (const list of lists) {
+        if (!Array.isArray(list)) continue;
+        const found = list.find((item) => item && String(item.id) === targetId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function promptCharacterPayload(char) {
+      const c = char || {};
+      const bundled = findBundledCharacterForPrompt(c.id);
+      // Local overrides remain saved and visible in the profile, but bundled identities
+      // use the latest catalogue physical fields when constructing an image prompt.
+      const source = bundled ? Object.assign({}, c, {
+        name: bundled.name || c.name,
+        age: bundled.age != null && bundled.age !== "" ? bundled.age : c.age,
+        title: bundled.title || c.title,
+        tags: Array.isArray(bundled.tags) ? bundled.tags : c.tags,
+        appearance: typeof bundled.appearance === "string" ? bundled.appearance : c.appearance,
+        looks_en: typeof bundled.looks_en === "string" ? bundled.looks_en : (c.looks_en || ""),
+        ethnicity: typeof bundled.ethnicity === "string" ? bundled.ethnicity : (c.ethnicity || ""),
+        body: typeof bundled.body === "string" ? bundled.body : (c.body || ""),
+        Poitrine: bundled.Poitrine || bundled.poitrine || "",
+        poitrine: bundled.Poitrine || bundled.poitrine || "",
+        canonicalCupSize: bundled.canonicalCupSize || "",
+        bustEstimate: bundled.bustEstimate || "",
+        nonHumanTraits: bundled.nonHumanTraits || "",
+      }) : c;
+      return {
+        id: source.id,
+        name: source.name,
+        age: source.age,
+        title: source.title,
+        canonicalCupSize: source.canonicalCupSize || "",
+        tags: source.tags,
+        scenario: source.scenario,
+        personality: source.personality,
+        appearance: source.appearance,
+        looks_en: source.looks_en || "",
+        ethnicity: source.ethnicity || "",
+        body: source.body || "",
+        Poitrine: source.Poitrine || source.poitrine || "",
+        poitrine: source.Poitrine || source.poitrine || "",
+        bustEstimate: source.bustEstimate || "",
+        estimatedAge: source.estimatedAge || null,
+        nonHumanTraits: source.nonHumanTraits || "",
+        system_extra: source.system_extra,
+        // Requis pour img2img (identité visage) en scène conversation + profil
+        cover: source.cover || "",
+        gallery: Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : [],
+      };
+    }
 
 function stripLeaMemory(text) {
   return String(text || "")
