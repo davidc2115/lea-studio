@@ -17,6 +17,7 @@ const state = {
   githubConnecting: false,
   githubDeviceFlow: null,
   githubSyncRunning: false,
+  githubSyncPending: false,
   githubSyncMessage: "",
 };
 
@@ -165,11 +166,76 @@ function waitForGitHubPoll(seconds) {
   return new Promise((resolve) => setTimeout(resolve, Math.max(1, seconds) * 1000));
 }
 
+function refreshGitHubSyncView() {
+  if (state.view === "settings") renderSettings();
+  else if (state.view === "profile") renderProfile();
+}
+
+function updateGitHubSyncStatus() {
+  if (state.view !== "settings") return;
+  const connected = !!(window.LeaAndroid &&
+    typeof window.LeaAndroid.hasGitHubAuthorization === "function" &&
+    window.LeaAndroid.hasGitHubAuthorization());
+  if (connected !== !!$("btn-github-sync")) {
+    refreshGitHubSyncView();
+    return;
+  }
+  const status = $("github-sync-status");
+  if (!status) {
+    if (state.view === "profile") renderProfile();
+    return;
+  }
+  status.textContent = state.githubSyncMessage || "";
+  const button = $("btn-github-sync");
+  if (button) {
+    button.disabled = state.githubSyncRunning;
+    button.textContent = state.githubSyncRunning
+      ? "⏳ Synchronisation globale…"
+      : "🔄 Synchroniser tous les personnages";
+  }
+}
+
+function githubSyncSectionHtml() {
+  const available = hasGitHubBridge() &&
+    typeof window.LeaAndroid.hasGitHubAuthorization === "function";
+  const connected = available && window.LeaAndroid.hasGitHubAuthorization();
+  return `<div class="section">
+    <h2>🔄 Synchronisation globale</h2>
+    <p class="hint">Une seule action regroupe la dernière image de tous les personnages enregistrés sur cet appareil, puis met à jour le pack du prochain APK. Les images restent aussi dans les galeries locales.</p>
+    <div id="github-sync-status" class="hint" role="status" aria-live="polite">${escapeHtml(state.githubSyncMessage || (connected ? "GitHub est connecté." : "GitHub n’est pas connecté."))}</div>
+    ${state.githubDeviceFlow ? `
+      <label class="hint" for="github-device-code">Code à saisir sur GitHub</label>
+      <input id="github-device-code" class="edit-input" readonly value="${escapeHtml(state.githubDeviceFlow.userCode)}" />
+      <p class="hint">${escapeHtml(state.githubDeviceFlow.verificationUrl)}</p>
+      <button type="button" class="btn btn-secondary" id="btn-github-open-device">🌐 Ouvrir la page de vérification</button>
+    ` : ""}
+    ${available
+      ? `<div class="btn-row" style="margin-top:8px">
+          ${connected
+            ? `<button type="button" class="btn btn-secondary" id="btn-github-sync" ${state.githubSyncRunning ? "disabled" : ""}>${state.githubSyncRunning ? "⏳ Synchronisation globale…" : "🔄 Synchroniser tous les personnages"}</button>`
+            : `<button type="button" class="btn btn-secondary" id="btn-github-connect" ${state.githubConnecting ? "disabled" : ""}>${state.githubConnecting ? "⏳ Connexion…" : "🔐 Connecter GitHub"}</button>`}
+        </div>`
+      : `<p class="hint">La synchronisation globale est disponible dans l’application Android.</p>`}
+  </div>`;
+}
+
+function bindGitHubSyncControls() {
+  if ($("btn-github-connect")) $("btn-github-connect").onclick = () => connectGitHubGallery();
+  if ($("btn-github-open-device")) {
+    $("btn-github-open-device").onclick = () => {
+      if (window.LeaAndroid && window.LeaAndroid.openGitHubDeviceVerification) {
+        window.LeaAndroid.openGitHubDeviceVerification();
+      }
+    };
+  }
+  if ($("btn-github-sync")) $("btn-github-sync").onclick = () => startGitHubCoversSync(false);
+}
+
 async function connectGitHubGallery() {
   if (state.githubConnecting || !hasGitHubBridge()) return;
   state.githubConnecting = true;
   state.githubSyncMessage = "Préparation de la connexion GitHub…";
-  renderProfile();
+  refreshGitHubSyncView();
   try {
     const started = parseGitHubBridgeResult(
       window.LeaAndroid.githubDeviceFlowStart(GITHUB_APP_CLIENT_ID)
@@ -190,7 +256,7 @@ async function connectGitHubGallery() {
       expiresAt,
     };
     state.githubSyncMessage = "Saisis ce code sur GitHub pour autoriser Léa Studio.";
-    renderProfile();
+    refreshGitHubSyncView();
     if (window.LeaAndroid.openGitHubDeviceVerification) {
       window.LeaAndroid.openGitHubDeviceVerification();
     }
@@ -204,7 +270,7 @@ async function connectGitHubGallery() {
         state.githubDeviceFlow = null;
         state.githubSyncMessage = "GitHub est connecté; synchronisation automatique activée.";
         state.githubConnecting = false;
-        renderProfile();
+        refreshGitHubSyncView();
         startGitHubCoversSync(true);
         return;
       }
@@ -220,23 +286,28 @@ async function connectGitHubGallery() {
   } catch (error) {
     state.githubDeviceFlow = null;
     state.githubSyncMessage = String(error.message || error);
-    renderProfile();
+    refreshGitHubSyncView();
   } finally {
     state.githubConnecting = false;
+    refreshGitHubSyncView();
   }
 }
 
 async function startGitHubCoversSync(silent) {
-  if (state.githubSyncRunning || !hasGitHubBridge()) return;
+  if (!hasGitHubBridge()) return;
+  if (state.githubSyncRunning) {
+    state.githubSyncPending = true;
+    return;
+  }
   if (!window.LeaAndroid.hasGitHubAuthorization ||
       !window.LeaAndroid.hasGitHubAuthorization()) {
     state.githubSyncMessage = "Connecte GitHub pour activer la synchronisation automatique.";
-    if (!silent) renderProfile();
+    if (!silent) updateGitHubSyncStatus();
     return;
   }
   state.githubSyncRunning = true;
   state.githubSyncMessage = "Préparation du pack d’images…";
-  if (!silent) renderProfile();
+  updateGitHubSyncStatus();
   try {
     const started = parseGitHubBridgeResult(
       window.LeaAndroid.startGitHubCoversSync(GITHUB_APP_CLIENT_ID)
@@ -253,13 +324,16 @@ async function startGitHubCoversSync(silent) {
         break;
       }
       if (current.status === "error") throw new Error(current.message || "La synchronisation GitHub a échoué.");
-      if (state.view === "profile") renderProfile();
+      updateGitHubSyncStatus();
     }
   } catch (error) {
     state.githubSyncMessage = String(error.message || error);
   } finally {
     state.githubSyncRunning = false;
-    if (state.view === "profile") renderProfile();
+    const rerun = state.githubSyncPending;
+    state.githubSyncPending = false;
+    updateGitHubSyncStatus();
+    if (rerun) setTimeout(() => startGitHubCoversSync(true), 100);
   }
 }
 
@@ -852,8 +926,6 @@ function renderProfile() {
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
   const canSaveToPhone = !!(window.LeaAndroid && typeof window.LeaAndroid.saveBase64ToDownloads === "function");
-  const canSyncGitHub = hasGitHubBridge() && typeof window.LeaAndroid.hasGitHubAuthorization === "function";
-  const githubConnected = canSyncGitHub && window.LeaAndroid.hasGitHubAuthorization();
   const tags = Array.isArray(c.tags) ? c.tags : [];
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
@@ -924,20 +996,26 @@ function renderProfile() {
     ` : ""}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
-      <p class="hint">★ = photo de profil · ⬇️ = enregistrer dans Téléchargements · 🗑️ = supprimer</p>
+       <p class="hint">★ = photo de profil · ◎ = référence visage pour Horde et Cloudflare</p>
       <div class="gallery-grid">
         ${gallery.filter(Boolean).map((src, i) => {
           const isCover = (c.cover === src) || (!c.cover && i === 0);
+           const isReference = c.referenceImage ? c.referenceImage === src : i === 0;
           const resolved = resolveImgSrc(src) || "";
           return `<div class="gal-card">
             <button type="button" class="gal-img-btn" data-i="${i}">
               ${resolved
                 ? `<img src="${escapeHtml(resolved)}" alt="${escapeHtml(c.name || "Personnage")} ${i+1}" loading="lazy" onerror="this.style.opacity=0.3" />`
                 : `<div class="cover-placeholder" style="height:120px;display:grid;place-items:center">🖼️</div>`}
-              ${isCover ? '<span class="gal-badge">★ Profil</span>' : ''}
+              ${isCover && isReference
+                ? '<span class="gal-badge">★ Profil · ◎ Référence</span>'
+                : isCover
+                  ? '<span class="gal-badge">★ Profil</span>'
+                  : (isReference ? '<span class="gal-badge">◎ Référence</span>' : '')}
             </button>
             <div class="gal-actions">
               <button type="button" class="gal-btn gal-cover" data-i="${i}" title="Photo de profil">★</button>
+               <button type="button" class="gal-btn gal-reference" data-i="${i}" title="Référence visage">◎</button>
               ${canSaveToPhone ? `<button type="button" class="gal-btn gal-save" data-i="${i}" title="Enregistrer dans Téléchargements">⬇️</button>` : ""}
               <button type="button" class="gal-btn gal-del" data-i="${i}" title="Supprimer">🗑️</button>
             </div>
@@ -950,7 +1028,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>🖼️ Générer une image</h2>
-      <p class="hint">La photo de profil sert de référence pour le visage. Mode SFW Horde (tenues modestes, pas de lingerie) pour éviter la censure worker. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
+      <p class="hint">La photo marquée ◎ sert de référence visage pour Horde et Cloudflare; choisis-la avec le bouton ◎ de la galerie. Mode SFW Horde (tenues modestes, pas de lingerie). Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
         <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX.2 Klein</option>
@@ -963,24 +1041,6 @@ function renderProfile() {
           <button type="button" class="btn btn-primary" id="btn-gen-img">✨ Générer (physique fidèle)</button>`}
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
-    </div>
-    <div class="section">
-      <h2>🔄 Synchronisation GitHub</h2>
-      <p class="hint">Les images générées sont enregistrées dans l’application. Si GitHub est connecté, la dernière image de chaque personnage est envoyée automatiquement au pack utilisé par le prochain APK.</p>
-      <div id="github-sync-status" class="hint" role="status" aria-live="polite">${escapeHtml(state.githubSyncMessage || (githubConnected ? "GitHub est connecté." : "GitHub n’est pas connecté."))}</div>
-      ${state.githubDeviceFlow ? `
-        <label class="hint" for="github-device-code">Code à saisir sur GitHub</label>
-        <input id="github-device-code" class="edit-input" readonly value="${escapeHtml(state.githubDeviceFlow.userCode)}" />
-        <p class="hint">${escapeHtml(state.githubDeviceFlow.verificationUrl)}</p>
-        <button type="button" class="btn btn-secondary" id="btn-github-open-device">🌐 Ouvrir la page de vérification</button>
-      ` : ""}
-      ${canSyncGitHub
-        ? `<div class="btn-row" style="margin-top:8px">
-            ${githubConnected
-              ? `<button type="button" class="btn btn-secondary" id="btn-github-sync" ${state.githubSyncRunning ? "disabled" : ""}>${state.githubSyncRunning ? "⏳ Synchronisation…" : "🔄 Synchroniser maintenant"}</button>`
-              : `<button type="button" class="btn btn-secondary" id="btn-github-connect" ${state.githubConnecting ? "disabled" : ""}>${state.githubConnecting ? "⏳ Connexion…" : "🔐 Connecter GitHub"}</button>`}
-          </div>`
-        : `<p class="hint">La synchronisation GitHub est disponible dans l’application Android.</p>`}
     </div>
     ` : ""}
     ${edit ? `
@@ -1026,6 +1086,16 @@ function renderProfile() {
       renderProfile();
     };
   });
+  root.querySelectorAll(".gal-reference").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const i = Number(btn.dataset.i) || 0;
+      const g = (state.character && state.character.gallery) || [];
+      if (!g[i]) return;
+      persistActiveCharacter(Object.assign({}, state.character, { referenceImage: g[i] }));
+      renderProfile();
+    };
+  });
   root.querySelectorAll(".gal-save").forEach((btn) => {
     btn.onclick = async (e) => {
       e.stopPropagation();
@@ -1064,6 +1134,7 @@ function renderProfile() {
       }
       const next = Object.assign({}, state.character, { gallery: g });
       if (next.cover === removed) next.cover = g[0] || "";
+      if (next.referenceImage === removed) next.referenceImage = g[0] || "";
        persistActiveCharacter(next);
       renderProfile();
     };
@@ -1080,19 +1151,6 @@ function renderProfile() {
     } else if (state.genBanner && state.genBanner.msg) {
       setGenBanner(state.genBanner.msg, state.genBanner.kind || "");
     }
-  }
-  if ($("btn-github-connect")) {
-    $("btn-github-connect").onclick = () => connectGitHubGallery();
-  }
-  if ($("btn-github-open-device")) {
-    $("btn-github-open-device").onclick = () => {
-      if (window.LeaAndroid && window.LeaAndroid.openGitHubDeviceVerification) {
-        window.LeaAndroid.openGitHubDeviceVerification();
-      }
-    };
-  }
-  if ($("btn-github-sync")) {
-    $("btn-github-sync").onclick = () => startGitHubCoversSync(false);
   }
   if ($("prof-chat")) $("prof-chat").onclick = () => { state.chatListMode = false; showView("chat"); };
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
@@ -1630,9 +1688,15 @@ async function generateProfileImage() {
   await new Promise((r) => setTimeout(r, 30));
   // Job détaché : survit au changement d'onglet
   const jobChar = Object.assign({}, c);
+  const referencePath = jobChar.referenceImage ||
+    (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) ||
+    jobChar.cover || "";
+  if (referencePath && !jobChar.referenceImage) {
+    jobChar.referenceImage = referencePath;
+    persistActiveCharacter(Object.assign({}, selectedCharacter, { referenceImage: referencePath }));
+  }
   (async () => {
     try {
-      const referencePath = jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "";
       const referenceDataUrl = await characterImageDataUrl(referencePath);
       const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
@@ -1685,6 +1749,7 @@ function renderSettings() {
       <button type="button" class="btn btn-primary" id="save-settings-top">💾 Enregistrer clés & réglages</button>
       <div id="set-status-top" class="hint"></div>
     </div>
+    ${githubSyncSectionHtml()}
     <div class="section">
       <h2>🔑 Clés API (dialogue)</h2>
       <div class="settings-block">
@@ -1791,6 +1856,7 @@ function renderSettings() {
       <div id="memory-status"></div>
     </div>
   `;
+  bindGitHubSyncControls();
   function doSaveSettings() {
     try {
       const prevKey = resolveHordeApiKey();
