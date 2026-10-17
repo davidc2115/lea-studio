@@ -2834,7 +2834,7 @@ window.LEA_CAST_CUPS = [
     "nsfw",
     "très ronde",
     "chubby",
-    "bonnet i",
+    "bonnet h",
     "gros seins",
     "brune",
     "métisse"
@@ -2974,7 +2974,7 @@ window.LEA_CAST_CUPS = [
     "babysitter",
     "nsfw",
     "mince",
-    "bonnet c",
+    "bonnet h",
     "cheveux noirs",
     "noire"
   ],
