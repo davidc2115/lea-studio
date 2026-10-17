@@ -2288,26 +2288,26 @@
       const cover = String(char.cover || (Array.isArray(char.gallery) && char.gallery[0]) || "");
       if (/^data:image\//i.test(cover)) sourceImage = cover;
 
-      // Cloudflare via bridge Android si dispo
-      if (wantCf && window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function") {
-        try {
-          const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
-          const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
-          if (account && token) {
-            const model = "https://api.cloudflare.com/client/v4/accounts/" + account + "/ai/run/@cf/black-forest-labs/flux-2-klein-4b";
-            // Some bridges expect (account, token, model, prompt, charId, ref)
-            const job = window.LeaAndroid.cloudflareImageStart(account, token, model, prompt, String(char.id || "lea"), sourceImage || "");
-            // If bridge returns data URL directly
-            if (job && String(job).indexOf("data:image") === 0) {
-              return { ok: true, image: String(job), engine: "cloudflare", prompt: prompt.slice(0, 200) };
-            }
-          }
-        } catch (e) {
-          console.warn("[cf-bridge]", e.message || e);
+      // Cloudflare est un choix explicite: ne jamais basculer silencieusement vers Horde.
+      if (wantCf) {
+        const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
+        const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
+        if (!account || !token) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages.");
+        if (sourceImage) throw new Error("Cette version de Cloudflare ne conserve pas encore la photo de référence. Choisis Horde ou retire la référence.");
+        if (!window.LeaAndroid || typeof window.LeaAndroid.cloudflareImageGenerate !== "function") {
+          throw new Error("Le pont Cloudflare manque dans cette APK. Mets l’application à jour avant de générer.");
         }
+        const model = "@cf/black-forest-labs/flux-1-schnell";
+        const raw = String(window.LeaAndroid.cloudflareImageGenerate(account, token, model, prompt, String(char.id || "lea")) || "");
+        if (raw.indexOf("gallery:") === 0 || raw.indexOf("data:image/") === 0) {
+          return { ok: true, image: raw, engine: "cloudflare", prompt: prompt.slice(0, 200) };
+        }
+        let errorText = raw;
+        try { const parsed = JSON.parse(raw); errorText = String(parsed.error || raw); } catch (_) {}
+        throw new Error("Cloudflare: " + (errorText || "aucune image renvoyée").slice(0, 220));
       }
 
-      // Horde (ou secours Cloudflare) : soumission + poll jusqu'à image
+      // Horde : soumission + poll jusqu'à image
       const hordeKey = String(st.hordeApiKey || st.horde_key || st.hordeKey || "0000000000").trim() || "0000000000";
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       const clientAgent = "lea-studio:2.0:android";
@@ -2320,12 +2320,13 @@
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 900000) srcB64 = raw;
       }
+      const registeredHorde = !!hordeKey && hordeKey !== "0000000000";
       const payload = {
         prompt: prompt + " ### " + negative,
         params: {
-          width: 512,
-          height: 768,
-          steps: 28,
+          width: registeredHorde ? 512 : 448,
+          height: registeredHorde ? 768 : 576,
+          steps: registeredHorde ? 28 : 12,
           n: 1,
           sampler_name: "k_euler_a",
           cfg_scale: 7,
@@ -2363,19 +2364,21 @@
             break;
           }
           lastErr = data.message || data.error || ("HTTP " + res.status);
+          if (/kudos|heavy demand|work budget/i.test(String(lastErr))) break;
         } catch (e) {
           lastErr = String(e.message || e);
         }
       }
       if (!jobId) {
-        throw new Error(lastErr || (wantCf
-          ? "Cloudflare indisponible (pas de bridge) et Horde a refusé. Configure les clés CF ou Horde."
-          : "Horde indisponible"));
+        if (/kudos|heavy demand|work budget/i.test(String(lastErr))) {
+          throw new Error("AI Horde réclame des kudos au-delà du quota anonyme. Ajoute une clé Horde avec assez de kudos ou utilise Cloudflare. " + String(lastErr).slice(0, 120));
+        }
+        throw new Error(lastErr || "Horde indisponible");
       }
 
       const started = Date.now();
       while (Date.now() - started < 600000) {
-        await new Promise(function (r) { setTimeout(r, 2500); });
+        await new Promise(function (r) { setTimeout(r, 10000); });
         try {
           const chk = await fetch(hostUsed + "/generate/check/" + jobId, {
             headers: { "Client-Agent": clientAgent }
