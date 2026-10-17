@@ -195,6 +195,44 @@
     });
   }
 
+
+  /** Lit Account ID + token CF depuis lea.settings (cfAccount / cfKeys) */
+  function resolveCloudflareCreds(st) {
+    const s = Object.assign({}, settings(), st || {});
+    let account = String(s.cfAccount || s.cfAccountId || s.cloudflareAccountId || "").trim();
+    let token = String(s.cfApiToken || s.cloudflareToken || s.cfToken || "").trim();
+    const rawKeys = String(s.cfKeys || "").trim();
+    if (rawKeys) {
+      // Formats: "token" | "account|token" | multi-lignes
+      const first = rawKeys.split(/[\n;]+/).map(function (x) { return x.trim(); }).filter(Boolean)[0] || "";
+      if (first.indexOf("|") >= 0) {
+        const parts = first.split("|").map(function (x) { return x.trim(); });
+        if (parts[0] && !account) account = parts[0];
+        if (parts[1]) token = parts[1];
+      } else if (first && !token) {
+        token = first;
+      }
+    }
+    if (Array.isArray(s.cfApiTokens) && s.cfApiTokens[0] && !token) {
+      token = String(s.cfApiTokens[0]).trim();
+    }
+    // Account parfois collé dans le champ token
+    if (!account && token && /^[a-f0-9]{32}$/i.test(token.split(/\s+/)[0] || "")) {
+      // ne pas confondre account hex 32 avec un token long
+    }
+    return { account: account, token: token };
+  }
+
+  function resolveHordeKey(st) {
+    const s = Object.assign({}, settings(), st || {});
+    let k = String(s.hordeApiKey || s.horde_key || s.hordeKey || "").trim();
+    if (!k || k === "0000000000") {
+      try { k = String(localStorage.getItem("lea.hordeApiKey") || "").trim(); } catch (_) {}
+    }
+    if (!k) k = "0000000000";
+    return k;
+  }
+
   function parseKeys(raw) {
     return String(raw || "")
       .split(/[\n,;]+/)
@@ -2292,9 +2330,10 @@
 
       // Cloudflare est un choix explicite: ne jamais basculer silencieusement vers Horde.
       if (wantCf) {
-        const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
-        const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
-        if (!account || !token) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages.");
+        const cfCreds = resolveCloudflareCreds(st);
+        const account = cfCreds.account;
+        const token = cfCreds.token;
+        if (!account || !token) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages. Account=" + (account ? "ok" : "manquant") + ", token=" + (token ? "ok" : "manquant") + ".");
         if (sourceImage) throw new Error("Cette version de Cloudflare ne conserve pas encore la photo de référence. Choisis Horde ou retire la référence.");
         if (!window.LeaAndroid || typeof window.LeaAndroid.cloudflareImageGenerate !== "function") {
           throw new Error("Le pont Cloudflare manque dans cette APK. Mets l’application à jour avant de générer.");
@@ -2310,7 +2349,7 @@
       }
 
       // Horde : soumission + poll jusqu'à image
-      const hordeKey = String(st.hordeApiKey || st.horde_key || st.hordeKey || "0000000000").trim() || "0000000000";
+      const hordeKey = resolveHordeKey(st);
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       const clientAgent = "lea-studio:2.0:android";
       const negative = "blurry, lowres, cartoon, anime, deformed, extra limbs, child, underage, watermark, text";
@@ -2322,13 +2361,14 @@
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 900000) srcB64 = raw;
       }
+      // Anonyme: rester ≤512×512 (sinon kudos "over 576x576"). Clé: 512×768 ok.
       const registeredHorde = !!hordeKey && hordeKey !== "0000000000";
       const payload = {
         prompt: prompt + " ### " + negative,
         params: {
-          width: registeredHorde ? 512 : 448,
-          height: registeredHorde ? 768 : 576,
-          steps: registeredHorde ? 28 : 12,
+          width: 512,
+          height: registeredHorde ? 768 : 512,
+          steps: registeredHorde ? 28 : 15,
           n: 1,
           sampler_name: "k_euler_a",
           cfg_scale: 7,
