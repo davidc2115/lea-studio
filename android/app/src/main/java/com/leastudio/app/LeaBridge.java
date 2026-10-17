@@ -847,8 +847,8 @@ public class LeaBridge {
                     JSONObject params = new JSONObject();
                     // Qualité type "scène" (e307da2): 576×768 + denoise 0.72 si clé
                     // Anonyme: 512×640 pour éviter heavy demand
-                    params.put("width", 576);
-                    params.put("height", 640);
+                    params.put("width", 512);
+                    params.put("height", registered ? 768 : 512);
                     double denoise = 0.55;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
@@ -875,7 +875,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", photorealistic photograph, fully clothed, modest fashion, natural lighting, sharp focus, realistic skin ### painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin, same pose as reference, same outfit as reference, duplicate of reference, copied composition, distorted face, malformed hands, warped body");
+                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, outfit as described, full-length head-to-toe framing, shoes visible, natural lighting, sharp focus, realistic skin ### painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin, headshot, close-up, chest-up crop, cropped legs, cut-off feet, same pose as reference, same outfit as reference, duplicate of reference, copied composition, distorted face, malformed hands, warped body");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
@@ -907,7 +907,7 @@ public class LeaBridge {
                             if (attemptSubmit == 1) {
                                 params.put("steps", registered ? 26 : 22);
                                 params.put("width", 512);
-                                params.put("height", 640);
+                                params.put("height", registered ? 640 : 512);
                                 params.put("denoising_strength", Math.min(denoise, 0.72));
                                 params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
@@ -916,7 +916,7 @@ public class LeaBridge {
                             } else if (attemptSubmit == 2) {
                                 params.put("steps", registered ? 24 : 20);
                                 params.put("width", 448);
-                                params.put("height", 576);
+                                params.put("height", registered ? 576 : 512);
                                 payload.put("params", params);
                                 Thread.sleep(4000);
                             } else if (attemptSubmit == 3) {

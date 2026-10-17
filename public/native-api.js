@@ -379,51 +379,84 @@
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
-    // Prompt Horde volontairement SFW : ses filtres examinent aussi le prompt négatif.
-    if (eng.indexOf("horde") >= 0) {
-      const nameH = String(c.name || "woman").slice(0, 60);
-      const parsedAgeH = parseInt(c.age, 10);
-      if (!Number.isFinite(parsedAgeH) || parsedAgeH < 18) {
-        throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
-      }
-      const ageH = parsedAgeH;
-      const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-      const extraH = String(extra || "").trim().slice(0, 80);
-      if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) {
-        throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
-      }
-      const outfitsH = [
-        "a modest long-sleeve knit dress with opaque tights",
-        "a tailored blazer, blouse and trousers",
-        "a modest short-sleeve midi dress",
-        "a cardigan over a simple knee-length dress",
-        "a button-up shirt and straight-leg trousers",
-        "a modest long-sleeve dress with a simple neckline"
-      ];
-      const posesH = [
-        "standing naturally beside a window, looking toward the camera",
-        "walking through a doorway, photographed at eye level",
-        "seated upright on a chair, hands resting naturally",
-        "standing in three-quarter view with relaxed arms",
-        "walking down a bright hallway, full body visible"
-      ];
-      const outfitH = outfitsH[Math.floor(Math.random() * outfitsH.length)];
-      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
-      const ph = [
-        "Photorealistic full-body modest fashion photo of one fully clothed adult woman, head and face clearly visible",
-        "AGE LOCK: exactly " + ageH + " years old, adult facial features; do not make her younger",
-        nameH,
-        hasRefH
-          ? "Use the face reference only to preserve her facial identity, hair and skin tone"
-          : "Follow the adult character identity without changing her age",
-        "Outfit: " + outfitH,
-        "Pose: " + poseH,
-        "Tasteful non-suggestive fashion photography, natural lighting, realistic anatomy, natural hands, no text or watermark"
-      ].join(". ");
-      if (extraH) return (ph + ". " + extraH).slice(0, 1500);
-      return ph.slice(0, 1500);
-    }
-    const age = c.age == null || c.age === "" ? NaN : Number(c.age);
+    // Horde: conserver les détails du profil et la variété, tout en restant non explicite.
+        if (eng.indexOf("horde") >= 0) {
+          const nameH = String(c.name || "woman").slice(0, 60);
+          const ageH = parseInt(c.age, 10);
+          if (!Number.isFinite(ageH) || ageH < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
+          const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
+          const extraH = String(extra || "").trim().slice(0, 80);
+          if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
+          const rawAppearanceH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim();
+          const appearanceH = sanitizeAppearanceForImage(rawAppearanceH).slice(0, 400);
+          const looksH = String(c.looks_en || "").replace(/\s+/g, " ").trim().slice(0, 300);
+          const bodyFieldH = String(c.body || "").replace(/\s+/g, " ").trim().slice(0, 160);
+          const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
+          const bustInfoH = describeBustLock(bustH, appearanceH || rawAppearanceH, "horde");
+          const bodyInfoH = describeBodyMorphology(c);
+          const cupH = String(bustInfoH.label || bustH).match(/([A-J])\s*$/i);
+          const largeBustH = !!(cupH && /[FGHIJ]/i.test(cupH[1]));
+          const outfitsH = [
+            "fitted emerald wrap midi dress with moderate neckline and opaque tights",
+            "burgundy satin midi dress with a defined waist and opaque tights",
+            "black fitted top with a forest-green midi skirt and opaque tights",
+            "rose satin blouse tucked into a charcoal pencil skirt",
+            "deep teal tailored jumpsuit with a defined waist",
+            "plum fitted dress with long sleeves and a modest side slit",
+            "navy blouse with a wine-red A-line midi skirt",
+            "ruby red belted dress with short sleeves and low heels",
+            "cream knit dress with opaque tights and ankle boots",
+            "fitted black blazer over a high-neck top with tailored trousers",
+            "lavender blouse with a dark pleated midi skirt",
+            "camel coat over a fitted plum dress",
+            "forest-green velvet midi dress with a moderate neckline",
+            "white blouse with a burgundy skirt and classic pumps",
+            "cobalt wrap dress with opaque tights",
+            "rose blazer dress with a narrow belt and opaque tights",
+            "champagne blouse with olive tailored trousers",
+            "black square-neck dress with long sleeves and opaque tights",
+            "coral sheath dress with cap sleeves and low heels",
+            "soft-blue cardigan over a fitted knee-length dress"
+          ];
+          const fittedH = ["well-fitted structured dress with a natural bust silhouette and fully covered neckline", "tailored wrap dress fitted naturally across the bust, opaque fabric and moderate neckline", "fitted square-neck midi dress showing natural proportions, fully covered", "close-fitting satin dress with a moderate neckline and natural silhouette"];
+          const posesH = [
+            "full-length three-quarter front view, shoulders open, arms relaxed away from torso, shoes visible",
+            "walking down a staircase, head turned toward camera, entire figure and shoes in frame",
+            "mid-step through a doorway, side view, head-to-toe framing",
+            "standing by a window in three-quarter view, full figure and feet visible",
+            "seated sideways on a bench, shoulders turned toward camera, legs and shoes visible",
+            "walking across the room, head turned toward camera, full body from head to shoes",
+            "leaning lightly against a bookshelf, camera pulled back to show full figure",
+            "standing beside a table in side-angle view, entire figure and feet visible"
+          ];
+          const bustPosesH = ["full-length three-quarter view, shoulders open, arms away from chest, shoes visible", "full-length standing, one hand at hip and other by her side, feet visible", "full-length seated upright, hands below bust, legs and shoes in frame", "full-length standing naturally, arms relaxed, clear head-to-toe silhouette"];
+          function chooseH(kind, list, limit) {
+            const key = "lea.profileImage." + kind + "History." + String(c.id || "lea"); let history = [];
+            try { const v = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(v)) history = v; } catch (_) {}
+            const options = list.filter(x => history.indexOf(x) < 0); const selected = (options.length ? options : list)[Math.floor(Math.random() * (options.length || list.length))];
+            try { localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(x => x !== selected)).slice(0, limit))); } catch (_) {}
+            return selected;
+          }
+          const outfitH = chooseH("outfit", largeBustH ? fittedH : outfitsH, 6);
+          const poseH = chooseH("pose", largeBustH ? bustPosesH : posesH, 5);
+          const scenesH = ["a bright apartment living room", "an elegant staircase", "a hotel hallway with tall windows", "a classic bedroom", "a refined lounge with a bookshelf", "a softly lit marble lobby"];
+          const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
+          const identityH = hasRefH ? "Use the reference only to preserve the same adult woman's face, hair and skin; do not copy its outfit, pose, framing, lighting or background." : "Follow the adult profile identity and physical description exactly.";
+          const partsH = [
+            "Photorealistic full-length fashion photograph of one fully clothed adult woman, head-to-toe, shoes visible, camera pulled back, entire figure inside frame; not a headshot or chest-up crop",
+            "AGE LOCK: exactly " + ageH + " years old; adult facial features; do not make her younger", nameH, identityH,
+            looksH ? "Appearance traits: " + looksH : "", appearanceH ? "Profile physical description: " + appearanceH : "",
+            bodyInfoH.lead || "", bodyInfoH.lock || "", bodyFieldH ? "Body description: " + bodyFieldH : "",
+            bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
+            "Outfit: " + outfitH + ". Fully clothed, naturally fitted to her body shape.", "Pose: " + poseH + ".", "Location: " + sceneH + ".",
+            "Natural proportions and realistic anatomy, face clearly visible, natural hands, one person, no text or watermark"
+          ].filter(Boolean);
+          if (extraH) partsH.push(extraH);
+          const suffixH = (hasRefH ? "Preserve her recognizable face, hair and skin from the reference; profile controls body and age." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "");
+          const promptH = partsH.join(". ");
+          return promptH.slice(0, 1800 - suffixH.length - 2).trimEnd() + ". " + suffixH;
+        }
+        const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
     const visuallyAdultAndConfirmed = c.adultConfirmed === true &&
       Number.isInteger(Number(c.estimatedAge)) && Number(c.estimatedAge) >= 18;

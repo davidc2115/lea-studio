@@ -1398,7 +1398,6 @@ async function generateProfileImage() {
         method: "POST",
         body: JSON.stringify({
           character: Object.assign(promptCharacterPayload(jobChar), {
-            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
             adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
