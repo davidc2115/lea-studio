@@ -2355,7 +2355,7 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.62;
+          const denoise = 0.80;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,

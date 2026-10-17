@@ -845,10 +845,9 @@ public class LeaBridge {
                     }
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
-                    // Qualité type "scène" (e307da2): 576×768 + denoise 0.72 si clé
-                    // Anonyme: 512×640 pour éviter heavy demand
-                    params.put("width", 512);
-                    params.put("height", registered ? 768 : 512);
+                    // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
+                    params.put("width", registered ? 512 : 448);
+                    params.put("height", registered ? 768 : 560);
                     double denoise = 0.55;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
@@ -906,9 +905,9 @@ public class LeaBridge {
                         try {
                             if (attemptSubmit == 1) {
                                 params.put("steps", registered ? 26 : 22);
-                                params.put("width", 512);
-                                params.put("height", registered ? 640 : 512);
-                                params.put("denoising_strength", Math.min(denoise, 0.72));
+                                params.put("width", registered ? 512 : 448);
+                                params.put("height", registered ? 640 : 560);
+                                params.put("denoising_strength", Math.min(denoise, 0.80));
                                 params.put("sampler_name", "k_euler_a");
                                 payload.put("params", params);
                                 payload.put("shared", false);
@@ -923,7 +922,7 @@ public class LeaBridge {
                                 // Dernier essai: encore plus léger MAIS garde toujours img2img si on a une ref
                                 params.put("steps", registered ? 22 : 18);
                                 params.put("width", 448);
-                                params.put("height", 576);
+                                params.put("height", registered ? 576 : 512);
                                 payload.put("params", params);
                                 Thread.sleep(5000);
                             }
