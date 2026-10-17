@@ -1594,7 +1594,9 @@
       let system = [
         FORMAT_REMINDER,
         "LANGUE OBLIGATOIRE : réponds TOUJOURS en français (paroles, actions, pensées). INTERDIT d'écrire en anglais sauf noms propres.",
-        `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans. Ton prénom est ${PERSONA.name}. INTERDIT de te présenter comme Léa, Léa Moreau, ou un autre personnage.`,
+        `Tu incarnes UNIQUEMENT ${PERSONA.name}, ${PERSONA.age} ans.`,
+        `IDENTITÉ NOM VERROUILLÉE: ton prénom et nom EXACTS sont « ${PERSONA.name} ». INTERDIT de te renommer, d'inventer un autre prénom (Emma, Léa, Sophie, etc.), de dire « je m'appelle X » si X n'est pas ${PERSONA.name}, ou de corriger le joueur vers un autre nom. Si le joueur se trompe de prénom, corrige uniquement vers « ${PERSONA.name} ».`,
+        `INTERDIT de te présenter comme Léa, Léa Moreau, Emma, ou tout autre personnage que ${PERSONA.name}.`,
         `TITRE EXACT (ne le contredis JAMAIS) : ${PERSONA.title || ""}.`,
         `SCÉNARIO EXACT (cadre de la scène — reste DANS ce scénario, PAS d'orage ni de vêtements trempés SAUF si le scénario le dit) : ${PERSONA.scenario || ""}.`,
         `IDENTITÉ VERROUILLÉE : tu n'es PAS la meilleure amie de la fille de l'utilisateur SAUF si le titre/scénario le dit explicitement. Tu n'arrives PAS trempée par un orage SAUF si le scénario le décrit.`,
@@ -2259,44 +2261,55 @@
       const char = body.character || body.char || {};
       const st = Object.assign({}, settings(), body.settings || {});
       const extra = String(body.extra || "").trim();
-      const name = String(char.name || "woman").slice(0, 80);
-      const age = Math.max(18, parseInt(char.age, 10) || 22);
-      const looks = String(char.looks_en || char.appearance || "").replace(/\s+/g, " ").trim().slice(0, 500);
-      const bodyField = String(char.body || "").slice(0, 120);
+      const name = String(char.name || "character").slice(0, 80);
+      const rawLooks = String(char.looks_en || char.appearance || "");
+      const isDuo = /^duo[_-]/i.test(String(char.id || "")) || /\b(?:LEFT|RIGHT)\b|Femme\s*[12]\s*[—:-]/i.test(rawLooks);
+      const declaredAge = parseInt(char.age, 10);
+      if (!isDuo && (!Number.isInteger(declaredAge) || declaredAge < 18)) {
+        throw new Error("La génération exige l’âge adulte exact indiqué dans la fiche.");
+      }
+      const looks = rawLooks.replace(/\s+/g, " ").trim().slice(0, isDuo ? 1300 : 750);
+      const bodyField = String(char.body || "").slice(0, 240);
+      const identityRule = isDuo
+        ? "exactly two distinct adult women, side by side; keep LEFT and RIGHT identities fixed; do not merge or clone them"
+        : "one adult woman, exactly " + declaredAge + " years old; preserve her profile identity";
       let prompt = [
-        "photorealistic full-body photo of one adult woman, " + age + " years old",
-        name ? ("named " + name) : "",
+        isDuo
+          ? "photorealistic full-body image of exactly two distinct adult women side by side"
+          : "photorealistic full-body photo of one adult woman, exactly " + declaredAge + " years old",
+        name,
         looks,
         bodyField,
         extra,
-        "sharp focus, natural lighting, detailed face, realistic skin, single person"
-      ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
+        identityRule,
+        "sharp focus, natural lighting, detailed faces, realistic skin"
+      ].filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 1500);
 
       // Source image (cover / gallery) for img2img if data URL
       let sourceImage = "";
       const cover = String(char.cover || (Array.isArray(char.gallery) && char.gallery[0]) || "");
       if (/^data:image\//i.test(cover)) sourceImage = cover;
 
-      // Cloudflare via bridge Android si dispo
-      if (wantCf && window.LeaAndroid && typeof window.LeaAndroid.cloudflareImageStart === "function") {
-        try {
-          const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
-          const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
-          if (account && token) {
-            const model = "https://api.cloudflare.com/client/v4/accounts/" + account + "/ai/run/@cf/black-forest-labs/flux-2-klein-4b";
-            // Some bridges expect (account, token, model, prompt, charId, ref)
-            const job = window.LeaAndroid.cloudflareImageStart(account, token, model, prompt, String(char.id || "lea"), sourceImage || "");
-            // If bridge returns data URL directly
-            if (job && String(job).indexOf("data:image") === 0) {
-              return { ok: true, image: String(job), engine: "cloudflare", prompt: prompt.slice(0, 200) };
-            }
-          }
-        } catch (e) {
-          console.warn("[cf-bridge]", e.message || e);
+      // Cloudflare est un choix explicite: ne jamais basculer silencieusement vers Horde.
+      if (wantCf) {
+        const account = String(st.cfAccountId || st.cloudflareAccountId || "").trim();
+        const token = String(st.cfApiToken || st.cloudflareToken || (Array.isArray(st.cfApiTokens) && st.cfApiTokens[0]) || "").trim();
+        if (!account || !token) throw new Error("Configure Cloudflare (Account ID + token) dans Réglages.");
+        if (sourceImage) throw new Error("Cette version de Cloudflare ne conserve pas encore la photo de référence. Choisis Horde ou retire la référence.");
+        if (!window.LeaAndroid || typeof window.LeaAndroid.cloudflareImageGenerate !== "function") {
+          throw new Error("Le pont Cloudflare manque dans cette APK. Mets l’application à jour avant de générer.");
         }
+        const model = "@cf/black-forest-labs/flux-1-schnell";
+        const raw = String(window.LeaAndroid.cloudflareImageGenerate(account, token, model, prompt, String(char.id || "lea")) || "");
+        if (raw.indexOf("gallery:") === 0 || raw.indexOf("data:image/") === 0) {
+          return { ok: true, image: raw, engine: "cloudflare", prompt: prompt.slice(0, 200) };
+        }
+        let errorText = raw;
+        try { const parsed = JSON.parse(raw); errorText = String(parsed.error || raw); } catch (_) {}
+        throw new Error("Cloudflare: " + (errorText || "aucune image renvoyée").slice(0, 220));
       }
 
-      // Horde (ou secours Cloudflare) : soumission + poll jusqu'à image
+      // Horde : soumission + poll jusqu'à image
       const hordeKey = String(st.hordeApiKey || st.horde_key || st.hordeKey || "0000000000").trim() || "0000000000";
       const hosts = ["https://stablehorde.net/api/v2", "https://aihorde.net/api/v2"];
       const clientAgent = "lea-studio:2.0:android";
@@ -2309,16 +2322,17 @@
         raw = raw.replace(/\s+/g, "");
         if (raw.length > 800 && raw.length < 900000) srcB64 = raw;
       }
+      const registeredHorde = !!hordeKey && hordeKey !== "0000000000";
       const payload = {
         prompt: prompt + " ### " + negative,
         params: {
-          width: 512,
-          height: 768,
-          steps: 28,
+          width: registeredHorde ? 512 : 448,
+          height: registeredHorde ? 768 : 576,
+          steps: registeredHorde ? 28 : 12,
           n: 1,
           sampler_name: "k_euler_a",
           cfg_scale: 7,
-          denoising_strength: srcB64 ? 0.72 : 1
+          denoising_strength: srcB64 ? 0.58 : 1
         },
         nsfw: true,
         censor_nsfw: false,
@@ -2352,19 +2366,21 @@
             break;
           }
           lastErr = data.message || data.error || ("HTTP " + res.status);
+          if (/kudos|heavy demand|work budget/i.test(String(lastErr))) break;
         } catch (e) {
           lastErr = String(e.message || e);
         }
       }
       if (!jobId) {
-        throw new Error(lastErr || (wantCf
-          ? "Cloudflare indisponible (pas de bridge) et Horde a refusé. Configure les clés CF ou Horde."
-          : "Horde indisponible"));
+        if (/kudos|heavy demand|work budget/i.test(String(lastErr))) {
+          throw new Error("AI Horde réclame des kudos au-delà du quota anonyme. Ajoute une clé Horde avec assez de kudos ou utilise Cloudflare. " + String(lastErr).slice(0, 120));
+        }
+        throw new Error(lastErr || "Horde indisponible");
       }
 
       const started = Date.now();
       while (Date.now() - started < 600000) {
-        await new Promise(function (r) { setTimeout(r, 2500); });
+        await new Promise(function (r) { setTimeout(r, 10000); });
         try {
           const chk = await fetch(hostUsed + "/generate/check/" + jobId, {
             headers: { "Client-Agent": clientAgent }
