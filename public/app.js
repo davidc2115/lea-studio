@@ -1709,6 +1709,16 @@ function mergeAllCasts() {
         if (!o.personality || String(o.personality).length < 40) {
           merged.personality = base.personality;
         }
+        // L'ancienne fiche locale d'Hortense ne doit pas masquer les valeurs canoniques du catalogue.
+        if (id === "aya") {
+          for (const key of ["name", "age", "tags", "appearance", "looks_en", "ethnicity", "body", "Poitrine", "poitrine", "nonHumanTraits"]) {
+            if (Object.prototype.hasOwnProperty.call(base, key)) merged[key] = base[key];
+          }
+          merged.Poitrine = base.Poitrine || base.poitrine || "";
+          merged.poitrine = merged.Poitrine;
+          merged.canonicalCupSize = base.canonicalCupSize || "";
+          merged.bustEstimate = base.bustEstimate || "";
+        }
         // Conserver galerie / champs édités volontairement
         byId.set(id, merged);
       }
