@@ -487,17 +487,20 @@ function findBundledCharacterForPrompt(id) {
         nonHumanTraits: source.nonHumanTraits || "",
         system_extra: source.system_extra,
         // Requis pour img2img (identité visage) en scène conversation + profil
-        // Keep Cloudflare's validated reference; use the current catalog portrait for Horde.
-        cover: bundled && String(bundled.id) === "aya"
-          ? (String(imageProvider || "").toLowerCase() === "horde"
-              ? (bundled.cover || "images/cast/aya.jpg")
-              : "images/cast/hortense-build1106-reference.jpg")
-          : (source.cover || ""),
-        gallery: bundled && String(bundled.id) === "aya"
-          ? (String(imageProvider || "").toLowerCase() === "horde" && Array.isArray(bundled.gallery)
+        // Horde uses current catalog references for bundled characters; Cloudflare's
+        // previously validated Hortense reference remains unchanged.
+        cover: bundled && String(imageProvider || "").toLowerCase() === "horde"
+          ? (bundled.cover || source.cover || "")
+          : (bundled && String(bundled.id) === "aya"
+              ? "images/cast/hortense-build1106-reference.jpg"
+              : (source.cover || "")),
+        gallery: bundled && String(imageProvider || "").toLowerCase() === "horde"
+          ? (Array.isArray(bundled.gallery) && bundled.gallery.length
               ? bundled.gallery.slice(0, 12)
-              : [])
-          : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : []),
+              : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : []))
+          : (bundled && String(bundled.id) === "aya"
+              ? []
+              : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : [])),
       };
     }
 
