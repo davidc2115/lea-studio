@@ -6,7 +6,7 @@ on:
       version:
         description: "Nom de version affiché (ex: 1.0.1)"
         required: true
-        default: "1.0.1"
+        default: "2.0"
   push:
     branches: [main]
     paths:
@@ -127,7 +127,7 @@ jobs:
       - name: Assemble APK signé
         working-directory: android
         run: |
-          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          VERSION="${{ github.event.inputs.version || '2.0' }}"
           CODE="${{ github.run_number }}"
           gradle assembleRelease --no-daemon --stacktrace \
             -PversionName="$VERSION" \
@@ -170,7 +170,7 @@ jobs:
             echo "WARN: APK encore très gros ($SIZE)"
             unzip -l "$APK" | sort -n -k1 | tail -20
           fi
-          VERSION="${{ github.event.inputs.version || '1.0.0' }}"
+          VERSION="${{ github.event.inputs.version || '2.0' }}"
           CODE="${{ github.run_number }}"
           OUT="$GITHUB_WORKSPACE/lea-studio-v${VERSION}-b${CODE}.apk"
           cp -f "$APK" "$OUT"
