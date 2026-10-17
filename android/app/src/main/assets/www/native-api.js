@@ -1273,13 +1273,14 @@
         }
       };
       push(window.CAST);
+      push(window.EXTRA_CAST);
+      push(window.LEA_CAST_EXTRA);
       push(window.LEA_CAST_NEW);
       push(window.LEA_CAST_SPECIAL);
       push(window.LEA_CAST_DIRECT);
       push(window.LEA_CAST_CUPS);
       push(window.LEA_CAST_COLLEGUES);
-      push(window.EXTRA_CAST);
-      push(window.LEA_CAST_EXTRA);
+      push(window.LEA_CAST_TAQUIN);
       try {
         const raw = localStorage.getItem("lea.customChars");
         if (raw) push(JSON.parse(raw));
@@ -1314,9 +1315,20 @@
     // UI (app.js) envoie souvent character dans le body — fusionne pour fiche complète
     try {
       if (body && body.character && typeof body.character === "object") {
-        PERSONA = Object.assign({}, PERSONA, body.character, {
+        const bc = body.character;
+        // Fiche CAST (29 sept) = source de vérité pour descriptifs ; body complète les manques
+        PERSONA = Object.assign({}, PERSONA, bc, {
           id: who,
-          name: body.character.name || PERSONA.name,
+          name: PERSONA.name || bc.name,
+          age: PERSONA.age != null ? PERSONA.age : bc.age,
+          title: PERSONA.title || bc.title || "",
+          appearance: PERSONA.appearance || bc.appearance || "",
+          personality: PERSONA.personality || bc.personality || "",
+          scenario: PERSONA.scenario || bc.scenario || "",
+          looks_en: PERSONA.looks_en || bc.looks_en || "",
+          body: PERSONA.body || bc.body || "",
+          system_extra: PERSONA.system_extra || bc.system_extra || "",
+          tags: (PERSONA.tags && PERSONA.tags.length) ? PERSONA.tags : (bc.tags || []),
         });
       }
     } catch (_) {}
