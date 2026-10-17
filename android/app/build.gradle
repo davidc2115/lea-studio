@@ -2,7 +2,7 @@ plugins {
     id "com.android.application"
 }
 
-def versionMajor = (project.findProperty("versionName") ?: "1.0.0")
+def versionMajor = (project.findProperty("versionName") ?: "2.0.0")
 def versionInt = (project.findProperty("versionCode") ?: "1").toInteger()
 
 android {
