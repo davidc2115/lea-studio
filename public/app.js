@@ -729,6 +729,7 @@ function renderProfile() {
   }
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
+  const canSaveToPhone = !!(window.LeaAndroid && typeof window.LeaAndroid.saveBase64ToDownloads === "function");
   const tags = Array.isArray(c.tags) ? c.tags : [];
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
@@ -799,7 +800,7 @@ function renderProfile() {
     ` : ""}
     <div class="section">
       <h2>🖼️ Galerie (${gallery.length})</h2>
-      <p class="hint">★ = photo de profil · 🗑️ = supprimer</p>
+      <p class="hint">★ = photo de profil · ⬇️ = enregistrer dans Téléchargements · 🗑️ = supprimer</p>
       <div class="gallery-grid">
         ${gallery.filter(Boolean).map((src, i) => {
           const isCover = (c.cover === src) || (!c.cover && i === 0);
@@ -813,6 +814,7 @@ function renderProfile() {
             </button>
             <div class="gal-actions">
               <button type="button" class="gal-btn gal-cover" data-i="${i}" title="Photo de profil">★</button>
+              ${canSaveToPhone ? `<button type="button" class="gal-btn gal-save" data-i="${i}" title="Enregistrer dans Téléchargements">⬇️</button>` : ""}
               <button type="button" class="gal-btn gal-del" data-i="${i}" title="Supprimer">🗑️</button>
             </div>
           </div>`;
@@ -880,6 +882,31 @@ function renderProfile() {
        const next = Object.assign({}, state.character, { cover: g[i] });
        persistActiveCharacter(next);
       renderProfile();
+    };
+  });
+  root.querySelectorAll(".gal-save").forEach((btn) => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const i = Number(btn.dataset.i) || 0;
+      const src = (state.character && state.character.gallery && state.character.gallery[i]) || "";
+      if (!src || !window.LeaAndroid || typeof window.LeaAndroid.saveBase64ToDownloads !== "function") return;
+      btn.disabled = true;
+      try {
+        const imageData = await characterImageDataUrl(src);
+        const safeName = String(state.character.name || "personnage")
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 48) || "personnage";
+        const saved = window.LeaAndroid.saveBase64ToDownloads(
+          imageData,
+          "lea-" + safeName + "-" + (i + 1) + ".jpg"
+        );
+        if (!saved) throw new Error("Android n’a pas pu enregistrer l’image.");
+        setGenBanner("✓ Image enregistrée dans Téléchargements", "ok");
+      } catch (error) {
+        setGenBanner(String(error.message || error), "bad");
+      } finally {
+        btn.disabled = false;
+      }
     };
   });
   root.querySelectorAll(".gal-del").forEach((btn) => {
