@@ -875,7 +875,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", photorealistic photograph, fully clothed, modest fashion, natural lighting, sharp focus, realistic skin ### nsfw, nude, lingerie, explicit, painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin, same pose as reference, same outfit as reference, duplicate of reference, copied composition, distorted face, malformed hands, warped body");
+                    payload.put("prompt", promptWork + ", photorealistic photograph, fully clothed, modest fashion, natural lighting, sharp focus, realistic skin ### painting, illustration, anime, cartoon, cgi, 3d, blurry, deformed, extra limbs, bad anatomy, plastic skin, same pose as reference, same outfit as reference, duplicate of reference, copied composition, distorted face, malformed hands, warped body");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {

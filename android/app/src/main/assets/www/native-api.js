@@ -346,92 +346,49 @@
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
-    // Horde: prompt COURT + tenues SFW (test qualité) — c = character OK ici
+    // Prompt Horde volontairement SFW : ses filtres examinent aussi le prompt négatif.
     if (eng.indexOf("horde") >= 0) {
       const nameH = String(c.name || "woman").slice(0, 60);
-      const ageH = Math.max(18, parseInt(c.age, 10) || 22);
-      const looksH = String(c.looks_en || "").trim().slice(0, 220);
-      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 360);
-      const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
-      const bustInfoH = describeBustLock(bustH, appH, "horde");
-      const bodyInfoH = describeBodyMorphology(c);
-      const largeBustH = /[FGHIJ]$/.test(bustInfoH.label);
-      const sfwOutfits = [
-        "cream long-sleeve knit dress with opaque tights, bright apartment",
-        "cobalt blazer over an ivory blouse and tailored trousers, modern hallway",
-        "burgundy satin midi dress with short sleeves, hotel lobby",
-        "navy fitted blouse and charcoal pleated skirt, daylight studio",
-        "red wrap dress with a waist belt and black pumps, city interior",
-        "white button-up shirt and dark straight-leg jeans, casual doorway",
-        "plum long-sleeve evening dress, hotel staircase",
-        "mustard sweater and black midi skirt, cozy library",
-        "black tailored jumpsuit with a square neckline, warm lounge",
-        "soft blue cardigan over a simple dress, bright living room",
-        "cream blouse and wine-red trousers, contemporary apartment",
-        "teal knee-length dress with cap sleeves, marble corridor",
-        "charcoal blazer and tailored trousers over a white top, office lounge",
-        "rose-colored midi dress with a modest V neckline, softly lit room",
-        "lavender sweater dress with opaque tights, wooden staircase",
-        "forest-green blouse with a beige A-line skirt, classic interior",
-        "coral short-sleeve dress with a simple neckline, sunny doorway",
-        "white blazer over a navy dress, elegant lobby",
-        "soft gray knit top with a deep-blue skirt, library interior",
-        "black long-sleeve dress with a gold belt, warm hotel hallway"
-      ];
-      const fittedBustOutfits = [
-        "well-fitted structured dress with visible natural bust volume, bright apartment",
-        "tailored wrap dress fitted across a full bust, modern hallway",
-        "fitted square-neck dress that shows the natural bust silhouette, hotel lobby",
-        "close-fitting satin dress with a moderate neckline and full natural bust volume"
-      ];
-      const outfitPool = largeBustH ? fittedBustOutfits : sfwOutfits;
-      const outfitH = outfitPool[Math.floor(Math.random() * outfitPool.length)];
-      const posesH = [
-        "walking in profile across the room, head turned toward camera",
-        "seated upright on a wooden chair, feet on the floor, hands relaxed in lap",
-        "standing in three-quarter profile beside a window, looking outside",
-        "mid-step through a doorway, photographed from the side",
-        "leaning lightly against a bookshelf, arms relaxed, camera at eye level",
-        "seated sideways on a bench, shoulders turned toward camera",
-        "walking down stairs while looking back, full body",
-        "standing beside a table, hands loosely resting on it, side-angle camera"
-      ];
-      const bustPosesH = [
-        "full-length three-quarter front view, shoulders open, arms relaxed away from the chest",
-        "full-length standing with one hand at the hip and the other relaxed by her side, chest unobstructed",
-        "full-length seated upright, shoulders open, hands below the bust, front three-quarter view",
-        "full-length standing naturally, arms relaxed at her sides, clear body silhouette"
-      ];
-      const posePoolH = largeBustH ? bustPosesH : posesH;
-      const poseH = posePoolH[Math.floor(Math.random() * posePoolH.length)];
+      const parsedAgeH = parseInt(c.age, 10);
+      if (!Number.isFinite(parsedAgeH) || parsedAgeH < 18) {
+        throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
+      }
+      const ageH = parsedAgeH;
       const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-      const idLockH = hasRefH
-        ? "IDENTITY LOCK: same exact adult woman as the reference; preserve her facial geometry, eyes, nose, lips, hair color and style, skin tone, ethnicity, and apparent age. Do not substitute or reinterpret her identity."
-        : "Follow the profile identity and physical description exactly.";
+      const extraH = String(extra || "").trim().slice(0, 80);
+      if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) {
+        throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
+      }
+      const outfitsH = [
+        "a modest long-sleeve knit dress with opaque tights",
+        "a tailored blazer, blouse and trousers",
+        "a modest short-sleeve midi dress",
+        "a cardigan over a simple knee-length dress",
+        "a button-up shirt and straight-leg trousers",
+        "a modest long-sleeve dress with a simple neckline"
+      ];
+      const posesH = [
+        "standing naturally beside a window, looking toward the camera",
+        "walking through a doorway, photographed at eye level",
+        "seated upright on a chair, hands resting naturally",
+        "standing in three-quarter view with relaxed arms",
+        "walking down a bright hallway, full body visible"
+      ];
+      const outfitH = outfitsH[Math.floor(Math.random() * outfitsH.length)];
+      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
       const ph = [
-        "Photorealistic full-body SFW fashion photo of an adult woman, head and face clearly visible",
+        "Photorealistic full-body modest fashion photo of one fully clothed adult woman, head and face clearly visible",
+        "AGE LOCK: exactly " + ageH + " years old, adult facial features; do not make her younger",
         nameH,
-        idLockH,
-        looksH ? "Appearance traits: " + looksH : "",
-        appH ? "Detailed profile description: " + appH : "",
-        bodyInfoH.lead || "",
-        bodyInfoH.lock || "",
-        bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
-        "NEW outfit, distinct from the reference: " + outfitH,
-        "NEW full-body pose: " + poseH,
-        "Use the reference only to preserve identity; do not copy its clothes, posture, arm position, framing, lighting, or background.",
-        "Natural anatomy, realistic hands and proportions, sharp facial details, single person, no text or watermark"
-      ].filter(Boolean).join(". ");
-      if (extra) ph += ". " + String(extra).slice(0, 80);
-      const finalIdentityH = hasRefH
-        ? "Same recognizable face, hair and skin as the reference; preserve the character's described features and apparent age."
-        : "Match the profile's described face and appearance exactly.";
-      const finalBustH = largeBustH
-        ? "Canonical profile size " + bustInfoH.label + ": visibly full broad natural bust with forward projection, shown through fitted clothing; the profile description controls body shape."
-        : "";
-      const suffixH = [finalIdentityH, finalBustH].filter(Boolean).join(" ");
-      const maxPromptLength = 1800;
-      return ph.slice(0, maxPromptLength - suffixH.length - 2).trimEnd() + ". " + suffixH;
+        hasRefH
+          ? "Use the face reference only to preserve her facial identity, hair and skin tone"
+          : "Follow the adult character identity without changing her age",
+        "Outfit: " + outfitH,
+        "Pose: " + poseH,
+        "Tasteful non-suggestive fashion photography, natural lighting, realistic anatomy, natural hands, no text or watermark"
+      ].join(". ");
+      if (extraH) return (ph + ". " + extraH).slice(0, 1500);
+      return ph.slice(0, 1500);
     }
     const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
