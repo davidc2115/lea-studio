@@ -99,8 +99,27 @@ jobs:
           curl -sSL -o /tmp/cast-covers.zip             "https://github.com/davidc2115/lea-studio/releases/download/covers-v1/cast-covers.zip" || true
           if [ -f /tmp/cast-covers.zip ]; then
             unzip -qo /tmp/cast-covers.zip -d /tmp/cast_unpack
-            cp -n /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
-            cp -n /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
+            cp -f /tmp/cast_unpack/cast_covers/*.jpg public/images/cast/ 2>/dev/null || true
+            cp -f /tmp/cast_unpack/cast_covers/*.jpg android/app/src/main/assets/www/images/cast/ 2>/dev/null || true
+            if [ -f /tmp/cast_unpack/cast_covers/manifest.json ]; then
+              python3 - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path("/tmp/cast_unpack/cast_covers/manifest.json").read_text())
+          safe = {
+              str(key): str(value)
+              for key, value in manifest.items()
+              if str(key).replace("_", "").replace("-", "").isalnum()
+              and str(value).replace("_", "").replace("-", "").replace(".", "").isalnum()
+              and str(value).lower().endswith(".jpg")
+          }
+          Path("public/generated-covers.js").write_text(
+              "window.LEA_GENERATED_COVERS = " + json.dumps(safe, ensure_ascii=False) + ";\n",
+              encoding="utf-8",
+          )
+          print(f"generated cover manifest: {len(safe)}")
+          PY
+            fi
             echo "covers: $(ls public/images/cast 2>/dev/null | wc -l)"
           else
             echo "WARN: pas de pack covers"

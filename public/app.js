@@ -14,9 +14,14 @@ const state = {
   chatListMode: true,
   genRunning: false,
   genBanner: null,
+  githubConnecting: false,
+  githubDeviceFlow: null,
+  githubSyncRunning: false,
+  githubSyncMessage: "",
 };
 
 const $ = (id) => document.getElementById(id);
+const GITHUB_APP_CLIENT_ID = "Iv23liv6fK66QaRyS1LN";
 
 /** Bannière de génération (profil + toast global) */
 function setGenBanner(msg, kind) {
@@ -139,6 +144,123 @@ function characterImageDataUrl(src) {
     image.onerror = () => reject(new Error("La photo de référence du personnage n’a pas pu être chargée."));
     image.src = resolved;
   });
+}
+
+function hasGitHubBridge() {
+  return !!(window.LeaAndroid &&
+    typeof window.LeaAndroid.githubDeviceFlowStart === "function" &&
+    typeof window.LeaAndroid.githubDeviceFlowPoll === "function" &&
+    typeof window.LeaAndroid.startGitHubCoversSync === "function");
+}
+
+function parseGitHubBridgeResult(raw) {
+  try {
+    return JSON.parse(String(raw || "{}"));
+  } catch (_) {
+    throw new Error("Réponse invalide du pont Android pour GitHub.");
+  }
+}
+
+function waitForGitHubPoll(seconds) {
+  return new Promise((resolve) => setTimeout(resolve, Math.max(1, seconds) * 1000));
+}
+
+async function connectGitHubGallery() {
+  if (state.githubConnecting || !hasGitHubBridge()) return;
+  state.githubConnecting = true;
+  state.githubSyncMessage = "Préparation de la connexion GitHub…";
+  renderProfile();
+  try {
+    const started = parseGitHubBridgeResult(
+      window.LeaAndroid.githubDeviceFlowStart(GITHUB_APP_CLIENT_ID)
+    );
+    if (started.status === "error" || started.error) {
+      throw new Error(started.error_description || started.error || "La connexion GitHub n’a pas démarré.");
+    }
+    if (!started.device_code || !started.user_code) {
+      throw new Error("GitHub n’a pas fourni le code d’autorisation.");
+    }
+    const interval = Math.max(5, Number(started.interval) || 5);
+    const expiresAt = Date.now() + Math.max(60, Number(started.expires_in) || 900) * 1000;
+    state.githubDeviceFlow = {
+      deviceCode: started.device_code,
+      userCode: started.user_code,
+      verificationUrl: started.verification_uri || "https://github.com/login/device",
+      interval,
+      expiresAt,
+    };
+    state.githubSyncMessage = "Saisis ce code sur GitHub pour autoriser Léa Studio.";
+    renderProfile();
+    if (window.LeaAndroid.openGitHubDeviceVerification) {
+      window.LeaAndroid.openGitHubDeviceVerification();
+    }
+    let pollInterval = interval;
+    while (Date.now() < expiresAt) {
+      await waitForGitHubPoll(pollInterval);
+      const result = parseGitHubBridgeResult(
+        window.LeaAndroid.githubDeviceFlowPoll(GITHUB_APP_CLIENT_ID, started.device_code)
+      );
+      if (result.status === "authorized") {
+        state.githubDeviceFlow = null;
+        state.githubSyncMessage = "GitHub est connecté; synchronisation automatique activée.";
+        state.githubConnecting = false;
+        renderProfile();
+        startGitHubCoversSync(true);
+        return;
+      }
+      if (result.status === "slow_down") {
+        pollInterval += 5;
+        continue;
+      }
+      if (result.status === "error" || result.error) {
+        throw new Error(result.error_description || result.error || "GitHub a refusé l’autorisation.");
+      }
+    }
+    throw new Error("Le code GitHub a expiré. Relance la connexion.");
+  } catch (error) {
+    state.githubDeviceFlow = null;
+    state.githubSyncMessage = String(error.message || error);
+    renderProfile();
+  } finally {
+    state.githubConnecting = false;
+  }
+}
+
+async function startGitHubCoversSync(silent) {
+  if (state.githubSyncRunning || !hasGitHubBridge()) return;
+  if (!window.LeaAndroid.hasGitHubAuthorization ||
+      !window.LeaAndroid.hasGitHubAuthorization()) {
+    state.githubSyncMessage = "Connecte GitHub pour activer la synchronisation automatique.";
+    if (!silent) renderProfile();
+    return;
+  }
+  state.githubSyncRunning = true;
+  state.githubSyncMessage = "Préparation du pack d’images…";
+  if (!silent) renderProfile();
+  try {
+    const started = parseGitHubBridgeResult(
+      window.LeaAndroid.startGitHubCoversSync(GITHUB_APP_CLIENT_ID)
+    );
+    if (!started.jobId) throw new Error(started.error_description || "Impossible de démarrer la synchronisation.");
+    while (true) {
+      await waitForGitHubPoll(1);
+      const current = parseGitHubBridgeResult(
+        window.LeaAndroid.getGitHubCoversSyncStatus(started.jobId)
+      );
+      state.githubSyncMessage = current.message || "Synchronisation GitHub…";
+      if (current.status === "done") {
+        state.githubSyncMessage = "Pack GitHub mis à jour (" + Number(current.count || 0) + " personnage(s)).";
+        break;
+      }
+      if (current.status === "error") throw new Error(current.message || "La synchronisation GitHub a échoué.");
+      if (state.view === "profile") renderProfile();
+    }
+  } catch (error) {
+    state.githubSyncMessage = String(error.message || error);
+  } finally {
+    state.githubSyncRunning = false;
+    if (state.view === "profile") renderProfile();
+  }
 }
 
 function persistGeneratedImage(charId, dataUrl) {
@@ -730,6 +852,8 @@ function renderProfile() {
   const edit = state.editMode;
   const gallery = Array.isArray(c.gallery) ? c.gallery : [];
   const canSaveToPhone = !!(window.LeaAndroid && typeof window.LeaAndroid.saveBase64ToDownloads === "function");
+  const canSyncGitHub = hasGitHubBridge() && typeof window.LeaAndroid.hasGitHubAuthorization === "function";
+  const githubConnected = canSyncGitHub && window.LeaAndroid.hasGitHubAuthorization();
   const tags = Array.isArray(c.tags) ? c.tags : [];
   const declaredAge = c.age == null || c.age === "" ? null : Number(c.age);
   const adultCharacter = Number.isInteger(declaredAge) && declaredAge >= 18;
@@ -840,6 +964,24 @@ function renderProfile() {
       <div id="gen-status" class="hint" style="margin-top:10px"></div>
       <div id="gen-preview" style="margin-top:12px"></div>
     </div>
+    <div class="section">
+      <h2>🔄 Synchronisation GitHub</h2>
+      <p class="hint">Les images générées sont enregistrées dans l’application. Si GitHub est connecté, la dernière image de chaque personnage est envoyée automatiquement au pack utilisé par le prochain APK.</p>
+      <div id="github-sync-status" class="hint" role="status" aria-live="polite">${escapeHtml(state.githubSyncMessage || (githubConnected ? "GitHub est connecté." : "GitHub n’est pas connecté."))}</div>
+      ${state.githubDeviceFlow ? `
+        <label class="hint" for="github-device-code">Code à saisir sur GitHub</label>
+        <input id="github-device-code" class="edit-input" readonly value="${escapeHtml(state.githubDeviceFlow.userCode)}" />
+        <p class="hint">${escapeHtml(state.githubDeviceFlow.verificationUrl)}</p>
+        <button type="button" class="btn btn-secondary" id="btn-github-open-device">🌐 Ouvrir la page de vérification</button>
+      ` : ""}
+      ${canSyncGitHub
+        ? `<div class="btn-row" style="margin-top:8px">
+            ${githubConnected
+              ? `<button type="button" class="btn btn-secondary" id="btn-github-sync" ${state.githubSyncRunning ? "disabled" : ""}>${state.githubSyncRunning ? "⏳ Synchronisation…" : "🔄 Synchroniser maintenant"}</button>`
+              : `<button type="button" class="btn btn-secondary" id="btn-github-connect" ${state.githubConnecting ? "disabled" : ""}>${state.githubConnecting ? "⏳ Connexion…" : "🔐 Connecter GitHub"}</button>`}
+          </div>`
+        : `<p class="hint">La synchronisation GitHub est disponible dans l’application Android.</p>`}
+    </div>
     ` : ""}
     ${edit ? `
       <div class="edit-actions">
@@ -938,6 +1080,19 @@ function renderProfile() {
     } else if (state.genBanner && state.genBanner.msg) {
       setGenBanner(state.genBanner.msg, state.genBanner.kind || "");
     }
+  }
+  if ($("btn-github-connect")) {
+    $("btn-github-connect").onclick = () => connectGitHubGallery();
+  }
+  if ($("btn-github-open-device")) {
+    $("btn-github-open-device").onclick = () => {
+      if (window.LeaAndroid && window.LeaAndroid.openGitHubDeviceVerification) {
+        window.LeaAndroid.openGitHubDeviceVerification();
+      }
+    };
+  }
+  if ($("btn-github-sync")) {
+    $("btn-github-sync").onclick = () => startGitHubCoversSync(false);
   }
   if ($("prof-chat")) $("prof-chat").onclick = () => { state.chatListMode = false; showView("chat"); };
   if ($("prof-edit")) $("prof-edit").onclick = () => { state.editMode = true; renderProfile(); };
@@ -1503,6 +1658,11 @@ async function generateProfileImage() {
       if (state.view === "profile" && state.character && String(state.character.id) === targetId) {
         try { renderProfile(); } catch (_) {}
       }
+      if (window.LeaAndroid && typeof window.LeaAndroid.hasGitHubAuthorization === "function" &&
+          window.LeaAndroid.hasGitHubAuthorization()) {
+        startGitHubCoversSync(true);
+      }
+
     } catch (e) {
       state.genRunning = false;
       setGenBanner("✗ " + String(e.message || e).slice(0, 160), "bad");
@@ -1863,6 +2023,19 @@ function mergeAllCasts() {
       }));
     }
   }
+  try {
+    const generatedCovers = window.LEA_GENERATED_COVERS || {};
+    for (const [id, filename] of Object.entries(generatedCovers)) {
+      if (!byId.has(id) || !/^[A-Za-z0-9_-]{1,80}\.jpg$/i.test(String(filename || ""))) continue;
+      const character = byId.get(id);
+      const cover = "images/cast/" + filename;
+      const gallery = Array.isArray(character.gallery) ? character.gallery : [];
+      byId.set(id, Object.assign({}, character, {
+        cover,
+        gallery: [cover].concat(gallery.filter((image) => image !== cover)),
+      }));
+    }
+  } catch (_) {}
   // Overrides locaux (modifs utilisateur) — ne pas écraser scénario/accueil packagés par d'anciennes versions génériques
   try {
     const ov = JSON.parse(localStorage.getItem("lea.cast.overrides") || "{}");

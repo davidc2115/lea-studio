@@ -27,10 +27,12 @@ import java.nio.charset.StandardCharsets;
  */
 public class LeaBridge {
     private final Context ctx;
+    private final GitHubGallerySync githubGallerySync;
     private boolean nativeOk;
 
     public LeaBridge(Context ctx) {
         this.ctx = ctx.getApplicationContext();
+        this.githubGallerySync = new GitHubGallerySync(this.ctx);
         // Ne pas charger MNN au démarrage : évite un crash au lancement si .so absente / incompatible.
         nativeOk = false;
     }
@@ -256,6 +258,24 @@ public class LeaBridge {
             return false;
         }
     }
+
+    @JavascriptInterface
+    public String githubDeviceFlowStart(String clientId) { return githubGallerySync.startDeviceFlow(clientId); }
+
+    @JavascriptInterface
+    public String githubDeviceFlowPoll(String clientId, String deviceCode) { return githubGallerySync.pollDeviceFlow(clientId, deviceCode); }
+
+    @JavascriptInterface
+    public boolean hasGitHubAuthorization() { return githubGallerySync.hasAuthorization(); }
+
+    @JavascriptInterface
+    public boolean openGitHubDeviceVerification() { return githubGallerySync.openVerificationPage(); }
+
+    @JavascriptInterface
+    public String startGitHubCoversSync(String clientId) { return githubGallerySync.startSync(clientId); }
+
+    @JavascriptInterface
+    public String getGitHubCoversSyncStatus(String jobId) { return githubGallerySync.syncStatus(jobId); }
 
 @JavascriptInterface
     public String loadGalleryImage(String key) {
