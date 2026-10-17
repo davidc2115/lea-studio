@@ -470,7 +470,11 @@ final class GitHubGallerySync {
 
     private String safeMessage(Exception error) {
         String message = error.getMessage();
-        return message == null || message.trim().isEmpty() ? "La synchronisation GitHub a échoué." : message;
+        if (message == null || message.trim().isEmpty()) return "La synchronisation GitHub a échoué.";
+        if (message.toLowerCase(java.util.Locale.ROOT).contains("resource not accessible by integration")) {
+            return "GitHub refuse l’accès au dépôt. Vérifie que la GitHub App est installée sur davidc2115/lea-studio avec Contents: Read and write, puis reconnecte GitHub dans Léa Studio.";
+        }
+        return message;
     }
 
 }
