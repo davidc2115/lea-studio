@@ -199,6 +199,18 @@
   }
 
 
+  /** Explicit Poitrine is canonical for solo profiles; cup cards may use a size in the title. */
+  function profileImageBustRaw(character) {
+    const c = character || {};
+    if (/^cup[_-]/i.test(String(c.id || ""))) {
+      const titleSize = String(c.title || "").match(/\b(\d{2,3})\s*([A-K])\b/i);
+      if (titleSize && Number(titleSize[1]) >= 60 && Number(titleSize[1]) <= 120) {
+        return (titleSize[1] + titleSize[2]).toUpperCase();
+      }
+    }
+    return String(c.Poitrine || c.poitrine || c.canonicalCupSize || c.bustEstimate || "").trim();
+  }
+
   /** Traduit une taille (ex. 95D) en consignes réalistes pour le modèle */
   function describeBustLock(bustRaw, appearanceText, engine) {
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
@@ -237,7 +249,7 @@
       A: "small natural A-cup, modest chest",
       B: "natural B-cup, light rounded shape",
       C: "true C-cup: medium natural breasts, moderate cleavage",
-      D: "true D-cup: full natural breasts, soft cleavage, fuller than C, realistic 95D proportions",
+      D: "full, visibly generous natural D-cup breasts with substantial volume, broad rounded fullness and soft cleavage; clearly fuller than C and consistent with the profile's 95D",
       E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
       F: "very large, visibly full F-cup with heavy natural volume, strong forward projection, and deep cleavage",
       G: "extremely full G-cup with very large heavy natural volume, broad bust, strong projection, and deep cleavage",
@@ -247,7 +259,12 @@
     };
     const guide = cupGuide[cupKey] || ("cup " + cupKey + " realistic breasts");
     let engineHint = "";
-    if (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0) {
+    const emphasizeFullD = cupKey === "D" &&
+      /g[eé]n[eé]reuse|volume marqu[eé]|gros seins|full D-cup|large D-cup/i.test(String(appearanceText || ""));
+    if (forCloudflare && emphasizeFullD) {
+      engineHint = " HIGH PRIORITY PROFILE CUP " + sizeLabel +
+        ": distinctly full natural D-cup volume, broad rounded fullness, soft cleavage, and visible forward projection beneath fitted clothing; clearly fuller than a C-cup and consistent with the profile's 95D.";
+    } else if (forCloudflare && "FGHIJ".indexOf(cupKey) >= 0) {
       const cloudflareScale = {
         F: "visibly very large full F-cup volume, broad rounded base, rounded lower fullness, strong forward projection, prominent cleavage, distinctly fuller than average",
         G: "very large and prominent across the upper torso, broad rounded base, heavy lower fullness, strong forward projection",
@@ -257,8 +274,12 @@
       };
       engineHint = " HIGH PRIORITY PROFILE CUP " + sizeLabel + ": " + cloudflareScale[cupKey] +
         ". European band-and-cup profile size " + sizeLabel + ". Show a distinctly full bust relative to the shoulders and waist, with a broad rounded base and strong forward projection beneath fitted clothing.";
-    } else if (!forCloudflare && "ABCD".indexOf(cupKey) >= 0) {
+    } else if (!forCloudflare && cupKey === "D" && emphasizeFullD) {
+      engineHint = " Preserve the profile's full natural " + sizeLabel + " volume and make it clearly visible beneath fitted clothing; do not reduce it.";
+    } else if (!forCloudflare && "ABC".indexOf(cupKey) >= 0) {
       engineHint = " Keep true " + sizeLabel + " only, do not inflate.";
+    } else if (!forCloudflare && cupKey === "D") {
+      engineHint = " Preserve realistic, visibly full " + sizeLabel + " volume; do not reduce it.";
     } else if (!forCloudflare && "EFGHIJ".indexOf(cupKey) >= 0) {
       engineHint = " Preserve large " + sizeLabel + " volume; realistic not cartoon; heavy soft breasts, deep cleavage.";
     }
@@ -282,18 +303,24 @@
   /** Morphologie dominante (chubby, mince, athlétique, sablier…) pour CF + Horde */
   function describeBodyMorphology(char) {
     const c = char || {};
-    const blob = [
+    const rawBlob = [
       c.appearance, c.body, c.looks_en, c.title,
       Array.isArray(c.tags) ? c.tags.join(" ") : "",
     ].join(" ").toLowerCase();
+    const blob = rawBlob
+      .replace(/\b(?:sans être|pas|not|never|without)\s+(?:(?:a|an|the|un|une|le|la|les)\s+)*(?:mannequin\s+mince|plus[- ]?size|chubby|bbw|obese|slim|thin|skinny|sablier|hourglass|ronde?|rounded|voluptuous|pregnant)\b/gi, " ")
+      .replace(/\b(?:pas|not)\s+(?:(?:a|an|the|un|une|le|la|les)\s+)*mannequin\s+mince\b/gi, " ");
 
     const isChubby = /chubby|plus-?size|plus size|plantureus|tr[eè]s rond|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|curvy thick|VRAIMENT ronde|plus-size/.test(blob)
-      || (/\bronde\b/.test(blob) && /plantureus|chubby|plus|ventre|cuisses [eé]paisses|hanches tr[eè]s/.test(blob));
+      || (/\bronde\b/.test(blob) && /plantureus|chubby|plus-?size|plus size|ventre|cuisses [eé]paisses|hanches tr[eè]s/.test(blob));
     const isChubbyFinal = isChubby && !/silhouette mince|slim slender|élanc[eé]e fine|narrow frame/.test(blob);
+    const isRoundCurvy = !isChubbyFinal &&
+      /(?:\bron(de|d)\b|rounded silhouette|curvy rounded|full-figured)/.test(blob) &&
+      /pulpeuse|curvy|voluptu|full-figured/.test(blob);
+    const isHourglass = /sablier|hourglass/.test(blob) && !isChubbyFinal;
     const isSlim = /silhouette mince|slim slender|élanc|longiligne|mince et|narrow frame|petite poitrine mince/.test(blob)
       && !isChubbyFinal;
-    const isAthletic = /athl[eé]tique|athletic|tonique|muscl|sportive/.test(blob) && !isChubbyFinal;
-    const isHourglass = /sablier|hourglass|taille fine.*hanches|voluptueus/.test(blob) && !isChubbyFinal;
+    const isAthletic = /athl[eé]tique|athletic/.test(blob) && !isChubbyFinal;
     const isPetite = /petite stature|petite femme|petite taille/.test(blob);
 
     if (isChubbyFinal) {
@@ -305,6 +332,20 @@
           "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. " +
           "Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
         neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
+      };
+    }
+    if (isRoundCurvy) {
+      return {
+        lead: "curvy rounded adult woman, full-figured softly rounded body, visibly rounded torso, full hips and thighs, generous natural curves,",
+        lock: "Body type: rounded and full-figured, with soft natural fullness through the torso, hips and thighs. Preserve the visibly curvy silhouette; do not make her slim or slender.",
+        neg: "slim model, skinny, slender frame, narrow thin body, flat straight figure, athletic lean body, no curves",
+      };
+    }
+    if (isHourglass) {
+      return {
+        lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
+        lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
+        neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
       };
     }
     if (isAthletic) {
@@ -319,13 +360,6 @@
         lead: "slim slender adult woman, narrow frame, elegant thin waist,",
         lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
         neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
-      };
-    }
-    if (isHourglass) {
-      return {
-        lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
-        lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
-        neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
       };
     }
     if (isPetite) {
@@ -350,12 +384,19 @@
     if (eng.indexOf("horde") >= 0) {
       const nameH = String(c.name || "woman").slice(0, 60);
       const ageH = Math.max(18, parseInt(c.age, 10) || 22);
-      const looksH = String(c.looks_en || "").trim().slice(0, 220);
-      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 360);
-      const bustH = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 20);
-      const bustInfoH = describeBustLock(bustH, appH, "horde");
+      const looksH = String(c.looks_en || "").trim().slice(0, 180);
+      const appH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim().slice(0, 400);
+      const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
+      const bustDescriptionH = [
+        c.appearance,
+        c.body,
+        c.looks_en,
+        Array.isArray(c.tags) ? c.tags.join(" ") : "",
+      ].join(" ");
+      const bustInfoH = describeBustLock(bustH, bustDescriptionH, "horde");
       const bodyInfoH = describeBodyMorphology(c);
-      const largeBustH = /[FGHIJ]$/.test(bustInfoH.label);
+      const largeBustH = /[EFGHIJ]$/.test(bustInfoH.label) ||
+        (bustInfoH.label === "95D" && /g[eé]n[eé]reuse|volume marqu[eé]|gros seins|full D-cup|large D-cup/i.test(bustDescriptionH));
       const sfwOutfits = [
         "cream long-sleeve knit dress with opaque tights, bright apartment",
         "cobalt blazer over an ivory blouse and tailored trousers, modern hallway",
@@ -409,14 +450,16 @@
         ? "IDENTITY LOCK: same exact adult woman as the reference; preserve her facial geometry, eyes, nose, lips, hair color and style, skin tone, ethnicity, and apparent age. Do not substitute or reinterpret her identity."
         : "Follow the profile identity and physical description exactly.";
       const ph = [
-        "Photorealistic full-body SFW fashion photo of an adult woman, head and face clearly visible",
+        "Photorealistic full-body SFW fashion photo of one adult woman, head and face clearly visible",
+        "AGE LOCK: exactly " + ageH + " years old; make her look exactly this age, not younger or older.",
+        bodyInfoH.lead || "",
+        bodyInfoH.lock || "",
+        bustInfoH.label ? "CANONICAL PROFILE BRA SIZE " + bustInfoH.label + ": " + bustInfoH.lock : "",
+        "COMPOSITION LOCK: full body, head to toe, entire figure and face visible, not a close-up.",
         nameH,
         idLockH,
         looksH ? "Appearance traits: " + looksH : "",
         appH ? "Detailed profile description: " + appH : "",
-        bodyInfoH.lead || "",
-        bodyInfoH.lock || "",
-        bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
         "NEW outfit, distinct from the reference: " + outfitH,
         "NEW full-body pose: " + poseH,
         "Use the reference only to preserve identity; do not copy its clothes, posture, arm position, framing, lighting, or background.",
@@ -444,10 +487,18 @@
     const name = String(c.name || "le personnage").slice(0, 100);
     const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
-    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
-    const bustInfo = describeBustLock(bust, appearance, engine);
-    const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
+    const bustDescription = [
+      c.appearance,
+      c.body,
+      c.looks_en,
+      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+    ].join(" ");
+    const bustInfo = describeBustLock(bust, bustDescription, engine);
+    const hasLargeCloudflareBust = forCloudflare &&
+      (/[EFGHIJ]$/.test(bustInfo.label) ||
+        (bustInfo.label === "95D" && /g[eé]n[eé]reuse|volume marqu[eé]|gros seins|full D-cup|large D-cup/i.test(bustDescription)));
     const bodyInfo = describeBodyMorphology(c);
     const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
     const bodyField = String(c.body || "").trim().slice(0, 160);
@@ -576,7 +627,15 @@
       ? "The SAME adult woman as input_image_0: preserve facial identity, eyes, hair and skin only. Rebuild body proportions from the character profile and give the canonical cup size visual priority. RAW photorealistic fashion photo, sharp focus, natural light, new pose and outfit,"
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
+    const cloudflarePriority = forCloudflare ? [
+      "AGE LOCK: one adult woman exactly " + age + " years old; she must look exactly this age, not younger or older.",
+      bodyInfo.lead,
+      bodyInfo.lock,
+      bustInfo.label ? ("CANONICAL PROFILE BRA SIZE " + bustInfo.label + ": " + bustInfo.lock) : "",
+      "COMPOSITION LOCK: full-body, head to toe; show the entire figure and clearly visible face, not a close-up.",
+    ].filter(Boolean).join(" ") : "";
     const base = [
+      cloudflarePriority,
       mood,
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
@@ -602,12 +661,12 @@
     let out = base;
     if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
     if (hasLargeCloudflareBust) {
-      const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        "const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
-        "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
-        "Do not copy bust volume from the reference. The reference controls facial identity only; the explicit profile cup size controls bust volume.";
-      const maxLength = 1600;
+      const finalBustLock = bustInfo.label === "95D"
+        ? "FINAL PROFILE BODY PRIORITY 95D: render a clearly full natural D-cup bust with visible rounded fullness and realistic forward projection, clearly fuller than a C-cup and proportionate to her rounded body. Do not reduce or compress it. The reference controls facial identity only; the explicit profile cup size controls bust volume."
+        : "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+          ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
+          "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
+          "Do not copy bust volume from the reference. The reference controls facial identity only; the explicit profile cup size controls bust volume.";
       const maxLength = 1600;
       return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
     }
@@ -618,6 +677,7 @@
   function buildCloudflareSafeRetryPrompt(char, extra, attempt) {
     const c = char || LEA;
     const name = String(c.name || "woman").slice(0, 80);
+    const age = Math.max(18, parseInt(c.age, 10) || 22);
     const appearance = String(c.appearance || "").trim().slice(0, 400);
     const softOutfits = [
       "elegant black dress, professional fashion photo",
@@ -626,12 +686,20 @@
       "cozy sweater and skirt, lifestyle photography",
       "smart casual outfit, portrait full body",
     ];
+    const bustDescription = [
+      c.appearance,
+      c.body,
+      c.looks_en,
+      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+    ].join(" ");
     const bustInfo = describeBustLock(
-      String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || ""),
-      appearance,
+      String(profileImageBustRaw(c)),
+      bustDescription,
       "cloudflare"
     );
-    const largeBust = /[FGHIJ]$/.test(bustInfo.label);
+    const bodyInfo = describeBodyMorphology(c);
+    const largeBust = /[EFGHIJ]$/.test(bustInfo.label) ||
+      (bustInfo.label === "95D" && /g[eé]n[eé]reuse|volume marqu[eé]|gros seins|full D-cup|large D-cup/i.test(bustDescription));
     const retryAppearance = largeBust
       ? appearance
           .replace(/\b(?:small|tiny|flat|modest|average|medium)\s+(?:natural\s+)?(?:breasts?|bust|chest)\b/gi, "")
@@ -643,7 +711,11 @@
       ? "well-fitted structured fashion dress with visible natural bust volume, not loose or compressive"
       : softOutfits[Math.min(attempt, softOutfits.length - 1)];
     const retryParts = [
-      "photorealistic full body photo of adult woman 18+,",
+      "photorealistic full-body photo of adult woman, AGE LOCK: exactly " + age + " years old; looks exactly this age, not younger or older.",
+      "COMPOSITION LOCK: full-body, head to toe, face visible, not a close-up.",
+      bodyInfo.lead || "",
+      bodyInfo.lock,
+      bustInfo.label ? ("CANONICAL PROFILE BRA SIZE " + bustInfo.label + ": " + bustInfo.lock) : "",
       "identity match reference input_image_0 for " + name + ",",
       retryAppearance ? retryAppearance.slice(0, 280) + "," : "",
       bustInfo.lock + ",",
@@ -655,11 +727,11 @@
       "single person, no text, high quality, realistic proportions",
     ].filter(Boolean).join(" ");
     if (largeBust) {
-      const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        "const finalLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; broad rounded base, substantial lower fullness, distinct forward projection, obvious silhouette relative to shoulders and waist. " +
-        "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
-      return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
+      const finalLock = bustInfo.label === "95D"
+        ? "FINAL PROFILE BODY PRIORITY 95D: preserve a clearly full natural D-cup bust with visible rounded fullness and realistic projection, proportionate to her body. Do not reduce or compress it. The explicit profile cup size controls bust volume."
+        : "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
+          ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; broad rounded base, substantial lower fullness, distinct forward projection, obvious silhouette relative to shoulders and waist. " +
+          "The reference controls facial identity only; the explicit profile cup size controls bust volume.";
       return retryParts.slice(0, 1400 - finalLock.length - 2).trimEnd() + ", " + finalLock;
     }
     return retryParts.slice(0, 1400);
@@ -942,7 +1014,7 @@
     const appearance = sanitizeAppearanceForImage(String(c.appearance || "").trim()).slice(0, 280);
     const looksEn = String(c.looks_en || "").trim().slice(0, 180);
     const ethnicity = String(c.ethnicity || "").trim().slice(0, 60);
-    const bust = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim().slice(0, 40);
+    const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const bustInfo = describeBustLock(bust, appearance, "horde");
     const bodyInfo = describeBodyMorphology(c);
     const hasRef = !!(c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])));
@@ -1084,7 +1156,7 @@
       bits.push("dark nearly black eyes");
 
     // --- Poitrine ---
-    const cup = String(c.canonicalCupSize || c.Poitrine || c.poitrine || c.bustEstimate || "").trim();
+    const cup = String(profileImageBustRaw(c)).trim();
     const cupBlob = (cup + " " + appRaw).toLowerCase();
     if (/95\s*d|90\s*d|85\s*e|bonnet\s*d\b|cup\s*d\b/.test(cupBlob) || cup.toUpperCase().indexOf("D") >= 0 && /9[05]/.test(cup))
       bits.push("large full natural 95D breasts, heavy cleavage, soft realistic breast shape");
