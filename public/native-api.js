@@ -1675,12 +1675,17 @@
       c.system_extra || "",
       "Profil joueur: " + userName + (userBio ? " — " + userBio : ""),
       memoryPromptBlock(c, memory),
-      "COHÉRENCE: respecte les derniers messages (qui a fait quoi, où, tenue). Pas d'inversion sujet/objet. Pas de réécriture du passé.",
+      "COHÉRENCE STRICTE AVEC LE JOUEUR:",
+      "- Réagis UNIQUEMENT à ce qu'il vient d'écrire (gestes, paroles, contact précis).",
+      "- Reprends ses actions concrètes (ex. s'il frotte, tu réagis au frottement — ne change pas le geste).",
+      "- Pas d'inversion sujet/objet. Pas de réécriture du passé.",
+      "- INTERDIT d'inventer ce que le joueur pense, dit ou veut (« tu te dis… », « tu veux que… »).",
+      "- INTERDIT de parler à sa place ou de décrire SES pensées.",
       "Format STRICT (sans écrire les mots action, dialogue, pensée):",
-      "1) Gestes/corps entre * * (1-3 phrases).",
+      "1) Gestes/corps entre * * (1-2 phrases max).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : 1 phrase, SANS préfixe 'pensée:'.",
-      "LONGUEUR: 4 à 10 phrases utiles. Termine TOUJOURS tes phrases et ta réplique — INTERDIT de couper au milieu d'une phrase ou d'un mot (ex. « Tu préfères » sans suite).",
+      "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman). Termine toujours tes phrases — INTERDIT de couper au milieu.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "TIERCES PERSONNES — TOUJOURS ACTIF:",
       "Dès que le joueur mentionne, touche, embrasse, parle à, ou décrit une autre personne (ma femme, Claire, ma fille, mon frère, un ami…), cette personne DOIT parler dans ta réponse.",
@@ -1706,7 +1711,7 @@
             "- Décris sensations corporelles précises (chaleur, humidité, pression, rythme, gémissements, tremblements).",
             "- Actions *...* très sensuelles et concrètes (mains, bouche, hanches, frottements, positions).",
             "- Pensées ( ) lubriques, excitantes, qui avouent le désir sans pudeur excessive.",
-            "- Style exotique / érotique littéraire: rythme, détails sensoriels, tension, pas de résumé vague.",
+            "- Style oral et sensuel: 1-2 détails sensoriels max, phrases courtes, pas de monologue littéraire.",
             "INITIATIVE DU PERSONNAGE:",
             "- Ne reste pas passive: propose, guide la main, embrasse la première, écarte les cuisses, tire vers toi, murmure ce que tu veux.",
             "- Selon ta personnalité (timide = initiative progressive mais réelle; directe = initiative franche et audacieuse).",
@@ -1777,8 +1782,8 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.92,
-              maxOutputTokens: 2200,
+              temperature: 0.85,
+              maxOutputTokens: 1400,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -2143,8 +2148,8 @@
             {
               model: model,
               messages: msgs,
-              temperature: 0.92,
-              max_tokens: 2200,
+              temperature: 0.85,
+              max_tokens: 1400,
             },
             { Authorization: "Bearer " + key }
           );
