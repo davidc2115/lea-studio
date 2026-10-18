@@ -535,7 +535,7 @@ public class LeaBridge {
                             writeMultipartFile(multipart, boundary, "input_image_0", "profile-reference.jpg", referenceBytes);
                             writeMultipartField(multipart, boundary, "width", "768");
                             writeMultipartField(multipart, boundary, "height", "1024");
-                            writeMultipartField(multipart, boundary, "guidance", "3.5");
+                            writeMultipartField(multipart, boundary, "guidance", "7.5");
                             writeMultipartField(multipart, boundary, "seed", String.valueOf(seed));
                             multipart.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
                             byte[] body = multipart.toByteArray();

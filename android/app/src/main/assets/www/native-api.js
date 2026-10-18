@@ -186,8 +186,8 @@
     const aspectRatio = image.naturalHeight / image.naturalWidth;
     // Square/landscape portraits place the chin lower in frame; include the whole face without the full torso.
     const cropRatio = strictFaceOnly
-        ? (aspectRatio < 1.3 ? 0.42 : 0.32)
-        : (aspectRatio < 1.3 ? 0.52 : 0.38);
+        ? (aspectRatio < 1.3 ? 0.34 : 0.28)
+        : (aspectRatio < 1.3 ? 0.48 : 0.36);
     const cropHeight = Math.max(64, Math.round(image.naturalHeight * cropRatio));
       const cropWidth = Math.min(image.naturalWidth, cropHeight);
       const cropX = Math.round((image.naturalWidth - cropWidth) / 2);
