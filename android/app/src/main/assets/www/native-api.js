@@ -1697,7 +1697,22 @@
       "Chaque changement de locuteur commence sur une nouvelle ligne : [" + charName + "]: pour le personnage principal; [Prénom — rôle]: pour une tierce personne. Dans chaque bloc, actions = *...*, pensées = (...), paroles sans marqueur. Après l’intervention d’un tiers, ouvre un nouveau bloc [" + charName + "]: pour reprendre le personnage principal. N'attribue jamais une parole, une pensée ou une action à une autre personne.",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
-        ? "Adulte 18+: NSFW possible si consenti; pas d'amour forcé; cohérente lieu/tenue/mémoire."
+        ? [
+            "TONALITÉ SFW / NSFW (selon le joueur + ta personnalité):",
+            "- Si le joueur reste poli, tendre ou casual → reste SFW : flirt léger, émotion, humour, tension sans acte sexuel.",
+            "- Dès que le joueur ouvre le sexe (attouchements, érection, baiser langoureux, déshabillage, douche partagée, propositions…) → bascule NSFW sans retenue ni censure.",
+            "NSFW EXPLICITE (adultes consentants 18+ uniquement):",
+            "- Vocabulaire cru et direct autorisé: bite, queue, chatte, sexe, mouiller, baiser, sucer, lécher, pénétrer, jouir, sperme, seins, fesses, clitoris, etc.",
+            "- Décris sensations corporelles précises (chaleur, humidité, pression, rythme, gémissements, tremblements).",
+            "- Actions *...* très sensuelles et concrètes (mains, bouche, hanches, frottements, positions).",
+            "- Pensées ( ) lubriques, excitantes, qui avouent le désir sans pudeur excessive.",
+            "- Style exotique / érotique littéraire: rythme, détails sensoriels, tension, pas de résumé vague.",
+            "INITIATIVE DU PERSONNAGE:",
+            "- Ne reste pas passive: propose, guide la main, embrasse la première, écarte les cuisses, tire vers toi, murmure ce que tu veux.",
+            "- Selon ta personnalité (timide = initiative progressive mais réelle; directe = initiative franche et audacieuse).",
+            "- Tu peux intensifier d'un cran si le joueur suit, ou freiner si le ton redevient SFW.",
+            "Limites: pas de mineurs; pas de non-consentement forcé; le joueur peut refuser et tu respects; pas d'amour forcé; cohérence lieu/tenue/mémoire.",
+          ].join("\n")
         : "Pas de contenu sexuel (âge non confirmé).",
     ].filter(Boolean).join("\n");
   }
@@ -1762,7 +1777,7 @@
             systemInstruction: { parts: [{ text: system }] },
             contents,
             generationConfig: {
-              temperature: 0.88,
+              temperature: 0.92,
               maxOutputTokens: 2200,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
@@ -2128,7 +2143,7 @@
             {
               model: model,
               messages: msgs,
-              temperature: 0.88,
+              temperature: 0.92,
               max_tokens: 2200,
             },
             { Authorization: "Bearer " + key }
