@@ -523,26 +523,26 @@
     // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
     // Horde : encore plus provocant (lingerie, sheer, lace)
     const outfitsCf = [
-      "emerald bodycon mini dress, black heels, sensual full body fashion",
-      "burgundy satin wrap mini dress, stilettos, hotel lobby",
-      "black deep-neck fitted dress, glamorous stairs, full body",
-      "sheer blouse over camisole, black mini skirt, polished sensual look",
-      "champagne silk slip dress, hotel suite, full body",
-      "black mesh top and leather mini, edgy fashion full body",
-      "red wrap mini dress, black pumps, city interior",
-      "navy crop top and tight dark jeans, hallway full body",
-      "black backless long dress looking over shoulder, grand staircase",
-      "olive satin mini dress thin straps, soft hotel lighting",
-      "white open blazer over fitted top and mini skirt, upscale lobby",
-      "forest green mini skirt and black fitted top, thigh-high boots",
-      "black one-shoulder dress, stilettos, full body",
-      "wet-look dark jeans and fitted top, after-rain aesthetic full body",
-      "lavender satin mini dress, sunlit room, full body",
-      "camel coat over short dress, elegant staircase",
-      "royal blue fitted dress short sleeves, softly lit interior",
-      "black lace robe over slip, bedroom soft light, fully covered sensual",
-      "burgundy short satin robe, hotel bed soft light, full body",
-      "white shirt loosely worn with mini skirt, bare legs, doorway"
+      "tight emerald bodycon mini dress deep neckline, black stilettos, sensual full body",
+      "burgundy satin wrap mini dress high slit, stilettos, hotel suite",
+      "black deep plunge fitted dress side cutouts, glamorous stairs, full body",
+      "sheer black blouse unbuttoned over lace camisole, leather mini skirt, heels",
+      "champagne silk slip dress thin straps thigh slit, bare legs, luxury bedroom",
+      "black mesh crop top and leather mini skirt, fishnet stockings, edgy full body",
+      "red bodycon mini dress, black pumps, city penthouse interior",
+      "wet white fitted top clinging fabric, dark skinny jeans, after-rain hallway",
+      "black backless long dress looking over shoulder, grand marble staircase",
+      "olive satin mini dress thin straps, soft hotel lighting, seductive stance",
+      "open white blazer only over black lingerie set, upscale hotel lobby",
+      "forest green micro skirt and black deep V top, thigh-high boots, staircase",
+      "black one-shoulder crop and mini, stilettos, nightclub corridor",
+      "ivory lace lingerie set with sheer robe open, bedroom soft lamps, full body",
+      "lavender satin mini dress plunging neckline, sunlit luxury apartment",
+      "camel coat falling open over short black dress, elegant hotel stairs",
+      "royal blue fitted mini dress, soft glamorous evening interior",
+      "black lace robe half open over matching slip, velvet bedroom, full body",
+      "burgundy short satin robe loosely tied, hotel bed, legs bare, full body",
+      "oversized white shirt barely buttoned, black micro shorts, doorway teasing"
     ];
     const outfitsHorde = [
       "emerald green long-sleeve knit midi dress, opaque fabric, black ankle boots, elegant full body",
@@ -585,21 +585,21 @@
     try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
-      "standing with weight on one hip, arms lightly crossed, looking at camera, full body sensual fashion pose",
-      "leaning against a wall, one knee bent, looking over the shoulder, full body",
-      "sitting on the edge of a bed, legs crossed, leaning slightly forward, full body",
-      "walking toward the camera, slow step, hand along the wall, full body fashion pose",
-      "on stairs one hand on railing, body slightly twisted looking back, full body",
-      "in a doorway one arm raised on the frame, arched silhouette, full body",
-      "three-quarter turn hands on hips, confident model pose, full body",
-      "seated sideways on a chair, legs elongated, soft look toward camera, full body",
-      "mid-step in hallway looking back over shoulder, full body",
-      "near a window one hand in hair, torso slightly angled, full body",
-      "leaning on a table with both hands, legs straight, full body fashion",
-      "back view head turned to camera, one hand on hip, full body",
-      "sitting on sofa armrest, shoulders open, inviting full body pose",
-      "one foot on a stair step, elongated body, editorial fashion pose",
-      "standing relaxed three-quarter view adjusting a sleeve, full body"
+      "standing weight on one hip, hand on waist, chin slightly raised, sensual full body",
+      "leaning back against a wall, one knee bent, looking over the shoulder teasing, full body",
+      "sitting on the edge of a bed, legs crossed, leaning forward, full body",
+      "slow walk toward camera, one hand trailing the wall, seductive full body",
+      "on a staircase looking back, hand on railing, body twisted, bold full body",
+      "arched in a doorway, one arm raised on the frame, provocative silhouette, full body",
+      "hands on hips three-quarter turn, confident model stance, full body",
+      "seated sideways on a chair, legs elongated, sultry gaze, full body",
+      "mid-step in a hallway looking back over the shoulder, hips angled, full body",
+      "near a window, hand in hair, torso arched, sensual full body",
+      "leaning on a table with both hands, legs straight, chest forward, full body",
+      "back view head turned to camera, hand on hip, mini dress silhouette, full body",
+      "sitting on a sofa armrest, shoulders open, inviting full body pose",
+      "one foot on a stair, body elongated, fashion-editorial seductive pose",
+      "kneeling on a velvet bench, hands on thighs, intimate bedroom full body"
     ];
     const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
     let recentPoses = [];
@@ -615,16 +615,18 @@
 
     const scenes = forCloudflare
       ? [
-          "grand marble staircase with wrought-iron railing and chandelier",
-          "luxury hotel hallway beige walls soft ceiling lights",
-          "elegant bedroom with satin sheets and bedside lamps",
-          "bright apartment living room with plants and sofa",
-          "classic interior with mirrors and warm wall sconces",
-          "spa bathroom soft daylight by a frosted window",
-          "upscale lobby with black marble stairs and chandeliers",
-          "cozy library lounge armchair and tall windows",
-          "modern apartment doorway wood floor",
-          "fashion-editorial interior warm glamorous light",
+          "grand marble staircase with wrought-iron railing, crystal chandelier, warm evening light",
+          "luxury hotel hallway, beige paneled walls, soft ceiling lights, carpet runner",
+          "elegant bedroom with satin sheets, gold bedside lamps, city night window",
+          "upscale apartment living room, velvet sofa, large windows, plants, golden hour",
+          "classic boudoir with ornate mirror, blue velvet bench, candlelight bokeh",
+          "spa bathroom, frosted window daylight, marble tiles, soft steam mood",
+          "black marble lobby with twin staircases and chandeliers, glamorous night",
+          "cozy library lounge, tall bookshelves, leather armchair, warm lamps",
+          "penthouse doorway, wood floor, skyline through glass at dusk",
+          "fashion-editorial suite, warm glamorous key light, rich interior detail",
+          "hotel suite with king bed, purple rug, lamp on nightstand, intimate evening",
+          "rooftop lounge at night, city bokeh lights, glass railing",
         ]
       : [
           "grand marble staircase chandelier glamorous night",
@@ -646,23 +648,26 @@
 
     const base = [
       mood,
+      forCloudflare
+        ? "PRIORITY: invent a NEW sexy outfit, a NEW sensual pose, and a RICH detailed background environment. Forbidden: plain white/beige studio backdrop, empty wall, simple t-shirt with trousers, boring casual office clothes."
+        : "",
+      forCloudflare ? ("Outfit (must follow exactly): " + outfit + ".") : ("Outfit: " + outfit + "."),
+      forCloudflare ? ("Pose (must follow exactly): " + pose + ".") : ("Pose: " + pose + "."),
+      forCloudflare ? ("Location / background (must be visible and detailed): " + scene + ".") : ("Location: " + scene + "."),
+      forCloudflare ? "photorealistic full-body fashion photo, one adult woman, head to toe, shoes visible, glamorous lighting, rich interior background, not a studio seamless, not a close-up," : "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
       bodyInfo.lead || "",
       bodyInfo.lock + ",",
       bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
       bustInfo.lock + ",",
       looksPrompt ? ("Technical looks: " + looksPrompt + ".") : "",
       bodyPrompt ? ("Body notes: " + bodyPrompt + ".") : "",
-      forCloudflare ? "Appearance text describes identity and body only; ignore any clothing, pose, arm position or framing mentioned there. The selected outfit and pose below take priority." : "",
-      "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
-      "Outfit: " + outfit + ".",
-      "Pose: " + pose + ".",
-      "Location: " + scene + ".",
+      forCloudflare ? "Appearance text describes identity and body only; ignore any clothing, pose, arm position or framing mentioned there." : "",
       faceLock,
       "Physical description: " + appearancePrompt + ".",
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
       forCloudflare
-        ? "natural anatomically plausible proportions, realistic body and clothing fit,"
+        ? "natural anatomically plausible proportions, realistic body and clothing fit, sensual fashion photography,"
         : "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
@@ -1396,8 +1401,9 @@
     }
     if (referenceB64) {
       const canonicalCup = profileImageBustRaw(character).slice(0, 20);
-      prompt = "Use input_image_0 only to preserve facial identity, eyes, hair and skin. Rebuild body proportions from the character profile; its canonical bust size " +
-        (canonicalCup || "and body description") + " must be visually clear. Change pose, outfit and background as described. " +
+      prompt = "Use input_image_0 ONLY for facial identity (eyes, hair, skin tone). Do NOT copy its clothing, pose or plain background. " +
+        "Rebuild a NEW sensual outfit, NEW pose and RICH detailed interior background as described in the prompt. " +
+        "Canonical bust size " + (canonicalCup || "from profile") + " must stay visible. " +
         String(prompt || "");
     }
     // Avec photo → Klein img2img ; sans photo → schnell txt2img
