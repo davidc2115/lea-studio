@@ -491,7 +491,7 @@
     }
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
     const name = String(c.name || "le personnage").slice(0, 100);
-    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
+    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 280 : 760);
     if (!forCloudflare) appearance = sanitizeForHordePrompt(appearance);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
     const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
@@ -499,7 +499,7 @@
     const bustInfo = describeBustLock(bust, appearance, engine);
     const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
     const bodyInfo = describeBodyMorphology(c);
-    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
+    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 160 : 360);
     if (!forCloudflare) looksEn = sanitizeForHordePrompt(looksEn);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const promptDescription = (value) => hasLargeCloudflareBust
