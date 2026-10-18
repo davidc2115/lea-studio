@@ -420,15 +420,15 @@
           ];
           const fittedH = ["well-fitted structured dress with a natural bust silhouette and fully covered neckline", "tailored wrap dress fitted naturally across the bust, opaque fabric and moderate neckline", "fitted square-neck midi dress showing natural proportions, fully covered", "close-fitting satin dress with a moderate neckline and natural silhouette"];
           const posesH = [
-            "full-length three-quarter front view, shoulders open, arms relaxed away from torso, shoes visible",
-            "walking down a staircase, head turned toward camera, entire figure and shoes in frame",
-            "mid-step through a doorway, side view, head-to-toe framing",
-            "standing by a window in three-quarter view, full figure and feet visible",
-            "seated sideways on a bench, shoulders turned toward camera, legs and shoes visible",
-            "walking across the room, head turned toward camera, full body from head to shoes",
-            "leaning lightly against a bookshelf, camera pulled back to show full figure",
-            "standing beside a table in side-angle view, entire figure and feet visible"
-          ];
+            "full-length seductive stance, weight on one hip, arms crossed under the bust, shoes visible",
+            "full-length looking back over the shoulder on stairs, body twisted, entire figure in frame",
+            "full-length leaning against a wall, one knee bent, teasing gaze, head-to-toe",
+            "full-length seated on bed edge, legs crossed, leaning forward, shoes visible",
+            "full-length hands on hips, three-quarter turn, confident model pose, feet visible",
+            "full-length walking toward camera, slow seductive step, entire figure and shoes",
+            "full-length arched silhouette in a doorway, one arm raised, provocative pose",
+            "full-length mid-step in hallway looking back, hips angled, head-to-toe framing"
+          ]
           const bustPosesH = ["full-length three-quarter view, shoulders open, arms away from chest, shoes visible", "full-length standing, one hand at hip and other by her side, feet visible", "full-length seated upright, hands below bust, legs and shoes in frame", "full-length standing naturally, arms relaxed, clear head-to-toe silhouette"];
           function chooseH(kind, list, limit) {
             const key = "lea.profileImage." + kind + "History." + String(c.id || "lea"); let history = [];
@@ -437,8 +437,8 @@
             try { localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(x => x !== selected)).slice(0, limit))); } catch (_) {}
             return selected;
           }
-          const outfitH = chooseH("outfit", largeBustH ? fittedH : outfitsH, 6);
-          const poseH = chooseH("pose", largeBustH ? bustPosesH : posesH, 5);
+          const outfitH = chooseH("outfit", outfitsH, 6);
+          const poseH = chooseH("pose", posesH, 5);
           const scenesH = ["a bright apartment living room", "an elegant staircase", "a hotel hallway with tall windows", "a classic bedroom", "a refined lounge with a bookshelf", "a softly lit marble lobby"];
           const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
           const identityH = hasRefH ? "Use the reference only to preserve the same adult woman's face, hair and skin; do not copy its outfit, pose, framing, lighting or background." : "Follow the adult profile identity and physical description exactly.";
@@ -546,8 +546,16 @@
       "emerald satin slip plunging neckline high thigh slit",
       "black one-shoulder crop and mini skirt, fishnets, garters, stilettos",
       "forest green mini skirt, black deep V top, thigh-high boots, staircase",
+      "red bodycon mini dress extreme deep V, sheer black stockings, stilettos, bold full body",
+      "black leather mini skirt, tight white crop top, knee-high boots, confident stance",
+      "sheer black blouse unbuttoned low, lace bralette visible, pencil skirt, heels",
+      "wet black tank top clinging to the chest, denim shorts, after shower hallway look",
+      "satin champagne slip dress thin straps, high thigh slit, bare feet in hotel suite",
+      "strappy black bodysuit under open blazer, no pants visible length, editorial sexy",
+      "micro wrap skirt and tied blouse knotted under the bust, platform heels",
     ];
-    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
+    // Tenues sexy/suggestives pour CF et Horde (plus de midi/blazer sages en profil).
+    const outfits = outfitsHorde.concat(outfitsCf.slice(0, 4));
     const outfitHistoryKey = "lea.profileImage.outfitHistory." + String(c.id || "lea");
     let recentOutfits = [];
     try {
@@ -561,22 +569,22 @@
     try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
-      "walking in profile down a hallway, head turned back toward the camera, full body",
-      "seated sideways on a wooden chair, feet on the floor, hands resting in lap",
-      "standing in three-quarter profile beside a window, one hand on the sill",
-      "mid-step through a doorway, photographed from the side, face turned toward camera",
-      "leaning lightly against a bookshelf, shoulders angled, arms relaxed",
-      "seated sideways on a bench, shoulders turned toward camera, hands below the waist",
-      "walking down stairs while looking back, one hand lightly on the railing",
-      "standing beside a table, one hand resting on a closed book, side-angle view",
-      "walking across a courtyard holding a light coat, candid full-body fashion photo",
-      "standing with her back near a mirror, head turned so her face is clearly visible",
-      "seated on the edge of a sofa, legs angled to one side, one hand on the armrest",
-      "standing in a relaxed three-quarter view while adjusting one sleeve",
-      "leaning lightly on a balcony rail, city background, face turned toward camera",
-      "walking through a bright lobby, looking to the side, arms naturally relaxed",
-      "seated upright in an armchair, ankles crossed, hands relaxed on the armrests"
-    ];
+      "standing with weight on one hip, arms crossed under the bust, chin slightly raised, full body seductive stance",
+      "leaning back against a wall, one knee bent, looking over the shoulder with a teasing gaze, full body",
+      "sitting on the edge of a bed, legs crossed, leaning forward with deep neckline visible, full body",
+      "walking toward the camera in slow steps, one hand trailing along the wall, seductive full-body fashion pose",
+      "standing on stairs, one hand on the railing, body slightly twisted, looking back with a bold look",
+      "arched back against a doorway frame, one arm raised above the head, provocative full-body silhouette",
+      "kneeling on a velvet bench, hands on thighs, chest forward, intimate bedroom full-body pose",
+      "three-quarter turn, hands on hips, weight shifted, confident model pose, full body",
+      "seated sideways on a chair, legs elongated, one hand at the collar, sultry look toward camera",
+      "mid-step down a hallway, hips angled, looking back over the shoulder, sexy full-body candid",
+      "standing near a window, one hand in hair, torso slightly arched, sensual daylight full body",
+      "leaning on a table with both hands, cleavage emphasized by pose, legs straight, full body",
+      "back view with head turned to camera, one hand on the hip, mini dress silhouette, full body",
+      "sitting on sofa armrest, legs together angled, shoulders open, inviting full-body pose",
+      "standing with one foot on a stair step, body elongated, bold fashion-editorial seductive pose"
+    ]
     const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
     let recentPoses = [];
     try {
@@ -1647,9 +1655,10 @@
       memoryPromptBlock(c, memory),
       "COHÉRENCE: respecte les derniers messages (qui a fait quoi, où, tenue). Pas d'inversion sujet/objet. Pas de réécriture du passé.",
       "Format STRICT (sans écrire les mots action, dialogue, pensée):",
-      "1) Gestes/corps entre * * seulement (1-2 phrases max).",
+      "1) Gestes/corps entre * * (1-3 phrases).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
-      "3) Ressenti interne entre ( ) : UNE phrase courte (max 12 mots), SANS préfixe 'pensée:'.",
+      "3) Ressenti interne entre ( ) : 1 phrase, SANS préfixe 'pensée:'.",
+      "LONGUEUR: 4 à 10 phrases utiles. Termine TOUJOURS tes phrases et ta réplique — INTERDIT de couper au milieu d'une phrase ou d'un mot (ex. « Tu préfères » sans suite).",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "TIERCES PERSONNES — TOUJOURS ACTIF:",
       "Dès que le joueur mentionne, touche, embrasse, parle à, ou décrit une autre personne (ma femme, Claire, ma fille, mon frère, un ami…), cette personne DOIT parler dans ta réponse.",
@@ -1732,7 +1741,7 @@
             contents,
             generationConfig: {
               temperature: 0.88,
-              maxOutputTokens: 1100,
+              maxOutputTokens: 2200,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -2098,7 +2107,7 @@
               model: model,
               messages: msgs,
               temperature: 0.88,
-              max_tokens: 1100,
+              max_tokens: 2200,
             },
             { Authorization: "Bearer " + key }
           );
