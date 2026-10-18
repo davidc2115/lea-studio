@@ -444,7 +444,8 @@
           const identityH = hasRefH ? "Use the reference only to preserve the same adult woman's face, hair and skin; do not copy its outfit, pose, framing, lighting or background." : "Follow the adult profile identity and physical description exactly.";
           const partsH = [
             "Photorealistic full-length fashion photograph of one fully clothed adult woman, head-to-toe, shoes visible, camera pulled back, entire figure inside frame; not a headshot or chest-up crop",
-            "AGE LOCK: exactly " + ageH + " years old; adult facial features; do not make her younger", nameH, identityH,
+            "AGE LOCK: exactly " + ageH + " years old, looks exactly " + ageH + " not older not younger; youthful face; FORBIDDEN: middle-aged, mature, elderly, wrinkles, thin gaunt face",
+            nameH, identityH,
             looksH ? "Appearance traits: " + looksH : "", appearanceH ? "Profile physical description: " + appearanceH : "",
             bodyInfoH.lead || "", bodyInfoH.lock || "", bodyFieldH ? "Body description: " + bodyFieldH : "",
             bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
@@ -452,7 +453,7 @@
             "Natural proportions and realistic anatomy, face clearly visible, natural hands, one person, no text or watermark"
           ].filter(Boolean);
           if (extraH) partsH.push(extraH);
-          const suffixH = (hasRefH ? "Preserve her recognizable face, hair and skin from the reference; profile controls body and age." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "");
+          const suffixH = (hasRefH ? "Preserve her recognizable face, hair, skin AND overall body shape from the reference; change outfit/pose only." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "") + " Avoid: middle-aged, mature woman, elderly, wrinkled skin, skinny thin body, Asian features unless profile says so.";
           const promptH = partsH.join(". ");
           return promptH.slice(0, 1800 - suffixH.length - 2).trimEnd() + ". " + suffixH;
         }
@@ -2355,12 +2356,13 @@
       }
       if (isHorde) {
         try {
-          const denoise = 0.80;
+          // Full-body ref keeps Cloudflare identity+morphology; face-only caused wrong bodies/ages.
+          const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
             requireRef: true,
-            faceOnlyRef: true,
+            faceOnlyRef: false,
           });
           return {
             ok: true,

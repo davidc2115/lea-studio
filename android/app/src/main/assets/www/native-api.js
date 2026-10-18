@@ -303,116 +303,161 @@
 
   /** Morphologie dominante (chubby, mince, athlétique, sablier…) pour CF + Horde */
   function describeBodyMorphology(char) {
-    const c = char || {};
-    const blob = [
-      c.appearance, c.body, c.looks_en, c.title,
-      Array.isArray(c.tags) ? c.tags.join(" ") : "",
-    ].join(" ").toLowerCase();
+        const c = char || {};
+        // Structured image-prompt fields are the morphology source of truth. Do not let
+        // incidental words in face/leg descriptions or category tags override them.
+        const classify = (value) => {
+          const text = String(value || "").toLowerCase().replace(
+            /\b(?:sans être|sans|not|no|non|pas|never|do not)\b[^,.;!?\n]{0,48}\b(?:plus[- ]?size|chubby|bbw|obese|ronde?|ventre souple|wide hips|thick thighs|slim|skinny|athletic|hourglass)\b/gi,
+            ""
+          );
+          if (/chubby|plus[- ]?size|plantureus|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|vraiment ronde|round belly/.test(text)) return "chubby";
+          if (/curvy rounded|full[- ]?figured|rounded torso|silhouette ronde|corps plein|rounded figure/.test(text)) return "roundCurvy";
+      if (/hourglass|sablier/.test(text)) return "hourglass";
+          if (/(?:athletic|athl[eé]tique)(?:\s+(?:toned|and toned|figure|build|body|woman|et tonique))?|toned (?:figure|body|build)/.test(text)) return "athletic";
+          if (/slim slender|slender (?:figure|body)|narrow frame|silhouette mince|longiligne|mince et|slim figure/.test(text)) return "slim";
+          if (/petite stature|petite adult|petite proportions/.test(text)) return "petite";
+          return "";
+        };
+        const bodyType = classify(c.body);
+        const looksType = classify(c.looks_en);
+        const silhouetteLine = String(c.appearance || "").match(/(?:👗\s*)?Silhouette\s*:\s*([^\n]+)/i);
+        const silhouetteType = classify(silhouetteLine ? silhouetteLine[1] : "");
+        const type = bodyType && looksType && bodyType !== looksType
+          ? ""
+          : (bodyType || looksType || silhouetteType);
 
-    const isChubby = /chubby|plus-?size|plus size|plantureus|tr[eè]s rond|soft belly|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|curvy thick|VRAIMENT ronde|plus-size/.test(blob)
-      || (/\bronde\b/.test(blob) && /plantureus|chubby|plus|ventre|cuisses [eé]paisses|hanches tr[eè]s/.test(blob));
-    const isChubbyFinal = isChubby && !/silhouette mince|slim slender|élanc[eé]e fine|narrow frame/.test(blob);
-    const isSlim = /silhouette mince|slim slender|élanc|longiligne|mince et|narrow frame|petite poitrine mince/.test(blob)
-      && !isChubbyFinal;
-    const isAthletic = /athl[eé]tique|athletic|tonique|muscl|sportive/.test(blob) && !isChubbyFinal;
-    const isHourglass = /sablier|hourglass|taille fine.*hanches|voluptueus/.test(blob) && !isChubbyFinal;
-    const isPetite = /petite stature|petite femme|petite taille/.test(blob);
-
-    if (isChubbyFinal) {
-      return {
-        lead:
-          "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, " +
-          "REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
-        lock:
-          "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. " +
-          "Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
-        neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
-      };
-    }
-    if (isAthletic) {
-      return {
-        lead: "athletic toned adult woman, firm figure, defined shoulders,",
-        lock: "Body type: athletic and toned, not chubby, not skinny frail.",
-        neg: "plus-size, chubby, soft belly, obese, skinny frail",
-      };
-    }
-    if (isSlim) {
-      return {
-        lead: "slim slender adult woman, narrow frame, elegant thin waist,",
-        lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
-        neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
-      };
-    }
-    if (isHourglass) {
-      return {
-        lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
-        lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
-        neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
-      };
-    }
-    if (isPetite) {
-      return {
-        lead: "petite adult woman, smaller stature, proportional,",
-        lock: "Body type: petite adult proportions.",
-        neg: "very tall amazon, plus-size bbw",
-      };
-    }
-    return {
-      lead: "",
-      lock: "Body type matches the character physical description exactly.",
-      neg: "wrong body type, inconsistent morphology",
-    };
-  }
-
+        if (type === "chubby") {
+          return {
+            lead: "plus-size chubby adult woman, soft round belly visible, very wide hips, thick thighs, soft arms, full face with round cheeks, REAL plus-size body NOT a slim model, NOT a thin waist fashion model,",
+            lock: "Body type: genuine chubby / plus-size. Soft stomach, wide hips, thick thighs, generous arms. Round face if described. Do NOT generate a slim, skinny, athletic-abs, or runway-model body.",
+            neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
+          };
+        }
+        if (type === "roundCurvy") {
+          return {
+            lead: "curvy rounded adult woman, full-figured softly rounded body, gently rounded abdomen, full hips and thighs, softly full arms, generous natural curves,",
+            lock: "Body type: softly rounded and full-figured, with natural fullness through the torso, hips, thighs, and arms. Preserve her rounded body; do not make her slim, slender, or athletic.",
+            neg: "slim model, skinny, slender frame, narrow thin body, flat straight figure, athletic lean body, no curves",
+          };
+        }
+        if (type === "athletic") {
+          return {
+            lead: "athletic toned adult woman, firm figure, defined shoulders,",
+            lock: "Body type: athletic and toned, not chubby, not skinny frail.",
+            neg: "plus-size, chubby, soft belly, obese, skinny frail",
+          };
+        }
+        if (type === "slim") {
+          return {
+            lead: "slim slender adult woman, narrow frame, elegant thin waist,",
+            lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
+            neg: "plus-size, chubby, thick thighs, wide hips, soft belly, bbw",
+          };
+        }
+        if (type === "hourglass") {
+          return {
+            lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
+            lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
+            neg: "plus-size, chubby, soft round belly, obese, pregnant belly, BBW, skinny stick figure, no curves",
+          };
+        }
+        if (type === "petite") {
+          return {
+            lead: "petite adult woman, smaller stature, proportional,",
+            lock: "Body type: petite adult proportions.",
+            neg: "very tall amazon, plus-size bbw",
+          };
+        }
+        return {
+          lead: "",
+          lock: "Body type matches the character physical description exactly.",
+          neg: "wrong body type, inconsistent morphology",
+        };
+      }
 
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
-    // Prompt Horde volontairement SFW : ses filtres examinent aussi le prompt négatif.
-    if (eng.indexOf("horde") >= 0) {
-      const nameH = String(c.name || "woman").slice(0, 60);
-      const parsedAgeH = parseInt(c.age, 10);
-      if (!Number.isFinite(parsedAgeH) || parsedAgeH < 18) {
-        throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
-      }
-      const ageH = parsedAgeH;
-      const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-      const extraH = String(extra || "").trim().slice(0, 80);
-      if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) {
-        throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
-      }
-      const outfitsH = [
-        "a modest long-sleeve knit dress with opaque tights",
-        "a tailored blazer, blouse and trousers",
-        "a modest short-sleeve midi dress",
-        "a cardigan over a simple knee-length dress",
-        "a button-up shirt and straight-leg trousers",
-        "a modest long-sleeve dress with a simple neckline"
-      ];
-      const posesH = [
-        "standing naturally beside a window, looking toward the camera",
-        "walking through a doorway, photographed at eye level",
-        "seated upright on a chair, hands resting naturally",
-        "standing in three-quarter view with relaxed arms",
-        "walking down a bright hallway, full body visible"
-      ];
-      const outfitH = outfitsH[Math.floor(Math.random() * outfitsH.length)];
-      const poseH = posesH[Math.floor(Math.random() * posesH.length)];
-      const ph = [
-        "Photorealistic full-body modest fashion photo of one fully clothed adult woman, head and face clearly visible",
-        "AGE LOCK: exactly " + ageH + " years old, adult facial features; do not make her younger",
-        nameH,
-        hasRefH
-          ? "Use the face reference only to preserve her facial identity, hair and skin tone"
-          : "Follow the adult character identity without changing her age",
-        "Outfit: " + outfitH,
-        "Pose: " + poseH,
-        "Tasteful non-suggestive fashion photography, natural lighting, realistic anatomy, natural hands, no text or watermark"
-      ].join(". ");
-      if (extraH) return (ph + ". " + extraH).slice(0, 1500);
-      return ph.slice(0, 1500);
-    }
-    const age = c.age == null || c.age === "" ? NaN : Number(c.age);
+    // Horde: conserver les détails du profil et la variété, tout en restant non explicite.
+        if (eng.indexOf("horde") >= 0) {
+          const nameH = String(c.name || "woman").slice(0, 60);
+          const ageH = parseInt(c.age, 10);
+          if (!Number.isFinite(ageH) || ageH < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
+          const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
+          const extraH = String(extra || "").trim().slice(0, 80);
+          if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
+          const rawAppearanceH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim();
+          const appearanceH = sanitizeAppearanceForImage(rawAppearanceH).slice(0, 400);
+          const looksH = String(c.looks_en || "").replace(/\s+/g, " ").trim().slice(0, 300);
+          const bodyFieldH = String(c.body || "").replace(/\s+/g, " ").trim().slice(0, 160);
+          const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
+          const bustInfoH = describeBustLock(bustH, appearanceH || rawAppearanceH, "horde");
+          const bodyInfoH = describeBodyMorphology(c);
+          const cupH = String(bustInfoH.label || bustH).match(/([A-J])\s*$/i);
+          const largeBustH = !!(cupH && /[FGHIJ]/i.test(cupH[1]));
+          const outfitsH = [
+            "fitted emerald wrap midi dress with moderate neckline and opaque tights",
+            "burgundy satin midi dress with a defined waist and opaque tights",
+            "black fitted top with a forest-green midi skirt and opaque tights",
+            "rose satin blouse tucked into a charcoal pencil skirt",
+            "deep teal tailored jumpsuit with a defined waist",
+            "plum fitted dress with long sleeves and a modest side slit",
+            "navy blouse with a wine-red A-line midi skirt",
+            "ruby red belted dress with short sleeves and low heels",
+            "cream knit dress with opaque tights and ankle boots",
+            "fitted black blazer over a high-neck top with tailored trousers",
+            "lavender blouse with a dark pleated midi skirt",
+            "camel coat over a fitted plum dress",
+            "forest-green velvet midi dress with a moderate neckline",
+            "white blouse with a burgundy skirt and classic pumps",
+            "cobalt wrap dress with opaque tights",
+            "rose blazer dress with a narrow belt and opaque tights",
+            "champagne blouse with olive tailored trousers",
+            "black square-neck dress with long sleeves and opaque tights",
+            "coral sheath dress with cap sleeves and low heels",
+            "soft-blue cardigan over a fitted knee-length dress"
+          ];
+          const fittedH = ["well-fitted structured dress with a natural bust silhouette and fully covered neckline", "tailored wrap dress fitted naturally across the bust, opaque fabric and moderate neckline", "fitted square-neck midi dress showing natural proportions, fully covered", "close-fitting satin dress with a moderate neckline and natural silhouette"];
+          const posesH = [
+            "full-length three-quarter front view, shoulders open, arms relaxed away from torso, shoes visible",
+            "walking down a staircase, head turned toward camera, entire figure and shoes in frame",
+            "mid-step through a doorway, side view, head-to-toe framing",
+            "standing by a window in three-quarter view, full figure and feet visible",
+            "seated sideways on a bench, shoulders turned toward camera, legs and shoes visible",
+            "walking across the room, head turned toward camera, full body from head to shoes",
+            "leaning lightly against a bookshelf, camera pulled back to show full figure",
+            "standing beside a table in side-angle view, entire figure and feet visible"
+          ];
+          const bustPosesH = ["full-length three-quarter view, shoulders open, arms away from chest, shoes visible", "full-length standing, one hand at hip and other by her side, feet visible", "full-length seated upright, hands below bust, legs and shoes in frame", "full-length standing naturally, arms relaxed, clear head-to-toe silhouette"];
+          function chooseH(kind, list, limit) {
+            const key = "lea.profileImage." + kind + "History." + String(c.id || "lea"); let history = [];
+            try { const v = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(v)) history = v; } catch (_) {}
+            const options = list.filter(x => history.indexOf(x) < 0); const selected = (options.length ? options : list)[Math.floor(Math.random() * (options.length || list.length))];
+            try { localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(x => x !== selected)).slice(0, limit))); } catch (_) {}
+            return selected;
+          }
+          const outfitH = chooseH("outfit", largeBustH ? fittedH : outfitsH, 6);
+          const poseH = chooseH("pose", largeBustH ? bustPosesH : posesH, 5);
+          const scenesH = ["a bright apartment living room", "an elegant staircase", "a hotel hallway with tall windows", "a classic bedroom", "a refined lounge with a bookshelf", "a softly lit marble lobby"];
+          const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
+          const identityH = hasRefH ? "Use the reference only to preserve the same adult woman's face, hair and skin; do not copy its outfit, pose, framing, lighting or background." : "Follow the adult profile identity and physical description exactly.";
+          const partsH = [
+            "Photorealistic full-length fashion photograph of one fully clothed adult woman, head-to-toe, shoes visible, camera pulled back, entire figure inside frame; not a headshot or chest-up crop",
+            "AGE LOCK: exactly " + ageH + " years old, looks exactly " + ageH + " not older not younger; youthful face; FORBIDDEN: middle-aged, mature, elderly, wrinkles, thin gaunt face",
+            nameH, identityH,
+            looksH ? "Appearance traits: " + looksH : "", appearanceH ? "Profile physical description: " + appearanceH : "",
+            bodyInfoH.lead || "", bodyInfoH.lock || "", bodyFieldH ? "Body description: " + bodyFieldH : "",
+            bustInfoH.label ? "Canonical bust: " + bustInfoH.lock : "",
+            "Outfit: " + outfitH + ". Fully clothed, naturally fitted to her body shape.", "Pose: " + poseH + ".", "Location: " + sceneH + ".",
+            "Natural proportions and realistic anatomy, face clearly visible, natural hands, one person, no text or watermark"
+          ].filter(Boolean);
+          if (extraH) partsH.push(extraH);
+          const suffixH = (hasRefH ? "Preserve her recognizable face, hair, skin AND overall body shape from the reference; change outfit/pose only." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "") + " Avoid: middle-aged, mature woman, elderly, wrinkled skin, skinny thin body, Asian features unless profile says so.";
+          const promptH = partsH.join(". ");
+          return promptH.slice(0, 1800 - suffixH.length - 2).trimEnd() + ". " + suffixH;
+        }
+        const age = c.age == null || c.age === "" ? NaN : Number(c.age);
     const ageConfirmed = Number.isInteger(age) && age >= 18;
     const visuallyAdultAndConfirmed = c.adultConfirmed === true &&
       Number.isInteger(Number(c.estimatedAge)) && Number(c.estimatedAge) >= 18;
@@ -2108,7 +2153,7 @@
       const names = u.match(/\b([A-ZÀ-Ü][a-zà-ü'’-]{2,20})\b/g) || [];
       for (const n of names) {
         if (charLow && n.toLowerCase() === charLow.split(/\s+/)[0]) continue;
-        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci)$/i.test(n)) continue;
+        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci|Euh|Eh|Hé|Hum|Hmm|Oh|Ah|Bah|Ben|Bon|Alors|Voilà)$/i.test(n)) continue;
         thirdHints.push("[" + n + "]:");
       }
       // Verbes d'adresse génériques
@@ -2311,12 +2356,13 @@
       }
       if (isHorde) {
         try {
+          // Full-body ref keeps Cloudflare identity+morphology; face-only caused wrong bodies/ages.
           const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
             requireRef: true,
-            faceOnlyRef: true,
+            faceOnlyRef: false,
           });
           return {
             ok: true,
