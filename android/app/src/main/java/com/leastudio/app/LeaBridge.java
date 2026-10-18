@@ -848,7 +848,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 448);
                     params.put("height", registered ? 768 : 560);
-                    double denoise = 0.55;
+                    double denoise = 0.46;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -863,9 +863,9 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    // Profil (denoise ~0.52): cfg modéré; scène (plus haut): un peu plus de cfg
-                    double cfg = 7.0;
-                    int steps = registered ? 30 : 26;
+                    // Avec référence: cfg un peu plus bas pour ne pas écraser le visage source.
+                    double cfg = hasRef ? 5.5 : 7.0;
+                    int steps = registered ? 32 : 26;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
                     params.put("sampler_name", "k_euler_a");

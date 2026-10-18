@@ -173,8 +173,8 @@
       element.src = imageSource;
     });
     if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
-    // Keep the higher-detail face reference for better identity consistency.
-    const maxSide = 512;
+    // Plus de détail visage/corps pour img2img Horde (limite payload ~900k).
+    const maxSide = faceOnly ? 512 : 640;
     const scale = Math.min(maxSide / image.naturalWidth, maxSide / image.naturalHeight, 1);
     const canvas = document.createElement("canvas");
     canvas.width = faceOnly ? maxSide : Math.max(64, Math.round(image.naturalWidth * scale));
@@ -465,6 +465,9 @@
             bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
           }
           const partsH = [
+            hasRefH
+              ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
+              : "photorealistic full-length fashion photo of one adult woman",
             "photorealistic full-length fashion photo of one adult woman",
             ageH + " years old",
             nameH,
@@ -472,7 +475,7 @@
             eyesH,
             skinH,
             bodyH,
-            hasRefH ? "identical face to the reference photo, same facial features and expression style" : "",
+            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "",
             "wearing " + outfitH,
             poseH,
             "location: " + sceneH,
@@ -2439,9 +2442,10 @@
       }
       if (isHorde) {
         try {
-          // Denoise plus bas = plus de fidélité visage+corps de la référence (ex. Hortense plus-size).
+          // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
+          // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
           const charId = String(char && char.id || "");
-          const denoise = (charId === "aya") ? 0.48 : 0.55;
+          const denoise = (charId === "aya") ? 0.40 : 0.46;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
