@@ -888,8 +888,8 @@ public class LeaBridge {
                     } else {
                         sourceB64 = null;
                     }
-                    payload.put("nsfw", false);
-                    payload.put("censor_nsfw", true);
+                    payload.put("nsfw", true);
+                    payload.put("censor_nsfw", false);
                     payload.put("trusted_workers", false);
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
@@ -1029,8 +1029,8 @@ public class LeaBridge {
                         JSONObject retryPayload = new JSONObject(payload.toString());
                         retryPayload.put("prompt",
                             "photorealistic portrait of the same adult woman in the reference image, fully clothed in a modest everyday outfit, face clearly visible, natural expression, soft daylight, realistic skin, editorial photography");
-                        retryPayload.put("nsfw", false);
-                        retryPayload.put("censor_nsfw", true);
+                        retryPayload.put("nsfw", true);
+                        retryPayload.put("censor_nsfw", false);
                         String retryRaw = hordeRequest("POST", "/api/v2/generate/async", retryPayload.toString(), hordeKey);
                         JSONObject retryAccepted = new JSONObject(retryRaw);
                         String retryId = retryAccepted.optString("id", "");

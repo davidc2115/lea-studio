@@ -294,6 +294,16 @@
     return { lock: lock, neg: neg, label: sizeLabel };
   }
 
+
+  function sanitizeForHordePrompt(text) {
+    // Mode NSFW Horde: garde tenues suggestives; retire seulement les termes ToS durs (mineurs, etc.).
+    return String(text || "")
+      .replace(/\b(child|children|kid|kids|underage|loli|shota|minor|schoolgirl)\b/gi, "")
+      .replace(/\b(real person|celebrity name|named politician)\b/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
+
   function sanitizeAppearanceForImage(text) {
     // Ne pas écraser chubby / ronde / volume — seulement le bruit hyper non réaliste
     return String(text || "")
@@ -523,33 +533,33 @@
       "royal-blue fit-and-flare dress with short sleeves, softly lit interior"
     ];
     const outfitsHorde = [
-      "emerald green long-sleeve knit midi dress, opaque fabric, black ankle boots, elegant full body",
-      "olive green square-neck midi dress, modest neckline, nude pumps, soft indoor light",
-      "burgundy wrap midi dress with waist belt, opaque fabric, black heels, hotel lobby",
-      "navy blouse with high neck and tailored dark trousers, refined hallway look",
-      "black long-sleeve fitted dress with boat neckline, opaque, glamorous stairs",
-      "black fitted knit midi dress, modest V neckline, elegant full body, realistic fabric",
-      "white button-up blouse fully buttoned with black midi skirt, professional look",
-      "camel trench coat over a plum midi dress, elegant staircase",
-      "forest-green tailored jumpsuit with defined waist, elegant corridor",
-      "rose tweed jacket with tailored black trousers, classic interior",
+      "emerald green bodycon mini dress deep V neckline, black sheer tights, black ankle boots, full body",
+      "olive green spaghetti-strap mini dress, modest heels, soft indoor light, full body",
+      "burgundy satin wrap mini dress, black stilettos, hotel lobby, full body",
+      "navy crop top and dark skinny jeans, refined hallway look, full body",
+      "black long-sleeve fitted dress with open neckline, glamorous stairs, full body",
+      "black fitted knit mini dress, elegant full body, realistic fabric",
+      "sheer white blouse over camisole, black midi skirt, professional-sexy look",
+      "black lace robe over matching lingerie set, seated on velvet bench, bedroom soft light",
+      "champagne silk slip dress thin straps, bare legs, hotel suite full body",
+      "red lace bra under open white shirt, black mini skirt, heels, full body",
+      "black mesh top and leather mini skirt, edgy full body fashion",
+      "wet white crop top and dark skinny jeans, after-rain look, full body",
+      "ivory lace lingerie set, soft bedroom teasing pose, full body",
+      "oversized open white shirt over black lace, bare legs, doorway",
+      "emerald satin slip plunging neckline, high thigh slit, full body",
+      "forest green mini skirt, black deep V top, thigh-high boots, staircase",
+      "black one-shoulder crop and mini skirt, stilettos, full body",
       "navy belted shirt dress with ankle boots, hotel hallway",
-      "lavender satin midi dress with modest neckline, sunlit room",
-      "champagne blouse with olive tailored trousers, fashion editorial",
-      "white blazer over a berry-colored midi dress, upscale lobby",
-      "blue-and-white striped blouse with beige A-line skirt, tall-window lounge",
-      "mint-green linen jumpsuit with narrow waist, modern apartment",
-      "royal-blue fit-and-flare dress with short sleeves, softly lit interior",
-      "sky-blue cardigan over cream pleated midi skirt, daylight studio",
-      "coral short-sleeve sheath dress with nude pumps, sunny doorway",
-      "mustard knit sweater with dark denim midi skirt, cozy library",
-      "lilac blouse with charcoal wide-leg trousers, contemporary apartment",
-      "red wrap dress with waist belt and black pumps, city interior",
-      "silver satin midi skirt with navy knit top, softly lit room",
-      "terracotta blouse with dark straight-leg jeans, casual doorway"
-    ];
-    // Horde = SFW only (évite CorruptPrompt / ToS). Cloudflare garde des options plus variées.
-    const outfits = forCloudflare ? outfitsCf.concat(outfitsHorde.slice(0, 6)) : outfitsHorde;
+      "lavender satin midi dress, sunlit room, full body",
+      "white blazer over berry mini dress, upscale lobby, full body",
+      "black backless long dress looking over shoulder, grand staircase",
+      "burgundy short satin robe, legs bare, hotel bed soft light",
+      "camel trench coat over plum dress, elegant staircase",
+      "royal-blue fit-and-flare dress, softly lit interior, full body"
+    ]
+    // NSFW Horde activé côté bridge: tenues suggestives autorisées.
+    const outfits = outfitsHorde.concat(forCloudflare ? outfitsCf.slice(0, 4) : []);
     const outfitHistoryKey = "lea.profileImage.outfitHistory." + String(c.id || "lea");
     let recentOutfits = [];
     try {

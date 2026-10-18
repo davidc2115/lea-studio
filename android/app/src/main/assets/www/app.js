@@ -766,7 +766,7 @@ function renderProfile() {
     ${!edit ? `
     <div class="section">
       <h2>🖼️ Générer une image</h2>
-      <p class="hint">La photo de profil sert de référence pour le visage. Mode SFW Horde (tenues modestes, pas de lingerie) pour éviter la censure worker. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
+      <p class="hint">La photo de profil sert de référence pour le visage. Mode Horde NSFW (tenues suggestives autorisées) pour éviter la censure worker. Visage ancré sur la photo de profil. Horde peut attendre en file.</p>
       <label class="hint" for="gen-provider">Moteur</label>
       <select class="edit-input" id="gen-provider" style="margin:4px 0 10px">
         <option value="cloudflare" ${resolveHordeApiKey() ? "" : "selected"}>Cloudflare · FLUX.2 Klein</option>
