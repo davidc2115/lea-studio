@@ -894,7 +894,7 @@ public class LeaBridge {
                     payload.put("slow_workers", true);
                     payload.put("r2", true);
                     payload.put("shared", false);
-                    payload.put("replacement_filter", false);
+                    payload.put("replacement_filter", true);
                     // Laisser les workers choisir un modèle réaliste dispo
                     payload.put("models", hordePhotoModels(hordeKey));
 

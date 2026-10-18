@@ -643,7 +643,7 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
+      ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Always place her in a detailed real-world interior (hotel, bedroom, lobby, stairs), never a plain seamless studio backdrop. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
     const base = [
