@@ -448,6 +448,22 @@
           const poseH = chooseH("pose", posesH, 5);
           const scenesH = ["bright apartment living room", "elegant staircase", "hotel hallway", "classic bedroom", "softly lit lobby"];
           const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
+          // Morphologie SURE (pas de seins/cleavage) — crucial pour Hortense et plus-size
+          const morphRaw = (String(c.body || "") + " " + String(c.looks_en || "") + " " + String(c.appearance || "")).toLowerCase();
+          let bodyH = "";
+          if (/chubby|plus[- ]?size|bbw|ronde|voluptueus|soft belly|rounded belly|wide hips|thick thighs|plantureus|curvy plus/.test(morphRaw)) {
+            bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, NOT thin, NOT skinny, NOT athletic";
+          } else if (/hourglass|sablier/.test(morphRaw)) {
+            bodyH = "hourglass figure, defined waist, curvy hips";
+          } else if (/slim|mince|slender/.test(morphRaw)) {
+            bodyH = "slim slender figure";
+          } else if (/athletic|athl/.test(morphRaw)) {
+            bodyH = "athletic toned figure";
+          }
+          // Hortense Henry (aya): forcer identité ronde + visage fidèle
+          if (String(c.id || "") === "aya" || /hortense\s*henry/i.test(nameH)) {
+            bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
+          }
           const partsH = [
             "photorealistic full-length fashion photo of one adult woman",
             ageH + " years old",
@@ -455,14 +471,15 @@
             hairH,
             eyesH,
             skinH,
-            hasRefH ? "same face as reference image" : "",
+            bodyH,
+            hasRefH ? "identical face to the reference photo, same facial features and expression style" : "",
             "wearing " + outfitH,
             poseH,
             "location: " + sceneH,
             "fully clothed, head to toe, shoes visible, natural light, sharp focus",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 900);
+          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
         }
 
         const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -2364,8 +2381,9 @@
       }
       if (isHorde) {
         try {
-          // Full-body ref keeps Cloudflare identity+morphology; face-only caused wrong bodies/ages.
-          const denoise = 0.62;
+          // Denoise plus bas = plus de fidélité visage+corps de la référence (ex. Hortense plus-size).
+          const charId = String(char && char.id || "");
+          const denoise = (charId === "aya") ? 0.48 : 0.55;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: denoise,
