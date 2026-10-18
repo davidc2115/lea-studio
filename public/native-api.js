@@ -1688,7 +1688,8 @@
       "1) Gestes/corps entre * * (1-2 phrases max).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
       "3) Ressenti interne entre ( ) : 1 phrase, SANS préfixe 'pensée:'.",
-      "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman). Termine toujours tes phrases — INTERDIT de couper au milieu.",
+      "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman).",
+      "COMPLETUDE: chaque réponse doit être ENTIÈRE. Termine toujours la dernière phrase et le dernier mot. INTERDIT de s'arrêter sur « Oui… rempl » ou « c'est » sans finir. Pas de coupure en milieu de mot.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "TIERCES PERSONNES — TOUJOURS ACTIF:",
       "Dès que le joueur mentionne, touche, embrasse, parle à, ou décrit une autre personne (ma femme, Claire, ma fille, mon frère, un ami…), cette personne DOIT parler dans ta réponse.",
@@ -1790,7 +1791,7 @@
             contents,
             generationConfig: {
               temperature: 0.85,
-              maxOutputTokens: 1400,
+              maxOutputTokens: 2048,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -2156,7 +2157,7 @@
               model: model,
               messages: msgs,
               temperature: 0.85,
-              max_tokens: 1400,
+              max_tokens: 2048,
             },
             { Authorization: "Bearer " + key }
           );
@@ -2288,6 +2289,26 @@
       try {
         let result = await callOne(eng, system);
         if (!result) continue;
+        // Réponse coupée en milieu de mot/phrase → un retry pour finir
+        function isIncompleteReply(text) {
+          const s = String(text || "").trim();
+          if (!s || s.length < 8) return true;
+          // Finit par lettre (mot coupé) sans ponctuation de fin
+          if (/[a-zàâäéèêëïîôùûüç]$/i.test(s) && !/[.!?…»")\]]$/.test(s)) {
+            // court dialogue type "Oui... rempl" ou "c'est"
+            const last = (s.split(/\s+/).pop() || "");
+            if (last.length <= 8 && !/^(oui|non|ah|oh|hmm+|mmh+|putain|merde)$/i.test(last)) return true;
+            if (/^(rempl|c'est|cest|je|tu|et|de|la|le|un|une)$/i.test(last)) return true;
+          }
+          return false;
+        }
+        if (isIncompleteReply(result.reply)) {
+          try {
+            const fixSys = system + "\n\nCORRECTION: ta réponse précédente était COUPÉE en plein milieu. Réécris une réponse COMPLÈTE (3-6 phrases), termine chaque phrase, aucun mot tronqué.";
+            const retry = await callOne(eng, fixSys);
+            if (retry && !isIncompleteReply(retry.reply) && !isRefusalReply(retry.reply)) result = retry;
+          } catch (_) {}
+        }
         // Refus soft (Gemini) → retry forcé puis moteur suivant
         if (isRefusalReply(result.reply)) {
           try {
