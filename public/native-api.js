@@ -397,8 +397,8 @@
           const nameH = String(c.name || "woman").replace(/[^\w\s\-àâäéèêëïîôùûüçÀÂÄÉÈÊËÏÎÔÙÛÜÇ']/gi, "").slice(0, 40);
           const ageRaw = parseInt(c.age, 10);
           if (!Number.isFinite(ageRaw) || ageRaw < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
-          // 18 dans le prompt + focus corps = souvent CorruptPrompt → minimum 21 dans le texte
-          const ageH = Math.max(21, ageRaw);
+          // Keep the confirmed catalog age exact in every provider prompt.
+          const ageH = ageRaw;
           const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
           const extraH = String(extra || "").trim().slice(0, 60);
           if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?|sexy|seductive|provocative)\b/i.test(extraH)) {
@@ -455,8 +455,8 @@
             bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, NOT thin, NOT skinny, NOT athletic";
           } else if (/hourglass|sablier/.test(morphRaw)) {
             bodyH = "hourglass figure, defined waist, curvy hips";
-          } else if (/slim|mince|slender/.test(morphRaw)) {
-            bodyH = "slim slender figure";
+          } else if (/slim|mince|slender|élancée|proportions fines|silhouette élancée/.test(morphRaw)) {
+            bodyH = "slim slender adult woman, fine elegant build, narrow frame, long legs, natural realistic proportions";
           } else if (/athletic|athl/.test(morphRaw)) {
             bodyH = "athletic toned figure";
           }
@@ -467,7 +467,7 @@
           // Sans ref: injecter plus de traits physiques (safe) depuis looks_en
           let descH = "";
           if (!hasRefH) {
-            const safeLooks = sanitizeForHordePrompt(String(c.looks_en || c.appearance || "")).replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
+            const safeLooks = sanitizeForHordePrompt([String(c.ethnicity || ""), String(c.body || ""), String(c.looks_en || ""), String(c.appearance || "")].filter(Boolean).join(", ")).replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 440);
             descH = safeLooks;
           }
           const partsH = [
@@ -500,7 +500,8 @@
     }
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
     const name = String(c.name || "le personnage").slice(0, 100);
-    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 280 : 760);
+    const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
+    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? (hasProfileRef ? 280 : 900) : 760);
     if (!forCloudflare) appearance = sanitizeForHordePrompt(appearance);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
     const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
@@ -508,7 +509,7 @@
     const bustInfo = describeBustLock(bust, appearance, engine);
     const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
     const bodyInfo = describeBodyMorphology(c);
-    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 160 : 360);
+    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? (hasProfileRef ? 160 : 420) : 360);
     if (!forCloudflare) looksEn = sanitizeForHordePrompt(looksEn);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const promptDescription = (value) => hasLargeCloudflareBust
@@ -521,7 +522,7 @@
     const appearancePrompt = promptDescription(appearanceClean || appearance || "match character sheet.");
     const looksPrompt = promptDescription(looksEn);
     const bodyPrompt = promptDescription(bodyField);
-    const faceLock = (c && (c.cover || (Array.isArray(c.gallery) && c.gallery[0])))
+    const faceLock = hasProfileRef
       ? ("FACE LOCK input_image_0: SAME person as reference — identical face, eyes, nose, lips, hair color/style, skin, age. " +
          "Follow the profile body description and prioritize its explicit cup size even if the reference chest appears smaller. " +
          "CRITICAL: completely NEW outfit, NEW pose, NEW camera angle — do NOT copy the reference pose, stance, hand position or clothing. " +
@@ -652,11 +653,18 @@
     const scene = scenes[Math.floor(Math.random() * scenes.length)];
 
     const mood = forCloudflare
-      ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Always place her in a detailed real-world interior (hotel, bedroom, lobby, stairs), never a plain seamless studio backdrop. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
+      ? (hasProfileRef
+          ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Always place her in a detailed real-world interior (hotel, bedroom, lobby, stairs), never a plain seamless studio backdrop. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
+          : "Create the original adult woman from the written character profile; NO reference image is available. Follow the profile for her identity, age, face, hair, skin, and body. Photorealistic fashion photo, sharp focus, natural light,")
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
+    const exactPromptAge = Number.isInteger(age) ? age : Number(c.estimatedAge || 0);
+    const textOnlyIdentity = forCloudflare && !hasProfileRef
+      ? ("TEXT-ONLY CHARACTER IDENTITY: " + name + ", exactly " + exactPromptAge + " years old; ethnicity/features: " + String(c.ethnicity || "as described in the profile") + ". " + (looksPrompt || bodyPrompt || appearancePrompt))
+      : "";
     const base = [
       mood,
+      textOnlyIdentity,
       forCloudflare
         ? "PRIORITY: invent a NEW sexy outfit, a NEW sensual pose, and a RICH detailed background environment. Forbidden: plain white/beige studio backdrop, empty wall, simple t-shirt with trousers, boring casual office clothes."
         : "",
@@ -699,7 +707,8 @@
   function buildCloudflareSafeRetryPrompt(char, extra, attempt) {
     const c = char || LEA;
     const name = String(c.name || "woman").slice(0, 80);
-    const appearance = String(c.appearance || "").trim().slice(0, 400);
+    const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
+    const appearance = String(c.appearance || "").trim().slice(0, hasProfileRef ? 400 : 700);
     const softOutfits = [
       "elegant black dress, professional fashion photo",
       "casual chic blouse and jeans, natural beauty",
@@ -725,7 +734,7 @@
       : softOutfits[Math.min(attempt, softOutfits.length - 1)];
     const retryParts = [
       "photorealistic full body photo of adult woman 18+,",
-      "identity match reference input_image_0 for " + name + ",",
+      hasProfileRef ? "identity match reference input_image_0 for " + name + "," : "text-only identity, no reference image; faithfully create " + name + " from the profile description,",
       retryAppearance ? retryAppearance.slice(0, 280) + "," : "",
       bustInfo.lock + ",",
       outfit + ",",
