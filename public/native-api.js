@@ -464,25 +464,31 @@
           if (String(c.id || "") === "aya" || /hortense\s*henry/i.test(nameH)) {
             bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
           }
+          // Sans ref: injecter plus de traits physiques (safe) depuis looks_en
+          let descH = "";
+          if (!hasRefH) {
+            const safeLooks = sanitizeForHordePrompt(String(c.looks_en || c.appearance || "")).replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 280);
+            descH = safeLooks;
+          }
           const partsH = [
             hasRefH
               ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
-              : "photorealistic full-length fashion photo of one adult woman",
-            "photorealistic full-length fashion photo of one adult woman",
+              : "photorealistic full-length fashion photo of one adult woman matching this description",
             ageH + " years old",
             nameH,
             hairH,
             eyesH,
             skinH,
             bodyH,
-            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "",
-            "wearing " + outfitH,
-            poseH,
+            descH,
+            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "match the physical description exactly, coherent face and body",
+            "NEW outfit: " + outfitH,
+            "NEW pose: " + poseH,
             "location: " + sceneH,
-            "fully clothed, head to toe, shoes visible, natural light, sharp focus",
+            "fully clothed, head to toe, shoes visible, natural light, sharp focus, different pose and clothes from any prior image",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1000);
+          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100);
         }
 
         const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -1400,13 +1406,18 @@
     try {
       referenceB64 = await profileReferenceJpegB64(character, !!(options && options.faceOnlyRef), true);
     } catch (e) {
-      throw new Error("Photo de profil requise / illisible: " + String(e.message || e).slice(0, 120));
+      referenceB64 = null; // pas de photo → txt2img depuis le descriptif physique
     }
     if (referenceB64) {
       const canonicalCup = profileImageBustRaw(character).slice(0, 20);
       prompt = "Use input_image_0 ONLY for facial identity (eyes, hair, skin tone). Do NOT copy its clothing, pose or plain background. " +
         "Rebuild a NEW sensual outfit, NEW pose and RICH detailed interior background as described in the prompt. " +
         "Canonical bust size " + (canonicalCup || "from profile") + " must stay visible. " +
+        String(prompt || "");
+    } else {
+      // Sans référence: le prompt physique complet doit porter l'identité
+      prompt = "Photorealistic full-body photo matching the character description exactly. " +
+        "Follow age, face, hair, body type and proportions from the profile. " +
         String(prompt || "");
     }
     // Avec photo → Klein img2img ; sans photo → schnell txt2img
@@ -2466,11 +2477,12 @@
           // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
           // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
           const charId = String(char && char.id || "");
-          const denoise = (charId === "aya") ? 0.40 : 0.46;
+          const denoise = (charId === "aya") ? 0.55 : 0.58;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
+          const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
-            denoise: denoise,
-            requireRef: true,
+            denoise: hasCover ? denoise : 1.0,
+            requireRef: false,
             faceOnlyRef: false,
           });
           return {
