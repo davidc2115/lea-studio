@@ -388,9 +388,9 @@
           const extraH = String(extra || "").trim().slice(0, 80);
           if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?)\b/i.test(extraH)) throw new Error("Pour AI Horde, la consigne additionnelle doit rester non sexuelle et prévoir une tenue complète.");
           const rawAppearanceH = String(c.appearance || "").replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ").replace(/\s+/g, " ").trim();
-          const appearanceH = sanitizeAppearanceForImage(rawAppearanceH).slice(0, 400);
-          const looksH = String(c.looks_en || "").replace(/\s+/g, " ").trim().slice(0, 300);
-          const bodyFieldH = String(c.body || "").replace(/\s+/g, " ").trim().slice(0, 160);
+          const appearanceH = sanitizeForHordePrompt(sanitizeAppearanceForImage(rawAppearanceH)).slice(0, 360);
+          const looksH = sanitizeForHordePrompt(String(c.looks_en || "").replace(/\s+/g, " ").trim()).slice(0, 280);
+          const bodyFieldH = sanitizeForHordePrompt(String(c.body || "").replace(/\s+/g, " ").trim()).slice(0, 140);
           const bustH = String(profileImageBustRaw(c)).trim().slice(0, 20);
           const bustInfoH = describeBustLock(bustH, appearanceH || rawAppearanceH, "horde");
           const bodyInfoH = describeBodyMorphology(c);
@@ -420,16 +420,15 @@
           ];
           const fittedH = ["well-fitted structured dress with a natural bust silhouette and fully covered neckline", "tailored wrap dress fitted naturally across the bust, opaque fabric and moderate neckline", "fitted square-neck midi dress showing natural proportions, fully covered", "close-fitting satin dress with a moderate neckline and natural silhouette"];
           const posesH = [
-            "full-length seductive stance, weight on one hip, arms crossed under the bust, shoes visible",
-            "full-length looking back over the shoulder on stairs, body twisted, entire figure in frame",
-            "full-length leaning against a wall, one knee bent, teasing gaze, head-to-toe",
-            "full-length seated on bed edge, legs crossed, leaning forward, shoes visible",
-            "full-length hands on hips, three-quarter turn, confident model pose, feet visible",
-            "full-length walking toward camera, slow seductive step, entire figure and shoes",
-            "full-length arched silhouette in a doorway, one arm raised, provocative pose",
-            "full-length mid-step in hallway looking back, hips angled, head-to-toe framing"
-          ]
-          const bustPosesH = ["full-length three-quarter view, shoulders open, arms away from chest, shoes visible", "full-length standing, one hand at hip and other by her side, feet visible", "full-length seated upright, hands below bust, legs and shoes in frame", "full-length standing naturally, arms relaxed, clear head-to-toe silhouette"];
+            "full-length three-quarter front view, shoulders open, arms relaxed away from torso, shoes visible",
+            "walking down a staircase, head turned toward camera, entire figure and shoes in frame",
+            "mid-step through a doorway, side view, head-to-toe framing",
+            "standing by a window in three-quarter view, full figure and feet visible",
+            "seated sideways on a bench, shoulders turned toward camera, legs and shoes visible",
+            "walking across the room, head turned toward camera, full body from head to shoes",
+            "leaning lightly against a bookshelf, camera pulled back to show full figure",
+            "standing beside a table in side-angle view, entire figure and feet visible"
+          ];
           function chooseH(kind, list, limit) {
             const key = "lea.profileImage." + kind + "History." + String(c.id || "lea"); let history = [];
             try { const v = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(v)) history = v; } catch (_) {}
@@ -453,7 +452,7 @@
             "Natural proportions and realistic anatomy, face clearly visible, natural hands, one person, no text or watermark"
           ].filter(Boolean);
           if (extraH) partsH.push(extraH);
-          const suffixH = (hasRefH ? "Preserve her recognizable face, hair, skin AND overall body shape from the reference; change outfit/pose only." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "") + " Avoid: middle-aged, mature woman, elderly, wrinkled skin, skinny thin body, Asian features unless profile says so.";
+          const suffixH = (hasRefH ? "Preserve her recognizable face, hair, skin AND overall body shape from the reference; change outfit/pose only." : "Match the profile face, age and body exactly.") + (bustInfoH.label ? " FINAL BODY PRIORITY: show canonical " + bustInfoH.label + " proportions through the fully clothed outfit." : "") + " Fully clothed fashion photo, SFW, no lingerie, no nudity.";
           const promptH = partsH.join(". ");
           return promptH.slice(0, 1800 - suffixH.length - 2).trimEnd() + ". " + suffixH;
         }
@@ -466,14 +465,16 @@
     }
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
     const name = String(c.name || "le personnage").slice(0, 100);
-    const appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
+    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? 520 : 760);
+    if (!forCloudflare) appearance = sanitizeForHordePrompt(appearance);
     const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
     const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
     const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
     const bodyInfo = describeBodyMorphology(c);
-    const looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
+    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? 220 : 360);
+    if (!forCloudflare) looksEn = sanitizeForHordePrompt(looksEn);
     const bodyField = String(c.body || "").trim().slice(0, 160);
     const promptDescription = (value) => hasLargeCloudflareBust
       ? String(value || "")
@@ -522,40 +523,33 @@
       "royal-blue fit-and-flare dress with short sleeves, softly lit interior"
     ];
     const outfitsHorde = [
-      "emerald green long-sleeve bodycon mini dress deep V neckline, black sheer tights, black stiletto ankle boots, seductive",
-      "olive green spaghetti-strap mini dress deep plunge cleavage, black fishnet stockings, black pointed heels",
-      "burgundy satin wrap mini dress deep V, high slit, black stilettos on bed edge",
-      "navy deep V crop top with transparent mesh midriff, tight dark jeans, seductive hallway walk",
-      "black long-sleeve deep V dress with side waist cutout, open back detail, glamorous stairs",
-      "black fitted knit dress moderate V neckline, elegant full body, realistic fabric,",
-      "sheer white blouse unbuttoned low deep cleavage, black micro skirt, lace-up heels to the knees",
-      "black crop top and leather mini skirt, fishnet stockings, garter straps visible, stilettos on marble stairs",
-      "black lace open robe over matching lingerie, seated on velvet bench in dark bedroom",
-      "burgundy satin short robe black lace cuffs, legs bare, hotel bed soft light",
-      "black deep plunge evening gown with side cutouts, clutch, chandelier lobby",
-      "black backless long dress, looking over shoulder, grand staircase",
-      "olive satin mini dress thin straps, natural fit on her body, soft hotel lighting,",
-      "wet white crop top clinging to chest, dark skinny jeans, after-rain look",
-      "ivory lace lingerie set, thin straps, soft bedroom teasing",
-      "dusty rose satin camisole and tailored trousers, refined evening look,",
-      "red lace bra under open white shirt, black mini skirt, heels",
-      "black mesh top and leather mini, edgy sexy full body",
-      "champagne silk robe falling open over lace lingerie, doorway",
-      "purple lace set kneeling by fireplace",
-      "oversized open white shirt over black lace, bare legs",
-      "emerald satin slip plunging neckline high thigh slit",
-      "black one-shoulder crop and mini skirt, fishnets, garters, stilettos",
-      "forest green mini skirt, black deep V top, thigh-high boots, staircase",
-      "red bodycon mini dress extreme deep V, sheer black stockings, stilettos, bold full body",
-      "black leather mini skirt, tight white crop top, knee-high boots, confident stance",
-      "sheer black blouse unbuttoned low, lace bralette visible, pencil skirt, heels",
-      "wet black tank top clinging to the chest, denim shorts, after shower hallway look",
-      "satin champagne slip dress thin straps, high thigh slit, bare feet in hotel suite",
-      "strappy black bodysuit under open blazer, no pants visible length, editorial sexy",
-      "micro wrap skirt and tied blouse knotted under the bust, platform heels",
+      "emerald green long-sleeve knit midi dress, opaque fabric, black ankle boots, elegant full body",
+      "olive green square-neck midi dress, modest neckline, nude pumps, soft indoor light",
+      "burgundy wrap midi dress with waist belt, opaque fabric, black heels, hotel lobby",
+      "navy blouse with high neck and tailored dark trousers, refined hallway look",
+      "black long-sleeve fitted dress with boat neckline, opaque, glamorous stairs",
+      "black fitted knit midi dress, modest V neckline, elegant full body, realistic fabric",
+      "white button-up blouse fully buttoned with black midi skirt, professional look",
+      "camel trench coat over a plum midi dress, elegant staircase",
+      "forest-green tailored jumpsuit with defined waist, elegant corridor",
+      "rose tweed jacket with tailored black trousers, classic interior",
+      "navy belted shirt dress with ankle boots, hotel hallway",
+      "lavender satin midi dress with modest neckline, sunlit room",
+      "champagne blouse with olive tailored trousers, fashion editorial",
+      "white blazer over a berry-colored midi dress, upscale lobby",
+      "blue-and-white striped blouse with beige A-line skirt, tall-window lounge",
+      "mint-green linen jumpsuit with narrow waist, modern apartment",
+      "royal-blue fit-and-flare dress with short sleeves, softly lit interior",
+      "sky-blue cardigan over cream pleated midi skirt, daylight studio",
+      "coral short-sleeve sheath dress with nude pumps, sunny doorway",
+      "mustard knit sweater with dark denim midi skirt, cozy library",
+      "lilac blouse with charcoal wide-leg trousers, contemporary apartment",
+      "red wrap dress with waist belt and black pumps, city interior",
+      "silver satin midi skirt with navy knit top, softly lit room",
+      "terracotta blouse with dark straight-leg jeans, casual doorway"
     ];
-    // Tenues sexy/suggestives pour CF et Horde (plus de midi/blazer sages en profil).
-    const outfits = outfitsHorde.concat(outfitsCf.slice(0, 4));
+    // Horde = SFW only (évite CorruptPrompt / ToS). Cloudflare garde des options plus variées.
+    const outfits = forCloudflare ? outfitsCf.concat(outfitsHorde.slice(0, 6)) : outfitsHorde;
     const outfitHistoryKey = "lea.profileImage.outfitHistory." + String(c.id || "lea");
     let recentOutfits = [];
     try {
@@ -569,24 +563,22 @@
     try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
-      "standing with weight on one hip, arms crossed under the bust, chin slightly raised, full body seductive stance",
-      "leaning back against a wall, one knee bent, looking over the shoulder with a teasing gaze, full body",
-      "sitting on the edge of a bed, legs crossed, leaning forward with deep neckline visible, full body",
-      "walking toward the camera in slow steps, one hand trailing along the wall, seductive full-body fashion pose",
-      "standing on stairs, one hand on the railing, body slightly twisted, looking back with a bold look",
-      "arched back against a doorway frame, one arm raised above the head, provocative full-body silhouette",
-      "kneeling on a velvet bench, hands on thighs, chest forward, intimate bedroom full-body pose",
-      "three-quarter turn, hands on hips, weight shifted, confident model pose, full body",
-      "seated sideways on a chair, legs elongated, one hand at the collar, sultry look toward camera",
-      "mid-step down a hallway, hips angled, looking back over the shoulder, sexy full-body candid",
-      "standing near a window, one hand in hair, torso slightly arched, sensual daylight full body",
-      "leaning on a table with both hands, cleavage emphasized by pose, legs straight, full body",
-      "back view with head turned to camera, one hand on the hip, mini dress silhouette, full body",
-      "sitting on sofa armrest, legs together angled, shoulders open, inviting full-body pose",
-      "standing with one foot on a stair step, body elongated, bold fashion-editorial seductive pose"
-    ]
-    const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
-    let recentPoses = [];
+      "walking in profile down a hallway, head turned toward the camera, full body",
+      "seated sideways on a wooden chair, feet on the floor, hands resting in lap",
+      "standing in three-quarter profile beside a window, one hand on the sill",
+      "mid-step through a doorway, photographed from the side, face turned toward camera",
+      "leaning lightly against a bookshelf, shoulders angled, arms relaxed",
+      "seated sideways on a bench, shoulders turned toward camera, hands below the waist",
+      "walking down stairs while looking back, one hand lightly on the railing",
+      "standing beside a table, one hand resting on a closed book, side-angle view",
+      "walking across a courtyard holding a light coat, candid full-body fashion photo",
+      "standing with her back near a mirror, head turned so her face is clearly visible",
+      "seated on the edge of a sofa, legs angled to one side, one hand on the armrest",
+      "standing in a relaxed three-quarter view while adjusting one sleeve",
+      "leaning lightly on a balcony rail, city background, face turned toward camera",
+      "walking through a bright lobby, looking to the side, arms naturally relaxed",
+      "seated upright in an armchair, ankles crossed, hands relaxed on the armrests"
+    ];
     try {
       const savedPoses = JSON.parse(localStorage.getItem(poseHistoryKey) || "[]");
       if (Array.isArray(savedPoses)) recentPoses = savedPoses;
@@ -653,7 +645,7 @@
     ].filter(Boolean).join(" ");
 
     let out = base;
-    if (extra) out += ", " + String(extra).slice(0, forCloudflare ? 100 : 160);
+    if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
         ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
