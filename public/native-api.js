@@ -811,21 +811,24 @@
     try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
 
     const poses = [
-      "standing weight on one hip, hand on waist, chin slightly raised, sensual full body",
-      "leaning back against a wall, one knee bent, looking over the shoulder teasing, full body",
-      "sitting on the edge of a bed, legs crossed, leaning forward, full body",
-      "slow walk toward camera, one hand trailing the wall, seductive full body",
-      "on a staircase looking back, hand on railing, body twisted, bold full body",
-      "arched in a doorway, one arm raised on the frame, provocative silhouette, full body",
-      "hands on hips three-quarter turn, confident model stance, full body",
-      "seated sideways on a chair, legs elongated, sultry gaze, full body",
-      "mid-step in a hallway looking back over the shoulder, hips angled, full body",
-      "near a window, hand in hair, torso arched, sensual full body",
-      "leaning on a table with both hands, legs straight, chest forward, full body",
-      "back view head turned to camera, hand on hip, mini dress silhouette, full body",
-      "sitting on a sofa armrest, shoulders open, inviting full body pose",
-      "one foot on a stair, body elongated, fashion-editorial seductive pose",
-      "kneeling on a velvet bench, hands on thighs, intimate bedroom full body"
+      "standing full body hands on hips facing camera",
+      "three-quarter turn looking over shoulder full body",
+      "walking toward camera mid-stride full length",
+      "seated on desk edge legs crossed elegant full body",
+      "leaning on railing looking back sensual full body",
+      "standing profile looking at camera full body",
+      "sitting on sofa arm leaning forward",
+      "climbing stairs mid-step looking over shoulder",
+      "standing far wide shot entire figure in room",
+      "leaning against wall one knee bent full body",
+      "lying on side on bed propped on elbow full body",
+      "standing with one hand in hair glamorous full body",
+      "sitting cross-legged on floor looking up",
+      "leaning forward over table three-quarter view",
+      "back to camera looking over shoulder full body",
+      "dancing pose one arm raised full body",
+      "kneeling on sofa elegant full body",
+      "standing side profile hands behind back full body"
     ];
     const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
     let recentPoses = [];
