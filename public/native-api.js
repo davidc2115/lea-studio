@@ -259,7 +259,7 @@
       A: "small natural A-cup, modest chest",
       B: "natural B-cup, light rounded shape",
       C: "true C-cup: medium natural breasts, moderate cleavage",
-      D: "true 95D full breasts: large rounded D-cup, deep soft cleavage, heavy natural volume clearly bigger than C-cup, strong silhouette in fitted clothes",
+      D: "VERY FULL oversized D-cup almost E/F look: very large rounded heavy breasts, extreme soft cleavage, massive lower fullness, dominant bust silhouette, fitted dress stretched by the bust",
       E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
       F: "very large, visibly full F-cup with heavy natural volume, strong forward projection, and deep cleavage",
       G: "extremely full G-cup with very large heavy natural volume, broad bust, strong projection, and deep cleavage",
@@ -860,8 +860,9 @@
     const customCfRaw = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
     const customCf = customCfRaw ? stripFixedOutfitFromPrompt(customCfRaw) : "";
     const cupBoost = (forCloudflare && bustInfo.label && /[DEFGHIJ]$/.test(bustInfo.label))
-      ? (", MANDATORY BUST " + bustInfo.label + ": full heavy natural breasts matching cup " + bustInfo.label
-         + ", deep cleavage, strong forward projection, visibly larger than C-cup, fitted clothing must show the volume, NEVER small flat or reduced bust")
+      ? (", MANDATORY HUGE BUST " + bustInfo.label + ": render breasts MUCH larger than a normal photo, very large heavy soft breasts with deep plunging cleavage, "
+         + "the bust dominates the torso like an F-cup glamorous magazine shot, dress fabric tight across a very full chest, "
+         + "NEVER small NEVER modest NEVER reduced by reference image, exaggerate fullness toward oversized D/E/F look")
       : (bustInfo.label ? (", cup " + bustInfo.label + " realistic bust") : "");
     let out = customCf
       ? ("PRIORITY OUTFIT: " + outfit + ". PRIORITY POSE: " + pose + ". PRIORITY LOCATION: " + scene + ". "
@@ -870,10 +871,10 @@
       : (base + cupBoost);
     if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
     if (hasLargeCloudflareBust) {
-      const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
-        ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
-        "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
-        "For cup D or larger: visibly full rounded bust with clear cleavage in fitted clothing, never flat or small, never reduced by the reference image; fitted dress must show the cup volume. Do not copy bust volume from the reference. The profile cup size controls bust volume.";
+      const finalBustLock = "FINAL BUST PRIORITY " + bustInfo.label +
+        ": EXTREMELY FULL heavy breasts, deep cleavage, bust much larger than average adult woman, "
+        + "like a glamorous F-cup pin-up in a tight dress, fabric stretched over very large soft breasts, "
+        + "do NOT copy a small chest from the reference photo, increase bust volume dramatically";
       const maxLength = 1600;
       return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
     }
