@@ -17,6 +17,11 @@ on:
 permissions:
   contents: write
 
+# Une seule build à la fois ; les pushes rapides annulent les runs en cours
+concurrency:
+  group: build-apk-main
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build Léa Studio APK
