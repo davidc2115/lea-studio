@@ -431,6 +431,8 @@
         ethnicity = "South Asian woman";
       else if (/latine|latina|br[eé]sil|hispanic|m[eé]tis/.test(blob))
         ethnicity = "Latina woman, warm medium skin";
+      else if (/espagnole|spanish|m[eé]diterran|italian|italienne/.test(blob))
+        ethnicity = "Mediterranean European woman, olive skin, Spanish or Italian features";
       else if (/europ[eé]en|caucasian/.test(blob))
         ethnicity = "European woman";
     }
@@ -438,7 +440,7 @@
     let skin = "";
     if (/peau [ée]b[eè]ne|ebony|deep dark skin|very dark skin/.test(blob)) skin = "deep dark ebony skin";
     else if (/peau fonc[eé]e|dark skin|rich dark/.test(blob)) skin = "rich dark brown skin";
-    else if (/peau mate|tan skin|olive|mate olive/.test(blob)) skin = "warm olive tan skin";
+    else if (/peau mate|peau olive|tan skin|olive|m[eé]diterran|mate olive/.test(blob)) skin = "warm Mediterranean olive skin";
     else if (/claire asiatique|asian fair|light asian/.test(blob)) skin = "fair East Asian skin";
     else if (/porcelaine|fair skin|peau claire|pale/.test(blob)) skin = "fair porcelain skin";
 
@@ -528,18 +530,18 @@
           const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
           const ethH = idTraits.ethnicity || "";
           const outfitsH = [
-            "emerald green midi dress, opaque fabric, black ankle boots",
-            "burgundy wrap midi dress, black heels",
-            "navy blouse and tailored trousers",
-            "black long-sleeve midi dress, elegant stairs",
-            "cream knit sweater and dark midi skirt",
-            "camel coat over plum dress",
-            "forest green tailored jumpsuit",
-            "white blouse and beige A-line skirt",
-            "soft grey knit top and charcoal trousers",
-            "lavender blouse and charcoal trousers",
-            "teal blouse with black midi skirt",
-            "rose jacket and black trousers"
+            "floral print fitted midi dress, opaque fabric, black heels, elegant full body",
+            "burgundy wrap midi dress defined waist, opaque, black pumps, hotel interior",
+            "black fitted midi dress boat neckline, opaque fabric, glamorous stairs",
+            "emerald green bodycon midi dress, opaque, ankle boots, full length",
+            "cream satin midi dress thin straps covered shoulders, soft indoor light",
+            "navy fitted blouse and pencil skirt, polished full body look",
+            "olive square-neck midi dress, defined waist, nude pumps",
+            "red wrap dress waist belt, opaque fabric, city interior",
+            "camel coat over plum fitted dress, elegant staircase",
+            "white blouse with black fitted midi skirt, refined hallway",
+            "rose tailored jacket and dark trousers, classic interior",
+            "teal blouse with black midi skirt, contemporary apartment"
           ];
           const posesH = [
             "standing full body facing camera",
@@ -610,7 +612,7 @@
             "NEW outfit: " + outfitH,
             "NEW pose: " + poseH,
             "location: " + sceneH,
-            "fully clothed, head to toe, shoes visible, natural light, sharp focus, single person only",
+            "fully clothed, head to toe, shoes visible, natural light, sharp focus, photorealistic high quality, single person only",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
           return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100)
@@ -680,30 +682,18 @@
       "oversized white shirt barely buttoned, black micro shorts, doorway teasing"
     ];
     const outfitsHorde = [
-      "emerald green long-sleeve knit midi dress, opaque fabric, black ankle boots, elegant full body",
-      "olive green square-neck midi dress, modest neckline, nude pumps, soft indoor light",
-      "burgundy wrap midi dress with waist belt, opaque fabric, black heels, hotel lobby",
-      "navy blouse and tailored dark trousers, refined hallway look, full body",
-      "black long-sleeve fitted dress with boat neckline, opaque, glamorous stairs",
-      "black fitted knit midi dress, modest neckline, elegant full body",
-      "white button-up blouse with black midi skirt, polished full body look",
-      "camel trench coat over a plum midi dress, elegant staircase",
-      "forest-green tailored jumpsuit with defined waist, elegant corridor",
-      "rose tweed jacket with tailored black trousers, classic interior",
-      "navy belted shirt dress with ankle boots, hotel hallway",
-      "lavender satin midi dress with modest neckline, sunlit room",
-      "champagne blouse with olive tailored trousers, fashion editorial",
-      "white blazer over a berry-colored midi dress, upscale lobby",
-      "blue-and-white striped blouse with beige A-line skirt, tall-window lounge",
-      "mint-green linen jumpsuit with narrow waist, modern apartment",
-      "royal-blue fit-and-flare dress with short sleeves, softly lit interior",
-      "sky-blue cardigan over cream pleated midi skirt, daylight studio",
-      "coral short-sleeve sheath dress with nude pumps, sunny doorway",
-      "mustard knit sweater with dark denim midi skirt, cozy library",
-      "lilac blouse with charcoal wide-leg trousers, contemporary apartment",
-      "red wrap dress with waist belt and black pumps, city interior",
-      "silver satin midi skirt with navy knit top, softly lit room",
-      "terracotta blouse with dark straight-leg jeans, casual doorway"
+      "floral print fitted midi dress, opaque fabric, black heels, elegant full body",
+      "burgundy wrap midi dress defined waist, opaque, black pumps, hotel interior",
+      "black fitted midi dress, opaque fabric, glamorous stairs, full body",
+      "emerald green bodycon midi dress opaque, ankle boots, full length",
+      "cream satin midi dress, soft indoor light, elegant full body",
+      "navy fitted blouse and pencil skirt, polished full body look",
+      "olive square-neck midi dress, defined waist, nude pumps",
+      "red wrap dress with waist belt, city interior, full body",
+      "camel coat over plum fitted dress, elegant staircase",
+      "white blouse with black fitted midi skirt, refined hallway",
+      "rose tailored jacket and dark trousers, classic interior",
+      "teal blouse with black midi skirt, contemporary apartment"
     ];
     // Cloudflare: tenues sensuelles. (Horde a son propre prompt minimal plus haut.)
     const outfits = forCloudflare ? outfitsCf : outfitsHorde;
