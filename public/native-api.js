@@ -389,7 +389,27 @@
         };
       }
 
-  function buildPhysicalImagePrompt(char, extra, engine) {
+  /** Verrouille l'âge perçu, pas seulement le nombre dans le prompt. */
+      function buildVisualAgeLock(age, character) {
+        const years = Number(age);
+        if (!Number.isInteger(years) || years < 18) return "";
+        const c = character || {};
+        const profileText = [c.appearance, c.looks_en].filter(Boolean).join(" ");
+        const locks = ["VISUAL AGE LOCK: one adult woman who visibly looks exactly " + years + " years old; her face must read as " + years + ", not older or younger."];
+        if (years <= 29) {
+          locks.push("Young-adult facial appearance appropriate to exactly " + years + ": naturally smooth, unlined skin and youthful adult facial features; no wrinkles, crow's feet, sagging skin, age spots, under-eye bags, middle-aged or elderly appearance.");
+        } else if (years <= 49) {
+          locks.push("Facial features and skin must look consistent with this exact adult age; do not depict a senior or elderly woman.");
+        } else if (years <= 64) {
+          locks.push("Mature adult appearance consistent with this exact age; do not make her look elderly or substantially older.");
+        }
+        if (/platine|platinum/i.test(profileText) && /blond|blonde/i.test(profileText)) {
+          locks.push("The profile specifies platinum-blonde hair: make it visibly blonde, NOT silver, gray, or white.");
+        }
+        return locks.join(" ");
+      }
+
+      function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
     // Horde: prompt MINIMAL — CorruptPrompt refuse looks_en/bust/lingerie même en "SFW".
@@ -399,6 +419,7 @@
           if (!Number.isFinite(ageRaw) || ageRaw < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
           // Keep the confirmed catalog age exact in every provider prompt.
           const ageH = ageRaw;
+          const visualAgeH = buildVisualAgeLock(ageH, c);
           const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
           const extraH = String(extra || "").trim().slice(0, 60);
           if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?|sexy|seductive|provocative)\b/i.test(extraH)) {
@@ -475,6 +496,7 @@
               ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
               : "photorealistic full-length fashion photo of one adult woman matching this description",
             ageH + " years old",
+            visualAgeH,
             nameH,
             hairH,
             eyesH,
@@ -659,11 +681,13 @@
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
     const exactPromptAge = Number.isInteger(age) ? age : Number(c.estimatedAge || 0);
+    const visualAgeLock = buildVisualAgeLock(exactPromptAge, c);
     const textOnlyIdentity = forCloudflare && !hasProfileRef
       ? ("TEXT-ONLY CHARACTER IDENTITY: " + name + ", exactly " + exactPromptAge + " years old; ethnicity/features: " + String(c.ethnicity || "as described in the profile") + ". " + (looksPrompt || bodyPrompt || appearancePrompt))
       : "";
     const base = [
       mood,
+      visualAgeLock,
       textOnlyIdentity,
       forCloudflare
         ? "PRIORITY: invent a NEW sexy outfit, a NEW sensual pose, and a RICH detailed background environment. Forbidden: plain white/beige studio backdrop, empty wall, simple t-shirt with trousers, boring casual office clothes."
@@ -732,7 +756,10 @@
     const outfit = largeBust
       ? "well-fitted structured fashion dress with visible natural bust volume, not loose or compressive"
       : softOutfits[Math.min(attempt, softOutfits.length - 1)];
+    const retryAgeValue = parseInt(c.age, 10);
+    const retryAge = Number.isFinite(retryAgeValue) && retryAgeValue >= 18 ? retryAgeValue : Math.max(18, parseInt(c.estimatedAge, 10) || 21);
     const retryParts = [
+      buildVisualAgeLock(retryAge, c),
       "photorealistic full body photo of adult woman 18+,",
       hasProfileRef ? "identity match reference input_image_0 for " + name + "," : "text-only identity, no reference image; faithfully create " + name + " from the profile description,",
       retryAppearance ? retryAppearance.slice(0, 280) + "," : "",
