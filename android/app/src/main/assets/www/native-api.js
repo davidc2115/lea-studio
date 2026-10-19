@@ -558,24 +558,32 @@
             "floral print fitted midi dress opaque fabric heels"
           ];
           const posesH = [
-            "standing full body facing camera hands on hips",
-            "three-quarter turn looking over shoulder full body",
-            "seated on desk edge full body",
-            "walking toward camera full length",
-            "leaning on staircase railing looking back",
-            "standing profile looking at camera full body",
-            "one hand on banister other on hip",
-            "seated on chair legs crossed full body"
+            "standing upright full body facing camera straight on, arms at sides",
+            "standing full body back to camera looking over right shoulder",
+            "walking toward camera mid-stride full length side angle",
+            "sitting cross-legged on floor looking up at camera high angle",
+            "leaning forward hands on table three-quarter body side view",
+            "standing profile view full body left side silhouette toward window",
+            "kneeling on one knee on sofa arm looking at camera",
+            "lying on side on bed propped on elbow full body horizontal",
+            "climbing stairs mid-step body turned away looking back",
+            "standing with arms crossed full body low camera angle looking down",
+            "sitting on chair legs crossed sideways body profile",
+            "dancing pose one arm raised full body dynamic motion",
+            "crouching slightly full body front view hands on thighs",
+            "standing far from camera full room wide shot entire figure small in frame"
           ];
           const scenesH = [
             "grand hotel staircase with chandelier",
-            "modern apartment living room",
-            "hotel lobby warm lamps",
-            "sunlit hallway wooden floor",
-            "bright cafe window",
-            "contemporary bedroom soft daylight",
-            "marble lobby twin staircases",
-            "elegant kitchen interior"
+            "modern kitchen with island counter",
+            "sunlit bedroom with large window",
+            "city street sidewalk daytime cars",
+            "marble hotel lobby twin stairs",
+            "rooftop terrace evening city lights",
+            "living room sofa and coffee table",
+            "office corridor glass walls",
+            "beach boardwalk outdoor daylight",
+            "luxury bathroom vanity mirror"
           ];
           function pickVar(list, key, limit) {
             let history = [];
@@ -641,17 +649,18 @@
             ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
             : "natural feminine bust";
           const identityBits = [
-            "FULL LENGTH fashion photo, head to feet, wide shot, shoes visible",
-            "COMPLETELY DIFFERENT outfit from reference: " + outfitH,
-            "COMPLETELY DIFFERENT pose from reference: " + poseH,
-            "COMPLETELY DIFFERENT background: " + sceneH,
+            "CAMERA AND BODY POSE (mandatory, ignore reference pose): " + poseH,
+            "OUTFIT (mandatory, ignore reference clothes): " + outfitH,
+            "LOCATION (mandatory): " + sceneH,
+            "full length head to feet, shoes visible, wide environmental shot",
+            "do NOT repeat the same sitting lean toward camera pose, change body orientation completely",
             hasRefH
-              ? "keep only the same face as the reference photo, change everything else"
+              ? "keep only the same face as the reference photo, change body pose clothing and scene"
               : "photorealistic woman",
             customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
             bustH,
-            "ignore reference clothing pose and camera framing",
-            "natural light, sharp focus, single person, seed " + String(Date.now() % 100000)
+            "unique pose variation " + String(Date.now() % 100000),
+            "natural light, sharp focus, single person"
           ].filter(Boolean);
           return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
         }
@@ -2676,7 +2685,7 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.80;
+          const denoise = 0.85;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
