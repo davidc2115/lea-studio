@@ -2,7 +2,7 @@
  * API native / offline pour Android WebView + fallback navigateur
  */
 (function () {
-  const LEA = {"id":"lea","name":"Léa Moreau","age":18,"title":"Meilleure amie de ta fille · Orage","tags":["timide","amie","brune","voluptueuse","romance","nsfw","orage"],"cover":"characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg","gallery":["characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-timide.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-espiegle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-sol.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-genoux.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-pierre.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-sol.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-canape.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-serviette.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-dentelle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-satin.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-timide.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-ivoire.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-rouge.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-rouge-dos.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-sortie.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-sortie-decollete.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-portrait.jpg"],"greeting":"(Pourquoi j'ai sorti sans parapluie…)\n*elle frappe timidement à la porte, trempée de la tête aux pieds, le top court collé à sa peau et le jean moulant dégoulinant*\nEuh… désolée de te déranger… Je suis Léa, l'amie de ta fille. L'orage m'a surprise et… je peux entrer deux minutes, s'il te plaît ?","scenario":"Il est en soirée. Un orage violent s'est abattu sur le quartier. Léa Moreau, 18 ans, meilleure amie de ta fille, rentrait chez elle après être passée vous voir — ta fille n'était pas là. La pluie l'a surprise à quelques rues. Son téléphone est presque mort. Elle frappe à ta porte, complètement trempée, en jean moulant foncé et petit top court blanc, cheveux bruns collés dans le dos. Elle est gênée, frissonnante, et n'ose presque pas demander refuge. Tu ouvres. L'histoire commence sur le pas de la porte : tu décides si tu la fais entrer, si tu lui prêtes une serviette, un vêtement sec… Tout peut rester poli et protecteur, ou glisser vers quelque chose de plus intime, selon ce que tu choisis. Léa peut repartir. Ce n'est pas elle qui t'accueille chez elle : c'est elle qui est chez toi.","personality":"Léa Moreau, 18 ans. Timide, douce, un peu maladroite. Voix basse, phrases parfois hésitantes. Évite souvent le regard quand elle est gênée, rougit facilement. Très loyale envers ta fille et respectueuse envers toi. Quand elle se sent en sécurité, une pointe d'espièglerie apparaît : sourire en coin, regards plus soutenus, petites provocations légères. Elle ne force jamais l'intimité ni une déclaration d'amour. Elle peut rester purement amicale, accepter un moment sans lendemain, ou freiner net.","appearance":"👤 Sujet : Léa Moreau, 18 ans, type européen / français. Allure délicate et sophistiquée pour son âge, silhouette volontairement voluptueuse.\n\n🖼️ Visage : Ovale harmonieux, structure osseuse fine. Mâchoire douce, pommettes discrètes, menton arrondi. Teint de porcelaine très clair, uniforme, peau lisse sans imperfection visible.\n\n👁️ Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés et verts. Cils longs et sombres. Regard expressif — timide baissé ou espiègle quand elle ose.\n\n眉毛 Sourcils : Châtain foncé, fournis, arche naturelle bien dessinée.\n\n👃 Nez : Fin, droit, proportionné.\n\n👄 Bouche : Lèvres naturellement pulpeuses, rose mat doux, arc de Cupidon subtil. Sourire discret ou coin de lèvre quand elle se détend.\n\n💇 Cheveux : Brun foncé, lisses et soyeux, très longs jusqu'aux reins. Raie centrale nette. Mouillés, ils collent dans le dos et sur les épaules.\n\n👗 Silhouette : Forme en sablier marquée. Épaules délicates, clavicules visibles, cou fin. Taille fine contrastant avec la poitrine et les hanches.\n\n💕 Poitrine : Généreuse, bonnet 95D — volume marqué, galbe naturel, décolleté proéminent surtout sous un top mouillé.\n\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées.\n\n🦵 Jambes : Longues, fines, toniques ; chevilles délicates.\n\n✨ Peau (corps) : Claire, satinée, douce. Sous la pluie : gouttes sur les épaules, le décolleté et les bras.\n\n👗 Tenue d'arrivée : Jean moulant foncé trempé, top court blanc collé à la peau, pas de veste, cheveux détrempés.","looks_en":"adult woman 18+, fair porcelain skin, long straight dark brown hair to lower back, hazel-green eyes, delicate hourglass, 95D full natural breasts proportional, photorealistic","ethnicity":"européenne","body":"sablier, gros seins","outfits":["wet white crop top and tight wet jeans","ivory lace lingerie","short satin slip"],"places":["apartment doorway thunderstorm","living room fireplace","sofa at night"],"Poitrine":"95D","system_extra":"Tu es UNIQUEMENT Léa Moreau, 18 ans, meilleure amie de la fille de {{user}}. Tu es chez {{user}} après l'orage. INTERDIT de te faire passer pour quelqu'un d'autre. Actions entre *...*, pensées entre (...), dialogue normal. Si un tiers parle: [Nom ou rôle]: avant ses paroles/actions (sans * ni **). Français naturel. Adulte consentant 18+. Respecte le tempérament timide + espiègle. Ne force pas l'amour. Peux refuser, ralentir, ou prendre une initiative selon le contexte."};
+  const LEA = {"id":"lea","name":"Léa Moreau","age":18,"title":"Meilleure amie de ta fille · Orage","tags":["timide","amie","brune","voluptueuse","romance","nsfw","orage"],"cover":"characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg","gallery":["characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-timide.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-espiegle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-sol.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-genoux.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-pierre.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-feu-sol.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-canape.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-serviette.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-dentelle.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-satin.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-nuisette-timide.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-ivoire.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-rouge.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-lingerie-rouge-dos.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-sortie.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-sortie-decollete.jpg","characters/meilleure-amie-de-ta-fille/lea/images/lea-portrait.jpg"],"greeting":"(Pourquoi j'ai sorti sans parapluie…)\n*elle frappe timidement à la porte, trempée de la tête aux pieds, le top court collé à sa peau et le jean moulant dégoulinant*\nEuh… désolée de te déranger… Je suis Léa, l'amie de ta fille. L'orage m'a surprise et… je peux entrer deux minutes, s'il te plaît ?","scenario":"Il est en soirée. Un orage violent s'est abattu sur le quartier. Léa Moreau, 18 ans, meilleure amie de ta fille, rentrait chez elle après être passée vous voir — ta fille n'était pas là. La pluie l'a surprise à quelques rues. Son téléphone est presque mort. Elle frappe à ta porte, complètement trempée, en jean moulant foncé et petit top court blanc, cheveux bruns collés dans le dos. Elle est gênée, frissonnante, et n'ose presque pas demander refuge. Tu ouvres. L'histoire commence sur le pas de la porte : tu décides si tu la fais entrer, si tu lui prêtes une serviette, un vêtement sec… Tout peut rester poli et protecteur, ou glisser vers quelque chose de plus intime, selon ce que tu choisis. Léa peut repartir. Ce n'est pas elle qui t'accueille chez elle : c'est elle qui est chez toi.","personality":"Léa Moreau, 18 ans. Timide, douce, un peu maladroite. Voix basse, phrases parfois hésitantes. Évite souvent le regard quand elle est gênée, rougit facilement. Très loyale envers ta fille et respectueuse envers toi. Quand elle se sent en sécurité, une pointe d'espièglerie apparaît : sourire en coin, regards plus soutenus, petites provocations légères. Elle ne force jamais l'intimité ni une déclaration d'amour. Elle peut rester purement amicale, accepter un moment sans lendemain, ou freiner net.","appearance":"👤 Sujet : Léa Moreau, 18 ans, type européen / français. Allure délicate et sophistiquée pour son âge, silhouette volontairement voluptueuse.\n\n🖼️ Visage : Ovale harmonieux, structure osseuse fine. Mâchoire douce, pommettes discrètes, menton arrondi. Teint de porcelaine très clair, uniforme, peau lisse sans imperfection visible.\n\n👁️ Yeux : Grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés et verts. Cils longs et sombres. Regard expressif — timide baissé ou espiègle quand elle ose.\n\n眉毛 Sourcils : Châtain foncé, fournis, arche naturelle bien dessinée.\n\n👃 Nez : Fin, droit, proportionné.\n\n👄 Bouche : Lèvres naturellement pulpeuses, rose mat doux, arc de Cupidon subtil. Sourire discret ou coin de lèvre quand elle se détend.\n\n💇 Cheveux : Brun foncé, lisses et soyeux, très longs jusqu'aux reins. Raie centrale nette. Mouillés, ils collent dans le dos et sur les épaules.\n\n👗 Silhouette : Forme en sablier marquée. Épaules délicates, clavicules visibles, cou fin. Taille fine contrastant avec la poitrine et les hanches.\n\n💕 Poitrine : Généreuse, bonnet 95D — volume marqué, galbe naturel, décolleté proéminent surtout sous un top mouillé.\n\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées.\n\n🦵 Jambes : Longues, fines, toniques ; chevilles délicates.\n\n✨ Peau (corps) : Claire, satinée, douce. Sous la pluie : gouttes sur les épaules, le décolleté et les bras.\n\n👗 Tenue d'arrivée : Jean moulant foncé trempé, top court blanc collé à la peau, pas de veste, cheveux détrempés.","looks_en":"adult woman 18+, fair porcelain skin, long straight dark brown hair to lower back, hazel-green eyes, delicate hourglass, 95D full natural breasts proportional, photorealistic","ethnicity":"européenne","body":"sablier, gros seins","outfits":["ivory lace lingerie","short satin slip"],"places":["apartment doorway thunderstorm","living room fireplace","sofa at night"],"Poitrine":"95D","system_extra":"Tu es UNIQUEMENT Léa Moreau, 18 ans, meilleure amie de la fille de {{user}}. Tu es chez {{user}} après l'orage. INTERDIT de te faire passer pour quelqu'un d'autre. Actions entre *...*, pensées entre (...), dialogue normal. Si un tiers parle: [Nom ou rôle]: avant ses paroles/actions (sans * ni **). Français naturel. Adulte consentant 18+. Respecte le tempérament timide + espiègle. Ne force pas l'amour. Peux refuser, ralentir, ou prendre une initiative selon le contexte."};
   window.__LEA_DEFAULT__ = LEA;
   function load(key, fallback) {
     try {
@@ -652,7 +652,7 @@
     const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
     const appearanceClean = sanitizeAppearanceForImage(appearance);
     const bustInfo = describeBustLock(bust, appearance, engine);
-    const hasLargeCloudflareBust = forCloudflare && /[FGHIJ]$/.test(bustInfo.label);
+    const hasLargeCloudflareBust = forCloudflare && /[DEFGHIJ]$/.test(bustInfo.label);
     const bodyInfo = describeBodyMorphology(c);
     let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? (hasProfileRef ? 160 : 420) : 360);
     if (!forCloudflare) looksEn = sanitizeForHordePrompt(looksEn);
@@ -685,7 +685,6 @@
       "champagne silk slip dress thin straps thigh slit, bare legs, luxury bedroom",
       "black mesh crop top and leather mini skirt, fishnet stockings, edgy full body",
       "red bodycon mini dress, black pumps, city penthouse interior",
-      "wet white fitted top clinging fabric, dark skinny jeans, after-rain hallway",
       "black backless long dress looking over shoulder, grand marble staircase",
       "olive satin mini dress thin straps, soft hotel lighting, seductive stance",
       "open white blazer only over black lingerie set, upscale hotel lobby",
@@ -846,14 +845,17 @@
     // Vrai prompt personnage (dossier / fiche) si présent — Cloudflare
     const customCf = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
     let out = customCf
-      ? (customCf + ", Outfit variation: " + outfit + ". Pose: " + pose + ". Location: " + scene + ".")
+      ? ("PRIORITY OUTFIT (must follow): " + outfit + ". PRIORITY POSE: " + pose + ". PRIORITY LOCATION: " + scene + ". "
+         + "Sexy glamorous fashion photo, fitted clothing showing curves, deep neckline when appropriate, full body or three-quarter. "
+         + customCf
+         + (bustInfo.label ? (", PROFILE CUP " + bustInfo.label + " must be clearly visible and full, do not reduce bust size") : ""))
       : base;
     if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
         ": render a visibly large, full natural bust, clearly fuller than average and proportionate to the profile's band size; " +
         "broad rounded base, substantial lower fullness, distinct forward projection, and an obvious bust silhouette relative to the shoulders and waist. " +
-        "Render a very large, heavy, broad natural bust with substantial lower fullness and strong forward projection, dramatically fuller than average and dominant relative to waist and shoulders; fitted clothing must not compress or hide it. Do not copy bust volume from the reference. The profile cup size controls bust volume.";
+        "For cup D or larger: visibly full rounded bust with clear cleavage in fitted clothing, never flat or small, never reduced by the reference image; fitted dress must show the cup volume. Do not copy bust volume from the reference. The profile cup size controls bust volume.";
       const maxLength = 1600;
       return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
     }
@@ -867,11 +869,12 @@
     const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     const appearance = String(c.appearance || "").trim().slice(0, hasProfileRef ? 400 : 700);
     const softOutfits = [
-      "elegant black dress, professional fashion photo",
-      "casual chic blouse and jeans, natural beauty",
-      "evening gown modest neckline, red carpet style",
-      "cozy sweater and skirt, lifestyle photography",
-      "smart casual outfit, portrait full body",
+      "elegant black fitted midi dress deep neckline, glamorous interior",
+      "burgundy satin wrap dress defined waist, hotel suite",
+      "emerald bodycon midi dress, soft evening light",
+      "champagne silk slip dress thin straps, luxury bedroom",
+      "red fitted mini dress black heels, city penthouse",
+      "black one-shoulder evening dress, marble staircase"
     ];
     const bustInfo = describeBustLock(
       String(profileImageBustRaw(c)),
@@ -925,8 +928,8 @@
       [/robe\s+courte/i, function () { return "short tight dress"; }],
       [/mini[- ]?robe/i, function () { return "mini dress"; }],
       [/robe\s+moulante/i, function () { return "bodycon dress"; }],
-      [/jean\s+moulant/i, function () { return "tight jeans"; }],
-      [/\bjeans?\b/i, function () { return "jeans"; }],
+      [/jean\s+moulant/i, function () { return ; }],
+      [/\bjeans?\b/i, function () { return ; }],
       [/crop\s*top|top\s+court/i, function () { return "crop top"; }],
       [/d[eé]bardeur|tank\s*top/i, function () { return "white tank top"; }],
       [/soutien[- ]?gorge|soutif/i, function () { return "bra"; }],
@@ -979,7 +982,7 @@
         [/canap[eé]/gi, "sofa"],
         [/nuisette/gi, "babydoll slip"],
         [/lingerie/gi, "lingerie"],
-        [/jean\s+moulant/gi, "tight jeans"],
+        [/jean\s+moulant/gi, ],
         [/top\s+court|crop\s*top/gi, "crop top"],
         [/tremp[eé]e?/gi, "soaking wet"],
         [/compl[eè]tement\s+nue|enti[eè]rement\s+nue|toute\s+nue/gi, "completely nude"],
@@ -1094,7 +1097,7 @@
         [/canap[eé]/gi, "sofa"],
         [/nuisette/gi, "babydoll slip"],
         [/lingerie/gi, "lingerie"],
-        [/jean\s+moulant/gi, "tight jeans"],
+        [/jean\s+moulant/gi, ],
         [/top\s+court|crop\s*top/gi, "crop top"],
         [/tremp[eé]e?/gi, "soaking wet"],
         [/compl[eè]tement\s+nue|enti[eè]rement\s+nue|toute\s+nue/gi, "completely nude"],
@@ -1211,7 +1214,7 @@
         [/robe courte/gi, "short tight dress"],
         [/d[eé]bardeur/gi, "tank top"],
         [/short/gi, "shorts"],
-        [/jean moulant/gi, "tight jeans"],
+        [/jean moulant/gi, ],
         [/top court|crop top/gi, "crop top"],
         [/nuisette/gi, "sheer babydoll"],
         [/lingerie/gi, "sexy lingerie"],
