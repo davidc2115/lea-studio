@@ -576,7 +576,7 @@
           }
           const partsH = [
             hasRefH
-              ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
+              ? "img2img from the reference photo, MUST keep the EXACT same face identity as the source image, identical eyes nose mouth jaw cheekbones and smile, same woman same age, do not invent a different face"
               : "photorealistic full-length fashion photo of ONE adult woman",
             idTraits.ageLock,
             ethH,

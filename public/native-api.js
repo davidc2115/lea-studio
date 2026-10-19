@@ -597,7 +597,7 @@
           }
           const partsH = [
             hasRefH
-              ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
+              ? "img2img from the reference photo, MUST keep the EXACT same face identity as the source image, identical eyes nose mouth jaw cheekbones and smile, same woman same age, do not invent a different face"
               : "photorealistic full-length fashion photo of ONE adult woman",
             idTraits.ageLock,
             ethH,
@@ -2634,13 +2634,14 @@
           // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
           // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
           const charId = String(char && char.id || "");
-          const denoise = 0.62;
+          const denoise = 0.48;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            faceOnlyRef: true,
+            // false = photo de profil entière (meilleure identité que crop visage seul)
+            faceOnlyRef: false,
           });
           return {
             ok: true,
