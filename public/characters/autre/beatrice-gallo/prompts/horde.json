@@ -2,22 +2,6 @@
   "id": "priya_bs",
   "name": "Béatrice Gallo",
   "age": 26,
-  "appearance": "👤 Sujet : Béatrice Gallo, 26 ans, type sud-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 26 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : tresses..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : sud-asiatique.\n📝 Résumé : Indienne, tresse, peau bronze, poitrine D, hanches, regard intelligent..",
-  "looks_en": "26 year old woman who looks exactly 26 not older not younger, sud-asiatique woman, golden caramel tan skin, braids, large full D-cup breasts, generous bust, full cleavage possible, (Indienne, tresse, peau bronze, poitrine D, hanches, regard intelligent.), same face identity",
-  "body": "formes, gros seins",
-  "ethnicity": "sud-asiatique",
-  "Poitrine": "95D",
-  "outfits": [
-    "modern kurti",
-    "jeans and blouse",
-    "silk lingerie"
-  ],
-  "places": [
-    "laptop dining table",
-    "balcony call",
-    "sofa stretch"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "26 year old East Asian woman who looks exactly 26, expressive brown eyes, long voluminous dark brown wavy hair, golden caramel skin, a genuine plus-size curvy figure with soft rounded belly, wide hips, thick thighs, soft arms, full cheeks — NOT slim, NOT skinny, NOT a thin model, full generous D-cup bust with deep cleavage, fitted clothing stretched by the full bust, never small or flat, photorealistic, same face identity if reference provided"
 }

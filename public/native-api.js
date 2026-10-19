@@ -671,21 +671,25 @@
           ].filter(Boolean);
           const customHorde = stripFixedOutfitFromPrompt(String(c.prompt_horde || c.image_prompt_horde || "").trim());
           const cupH = String(c.Poitrine || c.poitrine || "");
-          const bustH = /[DEFGHIJ]/i.test(cupH)
+          const bustH = /[DEFGHIJ]/i.test(cupH) || /plus-size|chubby|généreuse|ronde/i.test(String(c.body||"")+" "+customHorde)
             ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
             : "natural feminine bust";
+          // Always re-assert plus-size lock from fiche
+          const bodyLockH = /plus-size|chubby|ronde|généreuse|soft rounded belly/i.test(String(c.body||"")+" "+customHorde+" "+bodyH)
+            ? "BODY LOCK: genuine plus-size chubby soft rounded belly wide hips thick thighs soft arms NOT thin NOT skinny NOT slim model"
+            : bodyH;
           const identityBits = [
-            "CAMERA AND BODY POSE (mandatory, ignore reference pose): " + poseH,
-            "OUTFIT (mandatory, ignore reference clothes): " + outfitH,
-            "LOCATION (mandatory): " + sceneH,
-            "full length head to feet, shoes visible, wide environmental shot",
-            "do NOT repeat the same sitting lean toward camera pose, change body orientation completely",
+            "FULL LENGTH head to feet wide shot shoes visible, NOT portrait NOT close-up",
+            "POSE mandatory: " + poseH,
+            "OUTFIT mandatory: " + outfitH,
+            "LOCATION: " + sceneH,
             hasRefH
-              ? "keep only the same face as the reference photo, change body pose clothing and scene"
+              ? "face only from reference, identical eyes nose mouth, change pose clothing completely"
               : "photorealistic woman",
-            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
+            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, descH].filter(Boolean).join(", "),
+            bodyLockH,
             bustH,
-            "unique pose variation " + String(Date.now() % 100000),
+            "seed " + String(Date.now() % 100000),
             "natural light, sharp focus, single person"
           ].filter(Boolean);
           return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
@@ -2743,14 +2747,14 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.85;
+          const denoise = 0.90;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // full body ref obligatoire: face-only crop force des portraits
-            faceOnlyRef: false,
+            // crop visage: libère pose/tenue du corps de la ref; denoise 0.90
+            faceOnlyRef: true,
           });
           return {
             ok: true,
