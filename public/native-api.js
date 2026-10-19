@@ -468,7 +468,7 @@
           const outfitH = chooseH("outfit", outfitsH, 6);
           const poseH = chooseH("pose", posesH, 5);
           const scenesH = ["bright apartment living room", "elegant staircase", "hotel hallway", "classic bedroom", "softly lit lobby"];
-          const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
+          const sceneH = chooseH("scene", scenesH, 3);
           // Morphologie SURE (pas de seins/cleavage) — crucial pour Hortense et plus-size
           const morphRaw = (String(c.body || "") + " " + String(c.looks_en || "") + " " + String(c.appearance || "")).toLowerCase();
           let bodyH = "";
@@ -672,7 +672,17 @@
           "bedroom soft bokeh lights satin sheets",
           "elegant staircase cream walls iron railing",
         ];
-    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    const sceneHistoryKey = "lea.profileImage.sceneHistory." + String(c.id || "lea");
+    let recentScenes = [];
+    try {
+      const savedScenes = JSON.parse(localStorage.getItem(sceneHistoryKey) || "[]");
+      if (Array.isArray(savedScenes)) recentScenes = savedScenes;
+    } catch (_) {}
+    const availableScenes = scenes.filter((item) => recentScenes.indexOf(item) < 0);
+    const scenePool = availableScenes.length ? availableScenes : scenes;
+    const scene = scenePool[Math.floor(Math.random() * scenePool.length)];
+    recentScenes = [scene].concat(recentScenes.filter((item) => item !== scene)).slice(0, 5);
+    try { localStorage.setItem(sceneHistoryKey, JSON.stringify(recentScenes)); } catch (_) {}
 
     const mood = forCloudflare
       ? (hasProfileRef
@@ -690,7 +700,7 @@
       visualAgeLock,
       textOnlyIdentity,
       forCloudflare
-        ? "PRIORITY: invent a NEW sexy outfit, a NEW sensual pose, and a RICH detailed background environment. Forbidden: plain white/beige studio backdrop, empty wall, simple t-shirt with trousers, boring casual office clothes."
+        ? ("MANDATORY ENVIRONMENT LOCK: show a rich, unmistakable real-world location filling the background edge to edge: " + scene + ". She is physically inside this place; visible architecture, furnishings and background detail behind her. Absolutely no blank/white/gray/beige studio background, seamless backdrop, empty wall, cutout, or isolated subject. Keep the entire location visible in the final frame.")
         : "",
       forCloudflare ? ("Outfit (must follow exactly): " + outfit + ".") : ("Outfit: " + outfit + "."),
       forCloudflare ? ("Pose (must follow exactly): " + pose + ".") : ("Pose: " + pose + "."),
@@ -2513,13 +2523,13 @@
           // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
           // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
           const charId = String(char && char.id || "");
-          const denoise = (charId === "aya") ? 0.55 : 0.58;
+          const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            faceOnlyRef: false,
+            faceOnlyRef: true,
           });
           return {
             ok: true,
