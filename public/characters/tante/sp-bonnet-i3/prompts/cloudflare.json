@@ -1,0 +1,19 @@
+{
+  "id": "sp_bonnet_i3",
+  "name": "Safia Dieng",
+  "age": 33,
+  "appearance": "👤 Sujet : Safia Dieng, 33 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : iris noisette, reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 110I — poitrine bonnet I, volume extrême.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "feminine balanced proportions, natural figure, (extreme I-cup breasts:1.5), (33 year old woman:1.5), (looks exactly 33 not older:1.4), (chestnut brown hair:1.5), (hazel eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, extreme I-cup breasts",
+  "ethnicity": "européenne",
+  "Poitrine": "110I",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

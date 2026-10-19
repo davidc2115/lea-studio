@@ -1,0 +1,21 @@
+{
+  "id": "cup_maman_ami_05",
+  "name": "Apolline Singh",
+  "age": 42,
+  "appearance": "👤 Sujet : Apolline Singh, 42 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale fin, mâchoire douce, traits légers.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (natural B-cup breasts:1.5), (42 year old woman:1.5), (looks exactly 42 not older:1.4), (jet-black smooth hair:1.5), (hazel-green almond eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, natural B-cup breasts",
+  "ethnicity": "latine",
+  "Poitrine": "85B",
+  "provider": "Cloudflare",
+  "outfits": [
+    "tight top stretched over large breasts",
+    "scenario casual"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

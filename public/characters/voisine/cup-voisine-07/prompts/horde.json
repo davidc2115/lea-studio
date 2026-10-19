@@ -1,0 +1,21 @@
+{
+  "id": "cup_voisine_07",
+  "name": "Lila Nair",
+  "age": 31,
+  "appearance": "👤 Sujet : Lila Nair, 31 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage allongé délicat, structure osseuse fine, pommettes discrètes.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (natural B-cup breasts:1.5), (31 year old woman:1.5), (looks exactly 31 not older:1.4), (chestnut brown hair:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, natural B-cup breasts",
+  "ethnicity": "européenne",
+  "Poitrine": "85B",
+  "provider": "AI Horde",
+  "outfits": [
+    "tight top stretched over large breasts",
+    "scenario casual"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

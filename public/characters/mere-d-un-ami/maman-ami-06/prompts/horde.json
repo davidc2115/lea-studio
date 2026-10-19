@@ -1,0 +1,19 @@
+{
+  "id": "maman_ami_06",
+  "name": "Fiona Girard",
+  "age": 43,
+  "appearance": "👤 Sujet : Fiona Girard, 43 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : iris marron clair, regard doux. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 90C — poitrine bonnet C, volume moyen, décolleté modéré si encolure basse.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (medium C-cup breasts, moderate cleavage:1.5), (43 year old woman:1.5), (looks exactly 43 not older:1.4), (auburn red hair:1.5), (light brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, medium C-cup breasts, moderate cleavage",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "90C",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

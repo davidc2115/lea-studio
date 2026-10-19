@@ -1,0 +1,22 @@
+{
+  "id": "meera",
+  "name": "Andrée Marino",
+  "age": 21,
+  "appearance": "👤 Sujet : Meera Kapoor, 21 ans, type sud-asiatique\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux très foncés.\n💇 Cheveux : tresses.\n👗 Silhouette : jeune, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune.\nOrigine / teint : sud-asiatique.\nFiche body : jeune, seins moyens.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, sud-asiatique woman, braids, dark brown-black eyes, medium natural C-cup breasts, (Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune.), same face identity",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, sud-asiatique woman, braids, dark brown-black eyes, medium natural C-cup breasts, (Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune.), same face identity",
+  "body": "jeune, seins moyens",
+  "ethnicity": "sud-asiatique",
+  "Poitrine": "H",
+  "provider": "Cloudflare",
+  "outfits": [
+    "salwar casual",
+    "jeans and top",
+    "cotton lingerie"
+  ],
+  "places": [
+    "couch questions",
+    "kitchen tea",
+    "doorway linger"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

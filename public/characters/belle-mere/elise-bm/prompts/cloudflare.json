@@ -1,0 +1,22 @@
+{
+  "id": "elise_bm",
+  "name": "Sofia Esposito",
+  "age": 36,
+  "appearance": "👤 Sujet : Élise Bernard, 36 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux châtains.\n👗 Silhouette : douce, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Française, châtain, visage doux, poitrine C, silhouette jeune maman encore sexy.\nOrigine / teint : européenne.\nFiche body : douce, seins moyens.\n\n🔒 Détails techniques (génération) : 36 year old woman who looks exactly 36 not older not younger, européenne woman, chestnut brown hair, medium natural C-cup breasts, (Française, châtain, visage doux, poitrine C, silhouette jeune maman encore sexy.), same face identity",
+  "looks_en": "36 year old woman who looks exactly 36 not older not younger, européenne woman, chestnut brown hair, medium natural C-cup breasts, (Française, châtain, visage doux, poitrine C, silhouette jeune maman encore sexy.), same face identity",
+  "body": "douce, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "Cloudflare",
+  "outfits": [
+    "wrap dress",
+    "loungewear",
+    "lace bralette"
+  ],
+  "places": [
+    "sofa shared blanket",
+    "kitchen morning coffee",
+    "stairs brush past"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

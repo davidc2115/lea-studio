@@ -1,0 +1,21 @@
+{
+  "id": "cup_jeu_04",
+  "name": "Maud Chatterjee",
+  "age": 23,
+  "appearance": "👤 Sujet : Maud Chatterjee, 23 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale harmonieux, pommettes douces, menton délicat.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette en sablier marquée : taille fine bien définie, hanches arrondies, poitrine et hanches en équilibre, curves voluptueuses sans être plus-size global.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées, contraste net avec la taille.\n🦵 Jambes : Jambes longues, toniques, chevilles fines.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(hourglass figure:1.45), (defined waist:1.35), rounded hips, full shaped buttocks, (massive H-cup breasts, full wide cleavage:1.5), (23 year old woman:1.5), (looks exactly 23 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "hourglass figure, defined waist, rounded hips, full buttocks, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "105H",
+  "provider": "AI Horde",
+  "outfits": [
+    "tight top stretched over large breasts",
+    "scenario casual"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

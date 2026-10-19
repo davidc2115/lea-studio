@@ -1,0 +1,22 @@
+{
+  "id": "hannah",
+  "name": "Petra Ricci",
+  "age": 51,
+  "appearance": "👤 Sujet : Hannah Stein, 51 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : ferme, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.\nOrigine / teint : européenne.\nFiche body : ferme, seins moyens.\n\n🔒 Détails techniques (génération) : 51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
+  "looks_en": "51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
+  "body": "ferme, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "AI Horde",
+  "outfits": [
+    "blouse and trousers",
+    "structured lingerie",
+    "robe precise"
+  ],
+  "places": [
+    "organized kitchen",
+    "study",
+    "guest bed made"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

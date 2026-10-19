@@ -1,0 +1,21 @@
+{
+  "id": "cup_voisine_09",
+  "name": "Alma Nair",
+  "age": 33,
+  "appearance": "👤 Sujet : Alma Nair, 33 ans, type est-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale harmonieux, pommettes douces, menton délicat.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette en sablier marquée : taille fine bien définie, hanches arrondies, poitrine et hanches en équilibre, curves voluptueuses sans être plus-size global.\n💕 Poitrine : 110J — poitrine bonnet J, volume extrême.\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées, contraste net avec la taille.\n🦵 Jambes : Jambes longues, toniques, chevilles fines.\n✨ Peau : claire asiatique, texture douce et uniforme.\nOrigine / teint : est-asiatique.",
+  "looks_en": "(hourglass figure:1.45), (defined waist:1.35), rounded hips, full shaped buttocks, (extreme J-cup breasts:1.5), (33 year old woman:1.5), (looks exactly 33 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), East Asian features, fair East Asian skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "hourglass figure, defined waist, rounded hips, full buttocks, extreme J-cup breasts",
+  "ethnicity": "est-asiatique",
+  "Poitrine": "110J",
+  "provider": "Cloudflare",
+  "outfits": [
+    "tight top stretched over large breasts",
+    "scenario casual"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

@@ -1,0 +1,21 @@
+{
+  "id": "cup_belle_mere_08",
+  "name": "Olivia Sow",
+  "age": 45,
+  "appearance": "👤 Sujet : Olivia Sow, 45 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage allongé délicat, structure osseuse fine, pommettes discrètes.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, décolleté visible, cohérent avec un vrai soutien-gorge.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (full D-cup breasts, clear soft cleavage:1.5), (45 year old woman:1.5), (looks exactly 45 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, full D-cup breasts, clear soft cleavage",
+  "ethnicity": "latine",
+  "Poitrine": "95D",
+  "provider": "Cloudflare",
+  "outfits": [
+    "tight top stretched over large breasts",
+    "scenario casual"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

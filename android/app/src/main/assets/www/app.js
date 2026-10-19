@@ -426,32 +426,83 @@ function activeChatPath() {
   return "/api/chat/" + encodeURIComponent((state.character && state.character.id) || "lea");
 }
 
-function promptCharacterPayload(char) {
-  const c = char || {};
-  return {
-    id: c.id,
-    name: c.name,
-    age: c.age,
-    title: c.title,
-    canonicalCupSize: c.canonicalCupSize || "",
-    tags: c.tags,
-    scenario: c.scenario,
-    personality: c.personality,
-    appearance: c.appearance,
-    looks_en: c.looks_en || "",
-    ethnicity: c.ethnicity || "",
-    body: c.body || "",
-    Poitrine: c.Poitrine || c.poitrine || "",
-    poitrine: c.Poitrine || c.poitrine || "",
-    bustEstimate: c.bustEstimate || "",
-    estimatedAge: c.estimatedAge || null,
-    nonHumanTraits: c.nonHumanTraits || "",
-    system_extra: c.system_extra,
-    // Requis pour img2img (identité visage) en scène conversation + profil
-    cover: c.cover || "",
-    gallery: Array.isArray(c.gallery) ? c.gallery.slice(0, 12) : [],
-  };
-}
+function findBundledCharacterForPrompt(id) {
+      const targetId = String(id || "");
+      if (!targetId || typeof window === "undefined") return null;
+      const lists = [
+        window.CAST,
+        window.EXTRA_CAST,
+        window.LEA_CAST_NEW,
+        window.LEA_CAST_SPECIAL,
+        window.LEA_CAST_DIRECT,
+        window.LEA_CAST_CUPS,
+        window.LEA_CAST_COLLEGUES,
+        window.LEA_CAST_TAQUIN,
+      ];
+      for (const list of lists) {
+        if (!Array.isArray(list)) continue;
+        const found = list.find((item) => item && String(item.id) === targetId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function promptCharacterPayload(char, imageProvider) {
+      const c = char || {};
+      const bundled = findBundledCharacterForPrompt(c.id);
+      // Local overrides remain saved and visible in the profile, but bundled identities
+      // use the latest catalogue physical fields when constructing an image prompt.
+      const source = bundled ? Object.assign({}, c, {
+        name: bundled.name || c.name,
+        age: bundled.age != null && bundled.age !== "" ? bundled.age : c.age,
+        title: bundled.title || c.title,
+        tags: Array.isArray(bundled.tags) ? bundled.tags : c.tags,
+        appearance: typeof bundled.appearance === "string" ? bundled.appearance : c.appearance,
+        looks_en: typeof bundled.looks_en === "string" ? bundled.looks_en : (c.looks_en || ""),
+        ethnicity: typeof bundled.ethnicity === "string" ? bundled.ethnicity : (c.ethnicity || ""),
+        body: typeof bundled.body === "string" ? bundled.body : (c.body || ""),
+        Poitrine: bundled.Poitrine || bundled.poitrine || "",
+        poitrine: bundled.Poitrine || bundled.poitrine || "",
+        canonicalCupSize: bundled.canonicalCupSize || "",
+        bustEstimate: bundled.bustEstimate || "",
+        nonHumanTraits: bundled.nonHumanTraits || "",
+      }) : c;
+      return {
+        id: source.id,
+        name: source.name,
+        age: source.age,
+        title: source.title,
+        canonicalCupSize: source.canonicalCupSize || "",
+        tags: source.tags,
+        scenario: source.scenario,
+        personality: source.personality,
+        appearance: source.appearance,
+        looks_en: source.looks_en || "",
+        ethnicity: source.ethnicity || "",
+        body: source.body || "",
+        Poitrine: source.Poitrine || source.poitrine || "",
+        poitrine: source.Poitrine || source.poitrine || "",
+        bustEstimate: source.bustEstimate || "",
+        estimatedAge: source.estimatedAge || null,
+        nonHumanTraits: source.nonHumanTraits || "",
+        system_extra: source.system_extra,
+        // Requis pour img2img (identité visage) en scène conversation + profil
+        // Horde uses current catalog references for bundled characters; Cloudflare's
+        // previously validated Hortense reference remains unchanged.
+        cover: bundled && String(bundled.id) === "aya"
+          ? "characters/meilleure-amie-de-ta-fille/aya/images/hortense-build1106-reference.jpg"
+          : (bundled && String(imageProvider || "").toLowerCase() === "horde"
+              ? (bundled.cover || source.cover || "")
+              : (source.cover || "")),
+        gallery: bundled && String(bundled.id) === "aya"
+          ? []
+          : (bundled && String(imageProvider || "").toLowerCase() === "horde"
+              ? (Array.isArray(bundled.gallery) && bundled.gallery.length
+                  ? bundled.gallery.slice(0, 12)
+                  : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : []))
+              : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : [])),
+      };
+    }
 
 function stripLeaMemory(text) {
   return String(text || "")
@@ -471,11 +522,15 @@ function formatMessageHtml(text, options) {
     .replace(/\b(?:actions?|dialogues?|pens[eé]es?|thoughts?)\s*[:：]\s*/gi, "");
 
   // Speaker labels may appear mid-line or at the beginning of a line.
-  raw = raw.replace(/\[([^\]]{1,80})\]\s*:\s*/g, "\n@@@SPEAKER:$1@@@\n");
+  const nonSpeakerLabels = /^(?:euh|eh|hé|hum|hmm|oh|ah|bah|ben|bon|alors|voilà|oui|non)$/i;
+      raw = raw.replace(/\[([^\]]{1,80})\]\s*:\s*/g, function (_match, name) {
+        return nonSpeakerLabels.test(String(name).trim()) ? String(name).trim() + ": " : "\n@@@SPEAKER:" + name + "@@@\n";
+      });
   raw = raw.replace(
     /(^|\n)((?:La |Le |Ma |Mon |Sa |Son |Ta |Ton )?(?:fille|femme|m[eè]re|s[oe]ur|belle-?[mèe]re|belle-?s[oe]ur|amie|mari|fr[eè]re|p[eè]re|coloc|voisin(?:e)?|[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{2,28})(?:\s+[A-ZÀ-Ü][A-Za-zÀ-ÿ'’\-]{1,28})?)\s*:\s+/g,
     function (_match, prefix, name) {
       if (/^(actions?|dialogues?|pens[eé]es?|thoughts?|paroles?)$/i.test(String(name).trim())) return prefix;
+      if (nonSpeakerLabels.test(String(name).trim())) return prefix + String(name).trim() + ": ";
       return prefix + "\n@@@SPEAKER:" + name + "@@@\n";
     }
   );
@@ -515,8 +570,22 @@ function formatMessageHtml(text, options) {
   const parts = raw.split(/\n?@@@SPEAKER:([^@]+)@@@\n?/);
   const activeName = typeof state !== "undefined" && state.character ? String(state.character.name || "") : "";
   const bubbleTurns = !!(options && options.bubbleTurns);
+    function isMainSpeaker(name) {
+    if (!name) return true;
+    const normalize = (value) => String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase()
+      .replace(/\bpersonnage principal\b/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+    const candidate = normalize(name);
+    const active = normalize(activeName);
+    if (!candidate || candidate === active) return true;
+    return candidate === active.split(/\s+/)[0];
+  }
   function renderTurn(name, body) {
-    const isMain = !name || name.localeCompare(activeName, undefined, { sensitivity: "accent" }) === 0;
+    const isMain = isMainSpeaker(name);
     const formatted = formatSegments(body);
     if (!bubbleTurns) {
       if (isMain) return formatted;
@@ -529,17 +598,30 @@ function formatMessageHtml(text, options) {
     return '<div class="' + bubbleClass + '"><div class="speaker">' + speaker +
       '</div><div class="' + bodyClass + '">' + formatted + "</div></div>";
   }
-  let html = parts[0] && parts[0].trim() ? renderTurn(activeName, parts[0].trim()) : "";
-  for (let i = 1; i < parts.length; i += 2) {
-    const name = String(parts[i] || "").trim();
-    const body = String(parts[i + 1] || "").trim();
-    if (!body) continue;
-    html += renderTurn(name, body);
-  }
-  return html;
-}
+  const groups = [];
+      const bySpeaker = new Map();
+      function addTurn(name, body) {
+        const content = String(body || "").trim();
+        if (!content) return;
+        const main = isMainSpeaker(name);
+        const label = main ? (activeName || String(name || "Personnage").trim()) : String(name || "Tierce personne").trim();
+        const key = main ? "__main__" : label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+        let group = bySpeaker.get(key);
+        if (!group) {
+          group = { name: label, bodies: [] };
+          bySpeaker.set(key, group);
+          groups.push(group);
+        }
+        group.bodies.push(content);
+      }
+      addTurn(activeName, parts[0]);
+      for (let i = 1; i < parts.length; i += 2) {
+        addTurn(String(parts[i] || "").trim(), parts[i + 1]);
+      }
+      return groups.map((group) => renderTurn(group.name, group.bodies.join("\n"))).join("");
+    }
 
-function renderDiscover() {
+    function renderDiscover() {
   const c = state.character;
   const root = $("view-discover");
   if (!root) return;
@@ -1326,8 +1408,7 @@ async function generateProfileImage() {
       const res = await api(provider === "horde" ? "/api/image/horde" : "/api/image/cloudflare", {
         method: "POST",
         body: JSON.stringify({
-          character: Object.assign(promptCharacterPayload(jobChar), {
-            cover: jobChar.cover || (Array.isArray(jobChar.gallery) && jobChar.gallery[0]) || "",
+          character: Object.assign(promptCharacterPayload(jobChar, provider), {
             adultConfirmed: confirmedAdult || $("gen-adult-confirm")?.checked === true,
           }),
           settings: st,
@@ -1628,6 +1709,16 @@ function mergeAllCasts() {
         if (!o.personality || String(o.personality).length < 40) {
           merged.personality = base.personality;
         }
+        // L'ancienne fiche locale d'Hortense ne doit pas masquer les valeurs canoniques du catalogue.
+        if (id === "aya") {
+          for (const key of ["name", "age", "tags", "appearance", "looks_en", "ethnicity", "body", "Poitrine", "poitrine", "nonHumanTraits"]) {
+            if (Object.prototype.hasOwnProperty.call(base, key)) merged[key] = base[key];
+          }
+          merged.Poitrine = base.Poitrine || base.poitrine || "";
+          merged.poitrine = merged.Poitrine;
+          merged.canonicalCupSize = base.canonicalCupSize || "";
+          merged.bustEstimate = base.bustEstimate || "";
+        }
         // Conserver galerie / champs édités volontairement
         byId.set(id, merged);
       }
@@ -1670,8 +1761,8 @@ async function initCharacter() {
       age: 18,
       title: "Meilleure amie de ta fille · Orage",
       tags: ["timide", "amie", "orage"],
-      cover: "images/lea-orage-dentelle.jpg",
-      gallery: ["images/lea-orage-dentelle.jpg", "images/lea-portrait.jpg"],
+      cover: "characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg",
+      gallery: ["characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg", "characters/meilleure-amie-de-ta-fille/lea/images/lea-portrait.jpg"],
       greeting: "Euh… désolée de te déranger… L'orage m'a surprise… Je peux entrer ?",
       scenario: "Léa, trempée, frappe à ta porte.",
       personality: "Timide, douce.",

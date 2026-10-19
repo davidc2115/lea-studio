@@ -1,0 +1,22 @@
+{
+  "id": "nora",
+  "name": "Brigitte Bruno",
+  "age": 25,
+  "appearance": "👤 Sujet : Nora Lindqvist, 25 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : longiligne, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Suédoise, blonde, grande, seins moyens, silhouette longiligne.\nOrigine / teint : européenne.\nFiche body : longiligne, seins moyens.\n\n🔒 Détails techniques (génération) : 25 year old woman who looks exactly 25 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Suédoise, blonde, grande, seins moyens, silhouette longiligne.), same face identity",
+  "looks_en": "25 year old woman who looks exactly 25 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Suédoise, blonde, grande, seins moyens, silhouette longiligne.), same face identity",
+  "body": "longiligne, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "Cloudflare",
+  "outfits": [
+    "linen shirt",
+    "minimal dress",
+    "simple lingerie"
+  ],
+  "places": [
+    "window silent",
+    "sofa book",
+    "kitchen water glass"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

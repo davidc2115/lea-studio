@@ -1,0 +1,19 @@
+{
+  "id": "secretaire_28",
+  "name": "Warda Leroy",
+  "age": 32,
+  "appearance": "👤 Sujet : Warda Leroy, 32 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage allongé délicat, structure osseuse fine, pommettes discrètes.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 90C — poitrine bonnet C, volume moyen, décolleté modéré si encolure basse.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (medium C-cup breasts, moderate cleavage:1.5), (32 year old woman:1.5), (looks exactly 32 not older:1.4), (auburn red hair:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, medium C-cup breasts, moderate cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "90C",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

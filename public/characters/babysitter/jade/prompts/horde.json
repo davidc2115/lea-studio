@@ -1,0 +1,22 @@
+{
+  "id": "jade",
+  "name": "Katia Henry",
+  "age": 21,
+  "appearance": "👤 Sujet : Jade Morel, 21 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux bruns, souvent en chignon.\n✨ Peau : peau pâle.\n👗 Silhouette : mince, petits seins.\n💕 Poitrine : très petite, presque plate (bonnet A).\n📝 Résumé : Française, pâle, chignon brun, lunettes, poitrine petite A, silhouette mince, taches de rousseur.\nOrigine / teint : européenne.\nFiche body : mince, petits seins.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, européenne woman, pale fair skin, brown hair, hair in a bun, visible freckles on face, wearing glasses, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, pâle, chignon brun, lunettes, poitrine petite A, silhouette mince, taches de rousseur.), same face identity",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, pale fair skin, brown hair, hair in a bun, visible freckles on face, wearing glasses, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, pâle, chignon brun, lunettes, poitrine petite A, silhouette mince, taches de rousseur.), same face identity",
+  "body": "mince, petits seins",
+  "ethnicity": "européenne",
+  "Poitrine": "95D",
+  "provider": "AI Horde",
+  "outfits": [
+    "oversized boyfriend shirt and white socks",
+    "simple cotton tank and shorts",
+    "hoodie too big"
+  ],
+  "places": [
+    "desk with textbooks at night",
+    "bedroom window rain",
+    "floor cushions with notes"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

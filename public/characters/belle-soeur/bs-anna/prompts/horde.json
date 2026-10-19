@@ -1,0 +1,22 @@
+{
+  "id": "bs_anna",
+  "name": "Helga Mbaye",
+  "age": 24,
+  "appearance": "👤 Sujet : Helga Mbaye, 24 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : iris noisette, reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (massive H-cup breasts, full wide cleavage:1.5), (24 year old woman:1.5), (looks exactly 24 not older:1.4), (blonde hair with golden highlights:1.5), (hazel eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "105H",
+  "provider": "AI Horde",
+  "outfits": [
+    "jeans and sweater",
+    "comfortable t-shirt",
+    "soft pajamas after kids sleep"
+  ],
+  "places": [
+    "living room sofa night",
+    "hallway after kids asleep",
+    "kitchen waiting"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

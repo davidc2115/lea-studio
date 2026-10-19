@@ -1,0 +1,19 @@
+{
+  "id": "sp_grande4",
+  "name": "Nolwenn Watanabe",
+  "age": 24,
+  "appearance": "👤 Sujet : Nolwenn Watanabe, 24 ans, type est-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 90C — poitrine bonnet C, volume moyen, décolleté modéré si encolure basse.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : claire asiatique, texture douce et uniforme.\nOrigine / teint : est-asiatique.",
+  "looks_en": "feminine balanced proportions, natural figure, (medium C-cup breasts, moderate cleavage:1.5), (24 year old woman:1.5), (looks exactly 24 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), East Asian features, fair East Asian skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, medium C-cup breasts, moderate cleavage",
+  "ethnicity": "est-asiatique",
+  "Poitrine": "90C",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

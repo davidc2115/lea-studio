@@ -1,0 +1,19 @@
+{
+  "id": "chub_bm2",
+  "name": "Martine Ivanov",
+  "age": 51,
+  "appearance": "👤 Sujet : Martine Ivanov, 51 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage plein et doux, joues généreuses, menton arrondi, expression chaleureuse.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\n💕 Poitrine : 95E — poitrine bonnet E, volume généreux et lourd, décolleté profond.\n🍑 Hanches & fesses : Hanches très larges, fesses pleines et rondes, cuisses épaisses qui se touchent.\n🦵 Jambes : Jambes pleines, mollets doux, chevilles proportionnées au corps plus-size.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(very plus-size chubby body:1.55), (soft belly:1.4), (wide hips:1.4), (thick thighs:1.35), soft arms, full cheeks, (large E-cup breasts, deep cleavage:1.5), (51 year old woman:1.5), (looks exactly 51 not older:1.4), (blonde hair with golden highlights:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "very plus-size chubby body, soft belly, wide hips, thick thighs, soft arms, large E-cup breasts, deep cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "95E",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

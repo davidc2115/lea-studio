@@ -1,0 +1,22 @@
+{
+  "id": "bm_y_nora",
+  "name": "Ling Traore",
+  "age": 27,
+  "appearance": "👤 Sujet : Ling Traore, 27 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : iris marron clair, regard doux. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (massive H-cup breasts, full wide cleavage:1.5), (27 year old woman:1.5), (looks exactly 27 not older:1.4), (blonde hair with golden highlights:1.5), (light brown eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "105H",
+  "provider": "AI Horde",
+  "outfits": [
+    "summer dress",
+    "elegant blouse and skirt",
+    "silk robe"
+  ],
+  "places": [
+    "entrance hallway",
+    "kitchen island",
+    "living room evening"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

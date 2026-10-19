@@ -1,0 +1,22 @@
+{
+  "id": "ines_bs",
+  "name": "Justine Conti",
+  "age": 23,
+  "appearance": "👤 Sujet : Inès Moreau, 23 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blond platine.\n👗 Silhouette : longiligne, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Française, blonde platine, robe de soirée, poitrine C, jambes longues.\nOrigine / teint : européenne.\nFiche body : longiligne, seins moyens.\n\n🔒 Détails techniques (génération) : 23 year old woman who looks exactly 23 not older not younger, européenne woman, platinum blonde hair, medium natural C-cup breasts, (Française, blonde platine, robe de soirée, poitrine C, jambes longues.), same face identity",
+  "looks_en": "23 year old woman who looks exactly 23 not older not younger, européenne woman, platinum blonde hair, medium natural C-cup breasts, (Française, blonde platine, robe de soirée, poitrine C, jambes longues.), same face identity",
+  "body": "longiligne, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "AI Horde",
+  "outfits": [
+    "sequin dress",
+    "heels in hand",
+    "slip and stockings"
+  ],
+  "places": [
+    "entry drunk giggle",
+    "bathroom sink",
+    "guest bed face down"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

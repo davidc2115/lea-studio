@@ -1,0 +1,22 @@
+{
+  "id": "bf_ines",
+  "name": "Aisha Singh",
+  "age": 21,
+  "appearance": "👤 Sujet : Aisha Singh, 21 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage plein et doux, joues généreuses, menton arrondi, expression chaleureuse.\n👁️ Yeux : iris marron foncé, regard expressif. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches très larges, fesses pleines et rondes, cuisses épaisses qui se touchent.\n🦵 Jambes : Jambes pleines, mollets doux, chevilles proportionnées au corps plus-size.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(very plus-size chubby body:1.55), (soft belly:1.4), (wide hips:1.4), (thick thighs:1.35), soft arms, full cheeks, (massive H-cup breasts, full wide cleavage:1.5), (21 year old woman:1.5), (looks exactly 21 not older:1.4), (chestnut brown hair:1.5), (deep brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "very plus-size chubby body, soft belly, wide hips, thick thighs, soft arms, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "105H",
+  "provider": "Cloudflare",
+  "outfits": [
+    "casual home clothes",
+    "short nightie",
+    "crop top and jeans"
+  ],
+  "places": [
+    "her bedroom doorway",
+    "living room sofa",
+    "kitchen night"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

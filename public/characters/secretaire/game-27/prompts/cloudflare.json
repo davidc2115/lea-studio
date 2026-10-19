@@ -1,0 +1,19 @@
+{
+  "id": "game_27",
+  "name": "Théa Lindqvist",
+  "age": 25,
+  "appearance": "👤 Sujet : Théa Lindqvist, 25 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : iris marron foncé, regard expressif. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, décolleté visible, cohérent avec un vrai soutien-gorge.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (full D-cup breasts, clear soft cleavage:1.5), (25 year old woman:1.5), (looks exactly 25 not older:1.4), (chestnut brown hair:1.5), (deep brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, full D-cup breasts, clear soft cleavage",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "95D",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

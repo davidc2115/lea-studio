@@ -1,0 +1,20 @@
+{
+  "id": "dir_mam_07",
+  "name": "Malika Garnier",
+  "age": 41,
+  "appearance": "👤 Sujet : Malika Garnier, 41 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : iris bleus, clairs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 90C — poitrine bonnet C, volume moyen, décolleté modéré si encolure basse.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "feminine balanced proportions, natural figure, (medium C-cup breasts, moderate cleavage:1.5), (41 year old woman:1.5), (looks exactly 41 not older:1.4), (blonde hair with golden highlights:1.5), (blue eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, medium C-cup breasts, moderate cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "90C",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

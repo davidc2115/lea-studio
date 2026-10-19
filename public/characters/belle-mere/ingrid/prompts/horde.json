@@ -1,0 +1,22 @@
+{
+  "id": "ingrid",
+  "name": "Dana Rossi",
+  "age": 49,
+  "appearance": "👤 Sujet : Ingrid Bergström, 49 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux bleus.\n💇 Cheveux : cheveux blond platine.\n👗 Silhouette : longiligne, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.\nOrigine / teint : européenne.\nFiche body : longiligne, seins moyens.\n\n🔒 Détails techniques (génération) : 49 year old woman who looks exactly 49 not older not younger, européenne woman, platinum blonde hair, blue eyes, medium C-cup breasts, tall height, (Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.), same face identity",
+  "looks_en": "49 year old woman who looks exactly 49 not older not younger, européenne woman, platinum blonde hair, blue eyes, medium C-cup breasts, tall height, (Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.), same face identity",
+  "body": "longiligne, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "AI Horde",
+  "outfits": [
+    "linen shirt dress",
+    "minimal nude lingerie",
+    "sauna towel"
+  ],
+  "places": [
+    "minimalist living room",
+    "bathroom steam",
+    "bedroom window"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

@@ -490,7 +490,7 @@ function findBundledCharacterForPrompt(id) {
         // Horde uses current catalog references for bundled characters; Cloudflare's
         // previously validated Hortense reference remains unchanged.
         cover: bundled && String(bundled.id) === "aya"
-          ? "images/cast/hortense-build1106-reference.jpg"
+          ? "characters/meilleure-amie-de-ta-fille/aya/images/hortense-build1106-reference.jpg"
           : (bundled && String(imageProvider || "").toLowerCase() === "horde"
               ? (bundled.cover || source.cover || "")
               : (source.cover || "")),
@@ -1761,8 +1761,8 @@ async function initCharacter() {
       age: 18,
       title: "Meilleure amie de ta fille · Orage",
       tags: ["timide", "amie", "orage"],
-      cover: "images/lea-orage-dentelle.jpg",
-      gallery: ["images/lea-orage-dentelle.jpg", "images/lea-portrait.jpg"],
+      cover: "characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg",
+      gallery: ["characters/meilleure-amie-de-ta-fille/lea/images/lea-orage-dentelle.jpg", "characters/meilleure-amie-de-ta-fille/lea/images/lea-portrait.jpg"],
       greeting: "Euh… désolée de te déranger… L'orage m'a surprise… Je peux entrer ?",
       scenario: "Léa, trempée, frappe à ta porte.",
       personality: "Timide, douce.",
