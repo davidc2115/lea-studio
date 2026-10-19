@@ -391,6 +391,8 @@
 
 
   /** Extrait teint / origine / âge visibles depuis appearance + looks_en (FR/EN) pour txt2img sans photo. */
+
+  /** Extrait teint / origine / âge depuis appearance + looks_en (FR/EN) pour txt2img sans photo. */
   function extractIdentityTraits(char) {
     const c = char || {};
     const blob = [c.ethnicity, c.body, c.looks_en, c.appearance, c.name].filter(Boolean).join(" ").toLowerCase();
@@ -399,48 +401,84 @@
 
     let ethnicity = String(c.ethnicity || "").trim();
     if (!ethnicity) {
-      if (/ouest[- ]?afric|ivoirien|sénégal|africaine?\b|black woman|dark[- ]skinned|peau [ée]b[eè]ne|ebony|west african|afro[- ]?diaspora|nubian/.test(blob))
-        ethnicity = "West African Black woman, dark ebony skin";
-      else if (/maghr[eé]b|arabe|north african|peau mate|olive skin/.test(blob))
-        ethnicity = "North African / Mediterranean woman, olive to tan skin";
-      else if (/asiatique|asian|cor[eé]en|japon|chinois|east asian/.test(blob))
-        ethnicity = "East Asian woman";
-      else if (/latine|latina|br[eé]sil|hispanic/.test(blob))
-        ethnicity = "Latina woman";
-      else if (/europ[eé]en|porcelaine|fair skin|peau claire|caucasian|white skin/.test(blob))
-        ethnicity = "European woman, fair skin";
+      if (/ouest[- ]?afric|ivoirien|s[eé]n[eé]gal|africaine?\b|black woman|dark[- ]skinned|peau [ée]b[eè]ne|ebony|west african|afro[- ]?diaspora|nubian/.test(blob))
+        ethnicity = "West African Black woman, dark ebony skin, African facial features";
+      else if (/maghr[eé]b|arabe|north african/.test(blob))
+        ethnicity = "North African woman, olive to tan skin";
+      else if (/est[- ]?asiatique|asiatique|asian|cor[eé]en|japon|chinois|east asian|chinese|korean|japanese/.test(blob))
+        ethnicity = "East Asian woman, East Asian facial features, dark eyes";
+      else if (/sud[- ]?asiatique|indien|indian|pakistan/.test(blob))
+        ethnicity = "South Asian woman";
+      else if (/latine|latina|br[eé]sil|hispanic|m[eé]tis/.test(blob))
+        ethnicity = "Latina woman, warm medium skin";
+      else if (/europ[eé]en|caucasian/.test(blob))
+        ethnicity = "European woman";
     }
 
     let skin = "";
     if (/peau [ée]b[eè]ne|ebony|deep dark skin|very dark skin/.test(blob)) skin = "deep dark ebony skin";
     else if (/peau fonc[eé]e|dark skin|rich dark/.test(blob)) skin = "rich dark brown skin";
-    else if (/peau mate|tan skin|olive/.test(blob)) skin = "warm olive tan skin";
+    else if (/peau mate|tan skin|olive|mate olive/.test(blob)) skin = "warm olive tan skin";
+    else if (/claire asiatique|asian fair|light asian/.test(blob)) skin = "fair East Asian skin";
     else if (/porcelaine|fair skin|peau claire|pale/.test(blob)) skin = "fair porcelain skin";
 
+    // Cheveux: couleur + coiffure
+    let hairColor = "";
+    if (/blond/.test(blob)) hairColor = "blonde";
+    else if (/roux|red hair|cuivr/.test(blob)) hairColor = "red";
+    else if (/ch[aâ]tain|brown hair|chestnut|brun/.test(blob)) hairColor = "chestnut brown";
+    else if (/noir|black hair|jet[- ]black|noirs? de jais/.test(blob)) hairColor = "jet black";
+    else if (/gris|gray|grey|silver/.test(blob)) hairColor = "silver grey";
+
+    let hairStyle = "";
+    if (/chignon|bun|en chignon/.test(blob)) hairStyle = "in a neat bun";
+    else if (/tresses|braids|cornrows/.test(blob)) hairStyle = "in braids";
+    else if (/afro\b/.test(blob)) hairStyle = "natural afro";
+    else if (/lisse|straight|soyeux/.test(blob)) hairStyle = "straight and silky";
+    else if (/ondul|wav/.test(blob)) hairStyle = "wavy";
+
     let hair = "";
-    if (/chignon|bun|en chignon/.test(blob)) hair = "hair in a neat bun";
-    else if (/tresses|braids|cornrows/.test(blob)) hair = "braided hair";
-    else if (/afro\b/.test(blob)) hair = "natural afro hair";
-    else if (/blond/.test(blob)) hair = "blonde hair";
-    else if (/roux|red hair|cuivr/.test(blob)) hair = "red hair";
-    else if (/ch[aâ]tain|brown hair|chestnut/.test(blob)) hair = "chestnut brown hair";
-    else if (/noir|black hair|jet[- ]black/.test(blob)) hair = "black hair";
+    if (hairColor && hairStyle) hair = hairColor + " hair " + hairStyle;
+    else if (hairColor) hair = hairColor + " hair";
+    else if (hairStyle) hair = "hair " + hairStyle;
+
+    let eyes = "";
+    if (/yeux noirs|black eyes|iris tr[eè]s fonc|almost black|dark eyes/.test(blob)) eyes = "very dark nearly black eyes";
+    else if (/yeux marron|brown eyes/.test(blob)) eyes = "brown eyes";
+    else if (/yeux bleus|blue eyes/.test(blob)) eyes = "blue eyes";
+    else if (/yeux verts|green eyes/.test(blob)) eyes = "green eyes";
 
     let body = "";
-    if (/tonique|athletic|danseuse|fit\b/.test(blob)) body = "athletic toned figure";
+    if (/tonique|athletic|danseuse|athl[eé]tique|fit\b/.test(blob)) body = "athletic toned figure, firm stomach";
     else if (/plus[- ]?size|chubby|plantureus|ronde|bbw/.test(blob)) body = "plus-size curvy figure";
     else if (/sablier|hourglass/.test(blob)) body = "hourglass figure";
     else if (/mince|slim|slender/.test(blob)) body = "slim slender figure";
 
+    // Âge: ne PAS dire "young adult" pour 40+
+    let ageLock = "";
+    if (age <= 25) {
+      ageLock = age + " year old young adult woman, looks exactly " + age + ", youthful face, NOT middle-aged, NOT elderly";
+    } else if (age <= 35) {
+      ageLock = age + " year old adult woman, looks exactly " + age + ", early thirties appearance, NOT elderly, NOT teenage";
+    } else if (age <= 45) {
+      ageLock = age + " year old mature adult woman, looks exactly " + age + ", mid-forties, subtle mature features, NOT young 20s, NOT elderly";
+    } else if (age <= 55) {
+      ageLock = age + " year old mature woman, looks exactly " + age + ", late forties early fifties, natural mature face, NOT young, NOT teenage";
+    } else {
+      ageLock = age + " year old older mature woman, looks exactly " + age + ", natural age-appropriate features";
+    }
+
     return {
       age: age,
-      ageLock: age + " year old young adult woman, looks exactly " + age + ", NOT middle-aged, NOT elderly, NOT mature, NOT wrinkled",
+      ageLock: ageLock,
       ethnicity: ethnicity,
       skin: skin,
       hair: hair,
+      eyes: eyes,
       body: body,
     };
   }
+
 
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
@@ -465,7 +503,7 @@
             return m ? String(m[1] || m[0]).replace(/\s+/g, " ").trim().slice(0, 48) : fb;
           }
           const hairH = idTraits.hair || pick(/(?:blonde|blond|brunette|brown hair|black hair|red hair|auburn|chestnut|cheveux?\s+[a-zéèêëàâùûô\s\-]+)/i, "natural hair");
-          const eyesH = pick(/(?:blue eyes|green eyes|brown eyes|hazel eyes|grey eyes|gray eyes|yeux?\s+[a-zéèêëàâ\s\-]+)/i, "");
+          const eyesH = idTraits.eyes || pick(/(?:blue eyes|green eyes|brown eyes|hazel eyes|grey eyes|gray eyes|yeux?\s+[a-zéèêëàâ\s\-]+)/i, "");
           const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
           const ethH = idTraits.ethnicity || "";
           const outfitsH = [
@@ -734,7 +772,7 @@
         + (idTraitsCf.body ? idTraitsCf.body + ". " : "")
         + "ethnicity/features: " + String(c.ethnicity || idTraitsCf.ethnicity || "as in profile") + ". "
         + (looksPrompt || bodyPrompt || appearancePrompt)
-        + " CRITICAL: match ethnicity and skin tone exactly; do NOT generate a white European woman if the profile is African, Asian, or other.")
+        + " CRITICAL: match ethnicity, age, hair color and skin tone exactly. If East Asian: East Asian face, jet black hair, dark eyes — NOT blonde, NOT Caucasian. If African: dark skin — NOT white European. Age must match the profile number.")
       : "";
     const base = [
       mood,
