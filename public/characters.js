@@ -1712,8 +1712,8 @@ window.CAST = [
       "sofa close talk"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "A photorealistic three-quarter glamorous fashion photo of a 51-year-old Spanish Mediterranean woman who looks exactly 51, elegant mature beauty, prominent cheekbones, warm hazel eyes, full lips, long voluminous dark brown wavy hair, warm olive skin. Voluptuous curvaceous figure with a FULL generous D-cup bust, deep natural cleavage, marked hips — never small chest, never flat. She wears a sexy fitted outfit with a deep neckline that clearly shows her full D-cup shape. Sensual confident pose, rich interior or Mediterranean terrace background, cinematic lighting, sharp focus, highly detailed skin, 8k, masterpiece.",
-    "prompt_horde": "photorealistic full-body photo of a 51-year-old Spanish Mediterranean woman who looks exactly 51, elegant mature face, warm hazel eyes, long dark brown wavy hair, warm olive skin, voluptuous figure, FULL D-cup bust with cleavage, marked hips, sexy fitted midi dress deep neckline opaque fabric, confident pose, rich interior background, natural light, sharp focus, head to toe, single person"
+    "prompt_cloudflare": "Photorealistic glamorous photo of Carmen Rossi, a 51-year-old Spanish Mediterranean woman who looks exactly 51, elegant mature beauty, prominent cheekbones, warm hazel eyes, full lips, long voluminous dark brown wavy hair, warm olive skin. Voluptuous curvaceous body with MANDATORY full heavy 95D breasts, deep cleavage, marked hips — bust must look like a real D-cup, never small.",
+    "prompt_horde": "51-year-old Spanish Mediterranean woman looks exactly 51, elegant mature face, warm hazel eyes, long dark brown wavy hair, warm olive skin, voluptuous figure, full 95D breasts with cleavage, marked hips"
   },
   {
     "id": "ingrid",

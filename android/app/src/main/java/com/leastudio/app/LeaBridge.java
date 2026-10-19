@@ -847,8 +847,8 @@ public class LeaBridge {
                     JSONObject params = new JSONObject();
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 448);
-                    params.put("height", registered ? 768 : 560);
-                    double denoise = 0.72;
+                    params.put("height", registered ? 768 : 640);
+                    double denoise = 0.68;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {

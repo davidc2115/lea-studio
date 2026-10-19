@@ -259,7 +259,7 @@
       A: "small natural A-cup, modest chest",
       B: "natural B-cup, light rounded shape",
       C: "true C-cup: medium natural breasts, moderate cleavage",
-      D: "true D-cup: full natural breasts, soft cleavage, fuller than C, realistic 95D proportions",
+      D: "true 95D full breasts: large rounded D-cup, deep soft cleavage, heavy natural volume clearly bigger than C-cup, strong silhouette in fitted clothes",
       E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
       F: "very large, visibly full F-cup with heavy natural volume, strong forward projection, and deep cleavage",
       G: "extremely full G-cup with very large heavy natural volume, broad bust, strong projection, and deep cleavage",
@@ -503,6 +503,16 @@
   }
 
 
+
+  /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
+  function stripFixedOutfitFromPrompt(text) {
+    let s = String(text || "");
+    s = s.replace(/\b(?:wearing|wears|dressed in|outfit|dress|blouse|jeans|skirt|gown|lingerie|robe|coat|top|heels|boots)[^.,;]*/gi, " ");
+    s = s.replace(/\b(?:posing|pose|standing|seated|leaning|walking)[^.,;]*/gi, " ");
+    s = s.replace(/\s{2,}/g, " ").trim();
+    return s;
+  }
+
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
@@ -623,17 +633,21 @@
             "fully clothed head to toe shoes visible natural light sharp focus photorealistic single person",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          let hordePrompt = partsH.join(", ").replace(/\s+/g, " ").trim();
-          // Vrai prompt personnage (dossier / fiche) si présent
-          const customHorde = String(c.prompt_horde || c.image_prompt_horde || "").trim();
-          if (customHorde) {
-            hordePrompt = customHorde
-              + ", DIFFERENT outfit than last image: " + outfitH
-              + ", DIFFERENT pose: " + poseH
-              + ", location: " + sceneH
-              + (hasRefH ? ", keep the same face identity as the reference photo" : "");
-          }
-          return hordePrompt.replace(/\s+/g, " ").trim().slice(0, 1400);
+          // Identité du prompt perso (sans tenue figée) + rotation tenue/pose + FULL BODY
+          const customHorde = stripFixedOutfitFromPrompt(String(c.prompt_horde || c.image_prompt_horde || "").trim());
+          const identityBits = [
+            hasRefH
+              ? "img2img keep SAME face as reference photo, identical eyes nose mouth jaw"
+              : "photorealistic woman",
+            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
+            "FULL BODY head to toe, shoes visible, entire figure in frame, NOT portrait, NOT close-up, NOT headshot, NOT bust-only crop",
+            "MUST wear DIFFERENT outfit: " + outfitH,
+            "MUST use DIFFERENT pose: " + poseH,
+            "MUST use DIFFERENT location: " + sceneH,
+            "do not copy clothing or pose from the reference image",
+            "natural light, sharp focus, single person only"
+          ].filter(Boolean);
+          return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
         }
 
         const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -836,20 +850,24 @@
       nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
       bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
       forCloudflare
-        ? "natural anatomically plausible proportions, realistic body and clothing fit, sensual fashion photography,"
+        ? "sensual fashion photography, realistic clothing fit on this cup size, full bust volume as specified,"
         : "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
       "realistic clothing fit on this body type and cup size,",
       "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
-    // Vrai prompt personnage (dossier / fiche) si présent — Cloudflare
-    const customCf = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
+    // Prompt perso = identité seule (tenue retirée) + rotation sexy + verrou bonnet
+    const customCfRaw = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
+    const customCf = customCfRaw ? stripFixedOutfitFromPrompt(customCfRaw) : "";
+    const cupBoost = (forCloudflare && bustInfo.label && /[DEFGHIJ]$/.test(bustInfo.label))
+      ? (", MANDATORY BUST " + bustInfo.label + ": full heavy natural breasts matching cup " + bustInfo.label
+         + ", deep cleavage, strong forward projection, visibly larger than C-cup, fitted clothing must show the volume, NEVER small flat or reduced bust")
+      : (bustInfo.label ? (", cup " + bustInfo.label + " realistic bust") : "");
     let out = customCf
-      ? ("PRIORITY OUTFIT (must follow): " + outfit + ". PRIORITY POSE: " + pose + ". PRIORITY LOCATION: " + scene + ". "
-         + "Sexy glamorous fashion photo, fitted clothing showing curves, deep neckline when appropriate, full body or three-quarter. "
-         + customCf
-         + (bustInfo.label ? (", PROFILE CUP " + bustInfo.label + " must be clearly visible and full, do not reduce bust size") : ""))
-      : base;
+      ? ("PRIORITY OUTFIT: " + outfit + ". PRIORITY POSE: " + pose + ". PRIORITY LOCATION: " + scene + ". "
+         + "glamorous sexy fashion photo, fitted clothing, deep neckline, three-quarter or full body, not a casual jeans look. "
+         + customCf + cupBoost)
+      : (base + cupBoost);
     if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +
@@ -2648,14 +2666,14 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.72;
+          const denoise = 0.68;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // true = crop visage seul → la tenue/pose de la ref ne fige plus le corps
-            faceOnlyRef: true,
+            // full ref + denoise élevé = corps libre; "full body" forcé dans le prompt
+            faceOnlyRef: false,
           });
           return {
             ok: true,
