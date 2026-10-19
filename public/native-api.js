@@ -409,7 +409,60 @@
         return locks.join(" ");
       }
 
-      function buildPhysicalImagePrompt(char, extra, engine) {
+    
+  /** Extrait teint / origine / âge visibles depuis appearance + looks_en (FR/EN) pour txt2img sans photo. */
+  function extractIdentityTraits(char) {
+    const c = char || {};
+    const blob = [c.ethnicity, c.body, c.looks_en, c.appearance, c.name].filter(Boolean).join(" ").toLowerCase();
+    const ageRaw = parseInt(c.age, 10);
+    const age = Number.isFinite(ageRaw) && ageRaw >= 18 ? ageRaw : 21;
+
+    let ethnicity = String(c.ethnicity || "").trim();
+    if (!ethnicity) {
+      if (/ouest[- ]?afric|ivoirien|sénégal|africaine?\b|black woman|dark[- ]skinned|peau [ée]b[eè]ne|ebony|west african|afro[- ]?diaspora|nubian/.test(blob))
+        ethnicity = "West African Black woman, dark ebony skin";
+      else if (/maghr[eé]b|arabe|north african|peau mate|olive skin/.test(blob))
+        ethnicity = "North African / Mediterranean woman, olive to tan skin";
+      else if (/asiatique|asian|cor[eé]en|japon|chinois|east asian/.test(blob))
+        ethnicity = "East Asian woman";
+      else if (/latine|latina|br[eé]sil|hispanic/.test(blob))
+        ethnicity = "Latina woman";
+      else if (/europ[eé]en|porcelaine|fair skin|peau claire|caucasian|white skin/.test(blob))
+        ethnicity = "European woman, fair skin";
+    }
+
+    let skin = "";
+    if (/peau [ée]b[eè]ne|ebony|deep dark skin|very dark skin/.test(blob)) skin = "deep dark ebony skin";
+    else if (/peau fonc[eé]e|dark skin|rich dark/.test(blob)) skin = "rich dark brown skin";
+    else if (/peau mate|tan skin|olive/.test(blob)) skin = "warm olive tan skin";
+    else if (/porcelaine|fair skin|peau claire|pale/.test(blob)) skin = "fair porcelain skin";
+
+    let hair = "";
+    if (/chignon|bun|en chignon/.test(blob)) hair = "hair in a neat bun";
+    else if (/tresses|braids|cornrows/.test(blob)) hair = "braided hair";
+    else if (/afro\b/.test(blob)) hair = "natural afro hair";
+    else if (/blond/.test(blob)) hair = "blonde hair";
+    else if (/roux|red hair|cuivr/.test(blob)) hair = "red hair";
+    else if (/ch[aâ]tain|brown hair|chestnut/.test(blob)) hair = "chestnut brown hair";
+    else if (/noir|black hair|jet[- ]black/.test(blob)) hair = "black hair";
+
+    let body = "";
+    if (/tonique|athletic|danseuse|fit\b/.test(blob)) body = "athletic toned figure";
+    else if (/plus[- ]?size|chubby|plantureus|ronde|bbw/.test(blob)) body = "plus-size curvy figure";
+    else if (/sablier|hourglass/.test(blob)) body = "hourglass figure";
+    else if (/mince|slim|slender/.test(blob)) body = "slim slender figure";
+
+    return {
+      age: age,
+      ageLock: age + " year old young adult woman, looks exactly " + age + ", NOT middle-aged, NOT elderly, NOT mature, NOT wrinkled",
+      ethnicity: ethnicity,
+      skin: skin,
+      hair: hair,
+      body: body,
+    };
+  }
+
+  function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
     const eng = String(engine || "").toLowerCase();
     // Horde: prompt MINIMAL — CorruptPrompt refuse looks_en/bust/lingerie même en "SFW".
@@ -425,15 +478,17 @@
           if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?|sexy|seductive|provocative)\b/i.test(extraH)) {
             throw new Error("Pour AI Horde, évite les mots sensuels dans le champ optionnel (risque CorruptPrompt). Utilise Cloudflare pour le mode sexy.");
           }
-          // Traits sûrs uniquement (cheveux / yeux / teint) — pas de poitrine ni looks_en brut
+          // Identité forte (surtout sans photo de profil)
+          const idTraits = extractIdentityTraits(c);
           const rawId = (String(c.looks_en || "") + " " + String(c.appearance || "")).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ");
           function pick(re, fb) {
             const m = rawId.match(re);
             return m ? String(m[1] || m[0]).replace(/\s+/g, " ").trim().slice(0, 48) : fb;
           }
-          const hairH = pick(/(?:blonde|blond|brunette|brown hair|black hair|red hair|auburn|chestnut|cheveux?\s+[a-zéèêëàâùûô\s\-]+)/i, "natural hair");
+          const hairH = idTraits.hair || pick(/(?:blonde|blond|brunette|brown hair|black hair|red hair|auburn|chestnut|cheveux?\s+[a-zéèêëàâùûô\s\-]+)/i, "natural hair");
           const eyesH = pick(/(?:blue eyes|green eyes|brown eyes|hazel eyes|grey eyes|gray eyes|yeux?\s+[a-zéèêëàâ\s\-]+)/i, "");
-          const skinH = pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
+          const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
+          const ethH = idTraits.ethnicity || "";
           const outfitsH = [
             "emerald green midi dress, opaque fabric, black ankle boots",
             "burgundy wrap midi dress, black heels",
@@ -443,74 +498,84 @@
             "camel coat over plum dress",
             "forest green tailored jumpsuit",
             "white blouse and beige A-line skirt",
-            "royal blue fit-and-flare dress",
+            "soft grey knit top and charcoal trousers",
             "lavender blouse and charcoal trousers",
-            "red belted midi dress, city interior",
+            "teal blouse with black midi skirt",
             "rose jacket and black trousers"
           ];
           const posesH = [
-            "full-length standing three-quarter view, arms relaxed, shoes visible",
-            "walking down stairs, head toward camera, entire figure in frame",
-            "standing by a window, full figure and feet visible",
-            "seated on a bench, legs and shoes visible, full body",
-            "walking across a room, full body from head to shoes",
-            "leaning near a bookshelf, camera pulled back, full figure"
+            "standing full body facing camera",
+            "three-quarter turn looking over shoulder",
+            "walking toward camera full length",
+            "seated on chair elegant posture full body",
+            "leaning lightly on railing full body",
+            "standing with one hand on hip full body"
           ];
-          function chooseH(kind, list, limit) {
-            const key = "lea.profileImage." + kind + "History." + String(c.id || "lea");
+          const scenesH = [
+            "modern apartment living room",
+            "hotel lobby with warm lamps",
+            "sunlit hallway with wooden floor",
+            "elegant staircase interior",
+            "bright cafe window seat",
+            "contemporary bedroom soft daylight"
+          ];
+          function pickVar(list, key, limit) {
             let history = [];
-            try { const v = JSON.parse(localStorage.getItem(key) || "[]"); if (Array.isArray(v)) history = v; } catch (_) {}
-            const options = list.filter(function (x) { return history.indexOf(x) < 0; });
-            const selected = (options.length ? options : list)[Math.floor(Math.random() * (options.length || list.length))];
-            try { localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(function (x) { return x !== selected; })).slice(0, limit))); } catch (_) {}
+            try { history = JSON.parse(localStorage.getItem(key) || "[]"); } catch (_) {}
+            if (!Array.isArray(history)) history = [];
+            const available = list.filter(function (x) { return history.indexOf(x) < 0; });
+            const pool = available.length ? available : list;
+            const selected = pool[Math.floor(Math.random() * pool.length)];
+            try {
+              localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(function (x) { return x !== selected; })).slice(0, limit)));
+            } catch (_) {}
             return selected;
           }
-          const outfitH = chooseH("outfit", outfitsH, 6);
-          const poseH = chooseH("pose", posesH, 5);
-          const scenesH = ["bright apartment living room", "elegant staircase", "hotel hallway", "classic bedroom", "softly lit lobby"];
-          const sceneH = chooseH("scene", scenesH, 3);
-          // Morphologie SURE (pas de seins/cleavage) — crucial pour Hortense et plus-size
+          const outfitH = pickVar(outfitsH, "lea.hordeOutfitHist." + String(c.id || "x"), 6);
+          const poseH = pickVar(posesH, "lea.hordePoseHist." + String(c.id || "x"), 4);
+          const sceneH = pickVar(scenesH, "lea.hordeSceneHist." + String(c.id || "x"), 4);
+          let bodyH = idTraits.body || "";
           const morphRaw = (String(c.body || "") + " " + String(c.looks_en || "") + " " + String(c.appearance || "")).toLowerCase();
-          let bodyH = "";
-          if (/chubby|plus[- ]?size|bbw|ronde|voluptueus|soft belly|rounded belly|wide hips|thick thighs|plantureus|curvy plus/.test(morphRaw)) {
-            bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, NOT thin, NOT skinny, NOT athletic";
-          } else if (/hourglass|sablier/.test(morphRaw)) {
-            bodyH = "hourglass figure, defined waist, curvy hips";
-          } else if (/slim|mince|slender|élancée|proportions fines|silhouette élancée/.test(morphRaw)) {
-            bodyH = "slim slender adult woman, fine elegant build, narrow frame, long legs, natural realistic proportions";
-          } else if (/athletic|athl/.test(morphRaw)) {
-            bodyH = "athletic toned figure";
+          if (!bodyH) {
+            if (/chubby|plus[- ]?size|bbw|ronde|voluptueus|soft belly|rounded belly|wide hips|thick thighs|plantureus|curvy plus/.test(morphRaw)) {
+              bodyH = "plus-size curvy full figure, soft rounded belly, wide hips, thick thighs, soft arms, NOT thin, NOT skinny";
+            } else if (/athletic|tonique|danseuse/.test(morphRaw)) {
+              bodyH = "athletic toned figure, dancer legs";
+            } else if (/slim|mince|slender/.test(morphRaw)) {
+              bodyH = "slim slender figure";
+            } else {
+              bodyH = "natural feminine figure";
+            }
           }
-          // Hortense Henry (aya): forcer identité ronde + visage fidèle
           if (String(c.id || "") === "aya" || /hortense\s*henry/i.test(nameH)) {
-            bodyH = "plus-size young woman, very curvy soft full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
+            bodyH = "plus-size curvy full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
           }
-          // Sans ref: injecter plus de traits physiques (safe) depuis looks_en
+          // Sans ref: description physique safe + ethnicity/age en tête
           let descH = "";
           if (!hasRefH) {
-            const safeLooks = sanitizeForHordePrompt([String(c.ethnicity || ""), String(c.body || ""), String(c.looks_en || ""), String(c.appearance || "")].filter(Boolean).join(", ")).replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 440);
+            const safeLooks = sanitizeForHordePrompt([ethH, skinH, hairH, bodyH, String(c.looks_en || ""), String(c.appearance || "")].filter(Boolean).join(", "))
+              .replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 400);
             descH = safeLooks;
           }
           const partsH = [
             hasRefH
               ? "img2img from reference, KEEP the exact same face as the source photo, identical eyes nose mouth jaw and smile, same woman"
-              : "photorealistic full-length fashion photo of one adult woman matching this description",
-            ageH + " years old",
-            visualAgeH,
-            nameH,
+              : "photorealistic full-length fashion photo of ONE adult woman",
+            idTraits.ageLock,
+            ethH,
+            skinH,
             hairH,
             eyesH,
-            skinH,
             bodyH,
             descH,
-            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "match the physical description exactly, coherent face and body",
+            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "match ethnicity skin hair age and body exactly, coherent realistic face",
             "NEW outfit: " + outfitH,
             "NEW pose: " + poseH,
             "location: " + sceneH,
-            "fully clothed, head to toe, shoes visible, natural light, sharp focus, different pose and clothes from any prior image",
+            "fully clothed, head to toe, shoes visible, natural light, sharp focus, single person only",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100);
+          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100)
         }
 
         const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -692,8 +757,16 @@
 
     const exactPromptAge = Number.isInteger(age) ? age : Number(c.estimatedAge || 0);
     const visualAgeLock = buildVisualAgeLock(exactPromptAge, c);
+    const idTraitsCf = extractIdentityTraits(c);
     const textOnlyIdentity = forCloudflare && !hasProfileRef
-      ? ("TEXT-ONLY CHARACTER IDENTITY: " + name + ", exactly " + exactPromptAge + " years old; ethnicity/features: " + String(c.ethnicity || "as described in the profile") + ". " + (looksPrompt || bodyPrompt || appearancePrompt))
+      ? ("TEXT-ONLY CHARACTER IDENTITY (no photo — follow strictly): " + name + ", " + idTraitsCf.ageLock + ". "
+        + (idTraitsCf.ethnicity ? idTraitsCf.ethnicity + ". " : "")
+        + (idTraitsCf.skin ? idTraitsCf.skin + ". " : "")
+        + (idTraitsCf.hair ? idTraitsCf.hair + ". " : "")
+        + (idTraitsCf.body ? idTraitsCf.body + ". " : "")
+        + "ethnicity/features: " + String(c.ethnicity || idTraitsCf.ethnicity || "as in profile") + ". "
+        + (looksPrompt || bodyPrompt || appearancePrompt)
+        + " CRITICAL: match ethnicity and skin tone exactly; do NOT generate a white European woman if the profile is African, Asian, or other.")
       : "";
     const base = [
       mood,
