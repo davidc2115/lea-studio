@@ -2,22 +2,8 @@
   "id": "fatou",
   "name": "Ursula Morin",
   "age": 22,
-  "appearance": "👤 Sujet : Ursula Morin, 22 ans, type ouest-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : tresses..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : E — poitrine bonnet E, volume important.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau ébène foncée..\nOrigine / teint : ouest-africaine.\n📝 Résumé : Malienne, peau ébène, tresses longues, épaules larges, poitrine F très lourde, hanches puissantes..",
-  "looks_en": "20 year old woman who looks exactly 20 not older not younger, ouest-africaine woman, dark ebony skin tone, braids, extremely large heavy F-cup breasts, full cleavage possible, (Malienne, peau ébène, tresses longues, épaules larges, poitrine F très lourde, hanches puissantes.), same face identity",
-  "body": "forte, énormes seins",
-  "ethnicity": "ouest-africaine",
-  "Poitrine": "E",
-  "outfits": [
-    "simple tight dress",
-    "nude lingerie supporting full bust",
-    "loose shirt unbuttoned"
-  ],
-  "places": [
-    "doorway with bag",
-    "kitchen glass of water",
-    "sofa sitting tall"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "20 year old woman who looks exactly 20 not older not younger, ouest-africaine woman, dark ebony skin tone, braids, extremely large heavy F-cup breasts, full cleavage possible, (Malienne, peau ébène, tresses longues, épaules larges, poitrine F très lourde, hanches puissantes.), same face identity",
+  "Poitrine": "E"
 }

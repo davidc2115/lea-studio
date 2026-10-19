@@ -2,22 +2,8 @@
   "id": "camila",
   "name": "Roxane Perrin",
   "age": 22,
-  "appearance": "👤 Sujet : Roxane Perrin, 22 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux bruns, bouclés..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : latine.\n📝 Résumé : Colombienne, peau dorée, cheveux bruns bouclés, lèvres marquées, taille fine, poitrine C, fesses très rondes..",
-  "looks_en": "19 year old woman who looks exactly 19 not older not younger, latine woman, golden caramel tan skin, brown hair, curly hair, medium natural C-cup breasts, slim slender body, wide hips, (Colombienne, peau dorée, cheveux bruns bouclés, lèvres marquées, taille fine, poitrine C, fesses très rondes.), same face identity",
-  "body": "courbes, seins moyens",
-  "ethnicity": "latine",
-  "Poitrine": "H",
-  "outfits": [
-    "open-back salsa top",
-    "black thong and bra",
-    "tiny shorts"
-  ],
-  "places": [
-    "hallway after dance",
-    "kitchen drinking water",
-    "mirror adjusting hair"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, latine woman, golden caramel tan skin, brown hair, curly hair, medium natural C-cup breasts, slim slender body, wide hips, (Colombienne, peau dorée, cheveux bruns bouclés, lèvres marquées, taille fine, poitrine C, fesses très rondes.), same face identity",
+  "Poitrine": "H"
 }

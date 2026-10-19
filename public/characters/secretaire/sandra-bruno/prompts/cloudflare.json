@@ -2,22 +2,8 @@
   "id": "camille_bs",
   "name": "Sandra Bruno",
   "age": 30,
-  "appearance": "👤 Sujet : Sandra Bruno, 30 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 30 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux châtains..\n\n👗 Silhouette : femme, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, châtain attaché, poitrine C, silhouette de mère potentielle encore sexy..",
-  "looks_en": "30 year old woman who looks exactly 30 not older not younger, européenne woman, chestnut brown hair, medium natural C-cup breasts, (Française, châtain attaché, poitrine C, silhouette de mère potentielle encore sexy.), same face identity",
-  "body": "femme, seins moyens",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "blouse and jeans",
-    "silk camisole",
-    "nude lingerie"
-  ],
-  "places": [
-    "kitchen serious talk",
-    "balcony wine",
-    "sofa late"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a 30-year-old adult woman who looks exactly 30 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "30 year old woman who looks exactly 30 not older not younger, européenne woman, chestnut brown hair, medium natural C-cup breasts, (Française, châtain attaché, poitrine C, silhouette de mère potentielle encore sexy.), same face identity",
+  "Poitrine": "H"
 }

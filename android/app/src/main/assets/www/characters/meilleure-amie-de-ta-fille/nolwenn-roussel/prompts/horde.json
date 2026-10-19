@@ -2,22 +2,8 @@
   "id": "nina",
   "name": "Nolwenn Roussel",
   "age": 21,
-  "appearance": "👤 Sujet : Nolwenn Roussel, 21 ans, type slave. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux gris.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond platine..\n\n👗 Silhouette : grande, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau très pâle..\nOrigine / teint : slave.\n📝 Résumé : Slave, très pâle, cheveux platine longs, yeux gris, grande, poitrine C, jambes interminables..",
-  "looks_en": "21 year old woman who looks exactly 21 not older not younger, slave woman, very pale porcelain skin, platinum blonde hair, grey eyes, medium natural C-cup breasts, tall height, (Slave, très pâle, cheveux platine longs, yeux gris, grande, poitrine C, jambes interminables.), same face identity",
-  "body": "grande, seins moyens",
-  "ethnicity": "slave",
-  "Poitrine": "H",
-  "outfits": [
-    "black skirt and sheer tights",
-    "white lingerie on pale skin",
-    "coat and nothing much under"
-  ],
-  "places": [
-    "snowy doorway",
-    "minimalist bedroom",
-    "window at night"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, slave woman, very pale porcelain skin, platinum blonde hair, grey eyes, medium natural C-cup breasts, tall height, (Slave, très pâle, cheveux platine longs, yeux gris, grande, poitrine C, jambes interminables.), same face identity",
+  "Poitrine": "H"
 }

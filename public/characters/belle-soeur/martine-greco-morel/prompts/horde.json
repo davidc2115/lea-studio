@@ -2,21 +2,8 @@
   "id": "iris",
   "name": "Martine Greco-morel",
   "age": 26,
-  "appearance": "👤 Sujet : Iris Vermeer, 26 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : grande, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Néerlandaise, blonde, grande, seins moyens, attitude décontractée.\nOrigine / teint : européenne.\nFiche body : grande, seins moyens.\n\n🔒 Détails techniques (génération) : 26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
-  "looks_en": "26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
-  "body": "grande, seins moyens",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
   "provider": "AI Horde",
-  "outfits": [
-    "simple tee no bra",
-    "bike shorts",
-    "towel casual"
-  ],
-  "places": [
-    "entry bike helmet",
-    "shower casual",
-    "sofa bare feet"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "prompt": "photorealistic full-body fashion photo of a young adult 26-year-old woman who looks exactly 26 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
+  "Poitrine": "H"
 }

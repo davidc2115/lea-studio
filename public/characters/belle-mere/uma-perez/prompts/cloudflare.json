@@ -2,22 +2,8 @@
   "id": "karima",
   "name": "Uma Perez",
   "age": 46,
-  "appearance": "👤 Sujet : Uma Perez, 46 ans, type maghrébine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 46 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux amande.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, lisses..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau olive méditerranéenne..\nOrigine / teint : maghrébine.\n📝 Résumé : Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée..",
-  "looks_en": "46 year old woman who looks exactly 46 not older not younger, maghrébine woman, tan olive skin, black hair, straight hair, dark almond-shaped eyes, medium natural C-cup breasts, (Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée.), same face identity",
-  "body": "élancée, seins moyens",
-  "ethnicity": "maghrébine",
-  "Poitrine": "H",
-  "outfits": [
-    "modest elegant dress",
-    "satin slip",
-    "pearl and lace lingerie"
-  ],
-  "places": [
-    "living room tea",
-    "hallway mirror",
-    "guest bed"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a mature 46-year-old woman who looks exactly 46, elegant mature features, not a young 20s model of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "46 year old woman who looks exactly 46 not older not younger, maghrébine woman, tan olive skin, black hair, straight hair, dark almond-shaped eyes, medium natural C-cup breasts, (Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée.), same face identity",
+  "Poitrine": "H"
 }

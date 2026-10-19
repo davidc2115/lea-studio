@@ -2,22 +2,8 @@
   "id": "emma_bs",
   "name": "Awa Ferrari",
   "age": 24,
-  "appearance": "👤 Sujet : Awa Ferrari, 24 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 24 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond miel..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle..",
-  "looks_en": "24 year old woman who looks exactly 24 not older not younger, européenne woman, honey blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle.), same face identity",
-  "body": "fine, seins moyens",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "borrowed hoodie",
-    "summer short dress",
-    "shared lingerie drawer style"
-  ],
-  "places": [
-    "sofa feet on you",
-    "bathroom shared",
-    "guest mattress floor"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 24-year-old woman who looks exactly 24 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "24 year old woman who looks exactly 24 not older not younger, européenne woman, honey blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle.), same face identity",
+  "Poitrine": "H"
 }

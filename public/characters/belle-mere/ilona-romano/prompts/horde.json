@@ -2,22 +2,8 @@
   "id": "diane",
   "name": "Ilona Romano",
   "age": 40,
-  "appearance": "👤 Sujet : Ilona Romano, 40 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 40 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : soignée, seins moyens-gros.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Américaine, cheveux blonds californiens, sourire large, implants C-D, silhouette soignée..",
-  "looks_en": "40 year old woman who looks exactly 40 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Américaine, cheveux blonds californiens, sourire large, implants C-D, silhouette soignée.), same face identity",
-  "body": "soignée, seins moyens-gros",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "yoga pants and tank",
-    "bikini coverup",
-    "pink lingerie"
-  ],
-  "places": [
-    "kitchen island wine",
-    "patio",
-    "guest shower"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a 40-year-old adult woman who looks exactly 40 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "40 year old woman who looks exactly 40 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Américaine, cheveux blonds californiens, sourire large, implants C-D, silhouette soignée.), same face identity",
+  "Poitrine": "H"
 }

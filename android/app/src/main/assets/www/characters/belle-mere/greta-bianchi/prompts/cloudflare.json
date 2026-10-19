@@ -2,22 +2,8 @@
   "id": "marie_bm",
   "name": "Greta Bianchi",
   "age": 58,
-  "appearance": "👤 Sujet : Greta Bianchi, 58 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 58 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Marie-Claude Petit, 58 ans. Origine / type : européenne. Porte des lunettes. Silhouette : matronne, gros seins. Résumé : Française, cheveux gris courts, lunettes, formes rondes, poitrine lourde, silhouette matronne...",
-  "looks_en": "58 year old woman who looks exactly 58 not older not younger, européenne woman, wearing glasses, large full breasts, (Française, cheveux gris courts, lunettes, formes rondes, poitrine lourde, silhouette matronne.), same face identity",
-  "body": "matronne, gros seins",
-  "ethnicity": "européenne",
-  "Poitrine": "95D",
-  "outfits": [
-    "floral blouse",
-    "housecoat",
-    "soft cotton nightgown"
-  ],
-  "places": [
-    "armchair knitting",
-    "kitchen morning",
-    "hallway night"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a mature 58-year-old woman who looks exactly 58, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "58 year old woman who looks exactly 58 not older not younger, européenne woman, wearing glasses, large full breasts, (Française, cheveux gris courts, lunettes, formes rondes, poitrine lourde, silhouette matronne.), same face identity",
+  "Poitrine": "95D"
 }

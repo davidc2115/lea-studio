@@ -2,22 +2,8 @@
   "id": "brigitte",
   "name": "Vera Perez",
   "age": 55,
-  "appearance": "👤 Sujet : Vera Perez, 55 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 55 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux bleus.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Allemande, cheveux blonds grisants longs, yeux bleus, formes molles généreuses, poitrine D lourde, hanches larges..",
-  "looks_en": "55 year old woman who looks exactly 55 not older not younger, européenne woman, blonde hair, blue eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Allemande, cheveux blonds grisants longs, yeux bleus, formes molles généreuses, poitrine D lourde, hanches larges.), same face identity",
-  "body": "mature douce, gros seins",
-  "ethnicity": "européenne",
-  "Poitrine": "95D",
-  "outfits": [
-    "cardigan and dress",
-    "cotton nightgown",
-    "soft lace bra"
-  ],
-  "places": [
-    "sofa blanket",
-    "kitchen night",
-    "guest room doorway"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a mature 55-year-old woman who looks exactly 55, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "55 year old woman who looks exactly 55 not older not younger, européenne woman, blonde hair, blue eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Allemande, cheveux blonds grisants longs, yeux bleus, formes molles généreuses, poitrine D lourde, hanches larges.), same face identity",
+  "Poitrine": "95D"
 }

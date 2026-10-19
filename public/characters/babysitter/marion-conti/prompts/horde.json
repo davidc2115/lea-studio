@@ -2,22 +2,8 @@
   "id": "maya_bs",
   "name": "Marion Conti",
   "age": 21,
-  "appearance": "👤 Sujet : Marion Conti, 21 ans, type asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, lisses..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : asiatique.\n📝 Résumé : Chinoise, cheveux noirs lisses, lunettes, silhouette mince, très petite poitrine..",
-  "looks_en": "21 year old woman who looks exactly 21 not older not younger, asiatique woman, black hair, straight hair, wearing glasses, nearly flat A-cup chest, very small breasts, NOT busty, slim slender body, petite short stature, (Chinoise, cheveux noirs lisses, lunettes, silhouette mince, très petite poitrine.), same face identity",
-  "body": "mince, très petits seins",
-  "ethnicity": "asiatique",
-  "Poitrine": "95D",
-  "outfits": [
-    "cardigan and blouse",
-    "pajamas with socks",
-    "simple lingerie"
-  ],
-  "places": [
-    "desk laptop",
-    "floor books",
-    "tea kitchen"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, asiatique woman, black hair, straight hair, wearing glasses, nearly flat A-cup chest, very small breasts, NOT busty, slim slender body, petite short stature, (Chinoise, cheveux noirs lisses, lunettes, silhouette mince, très petite poitrine.), same face identity",
+  "Poitrine": "95D"
 }

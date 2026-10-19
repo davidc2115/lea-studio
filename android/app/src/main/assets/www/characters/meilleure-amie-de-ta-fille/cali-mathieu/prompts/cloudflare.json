@@ -2,22 +2,8 @@
   "id": "thea",
   "name": "Cali Mathieu",
   "age": 21,
-  "appearance": "👤 Sujet : Cali Mathieu, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux roux / auburn..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier..",
-  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, red auburn hair, visible freckles on face, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier.), same face identity",
-  "body": "fine, petits seins",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "paint-stained oversized tee",
-    "cream lingerie",
-    "shirt and nothing else"
-  ],
-  "places": [
-    "living room floor canvases",
-    "sink washing hands",
-    "window light"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, red auburn hair, visible freckles on face, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier.), same face identity",
+  "Poitrine": "H"
 }

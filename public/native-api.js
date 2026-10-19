@@ -623,7 +623,17 @@
             "fully clothed head to toe shoes visible natural light sharp focus photorealistic single person",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100)
+          let hordePrompt = partsH.join(", ").replace(/\s+/g, " ").trim();
+          // Vrai prompt personnage (dossier / fiche) si présent
+          const customHorde = String(c.prompt_horde || c.image_prompt_horde || "").trim();
+          if (customHorde) {
+            hordePrompt = customHorde
+              + ", DIFFERENT outfit than last image: " + outfitH
+              + ", DIFFERENT pose: " + poseH
+              + ", location: " + sceneH
+              + (hasRefH ? ", keep the same face identity as the reference photo" : "");
+          }
+          return hordePrompt.replace(/\s+/g, " ").trim().slice(0, 1400);
         }
 
         const age = c.age == null || c.age === "" ? NaN : Number(c.age);
@@ -833,7 +843,11 @@
       "no extra people, no text, no watermark, no deformed hands",
     ].filter(Boolean).join(" ");
 
-    let out = base;
+    // Vrai prompt personnage (dossier / fiche) si présent — Cloudflare
+    const customCf = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
+    let out = customCf
+      ? (customCf + ", Outfit variation: " + outfit + ". Pose: " + pose + ". Location: " + scene + ".")
+      : base;
     if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
     if (hasLargeCloudflareBust) {
       const finalBustLock = "FINAL PROFILE BODY PRIORITY " + bustInfo.label +

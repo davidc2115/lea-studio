@@ -2,22 +2,8 @@
   "id": "daria",
   "name": "Giulia Gautier",
   "age": 21,
-  "appearance": "👤 Sujet : Giulia Gautier, 21 ans, type européenne de l'est. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux bruns..\n\n👗 Silhouette : sculptée, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau claire..\nOrigine / teint : européenne de l'est.\n📝 Résumé : Roumaine, peau claire, cheveux bruns longs, pommettes, poitrine C implant-look naturel, hanches..",
-  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne de l'est woman, fair light skin, brown hair, medium natural C-cup breasts, (Roumaine, peau claire, cheveux bruns longs, pommettes, poitrine C implant-look naturel, hanches.), same face identity",
-  "body": "sculptée, seins moyens",
-  "ethnicity": "européenne de l'est",
-  "Poitrine": "H",
-  "outfits": [
-    "coat over lingerie",
-    "studio robe open",
-    "heels and set"
-  ],
-  "places": [
-    "night elevator",
-    "mirror full length",
-    "white studio-like room"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne de l'est appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne de l'est woman, fair light skin, brown hair, medium natural C-cup breasts, (Roumaine, peau claire, cheveux bruns longs, pommettes, poitrine C implant-look naturel, hanches.), same face identity",
+  "Poitrine": "H"
 }

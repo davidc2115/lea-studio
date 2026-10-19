@@ -2,22 +2,8 @@
   "id": "meera",
   "name": "Andrée Marino",
   "age": 21,
-  "appearance": "👤 Sujet : Andrée Marino, 21 ans, type sud-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux très foncés.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : tresses..\n\n👗 Silhouette : jeune, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : sud-asiatique.\n📝 Résumé : Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune..",
-  "looks_en": "21 year old woman who looks exactly 21 not older not younger, sud-asiatique woman, braids, dark brown-black eyes, medium natural C-cup breasts, (Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune.), same face identity",
-  "body": "jeune, seins moyens",
-  "ethnicity": "sud-asiatique",
-  "Poitrine": "H",
-  "outfits": [
-    "salwar casual",
-    "jeans and top",
-    "cotton lingerie"
-  ],
-  "places": [
-    "couch questions",
-    "kitchen tea",
-    "doorway linger"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, sud-asiatique woman, braids, dark brown-black eyes, medium natural C-cup breasts, (Indienne, longue tresse, yeux noirs, poitrine C, silhouette jeune.), same face identity",
+  "Poitrine": "H"
 }

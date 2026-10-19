@@ -2,22 +2,8 @@
   "id": "sasha",
   "name": "Luna Marchand",
   "age": 22,
-  "appearance": "👤 Sujet : Luna Marchand, 22 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : androgyne, petits seins.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau claire..\nOrigine / teint : européenne.\n📝 Résumé : Sasha Moreau, 19 ans. Origine / type : européenne. Peau : peau claire. Poitrine : très petite, presque plate (bonnet A). Silhouette : androgyne, petits seins. Résumé : Française, coupe courte messie, peau claire, poitrine petite A bandée ou non, hanches étroites...",
-  "looks_en": "19 year old woman who looks exactly 19 not older not younger, européenne woman, fair light skin, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, petite short stature, (Française, coupe courte messie, peau claire, poitrine petite A bandée ou non, hanches étroites.), same face identity",
-  "body": "androgyne, petits seins",
-  "ethnicity": "européenne",
-  "Poitrine": "95D",
-  "outfits": [
-    "crop and cargos",
-    "binder or small bralette",
-    "shirt unbuttoned"
-  ],
-  "places": [
-    "night street door",
-    "windowsill smoking banned",
-    "floor sketchbook"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, européenne woman, fair light skin, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, petite short stature, (Française, coupe courte messie, peau claire, poitrine petite A bandée ou non, hanches étroites.), same face identity",
+  "Poitrine": "95D"
 }

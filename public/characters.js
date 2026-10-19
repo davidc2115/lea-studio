@@ -55,7 +55,9 @@ window.CAST = [
       "living room fireplace",
       "sofa at night"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 18-year-old woman who looks exactly 18 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 18-year-old woman who looks exactly 18 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "ines",
@@ -94,7 +96,9 @@ window.CAST = [
       "kitchen counter",
       "guest bedroom"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, warm hazel eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, warm hazel eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "aya",
@@ -136,7 +140,9 @@ window.CAST = [
       "yoga mat in living room"
     ],
     "Poitrine": "95D",
-    "poitrine": "95D"
+    "poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sofia",
@@ -175,7 +181,9 @@ window.CAST = [
       "couch with wine glass",
       "bedroom mirror"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a bright modern apartment interior, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "jade",
@@ -215,7 +223,9 @@ window.CAST = [
       "bedroom window rain",
       "floor cushions with notes"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "myriam",
@@ -252,7 +262,9 @@ window.CAST = [
       "dim living room",
       "armchair"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "chloe",
@@ -290,7 +302,9 @@ window.CAST = [
       "stairs sitting",
       "balcony night"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, vivid green eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, vivid green eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "nina",
@@ -327,7 +341,9 @@ window.CAST = [
       "minimalist bedroom",
       "window at night"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "keisha",
@@ -365,7 +381,9 @@ window.CAST = [
       "living room dancing",
       "hallway laughing"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, voluminous natural afro-textured hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, voluminous natural afro-textured hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "lina",
@@ -404,7 +422,9 @@ window.CAST = [
       "guest room bed edge",
       "kitchen tea"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "priya",
@@ -441,7 +461,9 @@ window.CAST = [
       "sofa with tea",
       "dim bedroom"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "camila",
@@ -480,7 +502,9 @@ window.CAST = [
       "kitchen drinking water",
       "mirror adjusting hair"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "amelie",
@@ -521,7 +545,9 @@ window.CAST = [
       "kitchen midnight snack",
       "couch under blanket"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on an elegant indoor staircase, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "zoe",
@@ -558,7 +584,9 @@ window.CAST = [
       "stairwell",
       "bathroom black lipstick"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "fatou",
@@ -595,7 +623,9 @@ window.CAST = [
       "kitchen glass of water",
       "sofa sitting tall"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "hana",
@@ -634,7 +664,9 @@ window.CAST = [
       "genkan-like entry",
       "small guest bed"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "lucia",
@@ -672,7 +704,9 @@ window.CAST = [
       "dining table leftovers",
       "balcony cigarette"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "marine",
@@ -709,7 +743,9 @@ window.CAST = [
       "bathroom",
       "heater vent"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "rania",
@@ -739,7 +775,9 @@ window.CAST = [
       "dim corridor",
       "leather armchair",
       "half-lit bedroom"
-    ]
+    ],
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 19-year-old woman who looks exactly 19 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with a medium natural bust with soft cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 19-year-old woman who looks exactly 19 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with a medium natural bust with soft cleavage. She is in a sunlit living room, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "thea",
@@ -776,7 +814,9 @@ window.CAST = [
       "sink washing hands",
       "window light"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "viola",
@@ -814,7 +854,9 @@ window.CAST = [
       "hallway with suitcase",
       "kitchen morning"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "noemie",
@@ -850,7 +892,9 @@ window.CAST = [
       "searching a drawer",
       "sofa scrolling phone"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "daria",
@@ -888,7 +932,9 @@ window.CAST = [
       "mirror full length",
       "white studio-like room"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne de l'est appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne de l'est appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "mei",
@@ -924,7 +970,9 @@ window.CAST = [
       "RGB desk corner",
       "floor cables"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "aisha",
@@ -959,7 +1007,9 @@ window.CAST = [
       "barre-like chair",
       "hallway tying hair"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of West African appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, deep ebony dark skin. She has an athletic toned figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of West African appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, deep ebony dark skin. She has an athletic toned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "bruna",
@@ -994,7 +1044,9 @@ window.CAST = [
       "kitchen dancing",
       "hallway laughing"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "elise",
@@ -1034,7 +1086,9 @@ window.CAST = [
       "sofa kicking shoes",
       "bathroom sink"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a bright modern apartment interior, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sasha",
@@ -1071,7 +1125,9 @@ window.CAST = [
       "windowsill smoking banned",
       "floor sketchbook"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "yasmine",
@@ -1106,7 +1162,9 @@ window.CAST = [
       "mirror lipstick",
       "taxi-wait doorway"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of moyen-orientale appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of moyen-orientale appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "olga",
@@ -1142,7 +1200,9 @@ window.CAST = [
       "wine glass kitchen",
       "low lamp sofa"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is beside a large window soft daylight, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "maya",
@@ -1178,7 +1238,9 @@ window.CAST = [
       "fridge",
       "bedroom doorway"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of métisse appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of métisse appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "helen",
@@ -1216,7 +1278,9 @@ window.CAST = [
       "kitchen island at night",
       "master bedroom"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 48-year-old woman who looks exactly 48, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 48-year-old woman who looks exactly 48, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "monique",
@@ -1252,7 +1316,9 @@ window.CAST = [
       "sofa TV",
       "guest room"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 52-year-old woman who looks exactly 52, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 52-year-old woman who looks exactly 52, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on an elegant indoor staircase, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sofia_bm",
@@ -1288,7 +1354,9 @@ window.CAST = [
       "balcony wine",
       "sofa close"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 45-year-old woman who looks exactly 45, elegant mature features, not a young 20s model of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 45-year-old woman who looks exactly 45, elegant mature features, not a young 20s model of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a hotel lobby with warm lamps, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "nathalie",
@@ -1324,7 +1392,9 @@ window.CAST = [
       "shower doorway",
       "kitchen after run"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a 41-year-old adult woman who looks exactly 41 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 41-year-old adult woman who looks exactly 41 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "karima",
@@ -1361,7 +1431,9 @@ window.CAST = [
       "hallway mirror",
       "guest bed"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 46-year-old woman who looks exactly 46, elegant mature features, not a young 20s model of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 46-year-old woman who looks exactly 46, elegant mature features, not a young 20s model of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "brigitte",
@@ -1400,7 +1472,9 @@ window.CAST = [
       "kitchen night",
       "guest room doorway"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 55-year-old woman who looks exactly 55, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 55-year-old woman who looks exactly 55, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "valeria",
@@ -1438,7 +1512,9 @@ window.CAST = [
       "kitchen counter sitting",
       "bedroom mirror"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 39-year-old adult woman who looks exactly 39 of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 39-year-old adult woman who looks exactly 39 of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "eileen",
@@ -1475,7 +1551,9 @@ window.CAST = [
       "kitchen late",
       "stairs"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 50-year-old woman who looks exactly 50, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 50-year-old woman who looks exactly 50, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "amira",
@@ -1515,7 +1593,9 @@ window.CAST = [
       "living room judgment",
       "bathroom vanity"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a 43-year-old adult woman who looks exactly 43 of moyen-orient appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 43-year-old adult woman who looks exactly 43 of moyen-orient appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "yuki_bm",
@@ -1553,7 +1633,9 @@ window.CAST = [
       "hallway quiet",
       "futon guest room"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 47-year-old woman who looks exactly 47, elegant mature features, not a young 20s model of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 47-year-old woman who looks exactly 47, elegant mature features, not a young 20s model of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "claire_bm",
@@ -1591,7 +1673,9 @@ window.CAST = [
       "kitchen laughing",
       "couch feet up"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 38-year-old adult woman who looks exactly 38 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 38-year-old adult woman who looks exactly 38 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "rosa",
@@ -1627,7 +1711,9 @@ window.CAST = [
       "terrace",
       "sofa close talk"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "A photorealistic medium shot of a 51-year-old Spanish Mediterranean woman who looks exactly 51, elegant mature beauty, prominent cheekbones, warm hazel eyes, full lips, and long voluminous dark brown wavy hair. Warm olive Mediterranean skin. She has a voluptuous curvaceous figure with a full generous D-cup bust and natural cleavage, marked hips. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, wearing a chic white linen midi sundress with thin straps. She is posing naturally, leaning against a stone railing with a gentle, confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body photo of a 51-year-old Spanish Mediterranean woman who looks exactly 51, elegant mature face, warm hazel eyes, long voluminous dark brown wavy hair, warm olive skin, voluptuous figure, full D-cup bust, marked hips, wearing a beige fitted midi dress with thin straps opaque fabric, standing in a bright modern apartment, natural pose, gentle smile, natural light, sharp focus, realistic skin, single person, head to toe, fully clothed"
   },
   {
     "id": "ingrid",
@@ -1667,7 +1753,9 @@ window.CAST = [
       "bathroom steam",
       "bedroom window"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 49-year-old woman who looks exactly 49, elegant mature features, not a young 20s model of Latina appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 49-year-old woman who looks exactly 49, elegant mature features, not a young 20s model of Latina appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "fatima",
@@ -1706,7 +1794,9 @@ window.CAST = [
       "kitchen spices",
       "corridor night"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a 44-year-old adult woman who looks exactly 44 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 44-year-old adult woman who looks exactly 44 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "patricia",
@@ -1743,7 +1833,9 @@ window.CAST = [
       "kitchen loud",
       "guest room"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a 42-year-old adult woman who looks exactly 42 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 42-year-old adult woman who looks exactly 42 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a bright modern apartment interior, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "marie_bm",
@@ -1780,7 +1872,9 @@ window.CAST = [
       "kitchen morning",
       "hallway night"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 58-year-old woman who looks exactly 58, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 58-year-old woman who looks exactly 58, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "olga_bm",
@@ -1817,7 +1911,9 @@ window.CAST = [
       "sofa legs crossed",
       "bedroom command"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 46-year-old woman who looks exactly 46, elegant mature features, not a young 20s model of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 46-year-old woman who looks exactly 46, elegant mature features, not a young 20s model of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on an elegant indoor staircase, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "diane",
@@ -1854,7 +1950,9 @@ window.CAST = [
       "patio",
       "guest shower"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 40-year-old adult woman who looks exactly 40 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 40-year-old adult woman who looks exactly 40 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sylvie",
@@ -1891,7 +1989,9 @@ window.CAST = [
       "sofa after wine",
       "doorway night"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 53-year-old woman who looks exactly 53, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 53-year-old woman who looks exactly 53, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "priya_bm",
@@ -1929,7 +2029,9 @@ window.CAST = [
       "kitchen spices",
       "balcony night"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 45-year-old woman who looks exactly 45, elegant mature features, not a young 20s model of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 45-year-old woman who looks exactly 45, elegant mature features, not a young 20s model of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "chantal",
@@ -1969,7 +2071,9 @@ window.CAST = [
       "sofa too close",
       "hallway perfume"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 49-year-old woman who looks exactly 49, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 49-year-old woman who looks exactly 49, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "lena_bm",
@@ -2004,7 +2108,9 @@ window.CAST = [
       "kitchen snack",
       "doorway awkward"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 37-year-old adult woman who looks exactly 37 of slave appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 37-year-old adult woman who looks exactly 37 of slave appearance, gorgeous face, striking blue eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "aisha_bm",
@@ -2044,7 +2150,9 @@ window.CAST = [
       "kitchen hips moving",
       "terrace night"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a 44-year-old adult woman who looks exactly 44 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 44-year-old adult woman who looks exactly 44 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "hannah",
@@ -2081,7 +2189,9 @@ window.CAST = [
       "study",
       "guest bed made"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 51-year-old woman who looks exactly 51, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 51-year-old woman who looks exactly 51, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "carmen",
@@ -2118,7 +2228,9 @@ window.CAST = [
       "sofa telenovela",
       "doorway hip cocked"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 47-year-old woman who looks exactly 47, elegant mature features, not a young 20s model of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 47-year-old woman who looks exactly 47, elegant mature features, not a young 20s model of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "elise_bm",
@@ -2155,7 +2267,9 @@ window.CAST = [
       "kitchen morning coffee",
       "stairs brush past"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 36-year-old adult woman who looks exactly 36 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 36-year-old adult woman who looks exactly 36 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "noura",
@@ -2192,7 +2306,9 @@ window.CAST = [
       "mirror removing scarf",
       "guest room"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a 42-year-old adult woman who looks exactly 42 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 42-year-old adult woman who looks exactly 42 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "beatrice",
@@ -2231,7 +2347,9 @@ window.CAST = [
       "whiskey glass",
       "leather chair"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 54-year-old woman who looks exactly 54, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 54-year-old woman who looks exactly 54, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "giulia",
@@ -2269,7 +2387,9 @@ window.CAST = [
       "sofa judgment",
       "bedroom closet"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 48-year-old woman who looks exactly 48, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 48-year-old woman who looks exactly 48, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "marta",
@@ -2305,7 +2425,9 @@ window.CAST = [
       "table full plates",
       "sofa exhausted"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a mature 50-year-old woman who looks exactly 50, elegant mature features, not a young 20s model of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a mature 50-year-old woman who looks exactly 50, elegant mature features, not a young 20s model of slave appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a sunlit living room, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "emma_bs",
@@ -2343,7 +2465,9 @@ window.CAST = [
       "bathroom shared",
       "guest mattress floor"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 24-year-old woman who looks exactly 24 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 24-year-old woman who looks exactly 24 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "lea_bs",
@@ -2379,7 +2503,9 @@ window.CAST = [
       "couch under blanket",
       "kitchen glass of water"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "chloe_bs",
@@ -2417,7 +2543,9 @@ window.CAST = [
       "garage beer",
       "couch legs spread casual"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 27-year-old woman who looks exactly 27 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 27-year-old woman who looks exactly 27 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sara",
@@ -2453,7 +2581,9 @@ window.CAST = [
       "kitchen counter sit",
       "hallway music"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of maghrébine appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "julia_bs",
@@ -2492,7 +2622,9 @@ window.CAST = [
       "sofa close",
       "guest bed"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "maya_bs",
@@ -2529,7 +2661,9 @@ window.CAST = [
       "floor books",
       "tea kitchen"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "ines_bs",
@@ -2568,7 +2702,9 @@ window.CAST = [
       "bathroom sink",
       "guest bed face down"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 23-year-old woman who looks exactly 23 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 23-year-old woman who looks exactly 23 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "aisha_bs",
@@ -2608,7 +2744,9 @@ window.CAST = [
       "mirror practice",
       "kitchen water"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 26-year-old woman who looks exactly 26 of West African appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, deep ebony dark skin. She has an athletic toned figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 26-year-old woman who looks exactly 26 of West African appearance, gorgeous face, expressive brown eyes, full lips, dark hair styled in a neat elegant bun, deep ebony dark skin. She has an athletic toned figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sofia_bs",
@@ -2644,7 +2782,9 @@ window.CAST = [
       "sofa blanket",
       "doorway worried"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 28-year-old woman who looks exactly 28 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 28-year-old woman who looks exactly 28 of Spanish Mediterranean appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a sunlit living room, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "yuna",
@@ -2680,7 +2820,9 @@ window.CAST = [
       "kitchen snack",
       "guest bed scroll"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a bright modern apartment interior, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "camille_bs",
@@ -2717,7 +2859,9 @@ window.CAST = [
       "balcony wine",
       "sofa late"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a 30-year-old adult woman who looks exactly 30 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a 30-year-old adult woman who looks exactly 30 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "bruna_bs",
@@ -2756,7 +2900,9 @@ window.CAST = [
       "kitchen hip bump",
       "bathroom door"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 24-year-old woman who looks exactly 24 of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 24-year-old woman who looks exactly 24 of latino appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "nora",
@@ -2790,7 +2936,9 @@ window.CAST = [
       "sofa book",
       "kitchen water glass"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "zoe_bs",
@@ -2827,7 +2975,9 @@ window.CAST = [
       "couch scrolling",
       "kitchen raid"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "priya_bs",
@@ -2865,7 +3015,9 @@ window.CAST = [
       "balcony call",
       "sofa stretch"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 26-year-old woman who looks exactly 26 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 26-year-old woman who looks exactly 26 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "luna",
@@ -2901,7 +3053,9 @@ window.CAST = [
       "bathroom sink paint",
       "sofa sleep"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 23-year-old woman who looks exactly 23 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 23-year-old woman who looks exactly 23 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "keisha_bs",
@@ -2936,7 +3090,9 @@ window.CAST = [
       "kitchen dance",
       "couch sprawl"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 27-year-old woman who looks exactly 27 of West African appearance, gorgeous face, expressive brown eyes, full lips, voluminous natural afro-textured hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 27-year-old woman who looks exactly 27 of West African appearance, gorgeous face, expressive brown eyes, full lips, voluminous natural afro-textured hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a hotel lobby with warm lamps, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "hana_bs",
@@ -2976,7 +3132,9 @@ window.CAST = [
       "tea tray",
       "guest futon"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "marine_bs",
@@ -3012,7 +3170,9 @@ window.CAST = [
       "shower steam",
       "kitchen protein shake"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 25-year-old woman who looks exactly 25 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has an athletic toned figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "daria_bs",
@@ -3050,7 +3210,9 @@ window.CAST = [
       "mirror pose",
       "sofa exhausted"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 24-year-old woman who looks exactly 24 of slave appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 24-year-old woman who looks exactly 24 of slave appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on an elegant indoor staircase, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "elise_bs",
@@ -3088,7 +3250,9 @@ window.CAST = [
       "sofa face first",
       "kitchen coffee beg"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 29-year-old woman who looks exactly 29 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 29-year-old woman who looks exactly 29 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is in a sunlit living room, full body, wearing a navy blouse and tailored trousers. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "meera",
@@ -3122,7 +3286,9 @@ window.CAST = [
       "kitchen tea",
       "doorway linger"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is standing outdoors on a sunny Mediterranean terrace overlooking the sea, leaning against a stone railing, wearing a chic white linen midi sundress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 21-year-old woman who looks exactly 21 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a hotel lobby with warm lamps, full body, wearing a beige fitted midi dress with thin straps, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "victoria",
@@ -3160,7 +3326,9 @@ window.CAST = [
       "entry judgment",
       "guest room neat"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 27-year-old woman who looks exactly 27 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 27-year-old woman who looks exactly 27 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "lina_bs",
@@ -3195,7 +3363,9 @@ window.CAST = [
       "sofa pretend",
       "mirror comparison"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a sunlit living room, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "fatou_bs",
@@ -3232,7 +3402,9 @@ window.CAST = [
       "kitchen cook loud",
       "sofa take space"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 25-year-old woman who looks exactly 25 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 25-year-old woman who looks exactly 25 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, deep ebony dark skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on an elegant indoor staircase, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "iris",
@@ -3265,7 +3437,9 @@ window.CAST = [
       "shower casual",
       "sofa bare feet"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 26-year-old woman who looks exactly 26 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 26-year-old woman who looks exactly 26 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "noemie_bs",
@@ -3301,7 +3475,9 @@ window.CAST = [
       "kitchen raid fridge",
       "couch almost sleep"
     ],
-    "Poitrine": "H"
+    "Poitrine": "H",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a modern apartment living room with soft daylight, seated elegantly on a sofa arm, wearing a beige bodycon midi dress with thin straps. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "sasha_bs",
@@ -3336,7 +3512,9 @@ window.CAST = [
       "couch game",
       "kitchen beer"
     ],
-    "Poitrine": "95D"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 23-year-old woman who looks exactly 23 of slave appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on a grand marble staircase under a crystal chandelier, looking back over her shoulder, wearing an elegant black backless evening gown. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 23-year-old woman who looks exactly 23 of slave appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, fair natural skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is on an elegant indoor staircase, full body, wearing a burgundy wrap midi dress with waist belt, opaque fabric. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   },
   {
     "id": "amelie_bs",
@@ -3375,6 +3553,8 @@ window.CAST = [
       "kitchen bake",
       "doorway shy smile"
     ],
-    "Poitrine": "E"
+    "Poitrine": "E",
+    "prompt_cloudflare": "photorealistic medium shot of a young adult 28-year-old woman who looks exactly 28 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is on a bedroom balcony at dusk city lights behind, one hand on the railing, wearing a floral print fitted midi dress with a tasteful neckline. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+    "prompt_horde": "photorealistic full-body fashion photo of a young adult 28-year-old woman who looks exactly 28 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full E-cup bust with pronounced cleavage. She is beside a large window soft daylight, full body, wearing a cream satin midi dress, modest elegant cut. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe."
   }
 ];

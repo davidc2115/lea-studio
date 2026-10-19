@@ -2,22 +2,8 @@
   "id": "myriam",
   "name": "Lison Roussel",
   "age": 22,
-  "appearance": "👤 Sujet : Lison Roussel, 22 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux amande.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau mate / hâlé..\nOrigine / teint : nord-africaine.\n📝 Résumé : Marocaine, peau claire-mate, cheveux noirs longs, yeux amande, formes généreuses, poitrine D, hanches larges..",
-  "looks_en": "19 year old woman who looks exactly 19 not older not younger, nord-africaine woman, light warm tan skin, black hair, dark almond-shaped eyes, large full D-cup breasts, generous bust, full cleavage possible, voluptuous curvy figure, wide hips, (Marocaine, peau claire-mate, cheveux noirs longs, yeux amande, formes généreuses, poitrine D, hanches larges.), same face identity",
-  "body": "pulpeuse, gros seins",
-  "ethnicity": "nord-africaine",
-  "Poitrine": "95D",
-  "outfits": [
-    "fitted dress under coat",
-    "gold jewelry and nude lingerie",
-    "silk slip"
-  ],
-  "places": [
-    "rainy street door",
-    "dim living room",
-    "armchair"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a young adult 22-year-old woman who looks exactly 22 of West African appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is in a luxurious hotel suite with warm evening light, standing by a tall window, wearing a fitted burgundy satin wrap dress with a defined waist. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, nord-africaine woman, light warm tan skin, black hair, dark almond-shaped eyes, large full D-cup breasts, generous bust, full cleavage possible, voluptuous curvy figure, wide hips, (Marocaine, peau claire-mate, cheveux noirs longs, yeux amande, formes généreuses, poitrine D, hanches larges.), same face identity",
+  "Poitrine": "95D"
 }

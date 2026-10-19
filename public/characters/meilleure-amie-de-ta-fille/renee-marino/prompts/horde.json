@@ -2,21 +2,8 @@
   "id": "victoria",
   "name": "Renée Marino",
   "age": 27,
-  "appearance": "👤 Sujet : Victoria Hayes, 27 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : chic, petits seins.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Anglaise, blonde, coupe chic, poitrine B, posture raide.\nOrigine / teint : européenne.\nFiche body : chic, petits seins.\n\n🔒 Détails techniques (génération) : 27 year old woman who looks exactly 27 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Anglaise, blonde, coupe chic, poitrine B, posture raide.), same face identity",
-  "looks_en": "27 year old woman who looks exactly 27 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Anglaise, blonde, coupe chic, poitrine B, posture raide.), same face identity",
-  "body": "chic, petits seins",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
   "provider": "AI Horde",
-  "outfits": [
-    "tweed skirt set",
-    "silk blouse",
-    "pearl lingerie"
-  ],
-  "places": [
-    "sofa wine proper",
-    "entry judgment",
-    "guest room neat"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "prompt": "photorealistic full-body fashion photo of a young adult 27-year-old woman who looks exactly 27 of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in a bright modern apartment interior, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "27 year old woman who looks exactly 27 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Anglaise, blonde, coupe chic, poitrine B, posture raide.), same face identity",
+  "Poitrine": "H"
 }

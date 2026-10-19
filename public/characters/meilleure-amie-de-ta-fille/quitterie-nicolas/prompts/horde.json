@@ -2,22 +2,8 @@
   "id": "priya",
   "name": "Quitterie Nicolas",
   "age": 22,
-  "appearance": "👤 Sujet : Quitterie Nicolas, 22 ans, type sud-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux très foncés.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, tresses..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : sud-asiatique.\n📝 Résumé : Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges..",
-  "looks_en": "20 year old woman who looks exactly 20 not older not younger, sud-asiatique woman, golden caramel tan skin, black hair, braids, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges.), same face identity",
-  "body": "formes, gros seins",
-  "ethnicity": "sud-asiatique",
-  "Poitrine": "95D",
-  "outfits": [
-    "embroidered crop and skirt",
-    "deep red lingerie",
-    "silk wrap"
-  ],
-  "places": [
-    "entryway removing shoes",
-    "sofa with tea",
-    "dim bedroom"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 22-year-old woman who looks exactly 22 of East Asian appearance, gorgeous face, expressive brown eyes, full lips, long dark black hair, warm Mediterranean olive skin. She has a voluptuous curvaceous figure with generous hips with a full generous D-cup bust with natural cleavage. She is beside a large window soft daylight, full body, wearing an emerald green bodycon midi dress, opaque. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "20 year old woman who looks exactly 20 not older not younger, sud-asiatique woman, golden caramel tan skin, black hair, braids, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges.), same face identity",
+  "Poitrine": "95D"
 }

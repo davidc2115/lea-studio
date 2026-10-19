@@ -2,22 +2,8 @@
   "id": "hannah",
   "name": "Petra Ricci",
   "age": 51,
-  "appearance": "👤 Sujet : Petra Ricci, 51 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 51 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : ferme, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge..",
-  "looks_en": "51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
-  "body": "ferme, seins moyens",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "blouse and trousers",
-    "structured lingerie",
-    "robe precise"
-  ],
-  "places": [
-    "organized kitchen",
-    "study",
-    "guest bed made"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "Cloudflare",
-  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+  "prompt": "photorealistic medium shot of a mature 51-year-old woman who looks exactly 51, elegant mature features, not a young 20s model of européenne appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a feminine well-proportioned figure with an extremely full H-cup bust. She is in an elegant kitchen with candlelight, standing beside a wooden table, wearing a forest green mini skirt with a black fitted top and heels. She is posing naturally with a gentle confident smile. Natural sunlight, cinematic lighting, sharp focus, highly detailed skin texture, 8k resolution, masterpiece.",
+  "looks_en": "51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
+  "Poitrine": "H"
 }

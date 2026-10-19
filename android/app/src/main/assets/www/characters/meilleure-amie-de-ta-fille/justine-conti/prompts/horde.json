@@ -2,22 +2,8 @@
   "id": "ines_bs",
   "name": "Justine Conti",
   "age": 23,
-  "appearance": "👤 Sujet : Justine Conti, 23 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 23 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond platine..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, blonde platine, robe de soirée, poitrine C, jambes longues..",
-  "looks_en": "23 year old woman who looks exactly 23 not older not younger, européenne woman, platinum blonde hair, medium natural C-cup breasts, (Française, blonde platine, robe de soirée, poitrine C, jambes longues.), same face identity",
-  "body": "longiligne, seins moyens",
-  "ethnicity": "européenne",
-  "Poitrine": "H",
-  "outfits": [
-    "sequin dress",
-    "heels in hand",
-    "slip and stockings"
-  ],
-  "places": [
-    "entry drunk giggle",
-    "bathroom sink",
-    "guest bed face down"
-  ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
   "provider": "AI Horde",
-  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+  "prompt": "photorealistic full-body fashion photo of a young adult 23-year-old woman who looks exactly 23 of Latina appearance, gorgeous face, expressive brown eyes, full lips, long voluminous blonde hair, fair natural skin. She has a slim elegant figure with an extremely full H-cup bust. She is beside a large window soft daylight, full body, wearing a black long-sleeve fitted midi dress, elegant. She is posing naturally with a gentle confident smile. natural light, sharp focus, realistic skin texture, single person, fully clothed, head to toe.",
+  "looks_en": "23 year old woman who looks exactly 23 not older not younger, européenne woman, platinum blonde hair, medium natural C-cup breasts, (Française, blonde platine, robe de soirée, poitrine C, jambes longues.), same face identity",
+  "Poitrine": "H"
 }
