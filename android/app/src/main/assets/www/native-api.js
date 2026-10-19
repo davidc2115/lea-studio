@@ -531,26 +531,31 @@
           const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
           const ethH = idTraits.ethnicity || "";
           const outfitsH = [
-            "floral print fitted midi dress, opaque fabric, black heels, elegant full body",
-            "burgundy wrap midi dress defined waist, opaque, black pumps, hotel interior",
-            "black fitted midi dress boat neckline, opaque fabric, glamorous stairs",
-            "emerald green bodycon midi dress, opaque, ankle boots, full length",
-            "cream satin midi dress thin straps covered shoulders, soft indoor light",
-            "navy fitted blouse and pencil skirt, polished full body look",
-            "olive square-neck midi dress, defined waist, nude pumps",
-            "red wrap dress waist belt, opaque fabric, city interior",
+            "beige fitted midi dress thin straps, opaque fabric, indoor full body",
+            "black backless long evening dress, glamorous stairs, full length",
+            "emerald green bodycon midi dress, ankle boots, full body",
+            "burgundy wrap midi dress defined waist, black pumps, hotel lobby",
+            "black top and forest green mini skirt, thigh boots, bedroom balcony",
+            "navy fitted blouse and pencil skirt, polished hallway",
+            "red wrap dress waist belt, city interior, full body",
+            "cream satin midi dress, soft indoor light, elegant full body",
+            "white blouse with black fitted midi skirt, refined full body",
+            "olive square-neck midi dress, nude pumps, living room",
             "camel coat over plum fitted dress, elegant staircase",
-            "white blouse with black fitted midi skirt, refined hallway",
-            "rose tailored jacket and dark trousers, classic interior",
-            "teal blouse with black midi skirt, contemporary apartment"
+            "teal blouse with black midi skirt, contemporary apartment",
+            "charcoal tailored jumpsuit defined waist, corridor full body",
+            "rose jacket and dark trousers, classic interior full body",
+            "silver grey knit midi dress, soft daylight apartment"
           ];
           const posesH = [
-            "standing full body facing camera",
-            "three-quarter turn looking over shoulder",
+            "standing full body facing camera hands on hips",
+            "three-quarter turn looking over shoulder full body",
+            "seated on desk edge elegant posture full body",
             "walking toward camera full length",
-            "seated on chair elegant posture full body",
-            "leaning lightly on railing full body",
-            "standing with one hand on hip full body"
+            "leaning on staircase railing looking back",
+            "standing profile view looking at camera",
+            "one hand on banister other on hip full body",
+            "seated on chair legs crossed full body"
           ];
           const scenesH = [
             "modern apartment living room",
@@ -600,8 +605,14 @@
           }
           const partsH = [
             hasRefH
-              ? "img2img: KEEP the same FACE only as the reference photo (same eyes nose mouth jaw smile age), same woman"
+              ? "img2img face reference only: keep same face eyes nose mouth, same woman"
               : "photorealistic full-length fashion photo of ONE adult woman",
+            "DIFFERENT outfit than reference: " + outfitH,
+            "DIFFERENT pose than reference: " + poseH,
+            "DIFFERENT location than reference: " + sceneH,
+            hasRefH
+              ? "do not copy reference clothing pose or background, change them completely"
+              : "match ethnicity skin hair age and body exactly",
             idTraits.ageLock,
             ethH,
             skinH,
@@ -609,13 +620,7 @@
             eyesH,
             bodyH,
             descH,
-            hasRefH
-              ? "CRITICAL CHANGE: completely NEW outfit, NEW pose, NEW camera angle, NEW background — do NOT copy the reference clothing, pose, stance, hands or scene"
-              : "match ethnicity skin hair age and body exactly, coherent realistic face",
-            "outfit must be: " + outfitH,
-            "pose must be: " + poseH,
-            "location must be: " + sceneH,
-            "fully clothed, head to toe, shoes visible, natural light, sharp focus, photorealistic high quality, single person only",
+            "fully clothed head to toe shoes visible natural light sharp focus photorealistic single person",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
           return partsH.join(", ").replace(/\s+/g, " ").trim().slice(0, 1100)
@@ -2626,14 +2631,14 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.58;
+          const denoise = 0.72;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // false = photo de profil entière (meilleure identité que crop visage seul)
-            faceOnlyRef: false,
+            // true = crop visage seul → la tenue/pose de la ref ne fige plus le corps
+            faceOnlyRef: true,
           });
           return {
             ok: true,
