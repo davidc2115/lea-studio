@@ -541,39 +541,41 @@
           const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
           const ethH = idTraits.ethnicity || "";
           const outfitsH = [
-            "beige fitted midi dress thin straps, opaque fabric, indoor full body",
-            "black backless long evening dress, glamorous stairs, full length",
-            "emerald green bodycon midi dress, ankle boots, full body",
-            "burgundy wrap midi dress defined waist, black pumps, hotel lobby",
-            "black top and forest green mini skirt, thigh boots, bedroom balcony",
-            "navy fitted blouse and pencil skirt, polished hallway",
-            "red wrap dress waist belt, city interior, full body",
-            "cream satin midi dress, soft indoor light, elegant full body",
-            "white blouse with black fitted midi skirt, refined full body",
-            "olive square-neck midi dress, nude pumps, living room",
-            "camel coat over plum fitted dress, elegant staircase",
-            "teal blouse with black midi skirt, contemporary apartment",
-            "charcoal tailored jumpsuit defined waist, corridor full body",
-            "rose jacket and dark trousers, classic interior full body",
-            "silver grey knit midi dress, soft daylight apartment"
+            "black backless long evening dress on marble stairs",
+            "emerald green bodycon midi dress and ankle boots",
+            "burgundy wrap midi dress with black pumps in hotel lobby",
+            "forest green mini skirt black top and thigh boots",
+            "red wrap dress with waist belt in city interior",
+            "cream satin midi dress soft indoor light",
+            "navy blouse and pencil skirt polished hallway",
+            "olive square-neck midi dress nude pumps",
+            "camel coat over plum fitted dress on staircase",
+            "teal blouse black midi skirt contemporary apartment",
+            "charcoal tailored jumpsuit defined waist",
+            "rose jacket and dark trousers classic interior",
+            "silver grey knit midi dress daylight apartment",
+            "white blouse black fitted midi skirt refined look",
+            "floral print fitted midi dress opaque fabric heels"
           ];
           const posesH = [
             "standing full body facing camera hands on hips",
             "three-quarter turn looking over shoulder full body",
-            "seated on desk edge elegant posture full body",
+            "seated on desk edge full body",
             "walking toward camera full length",
             "leaning on staircase railing looking back",
-            "standing profile view looking at camera",
-            "one hand on banister other on hip full body",
+            "standing profile looking at camera full body",
+            "one hand on banister other on hip",
             "seated on chair legs crossed full body"
           ];
           const scenesH = [
+            "grand hotel staircase with chandelier",
             "modern apartment living room",
-            "hotel lobby with warm lamps",
-            "sunlit hallway with wooden floor",
-            "elegant staircase interior",
-            "bright cafe window seat",
-            "contemporary bedroom soft daylight"
+            "hotel lobby warm lamps",
+            "sunlit hallway wooden floor",
+            "bright cafe window",
+            "contemporary bedroom soft daylight",
+            "marble lobby twin staircases",
+            "elegant kitchen interior"
           ];
           function pickVar(list, key, limit) {
             let history = [];
@@ -587,9 +589,9 @@
             } catch (_) {}
             return selected;
           }
-          const outfitH = pickVar(outfitsH, "lea.hordeOutfitHist." + String(c.id || "x"), 6);
-          const poseH = pickVar(posesH, "lea.hordePoseHist." + String(c.id || "x"), 4);
-          const sceneH = pickVar(scenesH, "lea.hordeSceneHist." + String(c.id || "x"), 4);
+          const outfitH = outfitsH[Math.floor(Math.random() * outfitsH.length)];
+          const poseH = posesH[Math.floor(Math.random() * posesH.length)];
+          const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
           let bodyH = idTraits.body || "";
           const morphRaw = (String(c.body || "") + " " + String(c.looks_en || "") + " " + String(c.appearance || "")).toLowerCase();
           if (!bodyH) {
@@ -633,19 +635,23 @@
             "fully clothed head to toe shoes visible natural light sharp focus photorealistic single person",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
-          // Identité du prompt perso (sans tenue figée) + rotation tenue/pose + FULL BODY
           const customHorde = stripFixedOutfitFromPrompt(String(c.prompt_horde || c.image_prompt_horde || "").trim());
+          const cupH = String(c.Poitrine || c.poitrine || "");
+          const bustH = /[DEFGHIJ]/i.test(cupH)
+            ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
+            : "natural feminine bust";
           const identityBits = [
             hasRefH
-              ? "img2img keep SAME face as reference photo, identical eyes nose mouth jaw"
+              ? "img2img SAME face as reference, identical eyes nose mouth jaw cheekbones smile"
               : "photorealistic woman",
             customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
-            "FULL BODY head to toe, shoes visible, entire figure in frame, NOT portrait, NOT close-up, NOT headshot, NOT bust-only crop",
-            "MUST wear DIFFERENT outfit: " + outfitH,
-            "MUST use DIFFERENT pose: " + poseH,
-            "MUST use DIFFERENT location: " + sceneH,
-            "do not copy clothing or pose from the reference image",
-            "natural light, sharp focus, single person only"
+            bustH,
+            "FULL BODY from head to shoes, entire figure visible, NOT a portrait, NOT close-up headshot",
+            "wearing: " + outfitH,
+            "pose: " + poseH,
+            "location: " + sceneH,
+            "new clothing and pose every time, do not copy the reference outfit",
+            "natural light, sharp focus, single person, variation seed " + String(Date.now() % 100000)
           ].filter(Boolean);
           return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
         }
@@ -2667,14 +2673,14 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.68;
+          const denoise = 0.55;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // full ref + denoise élevé = corps libre; "full body" forcé dans le prompt
-            faceOnlyRef: false,
+            // crop visage pour identité; denoise 0.55 + full-body prompt pour nouvelle tenue
+            faceOnlyRef: true,
           });
           return {
             ok: true,
