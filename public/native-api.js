@@ -641,17 +641,17 @@
             ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
             : "natural feminine bust";
           const identityBits = [
-            hasRefH
-              ? "img2img SAME face as reference, identical eyes nose mouth jaw cheekbones smile"
-              : "photorealistic woman",
-            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
-            bustH,
-            "FULL BODY from head to shoes, entire figure visible, NOT a portrait, NOT close-up headshot",
+            "FULL LENGTH photo, entire body head to feet in frame, standing or seated full figure, wide shot, NOT portrait, NOT face close-up, NOT headshot, NOT selfie crop",
             "wearing: " + outfitH,
             "pose: " + poseH,
             "location: " + sceneH,
-            "new clothing and pose every time, do not copy the reference outfit",
-            "natural light, sharp focus, single person, variation seed " + String(Date.now() % 100000)
+            hasRefH
+              ? "img2img keep same face identity as reference, same eyes nose mouth jaw"
+              : "photorealistic woman",
+            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
+            bustH,
+            "do not copy reference framing if reference is a portrait — expand to full body with new outfit",
+            "natural light, sharp focus, single person, shoes visible, variation " + String(Date.now() % 100000)
           ].filter(Boolean);
           return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
         }
@@ -2673,14 +2673,14 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.55;
+          const denoise = 0.62;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // crop visage pour identité; denoise 0.55 + full-body prompt pour nouvelle tenue
-            faceOnlyRef: true,
+            // full body ref obligatoire: face-only crop force des portraits
+            faceOnlyRef: false,
           });
           return {
             ok: true,

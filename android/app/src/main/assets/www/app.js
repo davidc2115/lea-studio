@@ -1169,10 +1169,25 @@ function renderChat() {
   });
 
   const input = $("chat-input");
-  input && input.addEventListener("input", () => {
-    input.style.height = "auto";
-    input.style.height = Math.min(120, input.scrollHeight) + "px";
-  });
+  if (input) {
+    try {
+      const draft = localStorage.getItem("lea.chatDraft." + c.id) || "";
+      if (draft && !state.sending) {
+        input.value = draft;
+        input.style.height = "auto";
+        input.style.height = Math.min(120, input.scrollHeight) + "px";
+      }
+    } catch (_) {}
+    input.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(120, input.scrollHeight) + "px";
+      try {
+        const v = input.value || "";
+        if (v.trim()) localStorage.setItem("lea.chatDraft." + c.id, v);
+        else localStorage.removeItem("lea.chatDraft." + c.id);
+      } catch (_) {}
+    });
+  }
   $("chat-send") && ($("chat-send").onclick = sendMessage);
     $("chat-back") && ($("chat-back").onclick = () => {
     state.chatListMode = true;
@@ -1240,6 +1255,8 @@ async function sendMessage() {
   input.style.height = "auto";
   state.chat.messages = state.chat.messages || [];
   state.chat.messages.push({ role: "user", content: text, ts: Date.now() });
+  try { localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat)); } catch (_) {}
+  try { localStorage.removeItem("lea.chatDraft." + state.character.id); } catch (_) {}
   paintMessages();
   state.sending = true;
   const typing = $("chat-typing");
@@ -1833,6 +1850,20 @@ function bindNav() {
 
 // Au retour au premier plan: rester sur la vue actuelle, ne pas ouvrir Import sans raison
 document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    try {
+      const inp = document.getElementById("chat-input");
+      const cid = state.character && state.character.id;
+      if (inp && cid) {
+        const v = inp.value || "";
+        if (v.trim()) localStorage.setItem("lea.chatDraft." + cid, v);
+      }
+      if (state.character && state.chat && state.chat.messages) {
+        localStorage.setItem("lea.chat." + state.character.id, JSON.stringify(state.chat));
+      }
+    } catch (_) {}
+    return;
+  }
   if (document.visibilityState !== "visible") return;
   if (state.view === "import") {
     // Si aucun import en cours, revenir à Découvrir
