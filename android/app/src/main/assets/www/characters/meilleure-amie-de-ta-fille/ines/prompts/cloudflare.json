@@ -1,0 +1,23 @@
+{
+  "id": "ines",
+  "name": "Gwenaëlle Clement",
+  "age": 22,
+  "appearance": "👤 Sujet : Gwenaëlle Clement, 22 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux noisette.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, ondulés..\n\n👗 Silhouette : hanches, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : nord-africaine.\n📝 Résumé : Algérienne, peau mate dorée, longs cheveux noirs ondulés, yeux noisette, hanches marquées, poitrine moyenne C..",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, nord-africaine woman, golden caramel tan skin, black hair, wavy hair, hazel eyes, medium C-cup breasts, (Algérienne, peau mate dorée, longs cheveux noirs ondulés, yeux noisette, hanches marquées, poitrine moyenne C.), same face identity",
+  "body": "hanches, seins moyens",
+  "ethnicity": "nord-africaine",
+  "Poitrine": "H",
+  "outfits": [
+    "black crop top and short skirt",
+    "red lace bra and panties",
+    "silk robe half open"
+  ],
+  "places": [
+    "apartment hallway night",
+    "kitchen counter",
+    "guest bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

@@ -2,12 +2,11 @@
   "id": "monique",
   "name": "Romy Martinez",
   "age": 52,
-  "appearance": "👤 Sujet : Monique Lefèvre, 52 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n✨ Peau : peau claire.\n👗 Silhouette : pulpeuse mature, très gros seins.\n💕 Poitrine : très généreuse (bonnet E).\n📝 Résumé : Française, cheveux blonds décolorés courts, peau claire, formes généreuses, poitrine E lourde, ventre légèrement arrondi.\nOrigine / teint : européenne.\nFiche body : pulpeuse mature, très gros seins.\n\n🔒 Détails techniques (génération) : 52 year old woman who looks exactly 52 not older not younger, européenne woman, fair light skin, blonde hair, very large heavy E-cup breasts, full cleavage possible, voluptuous curvy figure, (Française, cheveux blonds décolorés courts, peau claire, formes généreuses, poitrine E lourde, ventre légèrement arrondi.), same face identity",
+  "appearance": "👤 Sujet : Romy Martinez, 52 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 52 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : E — poitrine bonnet E, volume important.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau claire..\nOrigine / teint : européenne.\n📝 Résumé : Française, cheveux blonds décolorés courts, peau claire, formes généreuses, poitrine E lourde, ventre légèrement arrondi..",
   "looks_en": "52 year old woman who looks exactly 52 not older not younger, européenne woman, fair light skin, blonde hair, very large heavy E-cup breasts, full cleavage possible, voluptuous curvy figure, (Française, cheveux blonds décolorés courts, peau claire, formes généreuses, poitrine E lourde, ventre légèrement arrondi.), same face identity",
   "body": "pulpeuse mature, très gros seins",
   "ethnicity": "européenne",
   "Poitrine": "E",
-  "provider": "Cloudflare",
   "outfits": [
     "knit sweater and tight jeans",
     "full-cup lingerie",
@@ -18,5 +17,7 @@
     "sofa TV",
     "guest room"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

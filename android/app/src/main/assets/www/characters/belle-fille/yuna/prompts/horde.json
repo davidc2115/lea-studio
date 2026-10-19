@@ -1,0 +1,23 @@
+{
+  "id": "yuna",
+  "name": "Émilie Greco",
+  "age": 22,
+  "appearance": "👤 Sujet : Émilie Greco, 22 ans, type asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau claire..\nOrigine / teint : asiatique.\n📝 Résumé : Coréenne, cheveux noirs épaules, peau claire, silhouette fine, petite poitrine..",
+  "looks_en": "20 year old woman who looks exactly 20 not older not younger, asiatique woman, fair light skin, black hair, small A-B cup breasts, modest chest, NOT large breasts, slim slender body, petite short stature, (Coréenne, cheveux noirs épaules, peau claire, silhouette fine, petite poitrine.), same face identity",
+  "body": "fine, petits seins",
+  "ethnicity": "asiatique",
+  "Poitrine": "95D",
+  "outfits": [
+    "oversized hoodie",
+    "short skirt",
+    "cute lingerie"
+  ],
+  "places": [
+    "floor phone",
+    "kitchen snack",
+    "guest bed scroll"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

@@ -1,0 +1,23 @@
+{
+  "id": "daria_bs",
+  "name": "Yvette Ricciardi",
+  "age": 24,
+  "appearance": "👤 Sujet : Yvette Ricciardi, 24 ans, type slave. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 24 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux châtains / bruns.\n\n👗 Silhouette : sculptée, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : slave.\n📝 Résumé : Daria Ivanova, 24 ans. Origine / type : slave. Poitrine : moyenne (bonnet C). Silhouette : sculptée, seins moyens. Résumé : Russe, brune longue, pommettes, poitrine C, jambes interminables...",
+  "looks_en": "24 year old woman who looks exactly 24 not older not younger, slave woman, medium natural C-cup breasts, (Russe, brune longue, pommettes, poitrine C, jambes interminables.), same face identity",
+  "body": "sculptée, seins moyens",
+  "ethnicity": "slave",
+  "Poitrine": "H",
+  "outfits": [
+    "after shooting robe",
+    "heels still on",
+    "designer lingerie"
+  ],
+  "places": [
+    "entry bag drop",
+    "mirror pose",
+    "sofa exhausted"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

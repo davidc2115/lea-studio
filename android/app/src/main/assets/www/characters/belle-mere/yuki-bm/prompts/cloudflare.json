@@ -1,0 +1,23 @@
+{
+  "id": "yuki_bm",
+  "name": "Alicia Sanchez",
+  "age": 47,
+  "appearance": "👤 Sujet : Alicia Sanchez, 47 ans, type asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 47 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, coupe au carré..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau claire..\nOrigine / teint : asiatique.\n📝 Résumé : Japonaise, cheveux noirs au carré, peau claire, silhouette mince, petite poitrine, posture impeccable..",
+  "looks_en": "47 year old woman who looks exactly 47 not older not younger, asiatique woman, fair light skin, black hair, short bob haircut, small A-B cup breasts, modest chest, NOT large breasts, slim slender body, petite short stature, (Japonaise, cheveux noirs au carré, peau claire, silhouette mince, petite poitrine, posture impeccable.), same face identity",
+  "body": "mince, petits seins",
+  "ethnicity": "asiatique",
+  "Poitrine": "95D",
+  "outfits": [
+    "simple blouse and skirt",
+    "cotton yukata-style robe",
+    "minimal lingerie"
+  ],
+  "places": [
+    "tea table",
+    "hallway quiet",
+    "futon guest room"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

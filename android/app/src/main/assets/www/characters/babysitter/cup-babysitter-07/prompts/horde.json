@@ -1,0 +1,22 @@
+{
+  "id": "cup_babysitter_07",
+  "name": "Kenza Cisse",
+  "age": 25,
+  "appearance": "👤 Sujet : Kenza Cisse, 25 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage allongé délicat, structure osseuse fine, pommettes discrètes.\n👁️ Yeux : iris bleus, clairs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 85A — petite poitrine bonnet A, volume discret sous les vêtements.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (small A-cup breasts:1.5), (25 year old woman:1.5), (looks exactly 25 not older:1.4), (blonde hair with golden highlights:1.5), (blue eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, small A-cup breasts",
+  "ethnicity": "européenne",
+  "Poitrine": "85A",
+  "provider": "AI Horde",
+  "outfits": [
+    "fitted casual blouse with a modest neckline and jeans, small natural chest",
+    "soft cardigan over a fitted cotton top and jeans, small natural chest",
+    "casual sleeveless top and slim trousers, small natural chest"
+  ],
+  "places": [
+    "dim living room, baby monitor on coffee table, sofa and warm lamp visible",
+    "indoor entrance to the living room, baby monitor on side table, evening lamp",
+    "living room sofa beside a baby monitor and warm table lamp, late evening"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

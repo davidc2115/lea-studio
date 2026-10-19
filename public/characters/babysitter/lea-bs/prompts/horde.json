@@ -2,12 +2,11 @@
   "id": "lea_bs",
   "name": "Léa-rose Russo",
   "age": 22,
-  "appearance": "👤 Sujet : Léa Martin, 19 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👗 Silhouette : mince, petits seins.\n💕 Poitrine : très petite, presque plate (bonnet A).\n📝 Résumé : Léa Martin, 19 ans. Origine / type : européenne. Poitrine : très petite, presque plate (bonnet A). Silhouette : mince, petits seins. Silhouette mince et fine. Résumé : Française, brune, plus jeune version de ta femme, poitrine A-B, silhouette adolescente adulte..\nOrigine / teint : européenne.\nFiche body : mince, petits seins.\n\n🔒 Détails techniques (génération) : 19 year old woman who looks exactly 19 not older not younger, européenne woman, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, slim slender body, (Française, brune, plus jeune version de ta femme, poitrine A-B, silhouette adolescente adulte.), same face identity",
+  "appearance": "👤 Sujet : Léa-rose Russo, 22 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux châtains / bruns.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Léa Martin, 19 ans. Origine / type : européenne. Poitrine : très petite, presque plate (bonnet A). Silhouette : mince, petits seins. Silhouette mince et fine. Résumé : Française, brune, plus jeune version de ta femme, poitrine A-B, silhouette adolescente adulte...",
   "looks_en": "19 year old woman who looks exactly 19 not older not younger, européenne woman, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, slim slender body, (Française, brune, plus jeune version de ta femme, poitrine A-B, silhouette adolescente adulte.), same face identity",
   "body": "mince, petits seins",
   "ethnicity": "européenne",
   "Poitrine": "95D",
-  "provider": "AI Horde",
   "outfits": [
     "oversized tee",
     "pajama shorts",
@@ -18,5 +17,7 @@
     "couch under blanket",
     "kitchen glass of water"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

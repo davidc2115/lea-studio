@@ -2,12 +2,11 @@
   "id": "karima",
   "name": "Uma Perez",
   "age": 46,
-  "appearance": "👤 Sujet : Karima Bensaïd, 46 ans, type maghrébine\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux amande.\n💇 Cheveux : cheveux noirs, lisses.\n✨ Peau : peau olive méditerranéenne.\n👗 Silhouette : élancée, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée.\nOrigine / teint : maghrébine.\nFiche body : élancée, seins moyens.\n\n🔒 Détails techniques (génération) : 46 year old woman who looks exactly 46 not older not younger, maghrébine woman, tan olive skin, black hair, straight hair, dark almond-shaped eyes, medium natural C-cup breasts, (Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée.), same face identity",
+  "appearance": "👤 Sujet : Uma Perez, 46 ans, type maghrébine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 46 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux amande.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, lisses..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau olive méditerranéenne..\nOrigine / teint : maghrébine.\n📝 Résumé : Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée..",
   "looks_en": "46 year old woman who looks exactly 46 not older not younger, maghrébine woman, tan olive skin, black hair, straight hair, dark almond-shaped eyes, medium natural C-cup breasts, (Algérienne, cheveux noirs lisses, yeux amande, peau mate, silhouette élancée, poitrine C, allure raffinée.), same face identity",
   "body": "élancée, seins moyens",
   "ethnicity": "maghrébine",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "modest elegant dress",
     "satin slip",
@@ -18,5 +17,7 @@
     "hallway mirror",
     "guest bed"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

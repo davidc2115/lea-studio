@@ -2,12 +2,11 @@
   "id": "thea",
   "name": "Cali Mathieu",
   "age": 21,
-  "appearance": "👤 Sujet : Théa Cohen, 21 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux roux / auburn.\n👗 Silhouette : fine, petits seins.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier.\nOrigine / teint : européenne.\nFiche body : fine, petits seins.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, européenne woman, red auburn hair, visible freckles on face, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier.), same face identity",
+  "appearance": "👤 Sujet : Cali Mathieu, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux roux / auburn..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier..",
   "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, red auburn hair, visible freckles on face, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, rousse légère, taches de rousseur, poitrine petite B, mince, collier.), same face identity",
   "body": "fine, petits seins",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "paint-stained oversized tee",
     "cream lingerie",
@@ -18,5 +17,7 @@
     "sink washing hands",
     "window light"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

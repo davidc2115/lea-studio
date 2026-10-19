@@ -1,0 +1,19 @@
+{
+  "id": "game_29",
+  "name": "Amandine Nielsen",
+  "age": 27,
+  "appearance": "👤 Sujet : Amandine Nielsen, 27 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : blonds, reflets dorés, longueur moyenne à longue, mouvement naturel.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (natural B-cup breasts:1.5), (27 year old woman:1.5), (looks exactly 27 not older:1.4), (blonde hair with golden highlights:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, natural B-cup breasts",
+  "ethnicity": "européenne",
+  "Poitrine": "85B",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

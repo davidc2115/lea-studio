@@ -1,0 +1,23 @@
+{
+  "id": "jade",
+  "name": "Katia Henry",
+  "age": 21,
+  "appearance": "👤 Sujet : Katia Henry, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux bruns, souvent en chignon..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau pâle..\nOrigine / teint : européenne.\n📝 Résumé : Française, pâle, chignon brun, lunettes, poitrine petite A, silhouette mince, taches de rousseur..",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, pale fair skin, brown hair, hair in a bun, visible freckles on face, wearing glasses, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, slim slender body, petite short stature, (Française, pâle, chignon brun, lunettes, poitrine petite A, silhouette mince, taches de rousseur.), same face identity",
+  "body": "mince, petits seins",
+  "ethnicity": "européenne",
+  "Poitrine": "95D",
+  "outfits": [
+    "oversized boyfriend shirt and white socks",
+    "simple cotton tank and shorts",
+    "hoodie too big"
+  ],
+  "places": [
+    "desk with textbooks at night",
+    "bedroom window rain",
+    "floor cushions with notes"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

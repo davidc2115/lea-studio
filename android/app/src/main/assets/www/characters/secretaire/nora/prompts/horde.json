@@ -1,0 +1,23 @@
+{
+  "id": "nora",
+  "name": "Brigitte Bruno",
+  "age": 25,
+  "appearance": "👤 Sujet : Brigitte Bruno, 25 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 25 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Suédoise, blonde, grande, seins moyens, silhouette longiligne..",
+  "looks_en": "25 year old woman who looks exactly 25 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Suédoise, blonde, grande, seins moyens, silhouette longiligne.), same face identity",
+  "body": "longiligne, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "linen shirt",
+    "minimal dress",
+    "simple lingerie"
+  ],
+  "places": [
+    "window silent",
+    "sofa book",
+    "kitchen water glass"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

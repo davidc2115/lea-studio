@@ -2,12 +2,11 @@
   "id": "sara",
   "name": "Clémence Russo",
   "age": 22,
-  "appearance": "👤 Sujet : Sara Benali, 22 ans, type maghrébine\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux noirs, ondulés.\n👗 Silhouette : courbes, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Algérienne, cheveux noirs ondulés, piercing discret, poitrine C, hanches, regard défiant.\nOrigine / teint : maghrébine.\nFiche body : courbes, seins moyens.\n\n🔒 Détails techniques (génération) : 22 year old woman who looks exactly 22 not older not younger, maghrébine woman, black hair, wavy hair, medium natural C-cup breasts, (Algérienne, cheveux noirs ondulés, piercing discret, poitrine C, hanches, regard défiant.), same face identity",
+  "appearance": "👤 Sujet : Clémence Russo, 22 ans, type maghrébine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, ondulés..\n\n👗 Silhouette : courbes, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : maghrébine.\n📝 Résumé : Algérienne, cheveux noirs ondulés, piercing discret, poitrine C, hanches, regard défiant..",
   "looks_en": "22 year old woman who looks exactly 22 not older not younger, maghrébine woman, black hair, wavy hair, medium natural C-cup breasts, (Algérienne, cheveux noirs ondulés, piercing discret, poitrine C, hanches, regard défiant.), same face identity",
   "body": "courbes, seins moyens",
   "ethnicity": "maghrébine",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "ripped jeans crop top",
     "bodycon",
@@ -18,5 +17,7 @@
     "kitchen counter sit",
     "hallway music"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

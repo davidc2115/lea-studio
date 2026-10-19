@@ -1,0 +1,19 @@
+{
+  "id": "tante_06",
+  "name": "Hélène Larsen",
+  "age": 41,
+  "appearance": "👤 Sujet : Hélène Larsen, 41 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale fin, mâchoire douce, traits légers.\n👁️ Yeux : iris marron foncé, regard expressif. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, peu de volume global, lignes longilignes, frame étroite — PAS plus-size.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches étroites à modérées, fesses discrètes et fermes.\n🦵 Jambes : Jambes longues et fines, chevilles délicates.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(slim slender body:1.45), (narrow frame:1.3), thin waist, (natural B-cup breasts:1.5), (41 year old woman:1.5), (looks exactly 41 not older:1.4), (auburn red hair:1.5), (deep brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "slim slender body, narrow frame, thin waist, natural B-cup breasts",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "85B",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

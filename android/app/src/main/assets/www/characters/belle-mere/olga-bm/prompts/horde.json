@@ -1,0 +1,23 @@
+{
+  "id": "olga_bm",
+  "name": "Hanna Romano",
+  "age": 46,
+  "appearance": "👤 Sujet : Hanna Romano, 46 ans, type slave. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 46 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : E — poitrine bonnet E, volume important.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : slave.\n📝 Résumé : Russe, blonde froide, pommettes, poitrine E, hanches, collants, regard glacial..",
+  "looks_en": "46 year old woman who looks exactly 46 not older not younger, slave woman, blonde hair, very large heavy E-cup breasts, full cleavage possible, voluptuous curvy figure, (Russe, blonde froide, pommettes, poitrine E, hanches, collants, regard glacial.), same face identity",
+  "body": "pulpeuse, très gros seins",
+  "ethnicity": "slave",
+  "Poitrine": "E",
+  "outfits": [
+    "black dress and stockings",
+    "fur coat over lingerie",
+    "corset"
+  ],
+  "places": [
+    "entry coat off",
+    "sofa legs crossed",
+    "bedroom command"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

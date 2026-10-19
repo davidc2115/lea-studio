@@ -1,0 +1,23 @@
+{
+  "id": "giulia",
+  "name": "Maëlle Ferrari",
+  "age": 48,
+  "appearance": "👤 Sujet : Maëlle Ferrari, 48 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 48 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : soignée, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Giulia Conti, 48 ans. Origine / type : européenne. Poitrine : moyenne (bonnet C). Silhouette : soignée, seins moyens. Résumé : Italienne, coupe chic, lèvres rouges, poitrine C implant-look, silhouette soignée...",
+  "looks_en": "48 year old woman who looks exactly 48 not older not younger, européenne woman, medium natural C-cup breasts, (Italienne, coupe chic, lèvres rouges, poitrine C implant-look, silhouette soignée.), same face identity",
+  "body": "soignée, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "designer dress",
+    "heels indoors",
+    "expensive lingerie"
+  ],
+  "places": [
+    "entry mirror",
+    "sofa judgment",
+    "bedroom closet"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

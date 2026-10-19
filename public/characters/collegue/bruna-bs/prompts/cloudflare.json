@@ -2,12 +2,11 @@
   "id": "bruna_bs",
   "name": "Sandrine Bruno",
   "age": 24,
-  "appearance": "👤 Sujet : Bruna Silva, 24 ans, type latino\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux noirs.\n✨ Peau : peau caramel / dorée.\n👗 Silhouette : sablier extrême, gros fessier.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Brésilienne, bronze, cheveux noirs, fessier énorme, taille fine, poitrine C.\nOrigine / teint : latino.\nFiche body : sablier extrême, gros fessier.\n\n🔒 Détails techniques (génération) : 24 year old woman who looks exactly 24 not older not younger, latino woman, golden caramel tan skin, black hair, medium natural C-cup breasts, hourglass waist, slim slender body, (Brésilienne, bronze, cheveux noirs, fessier énorme, taille fine, poitrine C.), same face identity",
+  "appearance": "👤 Sujet : Sandrine Bruno, 24 ans, type latino. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 24 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : silhouette sablier : taille marquée, hanches et poitrine en contraste.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : latino.\n📝 Résumé : Brésilienne, bronze, cheveux noirs, fessier énorme, taille fine, poitrine C..",
   "looks_en": "24 year old woman who looks exactly 24 not older not younger, latino woman, golden caramel tan skin, black hair, medium natural C-cup breasts, hourglass waist, slim slender body, (Brésilienne, bronze, cheveux noirs, fessier énorme, taille fine, poitrine C.), same face identity",
   "body": "sablier extrême, gros fessier",
   "ethnicity": "latino",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "tiny shorts",
     "crop top",
@@ -18,5 +17,7 @@
     "kitchen hip bump",
     "bathroom door"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

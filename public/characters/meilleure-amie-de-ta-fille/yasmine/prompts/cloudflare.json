@@ -2,12 +2,11 @@
   "id": "yasmine",
   "name": "Mila Marchand",
   "age": 21,
-  "appearance": "👤 Sujet : Yasmine Haddad, 21 ans, type moyen-orientale\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux noirs, lisses.\n✨ Peau : peau claire.\n👗 Silhouette : glamour, gros seins.\n💕 Poitrine : généreuse 95D (bonnet D, volume marqué).\n📝 Résumé : Libanaise, peau claire-dorée, cheveux noirs lisses, maquillage, poitrine 95D, lèvres marquées.\nOrigine / teint : moyen-orientale.\nFiche body : glamour, gros seins.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, moyen-orientale woman, fair light skin, black hair, straight hair, large full D-cup breasts, generous bust, bra size 95D, full cleavage possible, (Libanaise, peau claire-dorée, cheveux noirs lisses, maquillage, poitrine 95D, lèvres marquées.), same face identity",
+  "appearance": "👤 Sujet : Mila Marchand, 21 ans, type moyen-orientale. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, lisses..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau claire..\nOrigine / teint : moyen-orientale.\n📝 Résumé : Libanaise, peau claire-dorée, cheveux noirs lisses, maquillage, poitrine 95D, lèvres marquées..",
   "looks_en": "21 year old woman who looks exactly 21 not older not younger, moyen-orientale woman, fair light skin, black hair, straight hair, large full D-cup breasts, generous bust, bra size 95D, full cleavage possible, (Libanaise, peau claire-dorée, cheveux noirs lisses, maquillage, poitrine 95D, lèvres marquées.), same face identity",
   "body": "glamour, gros seins",
   "ethnicity": "moyen-orientale",
   "Poitrine": "95D",
-  "provider": "Cloudflare",
   "outfits": [
     "plunging going-out top",
     "champagne lingerie",
@@ -18,5 +17,7 @@
     "mirror lipstick",
     "taxi-wait doorway"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

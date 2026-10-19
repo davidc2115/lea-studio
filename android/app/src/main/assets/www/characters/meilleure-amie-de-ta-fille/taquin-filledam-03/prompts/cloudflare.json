@@ -1,0 +1,14 @@
+{
+  "id": "taquin_filledam_03",
+  "name": "Maya Greco",
+  "age": 30,
+  "appearance": "👤 Sujet : Maya Greco, 30 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage équilibré, structure douce, expression posée.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette en sablier marquée : taille fine bien définie, hanches arrondies, poitrine et hanches en équilibre, curves voluptueuses sans être plus-size global.\n💕 Poitrine : 95E — poitrine bonnet E, volume généreux et lourd, décolleté profond.\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées, contraste net avec la taille.\n🦵 Jambes : Jambes longues, toniques, chevilles fines.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(hourglass figure:1.45), (defined waist:1.35), rounded hips, full shaped buttocks, (large E-cup breasts, deep cleavage:1.5), (30 year old woman:1.5), (looks exactly 30 not older:1.4), (auburn red hair:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "hourglass figure, defined waist, rounded hips, full buttocks, large E-cup breasts, deep cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "95E",
+  "provider": "Cloudflare",
+  "outfits": [],
+  "places": [],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

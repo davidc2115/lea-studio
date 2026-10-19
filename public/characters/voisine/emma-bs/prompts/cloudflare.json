@@ -2,12 +2,11 @@
   "id": "emma_bs",
   "name": "Awa Ferrari",
   "age": 24,
-  "appearance": "👤 Sujet : Emma Martin, 24 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blond miel.\n👗 Silhouette : fine, seins moyens.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle.\nOrigine / teint : européenne.\nFiche body : fine, seins moyens.\n\n🔒 Détails techniques (génération) : 24 year old woman who looks exactly 24 not older not younger, européenne woman, honey blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle.), same face identity",
+  "appearance": "👤 Sujet : Awa Ferrari, 24 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 24 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond miel..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle..",
   "looks_en": "24 year old woman who looks exactly 24 not older not younger, européenne woman, honey blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, blonde miel, ressemble un peu à ta femme, poitrine B, silhouette fine, sourire espiègle.), same face identity",
   "body": "fine, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "borrowed hoodie",
     "summer short dress",
@@ -18,5 +17,7 @@
     "bathroom shared",
     "guest mattress floor"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

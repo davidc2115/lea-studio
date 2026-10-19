@@ -1,0 +1,23 @@
+{
+  "id": "chloe",
+  "name": "Maïwenn Roussel",
+  "age": 21,
+  "appearance": "👤 Sujet : Maïwenn Roussel, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux verts.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond miel..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, blonde miel, yeux verts, mince, poitrine B, taches de rousseur..",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, honey blonde hair, green eyes, visible freckles on face, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, blonde miel, yeux verts, mince, poitrine B, taches de rousseur.), same face identity",
+  "body": "fine, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "ripped jeans and tiny crop",
+    "pink lace set",
+    "only an oversized hoodie"
+  ],
+  "places": [
+    "kitchen fridge light",
+    "stairs sitting",
+    "balcony night"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

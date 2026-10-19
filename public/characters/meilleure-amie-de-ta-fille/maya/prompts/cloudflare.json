@@ -2,12 +2,11 @@
   "id": "maya",
   "name": "Ophélie Lopez",
   "age": 22,
-  "appearance": "👤 Sujet : Maya Benchimol, 19 ans, type métisse\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n✨ Peau : peau caramel / dorée.\n👗 Silhouette : courbes, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Maya Benchimol, 19 ans. Origine / type : métisse. Peau : peau caramel / dorée. Poitrine : moyenne (bonnet C). Silhouette : courbes, seins moyens. Silhouette mince et fine. Résumé : Métisse brésiliano-française, peau caramel, boucles, poitrine C, taille fine, hanches..\nOrigine / teint : métisse.\nFiche body : courbes, seins moyens.\n\n🔒 Détails techniques (génération) : 19 year old woman who looks exactly 19 not older not younger, métisse woman, golden caramel tan skin, medium natural C-cup breasts, slim slender body, (Métisse brésiliano-française, peau caramel, boucles, poitrine C, taille fine, hanches.), same face identity",
+  "appearance": "👤 Sujet : Ophélie Lopez, 22 ans, type métisse. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : métisse.\n📝 Résumé : Maya Benchimol, 19 ans. Origine / type : métisse. Peau : peau caramel / dorée. Poitrine : moyenne (bonnet C). Silhouette : courbes, seins moyens. Silhouette mince et fine. Résumé : Métisse brésiliano-française, peau caramel, boucles, poitrine C, taille fine, hanches...",
   "looks_en": "19 year old woman who looks exactly 19 not older not younger, métisse woman, golden caramel tan skin, medium natural C-cup breasts, slim slender body, (Métisse brésiliano-française, peau caramel, boucles, poitrine C, taille fine, hanches.), same face identity",
   "body": "courbes, seins moyens",
   "ethnicity": "métisse",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "sports bra and tiny sweatpants",
     "nude lingerie",
@@ -18,5 +17,7 @@
     "fridge",
     "bedroom doorway"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

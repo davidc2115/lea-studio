@@ -1,0 +1,22 @@
+{
+  "id": "iris",
+  "name": "Martine Greco-morel",
+  "age": 26,
+  "appearance": "👤 Sujet : Iris Vermeer, 26 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : grande, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Néerlandaise, blonde, grande, seins moyens, attitude décontractée.\nOrigine / teint : européenne.\nFiche body : grande, seins moyens.\n\n🔒 Détails techniques (génération) : 26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
+  "looks_en": "26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
+  "body": "grande, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "provider": "Cloudflare",
+  "outfits": [
+    "simple tee no bra",
+    "bike shorts",
+    "towel casual"
+  ],
+  "places": [
+    "entry bike helmet",
+    "shower casual",
+    "sofa bare feet"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

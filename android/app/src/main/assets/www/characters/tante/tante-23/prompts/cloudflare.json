@@ -1,0 +1,19 @@
+{
+  "id": "tante_23",
+  "name": "Myriam Novak",
+  "age": 41,
+  "appearance": "👤 Sujet : Myriam Novak, 41 ans, type métisse. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, décolleté visible, cohérent avec un vrai soutien-gorge.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : mate dorée, uniforme.\nOrigine / teint : métisse.",
+  "looks_en": "feminine balanced proportions, natural figure, (full D-cup breasts, clear soft cleavage:1.5), (41 year old woman:1.5), (looks exactly 41 not older:1.4), (auburn red hair:1.5), (hazel-green almond eyes:1.5), mixed heritage features, warm medium skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, full D-cup breasts, clear soft cleavage",
+  "ethnicity": "métisse",
+  "Poitrine": "95D",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

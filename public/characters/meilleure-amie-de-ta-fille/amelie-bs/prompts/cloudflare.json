@@ -2,12 +2,11 @@
   "id": "amelie_bs",
   "name": "Sylvie Nguyen",
   "age": 28,
-  "appearance": "👤 Sujet : Amélie Rousseau, 28 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👗 Silhouette : ronde, très gros seins.\n📝 Résumé : Amélie Rousseau, 28 ans. Origine / type : européenne. Silhouette : ronde, très gros seins. Morphologie ronde / plus-size, formes douces. Résumé : Française, joues rondes, silhouette plus-size, très grosse poitrine, douceur..\nOrigine / teint : européenne.\nFiche body : ronde, très gros seins.\n\n🔒 Détails techniques (génération) : 28 year old woman who looks exactly 28 not older not younger, européenne woman, very large heavy breasts, full bust, plus-size soft curvy body, (Française, joues rondes, silhouette plus-size, très grosse poitrine, douceur.), same face identity",
+  "appearance": "👤 Sujet : Sylvie Nguyen, 28 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 28 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : E — poitrine bonnet E, volume important.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Amélie Rousseau, 28 ans. Origine / type : européenne. Silhouette : ronde, très gros seins. Morphologie ronde / plus-size, formes douces. Résumé : Française, joues rondes, silhouette plus-size, très grosse poitrine, douceur...",
   "looks_en": "28 year old woman who looks exactly 28 not older not younger, européenne woman, very large heavy breasts, full bust, plus-size soft curvy body, (Française, joues rondes, silhouette plus-size, très grosse poitrine, douceur.), same face identity",
   "body": "ronde, très gros seins",
   "ethnicity": "européenne",
   "Poitrine": "E",
-  "provider": "Cloudflare",
   "outfits": [
     "soft sweater",
     "leggings",
@@ -18,5 +17,7 @@
     "kitchen bake",
     "doorway shy smile"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

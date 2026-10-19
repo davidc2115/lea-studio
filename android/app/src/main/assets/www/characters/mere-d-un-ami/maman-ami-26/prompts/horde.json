@@ -1,0 +1,19 @@
+{
+  "id": "maman_ami_26",
+  "name": "Flavie Muller",
+  "age": 50,
+  "appearance": "👤 Sujet : Flavie Muller, 50 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale large, joues rondes, pommettes enrobées, sourire facile.\n👁️ Yeux : iris noisette, reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches très larges, fesses pleines et rondes, cuisses épaisses qui se touchent.\n🦵 Jambes : Jambes pleines, mollets doux, chevilles proportionnées au corps plus-size.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "(very plus-size chubby body:1.55), (soft belly:1.4), (wide hips:1.4), (thick thighs:1.35), soft arms, full cheeks, (natural B-cup breasts:1.5), (50 year old woman:1.5), (looks exactly 50 not older:1.4), (chestnut brown hair:1.5), (hazel eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "very plus-size chubby body, soft belly, wide hips, thick thighs, soft arms, natural B-cup breasts",
+  "ethnicity": "latine",
+  "Poitrine": "85B",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

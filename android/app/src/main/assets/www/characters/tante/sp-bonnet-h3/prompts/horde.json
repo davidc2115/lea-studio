@@ -1,0 +1,19 @@
+{
+  "id": "sp_bonnet_h3",
+  "name": "Rachida Dieng",
+  "age": 35,
+  "appearance": "👤 Sujet : Rachida Dieng, 35 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "feminine balanced proportions, natural figure, (massive H-cup breasts, full wide cleavage:1.5), (35 year old woman:1.5), (looks exactly 35 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "latine",
+  "Poitrine": "105H",
+  "provider": "AI Horde",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

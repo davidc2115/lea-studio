@@ -1,0 +1,23 @@
+{
+  "id": "elise",
+  "name": "Kira Marchand",
+  "age": 21,
+  "appearance": "👤 Sujet : Kira Marchand, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux châtains..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : E — poitrine bonnet E, volume important.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, châtain attaché, cernes légers, poitrine très généreuse E, hanches douces..",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, chestnut brown hair, very large heavy E-cup breasts, full cleavage possible, (Française, châtain attaché, cernes légers, poitrine très généreuse E, hanches douces.), same face identity",
+  "body": "douce, très gros seins",
+  "ethnicity": "européenne",
+  "Poitrine": "E",
+  "outfits": [
+    "open student blouse",
+    "white lingerie",
+    "scrubs top only"
+  ],
+  "places": [
+    "doorway exhausted",
+    "sofa kicking shoes",
+    "bathroom sink"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

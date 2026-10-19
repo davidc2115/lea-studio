@@ -1,0 +1,14 @@
+{
+  "id": "taquin_tante_06",
+  "name": "Penda Martinez",
+  "age": 35,
+  "appearance": "👤 Sujet : Penda Martinez, 35 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 100F — poitrine bonnet F, très gros volume naturel, décolleté très marqué.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : claire porcelaine, uniforme.\nOrigine / teint : européenne.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (very large F-cup breasts, wide cleavage:1.5), (35 year old woman:1.5), (looks exactly 35 not older:1.4), (auburn red hair:1.5), (hazel-green almond eyes:1.5), European features, fair skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, very large F-cup breasts, wide cleavage",
+  "ethnicity": "européenne",
+  "Poitrine": "100F",
+  "provider": "Cloudflare",
+  "outfits": [],
+  "places": [],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

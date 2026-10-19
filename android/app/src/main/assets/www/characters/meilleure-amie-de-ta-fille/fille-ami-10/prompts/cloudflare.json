@@ -1,0 +1,20 @@
+{
+  "id": "fille_ami_10",
+  "name": "Zoé Morel",
+  "age": 22,
+  "appearance": "👤 Sujet : Zoé Morel, 22 ans, type est-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 90C — poitrine bonnet C, volume moyen, décolleté modéré si encolure basse.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : claire asiatique, texture douce et uniforme.\nOrigine / teint : est-asiatique.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (medium C-cup breasts, moderate cleavage:1.5), (22 year old woman:1.5), (looks exactly 22 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), East Asian features, fair East Asian skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, medium C-cup breasts, moderate cleavage",
+  "ethnicity": "est-asiatique",
+  "Poitrine": "90C",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "doorway",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

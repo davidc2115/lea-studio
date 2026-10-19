@@ -1,0 +1,23 @@
+{
+  "id": "keisha",
+  "name": "Oriane Nicolas",
+  "age": 22,
+  "appearance": "👤 Sujet : Oriane Nicolas, 22 ans, type ouest-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : texture afro volumineuse..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau ébène foncée..\nOrigine / teint : ouest-africaine.\n📝 Résumé : Sénégalaise, peau foncée lumineuse, afro volume, sourire large, poitrine généreuse D, fesses très rebondies..",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, ouest-africaine woman, dark ebony skin tone, voluminous afro textured hair, large full D-cup breasts, generous bust, full cleavage possible, voluptuous curvy figure, wide hips, (Sénégalaise, peau foncée lumineuse, afro volume, sourire large, poitrine généreuse D, fesses très rebondies.), same face identity",
+  "body": "voluptueuse, gros seins",
+  "ethnicity": "ouest-africaine",
+  "Poitrine": "95D",
+  "outfits": [
+    "tight party body",
+    "orange satin lingerie",
+    "towel wrap slipping"
+  ],
+  "places": [
+    "bathroom mirror makeup",
+    "living room dancing",
+    "hallway laughing"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

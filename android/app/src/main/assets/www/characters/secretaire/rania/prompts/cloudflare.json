@@ -1,0 +1,21 @@
+{
+  "id": "rania",
+  "name": "Rania Khelifi",
+  "age": 19,
+  "appearance": "👤 Sujet : Rania Khelifi, 19 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale harmonieux, traits doux et front lisse.\n👁️ Yeux : Grands yeux en amande, iris marron, regard expressif; cils longs et définis.\n眉毛 Sourcils : Sourcils foncés, fins mais définis, ligne naturelle.\n👃 Nez : Nez droit et proportionné.\n👄 Bouche : Lèvres moyennes bien dessinées, teinte rose naturelle.\n💇 Cheveux : Cheveux noirs de jais, lisses et soyeux, longueur aux épaules.\n\n👗 Silhouette : Silhouette élancée et harmonieuse, proportions fines.\n💕 Poitrine : Poitrine moyenne, bonnet C, galbe naturel et proportionné.\n🍑 Hanches & fesses : Hanches doucement galbées.\n🦵 Jambes : Jambes longues, fines et fuselées.\n✨ Peau : Peau olive méditerranéenne, uniforme et lumineuse.\nOrigine / teint : nord-africaine.",
+  "looks_en": "19 year old nord-africaine woman looks exactly 19, 19 year old woman who looks exactly 19 not older not younger, nord-africaine woman, olive mediterranean skin, black hair, straight hair, medium natural C-cup breasts, (Tunisienne, peau olive, cheveux noirs lisses, sourcils nets, poitrine C, allure de mannequin.), same face identity",
+  "body": "élancée, seins moyens",
+  "ethnicity": "nord-africaine",
+  "provider": "Cloudflare",
+  "outfits": [
+    "long coat and heels",
+    "black minimal lingerie",
+    "gold jewelry only"
+  ],
+  "places": [
+    "dim corridor",
+    "leather armchair",
+    "half-lit bedroom"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

@@ -2,12 +2,11 @@
   "id": "bruna",
   "name": "Jodie Masson",
   "age": 22,
-  "appearance": "👤 Sujet : Bruna Oliveira, 20 ans, type latine\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux noirs, ondulés.\n✨ Peau : peau caramel / dorée.\n👗 Silhouette : sablier extrême, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Brésilienne, peau bronze, cheveux noirs ondulés, taille ultra fine, poitrine C, fessier très volumineux.\nOrigine / teint : latine.\nFiche body : sablier extrême, seins moyens.\n\n🔒 Détails techniques (génération) : 20 year old woman who looks exactly 20 not older not younger, latine woman, golden caramel tan skin, black hair, wavy hair, medium natural C-cup breasts, hourglass waist, slim slender body, (Brésilienne, peau bronze, cheveux noirs ondulés, taille ultra fine, poitrine C, fessier très volumineux.), same face identity",
+  "appearance": "👤 Sujet : Jodie Masson, 22 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, ondulés..\n\n👗 Silhouette : silhouette sablier : taille marquée, hanches et poitrine en contraste.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : latine.\n📝 Résumé : Brésilienne, peau bronze, cheveux noirs ondulés, taille ultra fine, poitrine C, fessier très volumineux..",
   "looks_en": "20 year old woman who looks exactly 20 not older not younger, latine woman, golden caramel tan skin, black hair, wavy hair, medium natural C-cup breasts, hourglass waist, slim slender body, (Brésilienne, peau bronze, cheveux noirs ondulés, taille ultra fine, poitrine C, fessier très volumineux.), same face identity",
   "body": "sablier extrême, seins moyens",
   "ethnicity": "latine",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "tied crop and micro shorts",
     "colorful bikini",
@@ -18,5 +17,7 @@
     "kitchen dancing",
     "hallway laughing"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

@@ -2,12 +2,11 @@
   "id": "noura",
   "name": "Tara Esposito",
   "age": 42,
-  "appearance": "👤 Sujet : Noura Alami, 42 ans, type maghrébine\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux très foncés.\n👗 Silhouette : douce, gros seins.\n💕 Poitrine : généreuse (bonnet D).\n📝 Résumé : Marocaine, cheveux longs cachés puis libérés, yeux noirs, formes douces, poitrine D.\nOrigine / teint : maghrébine.\nFiche body : douce, gros seins.\n\n🔒 Détails techniques (génération) : 42 year old woman who looks exactly 42 not older not younger, maghrébine woman, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, (Marocaine, cheveux longs cachés puis libérés, yeux noirs, formes douces, poitrine D.), same face identity",
+  "appearance": "👤 Sujet : Tara Esposito, 42 ans, type maghrébine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 42 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux très foncés.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs.\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : maghrébine.\n📝 Résumé : Marocaine, cheveux longs cachés puis libérés, yeux noirs, formes douces, poitrine D..",
   "looks_en": "42 year old woman who looks exactly 42 not older not younger, maghrébine woman, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, (Marocaine, cheveux longs cachés puis libérés, yeux noirs, formes douces, poitrine D.), same face identity",
   "body": "douce, gros seins",
   "ethnicity": "maghrébine",
   "Poitrine": "95D",
-  "provider": "AI Horde",
   "outfits": [
     "home dress without scarf",
     "loose blouse",
@@ -18,5 +17,7 @@
     "mirror removing scarf",
     "guest room"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

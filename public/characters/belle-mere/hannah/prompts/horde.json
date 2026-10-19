@@ -2,12 +2,11 @@
   "id": "hannah",
   "name": "Petra Ricci",
   "age": 51,
-  "appearance": "👤 Sujet : Hannah Stein, 51 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : ferme, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.\nOrigine / teint : européenne.\nFiche body : ferme, seins moyens.\n\n🔒 Détails techniques (génération) : 51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
+  "appearance": "👤 Sujet : Petra Ricci, 51 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 51 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : ferme, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge..",
   "looks_en": "51 year old woman who looks exactly 51 not older not younger, européenne woman, blonde hair, medium C-cup breasts, (Allemande, cheveux blonds courts, posture droite, seins moyens, silhouette ferme pour son âge.), same face identity",
   "body": "ferme, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "blouse and trousers",
     "structured lingerie",
@@ -18,5 +17,7 @@
     "study",
     "guest bed made"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

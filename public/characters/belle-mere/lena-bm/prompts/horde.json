@@ -2,12 +2,11 @@
   "id": "lena_bm",
   "name": "Mona Colombo",
   "age": 37,
-  "appearance": "👤 Sujet : Léna Kowalski, 37 ans, type slave\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux bleus.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : jeune, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Polonaise, blonde, yeux bleus, silhouette jeune, poitrine C, air d'aînée trop proche.\nOrigine / teint : slave.\nFiche body : jeune, seins moyens.\n\n🔒 Détails techniques (génération) : 37 year old woman who looks exactly 37 not older not younger, slave woman, blonde hair, blue eyes, medium natural C-cup breasts, (Polonaise, blonde, yeux bleus, silhouette jeune, poitrine C, air d'aînée trop proche.), same face identity",
+  "appearance": "👤 Sujet : Mona Colombo, 37 ans, type slave. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 37 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux bleus.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : jeune, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : slave.\n📝 Résumé : Polonaise, blonde, yeux bleus, silhouette jeune, poitrine C, air d'aînée trop proche..",
   "looks_en": "37 year old woman who looks exactly 37 not older not younger, slave woman, blonde hair, blue eyes, medium natural C-cup breasts, (Polonaise, blonde, yeux bleus, silhouette jeune, poitrine C, air d'aînée trop proche.), same face identity",
   "body": "jeune, seins moyens",
   "ethnicity": "slave",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "jeans and sweater",
     "oversized shirt",
@@ -18,5 +17,7 @@
     "kitchen snack",
     "doorway awkward"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

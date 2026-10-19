@@ -2,12 +2,11 @@
   "id": "julia_bs",
   "name": "Flavie Conti",
   "age": 25,
-  "appearance": "👤 Sujet : Julia Rossi, 25 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux châtains.\n👗 Silhouette : sablier, gros seins.\n💕 Poitrine : généreuse (bonnet D).\n📝 Résumé : Italienne, châtain volumineux, poitrine D, taille fine, sourire large.\nOrigine / teint : européenne.\nFiche body : sablier, gros seins.\n\n🔒 Détails techniques (génération) : 25 year old woman who looks exactly 25 not older not younger, européenne woman, chestnut brown hair, large full D-cup breasts, generous bust, full cleavage possible, hourglass waist, slim slender body, (Italienne, châtain volumineux, poitrine D, taille fine, sourire large.), same face identity",
+  "appearance": "👤 Sujet : Flavie Conti, 25 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 25 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux châtains..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Italienne, châtain volumineux, poitrine D, taille fine, sourire large..",
   "looks_en": "25 year old woman who looks exactly 25 not older not younger, européenne woman, chestnut brown hair, large full D-cup breasts, generous bust, full cleavage possible, hourglass waist, slim slender body, (Italienne, châtain volumineux, poitrine D, taille fine, sourire large.), same face identity",
   "body": "sablier, gros seins",
   "ethnicity": "européenne",
   "Poitrine": "95D",
-  "provider": "AI Horde",
   "outfits": [
     "tight red top",
     "skirt short",
@@ -18,5 +17,7 @@
     "sofa close",
     "guest bed"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

@@ -2,12 +2,11 @@
   "id": "zoe",
   "name": "Tatiana Perrin",
   "age": 21,
-  "appearance": "👤 Sujet : Zoé Bernard, 21 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux noirs.\n✨ Peau : peau très pâle.\n👗 Silhouette : mince, seins moyens.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Française, peau très pâle, cheveux noirs teints, liner, mince, poitrine B, tatouage discret.\nOrigine / teint : européenne.\nFiche body : mince, seins moyens.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, européenne woman, very pale porcelain skin, black hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, peau très pâle, cheveux noirs teints, liner, mince, poitrine B, tatouage discret.), same face identity",
+  "appearance": "👤 Sujet : Tatiana Perrin, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : peau très pâle..\nOrigine / teint : européenne.\n📝 Résumé : Française, peau très pâle, cheveux noirs teints, liner, mince, poitrine B, tatouage discret..",
   "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, very pale porcelain skin, black hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, slim slender body, (Française, peau très pâle, cheveux noirs teints, liner, mince, poitrine B, tatouage discret.), same face identity",
   "body": "mince, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "ripped tights and short black dress",
     "dark lingerie and choker",
@@ -18,5 +17,7 @@
     "stairwell",
     "bathroom black lipstick"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

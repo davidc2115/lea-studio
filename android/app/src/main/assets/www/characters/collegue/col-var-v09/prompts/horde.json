@@ -1,0 +1,21 @@
+{
+  "id": "col_var_v09",
+  "name": "Laurence Pham",
+  "age": 30,
+  "appearance": "👤 Sujet : Laurence Pham, 30 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage tonique, traits nets, teint sain.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées sans lourdeur.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, décolleté visible, cohérent avec un vrai soutien-gorge.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes et toniques.\n🦵 Jambes : Jambes musclées et toniques, mollets dessinés.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "(athletic toned body:1.45), firm stomach, defined shoulders, (full D-cup breasts, clear soft cleavage:1.5), (30 year old woman:1.5), (looks exactly 30 not older:1.4), (jet-black smooth hair:1.5), (hazel-green almond eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "athletic toned body, firm figure, full D-cup breasts, clear soft cleavage",
+  "ethnicity": "latine",
+  "Poitrine": "95D",
+  "provider": "AI Horde",
+  "outfits": [
+    "office casual",
+    "afterwork blouse"
+  ],
+  "places": [
+    "living room",
+    "sofa",
+    "apartment at night"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

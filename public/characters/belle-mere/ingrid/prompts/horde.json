@@ -2,12 +2,11 @@
   "id": "ingrid",
   "name": "Dana Rossi",
   "age": 49,
-  "appearance": "👤 Sujet : Ingrid Bergström, 49 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux bleus.\n💇 Cheveux : cheveux blond platine.\n👗 Silhouette : longiligne, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.\nOrigine / teint : européenne.\nFiche body : longiligne, seins moyens.\n\n🔒 Détails techniques (génération) : 49 year old woman who looks exactly 49 not older not younger, européenne woman, platinum blonde hair, blue eyes, medium C-cup breasts, tall height, (Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.), same face identity",
+  "appearance": "👤 Sujet : Dana Rossi, 49 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 49 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux bleus.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blond platine..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne..",
   "looks_en": "49 year old woman who looks exactly 49 not older not younger, européenne woman, platinum blonde hair, blue eyes, medium C-cup breasts, tall height, (Suédoise, blonde platine, yeux bleus clairs, grande, seins moyens fermes, silhouette longiligne.), same face identity",
   "body": "longiligne, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "linen shirt dress",
     "minimal nude lingerie",
@@ -18,5 +17,7 @@
     "bathroom steam",
     "bedroom window"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

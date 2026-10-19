@@ -1,0 +1,23 @@
+{
+  "id": "noemie_bs",
+  "name": "Françoise Greco-morel",
+  "age": 22,
+  "appearance": "👤 Sujet : Françoise Greco-morel, 22 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux bruns..\n\n👗 Silhouette : petite, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, petite, cheveux brun court, poitrine B, air de fille d'à côté..",
+  "looks_en": "22 year old woman who looks exactly 22 not older not younger, européenne woman, brown hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, petite short stature, (Française, petite, cheveux brun court, poitrine B, air de fille d'à côté.), same face identity",
+  "body": "petite, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "nuisette under coat",
+    "slippers",
+    "thin sleep shirt"
+  ],
+  "places": [
+    "door night knock",
+    "kitchen raid fridge",
+    "couch almost sleep"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

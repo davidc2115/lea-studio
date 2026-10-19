@@ -1,0 +1,22 @@
+{
+  "id": "bf_yuki",
+  "name": "Rokhaya Iyer",
+  "age": 22,
+  "appearance": "👤 Sujet : Rokhaya Iyer, 22 ans, type est-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 105H — poitrine bonnet H, volume massif, décolleté très large.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : claire asiatique, texture douce et uniforme.\nOrigine / teint : est-asiatique.",
+  "looks_en": "feminine balanced proportions, natural figure, (massive H-cup breasts, full wide cleavage:1.5), (22 year old woman:1.5), (looks exactly 22 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), East Asian features, fair East Asian skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, massive H-cup breasts, full wide cleavage",
+  "ethnicity": "est-asiatique",
+  "Poitrine": "105H",
+  "provider": "AI Horde",
+  "outfits": [
+    "casual home clothes",
+    "short nightie",
+    "crop top and jeans"
+  ],
+  "places": [
+    "her bedroom doorway",
+    "living room sofa",
+    "kitchen night"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

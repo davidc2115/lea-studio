@@ -1,0 +1,23 @@
+{
+  "id": "hana_bs",
+  "name": "Marguerite Costa",
+  "age": 22,
+  "appearance": "👤 Sujet : Marguerite Costa, 22 ans, type asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs.\n\n👗 Silhouette : petite, très petits seins.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : asiatique.\n📝 Résumé : Hana Suzuki, 19 ans. Origine / type : asiatique. Poitrine : très petite, presque plate (bonnet A). Silhouette : petite, très petits seins. Résumé : Japonaise, carré noir, petite, poitrine A, posture parfaite...",
+  "looks_en": "19 year old woman who looks exactly 19 not older not younger, asiatique woman, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, petite short stature, (Japonaise, carré noir, petite, poitrine A, posture parfaite.), same face identity",
+  "body": "petite, très petits seins",
+  "ethnicity": "asiatique",
+  "Poitrine": "95D",
+  "outfits": [
+    "blouse and skirt",
+    "house slippers",
+    "simple lingerie"
+  ],
+  "places": [
+    "entry bow",
+    "tea tray",
+    "guest futon"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

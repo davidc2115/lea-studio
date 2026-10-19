@@ -2,12 +2,11 @@
   "id": "priya",
   "name": "Quitterie Nicolas",
   "age": 22,
-  "appearance": "👤 Sujet : Priya Sharma, 20 ans, type sud-asiatique\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n👁️ Yeux : yeux très foncés.\n💇 Cheveux : cheveux noirs, tresses.\n✨ Peau : peau caramel / dorée.\n👗 Silhouette : formes, gros seins.\n💕 Poitrine : généreuse (bonnet D).\n📝 Résumé : Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges.\nOrigine / teint : sud-asiatique.\nFiche body : formes, gros seins.\n\n🔒 Détails techniques (génération) : 20 year old woman who looks exactly 20 not older not younger, sud-asiatique woman, golden caramel tan skin, black hair, braids, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges.), same face identity",
+  "appearance": "👤 Sujet : Quitterie Nicolas, 22 ans, type sud-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux très foncés.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs, tresses..\n\n👗 Silhouette : formes généreuses / plus-size : ventre doucement arrondi possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : sud-asiatique.\n📝 Résumé : Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges..",
   "looks_en": "20 year old woman who looks exactly 20 not older not younger, sud-asiatique woman, golden caramel tan skin, black hair, braids, dark brown-black eyes, large full D-cup breasts, generous bust, full cleavage possible, wide hips, (Indienne, peau bronze, longue tresse noire, yeux noirs, poitrine généreuse D, hanches larges.), same face identity",
   "body": "formes, gros seins",
   "ethnicity": "sud-asiatique",
   "Poitrine": "95D",
-  "provider": "Cloudflare",
   "outfits": [
     "embroidered crop and skirt",
     "deep red lingerie",
@@ -18,5 +17,7 @@
     "sofa with tea",
     "dim bedroom"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

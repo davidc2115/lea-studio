@@ -1,0 +1,19 @@
+{
+  "id": "secretaire_24",
+  "name": "Sasha Durand",
+  "age": 28,
+  "appearance": "👤 Sujet : Sasha Durand, 28 ans, type est-asiatique. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage plein et doux, joues généreuses, menton arrondi, expression chaleureuse.\n👁️ Yeux : iris très foncés, presque noirs. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fournis, arche douce, bien entretenus.\n👃 Nez : Nez droit, délicat, harmonieux.\n👄 Bouche : Lèvres moyennes, bien dessinées, teinte rosée.\n💇 Cheveux : noirs de jais, lisses et soyeux, longueur aux épaules ou plus long.\n\n👗 Silhouette : silhouette VRAIMENT ronde et plantureuse (chubby / plus-size) : ventre souple visible, hanches très larges, cuisses épaisses, bras doux, formes généreuses — PAS une mannequin mince, PAS un sablier fin.\n💕 Poitrine : 85B — poitrine bonnet B, galbe naturel modéré.\n🍑 Hanches & fesses : Hanches très larges, fesses pleines et rondes, cuisses épaisses qui se touchent.\n🦵 Jambes : Jambes pleines, mollets doux, chevilles proportionnées au corps plus-size.\n✨ Peau : claire asiatique, texture douce et uniforme.\nOrigine / teint : est-asiatique.",
+  "looks_en": "(very plus-size chubby body:1.55), (soft belly:1.4), (wide hips:1.4), (thick thighs:1.35), soft arms, full cheeks, (natural B-cup breasts:1.5), (28 year old woman:1.5), (looks exactly 28 not older:1.4), (jet-black smooth hair:1.5), (dark brown eyes:1.5), East Asian features, fair East Asian skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "very plus-size chubby body, soft belly, wide hips, thick thighs, soft arms, natural B-cup breasts",
+  "ethnicity": "est-asiatique",
+  "Poitrine": "85B",
+  "provider": "Cloudflare",
+  "outfits": [
+    "scenario outfit"
+  ],
+  "places": [
+    "living room",
+    "sofa"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

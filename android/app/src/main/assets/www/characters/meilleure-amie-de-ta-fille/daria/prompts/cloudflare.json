@@ -1,0 +1,23 @@
+{
+  "id": "daria",
+  "name": "Giulia Gautier",
+  "age": 21,
+  "appearance": "👤 Sujet : Giulia Gautier, 21 ans, type européenne de l'est. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux bruns..\n\n👗 Silhouette : sculptée, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau claire..\nOrigine / teint : européenne de l'est.\n📝 Résumé : Roumaine, peau claire, cheveux bruns longs, pommettes, poitrine C implant-look naturel, hanches..",
+  "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne de l'est woman, fair light skin, brown hair, medium natural C-cup breasts, (Roumaine, peau claire, cheveux bruns longs, pommettes, poitrine C implant-look naturel, hanches.), same face identity",
+  "body": "sculptée, seins moyens",
+  "ethnicity": "européenne de l'est",
+  "Poitrine": "H",
+  "outfits": [
+    "coat over lingerie",
+    "studio robe open",
+    "heels and set"
+  ],
+  "places": [
+    "night elevator",
+    "mirror full length",
+    "white studio-like room"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

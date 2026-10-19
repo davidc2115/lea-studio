@@ -1,7 +1,19 @@
-# Dossiers des personnages
+# Personnages — dossiers par rôle
 
-Chaque personnage possède un dossier sous son rôle canonique. `character.json` rassemble la fiche complète; `dialogue.json` isole les champs utilisés pour démarrer et guider le roleplay; `prompts/cloudflare.json` et `prompts/horde.json` recensent les champs de profil fournis à chaque moteur. Les images réellement présentes et référencées par l’application sont dans `images/`.
+Arborescence :
 
-Les prompts d’image finaux ne sont pas des textes statiques par personnage : `public/native-api.js` les compose à partir de ces champs, du fournisseur, de la scène, de la pose et de l’historique de génération. Les JSON de prompts documentent donc les sources d’entrée et les limites propres au fournisseur; ils ne prétendent pas être une capture d’une requête particulière.
+```
+characters/
+  {role}/                    # belle-mere, belle-fille, babysitter, collegue, ...
+    {id}/                    # identifiant du personnage
+      character.json         # fiche complète
+      dialogue.json          # greeting, scenario, personality
+      descriptif.md          # descriptif physique (format emoji)
+      prompts/
+        cloudflare.json      # champs fournis au moteur Cloudflare
+        horde.json           # champs fournis au moteur AI Horde
+      images/                # photos de référence du personnage
+```
 
-Les catalogues `public/characters*.js` restent les index chargés par l’application. Leurs chemins d’images ont été migrés vers les dossiers ci-dessous, et la copie Android embarquée reprend les mêmes ressources.
+Les catalogues `public/characters*.js` restent chargés par l’application.
+Les prompts d’image finaux sont composés dynamiquement par `public/native-api.js`.

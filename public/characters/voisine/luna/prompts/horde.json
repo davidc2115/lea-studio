@@ -2,12 +2,11 @@
   "id": "luna",
   "name": "Carmenette Costa",
   "age": 23,
-  "appearance": "👤 Sujet : Luna Ferreira, 23 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : bouclés.\n👗 Silhouette : bohème, seins moyens.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème.\nOrigine / teint : européenne.\nFiche body : bohème, seins moyens.\n\n🔒 Détails techniques (génération) : 23 year old woman who looks exactly 23 not older not younger, européenne woman, curly hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème.), same face identity",
+  "appearance": "👤 Sujet : Carmenette Costa, 23 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 23 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : bouclés..\n\n👗 Silhouette : bohème, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème..",
   "looks_en": "23 year old woman who looks exactly 23 not older not younger, européenne woman, curly hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème.), same face identity",
   "body": "bohème, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "AI Horde",
   "outfits": [
     "paint-stained shirt",
     "nothing under shirt",
@@ -18,5 +17,7 @@
     "bathroom sink paint",
     "sofa sleep"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
 }

@@ -2,12 +2,11 @@
   "id": "marine",
   "name": "Ysolde Mathieu",
   "age": 21,
-  "appearance": "👤 Sujet : Marine Lefèvre, 21 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : athlétique, seins moyens.\n💕 Poitrine : petite à moyenne (bonnet B).\n📝 Résumé : Française, peau hâlé léger, cheveux blonds mouillés, corps de nageuse, poitrine B, épaules.\nOrigine / teint : européenne.\nFiche body : athlétique, seins moyens.\n\n🔒 Détails techniques (génération) : 21 year old woman who looks exactly 21 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, athletic fit body, (Française, peau hâlé léger, cheveux blonds mouillés, corps de nageuse, poitrine B, épaules.), same face identity",
+  "appearance": "👤 Sujet : Ysolde Mathieu, 21 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 21 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : silhouette athlétique et tonique : épaules dessinées, ventre ferme, jambes musclées.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches sportives, fesses fermes.\n🦵 Jambes : Jambes musclées et toniques.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Française, peau hâlé léger, cheveux blonds mouillés, corps de nageuse, poitrine B, épaules..",
   "looks_en": "21 year old woman who looks exactly 21 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, athletic fit body, (Française, peau hâlé léger, cheveux blonds mouillés, corps de nageuse, poitrine B, épaules.), same face identity",
   "body": "athlétique, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "wet swimsuit under towel",
     "sport bikini",
@@ -18,5 +17,7 @@
     "bathroom",
     "heater vent"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

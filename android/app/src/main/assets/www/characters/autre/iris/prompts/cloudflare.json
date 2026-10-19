@@ -1,0 +1,23 @@
+{
+  "id": "iris",
+  "name": "Martine Greco-morel",
+  "age": 26,
+  "appearance": "👤 Sujet : Martine Greco-morel, 26 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 26 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : grande, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Néerlandaise, blonde, grande, seins moyens, attitude décontractée..",
+  "looks_en": "26 year old woman who looks exactly 26 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Néerlandaise, blonde, grande, seins moyens, attitude décontractée.), same face identity",
+  "body": "grande, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "simple tee no bra",
+    "bike shorts",
+    "towel casual"
+  ],
+  "places": [
+    "entry bike helmet",
+    "shower casual",
+    "sofa bare feet"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

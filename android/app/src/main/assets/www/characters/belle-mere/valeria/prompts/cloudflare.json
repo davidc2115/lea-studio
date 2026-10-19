@@ -1,0 +1,23 @@
+{
+  "id": "valeria",
+  "name": "Warda Perez",
+  "age": 39,
+  "appearance": "👤 Sujet : Warda Perez, 39 ans, type latino. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 39 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : silhouette sablier : taille marquée, hanches et poitrine en contraste.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau caramel / dorée..\nOrigine / teint : latino.\n📝 Résumé : Brésilienne, peau bronze, cheveux noirs longs, fessier très rond, taille fine, poitrine C, sourire carnassier..",
+  "looks_en": "39 year old woman who looks exactly 39 not older not younger, latino woman, golden caramel tan skin, black hair, medium natural C-cup breasts, hourglass waist, slim slender body, (Brésilienne, peau bronze, cheveux noirs longs, fessier très rond, taille fine, poitrine C, sourire carnassier.), same face identity",
+  "body": "sablier, gros fessier",
+  "ethnicity": "latino",
+  "Poitrine": "H",
+  "outfits": [
+    "tiny shorts and crop",
+    "thong and robe",
+    "wet swimsuit coverup"
+  ],
+  "places": [
+    "pool edge",
+    "kitchen counter sitting",
+    "bedroom mirror"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

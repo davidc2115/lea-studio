@@ -1,0 +1,22 @@
+{
+  "id": "bs_keisha",
+  "name": "Giulia-rose Ba",
+  "age": 21,
+  "appearance": "👤 Sujet : Giulia-rose Ba, 21 ans, type afro-descendante. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage équilibré, structure douce, expression posée.\n👁️ Yeux : iris marron foncé, regard expressif. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez fin et droit, proportionné au visage.\n👄 Bouche : Lèvres naturellement pulpeuses, rose naturel, contour net.\n💇 Cheveux : châtains / bruns, texture naturelle.\n\n👗 Silhouette : silhouette en sablier marquée : taille fine bien définie, hanches arrondies, poitrine et hanches en équilibre, curves voluptueuses sans être plus-size global.\n💕 Poitrine : 95E — poitrine bonnet E, volume généreux et lourd, décolleté profond.\n🍑 Hanches & fesses : Hanches arrondies, fesses pleines et dessinées, contraste net avec la taille.\n🦵 Jambes : Jambes longues, toniques, chevilles fines.\n✨ Peau : très foncée, éclat naturel.\nOrigine / teint : afro-descendante.",
+  "looks_en": "(hourglass figure:1.45), (defined waist:1.35), rounded hips, full shaped buttocks, (large E-cup breasts, deep cleavage:1.5), (21 year old woman:1.5), (looks exactly 21 not older:1.4), (chestnut brown hair:1.5), (deep brown eyes:1.5), Black woman, deep rich dark skin, West African or Afro-diaspora features, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "hourglass figure, defined waist, rounded hips, full buttocks, large E-cup breasts, deep cleavage",
+  "ethnicity": "afro-descendante",
+  "Poitrine": "95E",
+  "provider": "Cloudflare",
+  "outfits": [
+    "jeans and sweater",
+    "comfortable t-shirt",
+    "soft pajamas after kids sleep"
+  ],
+  "places": [
+    "living room sofa night",
+    "hallway after kids asleep",
+    "kitchen waiting"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

@@ -1,0 +1,23 @@
+{
+  "id": "luna",
+  "name": "Carmenette Costa",
+  "age": 23,
+  "appearance": "👤 Sujet : Carmenette Costa, 23 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 23 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : bouclés..\n\n👗 Silhouette : bohème, seins moyens.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème..",
+  "looks_en": "23 year old woman who looks exactly 23 not older not younger, européenne woman, curly hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Portugaise, cheveux bouclés, taches de peinture, poitrine B, silhouette bohème.), same face identity",
+  "body": "bohème, seins moyens",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "paint-stained shirt",
+    "nothing under shirt",
+    "simple panties"
+  ],
+  "places": [
+    "floor canvas",
+    "bathroom sink paint",
+    "sofa sleep"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
+}

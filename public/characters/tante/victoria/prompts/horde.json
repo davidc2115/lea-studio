@@ -1,0 +1,23 @@
+{
+  "id": "victoria",
+  "name": "Renée Marino",
+  "age": 27,
+  "appearance": "👤 Sujet : Renée Marino, 27 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 27 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : chic, petits seins.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Anglaise, blonde, coupe chic, poitrine B, posture raide..",
+  "looks_en": "27 year old woman who looks exactly 27 not older not younger, européenne woman, blonde hair, small-medium B-cup breasts, modest chest, NOT large breasts, NOT busty, (Anglaise, blonde, coupe chic, poitrine B, posture raide.), same face identity",
+  "body": "chic, petits seins",
+  "ethnicity": "européenne",
+  "Poitrine": "H",
+  "outfits": [
+    "tweed skirt set",
+    "silk blouse",
+    "pearl lingerie"
+  ],
+  "places": [
+    "sofa wine proper",
+    "entry judgment",
+    "guest room neat"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "AI Horde",
+  "notes": "Prompt minimal SFW côté worker pour éviter CorruptPrompt; identité via looks_en/body/ethnicity."
+}

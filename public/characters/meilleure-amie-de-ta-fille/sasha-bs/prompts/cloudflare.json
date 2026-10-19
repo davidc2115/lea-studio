@@ -2,12 +2,11 @@
   "id": "sasha_bs",
   "name": "Catherine Nguyen",
   "age": 23,
-  "appearance": "👤 Sujet : Sasha Volkov, 23 ans, type slave\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n✨ Peau : peau claire.\n👗 Silhouette : androgyne, petits seins.\n💕 Poitrine : très petite, presque plate (bonnet A).\n📝 Résumé : Sasha Volkov, 23 ans. Origine / type : slave. Peau : peau claire. Poitrine : très petite, presque plate (bonnet A). Silhouette : androgyne, petits seins. Résumé : Russe, coupe messie, peau claire, poitrine petite A, hanches étroites..\nOrigine / teint : slave.\nFiche body : androgyne, petits seins.\n\n🔒 Détails techniques (génération) : 23 year old woman who looks exactly 23 not older not younger, slave woman, fair light skin, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, petite short stature, (Russe, coupe messie, peau claire, poitrine petite A, hanches étroites.), same face identity",
+  "appearance": "👤 Sujet : Catherine Nguyen, 23 ans, type slave. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 23 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux naturels.\n\n👗 Silhouette : androgyne, petits seins.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches proportionnées, fesses naturelles.\n🦵 Jambes : Jambes proportionnées.\n✨ Peau : peau claire..\nOrigine / teint : slave.\n📝 Résumé : Sasha Volkov, 23 ans. Origine / type : slave. Peau : peau claire. Poitrine : très petite, presque plate (bonnet A). Silhouette : androgyne, petits seins. Résumé : Russe, coupe messie, peau claire, poitrine petite A, hanches étroites...",
   "looks_en": "23 year old woman who looks exactly 23 not older not younger, slave woman, fair light skin, small A-cup nearly flat chest, minimal bust, NOT large breasts, NOT busty, petite short stature, (Russe, coupe messie, peau claire, poitrine petite A, hanches étroites.), same face identity",
   "body": "androgyne, petits seins",
   "ethnicity": "slave",
   "Poitrine": "95D",
-  "provider": "Cloudflare",
   "outfits": [
     "cargo and crop",
     "binder optional off",
@@ -18,5 +17,7 @@
     "couch game",
     "kitchen beer"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }

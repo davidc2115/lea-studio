@@ -1,0 +1,21 @@
+{
+  "id": "col_var_v29",
+  "name": "Émeline Patel",
+  "age": 31,
+  "appearance": "👤 Sujet : Émeline Patel, 31 ans, type latine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage ovale proportionné, expression naturelle.\n👁️ Yeux : grands, en amande, iris vert-noisette (hazel-green) aux reflets dorés. Cils définis, regard expressif.\n眉毛 Sourcils : Sourcils fins à moyens, ligne naturelle.\n👃 Nez : Nez légèrement arrondi, doux.\n👄 Bouche : Lèvres pleines, sourire facile, rose doux.\n💇 Cheveux : roux cuivrés, texture légèrement ondulée.\n\n👗 Silhouette : silhouette féminine harmonieuse, proportions naturelles et équilibrées.\n💕 Poitrine : 95E — poitrine bonnet E, volume généreux et lourd, décolleté profond.\n🍑 Hanches & fesses : Hanches naturellement galbées, fesses proportionnées.\n🦵 Jambes : Jambes proportionnées, silhouette équilibrée.\n✨ Peau : mate olive.\nOrigine / teint : latine.",
+  "looks_en": "feminine balanced proportions, natural figure, (large E-cup breasts, deep cleavage:1.5), (31 year old woman:1.5), (looks exactly 31 not older:1.4), (auburn red hair:1.5), (hazel-green almond eyes:1.5), Latina features, warm olive skin, photorealistic adult woman, sharp focus, full body visible, coherent body type",
+  "body": "feminine balanced body, natural proportions, large E-cup breasts, deep cleavage",
+  "ethnicity": "latine",
+  "Poitrine": "95E",
+  "provider": "AI Horde",
+  "outfits": [
+    "office casual",
+    "afterwork blouse"
+  ],
+  "places": [
+    "living room",
+    "sofa",
+    "apartment at night"
+  ],
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+}

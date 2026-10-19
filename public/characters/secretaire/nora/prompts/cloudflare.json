@@ -2,12 +2,11 @@
   "id": "nora",
   "name": "Brigitte Bruno",
   "age": 25,
-  "appearance": "👤 Sujet : Nora Lindqvist, 25 ans, type européenne\n\n🖼️ Visage : Identité fidèle à la photo de profil si présente ; traits cohérents avec la fiche.\n💇 Cheveux : cheveux blonds.\n👗 Silhouette : longiligne, seins moyens.\n💕 Poitrine : moyenne (bonnet C).\n📝 Résumé : Suédoise, blonde, grande, seins moyens, silhouette longiligne.\nOrigine / teint : européenne.\nFiche body : longiligne, seins moyens.\n\n🔒 Détails techniques (génération) : 25 year old woman who looks exactly 25 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Suédoise, blonde, grande, seins moyens, silhouette longiligne.), same face identity",
+  "appearance": "👤 Sujet : Brigitte Bruno, 25 ans, type européenne. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 25 ans, traits harmonieux, expression naturelle\n👁️ Yeux : regard expressif, cils définis\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux blonds..\n\n👗 Silhouette : silhouette mince et élancée : taille fine, lignes longilignes.\n💕 Poitrine : H — poitrine bonnet H, volume extrême.\n🍑 Hanches & fesses : Hanches fines à modérées, fesses discrètes.\n🦵 Jambes : Jambes longues et fines.\n✨ Peau : teint naturel cohérent avec l’origine.\nOrigine / teint : européenne.\n📝 Résumé : Suédoise, blonde, grande, seins moyens, silhouette longiligne..",
   "looks_en": "25 year old woman who looks exactly 25 not older not younger, européenne woman, blonde hair, medium C-cup breasts, tall height, (Suédoise, blonde, grande, seins moyens, silhouette longiligne.), same face identity",
   "body": "longiligne, seins moyens",
   "ethnicity": "européenne",
   "Poitrine": "H",
-  "provider": "Cloudflare",
   "outfits": [
     "linen shirt",
     "minimal dress",
@@ -18,5 +17,7 @@
     "sofa book",
     "kitchen water glass"
   ],
-  "source": "Données d’entrée du générateur dynamique dans public/native-api.js."
+  "source": "Données d’entrée du générateur dynamique dans public/native-api.js.",
+  "provider": "Cloudflare",
+  "notes": "Tenues sensuelles, décors riches, visage ancré sur photo de profil si présente."
 }
