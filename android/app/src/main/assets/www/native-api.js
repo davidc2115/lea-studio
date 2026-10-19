@@ -600,7 +600,7 @@
           }
           const partsH = [
             hasRefH
-              ? "img2img from the reference photo, MUST keep the EXACT same face identity as the source image, identical eyes nose mouth jaw cheekbones and smile, same woman same age, do not invent a different face"
+              ? "img2img: KEEP the same FACE only as the reference photo (same eyes nose mouth jaw smile age), same woman"
               : "photorealistic full-length fashion photo of ONE adult woman",
             idTraits.ageLock,
             ethH,
@@ -609,10 +609,12 @@
             eyesH,
             bodyH,
             descH,
-            hasRefH ? "face identity lock: same person as reference, do not change face structure" : "match ethnicity skin hair age and body exactly, coherent realistic face",
-            "NEW outfit: " + outfitH,
-            "NEW pose: " + poseH,
-            "location: " + sceneH,
+            hasRefH
+              ? "CRITICAL CHANGE: completely NEW outfit, NEW pose, NEW camera angle, NEW background — do NOT copy the reference clothing, pose, stance, hands or scene"
+              : "match ethnicity skin hair age and body exactly, coherent realistic face",
+            "outfit must be: " + outfitH,
+            "pose must be: " + poseH,
+            "location must be: " + sceneH,
             "fully clothed, head to toe, shoes visible, natural light, sharp focus, photorealistic high quality, single person only",
             extraH ? ("detail: " + extraH) : ""
           ].filter(Boolean);
@@ -2622,10 +2624,9 @@
       }
       if (isHorde) {
         try {
-          // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
-          // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
+          // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.48;
+          const denoise = 0.58;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
