@@ -641,17 +641,17 @@
             ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
             : "natural feminine bust";
           const identityBits = [
-            "FULL LENGTH photo, entire body head to feet in frame, standing or seated full figure, wide shot, NOT portrait, NOT face close-up, NOT headshot, NOT selfie crop",
-            "wearing: " + outfitH,
-            "pose: " + poseH,
-            "location: " + sceneH,
+            "FULL LENGTH fashion photo, head to feet, wide shot, shoes visible",
+            "COMPLETELY DIFFERENT outfit from reference: " + outfitH,
+            "COMPLETELY DIFFERENT pose from reference: " + poseH,
+            "COMPLETELY DIFFERENT background: " + sceneH,
             hasRefH
-              ? "img2img keep same face identity as reference, same eyes nose mouth jaw"
+              ? "keep only the same face as the reference photo, change everything else"
               : "photorealistic woman",
             customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, bodyH, descH].filter(Boolean).join(", "),
             bustH,
-            "do not copy reference framing if reference is a portrait — expand to full body with new outfit",
-            "natural light, sharp focus, single person, shoes visible, variation " + String(Date.now() % 100000)
+            "ignore reference clothing pose and camera framing",
+            "natural light, sharp focus, single person, seed " + String(Date.now() % 100000)
           ].filter(Boolean);
           return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
         }
@@ -1607,9 +1607,12 @@
     }
     if (referenceB64) {
       const canonicalCup = profileImageBustRaw(character).slice(0, 20);
-      prompt = "Use input_image_0 ONLY for facial identity (eyes, hair, skin tone). Do NOT copy its clothing, pose or plain background. " +
-        "Rebuild a NEW sensual outfit, NEW pose and RICH detailed interior background as described in the prompt. " +
-        "Canonical bust size " + (canonicalCup || "from profile") + " must stay visible. " +
+      const str = (options && options.strength != null) ? Number(options.strength) : 0.58;
+      prompt = "[[cf_strength:" + str + "]] " +
+        "FACE IDENTITY LOCK from input_image_0: same woman same face eyes nose lips hair age skin — CRITICAL match reference face. " +
+        "Do NOT copy clothing pose or background from input_image_0. " +
+        "NEW sexy fitted outfit, NEW pose, NEW rich interior. " +
+        "BUST SIZE " + (canonicalCup || "F-cup") + " very full heavy cleavage, larger than average, never small. " +
         String(prompt || "");
     } else {
       // Sans référence: le prompt physique complet doit porter l'identité
@@ -2673,7 +2676,7 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.62;
+          const denoise = 0.80;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
@@ -2698,7 +2701,7 @@
           if (queueFail && !hasKey) {
             try {
               const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
-              const dataUrl = await generateCloudflareImage(cfPrompt, st, char, { faceOnlyRef: true });
+              const dataUrl = await generateCloudflareImage(cfPrompt, st, char, { faceOnlyRef: true, strength: 0.58 });
               return {
                 ok: true,
                 image: dataUrl,
@@ -2722,7 +2725,7 @@
           if (attempt > 0) {
             prompt = buildCloudflareSafeRetryPrompt(char, body.extra || "", attempt);
           }
-          const dataUrl = await generateCloudflareImage(prompt, st, char, { faceOnlyRef: true });
+          const dataUrl = await generateCloudflareImage(prompt, st, char, { faceOnlyRef: true, strength: 0.58 });
           return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), attempt: attempt };
         } catch (e) {
           lastErr = String(e.message || e);

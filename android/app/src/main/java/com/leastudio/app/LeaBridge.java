@@ -531,11 +531,24 @@ public class LeaBridge {
                             String boundary = "----LeaStudioCF" + id;
                             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
                             ByteArrayOutputStream multipart = new ByteArrayOutputStream();
-                            writeMultipartField(multipart, boundary, "prompt", promptSafe);
+                            // strength img2img: plus bas = plus fidèle au visage ref; 0.55–0.65 = équilibre
+                            float cfStrength = 0.58f;
+                            try {
+                                java.util.regex.Matcher sm = java.util.regex.Pattern
+                                    .compile("\\[\\[cf_strength:([0-9.]+)\\]\\]")
+                                    .matcher(promptSafe);
+                                if (sm.find()) {
+                                    float s = Float.parseFloat(sm.group(1));
+                                    if (s >= 0.25f && s <= 0.95f) cfStrength = s;
+                                }
+                            } catch (Exception ignored) {}
+                            String promptClean = promptSafe.replaceAll("\\[\\[cf_strength:[0-9.]+\\]\\]\\s*", "");
+                            writeMultipartField(multipart, boundary, "prompt", promptClean);
                             writeMultipartFile(multipart, boundary, "input_image_0", "profile-reference.jpg", referenceBytes);
                             writeMultipartField(multipart, boundary, "width", "768");
                             writeMultipartField(multipart, boundary, "height", "1024");
-                            writeMultipartField(multipart, boundary, "guidance", "7.5");
+                            writeMultipartField(multipart, boundary, "guidance", "8.5");
+                            writeMultipartField(multipart, boundary, "strength", String.valueOf(cfStrength));
                             writeMultipartField(multipart, boundary, "seed", String.valueOf(seed));
                             multipart.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
                             byte[] body = multipart.toByteArray();
@@ -848,7 +861,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 448);
                     params.put("height", registered ? 768 : 640);
-                    double denoise = 0.62;
+                    double denoise = 0.80;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
