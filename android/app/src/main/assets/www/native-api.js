@@ -389,7 +389,27 @@
         };
       }
 
+  /** Verrouille l'âge perçu, pas seulement le nombre dans le prompt. */
+      function buildVisualAgeLock(age, character) {
+        const years = Number(age);
+        if (!Number.isInteger(years) || years < 18) return "";
+        const c = character || {};
+        const profileText = [c.appearance, c.looks_en].filter(Boolean).join(" ");
+        const locks = ["VISUAL AGE LOCK: one adult woman who visibly looks exactly " + years + " years old; her face must read as " + years + ", not older or younger."];
+        if (years <= 29) {
+          locks.push("Young-adult facial appearance appropriate to exactly " + years + ": naturally smooth, unlined skin and youthful adult facial features; no wrinkles, crow's feet, sagging skin, age spots, under-eye bags, middle-aged or elderly appearance.");
+        } else if (years <= 49) {
+          locks.push("Facial features and skin must look consistent with this exact adult age; do not depict a senior or elderly woman.");
+        } else if (years <= 64) {
+          locks.push("Mature adult appearance consistent with this exact age; do not make her look elderly or substantially older.");
+        }
+        if (/platine|platinum/i.test(profileText) && /blond|blonde/i.test(profileText)) {
+          locks.push("The profile specifies platinum-blonde hair: make it visibly blonde, NOT silver, gray, or white.");
+        }
+        return locks.join(" ");
+      }
 
+    
   /** Extrait teint / origine / âge visibles depuis appearance + looks_en (FR/EN) pour txt2img sans photo. */
 
   /** Extrait teint / origine / âge depuis appearance + looks_en (FR/EN) pour txt2img sans photo. */
@@ -490,6 +510,7 @@
           if (!Number.isFinite(ageRaw) || ageRaw < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
           // Keep the confirmed catalog age exact in every provider prompt.
           const ageH = ageRaw;
+          const visualAgeH = buildVisualAgeLock(ageH, c);
           const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
           const extraH = String(extra || "").trim().slice(0, 60);
           if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?|sexy|seductive|provocative)\b/i.test(extraH)) {
@@ -754,7 +775,17 @@
           "bedroom soft bokeh lights satin sheets",
           "elegant staircase cream walls iron railing",
         ];
-    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    const sceneHistoryKey = "lea.profileImage.sceneHistory." + String(c.id || "lea");
+    let recentScenes = [];
+    try {
+      const savedScenes = JSON.parse(localStorage.getItem(sceneHistoryKey) || "[]");
+      if (Array.isArray(savedScenes)) recentScenes = savedScenes;
+    } catch (_) {}
+    const availableScenes = scenes.filter((item) => recentScenes.indexOf(item) < 0);
+    const scenePool = availableScenes.length ? availableScenes : scenes;
+    const scene = scenePool[Math.floor(Math.random() * scenePool.length)];
+    recentScenes = [scene].concat(recentScenes.filter((item) => item !== scene)).slice(0, 5);
+    try { localStorage.setItem(sceneHistoryKey, JSON.stringify(recentScenes)); } catch (_) {}
 
     const mood = forCloudflare
       ? (hasProfileRef
@@ -763,6 +794,7 @@
       : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
 
     const exactPromptAge = Number.isInteger(age) ? age : Number(c.estimatedAge || 0);
+    const visualAgeLock = buildVisualAgeLock(exactPromptAge, c);
     const idTraitsCf = extractIdentityTraits(c);
     const textOnlyIdentity = forCloudflare && !hasProfileRef
       ? ("TEXT-ONLY CHARACTER IDENTITY (no photo — follow strictly): " + name + ", " + idTraitsCf.ageLock + ". "
@@ -776,9 +808,10 @@
       : "";
     const base = [
       mood,
+      visualAgeLock,
       textOnlyIdentity,
       forCloudflare
-        ? "PRIORITY: invent a NEW sexy outfit, a NEW sensual pose, and a RICH detailed background environment. Forbidden: plain white/beige studio backdrop, empty wall, simple t-shirt with trousers, boring casual office clothes."
+        ? ("MANDATORY ENVIRONMENT LOCK: show a rich, unmistakable real-world location filling the background edge to edge: " + scene + ". She is physically inside this place; visible architecture, furnishings and background detail behind her. Absolutely no blank/white/gray/beige studio background, seamless backdrop, empty wall, cutout, or isolated subject. Keep the entire location visible in the final frame.")
         : "",
       forCloudflare ? ("Outfit (must follow exactly): " + outfit + ".") : ("Outfit: " + outfit + "."),
       forCloudflare ? ("Pose (must follow exactly): " + pose + ".") : ("Pose: " + pose + "."),
@@ -844,7 +877,10 @@
     const outfit = largeBust
       ? "well-fitted structured fashion dress with visible natural bust volume, not loose or compressive"
       : softOutfits[Math.min(attempt, softOutfits.length - 1)];
+    const retryAgeValue = parseInt(c.age, 10);
+    const retryAge = Number.isFinite(retryAgeValue) && retryAgeValue >= 18 ? retryAgeValue : Math.max(18, parseInt(c.estimatedAge, 10) || 21);
     const retryParts = [
+      buildVisualAgeLock(retryAge, c),
       "photorealistic full body photo of adult woman 18+,",
       hasProfileRef ? "identity match reference input_image_0 for " + name + "," : "text-only identity, no reference image; faithfully create " + name + " from the profile description,",
       retryAppearance ? retryAppearance.slice(0, 280) + "," : "",
@@ -2598,12 +2634,13 @@
           // Denoise bas = visage+corps ancrés sur la photo de profil (Horde img2img).
           // Trop haut (0.6+) = nouveau visage. Trop bas (<0.35) = tenue figée.
           const charId = String(char && char.id || "");
-          const denoise = (charId === "aya") ? 0.55 : 0.58;
+          const denoise = 0.48;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
+            // false = photo de profil entière (meilleure identité que crop visage seul)
             faceOnlyRef: false,
           });
           return {
