@@ -505,6 +505,9 @@
 
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
+  /** Denoise Horde unique pour tous les personnages (img2img). */
+  const HORDE_COMMON_DENOISE = 0.82;
+
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
     s = s.replace(/\b(?:wearing|wears|dressed in|outfit|dress|blouse|jeans|skirt|gown|lingerie|robe|coat|top|heels|boots)[^.,;]*/gi, " ");
@@ -513,449 +516,112 @@
     return s;
   }
 
+
   function buildPhysicalImagePrompt(char, extra, engine) {
     const c = char || LEA;
-    const eng = String(engine || "").toLowerCase();
-    // Horde: prompt MINIMAL — CorruptPrompt refuse looks_en/bust/lingerie même en "SFW".
-        if (eng.indexOf("horde") >= 0) {
-          const nameH = String(c.name || "woman").replace(/[^\w\s\-àâäéèêëïîôùûüçÀÂÄÉÈÊËÏÎÔÙÛÜÇ']/gi, "").slice(0, 40);
-          const ageRaw = parseInt(c.age, 10);
-          if (!Number.isFinite(ageRaw) || ageRaw < 18) throw new Error("La génération AI Horde exige un âge adulte confirmé dans la fiche.");
-          // Keep the confirmed catalog age exact in every provider prompt.
-          const ageH = ageRaw;
-          const visualAgeH = buildVisualAgeLock(ageH, c);
-          const hasRefH = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-          const extraH = String(extra || "").trim().slice(0, 60);
-          if (/\b(?:nude|naked|underwear|lingerie|explicit|nsfw|sexual|erotic|topless|cleavage|breasts?|nipples?|sexy|seductive|provocative)\b/i.test(extraH)) {
-            throw new Error("Pour AI Horde, évite les mots sensuels dans le champ optionnel (risque CorruptPrompt). Utilise Cloudflare pour le mode sexy.");
-          }
-          // Identité forte (surtout sans photo de profil)
-          const idTraits = extractIdentityTraits(c);
-          const rawId = (String(c.looks_en || "") + " " + String(c.appearance || "")).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, " ");
-          function pick(re, fb) {
-            const m = rawId.match(re);
-            return m ? String(m[1] || m[0]).replace(/\s+/g, " ").trim().slice(0, 48) : fb;
-          }
-          const hairH = idTraits.hair || pick(/(?:blonde|blond|brunette|brown hair|black hair|red hair|auburn|chestnut|cheveux?\s+[a-zéèêëàâùûô\s\-]+)/i, "natural hair");
-          const eyesH = idTraits.eyes || pick(/(?:blue eyes|green eyes|brown eyes|hazel eyes|grey eyes|gray eyes|yeux?\s+[a-zéèêëàâ\s\-]+)/i, "");
-          const skinH = idTraits.skin || pick(/(?:fair skin|pale skin|olive skin|tan skin|dark skin|porcelain|peau\s+[a-zéèêëàâ\s\-]+)/i, "");
-          const ethH = idTraits.ethnicity || "";
-          const outfitsH = [
-            "black deep plunge bodycon mini dress, stilettos, full body",
-            "red wrap midi dress defined waist, black heels",
-            "emerald green satin slip dress thin straps thigh slit",
-            "burgundy off-shoulder fitted dress, gold earrings",
-            "white linen sundress thin straps, Mediterranean terrace",
-            "navy pencil skirt and white blouse unbuttoned cleavage",
-            "floral print fitted midi dress deep V neckline",
-            "champagne silk slip dress, bare legs, luxury interior",
-            "black leather mini skirt and sheer black blouse",
-            "royal blue bodycon midi dress, side slit",
-            "olive square-neck mini dress, nude pumps",
-            "pink satin wrap mini dress, hotel suite",
-            "black backless long evening gown, marble stairs",
-            "cream knit bodycon dress, soft daylight apartment",
-            "teal blouse open collar and black pencil skirt",
-            "lavender deep V mini dress, city penthouse",
-            "camel coat open over short black dress",
-            "silver sequin mini dress, evening lobby",
-            "forest green velvet midi dress, low neckline",
-            "yellow summer midi dress, outdoor balcony",
-            "black one-shoulder crop top and high-waist mini skirt",
-            "white shirt dress belted, legs bare",
-            "purple satin robe loosely tied over slip",
-            "striped boat-neck midi dress, elegant hallway",
-            "coral off-shoulder bodycon dress, heels",
-            "black lace midi dress sheer sleeves, décolleté",
-            "denim mini skirt and tight white tank top",
-            "gold satin evening dress deep neckline",
-            "grey tailored jumpsuit zip front, defined waist",
-            "rose floral wrap dress, soft indoor light"
-          ];
-          const posesH = [
-            "standing upright full body facing camera, hands on hips",
-            "standing full body back to camera looking over shoulder",
-            "walking toward camera mid-stride full length",
-            "three-quarter turn standing, weight on one leg",
-            "sitting on desk edge legs crossed full body",
-            "sitting on sofa arm looking at camera",
-            "leaning on staircase railing looking back",
-            "leaning against wall arms crossed full body",
-            "profile standing looking out window full body",
-            "kneeling on one knee on chair, elegant pose",
-            "lying on side on bed propped on elbow full body",
-            "climbing stairs mid-step looking back over shoulder",
-            "standing far away wide shot entire figure in room",
-            "seated on floor legs extended, leaning back on hands",
-            "dancing pose one arm raised full body",
-            "crouching slightly hands on thighs front view",
-            "standing side profile full body hands behind back",
-            "sitting cross-legged on bed facing camera",
-            "leaning forward over table cleavage view three-quarter",
-            "standing with one hand in hair full body glamorous"
-          ];
-          const scenesH = [
-            "grand hotel staircase chandelier",
-            "modern apartment living room daylight",
-            "luxury bedroom soft lamps",
-            "hotel lobby marble floor",
-            "kitchen island counter bright light",
-            "city balcony evening lights",
-            "sunlit hallway wooden floor",
-            "rooftop terrace skyline",
-            "elegant office corridor glass",
-            "cafe window seat daytime",
-            "bathroom vanity mirror soft light",
-            "library study warm lamps",
-            "penthouse floor-to-ceiling windows",
-            "garden terrace stone railing",
-            "nightclub corridor soft neon"
-          ];
-          function pickVar(list, key, limit) {
-            let history = [];
-            try { history = JSON.parse(localStorage.getItem(key) || "[]"); } catch (_) {}
-            if (!Array.isArray(history)) history = [];
-            const available = list.filter(function (x) { return history.indexOf(x) < 0; });
-            const pool = available.length ? available : list;
-            const selected = pool[Math.floor(Math.random() * pool.length)];
-            try {
-              localStorage.setItem(key, JSON.stringify([selected].concat(history.filter(function (x) { return x !== selected; })).slice(0, limit)));
-            } catch (_) {}
-            return selected;
-          }
-          const outfitH = outfitsH[Math.floor(Math.random() * outfitsH.length)];
-          const poseH = posesH[Math.floor(Math.random() * posesH.length)];
-          const sceneH = scenesH[Math.floor(Math.random() * scenesH.length)];
-          let bodyH = idTraits.body || "";
-          const morphRaw = (String(c.body || "") + " " + String(c.looks_en || "") + " " + String(c.appearance || "")).toLowerCase();
-          if (!bodyH) {
-            if (/chubby|plus[- ]?size|bbw|ronde|voluptueus|soft belly|rounded belly|wide hips|thick thighs|plantureus|curvy plus/.test(morphRaw)) {
-              bodyH = "plus-size curvy full figure, soft rounded belly, wide hips, thick thighs, soft arms, NOT thin, NOT skinny";
-            } else if (/athletic|tonique|danseuse/.test(morphRaw)) {
-              bodyH = "athletic toned figure, dancer legs";
-            } else if (/slim|mince|slender/.test(morphRaw)) {
-              bodyH = "slim slender figure";
-            } else {
-              bodyH = "natural feminine figure";
-            }
-          }
-          if (String(c.id || "") === "aya" || /hortense\s*henry/i.test(nameH)) {
-            bodyH = "plus-size curvy full figure, soft rounded belly, wide hips, thick thighs, soft arms, full cheeks, NOT thin, NOT skinny, NOT mature";
-          }
-          // Sans ref: description physique safe + ethnicity/age en tête
-          let descH = "";
-          if (!hasRefH) {
-            const safeLooks = sanitizeForHordePrompt([ethH, skinH, hairH, bodyH, String(c.looks_en || ""), String(c.appearance || "")].filter(Boolean).join(", "))
-              .replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 400);
-            descH = safeLooks;
-          }
-          const partsH = [
-            hasRefH
-              ? "img2img face reference only: keep same face eyes nose mouth, same woman"
-              : "photorealistic full-length fashion photo of ONE adult woman",
-            "DIFFERENT outfit than reference: " + outfitH,
-            "DIFFERENT pose than reference: " + poseH,
-            "DIFFERENT location than reference: " + sceneH,
-            hasRefH
-              ? "do not copy reference clothing pose or background, change them completely"
-              : "match ethnicity skin hair age and body exactly",
-            idTraits.ageLock,
-            ethH,
-            skinH,
-            hairH,
-            eyesH,
-            bodyH,
-            descH,
-            "fully clothed head to toe shoes visible natural light sharp focus photorealistic single person",
-            extraH ? ("detail: " + extraH) : ""
-          ].filter(Boolean);
-          const customHorde = stripFixedOutfitFromPrompt(String(c.prompt_horde || c.image_prompt_horde || "").trim());
-          const cupH = String(c.Poitrine || c.poitrine || "");
-          const bustH = /[DEFGHIJ]/i.test(cupH) || /plus-size|chubby|généreuse|ronde/i.test(String(c.body||"")+" "+customHorde)
-            ? "very full large bust, heavy soft volume, deep neckline, curvy torso"
-            : "natural feminine bust";
-          // Always re-assert plus-size lock from fiche
-          const bodyLockH = /plus-size|chubby|ronde|généreuse|soft rounded belly/i.test(String(c.body||"")+" "+customHorde+" "+bodyH)
-            ? "BODY LOCK: genuine plus-size chubby soft rounded belly wide hips thick thighs soft arms NOT thin NOT skinny NOT slim model"
-            : bodyH;
-          const identityBits = [
-            "FULL LENGTH head to feet wide shot shoes visible, NOT portrait NOT close-up",
-            "POSE mandatory: " + poseH,
-            "OUTFIT mandatory: " + outfitH,
-            "LOCATION: " + sceneH,
-            hasRefH
-              ? "face only from reference, identical eyes nose mouth, change pose clothing completely"
-              : "photorealistic woman",
-            customHorde || [idTraits.ageLock, ethH, skinH, hairH, eyesH, descH].filter(Boolean).join(", "),
-            bodyLockH,
-            bustH,
-            "seed " + String(Date.now() % 100000),
-            "natural light, sharp focus, single person"
-          ].filter(Boolean);
-          return identityBits.join(", ").replace(/\s+/g, " ").trim().slice(0, 1400);
-        }
-
-        const age = c.age == null || c.age === "" ? NaN : Number(c.age);
-    const ageConfirmed = Number.isInteger(age) && age >= 18;
-    const visuallyAdultAndConfirmed = c.adultConfirmed === true &&
-      Number.isInteger(Number(c.estimatedAge)) && Number(c.estimatedAge) >= 18;
-    if ((Number.isInteger(age) && age < 18) || (!ageConfirmed && !visuallyAdultAndConfirmed)) {
-      throw new Error("La génération nécessite un personnage majeur confirmé. Vérifie l’âge dans la fiche.");
-    }
     const forCloudflare = String(engine || "").toLowerCase().indexOf("horde") < 0;
-    const name = String(c.name || "le personnage").slice(0, 100);
-    const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-    let appearance = String(c.appearance || "").trim().slice(0, forCloudflare ? (hasProfileRef ? 280 : 900) : 760);
-    if (!forCloudflare) appearance = sanitizeForHordePrompt(appearance);
-    const nonHumanTraits = String(c.nonHumanTraits || "").trim().slice(0, 320);
-    const bust = String(profileImageBustRaw(c)).trim().slice(0, 40);
-    const appearanceClean = sanitizeAppearanceForImage(appearance);
-    const bustInfo = describeBustLock(bust, appearance, engine);
-    const hasLargeCloudflareBust = forCloudflare && /[DEFGHIJ]$/.test(bustInfo.label);
-    const bodyInfo = describeBodyMorphology(c);
-    let looksEn = String(c.looks_en || "").trim().slice(0, forCloudflare ? (hasProfileRef ? 160 : 420) : 360);
-    if (!forCloudflare) looksEn = sanitizeForHordePrompt(looksEn);
-    const bodyField = String(c.body || "").trim().slice(0, 160);
-    const promptDescription = (value) => hasLargeCloudflareBust
-      ? String(value || "")
-          .replace(/\b(?:small|tiny|flat|modest|average|medium)\s+(?:natural\s+)?(?:breasts?|bust|chest)\b/gi, "")
-          .replace(/\b(?:breasts?|bust|chest)\s+(?:is|are|stays?)?\s*(?:small|tiny|flat|modest|average|medium)\b/gi, "")
-          .replace(/\b(?:petite|petits|petit|menue|discr[eè]te)\s+(?:poitrine|seins|buste|bonnet)\b/gi, "")
-          .replace(/\b(?:poitrine|seins|buste)\s+(?:petite|petits|menue|discr[eè]te|moyenne)\b/gi, "")
-      : String(value || "");
-    const appearancePrompt = promptDescription(appearanceClean || appearance || "match character sheet.");
-    const looksPrompt = promptDescription(looksEn);
-    const bodyPrompt = promptDescription(bodyField);
-    const faceLock = hasProfileRef
-      ? ("FACE LOCK input_image_0: SAME person as reference — identical face, eyes, nose, lips, hair color/style, skin, age. " +
-         "Follow the profile body description and prioritize its explicit cup size even if the reference chest appears smaller. " +
-         "CRITICAL: completely NEW outfit, NEW pose, NEW camera angle — do NOT copy the reference pose, stance, hand position or clothing. " +
-         "Photorealistic RAW photo, natural skin texture, sharp facial detail, full body in frame, head visible.")
-      : ("Follow the physical description exactly for " + name + " including body morphology and bust. Photorealistic adult woman, full body, head visible.");
+    const sheetPrompt = forCloudflare
+      ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim()
+      : String(c.prompt_horde || c.image_prompt_horde || "").trim();
 
-    // Tenues inspirées mode éditoriale sexy (couleurs variées, décolletés, mini, mesh, satin…)
-    // Cloudflare : vocabulaire fashion pour limiter les rejets 3030
-    // Horde : encore plus provocant (lingerie, sheer, lace)
-    const outfitsCf = [
-      "tight emerald bodycon mini dress deep neckline, black stilettos, sensual full body",
-      "burgundy satin wrap mini dress high slit, stilettos, hotel suite",
-      "black deep plunge fitted dress side cutouts, glamorous stairs, full body",
-      "sheer black blouse unbuttoned over lace camisole, leather mini skirt, heels",
-      "champagne silk slip dress thin straps thigh slit, bare legs, luxury bedroom",
-      "red bodycon mini dress plunging neckline, black pumps, city penthouse",
-      "black backless long dress looking over shoulder, grand marble staircase",
-      "olive satin mini dress thin straps, soft hotel lighting, seductive stance",
-      "forest green micro skirt and black deep V top, thigh-high boots, staircase",
-      "lavender satin mini dress plunging neckline, sunlit luxury apartment",
-      "royal blue fitted mini dress deep neckline, soft glamorous evening interior",
-      "white linen midi sundress thin straps, Mediterranean terrace, full body",
-      "pink satin wrap dress décolleté, hotel bed soft light",
-      "gold sequin mini dress deep V, evening lobby chandelier",
-      "navy pencil skirt white blouse open buttons cleavage, office corridor",
-      "floral print fitted midi dress deep neckline, bright living room",
-      "black lace midi dress sheer sleeves, elegant décolleté, full body",
-      "coral off-shoulder bodycon dress, bare shoulders, penthouse window",
-      "cream silk slip dress, soft daylight bedroom, sensual pose",
-      "teal satin blouse and black leather mini skirt, heels, hallway",
-      "purple velvet midi dress low neckline, luxury lounge",
-      "yellow summer midi dress thin straps, outdoor balcony full body",
-      "silver metallic mini dress, nightclub corridor soft neon",
-      "camel coat open over short black deep V dress, hotel stairs",
-      "denim mini skirt tight white crop top, urban loft interior",
-      "rose floral wrap mini dress, defined waist, soft indoor light",
-      "black one-shoulder asymmetric mini dress, stilettos, full body",
-      "ivory lace lingerie set with sheer open robe, bedroom lamps, full body",
-      "burgundy short satin robe loosely tied, hotel suite, legs bare",
-      "oversized white shirt barely buttoned, black micro shorts, doorway"
+    // Rotation tenue / pose / lieu (sans reconstruire le physique hors fiche)
+    const outfits = forCloudflare ? [
+      "tight emerald bodycon mini dress deep neckline, black stilettos",
+      "burgundy satin wrap mini dress high slit, heels",
+      "black deep plunge fitted dress, glamorous stairs",
+      "champagne silk slip dress thin straps thigh slit",
+      "red bodycon mini dress plunging neckline, pumps",
+      "floral fitted midi dress deep V neckline",
+      "navy pencil skirt and white blouse open buttons",
+      "pink satin wrap dress decollete",
+      "black backless long evening gown, marble stairs",
+      "lavender satin mini dress plunging neckline",
+      "coral off-shoulder bodycon dress",
+      "white linen midi sundress thin straps",
+      "black lace midi dress sheer sleeves decollete",
+      "gold sequin mini dress deep V",
+      "forest green velvet midi dress low neckline"
+    ] : [
+      "black deep plunge bodycon mini dress stilettos",
+      "red wrap midi dress black heels",
+      "emerald satin slip dress thin straps",
+      "burgundy off-shoulder fitted dress",
+      "floral fitted midi dress deep V",
+      "navy pencil skirt white blouse",
+      "champagne silk slip dress",
+      "black backless long evening gown",
+      "pink satin wrap mini dress",
+      "royal blue bodycon midi dress",
+      "olive square-neck mini dress",
+      "cream knit bodycon dress",
+      "teal blouse black pencil skirt",
+      "white linen sundress thin straps",
+      "black lace midi dress decollete"
     ];
-    const outfitsHorde = [
-            "black deep plunge bodycon mini dress, stilettos, full body",
-            "red wrap midi dress defined waist, black heels",
-            "emerald green satin slip dress thin straps thigh slit",
-            "burgundy off-shoulder fitted dress, gold earrings",
-            "white linen sundress thin straps, Mediterranean terrace",
-            "navy pencil skirt and white blouse unbuttoned cleavage",
-            "floral print fitted midi dress deep V neckline",
-            "champagne silk slip dress, bare legs, luxury interior",
-            "black leather mini skirt and sheer black blouse",
-            "royal blue bodycon midi dress, side slit",
-            "olive square-neck mini dress, nude pumps",
-            "pink satin wrap mini dress, hotel suite",
-            "black backless long evening gown, marble stairs",
-            "cream knit bodycon dress, soft daylight apartment",
-            "teal blouse open collar and black pencil skirt",
-            "lavender deep V mini dress, city penthouse",
-            "camel coat open over short black dress",
-            "silver sequin mini dress, evening lobby",
-            "forest green velvet midi dress, low neckline",
-            "yellow summer midi dress, outdoor balcony",
-            "black one-shoulder crop top and high-waist mini skirt",
-            "white shirt dress belted, legs bare",
-            "purple satin robe loosely tied over slip",
-            "striped boat-neck midi dress, elegant hallway",
-            "coral off-shoulder bodycon dress, heels",
-            "black lace midi dress sheer sleeves, décolleté",
-            "denim mini skirt and tight white tank top",
-            "gold satin evening dress deep neckline",
-            "grey tailored jumpsuit zip front, defined waist",
-            "rose floral wrap dress, soft indoor light"
-          ];
-    // Cloudflare: tenues sensuelles. (Horde a son propre prompt minimal plus haut.)
-    const outfits = forCloudflare ? outfitsCf : outfitsHorde;
-    const outfitHistoryKey = "lea.profileImage.outfitHistory." + String(c.id || "lea");
-    let recentOutfits = [];
-    try {
-      const savedOutfits = JSON.parse(localStorage.getItem(outfitHistoryKey) || "[]");
-      if (Array.isArray(savedOutfits)) recentOutfits = savedOutfits;
-    } catch (_) {}
-    const availableOutfits = outfits.filter((item) => recentOutfits.indexOf(item) < 0);
-    const outfitPool = availableOutfits.length ? availableOutfits : outfits;
-    const outfit = outfitPool[Math.floor(Math.random() * outfitPool.length)];
-    recentOutfits = [outfit].concat(recentOutfits.filter((item) => item !== outfit)).slice(0, 6);
-    try { localStorage.setItem(outfitHistoryKey, JSON.stringify(recentOutfits)); } catch (_) {}
-
     const poses = [
       "standing full body hands on hips facing camera",
       "three-quarter turn looking over shoulder full body",
       "walking toward camera mid-stride full length",
-      "seated on desk edge legs crossed elegant full body",
-      "leaning on railing looking back sensual full body",
-      "standing profile looking at camera full body",
+      "seated on desk edge legs crossed full body",
+      "leaning on railing looking back full body",
+      "standing profile full body by window",
+      "climbing stairs mid-step looking back",
+      "standing wide shot entire figure in room",
       "sitting on sofa arm leaning forward",
-      "climbing stairs mid-step looking over shoulder",
-      "standing far wide shot entire figure in room",
-      "leaning against wall one knee bent full body",
-      "lying on side on bed propped on elbow full body",
-      "standing with one hand in hair glamorous full body",
-      "sitting cross-legged on floor looking up",
-      "leaning forward over table three-quarter view",
-      "back to camera looking over shoulder full body",
-      "dancing pose one arm raised full body",
-      "kneeling on sofa elegant full body",
-      "standing side profile hands behind back full body"
+      "back to camera looking over shoulder full body"
     ];
-    const poseHistoryKey = "lea.profileImage.poseHistory." + String(c.id || "lea");
-    let recentPoses = [];
-    try {
-      const savedPoses = JSON.parse(localStorage.getItem(poseHistoryKey) || "[]");
-      if (Array.isArray(savedPoses)) recentPoses = savedPoses;
-    } catch (_) {}
-    const availablePoses = poses.filter((item) => recentPoses.indexOf(item) < 0);
-    const posePool = availablePoses.length ? availablePoses : poses;
-    const pose = posePool[Math.floor(Math.random() * posePool.length)];
-    recentPoses = [pose].concat(recentPoses.filter((item) => item !== pose)).slice(0, 5);
-    try { localStorage.setItem(poseHistoryKey, JSON.stringify(recentPoses)); } catch (_) {}
+    const scenes = [
+      "grand hotel staircase chandelier",
+      "modern apartment living room",
+      "luxury bedroom soft light",
+      "hotel lobby marble",
+      "sunlit hallway",
+      "penthouse windows",
+      "Mediterranean terrace",
+      "elegant kitchen interior"
+    ];
+    const outfit = outfits[Math.floor(Math.random() * outfits.length)];
+    const pose = poses[Math.floor(Math.random() * poses.length)];
+    const scene = scenes[Math.floor(Math.random() * scenes.length)];
+    const extraBit = String(extra || "").trim().slice(0, forCloudflare ? 120 : 80);
 
-    const scenes = forCloudflare
-      ? [
-          "grand marble staircase with wrought-iron railing, crystal chandelier, warm evening light",
-          "luxury hotel hallway, beige paneled walls, soft ceiling lights, carpet runner",
-          "elegant bedroom with satin sheets, gold bedside lamps, city night window",
-          "upscale apartment living room, velvet sofa, large windows, plants, golden hour",
-          "classic boudoir with ornate mirror, blue velvet bench, candlelight bokeh",
-          "spa bathroom, frosted window daylight, marble tiles, soft steam mood",
-          "black marble lobby with twin staircases and chandeliers, glamorous night",
-          "cozy library lounge, tall bookshelves, leather armchair, warm lamps",
-          "penthouse doorway, wood floor, skyline through glass at dusk",
-          "fashion-editorial suite, warm glamorous key light, rich interior detail",
-          "hotel suite with king bed, purple rug, lamp on nightstand, intimate evening",
-          "rooftop lounge at night, city bokeh lights, glass railing",
-        ]
-      : [
-          "grand marble staircase chandelier glamorous night",
-          "luxury hotel hallway soft lights",
-          "dark romantic bedroom velvet and candles",
-          "hotel suite bed warm lamps city night window",
-          "living room fireplace leather couch intimate mood",
-          "apartment doorway after rain",
-          "boudoir with ornate mirror and blue velvet bench",
-          "marble lobby black and white stone stairs",
-          "bedroom soft bokeh lights satin sheets",
-          "elegant staircase cream walls iron railing",
-        ];
-    const sceneHistoryKey = "lea.profileImage.sceneHistory." + String(c.id || "lea");
-    let recentScenes = [];
-    try {
-      const savedScenes = JSON.parse(localStorage.getItem(sceneHistoryKey) || "[]");
-      if (Array.isArray(savedScenes)) recentScenes = savedScenes;
-    } catch (_) {}
-    const availableScenes = scenes.filter((item) => recentScenes.indexOf(item) < 0);
-    const scenePool = availableScenes.length ? availableScenes : scenes;
-    const scene = scenePool[Math.floor(Math.random() * scenePool.length)];
-    recentScenes = [scene].concat(recentScenes.filter((item) => item !== scene)).slice(0, 5);
-    try { localStorage.setItem(sceneHistoryKey, JSON.stringify(recentScenes)); } catch (_) {}
-
-    const mood = forCloudflare
-      ? (hasProfileRef
-          ? "The SAME adult woman as input_image_0: use the reference only for facial identity, eyes, hair and skin. Do NOT copy its clothing, outfit color, pose, arm position, camera angle, framing, lighting or background. Always place her in a detailed real-world interior (hotel, bedroom, lobby, stairs), never a plain seamless studio backdrop. Follow the selected outfit and pose below exactly. Rebuild body proportions from the profile and prioritize its canonical cup size. Photorealistic fashion photo, sharp focus, natural light,"
-          : "Create the original adult woman from the written character profile; NO reference image is available. Follow the profile for her identity, age, face, hair, skin, and body. Photorealistic fashion photo, sharp focus, natural light,")
-      : "SAME woman as reference, identical face. NEW outfit, pose and angle. RAW photo adult 18+, photorealistic, unretouched natural skin texture, crisp eyes, individual hair strands, realistic fabric detail, keep identity,";
-
-    const exactPromptAge = Number.isInteger(age) ? age : Number(c.estimatedAge || 0);
-    const visualAgeLock = buildVisualAgeLock(exactPromptAge, c);
-    const idTraitsCf = extractIdentityTraits(c);
-    const textOnlyIdentity = forCloudflare && !hasProfileRef
-      ? ("TEXT-ONLY CHARACTER IDENTITY (no photo — follow strictly): " + name + ", " + idTraitsCf.ageLock + ". "
-        + (idTraitsCf.ethnicity ? idTraitsCf.ethnicity + ". " : "")
-        + (idTraitsCf.skin ? idTraitsCf.skin + ". " : "")
-        + (idTraitsCf.hair ? idTraitsCf.hair + ". " : "")
-        + (idTraitsCf.body ? idTraitsCf.body + ". " : "")
-        + "ethnicity/features: " + String(c.ethnicity || idTraitsCf.ethnicity || "as in profile") + ". "
-        + (looksPrompt || bodyPrompt || appearancePrompt)
-        + " CRITICAL: match ethnicity, age, hair color and skin tone exactly. If East Asian: East Asian face, jet black hair, dark eyes — NOT blonde, NOT Caucasian. If African: dark skin — NOT white European. Age must match the profile number.")
-      : "";
-    const base = [
-      mood,
-      visualAgeLock,
-      textOnlyIdentity,
-      forCloudflare
-        ? ("MANDATORY ENVIRONMENT LOCK: show a rich, unmistakable real-world location filling the background edge to edge: " + scene + ". She is physically inside this place; visible architecture, furnishings and background detail behind her. Absolutely no blank/white/gray/beige studio background, seamless backdrop, empty wall, cutout, or isolated subject. Keep the entire location visible in the final frame.")
-        : "",
-      forCloudflare ? ("Outfit (must follow exactly): " + outfit + ".") : ("Outfit: " + outfit + "."),
-      forCloudflare ? ("Pose (must follow exactly): " + pose + ".") : ("Pose: " + pose + "."),
-      forCloudflare ? ("Location / background (must be visible and detailed): " + scene + ".") : ("Location: " + scene + "."),
-      forCloudflare ? "photorealistic full-body fashion photo, one adult woman, head to toe, shoes visible, glamorous lighting, rich interior background, not a studio seamless, not a close-up," : "photorealistic full-body photo, one adult woman, head to toe, face clearly visible, sharp facial details, not a close-up,",
-      bodyInfo.lead || "",
-      bodyInfo.lock + ",",
-      bustInfo.label ? ("bra size " + bustInfo.label + ",") : "",
-      bustInfo.lock + ",",
-      looksPrompt ? ("Technical looks: " + looksPrompt + ".") : "",
-      bodyPrompt ? ("Body notes: " + bodyPrompt + ".") : "",
-      forCloudflare ? "Appearance text describes identity and body only; ignore any clothing, pose, arm position or framing mentioned there." : "",
-      faceLock,
-      "Physical description: " + appearancePrompt + ".",
-      nonHumanTraits ? "Non-human traits: " + nonHumanTraits + "." : "",
-      bustInfo.label ? ("final body lock: " + bustInfo.lock) : "",
-      forCloudflare
-        ? "sensual fashion photography, realistic clothing fit on this cup size, full bust volume as specified,"
-        : "avoid: " + bustInfo.neg + ", " + bodyInfo.neg + ",",
-      "realistic clothing fit on this body type and cup size,",
-      "no extra people, no text, no watermark, no deformed hands",
-    ].filter(Boolean).join(" ");
-
-    // Prompt perso = identité seule (tenue retirée) + rotation sexy + verrou bonnet
-    const customCfRaw = forCloudflare ? String(c.prompt_cloudflare || c.image_prompt_cf || "").trim() : "";
-    const customCf = customCfRaw ? stripFixedOutfitFromPrompt(customCfRaw) : "";
-    const cupBoost = (forCloudflare && bustInfo.label && /[DEFGHIJ]$/.test(bustInfo.label))
-      ? (", MANDATORY HUGE BUST " + bustInfo.label + ": render breasts MUCH larger than a normal photo, very large heavy soft breasts with deep plunging cleavage, "
-         + "the bust dominates the torso like an F-cup glamorous magazine shot, dress fabric tight across a very full chest, "
-         + "NEVER small NEVER modest NEVER reduced by reference image, exaggerate fullness toward oversized D/E/F look")
-      : (bustInfo.label ? (", cup " + bustInfo.label + " realistic bust") : "");
-    let out = customCf
-      ? ("PRIORITY OUTFIT: " + outfit + ". PRIORITY POSE: " + pose + ". PRIORITY LOCATION: " + scene + ". "
-         + "glamorous sexy fashion photo, fitted clothing, deep neckline, three-quarter or full body, not a casual jeans look. "
-         + customCf + cupBoost)
-      : (base + cupBoost);
-    if (extra) out += ", " + (forCloudflare ? String(extra).slice(0, 100) : sanitizeForHordePrompt(String(extra).slice(0, 120)));
-    if (hasLargeCloudflareBust) {
-      const finalBustLock = "FINAL BUST PRIORITY " + bustInfo.label +
-        ": EXTREMELY FULL heavy breasts, deep cleavage, bust much larger than average adult woman, "
-        + "like a glamorous F-cup pin-up in a tight dress, fabric stretched over very large soft breasts, "
-        + "do NOT copy a small chest from the reference photo, increase bust volume dramatically";
-      const maxLength = 1600;
-      return out.slice(0, maxLength - finalBustLock.length - 2).trimEnd() + ", " + finalBustLock;
+    if (!sheetPrompt) {
+      // Fallback minimal si fiche sans prompt (ne devrait plus arriver)
+      const name = String(c.name || "woman").slice(0, 80);
+      const age = c.age != null ? Number(c.age) : 25;
+      return [
+        "photorealistic full-body photo of " + name + ", " + age + " years old",
+        "outfit: " + outfit,
+        "pose: " + pose,
+        "location: " + scene,
+        extraBit
+      ].filter(Boolean).join(", ").slice(0, forCloudflare ? 1600 : 1400);
     }
-    return out.slice(0, forCloudflare ? 1600 : 1800);
+
+    if (forCloudflare) {
+      let out = sheetPrompt
+        + " PRIORITY OUTFIT: " + outfit + "."
+        + " PRIORITY POSE: " + pose + "."
+        + " PRIORITY LOCATION: " + scene + "."
+        + " Full body or three-quarter, glamorous sensual fashion photo.";
+      if (extraBit) out += " " + extraBit;
+      // Face lock if profile image present
+      if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
+        out = "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age. Do not copy clothing or pose from reference. "
+          + out;
+      }
+      return out.slice(0, 1600);
+    }
+
+    // Horde: fiche uniquement + rotation
+    let out = sheetPrompt
+      + ", FULL LENGTH head to feet shoes visible NOT portrait"
+      + ", OUTFIT: " + outfit
+      + ", POSE: " + pose
+      + ", LOCATION: " + scene
+      + ", keep same face as reference if provided, change outfit and pose";
+    if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
+    return out.replace(/\s+/g, " ").trim().slice(0, 1400);
   }
 
   /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
@@ -2747,7 +2413,7 @@
         try {
           // Denoise: 0.48 = copie quasi identique de la ref; 0.58 = nouvelle tenue/pose, visage ancré par le prompt.
           const charId = String(char && char.id || "");
-          const denoise = 0.90;
+          const denoise = HORDE_COMMON_DENOISE;
           const promptWithDenoise = "[[denoise:" + denoise + "]] " + String(prompt || "");
           const hasCover = !!(char && (char.cover || (Array.isArray(char.gallery) && char.gallery[0])));
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {

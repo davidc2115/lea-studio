@@ -463,16 +463,18 @@ function findBundledCharacterForPrompt(id) {
         body: typeof bundled.body === "string" ? bundled.body : (c.body || ""),
         Poitrine: bundled.Poitrine || bundled.poitrine || "",
         poitrine: bundled.Poitrine || bundled.poitrine || "",
-        canonicalCupSize: bundled.canonicalCupSize || "",
-        bustEstimate: bundled.bustEstimate || "",
-        nonHumanTraits: bundled.nonHumanTraits || "",
+        prompt_cloudflare: bundled.prompt_cloudflare || c.prompt_cloudflare || "",
+        prompt_horde: bundled.prompt_horde || c.prompt_horde || "",
+        cover: bundled.cover || c.cover || "",
+        gallery: Array.isArray(bundled.gallery) && bundled.gallery.length ? bundled.gallery : c.gallery,
       }) : c;
+      const coverPath = String(source.cover || "").trim();
+      const galleryPaths = Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : [];
       return {
         id: source.id,
         name: source.name,
         age: source.age,
         title: source.title,
-        canonicalCupSize: source.canonicalCupSize || "",
         tags: source.tags,
         scenario: source.scenario,
         personality: source.personality,
@@ -482,25 +484,12 @@ function findBundledCharacterForPrompt(id) {
         body: source.body || "",
         Poitrine: source.Poitrine || source.poitrine || "",
         poitrine: source.Poitrine || source.poitrine || "",
-        bustEstimate: source.bustEstimate || "",
+        prompt_cloudflare: source.prompt_cloudflare || "",
+        prompt_horde: source.prompt_horde || "",
         estimatedAge: source.estimatedAge || null,
-        nonHumanTraits: source.nonHumanTraits || "",
         system_extra: source.system_extra,
-        // Requis pour img2img (identité visage) en scène conversation + profil
-        // Horde uses current catalog references for bundled characters; Cloudflare's
-        // previously validated Hortense reference remains unchanged.
-        cover: bundled && String(bundled.id) === "aya"
-          ? "characters/meilleure-amie-de-ta-fille/aya/images/hortense-build1106-reference.jpg"
-          : (bundled && String(imageProvider || "").toLowerCase() === "horde"
-              ? (bundled.cover || source.cover || "")
-              : (source.cover || "")),
-        gallery: bundled && String(bundled.id) === "aya"
-          ? []
-          : (bundled && String(imageProvider || "").toLowerCase() === "horde"
-              ? (Array.isArray(bundled.gallery) && bundled.gallery.length
-                  ? bundled.gallery.slice(0, 12)
-                  : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : []))
-              : (Array.isArray(source.gallery) ? source.gallery.slice(0, 12) : [])),
+        cover: coverPath,
+        gallery: galleryPaths,
       };
     }
 
