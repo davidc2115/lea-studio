@@ -471,7 +471,8 @@
     else if (/yeux verts|green eyes/.test(blob)) eyes = "green eyes";
 
     let body = "";
-    if (/tonique|athletic|danseuse|athl[eé]tique|fit\b/.test(blob)) body = "athletic toned figure, firm stomach";
+    if (/g[eé]n[eé]reuse|voluptueuse|formes g[eé]n[eé]reuses|gros seins|curvy|pulpeuse/.test(blob)) body = "voluptuous curvy figure, full bust, marked hips, generous feminine curves";
+    else if (/tonique|athletic|danseuse|athl[eé]tique|fit\b/.test(blob)) body = "athletic toned figure, firm stomach";
     else if (/plus[- ]?size|chubby|plantureus|ronde|bbw/.test(blob)) body = "plus-size curvy figure";
     else if (/sablier|hourglass/.test(blob)) body = "hourglass figure";
     else if (/mince|slim|slender/.test(blob)) body = "slim slender figure";
