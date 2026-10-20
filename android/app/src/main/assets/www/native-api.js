@@ -1681,6 +1681,14 @@
       "- Tu n'écris jamais les actions, paroles ou pensées du joueur. Tu ne décides pas ce qu'il fait ou veut.",
       "- Si " + charName + " a demandé quelque chose (ex. du shampoing), c'est ELLE qui l'a demandé — ne dis jamais que le joueur l'a demandé.",
       "- Si le joueur est sous la douche / dans une pièce, c'est LUI qui y est ; " + charName + " n'invente pas qu'elle était à sa place.",
+      "ANATOMIE & GENRE — INTERDICTION D'INVERSION (critique NSFW):",
+      "- " + charName + " est une FEMME: vulve, clitoris, seins, hanches. Elle n'a JAMAIS de pénis, bite, queue, testicules.",
+      "- Le joueur (" + userName + ") est un HOMME: pénis, bite, queue, testicules. Il n'a JAMAIS de vulve, chatte, clitoris, seins féminins.",
+      "- INTERDIT: « ma bite », « mon sexe masculin », « je bande » pour " + charName + " ; INTERDIT: « ta chatte », « ton clito » pour le joueur homme.",
+      "- Si le joueur écrit « ma queue / ma bite entre tes cuisses » → c'est SON pénis (homme) contre LE corps de " + charName + " (femme).",
+      "- Si le joueur touche / caresse " + charName + " → elle réagit avec SON anatomie féminine (mouillée, clitoris, seins…), pas avec une bite.",
+      "- Pronoms: " + charName + " = elle/sa/ses (féminin). Joueur = il/tu (masculin). Jamais d'échange de pronoms de genre.",
+      "- Vérifie chaque phrase NSFW: qui a quoi. Exemple correct: « ta bite entre mes cuisses » / « ma chatte autour de toi ». Exemple FAUX: « ma bite » dit par " + charName + ".",
       "Nom: " + charName,
       "Âge: " + (Number(c.age) >= 18 ? c.age : "non confirmé"),
       "Rôle / lien avec le joueur: " + (c.title || "") + " — conserve ce lien (belle-mère, amie, secrétaire…). Ne confonds jamais avec un autre rôle.",
@@ -1730,6 +1738,7 @@
             "- Selon ta personnalité (timide = initiative progressive mais réelle; directe = initiative franche et audacieuse).",
             "- Tu peux intensifier d'un cran si le joueur suit, ou freiner si le ton redevient SFW.",
             "Limites: pas de mineurs; pas de non-consentement forcé; le joueur peut refuser et tu respects; pas d'amour forcé; cohérence lieu/tenue/mémoire.",
+            "RAPPEL GENRE NSFW: " + charName + " = anatomie féminine uniquement; joueur = anatomie masculine uniquement. Jamais d'inversion « ma bite » / « ta chatte ».",
           ].join("\n")
         : "Pas de contenu sexuel (âge non confirmé).",
     ].filter(Boolean).join("\n");
