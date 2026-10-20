@@ -598,23 +598,47 @@
       ].filter(Boolean).join(", ").slice(0, forCloudflare ? 1600 : 1400);
     }
 
+    // Morphologie depuis la fiche (obligatoire pour cohérence ronde / mince)
+    const morphBlob = [
+      String(c.body || ""),
+      String(c.appearance || ""),
+      String(c.looks_en || ""),
+      Array.isArray(c.tags) ? c.tags.join(" ") : "",
+      sheetPrompt
+    ].join(" ").toLowerCase();
+    let bodyMorphLock = "";
+    if (/plus[- ]?size|chubby|plantureus|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs|généreuse|voluptueus|gros seins/.test(morphBlob)
+        || String(c.id || "") === "aya") {
+      bodyMorphLock = forCloudflare
+        ? " BODY TYPE LOCK: genuine plus-size chubby woman, soft rounded belly, wide hips, thick thighs, soft arms, full round face cheeks, heavy soft curves, REAL plus-size body — NEVER slim, NEVER skinny, NEVER thin waist fashion model, NEVER hourglass slim."
+        : ", BODY LOCK plus-size chubby soft rounded belly wide hips thick thighs soft arms NOT thin NOT skinny NOT slim model";
+    } else if (/\bmince\b|slim|slender|élancée|skinny|longiligne/.test(morphBlob)) {
+      bodyMorphLock = forCloudflare
+        ? " BODY TYPE LOCK: slim slender elegant figure, light frame — NOT plus-size, NOT chubby, NOT thick thighs."
+        : ", slim slender figure NOT plus-size NOT chubby";
+    }
+
     if (forCloudflare) {
       let out = sheetPrompt
+        + bodyMorphLock
         + " PRIORITY OUTFIT: " + outfit + "."
         + " PRIORITY POSE: " + pose + "."
         + " PRIORITY LOCATION: " + scene + "."
         + " Full body or three-quarter, glamorous sensual fashion photo.";
       if (extraBit) out += " " + extraBit;
-      // Face lock if profile image present
       if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
-        out = "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age. Do not copy clothing or pose from reference. "
+        out = "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age skin. Do not copy clothing or pose from reference. "
           + out;
       }
-      return out.slice(0, 1600);
+      // Répéter le verrou ronde en fin de prompt (FLUX suit mieux la fin)
+      if (/plus-size|chubby/.test(bodyMorphLock)) {
+        out += " FINAL: keep plus-size chubby body with soft belly and wide hips, never generate a slim model.";
+      }
+      return out.slice(0, 1800);
     }
 
-    // Horde: fiche uniquement + rotation
     let out = sheetPrompt
+      + bodyMorphLock
       + ", FULL LENGTH head to feet shoes visible NOT portrait"
       + ", OUTFIT: " + outfit
       + ", POSE: " + pose
