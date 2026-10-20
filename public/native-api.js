@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.82;
+  const HORDE_COMMON_DENOISE = 0.55;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -646,10 +646,13 @@
       return out.slice(0, 1900);
     }
 
+    const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     let out = "RAW photograph, photorealistic DSLR photo, natural skin pores and texture, real camera, 35mm lens, sharp focus, "
       + "NOT illustration, NOT painting, NOT digital art, NOT anime, NOT 3d render, NOT drawing, ";
+    if (hasRef) {
+      out += "FACE LOCK from reference image: keep the EXACT same face, eyes, nose, lips, hair color and style, age and skin tone as the reference photo, ";
+    }
     if (isPlusSize) {
-      // Anti-grossesse EN TÊTE (Horde suit fort le début du prompt)
       out += "IMPORTANT: woman is NOT pregnant, no pregnancy belly, no baby bump, no maternity, no swollen abdomen, "
         + "plus-size curvy with wide hips and thick thighs and full bust, soft love handles, relatively flat upper belly, ";
     }
@@ -2417,7 +2420,7 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // crop visage: libère pose/tenue du corps de la ref; denoise 0.90
+            // crop visage + denoise 0.55: fidélité visage, pose/tenue libres
             faceOnlyRef: true,
           });
           return {
