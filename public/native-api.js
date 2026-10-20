@@ -1688,19 +1688,12 @@
       "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman).",
       "COMPLETUDE: chaque réponse doit être ENTIÈRE. Termine toujours la dernière phrase et le dernier mot. INTERDIT de s'arrêter sur « Oui… rempl » ou « c'est » sans finir. Pas de coupure en milieu de mot.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
-      "TIERCES PERSONNES — TOUJOURS ACTIF:",
-      "Dès que le joueur mentionne, touche, embrasse, parle à, ou décrit une autre personne (ma femme, Claire, ma fille, mon frère, un ami…), cette personne DOIT parler dans ta réponse.",
-      "Format strict, une idée par ligne:",
-      "[" + charName + "]: *action de " + charName + "*",
-      "[Prénom]: uniquement les paroles de la tierce (ex: [Claire]: Oh… oui…)",
-      "(pensée courte de " + charName + ")",
-      "[" + charName + "]: paroles de " + charName + " sans marqueur",
-      "Exemple:",
-      "[" + charName + "]: *J'entends le grincement du lit.*",
-      "[Claire]: Oh mon dieu… si fort…",
-      "[" + charName + "]: (C'est excitant d'écouter.)",
-      "INTERDIT: ignorer la tierce; coller les tours de plusieurs locuteurs dans un même bloc.",
-      "Chaque changement de locuteur commence sur une nouvelle ligne : [" + charName + "]: pour le personnage principal; [Prénom — rôle]: pour une tierce personne. Dans chaque bloc, actions = *...*, pensées = (...), paroles sans marqueur. Après l’intervention d’un tiers, ouvre un nouveau bloc [" + charName + "]: pour reprendre le personnage principal. N'attribue jamais une parole, une pensée ou une action à une autre personne.",
+      "UN SEUL LOCUTEUR — TOI SEULE:",
+      "La discussion est UNIQUEMENT entre " + charName + " et le joueur.",
+      "INTERDIT d'écrire les paroles, actions ou pensées d'une tierce personne (femme, fille, amie, Claire, etc.).",
+      "INTERDIT les lignes du type [Claire]:, [Ma femme]:, [Prénom]: pour quelqu'un d'autre.",
+      "Si le joueur mentionne quelqu'un d'autre, " + charName + " peut réagir ou en parler, mais seule " + charName + " s'exprime dans ta réponse.",
+      "Pas de préfixe [" + charName + "]: inutile — tu es déjà " + charName + ".",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
       Number(c.age) >= 18
         ? [
@@ -2185,48 +2178,6 @@
     } catch (_) {}
 
     let system = buildSystemPrompt(char, st, loadLongTermMemory(charId));
-    // Détecter si le joueur s'adresse à une tierce → forcer sa réplique
-    let requiredThirdTags = [];
-    try {
-      const lastUser = [...(messages || [])].reverse().find((m) => m && m.role === "user");
-      const u = String(lastUser && lastUser.content || "");
-      const thirdHints = [];
-      if (/\b(ma|sa|ton|ta)\s+femme\b|\bClaire\b|embrasse\s+(ma\s+)?femme|caresse\s+(ma\s+)?femme|baiser\s+(ma\s+)?femme|avec\s+(ma\s+)?femme|parle\s+[àa]\s+(ma\s+)?femme/i.test(u)) {
-        thirdHints.push("[Claire]:");
-        thirdHints.push("[Ma femme]:");
-      }
-      if (/\b(ma|ta|sa)\s+fille\b/i.test(u)) thirdHints.push("[Ta fille]:");
-      if (/\b(mon|ton|son)\s+fils\b/i.test(u)) thirdHints.push("[Ton fils]:");
-      if (/\b(ma|ta|sa)\s+s[oe]ur\b/i.test(u)) thirdHints.push("[Ta sœur]:");
-      if (/\b(mon|ton|son)\s+fr[eè]re\b/i.test(u)) thirdHints.push("[Ton frère]:");
-      if (/\b(ma|ta|sa)\s+m[eè]re\b|\bbelle-?m[eè]re\b/i.test(u)) {
-        thirdHints.push("[Ta mère]:");
-        thirdHints.push("[Belle-mère]:");
-      }
-      if (/\b(mon|ton|son)\s+ami\b|\b(ma|ta|sa)\s+amie\b/i.test(u)) thirdHints.push("[Ami]:");
-      // Prénom capitalisé hors personnage
-      const charLow = String((char && char.name) || "").toLowerCase();
-      const names = u.match(/\b([A-ZÀ-Ü][a-zà-ü'’-]{2,20})\b/g) || [];
-      for (const n of names) {
-        if (charLow && n.toLowerCase() === charLow.split(/\s+/)[0]) continue;
-        if (/^(Je|Tu|Il|Elle|On|Nous|Vous|Le|La|Les|Un|Une|Des|Mon|Ma|Mes|Ton|Ta|Tes|Oui|Non|Bonjour|Merci|Euh|Eh|Hé|Hum|Hmm|Oh|Ah|Bah|Ben|Bon|Alors|Voilà)$/i.test(n)) continue;
-        thirdHints.push("[" + n + "]:");
-      }
-      // Verbes d'adresse génériques
-      if (/\b(parle|dis|demande|réponds|appelle|appelle|embrasse|caresse|touche|baise|regarde)\b.{0,40}\b(lui|elle|eux|elles)\b/i.test(u) && thirdHints.length === 0) {
-        thirdHints.push("[Elle]:");
-      }
-      if (thirdHints.length) {
-        requiredThirdTags = [...new Set(thirdHints)].slice(0, 6);
-        system += "\n\nRAPPEL TOUR ACTUEL — TIERCE PERSONNE OBLIGATOIRE:\n" +
-          "Le joueur implique une autre personne. Ta réponse DOIT contenir AU MOINS une ligne exactement au format:\n" +
-          requiredThirdTags.join("  ou  ") + "\n" +
-          "Règle: chaque bloc étiqueté ne contient que les actions, paroles et pensées de CE locuteur. Chaque changement exige une nouvelle étiquette; après la tierce, réouvre [" + String(char && char.name || "elle") + "]: avant tout retour au personnage principal.\n" +
-              "Exemple strict:\n[" + String(char && char.name || "elle") + "]: *je me tourne vers elle*\n" +
-              requiredThirdTags[0] + " Oh… continue…\n[" + String(char && char.name || "elle") + "]: (mon cœur s’emballe)\n[" + String(char && char.name || "elle") + "]: Tu es sûr ?\n" +
-              "INTERDIT de mélanger deux locuteurs dans un même bloc.";
-      }
-    } catch (_) {}
     const engine = (st && st.chatEngine) || "gemini";
     const geminiKeys = splitKeys(st.geminiKeys || st.GEMINI_API_KEYS);
     const openaiKeys = splitKeys(st.openaiKeys);
@@ -2319,16 +2270,6 @@
             errors.push(eng + ": refus NSFW / " + (re.message || re));
             continue;
           }
-        }
-        // Si tierce exigée mais absente → un seul retry avec rappel ultra-court
-        if (requiredThirdTags.length && !replyHasThirdParty(result.reply, requiredThirdTags)) {
-          const forceSys = system + "\n\nCORRECTION IMMÉDIATE: ta réponse précédente n'avait AUCUNE ligne [Nom]:. " +
-            "Réécris TOUT le message en incluant obligatoirement une ligne " + requiredThirdTags[0] + " avec les paroles de la tierce personne.";
-          try {
-            const retry = await callOne(eng, forceSys);
-            if (retry && replyHasThirdParty(retry.reply, requiredThirdTags)) result = retry;
-            else if (retry && !isRefusalReply(retry.reply)) result = retry;
-          } catch (_) {}
         }
         if (isRefusalReply(result.reply)) {
           errors.push(eng + ": refus NSFW persistant");
