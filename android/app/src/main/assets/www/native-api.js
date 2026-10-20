@@ -607,7 +607,7 @@
       sheetPrompt
     ].join(" ").toLowerCase();
     let bodyMorphLock = "";
-    if (/plus[- ]?size|chubby|plantureus|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs|généreuse|voluptueus|gros seins/.test(morphBlob)
+    if (/plus[- ]?size|chubby|plantureus|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs/.test(morphBlob)
         || String(c.id || "") === "aya") {
       bodyMorphLock = forCloudflare
         ? " BODY TYPE LOCK: genuine plus-size chubby woman, soft rounded belly, wide hips, thick thighs, soft arms, full round face cheeks, heavy soft curves, REAL plus-size body — NEVER slim, NEVER skinny, NEVER thin waist fashion model, NEVER hourglass slim."
