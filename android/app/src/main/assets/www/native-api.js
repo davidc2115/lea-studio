@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.78;
+  const HORDE_COMMON_DENOISE = 0.58;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -618,7 +618,7 @@
         || String(c.id || "") === "aya") {
       bodyMorphLock = forCloudflare
         ? " BODY TYPE LOCK: plus-size curvy chubby woman, wide hips, thick thighs, soft arms, full cheeks, heavy full bust, pear-shaped soft curves — flat-to-soft love handles, NEVER pregnant, NEVER baby bump, NEVER slim."
-        : ", BODY LOCK plus-size curvy wide hips thick thighs soft arms full bust, flat waist soft love handles only, NOT pregnant NOT baby bump NOT swollen belly NOT thin";
+        : ", BODY LOCK soft plus-size curvy like reference, wide hips thick thighs full bust soft arms, modest soft tummy not huge, NOT obese extreme, NOT pregnant NOT baby bump NOT thin";
     } else if (/\bmince\b|slim|slender|élancée|skinny|longiligne/.test(morphBlob)) {
       bodyMorphLock = forCloudflare
         ? " BODY TYPE LOCK: slim slender elegant figure, light frame — NOT plus-size, NOT chubby, NOT thick thighs."
@@ -655,21 +655,18 @@
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     let out = "";
-    // Cadrage + tenue d'abord (SD suit le début du prompt)
-    out += "full body shot, 35mm, woman standing in a room, entire body visible from head to toes, feet and shoes in frame, "
-      + "far from camera, environmental wide shot, "
-      + "wearing " + outfit + ", "
-      + pose + ", "
-      + "location " + scene + ", ";
     if (hasRef) {
-      out += "face matches reference portrait exactly, same eyes nose mouth hair, ";
+      out += "img2img: keep the exact same woman as the reference photo, same face eyes nose lips smile, same hair color and waves, same soft plus-size body proportions, ";
     }
-    out += "photorealistic RAW photo, detailed skin, sharp focus, ";
+    out += "photorealistic full body photo, head to feet, shoes visible, "
+      + "wearing " + outfit + ", " + pose + ", at " + scene + ", "
+      + "new clothing different from reference, new pose, ";
     if (isPlusSize) {
-      out += "plus-size curvy body wide hips thick thighs, large breasts, soft love handles, not pregnant, ";
+      out += "soft chubby curvy figure matching reference, large breasts, wide hips, NOT extremely obese, NOT huge belly, NOT pregnant, NOT baby bump, ";
     }
+    out += "RAW DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
     out += sheetPrompt + bodyMorphLock;
-    if (isPlusSize) out += ", not pregnant not baby bump";
+    if (isPlusSize) out += ", not pregnant not baby bump not maternity not distended belly";
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
     return out.replace(/\s+/g, " ").trim().slice(0, 1400);
   }
@@ -2433,9 +2430,9 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // Crop VISAGE strict: la ref n'embarque plus la tenue → variété réelle
-            faceOnlyRef: true,
-            strictFaceOnly: true,
+            // Ref COMPLÈTE + denoise 0.58: même visage et même morpho que la ★
+            faceOnlyRef: false,
+            strictFaceOnly: false,
           });
           return {
             ok: true,

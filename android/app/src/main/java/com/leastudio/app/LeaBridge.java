@@ -861,7 +861,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 512);
                     params.put("height", registered ? 768 : 768);
-                    double denoise = 0.78;
+                    double denoise = 0.58;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -877,7 +877,7 @@ public class LeaBridge {
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
                     // Avec référence: cfg bas + denoise bas = visage ancré; sans ref cfg plus haut.
-                    double cfg = hasRef ? 6.5 : 7.5;
+                    double cfg = hasRef ? 5.5 : 7.0;
                     int steps = registered ? 35 : 28;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
@@ -887,7 +887,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", full length head to toes shoes feet visible, far shot, different clothes, photorealistic ### white bra, beige bra, grey bra, lingerie, cleavage close-up, bust crop, headshot, portrait, selfie, upper body only, cropped at chest, cropped at waist, painting, anime, blurry, pregnant, baby bump");
+                    payload.put("prompt", promptWork + ", full length head to feet, shoes visible, photorealistic ### extreme obese, morbidly obese, huge hanging belly, pregnant, pregnancy belly, baby bump, maternity, headshot, bust crop, painting, anime, blurry");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
