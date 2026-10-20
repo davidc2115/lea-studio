@@ -1737,17 +1737,31 @@ function mergeAllCasts() {
         if (!o.cover || String(o.cover).trim().length < 5) {
           merged.cover = base.cover || merged.cover;
         }
-        if ((!Array.isArray(o.gallery) || o.gallery.length === 0) && Array.isArray(base.gallery) && base.gallery.length) {
-          merged.gallery = base.gallery.slice();
+        // Toujours fusionner galeries : images générées (gallery:) + assets catalogue
+        merged.gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+        // Cover utilisateur gallery: prioritaire
+        if (o.cover && String(o.cover).indexOf("gallery:") === 0) {
+          merged.cover = o.cover;
+        } else if (!o.cover || String(o.cover).trim().length < 5) {
+          merged.cover = base.cover || merged.cover;
         }
-        // Id amelie = toujours le catalogue Sidonie (évite nom "amelie" + fiche vide en local)
+        // Id amelie = catalogue Sidonie pour texte, mais CONSERVER galerie/cover générées
         if (id === "amelie") {
-          for (const key of ["name", "age", "title", "tags", "scenario", "greeting", "personality", "appearance", "looks_en", "ethnicity", "body", "Poitrine", "poitrine", "cover", "gallery", "prompt_cloudflare", "prompt_horde"]) {
+          for (const key of ["name", "age", "title", "tags", "scenario", "greeting", "personality", "appearance", "looks_en", "ethnicity", "body", "Poitrine", "poitrine", "prompt_cloudflare", "prompt_horde"]) {
             if (Object.prototype.hasOwnProperty.call(base, key) && base[key] != null && base[key] !== "") {
               merged[key] = base[key];
             }
           }
           merged.name = "Sidonie Perrin";
+          merged.gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+          // Cover: garder gallery: ou ★ utilisateur, sinon pack
+          if (o.cover && String(o.cover).indexOf("gallery:") === 0) {
+            merged.cover = o.cover;
+          } else if (o.cover && String(o.cover).trim() && String(o.cover) !== String(base.cover || "")) {
+            merged.cover = o.cover;
+          } else {
+            merged.cover = base.cover || o.cover || merged.cover;
+          }
         }
         // L'ancienne fiche locale d'Hortense ne doit pas masquer les valeurs canoniques du catalogue.
         if (id === "aya") {
