@@ -631,19 +631,24 @@
         + " PRIORITY LOCATION: " + scene + "."
         + " Full body or three-quarter, glamorous sensual fashion photo.";
       if (extraBit) out += " " + extraBit;
+      out = "Photorealistic RAW photo, natural skin texture, real camera, NOT illustration NOT painting NOT anime. " + out;
       if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
         out = (isPlusSize
-          ? "Use input_image_0 for face AND body type: keep the same plus-size chubby body proportions as the reference, same face. Do not slim her down. Do not copy clothing or pose. "
-          : "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age skin. Do not copy clothing or pose from reference. ")
+          ? "[[cf_strength:0.48]] input_image_0 IDENTITY: same face AND same plus-size body proportions as reference — same eyes nose lips hair age, soft belly wide hips. Do NOT slim her down. Do NOT invent a different face. New outfit and pose only. "
+          : "[[cf_strength:0.48]] FACE LOCK input_image_0: identical face eyes nose lips hair age skin as reference. Do not copy clothing or pose. ")
           + out;
+      } else {
+        out = "[[cf_strength:0.70]] " + out;
       }
       if (isPlusSize) {
-        out += " FINAL BODY CHECK: plus-size chubby soft belly wide hips thick thighs — reject slim runway body.";
+        out += " FINAL: plus-size chubby soft belly wide hips thick thighs, same face as reference, photorealistic photo only.";
       }
       return out.slice(0, 1900);
     }
 
-    let out = sheetPrompt
+    let out = "RAW photograph, photorealistic DSLR photo, natural skin pores and texture, real camera, 35mm lens, sharp focus, "
+      + "NOT illustration, NOT painting, NOT digital art, NOT anime, NOT 3d render, NOT drawing, "
+      + sheetPrompt
       + bodyMorphLock
       + ", FULL LENGTH head to feet shoes visible NOT portrait"
       + ", OUTFIT: " + outfit
@@ -1388,8 +1393,8 @@
     }
     if (referenceB64) {
       const canonicalCup = profileImageBustRaw(character).slice(0, 20);
-      const str = (options && options.strength != null) ? Number(options.strength) : 0.58;
-      prompt = "[[cf_strength:" + str + "]] " +
+      const str = (options && options.strength != null) ? Number(options.strength) : 0.48;
+      prompt = "[[cf_strength:" + (isFinite(str) ? str : 0.48) + "]] " +
         "FACE IDENTITY LOCK from input_image_0: same woman same face eyes nose lips hair age skin — CRITICAL match reference face. " +
         "Do NOT copy clothing pose or background from input_image_0. " +
         "NEW sexy fitted outfit, NEW pose, NEW rich interior. " +
@@ -2482,7 +2487,7 @@
           if (queueFail && !hasKey) {
             try {
               const cfPrompt = buildPhysicalImagePrompt(char, body.extra || "", "cloudflare");
-              const dataUrl = await generateCloudflareImage(cfPrompt, st, char, { faceOnlyRef: true, strength: 0.58 });
+              const dataUrl = await generateCloudflareImage(cfPrompt, st, char, { faceOnlyRef: true, strength: 0.48 });
               return {
                 ok: true,
                 image: dataUrl,
@@ -2506,7 +2511,7 @@
           if (attempt > 0) {
             prompt = buildCloudflareSafeRetryPrompt(char, body.extra || "", attempt);
           }
-          const dataUrl = await generateCloudflareImage(prompt, st, char, { faceOnlyRef: true, strength: 0.58 });
+          const dataUrl = await generateCloudflareImage(prompt, st, char, { faceOnlyRef: true, strength: 0.48 });
           return { ok: true, image: dataUrl, prompt: prompt.slice(0, 400), attempt: attempt };
         } catch (e) {
           lastErr = String(e.message || e);
