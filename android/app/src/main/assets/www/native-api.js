@@ -1702,10 +1702,10 @@
       "- INTERDIT d'inventer ce que le joueur pense, dit ou veut (« tu te dis… », « tu veux que… »).",
       "- INTERDIT de parler à sa place ou de décrire SES pensées.",
       "Format STRICT (sans écrire les mots action, dialogue, pensée):",
-      "1) Gestes/corps entre * * (1-2 phrases max).",
+      "1) Gestes/corps entre * * (1 phrase courte max).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
-      "3) Ressenti interne entre ( ) : 1 phrase, SANS préfixe 'pensée:'.",
-      "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman).",
+      "3) Ressenti interne entre ( ) : une demi-phrase max, SANS préfixe 'pensée:'.",
+      "LONGUEUR: 2 à 4 phrases COURTES maximum (80–150 mots au total). Style SMS / oral, jamais un pavé. Si tu dépasses 4 phrases, raccourcis.",
       "COMPLETUDE: chaque réponse doit être ENTIÈRE. Termine toujours la dernière phrase et le dernier mot. INTERDIT de s'arrêter sur « Oui… rempl » ou « c'est » sans finir. Pas de coupure en milieu de mot.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "UN SEUL LOCUTEUR — TOI SEULE:",
@@ -1802,7 +1802,7 @@
             contents,
             generationConfig: {
               temperature: 0.85,
-              maxOutputTokens: 2048,
+              maxOutputTokens: 700,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -2168,7 +2168,7 @@
               model: model,
               messages: msgs,
               temperature: 0.85,
-              max_tokens: 2048,
+              max_tokens: 600,
             },
             { Authorization: "Bearer " + key }
           );
