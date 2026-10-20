@@ -887,7 +887,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, full-length head-to-toe, shoes visible, natural lighting, sharp focus ### painting, anime, cartoon, blurry, deformed, headshot, close-up, cropped legs");
+                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, full-length head-to-toe, shoes visible, natural lighting, sharp focus ### painting, anime, cartoon, blurry, deformed, headshot, close-up, cropped legs, pregnant, pregnancy, pregnancy belly, maternity, baby bump, swollen pregnant stomach");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {
