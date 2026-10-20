@@ -1,11 +1,72 @@
-// Audit the runtime Horde prompt builder against every bundled character profile.
-import fs from 'node:fs'; import path from 'node:path'; import vm from 'node:vm'; import { fileURLToPath } from 'node:url';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'), storage=new Map(), window={};
-const context={window,localStorage:{getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,String(v))},Math,Date,console,setTimeout,clearTimeout,Promise,URL,Blob,Image:function(){},fetch:async()=>{throw Error('Unexpected network access')}};
-let source=fs.readFileSync(path.join(root,'public/native-api.js'),'utf8');source=source.replace(/\}\)\(\);\s*$/,'window.__buildHordePrompt=buildPhysicalImagePrompt; })();');vm.runInNewContext(source,context,{timeout:5000});
-if(typeof window.__buildHordePrompt!=='function')throw Error('Could not load runtime prompt builder');
-if(!/const HORDE_COMMON_DENOISE\s*=\s*0\.78/.test(source))throw Error('Expected Horde denoise 0.78');
-if(!/faceOnlyRef:\s*true,[\s\S]{0,80}strictFaceOnly:\s*true/.test(source))throw Error('Expected strict face-only Horde reference');
-const files=fs.readdirSync(path.join(root,'public')).filter(n=>/^characters.*\.js$/.test(n)).sort();let count=0,custom=0;const failures=[];
-for(const file of files){const t=fs.readFileSync(path.join(root,'public',file),'utf8'),a=t.indexOf('['),b=t.lastIndexOf(']');for(const c of JSON.parse(t.slice(a,b+1))){count++;if(c.prompt_horde||c.image_prompt_horde)custom++;const p=window.__buildHordePrompt(c,'','horde'),q=window.__buildHordePrompt(c,'','horde'),o=p.match(/OUTFIT \(must follow\): ([^.]+)\. POSE/),x=p.match(/POSE \(must follow\): ([^.]+)\. LOCATION/),o2=q.match(/OUTFIT \(must follow\): ([^.]+)\. POSE/),x2=q.match(/POSE \(must follow\): ([^.]+)\. LOCATION/);if(!o||!x||!o2||!x2)failures.push(`${c.id}: missing outfit/pose`);if(p.length>1400)failures.push(`${c.id}: prompt too long`);if(!Number.isInteger(Number(c.age))||Number(c.age)<18)failures.push(`${c.id}: adult age missing`);if(!p.includes(`${Number(c.age)} year old`))failures.push(`${c.id}: exact age missing`);if(o?.[1]===o2?.[1])failures.push(`${c.id}: outfit repeated immediately`);if(x?.[1]===x2?.[1])failures.push(`${c.id}: pose repeated immediately`);if((c.cover||c.gallery?.[0])&&!p.includes('FACE IDENTITY ONLY'))failures.push(`${c.id}: no identity-only reference lock`);}}
-if(failures.length){console.error(failures.slice(0,25).join('\n'));console.error('Failures:',failures.length);process.exit(1)}console.log(`Horde audit passed: ${count} profiles; ${custom} custom sheets; ${count-custom} profile-derived.`);
+// Runtime audit of Horde prompts and face-reference cropping for all bundled character profiles.
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const storage = new Map();
+const draws = [];
+class MockImage {
+  constructor() { this.naturalWidth = 453; this.naturalHeight = 677; }
+  set src(value) { queueMicrotask(() => this.onload?.()); }
+}
+const document = {
+  createElement() {
+    return {
+      width: 0, height: 0,
+      getContext: () => ({ drawImage: (...args) => draws.push(args) }),
+      toDataURL: () => 'data:image/jpeg;base64,' + 'a'.repeat(120),
+    };
+  },
+};
+const window = {};
+const context = {
+  window, document, Image: MockImage,
+  localStorage: { getItem: (key) => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, String(value)) },
+  Math, Date, console, setTimeout, clearTimeout, Promise, URL, Blob,
+  fetch: async () => { throw new Error('Unexpected network access in prompt test'); },
+};
+let source = fs.readFileSync(path.join(root, 'public/native-api.js'), 'utf8');
+source = source.replace(/\}\)\(\);\s*$/, 'window.__buildHordePrompt = buildPhysicalImagePrompt; window.__profileReferenceForTest = profileReferenceImageB64; })();');
+vm.runInNewContext(source, context, { timeout: 5000 });
+if (typeof window.__buildHordePrompt !== 'function') throw new Error('Could not load runtime prompt builder');
+if (!/const HORDE_COMMON_DENOISE\s*=\s*0\.58/.test(source)) throw new Error('Expected identity-preserving Horde denoise 0.58');
+if (!/faceOnlyRef:\s*true,[\s\S]{0,80}strictFaceOnly:\s*true/.test(source)) throw new Error('Expected strict face-only Horde reference');
+
+await window.__profileReferenceForTest({ cover: 'data:image/jpeg;base64,source' }, 'image/jpeg', true, true);
+const crop = draws.at(-1);
+if (!crop || crop[4] < 677 * 0.42 || crop[4] >= 677 * 0.60 || crop[2] !== 0) {
+  throw new Error(`Face crop does not include enough of a portrait face: ${JSON.stringify(crop?.slice(1, 5))}`);
+}
+
+const catalogueFiles = fs.readdirSync(path.join(root, 'public')).filter((name) => /^characters.*\.js$/.test(name)).sort();
+let checked = 0, customPrompts = 0;
+const failures = [];
+for (const file of catalogueFiles) {
+  const text = fs.readFileSync(path.join(root, 'public', file), 'utf8');
+  const start = text.indexOf('['), end = text.lastIndexOf(']');
+  for (const profile of JSON.parse(text.slice(start, end + 1))) {
+    checked++;
+    if (profile.prompt_horde || profile.image_prompt_horde) customPrompts++;
+    const first = window.__buildHordePrompt(profile, '', 'horde');
+    const second = window.__buildHordePrompt(profile, '', 'horde');
+    const outfit1 = first.match(/OUTFIT \(must follow\): ([^.]+)\. POSE/);
+    const pose1 = first.match(/POSE \(must follow\): ([^.]+)\. LOCATION/);
+    const outfit2 = second.match(/OUTFIT \(must follow\): ([^.]+)\. POSE/);
+    const pose2 = second.match(/POSE \(must follow\): ([^.]+)\. LOCATION/);
+    if (!outfit1 || !pose1 || !outfit2 || !pose2) failures.push(`${profile.id}: missing explicit outfit/pose`);
+    if (first.length > 1400) failures.push(`${profile.id}: prompt exceeds 1400 chars`);
+    if (!Number.isInteger(Number(profile.age)) || Number(profile.age) < 18) failures.push(`${profile.id}: adult age missing`);
+    if (!first.includes(`${Number(profile.age)} year old`)) failures.push(`${profile.id}: exact age missing`);
+    if (outfit1?.[1] === outfit2?.[1]) failures.push(`${profile.id}: outfit repeats immediately`);
+    if (pose1?.[1] === pose2?.[1]) failures.push(`${profile.id}: pose repeats immediately`);
+    if ((profile.cover || profile.gallery?.[0]) && !first.includes('FACE IDENTITY ONLY')) failures.push(`${profile.id}: missing face identity lock`);
+  }
+}
+if (failures.length) {
+  console.error(failures.slice(0, 25).join('\n'));
+  console.error(`Failures: ${failures.length}`);
+  process.exit(1);
+}
+console.log(`Horde audit passed: ${checked} profiles; ${customPrompts} custom sheets; ${checked - customPrompts} profile-derived; portrait face crop ${crop[4]}px.`);

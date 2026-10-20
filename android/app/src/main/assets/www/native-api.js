@@ -182,12 +182,13 @@
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Impossible de préparer la photo de profil.");
     if (faceOnly) {
-      // Crop to head/face only; keep the source outfit and chest out of Klein's image conditioning.
+      // Include the complete face, hairline, chin, and a little neck; keep the torso/outfit out of conditioning.
     const aspectRatio = image.naturalHeight / image.naturalWidth;
-    // Square/landscape portraits place the chin lower in frame; include the whole face without the full torso.
+    // A 28% portrait crop cut off the lower face on tall references. Use a larger face crop
+    // while still excluding most clothing and body composition.
     const cropRatio = strictFaceOnly
-        ? (aspectRatio < 1.3 ? 0.34 : 0.28)
-        : (aspectRatio < 1.3 ? 0.48 : 0.36);
+        ? (aspectRatio < 1.3 ? 0.48 : 0.44)
+        : (aspectRatio < 1.3 ? 0.52 : 0.42);
     const cropHeight = Math.max(64, Math.round(image.naturalHeight * cropRatio));
       const cropWidth = Math.min(image.naturalWidth, cropHeight);
       const cropX = Math.round((image.naturalWidth - cropWidth) / 2);
@@ -506,7 +507,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.78;
+  const HORDE_COMMON_DENOISE = 0.58;
 
   function pickPromptVariant(values, historyKey, historySize) {
     const list = Array.isArray(values) ? values.filter(Boolean) : [];
