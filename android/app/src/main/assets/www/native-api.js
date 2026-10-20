@@ -324,7 +324,7 @@
             /\b(?:sans être|sans|not|no|non|pas|never|do not)\b[^,.;!?\n]{0,48}\b(?:plus[- ]?size|chubby|bbw|obese|ronde?|ventre souple|wide hips|thick thighs|slim|skinny|athletic|hourglass)\b/gi,
             ""
           );
-          if (/chubby|plus[- ]?size|plantureus|soft non-pregnant stomach|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|vraiment ronde|round belly/.test(text)) return "chubby";
+          if (/chubby|plus[- ]?size|plantureus|soft love handles|wide hips|thick thighs|ventre souple|hanches tr[eè]s larges|cuisses [eé]paisses|bbw|vraiment ronde|round belly/.test(text)) return "chubby";
           if (/curvy rounded|full[- ]?figured|rounded torso|silhouette ronde|corps plein|rounded figure/.test(text)) return "roundCurvy";
       if (/hourglass|sablier/.test(text)) return "hourglass";
           if (/(?:athletic|athl[eé]tique)(?:\s+(?:toned|and toned|figure|build|body|woman|et tonique))?|toned (?:figure|body|build)/.test(text)) return "athletic";
@@ -342,7 +342,7 @@
 
         if (type === "chubby") {
           return {
-            lead: "plus-size curvy chubby adult woman, wide hips, thick thighs, soft arms, full face with round cheeks, heavy bust, soft non-pregnant stomach, REAL plus-size NOT pregnant NOT slim,",
+            lead: "plus-size curvy chubby adult woman, wide hips, thick thighs, soft arms, full face with round cheeks, heavy bust, soft love handles, REAL plus-size NOT pregnant NOT slim,",
             lock: "Body type: genuine chubby / plus-size. Wide hips, thick thighs, soft arms, heavy bust. Soft non-pregnant stomach only. Do NOT generate pregnant, pregnancy belly, baby bump, or slim body.",
             neg: "slim model, skinny, thin waist, flat stomach, athletic abs, slender legs, fashion model proportions, underweight",
           };
@@ -358,21 +358,21 @@
           return {
             lead: "athletic toned adult woman, firm figure, defined shoulders,",
             lock: "Body type: athletic and toned, not chubby, not skinny frail.",
-            neg: "plus-size, chubby, soft non-pregnant stomach, obese, skinny frail",
+            neg: "plus-size, chubby, soft love handles, obese, skinny frail",
           };
         }
         if (type === "slim") {
           return {
             lead: "slim slender adult woman, narrow frame, elegant thin waist,",
             lock: "Body type: slim and slender, light frame, not plus-size, not heavy.",
-            neg: "plus-size, chubby, thick thighs, wide hips, soft non-pregnant stomach, bbw",
+            neg: "plus-size, chubby, thick thighs, wide hips, soft love handles, bbw",
           };
         }
         if (type === "hourglass") {
           return {
             lead: "hourglass figure adult woman, narrow defined waist, full bust, rounded hips, flat-to-soft stomach NOT pregnant NOT obese,",
             lock: "Body type: classic hourglass — cinched waist, curves at bust and hips only. NOT plus-size, NOT chubby belly, NOT BBW, NOT pregnant.",
-            neg: "plus-size, chubby, soft non-pregnant stomach, obese, pregnant belly, BBW, skinny stick figure, no curves",
+            neg: "plus-size, chubby, soft love handles, obese, pregnant belly, BBW, skinny stick figure, no curves",
           };
         }
         if (type === "petite") {
@@ -610,15 +610,15 @@
     if (/plus[- ]?size|chubby|plantureus|tr[eè]s ronde|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs|soft curvy/.test(morphBlob)
         || String(c.id || "") === "aya") {
       bodyMorphLock = forCloudflare
-        ? " BODY TYPE LOCK: plus-size curvy chubby woman, wide hips, thick thighs, soft arms, full cheeks, heavy full bust, pear-shaped soft curves — flat-to-soft non-pregnant stomach, NEVER pregnant, NEVER baby bump, NEVER slim."
-        : ", BODY LOCK plus-size curvy wide hips thick thighs soft arms full bust, non-pregnant stomach, NOT pregnant NOT baby bump NOT thin";
+        ? " BODY TYPE LOCK: plus-size curvy chubby woman, wide hips, thick thighs, soft arms, full cheeks, heavy full bust, pear-shaped soft curves — flat-to-soft love handles, NEVER pregnant, NEVER baby bump, NEVER slim."
+        : ", BODY LOCK plus-size curvy wide hips thick thighs soft arms full bust, flat waist soft love handles only, NOT pregnant NOT baby bump NOT swollen belly NOT thin";
     } else if (/\bmince\b|slim|slender|élancée|skinny|longiligne/.test(morphBlob)) {
       bodyMorphLock = forCloudflare
         ? " BODY TYPE LOCK: slim slender elegant figure, light frame — NOT plus-size, NOT chubby, NOT thick thighs."
         : ", slim slender figure NOT plus-size NOT chubby";
     }
 
-    const isPlusSize = /plus-size|chubby|BODY TYPE LOCK: genuine plus-size/.test(bodyMorphLock);
+    const isPlusSize = /plus-size|chubby|BODY TYPE LOCK:|BODY LOCK plus-size/.test(bodyMorphLock);
     if (forCloudflare) {
       let out = "";
       if (isPlusSize) {
@@ -647,8 +647,13 @@
     }
 
     let out = "RAW photograph, photorealistic DSLR photo, natural skin pores and texture, real camera, 35mm lens, sharp focus, "
-      + "NOT illustration, NOT painting, NOT digital art, NOT anime, NOT 3d render, NOT drawing, "
-      + sheetPrompt
+      + "NOT illustration, NOT painting, NOT digital art, NOT anime, NOT 3d render, NOT drawing, ";
+    if (isPlusSize) {
+      // Anti-grossesse EN TÊTE (Horde suit fort le début du prompt)
+      out += "IMPORTANT: woman is NOT pregnant, no pregnancy belly, no baby bump, no maternity, no swollen abdomen, "
+        + "plus-size curvy with wide hips and thick thighs and full bust, soft love handles, relatively flat upper belly, ";
+    }
+    out += sheetPrompt
       + bodyMorphLock
       + ", FULL LENGTH head to feet shoes visible NOT portrait"
       + ", OUTFIT: " + outfit
@@ -656,10 +661,10 @@
       + ", LOCATION: " + scene
       + ", keep same face as reference if provided, change outfit and pose";
     if (isPlusSize) {
-      out += ", non-pregnant soft stomach, NOT pregnant, NOT pregnancy, NOT baby bump, NOT maternity belly, NOT swollen pregnant abdomen";
+      out += ", NOT pregnant, NOT pregnancy, NOT baby bump, NOT maternity belly, NOT swollen abdomen, NOT distended belly";
     }
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
-    return out.replace(/\s+/g, " ").trim().slice(0, 1400);
+    return out.replace(/\s+/g, " ").trim().slice(0, 1500);
   }
 
   /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
@@ -668,7 +673,7 @@
     const name = String(c.name || "woman").slice(0, 80);
     const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     const appearance = String(c.appearance || "").trim().slice(0, hasProfileRef ? 400 : 700);
-    const plusRetry = /plus[- ]?size|chubby|ronde|bbw|soft non-pregnant stomach/i.test(
+    const plusRetry = /plus[- ]?size|chubby|ronde|bbw|soft love handles/i.test(
       appearance + " " + String(c.body || "") + " " + String(c.looks_en || "") + " " + (Array.isArray(c.tags) ? c.tags.join(" ") : "")
     );
     const softOutfits = [
@@ -1157,9 +1162,9 @@
 
     // --- Morphologie ---
     if (/voluptueuse|curvy|sablier|hourglass|pulpeuse|bomb[eé]e|thick|curves/.test(blob) || /95d|90d/.test(cupBlob))
-      bits.push("voluptuous hourglass body, narrow waist, wide hips, thick soft thighs, full round butt, soft non-pregnant stomach, curvy realistic NOT slim NOT skinny NOT model-thin");
+      bits.push("voluptuous hourglass body, narrow waist, wide hips, thick soft thighs, full round butt, soft love handles, curvy realistic NOT slim NOT skinny NOT model-thin");
     else if (/chubby|plus.?size|ronde|forte|embonpoint|gros/.test(blob))
-      bits.push("plus-size chubby soft body, full figure, soft non-pregnant stomach NOT pregnant, thick arms and legs");
+      bits.push("plus-size chubby soft body, full figure, soft love handles NOT pregnant, thick arms and legs");
     else if (/athl|sportive|muscl/.test(blob))
       bits.push("athletic toned body");
     else if (/mince|slim|fine|skinny/.test(blob))
