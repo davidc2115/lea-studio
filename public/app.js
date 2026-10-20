@@ -1705,15 +1705,49 @@ function mergeAllCasts() {
           /je passais|venais voir si t.?étais seul|Je passais\. Enfin non/i.test(oGr);
         const merged = Object.assign({}, base, o, { id: id });
         // Toujours préférer le pack APK pour titre / scénario / accueil / personnalité si override obsolète ou générique
-        if (staleScenario || !o.scenario) {
+        if (staleScenario || !o.scenario || String(o.scenario || "").trim().length < 40) {
           merged.scenario = base.scenario;
           merged.title = base.title || merged.title;
         }
-        if (staleGreeting || !o.greeting) {
+        if (staleGreeting || !o.greeting || String(o.greeting || "").trim().length < 10) {
           merged.greeting = base.greeting;
         }
         if (!o.personality || String(o.personality).length < 40) {
           merged.personality = base.personality;
+        }
+        // Nom / apparence / prompts / cover : ne jamais laisser un override vide ou cassé masquer le catalogue
+        if (!o.name || String(o.name).trim().length < 2 || String(o.name).toLowerCase() === String(id).toLowerCase()) {
+          merged.name = base.name || merged.name;
+        }
+        if (!o.appearance || String(o.appearance).trim().length < 40) {
+          merged.appearance = base.appearance || merged.appearance;
+        }
+        if (!o.looks_en || String(o.looks_en).trim().length < 20) {
+          merged.looks_en = base.looks_en || merged.looks_en;
+        }
+        if (!o.body) merged.body = base.body || merged.body;
+        if (!o.ethnicity) merged.ethnicity = base.ethnicity || merged.ethnicity;
+        if (!(o.Poitrine || o.poitrine)) {
+          merged.Poitrine = base.Poitrine || base.poitrine || "";
+          merged.poitrine = merged.Poitrine;
+        }
+        if (!o.prompt_cloudflare) merged.prompt_cloudflare = base.prompt_cloudflare || "";
+        if (!o.prompt_horde) merged.prompt_horde = base.prompt_horde || "";
+        // Cover: si l'override pointe vers un chemin absent / vide, garder le pack
+        if (!o.cover || String(o.cover).trim().length < 5) {
+          merged.cover = base.cover || merged.cover;
+        }
+        if ((!Array.isArray(o.gallery) || o.gallery.length === 0) && Array.isArray(base.gallery) && base.gallery.length) {
+          merged.gallery = base.gallery.slice();
+        }
+        // Id amelie = toujours le catalogue Sidonie (évite nom "amelie" + fiche vide en local)
+        if (id === "amelie") {
+          for (const key of ["name", "age", "title", "tags", "scenario", "greeting", "personality", "appearance", "looks_en", "ethnicity", "body", "Poitrine", "poitrine", "cover", "gallery", "prompt_cloudflare", "prompt_horde"]) {
+            if (Object.prototype.hasOwnProperty.call(base, key) && base[key] != null && base[key] !== "") {
+              merged[key] = base[key];
+            }
+          }
+          merged.name = "Sidonie Perrin";
         }
         // L'ancienne fiche locale d'Hortense ne doit pas masquer les valeurs canoniques du catalogue.
         if (id === "aya") {

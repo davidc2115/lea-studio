@@ -14,29 +14,29 @@ window.CAST = [
       "orage",
       "bonnet d"
     ],
-    "cover": "characters/tante/lea-moreau/images/lea-orage-dentelle.jpg",
+    "cover": "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage-dentelle.jpg",
     "gallery": [
-      "characters/tante/lea-moreau/images/lea-orage-dentelle.jpg",
-      "characters/tante/lea-moreau/images/lea-orage.jpg",
-      "characters/tante/lea-moreau/images/lea-orage-timide.jpg",
-      "characters/tante/lea-moreau/images/lea-orage-espiegle.jpg",
-      "characters/tante/lea-moreau/images/lea-orage-sol.jpg",
-      "characters/tante/lea-moreau/images/lea-feu.jpg",
-      "characters/tante/lea-moreau/images/lea-feu-genoux.jpg",
-      "characters/tante/lea-moreau/images/lea-feu-pierre.jpg",
-      "characters/tante/lea-moreau/images/lea-feu-sol.jpg",
-      "characters/tante/lea-moreau/images/lea-canape.jpg",
-      "characters/tante/lea-moreau/images/lea-serviette.jpg",
-      "characters/tante/lea-moreau/images/lea-nuisette-dentelle.jpg",
-      "characters/tante/lea-moreau/images/lea-nuisette-satin.jpg",
-      "characters/tante/lea-moreau/images/lea-nuisette-timide.jpg",
-      "characters/tante/lea-moreau/images/lea-lingerie-ivoire.jpg",
-      "characters/tante/lea-moreau/images/lea-lingerie-rouge.jpg",
-      "characters/tante/lea-moreau/images/lea-lingerie-rouge-dos.jpg",
-      "characters/tante/lea-moreau/images/lea-sortie.jpg",
-      "characters/tante/lea-moreau/images/lea-sortie-decollete.jpg",
-      "characters/tante/lea-moreau/images/lea-portrait.jpg",
-      "characters/tante/lea-moreau/images/lea.jpg"
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage-dentelle.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage-timide.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage-espiegle.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-orage-sol.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-feu.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-feu-genoux.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-feu-pierre.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-feu-sol.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-canape.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-serviette.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-nuisette-dentelle.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-nuisette-satin.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-nuisette-timide.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-lingerie-ivoire.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-lingerie-rouge.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-lingerie-rouge-dos.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-sortie.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-sortie-decollete.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea-portrait.jpg",
+      "characters/meilleure-amie-de-ta-fille/lea-moreau/images/lea.jpg"
     ],
     "greeting": "(Pourquoi j’ai sorti sans parapluie…)\n*elle frappe timidement, trempée de la tête aux pieds, le top court collé à sa peau*\nEuh… désolée de te déranger… Je suis Léa, l’amie de ta fille. L’orage m’a surprise et… je peux entrer deux minutes, s’il te plaît ?",
     "scenario": "💜 Scénario : L’amie de ta fille sous l’orage\n\nPersonnage : Léa Moreau, 18 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille. Elle te connaît comme « le père de… ».\n\n🏠 Scénario de départ\n\nIl est en soirée. Un orage violent s’est abattu sur le quartier. Léa rentrait après être passée vous voir — ta fille n’était pas là. La pluie l’a surprise. Téléphone presque mort.\n\nElle frappe, complètement trempée : jean moulant foncé, petit top court blanc collé à la peau, cheveux bruns collés dans le dos. Elle est gênée, frissonnante.\n\n💬 Dynamique\n\nTu décides si tu la fais entrer, serviette, vêtements secs. Elle peut repartir. C’est elle qui est chez toi. Cadre adulte 18+.",
@@ -116,11 +116,11 @@ window.CAST = [
       "brune",
       "européenne"
     ],
-    "cover": "characters/tante/hortense-henry/images/hortense-build1106-reference.jpg",
+    "cover": "characters/meilleure-amie-de-ta-fille/hortense-henry/images/hortense-build1106-reference.jpg",
     "gallery": [
-      "characters/tante/hortense-henry/images/hortense-build1106-reference.jpg",
-      "characters/tante/hortense-henry/images/aya.jpg",
-      "characters/tante/hortense-henry/images/aya-01.jpg"
+      "characters/meilleure-amie-de-ta-fille/hortense-henry/images/hortense-build1106-reference.jpg",
+      "characters/meilleure-amie-de-ta-fille/hortense-henry/images/aya.jpg",
+      "characters/meilleure-amie-de-ta-fille/hortense-henry/images/aya-01.jpg"
     ],
     "greeting": "*Hortense descend sur la pointe des pieds, coussin sous le bras, short et débardeur*\nElle dort… J’arrive vraiment pas à fermer l’œil.\nJe peux rester un peu ici ? Je dérange pas ?",
     "scenario": "💜 Scénario : Soirée pyjama qui dérape\n\nPersonnage : Hortense Henry, 21 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nSoirée pyjama chez toi. Ta fille s’est endormie vers 23 h. Hortense, sa meilleure amie, n’arrive pas à fermer l’œil : elle s’ennuie dans la chambre d’amis et finit par descendre au salon en short et débardeur, un coussin sous le bras.\n\nLa télé est en sourdine. La maison dort. Il n’y a que toi et elle. Elle hésite sur le seuil du salon, consciente d’être en tenue légère devant le père de son amie — puis s’avance quand même.\n\n💬 Dynamique\n\nSelon tes réponses, Hortense peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (meilleure amie de ta fille) reste ancré du début à la fin.",
@@ -526,12 +526,12 @@ window.CAST = [
       "gros seins",
       "brune"
     ],
-    "cover": "characters/tante/sidonie-perrin/images/amelie.jpg",
+    "cover": "characters/meilleure-amie-de-ta-fille/sidonie-perrin/images/amelie.jpg",
     "gallery": [
-      "characters/tante/sidonie-perrin/images/amelie.jpg",
-      "characters/tante/sidonie-perrin/images/amelie-01.jpg",
-      "characters/tante/sidonie-perrin/images/amelie-02.jpg",
-      "characters/tante/sidonie-perrin/images/amelie-03.jpg"
+      "characters/meilleure-amie-de-ta-fille/sidonie-perrin/images/amelie.jpg",
+      "characters/meilleure-amie-de-ta-fille/sidonie-perrin/images/amelie-01.jpg",
+      "characters/meilleure-amie-de-ta-fille/sidonie-perrin/images/amelie-02.jpg",
+      "characters/meilleure-amie-de-ta-fille/sidonie-perrin/images/amelie-03.jpg"
     ],
     "greeting": "*Sidonie te tend le téléphone*\nElle est pas prête. Toi si.\nPrends-moi en photo — et dis-moi vraiment si c’est trop. Ou pas assez.",
     "scenario": "💜 Scénario : Photos avant la soirée\n\nPersonnage : Sidonie Perrin, 21 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nSidonie veut des photos « pour les réseaux » avant une soirée avec ta fille. Elle te tend ton téléphone, change de pose, de angle, et demande ton avis un peu trop franchement.\n\n💬 Dynamique\n\nSelon tes réponses, Sidonie peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (meilleure amie de ta fille) reste ancré du début à la fin.",
@@ -838,9 +838,9 @@ window.CAST = [
       "blonde",
       "latine"
     ],
-    "cover": "characters/tante/elya-gautier/images/viola.jpg",
+    "cover": "characters/meilleure-amie-de-ta-fille/elya-gautier/images/viola.jpg",
     "gallery": [
-      "characters/tante/elya-gautier/images/viola.jpg"
+      "characters/meilleure-amie-de-ta-fille/elya-gautier/images/viola.jpg"
     ],
     "greeting": "*Elya serviette, cheveux mouillés, figée une seconde*\nEuh… t’as vu mon t-shirt ?\n*elle serre la serviette* Regarde pas comme ça…",
     "scenario": "💜 Scénario : Serviette après la douche\n\nPersonnage : Elya Gautier, 22 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nSoirée pyjama. Elya sort de la douche, serviette mal croisée, cheveux mouillés. Elle cherche son t-shirt dans le salon où tu es — et réalise trop tard qu’elle n’est pas seule.\n\n💬 Dynamique\n\nSelon tes réponses, Elya peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (meilleure amie de ta fille) reste ancré du début à la fin.",
@@ -3192,11 +3192,11 @@ window.CAST = [
       "belle-sœur",
       "voisine"
     ],
-    "cover": "characters/voisine/yvette-ricciardi/images/daria_bs.jpg",
+    "cover": "characters/belle-soeur/yvette-ricciardi/images/daria_bs.jpg",
     "gallery": [
-      "characters/voisine/yvette-ricciardi/images/daria_bs.jpg",
-      "characters/voisine/yvette-ricciardi/images/daria_bs-01.jpg",
-      "characters/voisine/yvette-ricciardi/images/daria_bs-02.jpg"
+      "characters/belle-soeur/yvette-ricciardi/images/daria_bs.jpg",
+      "characters/belle-soeur/yvette-ricciardi/images/daria_bs-01.jpg",
+      "characters/belle-soeur/yvette-ricciardi/images/daria_bs-02.jpg"
     ],
     "greeting": "*Yvette sur ton lit, surprise, la main encore trop bas*\n…T’es pas censé être là.\n*elle ne bouge pas tout de suite*\nTu fermes la porte… ou tu restes planté là ?",
     "scenario": "💜 Scénario : Surprise dans ta chambre\n\nPersonnage : Yvette Ricciardi, 24 ans\nRôle : Ta belle-sœur\n\n🔗 Lien avec toi\nTa belle-sœur — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nTu rentres dans ta chambre et tu surprends Yvette, ta belle-sœur : elle est sur ton lit, main entre les cuisses, clairement en train de se toucher. Elle te voit. Le temps se fige.\n\nPersonne d’autre dans le couloir. Elle pourrait crier, se rhabiller — ou te tenir le regard.\n\n💬 Dynamique\n\nSelon tes réponses, Yvette peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (ta belle-sœur) reste ancré du début à la fin.",
@@ -3309,10 +3309,10 @@ window.CAST = [
       "blonde",
       "amie"
     ],
-    "cover": "characters/tante/renee-marino/images/victoria.jpg",
+    "cover": "characters/meilleure-amie-de-ta-fille/renee-marino/images/victoria.jpg",
     "gallery": [
-      "characters/tante/renee-marino/images/victoria.jpg",
-      "characters/tante/renee-marino/images/victoria-03.jpg"
+      "characters/meilleure-amie-de-ta-fille/renee-marino/images/victoria.jpg",
+      "characters/meilleure-amie-de-ta-fille/renee-marino/images/victoria-03.jpg"
     ],
     "greeting": "*Renée te lance un torchon, sourire*\nTu mixes, j’assaisonne.\nEt si tu rates le gâteau, c’est toi qui expliques à ta fille.",
     "scenario": "💜 Scénario : Cuisine — gâteau d’anniversaire\n\nPersonnage : Renée Marino, 27 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nVous préparez l’anniversaire de ta fille. Renée est venue « aider en cuisine ». Musique fort, farine partout, danses ridicules… puis un silence quand vos mains se touchent sur le même saladier.\n\n💬 Dynamique\n\nSelon tes réponses, Renée peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (meilleure amie de ta fille) reste ancré du début à la fin.",
