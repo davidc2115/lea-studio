@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.50;
+  const HORDE_COMMON_DENOISE = 0.70;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -542,21 +542,26 @@
       "gold sequin mini dress deep V",
       "forest green velvet midi dress low neckline"
     ] : [
-      "black deep plunge bodycon mini dress stilettos",
-      "red wrap midi dress black heels",
-      "emerald satin slip dress thin straps",
-      "burgundy off-shoulder fitted dress",
-      "floral fitted midi dress deep V",
-      "navy pencil skirt white blouse",
-      "champagne silk slip dress",
-      "black backless long evening gown",
-      "pink satin wrap mini dress",
-      "royal blue bodycon midi dress",
-      "olive square-neck mini dress",
-      "cream knit bodycon dress",
-      "teal blouse black pencil skirt",
-      "white linen sundress thin straps",
-      "black lace midi dress decollete"
+      "black deep plunge bodycon mini dress and black stilettos, fully clothed",
+      "red wrap midi dress black heels, fully clothed",
+      "emerald satin slip dress thin straps, fully clothed",
+      "burgundy off-shoulder fitted dress, fully clothed",
+      "floral fitted midi dress deep V neckline, fully clothed",
+      "navy pencil skirt and white blouse, fully clothed",
+      "champagne silk slip dress, fully clothed",
+      "black long evening gown backless, fully clothed",
+      "pink satin wrap mini dress, fully clothed",
+      "royal blue bodycon midi dress, fully clothed",
+      "olive square-neck mini dress, fully clothed",
+      "cream knit sweater dress, fully clothed",
+      "teal blouse and black pencil skirt, fully clothed",
+      "white linen sundress thin straps, fully clothed",
+      "black lace midi dress, fully clothed",
+      "forest green velvet midi dress, fully clothed",
+      "yellow summer dress and sandals, fully clothed",
+      "grey blazer dress above knee, fully clothed",
+      "purple satin cocktail dress, fully clothed",
+      "striped shirt dress belted, fully clothed"
     ];
     const poses = [
       "standing full body hands on hips facing camera",
@@ -648,27 +653,26 @@
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     let out = "";
-    // Identité + cadrage EN TÊTE (Horde pondère fort le début)
+    // Tenue + pose + cadrage EN TÊTE (priorité sur la ref img2img)
+    out += "CRITICAL NEW OUTFIT: " + outfit + ", "
+      + "CRITICAL NEW POSE: " + pose + ", "
+      + "LOCATION: " + scene + ", "
+      + "full body from head to feet including shoes, wide environmental shot, entire figure visible, "
+      + "NOT bust portrait, NOT chest crop, NOT close-up, NOT headshot, NOT selfie, ";
     if (hasRef) {
-      out += "img2img same person as reference photo, identical face eyes nose lips hair skin age, ";
+      out += "same face as reference only: identical eyes nose lips hair color style age skin, "
+        + "IGNORE and REPLACE all clothing from the reference image, IGNORE reference pose, ";
     }
-    out += "full body photograph, entire woman visible head to feet, shoes visible, standing or posed in room, "
-      + "wide shot, medium full body, NOT close-up, NOT portrait, NOT headshot, NOT selfie, NOT face only, "
-      + "RAW photorealistic DSLR, natural skin, sharp focus, "
-      + "NOT illustration, NOT painting, NOT anime, NOT 3d render, ";
+    out += "RAW photorealistic DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
     if (isPlusSize) {
-      out += "plus-size curvy wide hips thick thighs full bust soft love handles, NOT pregnant, no baby bump, no swollen belly, ";
+      out += "plus-size curvy wide hips thick thighs full bust soft love handles, NOT pregnant no baby bump, ";
     }
-    out += sheetPrompt
-      + bodyMorphLock
-      + ", NEW OUTFIT: " + outfit
-      + ", NEW POSE: " + pose
-      + ", LOCATION: " + scene
-      + ", change clothing and pose completely from reference, keep only the same face and body type";
+    out += sheetPrompt + bodyMorphLock;
     if (isPlusSize) {
       out += ", NOT pregnant NOT baby bump NOT maternity";
     }
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
+    out += ", fully clothed in the CRITICAL NEW OUTFIT, full length body";
     return out.replace(/\s+/g, " ").trim().slice(0, 1500);
   }
 
