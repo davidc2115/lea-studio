@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.55;
+  const HORDE_COMMON_DENOISE = 0.58;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -652,13 +652,14 @@
     if (hasRef) {
       out += "FACE LOCK from reference image: keep the EXACT same face, eyes, nose, lips, hair color and style, age and skin tone as the reference photo, ";
     }
+    out += "FRAMING: full-length body photo head to toe, not a close-up face crop, not a portrait selfie, ";
     if (isPlusSize) {
       out += "IMPORTANT: woman is NOT pregnant, no pregnancy belly, no baby bump, no maternity, no swollen abdomen, "
         + "plus-size curvy with wide hips and thick thighs and full bust, soft love handles, relatively flat upper belly, ";
     }
     out += sheetPrompt
       + bodyMorphLock
-      + ", FULL LENGTH head to feet shoes visible NOT portrait"
+      + ", FULL BODY standing or posed, entire figure head to feet including shoes, wide shot medium-full, NOT close-up, NOT face portrait, NOT headshot, NOT cropped at chest"
       + ", OUTFIT: " + outfit
       + ", POSE: " + pose
       + ", LOCATION: " + scene

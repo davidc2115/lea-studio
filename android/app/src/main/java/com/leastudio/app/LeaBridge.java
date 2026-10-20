@@ -861,7 +861,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 448);
                     params.put("height", registered ? 768 : 640);
-                    double denoise = 0.55;
+                    double denoise = 0.58;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -887,7 +887,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, full-length head-to-toe, shoes visible, natural lighting, sharp focus ### painting, anime, cartoon, blurry, deformed, headshot, close-up, cropped legs, pregnant, pregnancy, pregnancy belly, pregnant belly, maternity, baby bump, swollen pregnant stomach, swollen belly, distended abdomen, large round pregnant stomach, maternity clothes");
+                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, full-length head-to-toe, shoes visible, natural lighting, sharp focus ### headshot, close-up portrait, face only crop, selfie, extreme close-up, cropped at chest, painting, anime, cartoon, blurry, deformed, cropped legs, pregnant, pregnancy, pregnancy belly, pregnant belly, maternity, baby bump, swollen pregnant stomach, swollen belly, distended abdomen, large round pregnant stomach, maternity clothes");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {

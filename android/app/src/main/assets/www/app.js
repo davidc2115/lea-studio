@@ -277,14 +277,15 @@ function saveCharOverrides(c) {
   localStorage.setItem("lea.char.lea", JSON.stringify(c));
 }
 
-function mergeGalleries(baseGallery, overrideGallery) {
+function mergeGalleries(baseGallery, overrideGallery, deletedGallery) {
   const base = Array.isArray(baseGallery) ? baseGallery.slice() : [];
   const over = Array.isArray(overrideGallery) ? overrideGallery.slice() : [];
+  const deleted = new Set((Array.isArray(deletedGallery) ? deletedGallery : []).map(String));
   const seen = new Set();
   const out = [];
-  // Générées / clés gallery: d'abord, puis assets d'origine
   function push(src) {
     if (!src || seen.has(src)) return;
+    if (deleted.has(String(src))) return; // volontairement supprimée
     seen.add(src);
     out.push(src);
   }
@@ -296,7 +297,7 @@ function mergeGalleries(baseGallery, overrideGallery) {
 function mergeChar(base) {
   const o = loadCharOverrides();
   if (!o) return base;
-  const gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+  const gallery = mergeGalleries(base.gallery || [], o.gallery || [], o.deletedGallery || []);
   const merged = Object.assign({}, base, o, {
     id: "lea",
     gallery: gallery,
@@ -906,9 +907,16 @@ function renderProfile() {
       if (removed && String(removed).indexOf("gallery:") === 0 && window.LeaAndroid && window.LeaAndroid.deleteGalleryImage) {
         try { window.LeaAndroid.deleteGalleryImage(removed); } catch (_) {}
       }
-      const next = Object.assign({}, state.character, { gallery: g });
+      const deleted = Array.isArray(state.character.deletedGallery)
+        ? state.character.deletedGallery.slice()
+        : [];
+      if (removed && deleted.indexOf(removed) < 0) deleted.push(removed);
+      const next = Object.assign({}, state.character, {
+        gallery: g,
+        deletedGallery: deleted.slice(-200),
+      });
       if (next.cover === removed) next.cover = g[0] || "";
-       persistActiveCharacter(next);
+      persistActiveCharacter(next);
       renderProfile();
     };
   });
@@ -1738,7 +1746,7 @@ function mergeAllCasts() {
           merged.cover = base.cover || merged.cover;
         }
         // Toujours fusionner galeries : images générées (gallery:) + assets catalogue
-        merged.gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+        merged.gallery = mergeGalleries(base.gallery || [], o.gallery || [], o.deletedGallery || []);
         // Cover utilisateur gallery: prioritaire
         if (o.cover && String(o.cover).indexOf("gallery:") === 0) {
           merged.cover = o.cover;
@@ -1753,7 +1761,7 @@ function mergeAllCasts() {
             }
           }
           merged.name = "Sidonie Perrin";
-          merged.gallery = mergeGalleries(base.gallery || [], o.gallery || []);
+          merged.gallery = mergeGalleries(base.gallery || [], o.gallery || [], o.deletedGallery || []);
           // Cover: garder gallery: ou ★ utilisateur, sinon pack
           if (o.cover && String(o.cover).indexOf("gallery:") === 0) {
             merged.cover = o.cover;
@@ -1773,7 +1781,10 @@ function mergeAllCasts() {
           merged.canonicalCupSize = base.canonicalCupSize || "";
           merged.bustEstimate = base.bustEstimate || "";
         }
-        // Conserver galerie / champs édités volontairement
+        // Conserver liste des suppressions volontaires
+        if (Array.isArray(o.deletedGallery) && o.deletedGallery.length) {
+          merged.deletedGallery = o.deletedGallery.slice();
+        }
         byId.set(id, merged);
       }
     }
