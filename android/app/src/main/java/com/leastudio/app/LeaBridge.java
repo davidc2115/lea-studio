@@ -859,9 +859,9 @@ public class LeaBridge {
                     final boolean hasRef = refForHorde.length() >= 100;
                     JSONObject params = new JSONObject();
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
-                    params.put("width", registered ? 512 : 448);
-                    params.put("height", registered ? 768 : 640);
-                    double denoise = 0.70;
+                    params.put("width", registered ? 512 : 512);
+                    params.put("height", registered ? 768 : 768);
+                    double denoise = 0.78;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -887,7 +887,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", full length head to toes shoes visible, different outfit than source image, photorealistic, natural lighting ### white bra, lingerie only, bust crop, headshot, close-up portrait, face only, selfie, upper body only, cropped at chest, cropped at waist, portrait crop, painting, anime, blurry, pregnant, baby bump, maternity");
+                    payload.put("prompt", promptWork + ", full length head to toes shoes feet visible, far shot, different clothes, photorealistic ### white bra, beige bra, grey bra, lingerie, cleavage close-up, bust crop, headshot, portrait, selfie, upper body only, cropped at chest, cropped at waist, painting, anime, blurry, pregnant, baby bump");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {

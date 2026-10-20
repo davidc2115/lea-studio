@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.70;
+  const HORDE_COMMON_DENOISE = 0.78;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -564,16 +564,18 @@
       "striped shirt dress belted, fully clothed"
     ];
     const poses = [
-      "standing full body hands on hips facing camera",
-      "three-quarter turn looking over shoulder full body",
-      "walking toward camera mid-stride full length",
-      "seated on desk edge legs crossed full body",
-      "leaning on railing looking back full body",
-      "standing profile full body by window",
-      "climbing stairs mid-step looking back",
-      "standing wide shot entire figure in room",
-      "sitting on sofa arm leaning forward",
-      "back to camera looking over shoulder full body"
+      "standing full body hands on hips facing camera feet visible",
+      "walking toward camera mid-stride full length feet visible",
+      "leaning against wall one knee bent full body feet visible",
+      "sitting on armchair legs crossed full body feet visible",
+      "climbing stairs one foot up looking at camera full body",
+      "standing in doorway arms crossed full body feet visible",
+      "twirling dress mid-spin full body feet visible",
+      "crouching to pick something full body side view",
+      "standing profile by tall window full body feet visible",
+      "leaning on kitchen counter hip cocked full body feet visible",
+      "sitting on bed edge leaning forward full body feet visible",
+      "standing with one hand on hip other on hair full body"
     ];
     const scenes = [
       "grand hotel staircase chandelier",
@@ -653,27 +655,23 @@
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     let out = "";
-    // Tenue + pose + cadrage EN TÊTE (priorité sur la ref img2img)
-    out += "CRITICAL NEW OUTFIT: " + outfit + ", "
-      + "CRITICAL NEW POSE: " + pose + ", "
-      + "LOCATION: " + scene + ", "
-      + "full body from head to feet including shoes, wide environmental shot, entire figure visible, "
-      + "NOT bust portrait, NOT chest crop, NOT close-up, NOT headshot, NOT selfie, ";
+    // Cadrage + tenue d'abord (SD suit le début du prompt)
+    out += "full body shot, 35mm, woman standing in a room, entire body visible from head to toes, feet and shoes in frame, "
+      + "far from camera, environmental wide shot, "
+      + "wearing " + outfit + ", "
+      + pose + ", "
+      + "location " + scene + ", ";
     if (hasRef) {
-      out += "same face as reference only: identical eyes nose lips hair color style age skin, "
-        + "IGNORE and REPLACE all clothing from the reference image, IGNORE reference pose, ";
+      out += "face matches reference portrait exactly, same eyes nose mouth hair, ";
     }
-    out += "RAW photorealistic DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
+    out += "photorealistic RAW photo, detailed skin, sharp focus, ";
     if (isPlusSize) {
-      out += "plus-size curvy wide hips thick thighs full bust soft love handles, NOT pregnant no baby bump, ";
+      out += "plus-size curvy body wide hips thick thighs, large breasts, soft love handles, not pregnant, ";
     }
     out += sheetPrompt + bodyMorphLock;
-    if (isPlusSize) {
-      out += ", NOT pregnant NOT baby bump NOT maternity";
-    }
+    if (isPlusSize) out += ", not pregnant not baby bump";
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
-    out += ", fully clothed in the CRITICAL NEW OUTFIT, full length body";
-    return out.replace(/\s+/g, " ").trim().slice(0, 1500);
+    return out.replace(/\s+/g, " ").trim().slice(0, 1400);
   }
 
   /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
@@ -1284,7 +1282,7 @@
     const opts = options || {};
     let referenceB64 = null;
     try {
-      referenceB64 = await profileReferenceJpegB64(character, !!opts.faceOnlyRef);
+      referenceB64 = await profileReferenceJpegB64(character, !!opts.faceOnlyRef, !!opts.strictFaceOnly);
     } catch (refErr) {
       referenceB64 = null;
       if (opts.requireRef) throw new Error("Photo de profil requise pour garder le visage: " + String(refErr.message || refErr).slice(0, 100));
@@ -2426,8 +2424,9 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // Réf CORPS ENTIER (pas crop visage) : évite les portraits, ancre le visage
-            faceOnlyRef: false,
+            // Crop VISAGE strict: la ref n'embarque plus la tenue → variété réelle
+            faceOnlyRef: true,
+            strictFaceOnly: true,
           });
           return {
             ok: true,
