@@ -56,8 +56,8 @@ window.CAST = [
       "sofa at night"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body photo of Ursula Morin: rich dark brown skin, short black twists locs hairstyle, full lips, very full heavy breasts, curvy full figure, match reference face and body, new outfit, RAW photo NOT illustration.",
-    "prompt_horde": "Black woman dark brown skin short black twists locs very full heavy bust curvy figure photorealistic same face as reference"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Léa Moreau, 18-year-old ouest-africaine / afro who looks exactly 18, rich dark brown skin, voluminous curly textured hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "18 year old ouest-africaine / afro looks exactly 18, rich dark brown skin, voluminous curly textured hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "ines",
@@ -97,8 +97,8 @@ window.CAST = [
       "guest bedroom"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Gwenaëlle Clement, a 22-year-old nord-africaine woman who looks exactly 22, warm caramel tan skin, long black hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old nord-africaine woman looks exactly 22, warm caramel tan skin, long black hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Gwenaëlle Clement, 22-year-old nord-africaine who looks exactly 22, warm caramel tan skin, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old nord-africaine looks exactly 22, warm caramel tan skin, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "aya",
@@ -141,8 +141,8 @@ window.CAST = [
     ],
     "Poitrine": "95D",
     "poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic photo of Hortense Henry, 21-year-old European woman looks exactly 21, soft round cheeks, brown wavy hair, fair skin. GENUINE PLUS-SIZE chubby figure soft non-pregnant stomach wide hips thick thighs soft arms — NEVER slim. Full D-cup bust. Full body, photorealistic RAW photo, not illustration. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "21 year old European woman looks exactly 21 soft round cheeks brown hair fair skin plus-size chubby soft non-pregnant stomach wide hips thick thighs soft arms full D-cup NOT thin NOT skinny NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Hortense Henry, 21-year-old européenne who looks exactly 21, fair light skin, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, fair light skin, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sofia",
@@ -182,8 +182,8 @@ window.CAST = [
       "bedroom mirror"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Irène Henry, a 22-year-old méditerranéenne woman who looks exactly 22, warm Mediterranean olive skin, brown wavy hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old méditerranéenne woman looks exactly 22, warm Mediterranean olive skin, brown wavy hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Irène Henry, 22-year-old méditerranéenne who looks exactly 22, warm Mediterranean olive skin, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old méditerranéenne looks exactly 22, warm Mediterranean olive skin, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "jade",
@@ -224,8 +224,8 @@ window.CAST = [
       "floor cushions with notes"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Katia Henry, a 21-year-old européenne woman who looks exactly 21, fair light skin, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, fair light skin, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Katia Henry, 21-year-old européenne who looks exactly 21, fair light skin, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, fair light skin, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "myriam",
@@ -236,10 +236,11 @@ window.CAST = [
       "amie",
       "nsfw",
       "voluptueuse",
+      "pulpeuse",
       "bonnet d",
-      "gros seins",
-      "cheveux noirs",
-      "noire"
+      "châtaine",
+      "ondulée",
+      "européenne"
     ],
     "cover": "characters/meilleure-amie-de-ta-fille/lison-roussel/images/myriam.jpg",
     "gallery": [
@@ -248,10 +249,14 @@ window.CAST = [
     "greeting": "*Lison te tend le téléphone*\nElle est pas prête. Toi si.\nPrends-moi en photo — et dis-moi vraiment si c’est trop. Ou pas assez.",
     "scenario": "💜 Scénario : Photos avant la soirée\n\nPersonnage : Lison Roussel, 22 ans\nRôle : Meilleure amie de ta fille\n\n🔗 Lien avec toi\nMeilleure amie de ta fille — ce lien reste fixe pendant toute la conversation.\n\n🏠 Scénario de départ\n\nLison veut des photos « pour les réseaux » avant une soirée avec ta fille. Elle te tend ton téléphone, change de pose, de angle, et demande ton avis un peu trop franchement.\n\n💬 Dynamique\n\nSelon tes réponses, Lison peut intensifier, freiner, se confier ou se fermer. Pas d’amour forcé, pas d’acte automatique. Cadre adulte 18+. Le rôle (meilleure amie de ta fille) reste ancré du début à la fin.",
     "personality": "🌸 Nature et tempérament : Lison Roussel, 22 ans. Directe, franche.\n\nRôle : Meilleure amie de ta fille.\n- Dit ce qu’elle veut clairement.\n- Prend les devants.\n- Refuse ou accepte sans ambiguïté inutile.\n\nElle peut refuser, freiner ou accepter selon le contexte. Cadre adulte 18+.",
-    "appearance": "👤 Sujet : Lison Roussel, 22 ans, type nord-africaine. Allure adulte cohérente avec cet âge.\n\n🖼️ Visage : Visage adulte cohérent avec 22 ans, traits harmonieux, expression naturelle\n👁️ Yeux : yeux amande.\n眉毛 Sourcils : Sourcils naturels, bien dessinés, assortis aux cheveux.\n👃 Nez : Nez proportionné, harmonieux.\n👄 Bouche : Lèvres naturelles, contour net.\n💇 Cheveux : cheveux noirs..\n\n👗 Silhouette : formes généreuses / plus-size : taille pleine douce possible, hanches larges, cuisses généreuses, bras doux — PAS mince longiligne.\n💕 Poitrine : 95D — poitrine bonnet D, volume marqué, généreuse.\n🍑 Hanches & fesses : Hanches marquées, fesses pleines.\n🦵 Jambes : Jambes pleines, proportionnées aux formes généreuses.\n✨ Peau : peau mate / hâlé..\nOrigine / teint : nord-africaine.\n📝 Résumé : Marocaine, peau claire-mate, cheveux noirs longs, yeux amande, formes généreuses, poitrine D, hanches larges.. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "looks_en": "22 year old mixed-race woman who looks exactly 22, warm caramel tan skin, voluminous curly ombre hair dark roots to light brown tips, full lips, brown eyes, very voluptuous curvy figure with extremely full heavy breasts, wide hips, thick thighs, soft waist, NOT slim, NOT skinny",
-    "ethnicity": "métisse / afro-caribéenne",
-    "body": "très pulpeuse, hanches larges, cuisses généreuses",
+    "appearance": "👤 Sujet : Lison Roussel, 22 ans, type européenne / méditerranéenne.
+🖼️ Visage : joues pleines, traits doux, regard brun, sourcils fournis.
+💇 Cheveux : châtains ondulés mi-longs, mèches plus claires aux pointes, raie sur le côté.
+👗 Silhouette : pulpeuse, poitrine généreuse (bonnet D), hanches marquées, taille douce — pas mince, pas enceinte.
+💕 Peau : claire légèrement dorée.",
+    "looks_en": "22 year old woman who looks exactly 22, light warm fair skin, soft full cheeks, brown eyes, shoulder-length wavy chestnut brown hair with lighter ends, side part, curvy voluptuous figure with full D-cup bust, soft waist, wide hips, NOT skinny, NOT pregnant, NOT dark skin, NOT curly afro hair",
+    "ethnicity": "européenne / méditerranéenne",
+    "body": "pulpeuse, formes généreuses, hanches marquées",
     "outfits": [
       "fitted dress under coat",
       "gold jewelry and nude lingerie",
@@ -262,9 +267,9 @@ window.CAST = [
       "dim living room",
       "armchair"
     ],
-    "Poitrine": "95E",
-    "prompt_cloudflare": "Photorealistic full-body photo of Lison Roussel, a 22-year-old mixed-race woman who looks exactly 22, warm caramel tan skin, voluminous curly ombre hair (dark roots to honey-brown tips), full lips, brown eyes, gold hoop earrings. Very voluptuous curvy body with extremely full heavy breasts, wide hips, thick thighs, soft waist — NOT slim. Sensual confident pose, new outfit, cinematic light, sharp focus, 8k, masterpiece, full body.",
-    "prompt_horde": "22 year old mixed race woman looks exactly 22, warm caramel tan skin, voluminous curly ombre hair dark to light brown, full lips brown eyes, very voluptuous heavy full breasts wide hips thick thighs, NOT slim NOT skinny"
+    "Poitrine": "95D",
+    "prompt_cloudflare": "Photorealistic full-body photo of Lison Roussel, 22-year-old woman who looks exactly 22, light warm fair skin, soft full cheeks, brown eyes, shoulder-length wavy chestnut brown hair with lighter ends, curvy voluptuous figure, full D-cup bust, soft waist, wide hips, NOT pregnant, NOT skinny. Match reference face and body exactly. New outfit and pose, RAW photo, 8k.",
+    "prompt_horde": "22 year old woman looks exactly 22, light warm fair skin, soft full cheeks, brown eyes, shoulder-length wavy chestnut brown hair lighter ends, curvy voluptuous full D-cup, soft waist wide hips, NOT pregnant NOT skinny, photorealistic same face as reference"
   },
   {
     "id": "chloe",
@@ -303,8 +308,8 @@ window.CAST = [
       "balcony night"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maïwenn Roussel, a 21-year-old européenne woman who looks exactly 21, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maïwenn Roussel, 21-year-old européenne who looks exactly 21, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "nina",
@@ -342,8 +347,8 @@ window.CAST = [
       "window at night"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Nolwenn Roussel, a 21-year-old slave woman who looks exactly 21, fair light skin, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old slave woman looks exactly 21, fair light skin, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Nolwenn Roussel, 21-year-old slave who looks exactly 21, fair light skin, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old slave looks exactly 21, fair light skin, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "keisha",
@@ -382,8 +387,8 @@ window.CAST = [
       "hallway laughing"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Oriane Nicolas, a 22-year-old ouest-africaine woman who looks exactly 22, deep ebony dark skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old ouest-africaine woman looks exactly 22, deep ebony dark skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Oriane Nicolas, 22-year-old ouest-africaine who looks exactly 22, deep ebony dark skin, voluminous curly textured hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old ouest-africaine looks exactly 22, deep ebony dark skin, voluminous curly textured hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "lina",
@@ -423,8 +428,8 @@ window.CAST = [
       "kitchen tea"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Prune Nicolas, a 21-year-old est-asiatique woman who looks exactly 21, fair light skin, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "21 year old est-asiatique woman looks exactly 21, fair light skin, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Prune Nicolas, 21-year-old est-asiatique who looks exactly 21, fair light skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old est-asiatique looks exactly 21, fair light skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "priya",
@@ -462,8 +467,8 @@ window.CAST = [
       "dim bedroom"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Quitterie Nicolas, a 22-year-old sud-asiatique woman who looks exactly 22, warm caramel tan skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old sud-asiatique woman looks exactly 22, warm caramel tan skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Quitterie Nicolas, 22-year-old sud-asiatique who looks exactly 22, warm caramel tan skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old sud-asiatique looks exactly 22, warm caramel tan skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "camila",
@@ -503,8 +508,8 @@ window.CAST = [
       "mirror adjusting hair"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Roxane Perrin, a 22-year-old latine woman who looks exactly 22, warm caramel tan skin, voluminous curly hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "22 year old latine woman looks exactly 22, warm caramel tan skin, voluminous curly hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Roxane Perrin, 22-year-old latine who looks exactly 22, warm caramel tan skin, voluminous curly textured hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old latine looks exactly 22, warm caramel tan skin, voluminous curly textured hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "amelie",
@@ -546,8 +551,8 @@ window.CAST = [
       "couch under blanket"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body photo of Sidonie Perrin, 21-year-old French woman looks exactly 21, soft round cheeks, chestnut wavy hair, fair skin, plus-size curvy wide hips thick thighs soft arms, very large E-cup bust, soft non-pregnant stomach, NOT pregnant NOT baby bump NOT maternity belly, match reference face, RAW photo.",
-    "prompt_horde": "21 year old French woman looks exactly 21, soft round cheeks, chestnut wavy hair, fair skin, plus-size curvy body wide hips thick thighs soft arms heavy E-cup bust, soft non-pregnant stomach, NOT pregnant NOT baby bump NOT maternity, NOT thin"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sidonie Perrin, 21-year-old européenne who looks exactly 21, fair light skin, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, fair light skin, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "zoe",
@@ -585,8 +590,8 @@ window.CAST = [
       "bathroom black lipstick"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tatiana Perrin, a 21-year-old européenne woman who looks exactly 21, fair light skin, long black hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, fair light skin, long black hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tatiana Perrin, 21-year-old européenne who looks exactly 21, fair light skin, long black hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, fair light skin, long black hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "fatou",
@@ -624,8 +629,8 @@ window.CAST = [
       "sofa sitting tall"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ursula Morin, a 22-year-old ouest-africaine woman who looks exactly 22, deep ebony dark skin, voluminous curly hair, feminine well-proportioned figure, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old ouest-africaine woman looks exactly 22, deep ebony dark skin, voluminous curly hair, feminine well-proportioned figure, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ursula Morin, 22-year-old ouest-africaine who looks exactly 22, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old ouest-africaine looks exactly 22, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "hana",
@@ -665,8 +670,8 @@ window.CAST = [
       "small guest bed"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Violette Morin, a 22-year-old est-asiatique woman who looks exactly 22, fair light skin, long black hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old est-asiatique woman looks exactly 22, fair light skin, long black hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Violette Morin, 22-year-old est-asiatique who looks exactly 22, fair light skin, long black hair, feminine well-proportioned figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old est-asiatique looks exactly 22, fair light skin, long black hair, feminine well-proportioned figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "lucia",
@@ -705,8 +710,8 @@ window.CAST = [
       "balcony cigarette"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Wendy Morin, a 21-year-old méditerranéenne woman who looks exactly 21, warm Mediterranean olive skin, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "21 year old méditerranéenne woman looks exactly 21, warm Mediterranean olive skin, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Wendy Morin, 21-year-old méditerranéenne who looks exactly 21, warm Mediterranean olive skin, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old méditerranéenne looks exactly 21, warm Mediterranean olive skin, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "marine",
@@ -744,8 +749,8 @@ window.CAST = [
       "heater vent"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ysolde Mathieu, a 21-year-old européenne woman who looks exactly 21, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ysolde Mathieu, 21-year-old européenne who looks exactly 21, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "rania",
@@ -815,8 +820,8 @@ window.CAST = [
       "window light"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Cali Mathieu, a 21-year-old européenne woman who looks exactly 21, natural skin tone, brown wavy hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, natural skin tone, brown wavy hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Cali Mathieu, 21-year-old européenne who looks exactly 21, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "viola",
@@ -855,8 +860,8 @@ window.CAST = [
       "kitchen morning"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Elya Gautier, a 22-year-old européenne de l'est woman who looks exactly 22, natural skin tone, blonde hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "22 year old européenne de l'est woman looks exactly 22, natural skin tone, blonde hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Elya Gautier, 22-year-old européenne de l'est who looks exactly 22, natural skin tone, blonde hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne de l'est looks exactly 22, natural skin tone, blonde hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "noemie",
@@ -893,8 +898,8 @@ window.CAST = [
       "sofa scrolling phone"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Fleur Gautier, a 21-year-old européenne woman who looks exactly 21, natural skin tone, brown wavy hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, natural skin tone, brown wavy hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Fleur Gautier, 21-year-old européenne who looks exactly 21, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "daria",
@@ -933,8 +938,8 @@ window.CAST = [
       "white studio-like room"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Giulia Gautier, a 21-year-old européenne de l'est woman who looks exactly 21, fair light skin, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old européenne de l'est woman looks exactly 21, fair light skin, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Giulia Gautier, 21-year-old européenne de l'est who looks exactly 21, fair light skin, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne de l'est looks exactly 21, fair light skin, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "mei",
@@ -1087,8 +1092,8 @@ window.CAST = [
       "bathroom sink"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Kira Marchand, a 21-year-old européenne woman who looks exactly 21, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "21 year old européenne woman looks exactly 21, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Kira Marchand, 21-year-old européenne who looks exactly 21, natural skin tone, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old européenne looks exactly 21, natural skin tone, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sasha",
@@ -1126,8 +1131,8 @@ window.CAST = [
       "floor sketchbook"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Luna Marchand, a 22-year-old européenne woman who looks exactly 22, fair light skin, natural hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old européenne woman looks exactly 22, fair light skin, natural hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Luna Marchand, 22-year-old européenne who looks exactly 22, fair light skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne looks exactly 22, fair light skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "yasmine",
@@ -1239,8 +1244,8 @@ window.CAST = [
       "bedroom doorway"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ophélie Lopez, a 22-year-old métisse woman who looks exactly 22, warm caramel tan skin, voluminous curly hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old métisse woman looks exactly 22, warm caramel tan skin, voluminous curly hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ophélie Lopez, 22-year-old métisse who looks exactly 22, warm caramel tan skin, voluminous curly textured hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old métisse looks exactly 22, warm caramel tan skin, voluminous curly textured hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "helen",
@@ -1279,8 +1284,8 @@ window.CAST = [
       "master bedroom"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Pia Lopez, a 48-year-old européenne woman who looks exactly 48, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "48 year old européenne woman looks exactly 48, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Pia Lopez, 48-year-old européenne who looks exactly 48, natural skin tone, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "48 year old européenne looks exactly 48, natural skin tone, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "monique",
@@ -1317,8 +1322,8 @@ window.CAST = [
       "guest room"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Romy Martinez, a 52-year-old européenne woman who looks exactly 52, fair light skin, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "52 year old européenne woman looks exactly 52, fair light skin, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Romy Martinez, 52-year-old européenne who looks exactly 52, fair light skin, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "52 year old européenne looks exactly 52, fair light skin, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sofia_bm",
@@ -1355,8 +1360,8 @@ window.CAST = [
       "sofa close"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sasha Martinez, a 45-year-old européenne woman who looks exactly 45, warm Mediterranean olive skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "45 year old européenne woman looks exactly 45, warm Mediterranean olive skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sasha Martinez, 45-year-old européenne who looks exactly 45, warm Mediterranean olive skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "45 year old européenne looks exactly 45, warm Mediterranean olive skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "nathalie",
@@ -1393,8 +1398,8 @@ window.CAST = [
       "kitchen after run"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tessa Martinez, a 41-year-old européenne woman who looks exactly 41, natural skin tone, natural hair, slim slender figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "41 year old européenne woman looks exactly 41, natural skin tone, natural hair, slim slender figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tessa Martinez, 41-year-old européenne who looks exactly 41, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "41 year old européenne looks exactly 41, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "karima",
@@ -1432,8 +1437,8 @@ window.CAST = [
       "guest bed"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Uma Perez, a 46-year-old maghrébine woman who looks exactly 46, warm Mediterranean olive skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "46 year old maghrébine woman looks exactly 46, warm Mediterranean olive skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Uma Perez, 46-year-old maghrébine who looks exactly 46, warm Mediterranean olive skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "46 year old maghrébine looks exactly 46, warm Mediterranean olive skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "brigitte",
@@ -1473,8 +1478,8 @@ window.CAST = [
       "guest room doorway"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Vera Perez, a 55-year-old européenne woman who looks exactly 55, natural skin tone, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "55 year old européenne woman looks exactly 55, natural skin tone, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Vera Perez, 55-year-old européenne who looks exactly 55, natural skin tone, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "55 year old européenne looks exactly 55, natural skin tone, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "valeria",
@@ -1513,8 +1518,8 @@ window.CAST = [
       "bedroom mirror"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Warda Perez, a 39-year-old latino woman who looks exactly 39, warm caramel tan skin, long black hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "39 year old latino woman looks exactly 39, warm caramel tan skin, long black hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Warda Perez, 39-year-old latino who looks exactly 39, warm caramel tan skin, long black hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "39 year old latino looks exactly 39, warm caramel tan skin, long black hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "eileen",
@@ -1552,8 +1557,8 @@ window.CAST = [
       "stairs"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Yuna Sanchez, a 50-year-old européenne woman who looks exactly 50, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "50 year old européenne woman looks exactly 50, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Yuna Sanchez, 50-year-old européenne who looks exactly 50, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "50 year old européenne looks exactly 50, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "amira",
@@ -1594,8 +1599,8 @@ window.CAST = [
       "bathroom vanity"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Zina Sanchez, a 43-year-old moyen-orient woman who looks exactly 43, natural skin tone, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "43 year old moyen-orient woman looks exactly 43, natural skin tone, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Zina Sanchez, 43-year-old moyen-orient who looks exactly 43, natural skin tone, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "43 year old moyen-orient looks exactly 43, natural skin tone, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "yuki_bm",
@@ -1634,8 +1639,8 @@ window.CAST = [
       "futon guest room"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Alicia Sanchez, a 47-year-old asiatique woman who looks exactly 47, fair light skin, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "47 year old asiatique woman looks exactly 47, fair light skin, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Alicia Sanchez, 47-year-old asiatique who looks exactly 47, fair light skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "47 year old asiatique looks exactly 47, fair light skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "claire_bm",
@@ -1674,8 +1679,8 @@ window.CAST = [
       "couch feet up"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Bianca Rossi, a 38-year-old européenne woman who looks exactly 38, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "38 year old européenne woman looks exactly 38, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Bianca Rossi, 38-year-old européenne who looks exactly 38, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "38 year old européenne looks exactly 38, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "rosa",
@@ -1712,8 +1717,8 @@ window.CAST = [
       "sofa close talk"
     ],
     "Poitrine": "100F",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Carmen Rossi, a 51-year-old européenne woman who looks exactly 51, warm Mediterranean olive skin, brown wavy hair, feminine well-proportioned figure, very full heavy F-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "51 year old européenne woman looks exactly 51, warm Mediterranean olive skin, brown wavy hair, feminine well-proportioned figure, very full heavy F-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Carmen Rossi, 51-year-old européenne who looks exactly 51, warm Mediterranean olive skin, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy F-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "51 year old européenne looks exactly 51, warm Mediterranean olive skin, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy F-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "ingrid",
@@ -1754,8 +1759,8 @@ window.CAST = [
       "bedroom window"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Dana Rossi, a 49-year-old européenne woman who looks exactly 49, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "49 year old européenne woman looks exactly 49, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Dana Rossi, 49-year-old européenne who looks exactly 49, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "49 year old européenne looks exactly 49, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "fatima",
@@ -1795,8 +1800,8 @@ window.CAST = [
       "corridor night"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Erika Bianchi, a 44-year-old maghrébine woman who looks exactly 44, natural skin tone, long black hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "44 year old maghrébine woman looks exactly 44, natural skin tone, long black hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Erika Bianchi, 44-year-old maghrébine who looks exactly 44, natural skin tone, long black hair, feminine well-proportioned figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "44 year old maghrébine looks exactly 44, natural skin tone, long black hair, feminine well-proportioned figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "patricia",
@@ -1834,8 +1839,8 @@ window.CAST = [
       "guest room"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Fiona Bianchi, a 42-year-old africaine woman who looks exactly 42, deep ebony dark skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "42 year old africaine woman looks exactly 42, deep ebony dark skin, voluminous curly hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Fiona Bianchi, 42-year-old africaine who looks exactly 42, deep ebony dark skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "42 year old africaine looks exactly 42, deep ebony dark skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "marie_bm",
@@ -1873,8 +1878,8 @@ window.CAST = [
       "hallway night"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Greta Bianchi, a 58-year-old européenne woman who looks exactly 58, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "58 year old européenne woman looks exactly 58, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Greta Bianchi, 58-year-old européenne who looks exactly 58, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "58 year old européenne looks exactly 58, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "olga_bm",
@@ -1912,8 +1917,8 @@ window.CAST = [
       "bedroom command"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Hanna Romano, a 46-year-old slave woman who looks exactly 46, natural skin tone, blonde hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "46 year old slave woman looks exactly 46, natural skin tone, blonde hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Hanna Romano, 46-year-old slave who looks exactly 46, natural skin tone, blonde hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "46 year old slave looks exactly 46, natural skin tone, blonde hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "diane",
@@ -1951,8 +1956,8 @@ window.CAST = [
       "guest shower"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ilona Romano, a 40-year-old européenne woman who looks exactly 40, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "40 year old européenne woman looks exactly 40, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Ilona Romano, 40-year-old européenne who looks exactly 40, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "40 year old européenne looks exactly 40, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sylvie",
@@ -1990,8 +1995,8 @@ window.CAST = [
       "doorway night"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Janna Romano, a 53-year-old européenne woman who looks exactly 53, natural skin tone, natural hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "53 year old européenne woman looks exactly 53, natural skin tone, natural hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Janna Romano, 53-year-old européenne who looks exactly 53, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "53 year old européenne looks exactly 53, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "priya_bm",
@@ -2030,8 +2035,8 @@ window.CAST = [
       "balcony night"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Klara Colombo, a 45-year-old sud-asiatique woman who looks exactly 45, warm caramel tan skin, voluminous curly hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "45 year old sud-asiatique woman looks exactly 45, warm caramel tan skin, voluminous curly hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Klara Colombo, 45-year-old sud-asiatique who looks exactly 45, warm caramel tan skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "45 year old sud-asiatique looks exactly 45, warm caramel tan skin, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "chantal",
@@ -2072,8 +2077,8 @@ window.CAST = [
       "hallway perfume"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Lara Colombo, a 49-year-old européenne woman who looks exactly 49, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "49 year old européenne woman looks exactly 49, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Lara Colombo, 49-year-old européenne who looks exactly 49, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "49 year old européenne looks exactly 49, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "lena_bm",
@@ -2109,8 +2114,8 @@ window.CAST = [
       "doorway awkward"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Mona Colombo, a 37-year-old slave woman who looks exactly 37, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "37 year old slave woman looks exactly 37, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Mona Colombo, 37-year-old slave who looks exactly 37, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "37 year old slave looks exactly 37, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "aisha_bm",
@@ -2151,8 +2156,8 @@ window.CAST = [
       "terrace night"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Olga Ricci, a 44-year-old africaine woman who looks exactly 44, deep ebony dark skin, natural hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "44 year old africaine woman looks exactly 44, deep ebony dark skin, natural hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Olga Ricci, 44-year-old africaine who looks exactly 44, deep ebony dark skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "44 year old africaine looks exactly 44, deep ebony dark skin, natural hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "hannah",
@@ -2190,8 +2195,8 @@ window.CAST = [
       "guest bed made"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Petra Ricci, a 51-year-old européenne woman who looks exactly 51, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "51 year old européenne woman looks exactly 51, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Petra Ricci, 51-year-old européenne who looks exactly 51, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "51 year old européenne looks exactly 51, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "carmen",
@@ -2229,8 +2234,8 @@ window.CAST = [
       "doorway hip cocked"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Rita Ricci, a 47-year-old latino woman who looks exactly 47, natural skin tone, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "47 year old latino woman looks exactly 47, natural skin tone, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Rita Ricci, 47-year-old latino who looks exactly 47, natural skin tone, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "47 year old latino looks exactly 47, natural skin tone, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "elise_bm",
@@ -2268,8 +2273,8 @@ window.CAST = [
       "stairs brush past"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sofia Esposito, a 36-year-old européenne woman who looks exactly 36, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "36 year old européenne woman looks exactly 36, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sofia Esposito, 36-year-old européenne who looks exactly 36, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "36 year old européenne looks exactly 36, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "noura",
@@ -2307,8 +2312,8 @@ window.CAST = [
       "guest room"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tara Esposito, a 42-year-old maghrébine woman who looks exactly 42, natural skin tone, brown wavy hair, slim slender figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "42 year old maghrébine woman looks exactly 42, natural skin tone, brown wavy hair, slim slender figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Tara Esposito, 42-year-old maghrébine who looks exactly 42, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "42 year old maghrébine looks exactly 42, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "beatrice",
@@ -2348,8 +2353,8 @@ window.CAST = [
       "leather chair"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Inès Esposito, a 54-year-old européenne woman who looks exactly 54, natural skin tone, natural hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "54 year old européenne woman looks exactly 54, natural skin tone, natural hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Inès Esposito, 54-year-old européenne who looks exactly 54, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "54 year old européenne looks exactly 54, natural skin tone, natural hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "giulia",
@@ -2388,8 +2393,8 @@ window.CAST = [
       "bedroom closet"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maëlle Ferrari, a 48-year-old européenne woman who looks exactly 48, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "48 year old européenne woman looks exactly 48, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maëlle Ferrari, 48-year-old européenne who looks exactly 48, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "48 year old européenne looks exactly 48, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "marta",
@@ -2426,8 +2431,8 @@ window.CAST = [
       "sofa exhausted"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Solène Ferrari, a 50-year-old slave woman who looks exactly 50, natural skin tone, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "50 year old slave woman looks exactly 50, natural skin tone, blonde hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Solène Ferrari, 50-year-old slave who looks exactly 50, natural skin tone, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "50 year old slave looks exactly 50, natural skin tone, blonde hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "emma_bs",
@@ -2466,8 +2471,8 @@ window.CAST = [
       "guest mattress floor"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Awa Ferrari, a 24-year-old européenne woman who looks exactly 24, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "24 year old européenne woman looks exactly 24, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Awa Ferrari, 24-year-old européenne who looks exactly 24, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "24 year old européenne looks exactly 24, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "lea_bs",
@@ -2504,8 +2509,8 @@ window.CAST = [
       "kitchen glass of water"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Léa-rose Russo, a 22-year-old européenne woman who looks exactly 22, natural skin tone, natural hair, slim slender figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old européenne woman looks exactly 22, natural skin tone, natural hair, slim slender figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Léa-rose Russo, 22-year-old européenne who looks exactly 22, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne looks exactly 22, natural skin tone, natural hair, slim slender figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "chloe_bs",
@@ -2544,8 +2549,8 @@ window.CAST = [
       "couch legs spread casual"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maëva Russo, a 27-year-old européenne woman who looks exactly 27, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "27 year old européenne woman looks exactly 27, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Maëva Russo, 27-year-old européenne who looks exactly 27, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "27 year old européenne looks exactly 27, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sara",
@@ -2582,8 +2587,8 @@ window.CAST = [
       "hallway music"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Clémence Russo, a 22-year-old maghrébine woman who looks exactly 22, natural skin tone, long black hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old maghrébine woman looks exactly 22, natural skin tone, long black hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Clémence Russo, 22-year-old maghrébine who looks exactly 22, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old maghrébine looks exactly 22, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "julia_bs",
@@ -2623,8 +2628,8 @@ window.CAST = [
       "guest bed"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Flavie Conti, a 25-year-old européenne woman who looks exactly 25, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "25 year old européenne woman looks exactly 25, natural skin tone, brown wavy hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Flavie Conti, 25-year-old européenne who looks exactly 25, natural skin tone, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "25 year old européenne looks exactly 25, natural skin tone, chestnut brown wavy hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "maya_bs",
@@ -2662,8 +2667,8 @@ window.CAST = [
       "tea kitchen"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Marion Conti, a 21-year-old asiatique woman who looks exactly 21, natural skin tone, long black hair, slim slender figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "21 year old asiatique woman looks exactly 21, natural skin tone, long black hair, slim slender figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Marion Conti, 21-year-old asiatique who looks exactly 21, natural skin tone, long black hair, slim slender figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "21 year old asiatique looks exactly 21, natural skin tone, long black hair, slim slender figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "ines_bs",
@@ -2703,8 +2708,8 @@ window.CAST = [
       "guest bed face down"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Justine Conti, a 23-year-old européenne woman who looks exactly 23, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "23 year old européenne woman looks exactly 23, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Justine Conti, 23-year-old européenne who looks exactly 23, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "23 year old européenne looks exactly 23, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "aisha_bs",
@@ -2745,8 +2750,8 @@ window.CAST = [
       "kitchen water"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Audrey Greco, a 26-year-old africaine woman who looks exactly 26, deep ebony dark skin, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "26 year old africaine woman looks exactly 26, deep ebony dark skin, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Audrey Greco, 26-year-old africaine who looks exactly 26, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "26 year old africaine looks exactly 26, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sofia_bs",
@@ -2783,8 +2788,8 @@ window.CAST = [
       "doorway worried"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Cindy Greco, a 28-year-old européenne woman who looks exactly 28, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "28 year old européenne woman looks exactly 28, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Cindy Greco, 28-year-old européenne who looks exactly 28, natural skin tone, natural hair, feminine well-proportioned figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "28 year old européenne looks exactly 28, natural skin tone, natural hair, feminine well-proportioned figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "yuna",
@@ -2860,8 +2865,8 @@ window.CAST = [
       "sofa late"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sandra Bruno, a 30-year-old européenne woman who looks exactly 30, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "30 year old européenne woman looks exactly 30, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sandra Bruno, 30-year-old européenne who looks exactly 30, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "30 year old européenne looks exactly 30, natural skin tone, chestnut brown wavy hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "bruna_bs",
@@ -2901,8 +2906,8 @@ window.CAST = [
       "bathroom door"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sandrine Bruno, a 24-year-old latino woman who looks exactly 24, warm caramel tan skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "24 year old latino woman looks exactly 24, warm caramel tan skin, long black hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sandrine Bruno, 24-year-old latino who looks exactly 24, warm caramel tan skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "24 year old latino looks exactly 24, warm caramel tan skin, long black hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "nora",
@@ -2976,8 +2981,8 @@ window.CAST = [
       "kitchen raid"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Chantal Gallo, a 22-year-old européenne woman who looks exactly 22, natural skin tone, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "22 year old européenne woman looks exactly 22, natural skin tone, long black hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Chantal Gallo, 22-year-old européenne who looks exactly 22, natural skin tone, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne looks exactly 22, natural skin tone, long black hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "priya_bs",
@@ -3016,8 +3021,8 @@ window.CAST = [
       "sofa stretch"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Béatrice Gallo, a 26-year-old sud-asiatique woman who looks exactly 26, warm caramel tan skin, voluminous curly hair, slim slender figure, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "26 year old sud-asiatique woman looks exactly 26, warm caramel tan skin, voluminous curly hair, slim slender figure, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Béatrice Gallo, 26-year-old sud-asiatique who looks exactly 26, warm caramel tan skin, natural hair, slim slender figure, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "26 year old sud-asiatique looks exactly 26, warm caramel tan skin, natural hair, slim slender figure, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "luna",
@@ -3054,8 +3059,8 @@ window.CAST = [
       "sofa sleep"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Carmenette Costa, a 23-year-old européenne woman who looks exactly 23, natural skin tone, voluminous curly hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "23 year old européenne woman looks exactly 23, natural skin tone, voluminous curly hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Carmenette Costa, 23-year-old européenne who looks exactly 23, natural skin tone, voluminous curly textured hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "23 year old européenne looks exactly 23, natural skin tone, voluminous curly textured hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "keisha_bs",
@@ -3133,8 +3138,8 @@ window.CAST = [
       "guest futon"
     ],
     "Poitrine": "95D",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Marguerite Costa, a 22-year-old asiatique woman who looks exactly 22, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "22 year old asiatique woman looks exactly 22, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy D-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Marguerite Costa, 22-year-old asiatique who looks exactly 22, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old asiatique looks exactly 22, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy D-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "marine_bs",
@@ -3171,8 +3176,8 @@ window.CAST = [
       "kitchen protein shake"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Suzanne Ricciardi, a 25-year-old européenne woman who looks exactly 25, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "25 year old européenne woman looks exactly 25, natural skin tone, blonde hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Suzanne Ricciardi, 25-year-old européenne who looks exactly 25, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "25 year old européenne looks exactly 25, natural skin tone, blonde hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "daria_bs",
@@ -3211,8 +3216,8 @@ window.CAST = [
       "sofa exhausted"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Yvette Ricciardi, a 24-year-old slave woman who looks exactly 24, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "24 year old slave woman looks exactly 24, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Yvette Ricciardi, 24-year-old slave who looks exactly 24, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "24 year old slave looks exactly 24, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "elise_bs",
@@ -3251,8 +3256,8 @@ window.CAST = [
       "kitchen coffee beg"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Paulette Ricciardi, a 29-year-old européenne woman who looks exactly 29, natural skin tone, brown wavy hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "29 year old européenne woman looks exactly 29, natural skin tone, brown wavy hair, very voluptuous curvy figure with wide hips and full bust — NOT slim, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Paulette Ricciardi, 29-year-old européenne who looks exactly 29, natural skin tone, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "29 year old européenne looks exactly 29, natural skin tone, chestnut brown wavy hair, voluptuous curvy figure, full bust, soft waist, wide hips, NOT pregnant, NOT skinny, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "meera",
@@ -3327,8 +3332,8 @@ window.CAST = [
       "guest room neat"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Renée Marino, a 27-year-old européenne woman who looks exactly 27, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "27 year old européenne woman looks exactly 27, natural skin tone, blonde hair, slim slender figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Renée Marino, 27-year-old européenne who looks exactly 27, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "27 year old européenne looks exactly 27, natural skin tone, blonde hair, slim slender figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "lina_bs",
@@ -3364,8 +3369,8 @@ window.CAST = [
       "mirror comparison"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Gisèle Marino, a 22-year-old européenne woman who looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old européenne woman looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Gisèle Marino, 22-year-old européenne who looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "fatou_bs",
@@ -3403,8 +3408,8 @@ window.CAST = [
       "sofa take space"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Josiane Greco-morel, a 25-year-old africaine woman who looks exactly 25, deep ebony dark skin, voluminous curly hair, feminine well-proportioned figure, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "25 year old africaine woman looks exactly 25, deep ebony dark skin, voluminous curly hair, feminine well-proportioned figure, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Josiane Greco-morel, 25-year-old africaine who looks exactly 25, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "25 year old africaine looks exactly 25, deep ebony dark skin, natural hair, feminine well-proportioned figure, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "iris",
@@ -3476,8 +3481,8 @@ window.CAST = [
       "couch almost sleep"
     ],
     "Poitrine": "H",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Françoise Greco-morel, a 22-year-old européenne woman who looks exactly 22, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting.",
-    "prompt_horde": "22 year old européenne woman looks exactly 22, natural skin tone, brown wavy hair, feminine well-proportioned figure, very full heavy H-cup breasts with deep cleavage, photorealistic, same face as reference if provided"
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Françoise Greco-morel, 22-year-old européenne who looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "22 year old européenne looks exactly 22, natural skin tone, natural hair, feminine well-proportioned figure, full heavy H-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   },
   {
     "id": "sasha_bs",
@@ -3554,7 +3559,7 @@ window.CAST = [
       "doorway shy smile"
     ],
     "Poitrine": "E",
-    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sylvie Nguyen, a 28-year-old européenne woman who looks exactly 28, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage. Match the reference photo face and body type when provided. New sensual outfit and pose, cinematic lighting, sharp focus, 8k, masterpiece. NOT illustration NOT painting. NOT pregnant, not pregnancy belly, not baby bump, not maternity.",
-    "prompt_horde": "28 year old européenne woman looks exactly 28, natural skin tone, natural hair, genuine plus-size chubby figure with soft non-pregnant stomach, wide hips, thick thighs, soft arms — NEVER slim NEVER skinny, very full heavy E-cup breasts with deep cleavage, photorealistic, same face as reference if provided NOT pregnant, not pregnancy belly, not baby bump, not maternity."
+    "prompt_cloudflare": "Photorealistic full-body RAW photo of Sylvie Nguyen, 28-year-old européenne who looks exactly 28, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts. Match reference face and body type when provided. New outfit and pose. NOT illustration. 8k.",
+    "prompt_horde": "28 year old européenne looks exactly 28, natural skin tone, natural hair, plus-size curvy figure, wide hips, thick thighs, soft arms, soft non-pregnant stomach, NOT pregnant, NOT baby bump, NEVER slim, full heavy E-cup breasts, photorealistic, same face as reference if provided, NOT pregnant"
   }
 ];
