@@ -607,7 +607,7 @@
       sheetPrompt
     ].join(" ").toLowerCase();
     let bodyMorphLock = "";
-    if (/plus[- ]?size|chubby|plantureus|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs/.test(morphBlob)
+    if (/plus[- ]?size|chubby|plantureus|tr[eè]s ronde|\bronde\b|bbw|soft (rounded )?belly|wide hips|thick thighs|soft curvy/.test(morphBlob)
         || String(c.id || "") === "aya") {
       bodyMorphLock = forCloudflare
         ? " BODY TYPE LOCK: genuine plus-size chubby woman, soft rounded belly, wide hips, thick thighs, soft arms, full round face cheeks, heavy soft curves, REAL plus-size body — NEVER slim, NEVER skinny, NEVER thin waist fashion model, NEVER hourglass slim."
@@ -618,23 +618,29 @@
         : ", slim slender figure NOT plus-size NOT chubby";
     }
 
+    const isPlusSize = /plus-size|chubby|BODY TYPE LOCK: genuine plus-size/.test(bodyMorphLock);
     if (forCloudflare) {
-      let out = sheetPrompt
-        + bodyMorphLock
+      let out = "";
+      if (isPlusSize) {
+        out = "CRITICAL BODY: this woman is PLUS-SIZE CHUBBY with soft rounded belly, wide hips, thick thighs, soft arms, full cheeks. "
+          + "She is NOT a slim model, NOT skinny, NOT thin, NOT athletic-abs. Match a real plus-size body type. ";
+      }
+      out += sheetPrompt + bodyMorphLock
         + " PRIORITY OUTFIT: " + outfit + "."
         + " PRIORITY POSE: " + pose + "."
         + " PRIORITY LOCATION: " + scene + "."
         + " Full body or three-quarter, glamorous sensual fashion photo.";
       if (extraBit) out += " " + extraBit;
       if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
-        out = "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age skin. Do not copy clothing or pose from reference. "
+        out = (isPlusSize
+          ? "Use input_image_0 for face AND body type: keep the same plus-size chubby body proportions as the reference, same face. Do not slim her down. Do not copy clothing or pose. "
+          : "FACE IDENTITY LOCK from input_image_0: same face eyes nose lips hair age skin. Do not copy clothing or pose from reference. ")
           + out;
       }
-      // Répéter le verrou ronde en fin de prompt (FLUX suit mieux la fin)
-      if (/plus-size|chubby/.test(bodyMorphLock)) {
-        out += " FINAL: keep plus-size chubby body with soft belly and wide hips, never generate a slim model.";
+      if (isPlusSize) {
+        out += " FINAL BODY CHECK: plus-size chubby soft belly wide hips thick thighs — reject slim runway body.";
       }
-      return out.slice(0, 1800);
+      return out.slice(0, 1900);
     }
 
     let out = sheetPrompt
@@ -654,6 +660,9 @@
     const name = String(c.name || "woman").slice(0, 80);
     const hasProfileRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
     const appearance = String(c.appearance || "").trim().slice(0, hasProfileRef ? 400 : 700);
+    const plusRetry = /plus[- ]?size|chubby|ronde|bbw|soft belly/i.test(
+      appearance + " " + String(c.body || "") + " " + String(c.looks_en || "") + " " + (Array.isArray(c.tags) ? c.tags.join(" ") : "")
+    );
     const softOutfits = [
       "elegant black fitted midi dress deep neckline, glamorous interior",
       "burgundy satin wrap dress defined waist, hotel suite",
@@ -1362,9 +1371,20 @@
     try { start = Number(localStorage.getItem("lea.cfKeyIndex") || 0) || 0; } catch (_) {}
     let referenceB64 = null;
     try {
-      referenceB64 = await profileReferenceJpegB64(character, !!(options && options.faceOnlyRef), true);
+      // Plus-size: full-body ref so FLUX keeps chubby proportions (face-only → often slim body)
+      const morphCheck = [
+        String(character && character.body || ""),
+        String(character && character.appearance || ""),
+        String(character && character.looks_en || ""),
+        String(character && character.prompt_cloudflare || ""),
+        Array.isArray(character && character.tags) ? character.tags.join(" ") : ""
+      ].join(" ").toLowerCase();
+      const plusSizeChar = /plus[- ]?size|chubby|plantureus|tr[eè]s ronde|\bronde\b|bbw|soft (rounded )?belly/.test(morphCheck)
+        || String(character && character.id || "") === "aya";
+      const useFaceOnly = plusSizeChar ? false : !!(options && options.faceOnlyRef);
+      referenceB64 = await profileReferenceJpegB64(character, useFaceOnly, !plusSizeChar);
     } catch (e) {
-      referenceB64 = null; // pas de photo → txt2img depuis le descriptif physique
+      referenceB64 = null;
     }
     if (referenceB64) {
       const canonicalCup = profileImageBustRaw(character).slice(0, 20);
