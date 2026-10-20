@@ -861,7 +861,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 448);
                     params.put("height", registered ? 768 : 640);
-                    double denoise = 0.58;
+                    double denoise = 0.50;
                     // Prefixe optionnel dans le prompt: [[denoise:0.78]]
                     String promptWork = promptSafe;
                     try {
@@ -877,7 +877,7 @@ public class LeaBridge {
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
                     // Avec référence: cfg bas + denoise bas = visage ancré; sans ref cfg plus haut.
-                    double cfg = hasRef ? 5.0 : 7.0;
+                    double cfg = hasRef ? 6.5 : 7.5;
                     int steps = registered ? 35 : 28;
                     params.put("cfg_scale", cfg);
                     params.put("steps", steps);
@@ -887,7 +887,7 @@ public class LeaBridge {
                     params.put("n", 1);
                     params.put("clip_skip", 1);
                     JSONObject payload = new JSONObject();
-                    payload.put("prompt", promptWork + ", photorealistic fashion photograph, fully clothed, full-length head-to-toe, shoes visible, natural lighting, sharp focus ### headshot, close-up portrait, face only crop, selfie, extreme close-up, cropped at chest, painting, anime, cartoon, blurry, deformed, cropped legs, pregnant, pregnancy, pregnancy belly, pregnant belly, maternity, baby bump, swollen pregnant stomach, swollen belly, distended abdomen, large round pregnant stomach, maternity clothes");
+                    payload.put("prompt", promptWork + ", full body head to toe, shoes visible, standing pose, photorealistic fashion photograph, natural lighting, sharp focus ### headshot, close-up portrait, face only, selfie, extreme close-up, upper body only, cropped at chest, cropped at waist, portrait crop, painting, anime, cartoon, blurry, deformed, pregnant, pregnancy belly, baby bump, swollen belly, maternity");
                     payload.put("params", params);
                     final String sourceB64;
                     if (hasRef) {

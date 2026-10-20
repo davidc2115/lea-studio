@@ -174,7 +174,7 @@
     });
     if (!image.naturalWidth || !image.naturalHeight) throw new Error("Photo de profil vide ou invalide.");
     // Plus de détail visage/corps pour img2img Horde (limite payload ~900k).
-    const maxSide = faceOnly ? 512 : 640;
+    const maxSide = faceOnly ? 512 : 768;
     const scale = Math.min(maxSide / image.naturalWidth, maxSide / image.naturalHeight, 1);
     const canvas = document.createElement("canvas");
     canvas.width = faceOnly ? maxSide : Math.max(64, Math.round(image.naturalWidth * scale));
@@ -506,7 +506,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.58;
+  const HORDE_COMMON_DENOISE = 0.50;
 
   function stripFixedOutfitFromPrompt(text) {
     let s = String(text || "");
@@ -647,25 +647,26 @@
     }
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-    let out = "RAW photograph, photorealistic DSLR photo, natural skin pores and texture, real camera, 35mm lens, sharp focus, "
-      + "NOT illustration, NOT painting, NOT digital art, NOT anime, NOT 3d render, NOT drawing, ";
+    let out = "";
+    // Identité + cadrage EN TÊTE (Horde pondère fort le début)
     if (hasRef) {
-      out += "FACE LOCK from reference image: keep the EXACT same face, eyes, nose, lips, hair color and style, age and skin tone as the reference photo, ";
+      out += "img2img same person as reference photo, identical face eyes nose lips hair skin age, ";
     }
-    out += "FRAMING: full-length body photo head to toe, not a close-up face crop, not a portrait selfie, ";
+    out += "full body photograph, entire woman visible head to feet, shoes visible, standing or posed in room, "
+      + "wide shot, medium full body, NOT close-up, NOT portrait, NOT headshot, NOT selfie, NOT face only, "
+      + "RAW photorealistic DSLR, natural skin, sharp focus, "
+      + "NOT illustration, NOT painting, NOT anime, NOT 3d render, ";
     if (isPlusSize) {
-      out += "IMPORTANT: woman is NOT pregnant, no pregnancy belly, no baby bump, no maternity, no swollen abdomen, "
-        + "plus-size curvy with wide hips and thick thighs and full bust, soft love handles, relatively flat upper belly, ";
+      out += "plus-size curvy wide hips thick thighs full bust soft love handles, NOT pregnant, no baby bump, no swollen belly, ";
     }
     out += sheetPrompt
       + bodyMorphLock
-      + ", FULL BODY standing or posed, entire figure head to feet including shoes, wide shot medium-full, NOT close-up, NOT face portrait, NOT headshot, NOT cropped at chest"
-      + ", OUTFIT: " + outfit
-      + ", POSE: " + pose
+      + ", NEW OUTFIT: " + outfit
+      + ", NEW POSE: " + pose
       + ", LOCATION: " + scene
-      + ", keep same face as reference if provided, change outfit and pose";
+      + ", change clothing and pose completely from reference, keep only the same face and body type";
     if (isPlusSize) {
-      out += ", NOT pregnant, NOT pregnancy, NOT baby bump, NOT maternity belly, NOT swollen abdomen, NOT distended belly";
+      out += ", NOT pregnant NOT baby bump NOT maternity";
     }
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
     return out.replace(/\s+/g, " ").trim().slice(0, 1500);
@@ -2421,8 +2422,8 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // crop visage + denoise 0.55: fidélité visage, pose/tenue libres
-            faceOnlyRef: true,
+            // Réf CORPS ENTIER (pas crop visage) : évite les portraits, ancre le visage
+            faceOnlyRef: false,
           });
           return {
             ok: true,
