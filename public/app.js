@@ -1773,7 +1773,17 @@ function findCharacterById(id) {
   if (state.leaCharacter && String(state.leaCharacter.id) === sid) return state.leaCharacter;
   const imp = (state.importedCharacters || []).find((x) => String(x.id) === sid);
   if (imp) return imp;
-  return (state.castCharacters || []).find((x) => String(x.id) === sid) || null;
+  const fromCast = (state.castCharacters || []).find((x) => String(x.id) === sid);
+  if (fromCast) return fromCast;
+  // Fallback catalogue si le cast mémoire est vide / partiel
+  const lists = [window.CAST, window.EXTRA_CAST, window.LEA_CAST_NEW, window.LEA_CAST_SPECIAL,
+    window.LEA_CAST_DIRECT, window.LEA_CAST_CUPS, window.LEA_CAST_COLLEGUES, window.LEA_CAST_TAQUIN];
+  for (const list of lists) {
+    if (!Array.isArray(list)) continue;
+    const hit = list.find((x) => x && String(x.id) === sid);
+    if (hit) return hit;
+  }
+  return null;
 }
 
 async function initCharacter() {
