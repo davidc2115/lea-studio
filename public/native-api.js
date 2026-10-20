@@ -1697,15 +1697,18 @@
       memoryPromptBlock(c, memory),
       "COHÉRENCE STRICTE AVEC LE JOUEUR:",
       "- Réagis UNIQUEMENT à ce qu'il vient d'écrire (gestes, paroles, contact précis).",
-      "- Reprends ses actions concrètes (ex. s'il frotte, tu réagis au frottement — ne change pas le geste).",
+      "- QUI FAIT QUOI (critique): ne inverse JAMAIS le sujet et l'objet de l'action du joueur.",
+      "  Exemple: s'il écrit « tu caresses ma queue / tu serres ma bite » → C'EST TOI (" + charName + ") qui le touches. Tu réponds en faisant l'action (je caresse ta queue…), PAS « tes mains sur moi ».",
+      "  Exemple: s'il écrit « je te caresse / mes doigts sur toi » → C'EST LUI qui te touche. Tu réagis à son contact, tu ne prétends pas le caresser à sa place.",
+      "- Reprends ses actions concrètes sans les inverser (s'il dit que TU le touches, tu le touches; s'il dit que LUI te touche, tu ressens son contact).",
       "- Pas d'inversion sujet/objet. Pas de réécriture du passé.",
       "- INTERDIT d'inventer ce que le joueur pense, dit ou veut (« tu te dis… », « tu veux que… »).",
       "- INTERDIT de parler à sa place ou de décrire SES pensées.",
       "Format STRICT (sans écrire les mots action, dialogue, pensée):",
-      "1) Gestes/corps entre * * (1 phrase courte max).",
+      "1) Gestes/corps entre * * (1-2 phrases max).",
       "2) Paroles à voix haute: texte normal, sans * ni ( ), SANS préfixe 'dialogue:'.",
-      "3) Ressenti interne entre ( ) : une demi-phrase max, SANS préfixe 'pensée:'.",
-      "LONGUEUR: 2 à 4 phrases COURTES maximum (80–150 mots au total). Style SMS / oral, jamais un pavé. Si tu dépasses 4 phrases, raccourcis.",
+      "3) Ressenti interne entre ( ) : 1 phrase, SANS préfixe 'pensée:'.",
+      "LONGUEUR: 3 à 6 phrases utiles, style oral et humain (pas de roman).",
       "COMPLETUDE: chaque réponse doit être ENTIÈRE. Termine toujours la dernière phrase et le dernier mot. INTERDIT de s'arrêter sur « Oui… rempl » ou « c'est » sans finir. Pas de coupure en milieu de mot.",
       "N'écris JAMAIS les libellés action: dialogue: pensée: thought:.",
       "UN SEUL LOCUTEUR — TOI SEULE:",
@@ -1802,7 +1805,7 @@
             contents,
             generationConfig: {
               temperature: 0.85,
-              maxOutputTokens: 700,
+              maxOutputTokens: 2048,
             },
             // Désactive tous les filtres de sécurité supportés (NSFW adulte autorisé)
             safetySettings: [
@@ -2168,7 +2171,7 @@
               model: model,
               messages: msgs,
               temperature: 0.85,
-              max_tokens: 600,
+              max_tokens: 2048,
             },
             { Authorization: "Bearer " + key }
           );
