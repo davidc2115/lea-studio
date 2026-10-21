@@ -507,7 +507,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.58;
+  const HORDE_COMMON_DENOISE = 0.68;
 
   function pickPromptVariant(values, historyKey, historySize) {
     const list = Array.isArray(values) ? values.filter(Boolean) : [];
@@ -619,7 +619,8 @@
     // Horde: les fiches sans prompt dédié utilisent leurs attributs physiques, pas le fallback nom/âge.
     const identity = forCloudflare ? null : extractIdentityTraits(c);
     const fallbackProfile = forCloudflare ? "" : sanitizeForHordePrompt(stripFixedOutfitFromPrompt([String(c.looks_en || ""), String(c.body || "")].filter(Boolean).join(", ")));
-    const effectiveSheetPrompt = forCloudflare ? sheetPrompt : [sheetPrompt || fallbackProfile, identity && identity.ageLock, identity && identity.ethnicity, identity && identity.skin, identity && identity.hair, identity && identity.eyes].filter(Boolean).join(", ");
+    const profileIdentityPrompt = forCloudflare ? "" : [identity && identity.ageLock, identity && identity.ethnicity, identity && identity.skin, identity && identity.hair, identity && identity.eyes].filter(Boolean).join(", ");
+    const effectiveSheetPrompt = forCloudflare ? sheetPrompt : (sheetPrompt || fallbackProfile);
 
     // Morphologie depuis la fiche (obligatoire pour cohérence ronde / mince)
     const morphBlob = [String(c.body || ""), String(c.appearance || ""), String(c.looks_en || ""), Array.isArray(c.tags) ? c.tags.join(" ") : "", effectiveSheetPrompt].join(" ").toLowerCase();
@@ -635,7 +636,7 @@
         : ", slim slender figure NOT plus-size NOT chubby";
     }
 
-    const isPlusSize = /plus-size|chubby|BODY TYPE LOCK:|BODY LOCK plus-size/.test(bodyMorphLock);
+    const isPlusSize = /plus-size|chubby|BODY TYPE LOCK:|BODY LOCK (?:soft )?plus-size/.test(bodyMorphLock);
     if (forCloudflare) {
       let out = "";
       if (isPlusSize) {
@@ -664,14 +665,13 @@
     }
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-    let out = "Create a distinctly new full-body portrait, head to feet, shoes visible. "
-      + "OUTFIT (must follow): " + outfit + ". POSE (must follow): " + pose + ". LOCATION (must follow): " + scene + ". "
-      + "Do not copy the reference clothing, garment color, neckline, arm position, pose, camera angle, crop, or background. ";
-    if (hasRef) out += "Use the reference image for FACE IDENTITY ONLY: same face, eyes, nose, lips, smile, hair color and age. Do not preserve its body crop or composition. ";
+    let out = "FULL-LENGTH WIDE SHOT: adult woman standing, entire body visible from head to shoes, camera several meters away. ";
+    if (!forCloudflare) out += profileIdentityPrompt + ". ";
+    if (isPlusSize) out += "BODY TYPE LOCK: visibly plus-size, genuinely round soft figure, full rounded waist, wide hips, thick thighs, soft upper arms, very full heavy breasts; preserve these proportions, never slim or skinny. Not extreme obesity, no pregnancy or baby bump. ";
+    out += "OUTFIT (must follow): " + outfit + ". POSE (must follow): " + pose + ". LOCATION (must follow): " + scene + ". ";
+    out += "Do not make a headshot, portrait crop, close-up, or bust shot. Do not copy the reference clothing, pose, camera angle, crop, or background. ";
+    if (hasRef) out += "Use the full reference photo to preserve the same identity: exact face, eyes, nose, lips, hairstyle, skin, adult age, and natural body proportions. Treat it as an identity/body reference only, not a composition template; change outfit, pose, camera angle, background, and framing. ";
     out += "Photorealistic adult woman, wearing " + outfit + ", " + pose + ", at " + scene + ". ";
-    if (isPlusSize) {
-      out += "soft chubby curvy figure matching reference, large breasts, wide hips, NOT extremely obese, NOT huge belly, NOT pregnant, NOT baby bump, ";
-    }
     out += "RAW DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
     out += effectiveSheetPrompt + bodyMorphLock;
     if (isPlusSize) out += ", not pregnant not baby bump not maternity not distended belly";
@@ -2441,9 +2441,9 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // Référence visage seule; les champs du profil verrouillent la morphologie.
-            faceOnlyRef: true,
-            strictFaceOnly: true,
+            // Référence complète pour ancrer visage ET morphologie; le prompt interdit d'en copier la composition.
+            faceOnlyRef: false,
+            strictFaceOnly: false,
           });
           return {
             ok: true,

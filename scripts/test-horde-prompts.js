@@ -31,8 +31,8 @@ let source = fs.readFileSync(path.join(root, 'public/native-api.js'), 'utf8');
 source = source.replace(/\}\)\(\);\s*$/, 'window.__buildHordePrompt = buildPhysicalImagePrompt; window.__profileReferenceForTest = profileReferenceImageB64; })();');
 vm.runInNewContext(source, context, { timeout: 5000 });
 if (typeof window.__buildHordePrompt !== 'function') throw new Error('Could not load runtime prompt builder');
-if (!/const HORDE_COMMON_DENOISE\s*=\s*0\.58/.test(source)) throw new Error('Expected identity-preserving Horde denoise 0.58');
-if (!/faceOnlyRef:\s*true,[\s\S]{0,80}strictFaceOnly:\s*true/.test(source)) throw new Error('Expected strict face-only Horde reference');
+if (!/const HORDE_COMMON_DENOISE\s*=\s*0\.68/.test(source)) throw new Error('Expected balanced Horde denoise 0.68');
+if (!/faceOnlyRef:\s*false,[\s\S]{0,80}strictFaceOnly:\s*false/.test(source)) throw new Error('Horde must use the full-frame reference to preserve body and framing');
 
 await window.__profileReferenceForTest({ cover: 'data:image/jpeg;base64,source' }, 'image/jpeg', true, true);
 const crop = draws.at(-1);
@@ -61,7 +61,9 @@ for (const file of catalogueFiles) {
     if (!first.includes(`${Number(profile.age)} year old`)) failures.push(`${profile.id}: exact age missing`);
     if (outfit1?.[1] === outfit2?.[1]) failures.push(`${profile.id}: outfit repeats immediately`);
     if (pose1?.[1] === pose2?.[1]) failures.push(`${profile.id}: pose repeats immediately`);
-    if ((profile.cover || profile.gallery?.[0]) && !first.includes('FACE IDENTITY ONLY')) failures.push(`${profile.id}: missing face identity lock`);
+    if ((profile.cover || profile.gallery?.[0]) && !first.includes('identity/body reference only')) failures.push(`${profile.id}: missing identity/body reference instruction`);
+    if (!first.includes('FULL-LENGTH WIDE SHOT')) failures.push(`${profile.id}: missing full-body framing instruction`);
+    if (/plus-size|chubby|ronde|bbw/i.test([profile.body, profile.looks_en, profile.appearance, ...(profile.tags || [])].join(' ')) && !first.includes('BODY TYPE LOCK')) failures.push(`${profile.id}: missing explicit body-type lock`);
   }
 }
 if (failures.length) {
