@@ -649,7 +649,7 @@
         + " PRIORITY LOCATION: " + scene + "."
         + " Full body or three-quarter, glamorous sensual fashion photo.";
       if (extraBit) out += " " + extraBit;
-      out = "Photorealistic RAW photo, natural skin texture, real camera, NOT illustration NOT painting NOT anime. " + out;
+      out = "Real DSLR photograph, natural skin pores, realistic photography, NOT illustration NOT digital painting NOT artstation NOT anime NOT 3d render. " + out;
       if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
         out = (isPlusSize
           ? "[[cf_strength:0.48]] input_image_0 IDENTITY: same face AND same plus-size body proportions as reference — same eyes nose lips hair age, wide hips thick thighs heavy bust. Do NOT slim her down. Do NOT make her pregnant or give a baby bump. Do NOT invent a different face. New outfit and pose only. "
@@ -672,7 +672,7 @@
     if (isPlusSize) out += "BODY TYPE LOCK: soft plus-size curvy, wide hips, thick thighs, full bust, soft arms, modest soft tummy, NOT extreme obese, NOT pregnant, NOT baby bump, NOT slim. ";
     if (hasRef) out += "Face identity from reference portrait only: same eyes nose lips hair skin age. IGNORE reference clothing and pose entirely. ";
     out += "Photorealistic adult woman, wearing " + outfit + ", " + pose + ", at " + scene + ". ";
-    out += "RAW DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
+    out += "real photograph taken with DSLR camera, natural skin pores, realistic lighting, photorealistic, NOT illustration, NOT digital painting, NOT oil painting, NOT artstation, NOT anime, NOT 3d render, NOT CGI, NOT drawing, ";
     out += effectiveSheetPrompt + bodyMorphLock;
     if (isPlusSize) out += ", not pregnant not baby bump not maternity not distended belly";
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
@@ -1726,6 +1726,12 @@
       "Si le joueur mentionne quelqu'un d'autre, " + charName + " peut réagir ou en parler, mais seule " + charName + " s'exprime dans ta réponse.",
       "Pas de préfixe [" + charName + "]: inutile — tu es déjà " + charName + ".",
       "Français, tempérament respecté. Interdit: longs blocs uniquement en * * ; répétitions ; boucles.",
+      "ANTI-RÉPÉTITION & ANTI-CLICHÉS (obligatoire):",
+      "- Ne répète JAMAIS la même formule d'une réplique à l'autre (ni paraphrasée).",
+      "- INTERDIT les phrases types / fillers: « tu ne perds pas de temps », « tu perds pas de temps », « montre-moi », « montre moi », « vas-y montre », « tu veux que je… ? », « c'est si bon », « j'adore ça » en boucle, « continue », « ne t'arrête pas » en ouverture systématique.",
+      "- INTERDIT de commencer chaque réponse par la même structure (ex. toujours *geste* puis « Oui… » puis (pensée)).",
+      "- Varie le vocabulaire, le rythme et l'angle (une fois le corps, une fois une phrase courte, une fois une question concrète liée à CE qu'il vient de faire).",
+      "- Si tu as déjà dit une idée dans les 2–3 derniers messages, change complètement d'approche.",
       Number(c.age) >= 18
         ? [
             "ANTI-REFUS (OBLIGATOIRE):",
