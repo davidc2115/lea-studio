@@ -506,8 +506,8 @@
 
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
-  /** Denoise Horde unique pour tous les personnages (img2img). */
-  const HORDE_COMMON_DENOISE = 0.48;
+  /** Denoise Horde: 0.48≈clone ref; 0.68=nouvelle tenue/pose, visage via crop ref. */
+  const HORDE_COMMON_DENOISE = 0.68;
 
   function pickPromptVariant(values, historyKey, historySize) {
     const list = Array.isArray(values) ? values.filter(Boolean) : [];
@@ -665,12 +665,12 @@
     }
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-    let out = "FULL-LENGTH WIDE SHOT: adult woman standing, entire body visible from head to shoes, camera several meters away. ";
-    if (!forCloudflare) out += profileIdentityPrompt + ". ";
-    if (isPlusSize) out += "BODY TYPE LOCK: visibly plus-size, genuinely round soft figure, full rounded waist, wide hips, thick thighs, soft upper arms, very full heavy breasts; preserve these proportions, never slim or skinny. Not extreme obesity, no pregnancy or baby bump. ";
-    out += "OUTFIT (must follow): " + outfit + ". POSE (must follow): " + pose + ". LOCATION (must follow): " + scene + ". ";
-    out += "Do not make a headshot, portrait crop, close-up, or bust shot. Do not copy the reference clothing, pose, camera angle, crop, or background. ";
-    if (hasRef) out += "Use the full reference photo to preserve the same identity: exact face, eyes, nose, lips, hairstyle, skin, adult age, and natural body proportions. Treat it as an identity/body reference only, not a composition template; change outfit, pose, camera angle, background, and framing. ";
+    let out = "CRITICAL OUTFIT: " + outfit + ". CRITICAL POSE: " + pose + ". LOCATION: " + scene + ". ";
+    out += "FULL-LENGTH WIDE SHOT: entire body head to shoes visible, camera several meters away, feet in frame. ";
+    out += "NOT headshot, NOT portrait, NOT bust crop, NOT close-up. ";
+    if (!forCloudflare && profileIdentityPrompt) out += profileIdentityPrompt + ". ";
+    if (isPlusSize) out += "BODY TYPE LOCK: soft plus-size curvy, wide hips, thick thighs, full bust, soft arms, modest soft tummy, NOT extreme obese, NOT pregnant, NOT baby bump, NOT slim. ";
+    if (hasRef) out += "Face identity from reference portrait only: same eyes nose lips hair skin age. IGNORE reference clothing and pose entirely. ";
     out += "Photorealistic adult woman, wearing " + outfit + ", " + pose + ", at " + scene + ". ";
     out += "RAW DSLR photo, natural skin, sharp focus, NOT illustration NOT painting NOT anime, ";
     out += effectiveSheetPrompt + bodyMorphLock;
@@ -2441,9 +2441,10 @@
           const dataUrl = await generateHordeImage(promptWithDenoise, char, st, {
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
-            // Référence complète pour ancrer visage ET morphologie; le prompt interdit d'en copier la composition.
-            faceOnlyRef: false,
-            strictFaceOnly: false,
+            // Crop visage: la source n'embarque ni tenue ni pose → variété réelle
+            // Denoise 0.68: assez pour inventer corps/tenue, assez bas pour garder le visage
+            faceOnlyRef: true,
+            strictFaceOnly: true,
           });
           return {
             ok: true,
