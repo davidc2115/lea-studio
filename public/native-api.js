@@ -507,7 +507,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde: 0.48≈clone ref; 0.68=nouvelle tenue/pose, visage via crop ref. */
-  const HORDE_COMMON_DENOISE = 0.68;
+  const HORDE_COMMON_DENOISE = 0.62;
 
   function pickPromptVariant(values, historyKey, historySize) {
     const list = Array.isArray(values) ? values.filter(Boolean) : [];
