@@ -31,7 +31,7 @@ let source = fs.readFileSync(path.join(root, 'public/native-api.js'), 'utf8');
 source = source.replace(/\}\)\(\);\s*$/, 'window.__buildHordePrompt = buildPhysicalImagePrompt; window.__profileReferenceForTest = profileReferenceImageB64; })();');
 vm.runInNewContext(source, context, { timeout: 5000 });
 if (typeof window.__buildHordePrompt !== 'function') throw new Error('Could not load runtime prompt builder');
-if (!/const HORDE_COMMON_DENOISE\s*=\s*0\.68/.test(source)) throw new Error('Expected balanced Horde denoise 0.68');
+if (!/const HORDE_COMMON_DENOISE\s*=\s*0\.48/.test(source)) throw new Error('Expected face-priority Horde denoise 0.48');
 if (!/faceOnlyRef:\s*false,[\s\S]{0,80}strictFaceOnly:\s*false/.test(source)) throw new Error('Horde must use the full-frame reference to preserve body and framing');
 
 await window.__profileReferenceForTest({ cover: 'data:image/jpeg;base64,source' }, 'image/jpeg', true, true);

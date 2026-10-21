@@ -862,7 +862,7 @@ public class LeaBridge {
                     params.put("width", registered ? 512 : 512);
                     params.put("height", registered ? 768 : 768);
                     double denoise = 0.58;
-                    // Prefixe optionnel dans le prompt: [[denoise:0.78]]
+                    // Préfixe optionnel dans le prompt: [[denoise:0.48]]
                     String promptWork = promptSafe;
                     try {
                         java.util.regex.Matcher dm = java.util.regex.Pattern
@@ -876,7 +876,7 @@ public class LeaBridge {
                     } catch (Exception ignored) {}
                     if (strengthOverride > 0.15 && strengthOverride <= 1.0) denoise = strengthOverride;
                     else if (!hasRef) denoise = 1.0;
-                    // Avec référence: cfg bas + denoise bas = visage ancré; sans ref cfg plus haut.
+                    // Denoise bas avec référence: meilleure fidélité visage, mais composition/tenue plus conservées.
                     double cfg = hasRef ? 5.5 : 7.0;
                     int steps = registered ? 35 : 28;
                     params.put("cfg_scale", cfg);
