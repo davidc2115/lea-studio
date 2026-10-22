@@ -260,9 +260,9 @@
       A: "small natural A-cup, modest chest",
       B: "natural B-cup, light rounded shape",
       C: "true C-cup: medium natural breasts, moderate cleavage",
-      D: "VERY FULL oversized D-cup almost E/F look: very large rounded heavy breasts, extreme soft cleavage, massive lower fullness, dominant bust silhouette, fitted dress stretched by the bust",
-      E: "true E-cup: large full natural breasts, deeper cleavage than D, heavy soft volume",
-      F: "very large, visibly full F-cup with heavy natural volume, strong forward projection, and deep cleavage",
+      D: "natural full D-cup breasts, proportional to body, soft rounded cleavage, realistic not exaggerated",
+      E: "natural E-cup breasts, full but proportional to hourglass frame, realistic cleavage, NOT hyperbolically huge, NOT cartoon",
+      F: "full F-cup breasts, large but still human proportions, natural shape, NOT impossible size",
       G: "extremely full G-cup with very large heavy natural volume, broad bust, strong projection, and deep cleavage",
       H: "exceptionally large H-cup with heavy soft volume, broad full chest, pronounced projection, and deep cleavage",
       I: "extremely prominent I-cup with very heavy natural volume, broad chest, pronounced projection, and deep cleavage",
@@ -672,7 +672,7 @@
     if (isPlusSize) out += "BODY TYPE LOCK: soft plus-size curvy, wide hips, thick thighs, full bust, soft arms, modest soft tummy, NOT extreme obese, NOT pregnant, NOT baby bump, NOT slim. ";
     if (hasRef) out += "Face identity from reference portrait only: same eyes nose lips hair skin age. IGNORE reference clothing and pose entirely. ";
     out += "Photorealistic adult woman, wearing " + outfit + ", " + pose + ", at " + scene + ". ";
-    out += "real photograph taken with DSLR camera, natural skin pores, realistic lighting, photorealistic, NOT illustration, NOT digital painting, NOT oil painting, NOT artstation, NOT anime, NOT 3d render, NOT CGI, NOT drawing, ";
+    out += "real photograph taken with DSLR camera, natural skin pores, realistic lighting, photorealistic, realistic breast size proportional to body, NOT hyper breasts, NOT giant breasts, NOT cartoon bust, NOT illustration, NOT digital painting, NOT oil painting, NOT artstation, NOT anime, NOT 3d render, NOT CGI, NOT drawing, ";
     out += effectiveSheetPrompt + bodyMorphLock;
     if (isPlusSize) out += ", not pregnant not baby bump not maternity not distended belly";
     if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
