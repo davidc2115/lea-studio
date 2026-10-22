@@ -507,7 +507,7 @@
 
   /** Retire tenue/pose figées d'un prompt perso pour laisser la rotation outfit/pose. */
   /** Denoise Horde: 0.48≈clone ref; 0.68=nouvelle tenue/pose, visage via crop ref. */
-  const HORDE_COMMON_DENOISE = 0.62;
+  const HORDE_COMMON_DENOISE = 0.58;
 
   function pickPromptVariant(values, historyKey, historySize) {
     const list = Array.isArray(values) ? values.filter(Boolean) : [];
@@ -543,21 +543,26 @@
 
     // Rotation tenue / pose / lieu (sans reconstruire le physique hors fiche)
     const outfits = forCloudflare ? [
-      "tight emerald bodycon mini dress deep neckline, black stilettos",
-      "burgundy satin wrap mini dress high slit, heels",
-      "black deep plunge fitted dress, glamorous stairs",
-      "champagne silk slip dress thin straps thigh slit",
-      "red bodycon mini dress plunging neckline, pumps",
-      "floral fitted midi dress deep V neckline",
-      "navy pencil skirt and white blouse open buttons",
-      "pink satin wrap dress decollete",
-      "black backless long evening gown, marble stairs",
-      "lavender satin mini dress plunging neckline",
-      "coral off-shoulder bodycon dress",
-      "white linen midi sundress thin straps",
-      "black lace midi dress sheer sleeves decollete",
-      "gold sequin mini dress deep V",
-      "forest green velvet midi dress low neckline"
+      "black lace lingerie set with sheer robe, bare legs",
+      "ivory silk nightie thin straps, thigh high slit",
+      "red satin babydoll and matching panties",
+      "sheer black mesh bodysuit, high heels",
+      "white lace teddy deep cleavage",
+      "champagne silk slip dress barely covering thighs",
+      "black micro mini skirt and tight crop top",
+      "leather mini skirt and unbuttoned white blouse",
+      "pink satin short nightie, soft bedroom light",
+      "black deep plunge bodycon mini dress, stilettos",
+      "burgundy lace bra and high-waisted panties",
+      "emerald satin robe loosely tied, lingerie underneath",
+      "sheer white blouse unbuttoned over lace bra, mini skirt",
+      "red bodycon mini with thigh slit, pumps",
+      "black lace garter belt stockings and heels",
+      "nude-tone lace bodysuit, open silk robe",
+      "short black cocktail dress extreme cleavage",
+      "lavender silk camisole and tiny shorts",
+      "wet-look black mini dress, high heels",
+      "coral off-shoulder mini dress deep neckline"
     ] : [
       "black deep plunge bodycon mini dress and black stilettos, fully clothed",
       "red wrap midi dress black heels, fully clothed",
@@ -581,18 +586,18 @@
       "striped shirt dress belted, fully clothed"
     ];
     const poses = [
-      "standing full body hands on hips facing camera feet visible",
-      "walking toward camera mid-stride full length feet visible",
-      "leaning against wall one knee bent full body feet visible",
-      "sitting on armchair legs crossed full body feet visible",
-      "climbing stairs one foot up looking at camera full body",
-      "standing in doorway arms crossed full body feet visible",
-      "twirling dress mid-spin full body feet visible",
-      "crouching to pick something full body side view",
-      "standing profile by tall window full body feet visible",
-      "leaning on kitchen counter hip cocked full body feet visible",
-      "sitting on bed edge leaning forward full body feet visible",
-      "standing with one hand on hip other on hair full body"
+      "standing full body hand on hip looking at camera, feet visible",
+      "leaning against doorframe one leg bent, full body sensual",
+      "sitting on bed edge knees together leaning forward, full body",
+      "walking toward camera mid-stride, full length feet visible",
+      "arching slightly against wall, full body side angle",
+      "sitting on chair arm legs crossed, full body",
+      "looking over shoulder back arched, full body",
+      "kneeling on bed soft pose, full body in frame",
+      "standing profile by window, full body feet visible",
+      "leaning on counter hip cocked, full body provocative",
+      "one hand in hair other on thigh, standing full body",
+      "stepping out of doorway, full length sensual pose"
     ];
     const scenes = [
       "grand hotel staircase chandelier",
@@ -647,7 +652,7 @@
         + " PRIORITY OUTFIT: " + outfit + "."
         + " PRIORITY POSE: " + pose + "."
         + " PRIORITY LOCATION: " + scene + "."
-        + " Full body or three-quarter, glamorous sensual fashion photo.";
+        + " Full body sensual provocative fashion photo, alluring pose, tasteful lingerie or revealing outfit.";
       if (extraBit) out += " " + extraBit;
       out = "Real DSLR photograph, natural skin pores, realistic photography, NOT illustration NOT digital painting NOT artstation NOT anime NOT 3d render. " + out;
       if (c.cover || (Array.isArray(c.gallery) && c.gallery[0])) {
@@ -665,18 +670,22 @@
     }
 
     const hasRef = !!(c.cover || (Array.isArray(c.gallery) && c.gallery[0]));
-    let out = "CRITICAL OUTFIT: " + outfit + ". CRITICAL POSE: " + pose + ". LOCATION: " + scene + ". ";
-    out += "FULL-LENGTH WIDE SHOT: entire body head to shoes visible, camera several meters away, feet in frame. ";
-    out += "NOT headshot, NOT portrait, NOT bust crop, NOT close-up. ";
-    if (!forCloudflare && profileIdentityPrompt) out += profileIdentityPrompt + ". ";
-    if (isPlusSize) out += "BODY TYPE LOCK: soft plus-size curvy, wide hips, thick thighs, full bust, soft arms, modest soft tummy, NOT extreme obese, NOT pregnant, NOT baby bump, NOT slim. ";
-    if (hasRef) out += "Face identity from reference portrait only: same eyes nose lips hair skin age. IGNORE reference clothing and pose entirely. ";
-    out += "Photorealistic adult woman, wearing " + outfit + ", " + pose + ", at " + scene + ". ";
-    out += "real photograph taken with DSLR camera, natural skin pores, realistic lighting, photorealistic, realistic breast size proportional to body, NOT hyper breasts, NOT giant breasts, NOT cartoon bust, NOT illustration, NOT digital painting, NOT oil painting, NOT artstation, NOT anime, NOT 3d render, NOT CGI, NOT drawing, ";
-    out += effectiveSheetPrompt + bodyMorphLock;
-    if (isPlusSize) out += ", not pregnant not baby bump not maternity not distended belly";
-    if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit);
-    return out.replace(/\s+/g, " ").trim().slice(0, 1400);
+    // Prompt COURT: max ressemblance visage + corps entier (pas de clone buste de la ref)
+    let out = "";
+    if (hasRef) {
+      out += "same face as reference photo, identical eyes nose lips hair skin age, ";
+    }
+    // Identité courte (pas le long prompt_horde fiche)
+    const shortId = [profileIdentityPrompt, bodyMorphLock.replace(/^,\s*/, "")]
+      .filter(Boolean).join(", ").replace(/\s+/g, " ").trim().slice(0, 220);
+    if (shortId) out += shortId + ", ";
+    if (isPlusSize) out += "soft plus-size curvy not pregnant, ";
+    out += "full body head to feet shoes visible, wide shot, NOT bust crop NOT portrait NOT close-up, ";
+    out += "wearing " + outfit + ", " + pose + ", at " + scene + ", ";
+    out += "real DSLR photo, natural skin, photorealistic, proportional breasts, ";
+    out += "NOT painting NOT anime NOT hyper breasts NOT headshot";
+    if (extraBit) out += ", " + sanitizeForHordePrompt(extraBit).slice(0, 60);
+    return out.replace(/\s+/g, " ").trim().slice(0, 700);
   }
 
   /** Prompt Cloudflare encore plus soft après un rejet « flagged » */
@@ -2448,7 +2457,7 @@
             denoise: hasCover ? denoise : 1.0,
             requireRef: false,
             // Crop visage: la source n'embarque ni tenue ni pose → variété réelle
-            // Denoise 0.68: assez pour inventer corps/tenue, assez bas pour garder le visage
+            // Denoise 0.58 + face crop: visage prioritaire, corps/tenue inventés, cadrage full body via prompt
             faceOnlyRef: true,
             strictFaceOnly: true,
           });

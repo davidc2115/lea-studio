@@ -861,7 +861,7 @@ public class LeaBridge {
                     // Plein pied prioritaire: vertical en mode clé; anonyme sous 576×576.
                     params.put("width", registered ? 512 : 512);
                     params.put("height", registered ? 768 : 768);
-                    double denoise = 0.68;
+                    double denoise = 0.58;
                     // Préfixe optionnel dans le prompt: [[denoise:0.48]]
                     String promptWork = promptSafe;
                     try {
